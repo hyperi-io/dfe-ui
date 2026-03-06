@@ -1,0 +1,199 @@
+import type { paths } from '@hyperi/dfe-engine-types';
+
+type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
+
+/** Extract the operation type for a path and method (when the endpoint exists). */
+type OperationFor<Path extends keyof paths, Method extends HttpMethod> =
+  paths[Path] extends Record<Method, infer Op> ? Op : never;
+
+/** Success response body: 200 or 201 application/json. */
+type SuccessResponseBody<Op> = Op extends {
+  responses: {
+    200: { content: { 'application/json': infer R } };
+  };
+}
+  ? R
+  : Op extends {
+        responses: {
+          201: { content: { 'application/json': infer R } };
+        };
+      }
+    ? R
+    : never;
+
+/** Request body when present. */
+type RequestBody<Op> = Op extends {
+  requestBody: { content: { 'application/json': infer B } };
+}
+  ? B
+  : undefined;
+
+/** Path parameters when present. */
+type PathParams<Op> = Op extends { parameters: { path: infer P } }
+  ? P
+  : undefined;
+
+/** Query parameters when present. */
+type QueryParams<Op> = Op extends { parameters: { query: infer Q } }
+  ? Q extends Record<string, unknown>
+    ? Q
+    : undefined
+  : undefined;
+
+/** Options for a request that has path params. */
+type RequestOptions<Path extends keyof paths, Method extends HttpMethod> =
+  OperationFor<Path, Method> extends infer Op
+    ? Op extends never
+      ? { pathParams?: undefined; query?: undefined; body?: undefined }
+      : {
+          pathParams?: PathParams<Op>;
+          query?: QueryParams<Op>;
+          body?: RequestBody<Op>;
+        }
+    : never;
+
+/** Replaces {param} segments in path with values from params. */
+function applyPathParams(
+  path: string,
+  pathParams?: Record<string, string>,
+): string {
+  if (!pathParams) return path;
+  return path.replace(/\{(\w+)\}/g, (_, key) => pathParams[key] ?? `{${key}}`);
+}
+
+/** Builds URL with optional query string. */
+function buildUrl(
+  base: string,
+  path: string,
+  query?: Record<string, unknown>,
+): string {
+  const url = new URL(path, base);
+  if (query) {
+    for (const [k, v] of Object.entries(query)) {
+      if (v !== undefined && v !== null) {
+        url.searchParams.set(k, String(v));
+      }
+    }
+  }
+  return url.toString();
+}
+
+export type ApiClientConfig = {
+  baseUrl: string;
+  getAuthHeaders?: () => HeadersInit | Promise<HeadersInit>;
+  fetch?: typeof fetch;
+};
+
+/**
+ * Type-safe API client for the DFE Engine API.
+ * Request bodies, query/path params, and response data are inferred from @hyperi/dfe-engine-types.
+ */
+export function createApiClient(config: ApiClientConfig) {
+  const { baseUrl, getAuthHeaders, fetch: customFetch = fetch } = config;
+
+  async function request<Path extends keyof paths, Method extends HttpMethod>(
+    path: Path,
+    method: Method,
+    options?: RequestOptions<Path, Method>,
+  ): Promise<SuccessResponseBody<OperationFor<Path, Method>>> {
+    const { pathParams, query, body } = options ?? {};
+    const resolvedPath = applyPathParams(
+      path as string,
+      pathParams as Record<string, string> | undefined,
+    );
+    const url = buildUrl(
+      baseUrl,
+      resolvedPath,
+      query as Record<string, unknown> | undefined,
+    );
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...(await getAuthHeaders?.()),
+    };
+
+    const init: RequestInit = {
+      method,
+      headers,
+      ...(body !== undefined &&
+        method !== 'get' && { body: JSON.stringify(body) }),
+    };
+
+    const res = await customFetch(url, init);
+
+    if (!res.ok) {
+      const text = await res.text();
+      let detail: unknown = text;
+      try {
+        detail = JSON.parse(text);
+      } catch {
+        // use text as detail
+      }
+
+      throw new ApiError(res.status, res.statusText, detail);
+    }
+
+    const contentType = res.headers.get('Content-Type');
+    if (contentType?.includes('application/json')) {
+      return res.json() as Promise<
+        SuccessResponseBody<OperationFor<Path, Method>>
+      >;
+    }
+
+    return undefined as unknown as Promise<
+      SuccessResponseBody<OperationFor<Path, Method>>
+    >;
+  }
+
+  return {
+    request,
+
+    get<Path extends keyof paths>(
+      path: Path,
+      options?: RequestOptions<Path, 'get'>,
+    ): Promise<SuccessResponseBody<OperationFor<Path, 'get'>>> {
+      return request(path, 'get', options);
+    },
+
+    post<Path extends keyof paths>(
+      path: Path,
+      options?: RequestOptions<Path, 'post'>,
+    ): Promise<SuccessResponseBody<OperationFor<Path, 'post'>>> {
+      return request(path, 'post', options);
+    },
+
+    put<Path extends keyof paths>(
+      path: Path,
+      options?: RequestOptions<Path, 'put'>,
+    ): Promise<SuccessResponseBody<OperationFor<Path, 'put'>>> {
+      return request(path, 'put', options);
+    },
+
+    delete<Path extends keyof paths>(
+      path: Path,
+      options?: RequestOptions<Path, 'delete'>,
+    ): Promise<SuccessResponseBody<OperationFor<Path, 'delete'>>> {
+      return request(path, 'delete', options);
+    },
+
+    patch<Path extends keyof paths>(
+      path: Path,
+      options?: RequestOptions<Path, 'patch'>,
+    ): Promise<SuccessResponseBody<OperationFor<Path, 'patch'>>> {
+      return request(path, 'patch', options);
+    },
+  };
+}
+
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly statusText: string,
+    public readonly detail: unknown,
+  ) {
+    super(`API Error ${status}: ${statusText}`);
+    this.name = 'ApiError';
+  }
+}
+
+export type ApiClient = ReturnType<typeof createApiClient>;
