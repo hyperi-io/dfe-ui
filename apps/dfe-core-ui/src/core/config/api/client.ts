@@ -89,7 +89,7 @@ export type ApiClientConfig = {
  * Request bodies, query/path params, and response data are inferred from @hyperi/dfe-engine-types.
  */
 export function createApiClient(config: ApiClientConfig) {
-  const { baseUrl, getAuthHeaders, fetch: customFetch = fetch } = config;
+  const { baseUrl, getAuthHeaders, fetch: customFetch } = config;
 
   async function request<Path extends keyof paths, Method extends HttpMethod>(
     path: Path,
@@ -119,7 +119,8 @@ export function createApiClient(config: ApiClientConfig) {
         method !== 'get' && { body: JSON.stringify(body) }),
     };
 
-    const res = await customFetch(url, init);
+    const fetchFn = customFetch ?? globalThis.fetch;
+    const res = await fetchFn(url, init);
 
     if (!res.ok) {
       const text = await res.text();

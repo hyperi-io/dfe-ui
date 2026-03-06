@@ -1,0 +1,21 @@
+import path from 'path';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    environmentOptions: {
+      jsdom: { url: 'http://localhost' },
+    },
+    setupFiles: ['./vitest.setup.ts'],
+    env: {
+      NEXT_PUBLIC_API_URL: 'http://localhost',
+      NODE_ENV: 'test',
+    },
+  },
+});

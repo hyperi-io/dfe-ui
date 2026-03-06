@@ -8,11 +8,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
       post: {
         success: ({
           mockedResponse = {
-            access_token: 'mock-access-token',
+            access_token: 'string',
             token_type: 'bearer',
-            expires_in: 3600,
-            user_id: 'mock-user-id',
-            roles: ['mock-role'],
+            expires_in: 0,
+            user_id: 'string',
+            roles: ['string'],
           },
         }: {
           mockedResponse?: components['schemas']['TokenResponse'];
