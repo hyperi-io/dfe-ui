@@ -1,0 +1,18 @@
+{
+  "name": "@hyperi/dfe-engine-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript types for DFE Engine API",
+  "type": "module",
+  "exports": {
+    ".": "./types/index.d.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf types",
+    "generate": "npm run clean && openapi-typescript ./specs/openapi.json -o ./types/index.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "typescript": "^5.9.2"
+  }
+}
