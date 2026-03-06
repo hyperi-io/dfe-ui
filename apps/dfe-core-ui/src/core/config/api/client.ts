@@ -186,14 +186,33 @@ export function createApiClient(config: ApiClientConfig) {
   };
 }
 
+/** Extracts a user-facing message from an error detail */
+export function getErrorMessage(detail: unknown): string {
+  if (detail != null) {
+    if (typeof detail === 'string') return detail;
+    if (typeof detail === 'object') {
+      if (
+        'message' in detail &&
+        typeof (detail as { message: unknown }).message === 'string'
+      )
+        return (detail as { message: string }).message;
+    }
+  }
+  return String(detail);
+}
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly statusText: string,
     public readonly detail: unknown,
   ) {
-    super(`API Error ${status}: ${statusText}`);
+    const message = getErrorMessage(detail) || statusText;
+    super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.statusText = statusText;
+    this.detail = detail;
   }
 }
 
