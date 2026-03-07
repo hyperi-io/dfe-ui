@@ -18,11 +18,11 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
-const Login = () => {
+const Login = ({ callbackUrl }: { callbackUrl: string }) => {
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
-  const { mutate: login, isPending, error } = useLogin();
+  const { mutate: login, isPending, error } = useLogin({ callbackUrl });
 
   const onSubmit = (data: FormData) => {
     login(data);
@@ -67,11 +67,11 @@ const Login = () => {
   );
 };
 
-export const LoginScene = () => {
+export const LoginScene = ({ callbackUrl = '/' }: { callbackUrl?: string }) => {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <Login />
+      <Login callbackUrl={callbackUrl} />
     </QueryClientProvider>
   );
 };
