@@ -127,8 +127,10 @@ export function createApiClient(config: ApiClientConfig) {
       let detail: unknown = text;
       try {
         detail = JSON.parse(text);
-      } catch {
-        // use text as detail
+      } catch (error) {
+        throw new Error(`Response body is not valid JSON: ${text}`, {
+          cause: error,
+        });
       }
 
       throw new ApiError(res.status, res.statusText, detail);

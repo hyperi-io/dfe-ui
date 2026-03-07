@@ -1,23 +1,40 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { components } from '@hyperi/dfe-engine-types';
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export const useLogin = () => {
+export const useLogin = ({
+  callbackUrl: callbackUrl_,
+}: {
+  callbackUrl?: string;
+} = {}) => {
   const router = useRouter();
-  const { mutate, data, isPending, error } = useMutation({
-    mutationFn: (data: components['schemas']['LoginRequest']) => {
-      return apiClient.post(API_CONFIG.auth.login, {
-        body: data,
+  const searchParams = useSearchParams();
+  const callbackUrl = callbackUrl_ ?? searchParams.get('callbackUrl') ?? '/';
+
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: async (data: components['schemas']['LoginRequest']) => {
+      const result = await signIn('credentials', {
+        username: data.username,
+        password: data.password,
+        callbackUrl,
+        redirect: false,
       });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      return result;
     },
-    onSuccess: (data) => {
-      const maxAge = data.expires_in ?? 86400; // default 24h
-      document.cookie = `token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Strict`;
-      router.push('/');
+    onSuccess: (result) => {
+      const url = result?.url ?? callbackUrl;
+      // Extract pathname for client-side navigation (router.push with full URLs can cause full reload)
+      const path =
+        typeof url === 'string' && url.startsWith('http')
+          ? new URL(url).pathname
+          : url;
+      router.push(path);
     },
   });
 
-  return { mutate, isPending, error, data };
+  return { mutate, isPending, error };
 };

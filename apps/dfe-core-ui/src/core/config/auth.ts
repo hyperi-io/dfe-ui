@@ -1,0 +1,73 @@
+import { API_CONFIG } from '@/core/config/api/endpoints';
+import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+
+const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? '';
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        username: { label: 'Username', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null;
+        const loginRes = await fetch(`${baseUrl}${API_CONFIG.auth.login}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: credentials.username,
+            password: credentials.password,
+          }),
+        });
+        if (!loginRes.ok) return null;
+        const tokenData = (await loginRes.json()) as {
+          access_token: string;
+          expires_in?: number;
+        };
+
+        const meRes = await fetch(`${baseUrl}${API_CONFIG.auth.me}`, {
+          headers: {
+            Authorization: `Bearer ${tokenData.access_token}`,
+          },
+        });
+        const roles: string[] =
+          meRes.ok && meRes.headers.get('content-type')?.includes('application/json')
+            ? ((await meRes.json()) as { roles?: string[] }).roles ?? []
+            : [];
+
+        return {
+          id: credentials.username,
+          name: credentials.username,
+          accessToken: tokenData.access_token,
+          expiresIn: tokenData.expires_in ?? 86400,
+          roles,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = (user as { accessToken?: string }).accessToken;
+        token.expiresIn = (user as { expiresIn?: number }).expiresIn;
+        token.roles = (user as { roles?: string[] }).roles ?? [];
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as { accessToken?: string }).accessToken =
+          token.accessToken as string;
+        (session.user as { roles?: string[] }).roles =
+          (token.roles as string[]) ?? [];
+      }
+      return session;
+    },
+  },
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
+  secret: process.env.NEXTAUTH_SECRET,
+};

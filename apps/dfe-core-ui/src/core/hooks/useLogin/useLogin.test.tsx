@@ -1,29 +1,26 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useLogin } from '.';
-import { LoginRequest, LoginResponse } from './types';
-import { server } from './useLogin.mocks';
+import { LoginRequest } from './types';
 
+const { mockPush, mockSignIn, searchParamsRef } = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+  mockSignIn: vi.fn(),
+  searchParamsRef: { current: new URLSearchParams() },
+}));
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockPush }),
+  useSearchParams: () => searchParamsRef.current,
+}));
+vi.mock('next-auth/react', () => ({
+  signIn: (...args: unknown[]) => mockSignIn(...args),
 }));
 
-beforeAll(() =>
-  server.listen({
-    onUnhandledRequest: 'error',
-  }),
-);
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+afterEach(() => {
+  mockPush.mockClear();
+  mockSignIn.mockReset();
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -39,21 +36,45 @@ describe('.useAuthMe', () => {
 
     result.current.mutate({ username: 'admin', password: 'password' });
 
-    const expectedData: LoginResponse = {
-      access_token: 'string',
-      token_type: 'bearer',
-      expires_in: 0,
-      user_id: 'string',
-      roles: ['string'],
-    };
-
     await waitFor(() => {
       expect(result.current).toEqual({
         mutate: expect.any(Function) as (data: LoginRequest) => Promise<void>,
         isPending: false,
         error: null,
-        data: expectedData,
       });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  test('should use only the path if the full URL is provided', async () => {
+    mockSignIn.mockResolvedValue({
+      url: 'https://example.com/dashboard',
+      error: null,
+    });
+
+    const { result } = renderHook(() => useLogin(), { wrapper });
+
+    result.current.mutate({
+      username: 'admin',
+      password: 'password',
+    });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+    });
+  });
+
+  test('when using callback search param, it should use the value', async () => {
+    mockSignIn.mockResolvedValueOnce({ url: null, error: null });
+    searchParamsRef.current = new URLSearchParams('callbackUrl=/other-dashboard');
+
+    const { result } = renderHook(() => useLogin(), { wrapper });
+
+    result.current.mutate({ username: 'admin', password: 'password' });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/other-dashboard');
     });
   });
 });
