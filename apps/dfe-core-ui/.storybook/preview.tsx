@@ -1,7 +1,7 @@
 import type { Preview } from '@storybook/react';
 import React from 'react';
 import '../src/app/globals.css';
-import { CompatibleStyleWrapper } from '../src/core/components/CompatibleStyleWrapper';
+import { CompatibleStyleWrapper } from '../src/core/contexts/ClientContext/CompatibleStyleWrapper';
 
 const preview: Preview = {
   parameters: {

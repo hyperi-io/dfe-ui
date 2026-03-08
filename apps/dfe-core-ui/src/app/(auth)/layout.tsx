@@ -1,8 +1,9 @@
+import { AppLayout } from '@/app/(auth)/__server__/components/AppLayout';
 import { authOptions } from '@/core/config/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
-export default async function Layout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,5 +12,5 @@ export default async function Layout({
   if (!session) {
     redirect('/login');
   }
-  return <>{children}</>;
+  return <AppLayout>{children}</AppLayout>;
 }
