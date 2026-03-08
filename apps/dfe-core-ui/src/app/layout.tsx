@@ -29,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${ibmPlexMono.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${ibmPlexMono.variable} antialiased min-h-screen overflow-hidden`}
+      >
         <AntdRegistry>{children}</AntdRegistry>
       </body>
     </html>
