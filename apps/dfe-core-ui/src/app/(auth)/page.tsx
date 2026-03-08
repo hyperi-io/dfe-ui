@@ -1,3 +1,5 @@
-export default function Home() {
-  return <main>Home</main>;
+import Home from '@/core/scenes/Home';
+
+export default function HomePage() {
+  return <Home />;
 }
