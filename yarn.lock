@@ -767,6 +767,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hyperi/dev-logger@workspace:packages/dev-logger":
+  version: 0.0.0-use.local
+  resolution: "@hyperi/dev-logger@workspace:packages/dev-logger"
+  dependencies:
+    "@repo/typescript-config": "workspace:*"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
 "@hyperi/dfe-engine-types@npm:*, @hyperi/dfe-engine-types@workspace:packages/dfe-engine-types":
   version: 0.0.0-use.local
   resolution: "@hyperi/dfe-engine-types@workspace:packages/dfe-engine-types"
@@ -780,7 +789,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@hyperi/icons@workspace:packages/hyperi-icons"
   dependencies:
-    "@repo/typescript-config": "npm:*"
+    "@repo/typescript-config": "workspace:*"
     "@storybook/react": "npm:^10.2.15"
     "@storybook/react-vite": "npm:^10.2.15"
     "@svgr/cli": "npm:^8.1.0"
@@ -1996,7 +2005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repo/typescript-config@npm:*, @repo/typescript-config@workspace:packages/typescript-config":
+"@repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
   languageName: unknown
