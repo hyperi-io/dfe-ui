@@ -176,9 +176,13 @@ for (const dir of subdirs) {
 allIcons = allIcons.sort();
 
 // SVGR uses default exports; re-export as named exports for consumers.
-const indexLines = allIcons.map(
-  (name) => `export { default as ${name} } from "./icons/${name}";`,
-);
+const indexLines = [
+  ...allIcons.map((name) => `export { default as ${name} } from "./icons/${name}";`),
+  "",
+  "// Single type for all icon names",
+  'export { iconManifest, type IconName } from "./manifest";',
+  'export type IconComponent = import("react").ComponentType<import("react").SVGProps<SVGSVGElement>>;',
+].filter(Boolean);
 fs.writeFileSync(path.join(SRC_DIR, "index.ts"), indexLines.join("\n") + "\n");
 
 // Manifest for programmatic access
