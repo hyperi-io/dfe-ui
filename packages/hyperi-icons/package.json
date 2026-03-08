@@ -1,0 +1,34 @@
+{
+  "name": "@hyperi/icons",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "build": "node scripts/generate.mjs",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "@storybook/react": "^10.2.15",
+    "@storybook/react-vite": "^10.2.15",
+    "@svgr/cli": "^8.1.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "react-dom": "^19.2.0",
+    "storybook": "^10.2.15",
+    "typescript": "5.9.2",
+    "vite": "^7.3.1"
+  }
+}

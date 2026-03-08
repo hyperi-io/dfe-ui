@@ -1,0 +1,9 @@
+{
+  "typescript": true,
+  "memo": true,
+  "titleProp": true,
+  "svgProps": {
+    "role": "img"
+  },
+  "plugins": ["@svgr/plugin-svgo", "@svgr/plugin-jsx"]
+}
