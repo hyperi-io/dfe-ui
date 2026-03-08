@@ -1,6 +1,6 @@
+import { authOptions } from '@/core/config/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/core/config/auth';
 
 export default async function Layout({
   children,
@@ -11,5 +11,5 @@ export default async function Layout({
   if (!session) {
     redirect('/login');
   }
-  return <main>{children}</main>;
+  return <>{children}</>;
 }

@@ -1,6 +1,18 @@
+/* Implementing the layer order to ensure the correct order of the layers
+  This prevents tailwind 4 styles from being overridden by the antd styles
+  *most of the time*
+  https://ant.design/docs/react/compatible-style#layer
+  https://tailwindcss.com/docs/preflight#overview
+*/
+@layer base, theme, antd, utilities;
+
+/* Importing tailwindcss */
 @import 'tailwindcss';
+
+/* Importing the tokens */
 @import './__hyperi.tokens.css';
 
+/* Defining the dark variant */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

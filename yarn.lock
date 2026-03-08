@@ -767,7 +767,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hyperi/dev-logger@workspace:packages/dev-logger":
+"@hyperi/dev-logger@npm:*, @hyperi/dev-logger@workspace:packages/dev-logger":
   version: 0.0.0-use.local
   resolution: "@hyperi/dev-logger@workspace:packages/dev-logger"
   dependencies:
@@ -785,7 +785,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@hyperi/icons@workspace:packages/hyperi-icons":
+"@hyperi/icons@npm:*, @hyperi/icons@workspace:packages/hyperi-icons":
   version: 0.0.0-use.local
   resolution: "@hyperi/icons@workspace:packages/hyperi-icons"
   dependencies:
@@ -2005,7 +2005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
+"@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
   languageName: unknown
@@ -2701,7 +2701,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.6.3":
+"@testing-library/jest-dom@npm:^6.6.3, @testing-library/jest-dom@npm:^6.9.1":
   version: 6.9.1
   resolution: "@testing-library/jest-dom@npm:6.9.1"
   dependencies:
@@ -4266,10 +4266,14 @@ __metadata:
   resolution: "dfe-core-ui@workspace:apps/dfe-core-ui"
   dependencies:
     "@ant-design/nextjs-registry": "npm:^1.3.0"
+    "@hyperi/dev-logger": "npm:*"
     "@hyperi/dfe-engine-types": "npm:*"
+    "@hyperi/icons": "npm:*"
+    "@repo/typescript-config": "npm:*"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.90.21"
     "@testing-library/dom": "npm:^10.4.1"
+    "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:^16.3.2"
     "@types/jsdom": "npm:^28"
     "@types/node": "npm:^20"

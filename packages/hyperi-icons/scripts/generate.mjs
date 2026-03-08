@@ -121,7 +121,7 @@ function IconGallery() {
       <div className="icon-gallery-grid">
         {filtered.map(([name, Icon]) => (
           <div key={name} className="icon-gallery-item" title={name}>
-            <Icon width={24} height={24} />
+            <Icon className="size-6" />
             <span className="icon-gallery-name">{name}</span>
           </div>
         ))}
