@@ -25,6 +25,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           src={darkMode ? inverseLogoMark : primaryLogoMark}
           alt="logo"
           loading="eager"
+          width={30}
         />
       ) : (
         <Image
@@ -32,6 +33,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           src={darkMode ? inverseLogoFull : primaryLogoFull}
           alt="logo"
           loading="eager"
+          width={249}
         />
       )}
     </Link>
