@@ -1,0 +1,16 @@
+{
+  "name": "@hyperi/dev-logger",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "build": "echo 'No build required - exports TS source directly'"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "5.9.2"
+  }
+}
