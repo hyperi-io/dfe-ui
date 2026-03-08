@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     rules: {
       'no-console': ERROR,
       'no-alert': ERROR,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.
@@ -22,6 +30,7 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     '.next',
+    'coverage/**',
   ]),
 ]);
 

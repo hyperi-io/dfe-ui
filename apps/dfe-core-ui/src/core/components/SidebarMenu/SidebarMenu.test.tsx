@@ -9,22 +9,6 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/schemas'),
 }));
 
-// Mock Ant Design Tooltip to avoid ResizeObserver and heavy rc-component deps
-vi.mock('antd', () => ({
-  Tooltip: ({
-    children,
-    title,
-  }: {
-    children: React.ReactNode;
-    title?: React.ReactNode;
-  }) => (
-    <>
-      {title && <span data-testid="tooltip">{title}</span>}
-      {children}
-    </>
-  ),
-}));
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>{children}</ThemeProvider>
 );
