@@ -9,7 +9,7 @@ import {
   IconShieldCheck as SafetyCertificateOutlined,
   IconSettings as SettingOutlined,
 } from '@hyperi/icons';
-import { SidebarLink } from './SidebarLink';
+import { SidebarLink } from '../SidebarLink';
 
 interface SidebarMenuProps {
   collapsed: boolean;
