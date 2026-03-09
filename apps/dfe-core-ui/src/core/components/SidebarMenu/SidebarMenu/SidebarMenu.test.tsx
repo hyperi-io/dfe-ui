@@ -2,12 +2,8 @@ import { ThemeProvider } from '@/core/contexts/ThemeContext';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SidebarMenu } from './index';
-
-vi.mock('next/navigation', () => ({
-  usePathname: vi.fn(() => '/schemas'),
-}));
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>{children}</ThemeProvider>

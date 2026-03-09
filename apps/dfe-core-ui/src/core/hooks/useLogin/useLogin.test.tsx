@@ -4,6 +4,9 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useLogin } from '.';
 import { LoginRequest } from './types';
 
+// Custom mocks needed for useLogin
+// These are mocked globally in vitest.setup.ts
+// but we need to define specific mock behavior for this test file
 const { mockPush, mockSignIn, searchParamsRef } = vi.hoisted(() => ({
   mockPush: vi.fn(),
   mockSignIn: vi.fn(),
@@ -67,7 +70,9 @@ describe('.useAuthMe', () => {
 
   test('when using callback search param, it should use the value', async () => {
     mockSignIn.mockResolvedValueOnce({ url: null, error: null });
-    searchParamsRef.current = new URLSearchParams('callbackUrl=/other-dashboard');
+    searchParamsRef.current = new URLSearchParams(
+      'callbackUrl=/other-dashboard',
+    );
 
     const { result } = renderHook(() => useLogin(), { wrapper });
 

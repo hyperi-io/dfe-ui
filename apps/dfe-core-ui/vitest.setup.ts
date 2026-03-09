@@ -20,6 +20,7 @@ globalThis.Headers = Headers as unknown as typeof globalThis.Headers;
 globalThis.Request = Request as unknown as typeof globalThis.Request;
 globalThis.Response = Response as unknown as typeof globalThis.Response;
 
+// Mock next calls globally - to reduce setup time
 vi.mock('next/link', () => ({
   default: ({
     children,
@@ -29,6 +30,13 @@ vi.mock('next/link', () => ({
     children: React.ReactNode;
     href: string;
   }) => React.createElement('a', { href, ...props }, children),
+}));
+vi.mock('next-auth', () => ({
+  getServerSession: vi.fn(),
+}));
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+  usePathname: vi.fn(),
 }));
 
 afterEach(() => {

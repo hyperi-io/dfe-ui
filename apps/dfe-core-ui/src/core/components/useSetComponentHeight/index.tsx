@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -9,12 +11,14 @@ interface Props {
  * @param offset - The offset to subtract from the window height to get the component height
  * @returns { componentHeight, setComponentHeight } - The component height and the function to set the component height
  */
+const DEFAULT_HEIGHT = 600;
+
 export const useSetComponentHeight = ({ offset = 397 }: Props = {}) => {
-  const [componentHeight, setComponentHeight] = useState(
-    window.innerHeight - offset,
-  );
+  // Use consistent initial value for SSR/hydration; update from window in effect
+  const [componentHeight, setComponentHeight] = useState(DEFAULT_HEIGHT);
 
   useEffect(() => {
+    queueMicrotask(() => setComponentHeight(window.innerHeight - offset));
     const handleResize = () => {
       setComponentHeight(window.innerHeight - offset);
     };
