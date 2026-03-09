@@ -26,6 +26,8 @@ export const AceEditor = ({ ...props }) => {
       wrapEnabled
       editorProps={{ $blockScrolling: true }}
       theme={colorMode === 'light' ? 'github_light_default' : 'github_dark'}
+      enableSnippets
+      enableLiveAutocompletion
       onLoad={(editor) => {
         editor.commands.addCommand({
           name: 'beautify',
