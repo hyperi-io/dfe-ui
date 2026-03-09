@@ -1,4 +1,4 @@
-import { AppLayout } from '@/app/(auth)/__server__/components/AppLayout';
+import { AppLayout } from '@/core/components/AppLayout';
 import { authOptions } from '@/core/config/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
