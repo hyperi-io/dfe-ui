@@ -1,3 +1,5 @@
+'use client';
+
 import { cn } from '@/core/utils/style';
 import { usePathname } from 'next/navigation';
 import { featureFlagSidebarMenuItems } from './constants';
@@ -9,7 +11,7 @@ interface SidebarMenuProps {
 export const SidebarMenu = ({ collapsed }: SidebarMenuProps) => {
   const pathname = usePathname();
   const isSelected = (key: string) =>
-    key.replace('/', '') === pathname.split('/')[1];
+    key.replace('/', '') === pathname?.split('/')[1];
 
   return (
     <ul className={cn(collapsed ? 'max-w-24' : 'max-w-96')}>

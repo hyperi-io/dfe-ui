@@ -2,14 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import Layout from '../layout';
 
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
-}));
-
-vi.mock('next/navigation', () => ({
-  redirect: vi.fn(),
-}));
-
 const getServerSession = vi.mocked(
   (await import('next-auth')).getServerSession,
 );
