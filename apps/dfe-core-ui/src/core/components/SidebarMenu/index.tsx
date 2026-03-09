@@ -12,13 +12,12 @@ import { ThemeToggle } from '@/core/components/ThemeToggle';
 import { UserActionsButton } from '@/core/components/UserActionsButton';
 import { useTheme } from '@/core/contexts/ThemeContext';
 import { cn } from '@/core/utils/style';
-import { CompatibleStyleWrapper } from '../../contexts/ClientContext/CompatibleStyleWrapper';
 import { Logo } from './Logo';
 import { SidebarMenu } from './SidebarMenu';
 
 const { Sider } = Layout;
 
-export const BaseSidebar = () => {
+export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   return (
@@ -70,13 +69,5 @@ export const BaseSidebar = () => {
         </div>
       </div>
     </Sider>
-  );
-};
-
-export const Sidebar = () => {
-  return (
-    <CompatibleStyleWrapper>
-      <BaseSidebar />
-    </CompatibleStyleWrapper>
   );
 };

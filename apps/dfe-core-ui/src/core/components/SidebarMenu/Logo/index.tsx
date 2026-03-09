@@ -26,6 +26,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           alt="logo"
           loading="eager"
           width={30}
+          height={44}
         />
       ) : (
         <Image
@@ -34,6 +35,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           alt="logo"
           loading="eager"
           width={249}
+          height={40}
         />
       )}
     </Link>

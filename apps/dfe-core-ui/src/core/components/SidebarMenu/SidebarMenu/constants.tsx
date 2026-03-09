@@ -1,13 +1,9 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
 import {
-  IconFocus2 as AimOutlined,
-  IconDatabase as DatabaseOutlined,
-  IconFilter as FilterOutlined,
   IconChartDots,
   IconLayoutGrid,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
-  IconSettings as SettingOutlined,
 } from '@hyperi/icons';
 import { SidebarLink } from '../SidebarLink';
 
@@ -66,20 +62,6 @@ export const featureFlagSidebarMenuItems = [
       ]
     : []),
   {
-    key: '/schemas',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/schemas',
-          icon: <IconWrapper icon={<DatabaseOutlined />} />,
-          label: 'Schemas',
-          external: false,
-        }}
-      />
-    ),
-  },
-  {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (
       <SidebarLink
@@ -88,48 +70,6 @@ export const featureFlagSidebarMenuItems = [
           key: '/rules',
           icon: <IconWrapper icon={<SafetyCertificateOutlined />} />,
           label: 'Rules',
-          external: false,
-        }}
-      />
-    ),
-  },
-  {
-    key: '/hunts',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/hunts',
-          icon: <IconWrapper icon={<AimOutlined />} />,
-          label: 'Hunts',
-          external: false,
-        }}
-      />
-    ),
-  },
-  {
-    key: '/ingest',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/ingest',
-          icon: <IconWrapper icon={<FilterOutlined />} />,
-          label: 'Ingest',
-          external: false,
-        }}
-      />
-    ),
-  },
-  {
-    key: '/settings',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/settings',
-          icon: <IconWrapper icon={<SettingOutlined />} />,
-          label: 'Settings',
           external: false,
         }}
       />

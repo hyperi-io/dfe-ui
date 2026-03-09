@@ -22,11 +22,7 @@ describe('SidebarMenu', () => {
         'Search',
         'Chart Explorer',
         'Dashboards',
-        'Schemas',
         'Rules',
-        'Hunts',
-        'Ingest',
-        'Settings',
       ]);
     });
 
