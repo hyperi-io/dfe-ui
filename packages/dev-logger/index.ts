@@ -3,24 +3,24 @@ export const devLogger = ({
   label,
   message,
 }: {
-  level: "warn" | "error" | "info";
+  level: 'warn' | 'error' | 'info';
   label?: string;
   message: string;
 }) => {
-  if (process.env.NODE_ENV !== "development") {
+  if (process.env.NODE_ENV !== 'development') {
     return;
   }
 
   switch (level) {
-    case "warn":
-      console.warn(`[DEV LOGGER]${label ? ` [${label}]: ` : ": "}`, message);
+    case 'warn':
+      console.warn(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
       break;
-    case "error":
-      console.error(`[DEV LOGGER]${label ? ` [${label}]: ` : ": "}`, message);
+    case 'error':
+      console.error(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
       break;
-    case "info":
+    case 'info':
     default:
-      console.info(`[DEV LOGGER]${label ? ` [${label}]: ` : ": "}`, message);
+      console.info(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
       break;
   }
 };
