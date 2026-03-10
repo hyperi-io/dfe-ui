@@ -196,8 +196,12 @@ export function getErrorMessage(detail: unknown): string {
       if (
         'message' in detail &&
         typeof (detail as { message: unknown }).message === 'string'
-      )
+      ) {
         return (detail as { message: string }).message;
+      }
+      if ('detail' in detail && typeof detail.detail === 'string') {
+        return (detail as { detail: string }).detail;
+      }
     }
   }
   return String(detail);

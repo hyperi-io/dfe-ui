@@ -265,17 +265,108 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/rules',
       post: {
-        success: () => {
-          console.error('Not implemented');
-        },
+        success: ({
+          mockedResponse = {
+            rule: {
+              rule_id: 'string',
+              name: 'string',
+              severity: 'string',
+              source_db: 'string',
+              source_table: 'string',
+              where_clause: 'string',
+              cel_filter: 'string',
+              original_sql: 'string',
+              hunt_name: 'string',
+              source: 'string',
+              warnings: ['string'],
+              created_at: 'string',
+            },
+            sanitize_summary: {
+              additionalProp1: {},
+            },
+            sql_errors: [
+              {
+                message: 'string',
+                position: 0,
+                suggestion: 'string',
+              },
+            ],
+            cost_estimate: {
+              estimated_rows: 0,
+              explain_plan: 'string',
+              explain_duration_ms: 0,
+              window_minutes: 60,
+              warnings: ['string'],
+            },
+          },
+        }: {
+          mockedResponse?: components['schemas']['RuleCreateResponse'];
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          }),
+        error: ({
+          mockedResponse = {
+            detail: [
+              {
+                loc: ['string', 0],
+                msg: 'string',
+                type: 'string',
+                input: 'string',
+                ctx: {},
+              },
+            ],
+          },
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          }),
       },
     },
     validate: {
       mockedUrl: '/api/v1/rules/validate',
       post: {
-        success: () => {
-          console.error('Not implemented');
-        },
+        success: ({
+          mockedResponse = {
+            valid: true,
+            errors: [
+              {
+                message: 'string',
+                position: 0,
+                suggestion: 'string',
+              },
+            ],
+          },
+        }: {
+          mockedResponse?: components['schemas']['SqlValidationResponse'];
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.rules.validate.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          }),
+        error: ({
+          mockedResponse = {
+            detail: [
+              {
+                loc: ['string', 0],
+                msg: 'string',
+                type: 'string',
+                input: 'string',
+                ctx: {},
+              },
+            ],
+          },
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.rules.validate.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          }),
       },
     },
   },
