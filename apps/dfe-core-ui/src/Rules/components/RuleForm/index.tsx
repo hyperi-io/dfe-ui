@@ -79,7 +79,9 @@ export const RuleForm = ({
     createRule({
       ...values,
       estimate_cost: values.estimate_cost ?? false,
-      cost_window_minutes: Number(values.cost_window_minutes) ?? 0,
+      cost_window_minutes: values.cost_window_minutes
+        ? Number(values.cost_window_minutes)
+        : 0,
     });
   };
 
@@ -128,7 +130,6 @@ export const RuleForm = ({
             <AceEditor
               value={initialValues?.user_sql}
               height={`${componentHeight}px`}
-              name="sql-editor"
               mode="sql"
               // readOnly={!!initialValues?.user_sql}
             />

@@ -8,6 +8,7 @@ import {
   ThemeProvider,
   useTheme,
 } from '@/core/contexts/ClientContext/ThemeContext';
+import { colors } from '@/core/utils/theme';
 import {
   darkAlgorithm,
   defaultAlgorithm,
@@ -36,6 +37,7 @@ const CompatibleStyleProviders = ({
           token: {
             fontFamily: typography.fontFamily.base,
             fontFamilyCode: typography.fontFamily.mono,
+            colorPrimary: colors.brand.tertiary,
           },
           components: {
             Typography: {
