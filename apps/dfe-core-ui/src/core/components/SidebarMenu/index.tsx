@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 import { ThemeToggle } from '@/core/components/ThemeToggle';
 import { UserActionsButton } from '@/core/components/UserActionsButton';
-import { useTheme } from '@/core/contexts/ThemeContext';
+import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { cn } from '@/core/utils/style';
 import { Logo } from './Logo';
 import { SidebarMenu } from './SidebarMenu';
