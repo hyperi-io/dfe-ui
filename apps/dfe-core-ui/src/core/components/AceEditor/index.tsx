@@ -12,9 +12,15 @@ import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-github_dark';
 import 'ace-builds/src-noconflict/theme-github_light_default';
 
-type AceEditorProps = React.ComponentProps<typeof ReactAceEditor>;
+interface AceEditorProps extends React.ComponentProps<typeof ReactAceEditor> {
+  'aria-invalid'?: boolean;
+}
 
-export const AceEditor = ({ className, ...props }: AceEditorProps) => {
+export const AceEditor = ({
+  className,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: AceEditorProps) => {
   const { colorMode } = useTheme();
 
   const beautifyContent = (editor: Editor) => {
@@ -27,7 +33,12 @@ export const AceEditor = ({ className, ...props }: AceEditorProps) => {
       height="600px"
       showPrintMargin={false}
       className={cn(
-        'border border-foreground/10 dark:border-dark-foreground/10 rounded-sm',
+        'border rounded-sm transition-shadow',
+        'border-foreground/10 dark:border-dark-foreground/10',
+        ariaInvalid
+          ? 'focus-within:ring-2 focus-within:ring-error/10'
+          : 'focus-within:ring-2 focus-within:ring-info/10 focus-within:border-info hover:border-info',
+        ariaInvalid && 'border-error',
         className,
       )}
       wrapEnabled

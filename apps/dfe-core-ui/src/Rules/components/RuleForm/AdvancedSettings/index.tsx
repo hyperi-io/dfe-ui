@@ -13,49 +13,51 @@ export const AdvancedSettings = ({
   return (
     <div className="relative">
       <ContentCard className="flex w-full gap-x-2 items-center border-b border-foreground/10 dark:border-dark-foreground/10">
-        <Form.Item
-          name="name"
-          label="Name"
-          className="m-0! grow text-sm"
-          layout="vertical"
-          rules={[formValidation]}
-        >
-          <Input className="w-full" />
-        </Form.Item>
+        <div className="flex gap-x-2 w-full">
+          <Form.Item
+            name="name"
+            label="Name"
+            className="m-0! grow text-sm"
+            layout="vertical"
+            rules={[formValidation]}
+          >
+            <Input className="w-full" />
+          </Form.Item>
 
-        <Form.Item
-          label="Severity"
-          name="severity"
-          className="m-0! grow text-sm"
-          layout="vertical"
-          rules={[formValidation]}
-        >
-          <Select
-            className="w-full"
-            options={[
-              { label: 'Low', value: 'low' },
-              { label: 'Medium', value: 'medium' },
-              { label: 'High', value: 'high' },
-              { label: 'Critical', value: 'critical' },
-            ]}
-          />
-        </Form.Item>
+          <Form.Item
+            label="Severity"
+            name="severity"
+            className="m-0! grow text-sm"
+            layout="vertical"
+            rules={[formValidation]}
+          >
+            <Select
+              className="w-full"
+              options={[
+                { label: 'Low', value: 'low' },
+                { label: 'Medium', value: 'medium' },
+                { label: 'High', value: 'high' },
+                { label: 'Critical', value: 'critical' },
+              ]}
+            />
+          </Form.Item>
 
-        <Form.Item
-          label="Source Type"
-          name="source_type"
-          className="m-0! grow text-sm"
-          layout="vertical"
-          rules={[formValidation]}
-        >
-          <Select
-            className="w-full"
-            options={[
-              { label: 'Raw', value: 'raw' },
-              { label: 'HyperDX', value: 'hyperdx' },
-            ]}
-          />
-        </Form.Item>
+          <Form.Item
+            label="Source Type"
+            name="source_type"
+            className="m-0! grow text-sm"
+            layout="vertical"
+            rules={[formValidation]}
+          >
+            <Select
+              className="w-full"
+              options={[
+                { label: 'Raw', value: 'raw' },
+                { label: 'HyperDX', value: 'hyperdx' },
+              ]}
+            />
+          </Form.Item>
+        </div>
 
         <Button
           type="text"
