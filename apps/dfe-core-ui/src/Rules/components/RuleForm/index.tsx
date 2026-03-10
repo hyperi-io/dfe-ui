@@ -56,7 +56,7 @@ export const RuleForm = ({
     mutate: createRule,
     reset: resetCreateRule,
     isPending,
-    error,
+    error: createRuleError,
   } = useCreateRule({
     onSuccess: (data) => {
       onRuleCreateSuccess?.(data);
@@ -134,10 +134,10 @@ export const RuleForm = ({
             />
           </Form.Item>
 
-          {error && (
+          {createRuleError && (
             <FormNotification
               type="error"
-              text={error?.message ?? 'An unexpected error occurred'}
+              text={createRuleError?.message ?? 'An unexpected error occurred'}
             />
           )}
 
