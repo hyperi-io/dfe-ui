@@ -1,5 +1,5 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
-import { useTheme } from '@/core/contexts/ThemeContext';
+import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { cn } from '@/core/utils/style';
 import {
   IconMoon as MoonOutlined,

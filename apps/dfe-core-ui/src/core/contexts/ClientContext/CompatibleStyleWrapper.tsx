@@ -4,7 +4,10 @@ import { ConfigProvider } from 'antd';
 
 // import '@/core/config/AceEditor/init';
 
-import { ThemeProvider, useTheme } from '@/core/contexts/ThemeContext';
+import {
+  ThemeProvider,
+  useTheme,
+} from '@/core/contexts/ClientContext/ThemeContext';
 import {
   darkAlgorithm,
   defaultAlgorithm,
@@ -29,10 +32,19 @@ const CompatibleStyleProviders = ({
     <StyleProvider layer>
       <ConfigProvider
         theme={{
-          algorithm: colorMode === 'light' ? defaultAlgorithm : darkAlgorithm,
+          algorithm: [colorMode === 'light' ? defaultAlgorithm : darkAlgorithm],
           token: {
             fontFamily: typography.fontFamily.base,
             fontFamilyCode: typography.fontFamily.mono,
+          },
+          components: {
+            Typography: {
+              fontSizeHeading1: typography.fontSize['xl'],
+              fontSizeHeading2: typography.fontSize['lg'],
+              fontSizeHeading3: typography.fontSize['md'],
+              fontSizeHeading4: typography.fontSize['base'],
+              fontSizeHeading5: typography.fontSize['sm'],
+            },
           },
         }}
       >
