@@ -1,0 +1,25 @@
+# Project:   dfe-ui
+# File:      .hyperi-ci.yaml
+# Purpose:   HyperI CI configuration
+#
+# License:   FSL-1.1-ALv2
+# Copyright: (c) 2026 HYPERI PTY LIMITED
+#
+# Override defaults with HYPERCI_* env vars.
+# Reference: config/defaults.yaml in hyperi-ci.
+
+language: typescript
+quality:
+  enabled: true
+test:
+  enabled: true
+  coverage: true
+build:
+  enabled: true
+  strategies:
+  - native
+publish:
+  enabled: true
+  target: internal
+typescript:
+  package_manager: auto
