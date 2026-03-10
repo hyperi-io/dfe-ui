@@ -31,8 +31,9 @@ export const fontSize = {
   xs: 12, // Small labels, captions
   sm: 14, // Body small
   base: 16, // Body default
-  lg: 18, // Subheadings
-  xl: 20, // Headings
+  md: 18, // Subheadings default
+  lg: 20, // Subheadings large
+  xl: 22, // Headings
   '2xl': 24, // Large headings
   '3xl': 30, // Display small
   '4xl': 36, // Display medium
