@@ -1,0 +1,123 @@
+/* Implementing the layer order to ensure the correct order of the layers
+  This prevents tailwind 4 styles from being overridden by the antd styles
+  *most of the time*
+  https://ant.design/docs/react/compatible-style#layer
+  https://tailwindcss.com/docs/preflight#overview
+*/
+@layer base, theme, antd, utilities;
+
+/* Importing tailwindcss */
+@import 'tailwindcss';
+
+/* Importing the tokens */
+@import './__hyperi.tokens.css';
+
+/* Defining the dark variant */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+@theme {
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  --font-sans:
+    Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  --font-base:
+    Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  --font-display: Inter, sans-serif;
+  --font-secondary: Inter, sans-serif;
+  --font-mono:
+    ui-monospace, SF Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo,
+    monospace;
+  --font-hyper:
+    SF Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  --color-brand-primary: #000647;
+  --color-secondary: #10398f;
+  --color-tertiary: #2ea4f6;
+
+  --color-success: #00a63e;
+  --color-dark-success: #00a63e;
+  --color-warning: #faad14;
+  --color-dark-warning: #faad14;
+  --color-error: #ff4d4f;
+  --color-dark-error: #ff4d4f;
+  --color-info: #2ea4f6;
+  --color-dark-info: #2ea4f6;
+
+  --color-light_grey: #f1f2f2;
+  --color-dark_blue: #000647;
+  --color-link: #2ea4f6;
+  --color-link-hover: #10398f;
+  --color-selection: #e6f4ff;
+  --color-disabled: rgba(0, 0, 0, 0.25);
+
+  /* Light mode colors */
+  --color-foreground: #000000;
+  --color-foreground-muted: #222222;
+  --color-background: #ffffff;
+  --color-background-muted: #f5f5f5;
+  --color-background-secondary: #e5e7eb;
+
+  /* Dark mode colors */
+  --color-dark-foreground: #ffffff;
+  --color-dark-foreground-muted: #dddddd;
+  --color-dark-background: #141414;
+  --color-dark-background-muted: #000000;
+  --color-dark-background-secondary: #303030;
+
+  --toolbar-height: 64px;
+
+  --shadow-highlight: 0 0 2px;
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+}
