@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [
+        "src/icons/**",
+        "src/index.ts",
+        "src/manifest.ts",
+        "stories/AllIcons.stories.tsx"
+      ]
+    }
+  }
+}

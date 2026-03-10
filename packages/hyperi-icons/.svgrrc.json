@@ -1,0 +1,12 @@
+{
+  "typescript": true,
+  "memo": true,
+  "titleProp": true,
+  "dimensions": false,
+  "svgProps": {
+    "role": "img",
+    "width": "1em",
+    "height": "1em"
+  },
+  "plugins": ["@svgr/plugin-svgo", "@svgr/plugin-jsx"]
+}

@@ -1,0 +1,21 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-sql"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="m 18,15.498475 v 6 h 2" />
+  <path d="M 5.0397836,15.498475 6.498944,18.495968 8.1127588,15.498475" />
+  <path d="m 14,3 v 4 a 1,1 0 0 0 1,1 h 4" />
+  <path d="m 14,3 v 4 a 1,1 0 0 0 1,1 h 4" />
+  <path d="M 5,12 V 5 A 2,2 0 0 1 7,3 h 7 l 5,5 v 4" />
+  <path d="m 6.498944,18.495968 v 3.002507" />
+  <path d="m 10.982255,21.5 -0.0015,-6.001525 2.020007,2.717213 2.018482,-2.717213 v 6" />
+</svg>
