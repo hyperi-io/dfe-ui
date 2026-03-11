@@ -4,7 +4,7 @@ import {
   IconLayoutGrid,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
-} from '@hyperi/icons';
+} from '@dfe/icons';
 import { SidebarLink } from '../SidebarLink';
 
 interface SidebarMenuProps {

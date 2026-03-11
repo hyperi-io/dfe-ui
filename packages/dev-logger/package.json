@@ -1,5 +1,5 @@
 {
-  "name": "@hyperi/dev-logger",
+  "name": "@dfe/dev-logger",
   "version": "0.0.0",
   "type": "module",
   "private": true,

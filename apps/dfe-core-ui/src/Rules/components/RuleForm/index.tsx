@@ -1,4 +1,4 @@
-import { IconDeviceFloppy } from '@hyperi/icons';
+import { IconDeviceFloppy } from '@dfe/icons';
 import { Button, Form } from 'antd';
 import { useEffect } from 'react';
 

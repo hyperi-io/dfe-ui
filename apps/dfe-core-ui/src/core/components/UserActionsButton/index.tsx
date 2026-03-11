@@ -1,5 +1,5 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
-import { IconUser as UserOutlined } from '@hyperi/icons';
+import { IconUser as UserOutlined } from '@dfe/icons';
 import { Button, Popover } from 'antd';
 import { UserActionsPopoverContent } from './UserActionsPopoverContent';
 

@@ -1,4 +1,4 @@
-import type { paths } from '@hyperi/dfe-engine-types';
+import type { paths } from '@dfe/dfe-engine-types';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
 
@@ -86,7 +86,7 @@ export type ApiClientConfig = {
 
 /**
  * Type-safe API client for the DFE Engine API.
- * Request bodies, query/path params, and response data are inferred from @hyperi/dfe-engine-types.
+ * Request bodies, query/path params, and response data are inferred from @dfe/dfe-engine-types.
  */
 export function createApiClient(config: ApiClientConfig) {
   const { baseUrl, getAuthHeaders, fetch: customFetch } = config;

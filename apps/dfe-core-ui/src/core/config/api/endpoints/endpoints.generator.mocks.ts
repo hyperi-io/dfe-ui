@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { components } from '@hyperi/dfe-engine-types';
+import { components } from '@dfe/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
 export const API_CONFIG_MOCKS = Object.freeze({

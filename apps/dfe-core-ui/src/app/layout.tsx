@@ -18,8 +18,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Hyperi DFE UI',
-  description: 'Hyperi Data Fusion Engine management console',
+  title: 'DFE UI',
+  description: 'Data Fusion Engine management console',
 };
 
 export default function RootLayout({

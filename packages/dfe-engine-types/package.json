@@ -1,5 +1,5 @@
 {
-  "name": "@hyperi/dfe-engine-types",
+  "name": "@dfe/dfe-engine-types",
   "version": "0.1.0",
   "private": true,
   "description": "TypeScript types for DFE Engine API",

@@ -1,4 +1,4 @@
-import { components } from '@hyperi/dfe-engine-types';
+import { components } from '@dfe/dfe-engine-types';
 
 export type SqlValidationRequest =
   components['schemas']['SqlValidationRequest'];
