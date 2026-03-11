@@ -1,4 +1,4 @@
-import { paths } from '@hyperi/dfe-engine-types';
+import { paths } from '@dfe/dfe-engine-types';
 import { KeysWithSubstring, ReplaceParams } from './type.utils';
 
 /** Union of all path keys that contain `{param}` placeholders. */

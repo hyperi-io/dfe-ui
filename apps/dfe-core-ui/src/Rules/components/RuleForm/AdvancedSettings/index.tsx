@@ -1,5 +1,5 @@
 import { ContentCard } from '@/core/components/ContentCard';
-import { IconChevronDown, IconChevronUp } from '@hyperi/icons';
+import { IconChevronDown, IconChevronUp } from '@dfe/icons';
 import { Button, Form, FormRule, Input, Select, Switch } from 'antd';
 import { useState } from 'react';
 

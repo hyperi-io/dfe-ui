@@ -1,10 +1,7 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { cn } from '@/core/utils/style';
-import {
-  IconMoon as MoonOutlined,
-  IconSun as SunOutlined,
-} from '@hyperi/icons';
+import { IconMoon as MoonOutlined, IconSun as SunOutlined } from '@dfe/icons';
 import { Button, Tooltip } from 'antd';
 
 interface ThemeToggleProps {

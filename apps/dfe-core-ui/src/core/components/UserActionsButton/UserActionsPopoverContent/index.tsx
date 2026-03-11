@@ -1,6 +1,6 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { useLogout } from '@/core/hooks/useLogout';
-import { IconLogout as LogoutOutlined } from '@hyperi/icons';
+import { IconLogout as LogoutOutlined } from '@dfe/icons';
 import { Button } from 'antd';
 
 export const UserActionsPopoverContent = () => {
