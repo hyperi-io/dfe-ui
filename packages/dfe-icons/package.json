@@ -11,7 +11,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "generate": "node scripts/generate.mjs",
-    "build": "node scripts/generate.mjs",
+    "build": "npm run generate",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "check-types": "tsc --noEmit"

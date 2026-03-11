@@ -9,9 +9,6 @@
 /* Importing tailwindcss */
 @import 'tailwindcss';
 
-/* Importing the tokens */
-@import './__dfe.tokens.css';
-
 /* Defining the dark variant */
 @custom-variant dark (&:is(.dark *));
 
