@@ -1,5 +1,5 @@
 import { cn } from '@/core/utils/style';
-import { IconChevronDown, IconChevronUp } from '@hyperi/icons';
+import { IconChevronDown, IconChevronUp } from '@dfe/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
