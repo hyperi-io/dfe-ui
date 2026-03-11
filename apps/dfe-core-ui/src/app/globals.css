@@ -1,3 +1,4 @@
+@import './__dfe.tokens.css';
 @import './tailwind.config.css';
 
 /* Prevent layout shift: reserve Sider dimensions before Ant Design CSS-in-JS loads */
