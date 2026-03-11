@@ -1,4 +1,4 @@
-# @hyperi/icons
+# @dfe/icons
 
 React icon components built from [Tabler Icons](https://tabler.io/icons) SVG source, with support for adding custom icons alongside the upstream set.
 
@@ -8,17 +8,17 @@ The `scripts/generate.mjs` script reads every `.svg` file from subdirectories un
 
 Source directories are auto-discovered. The upstream Tabler icons live in `svg/outline/` and `svg/filled/`, while any additional directories (e.g. `svg/custom/`) are picked up automatically.
 
-| Directory | Naming convention | Example |
-|---|---|---|
-| `svg/outline/` | `Icon` + PascalCase | `zoom.svg` → `IconZoom` |
-| `svg/filled/` | `Icon` + PascalCase + `Filled` | `alarm.svg` → `IconAlarmFilled` |
-| `svg/custom/` | `Icon` + PascalCase | `file-type-yml.svg` → `IconFileTypeYml` |
-| `svg/<any>/` | `Icon` + PascalCase | (auto-discovered, no suffix) |
+| Directory      | Naming convention              | Example                                 |
+| -------------- | ------------------------------ | --------------------------------------- |
+| `svg/outline/` | `Icon` + PascalCase            | `zoom.svg` → `IconZoom`                 |
+| `svg/filled/`  | `Icon` + PascalCase + `Filled` | `alarm.svg` → `IconAlarmFilled`         |
+| `svg/custom/`  | `Icon` + PascalCase            | `file-type-yml.svg` → `IconFileTypeYml` |
+| `svg/<any>/`   | `Icon` + PascalCase            | (auto-discovered, no suffix)            |
 
 ## Usage
 
 ```tsx
-import { IconZoom, IconAlarmFilled, IconFileTypeYml } from "@hyperi/icons";
+import { IconZoom, IconAlarmFilled, IconFileTypeYml } from '@dfe/icons';
 
 function Example() {
   return (
@@ -45,7 +45,7 @@ Every component is a `React.forwardRef` wrapping an `<svg>` element, so it accep
 3. Import the new component by its PascalCase name:
 
    ```tsx
-   import { IconMyNewIcon } from "@hyperi/icons";
+   import { IconMyNewIcon } from '@dfe/icons';
    ```
 
 The SVG should follow the same 24×24 viewBox convention used by Tabler:
@@ -68,13 +68,13 @@ The SVG should follow the same 24×24 viewBox convention used by Tabler:
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `yarn generate` | Transform SVGs into React components |
-| `yarn build` | Same as `generate` (runs as part of the turbo pipeline) |
-| `yarn storybook` | Start Storybook dev server on port 6006 |
-| `yarn build-storybook` | Build a static Storybook site |
-| `yarn check-types` | Run TypeScript type checking |
+| Command                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| `yarn generate`        | Transform SVGs into React components                    |
+| `yarn build`           | Same as `generate` (runs as part of the turbo pipeline) |
+| `yarn storybook`       | Start Storybook dev server on port 6006                 |
+| `yarn build-storybook` | Build a static Storybook site                           |
+| `yarn check-types`     | Run TypeScript type checking                            |
 
 ## Storybook
 

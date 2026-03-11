@@ -1,5 +1,5 @@
 {
-  "name": "hyperi-dfe-ui",
+  "name": "dfe-ui",
   "private": true,
   "scripts": {
     "build": "turbo run build",

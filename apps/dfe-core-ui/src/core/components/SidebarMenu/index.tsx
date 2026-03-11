@@ -4,7 +4,7 @@ import { IconWrapper } from '@/core/components/IconWrapper';
 import {
   IconLayoutSidebarLeftCollapse as MenuFoldOutlined,
   IconLayoutSidebarRightCollapse as MenuUnfoldOutlined,
-} from '@hyperi/icons';
+} from '@dfe/icons';
 import { Button, Layout } from 'antd';
 import { useState } from 'react';
 

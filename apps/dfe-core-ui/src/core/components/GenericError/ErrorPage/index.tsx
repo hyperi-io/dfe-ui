@@ -1,7 +1,7 @@
 import { ErrorHoundSvg } from '@/core/components/ErrorHoundSvg';
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { cn } from '@/core/utils/style';
-import { IconExclamationCircle as ExclamationCircleOutlined } from '@hyperi/icons';
+import { IconExclamationCircle as ExclamationCircleOutlined } from '@dfe/icons';
 interface GenericErrorProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   description?: string;
