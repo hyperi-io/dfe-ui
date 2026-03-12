@@ -1,0 +1,110 @@
+import { apiClient } from '@/core/config/api';
+import { API_CONFIG } from '@/core/config/api/endpoints';
+import { useDebounce } from '@/core/hooks/useDebounce';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef } from 'react';
+import { SourceListRequestParams } from './types';
+
+/** useFetchInfiniteFilteredSources props */
+/**
+ * @param search - The search query to filter the sources by name and description.
+ * @param enabled - Whether the sources are enabled.
+ * @param sort_by - The field to sort the sources by (source, display_name, enabled).
+ * @param sort_order - The order to sort the sources by.
+ * @param per_page - The number of sources to fetch per page.
+ */
+/**
+ * @returns A list of sources.
+ */
+export const useFetchInfiniteFilteredSources = ({
+  search,
+  enabled,
+  sort_by,
+  sort_order,
+  per_page,
+}: Omit<SourceListRequestParams, 'page'> = {}) => {
+  const debouncedSearch = useDebounce(search ?? '', 300);
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: [
+      'sources',
+      debouncedSearch,
+      enabled,
+      sort_by,
+      sort_order,
+      per_page,
+    ],
+    queryFn: async ({ pageParam = 1 }) =>
+      apiClient.get(API_CONFIG.sources.default, {
+        queryParams: {
+          search: debouncedSearch,
+          enabled,
+          sort_by,
+          sort_order,
+          page: pageParam,
+          per_page,
+        },
+      }),
+    getNextPageParam: (lastPage, allPages) => {
+      const pageSize = per_page ?? lastPage.per_page;
+      const hasMore =
+        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
+      return hasMore ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+
+  const flattenedData = useMemo(() => {
+    if (!data?.pages) return { items: [] };
+
+    const allItems = data.pages.flatMap((page) => page.items || []);
+    return {
+      ...data.pages[0],
+      items: allItems,
+    };
+  }, [data]);
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  return {
+    data: flattenedData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    loadMoreRef,
+    isFetchingNextPage,
+  };
+};

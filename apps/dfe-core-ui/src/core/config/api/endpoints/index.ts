@@ -14,7 +14,7 @@ function pathBuilder<P extends DynamicPathResolved>(
   return fn;
 }
 
-const config = {
+const config = Object.freeze({
   auth: {
     login: '/api/v1/auth/login',
     refresh: '/api/v1/auth/refresh',
@@ -88,7 +88,7 @@ const config = {
     version: '/api/v1/system/version',
     settings: '/api/v1/system/settings',
   },
-} satisfies {
+}) satisfies {
   [key: string]: {
     [key: string]:
       | keyof paths
