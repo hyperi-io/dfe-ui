@@ -5,7 +5,7 @@
 # License:   FSL-1.1-ALv2
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 
-.PHONY: quality test build
+.PHONY: quality test build check
 
 quality:
 	hyperi-ci run quality
@@ -15,3 +15,6 @@ test:
 
 build:
 	hyperi-ci run build
+
+check:
+	hyperi-ci check
