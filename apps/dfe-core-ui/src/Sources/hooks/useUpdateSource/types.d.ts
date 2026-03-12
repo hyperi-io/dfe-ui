@@ -1,6 +1,6 @@
 import { components } from '@dfe/dfe-engine-types';
 
-export type SourceCreateRequestBody = {
+export type SourceUpdateRequestBody = {
   source: string;
   display_name: string;
   description?: string | null;
@@ -11,4 +11,4 @@ export type SourceCreateRequestBody = {
   mapping_standards?: string[];
 };
 
-export type SourceCreateResponse = components['schemas']['SourceResponse'];
+export type SourceUpdateResponse = components['schemas']['SourceResponse'];
