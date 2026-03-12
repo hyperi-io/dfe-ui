@@ -86,9 +86,7 @@ describe('createApiClient', () => {
 
     const client = createApiClient({ baseUrl: BASE_URL });
     await client.request('/api/v1/sources', 'get', {
-      // QueryParams for list_sources uses optional parameters; runtime supports query
-      // @ts-expect-error - TS infers query as undefined for optional query ops
-      query: { search: 'foo', enabled: true, sort_order: 'asc' },
+      queryParams: { search: 'foo', enabled: true, sort_order: 'asc' },
     });
 
     expect(capturedUrl).toContain('search=foo');

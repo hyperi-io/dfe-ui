@@ -34,7 +34,7 @@ type PathParams<Op> = Op extends { parameters: { path: infer P } }
   : undefined;
 
 /** Query parameters when present. */
-type QueryParams<Op> = Op extends { parameters: { query: infer Q } }
+type QueryParams<Op> = Op extends { parameters: { query?: infer Q } }
   ? Q extends Record<string, unknown>
     ? Q
     : undefined
@@ -44,10 +44,10 @@ type QueryParams<Op> = Op extends { parameters: { query: infer Q } }
 type RequestOptions<Path extends keyof paths, Method extends HttpMethod> =
   OperationFor<Path, Method> extends infer Op
     ? Op extends never
-      ? { pathParams?: undefined; query?: undefined; body?: undefined }
+      ? { pathParams?: undefined; queryParams?: undefined; body?: undefined }
       : {
           pathParams?: PathParams<Op>;
-          query?: QueryParams<Op>;
+          queryParams?: QueryParams<Op>;
           body?: RequestBody<Op>;
         }
     : never;
@@ -96,7 +96,7 @@ export function createApiClient(config: ApiClientConfig) {
     method: Method,
     options?: RequestOptions<Path, Method>,
   ): Promise<SuccessResponseBody<OperationFor<Path, Method>>> {
-    const { pathParams, query, body } = options ?? {};
+    const { pathParams, queryParams, body } = options ?? {};
     const resolvedPath = applyPathParams(
       path as string,
       pathParams as Record<string, string> | undefined,
@@ -104,7 +104,7 @@ export function createApiClient(config: ApiClientConfig) {
     const url = buildUrl(
       baseUrl,
       resolvedPath,
-      query as Record<string, unknown> | undefined,
+      queryParams as Record<string, unknown> | undefined,
     );
 
     const headers: HeadersInit = {
