@@ -1,6 +1,7 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
 import { Button, Form, FormProps, Input, Select, Switch } from 'antd';
+import { useEffect } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -20,6 +21,7 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   onFinish: (values: CreateUpdateSourceFormData) => void;
   isPending?: boolean;
   error?: Error;
+  resetFormFields?: boolean;
 };
 
 export const CreateUpdateSourceForm = ({
@@ -27,11 +29,18 @@ export const CreateUpdateSourceForm = ({
   onFinish,
   isPending = false,
   error,
+  resetFormFields,
   ...props
 }: CreateUpdateSourceFormProps) => {
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateSourceFormData>(formSchema);
+
+  useEffect(() => {
+    if (resetFormFields) {
+      form.resetFields();
+    }
+  }, [resetFormFields, form]);
 
   return (
     <Form

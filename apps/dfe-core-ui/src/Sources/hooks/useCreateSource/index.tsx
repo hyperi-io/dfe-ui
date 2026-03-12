@@ -12,7 +12,7 @@ export const useCreateSource = ({
   onSuccess,
   onError,
 }: UseCreateSourceProps = {}) => {
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (source: SourceCreateRequestBody) =>
       apiClient.post(API_CONFIG.sources.default, { body: source }),
     onSuccess: (data) => {
@@ -27,5 +27,6 @@ export const useCreateSource = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };
