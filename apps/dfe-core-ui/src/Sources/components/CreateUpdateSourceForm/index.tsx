@@ -7,9 +7,9 @@ import z from 'zod';
 const formSchema = z.object({
   source: z.string().min(1, { message: 'Name is required' }),
   display_name: z.string().min(1, { message: 'Display name is required' }),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   enabled: z.boolean().optional(),
-  header_type: z.enum(['text', 'json']).optional(),
+  header_type: z.string().nullable().optional(),
   has_transform: z.boolean().optional(),
   has_fetcher: z.boolean().optional(),
   mapping_standards: z.array(z.string()).optional(),

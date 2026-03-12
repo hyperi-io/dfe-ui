@@ -3,10 +3,11 @@ import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SourceSummary } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { devLogger } from '@dfe/dev-logger';
-import { IconEdit, IconTrash } from '@dfe/icons';
+import { IconTrash } from '@dfe/icons';
 import { Button, Spin } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import { useCallback } from 'react';
+import { UpdateSourceDrawer } from '../UpdateSourceDrawer';
 import { useListSourcesContext } from './context';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
@@ -68,18 +69,7 @@ const sourceSummaryColumns: ColumnType<SourceSummary>[] = [
     width: 100,
     render: (_text: string, record: SourceSummary) => (
       <div className="flex gap-2 text-foreground-muted dark:text-dark-foreground-muted">
-        <Button
-          type="default"
-          shape="circle"
-          aria-label={`Edit ${record.display_name ?? record.source}`}
-          icon={<IconEdit />}
-          onClick={() =>
-            devLogger({
-              level: 'info',
-              message: `Edit ${record.display_name ?? record.source}`,
-            })
-          }
-        />
+        <UpdateSourceDrawer source={record} />
 
         <Button
           type="default"

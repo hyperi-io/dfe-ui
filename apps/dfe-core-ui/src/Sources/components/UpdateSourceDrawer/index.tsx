@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
-import { useCreateSource } from '@/Sources/hooks/useCreateSource';
-import { IconPlus } from '@dfe/icons';
+import { SourceSummary } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
+import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
+import { IconEdit } from '@dfe/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import {
@@ -9,34 +10,38 @@ import {
 } from '../CreateUpdateSourceForm';
 import { useListSourcesContext } from '../ListSources/context';
 
-export const CreateSourceDrawer = () => {
-  const title = 'Add Source';
+interface UpdateSourceDrawerProps {
+  source: SourceSummary;
+}
+
+export const UpdateSourceDrawer = ({ source }: UpdateSourceDrawerProps) => {
+  const title = `Update ${source.display_name ?? source.source}`;
 
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const { refetch: refetchSources } = useListSourcesContext();
   const {
-    mutate: createSourceMutation,
+    mutate: updateSourceMutation,
     isPending,
     error,
-    reset: resetCreateSource,
-  } = useCreateSource({
+    reset: resetUpdateSource,
+  } = useUpdateSource({
     onSuccess: () => {
       refetchSources();
       setIsDrawerVisible(false);
     },
   });
-  const handleCreateSource = (values: CreateUpdateSourceFormData) => {
-    createSourceMutation(values);
+  const handleUpdateSource = (values: CreateUpdateSourceFormData) => {
+    updateSourceMutation(values);
   };
   return (
     <>
       <Button
-        type="primary"
-        icon={<IconPlus />}
+        type="default"
+        shape="circle"
+        aria-label={`Edit ${source.display_name ?? source.source}`}
+        icon={<IconEdit />}
         onClick={() => setIsDrawerVisible(true)}
-      >
-        {title}
-      </Button>
+      />
       <Drawer
         title={title}
         open={isDrawerVisible}
@@ -45,10 +50,11 @@ export const CreateSourceDrawer = () => {
         }}
       >
         <CreateUpdateSourceForm
-          onFinish={handleCreateSource}
-          onValuesChange={resetCreateSource}
+          onFinish={handleUpdateSource}
+          onValuesChange={resetUpdateSource}
           isPending={isPending}
           error={error ?? undefined}
+          initialValues={source}
         />
       </Drawer>
     </>
