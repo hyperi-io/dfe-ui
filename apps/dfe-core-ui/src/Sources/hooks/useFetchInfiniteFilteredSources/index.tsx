@@ -3,7 +3,7 @@ import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { SourceListRequestParams } from './types';
+import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
 /** useFetchInfiniteFilteredSources props */
 /**
@@ -22,7 +22,7 @@ export const useFetchInfiniteFilteredSources = ({
   sort_by,
   sort_order,
   per_page,
-}: Omit<SourceListRequestParams, 'page'> = {}) => {
+}: UseFetchInfiniteFilteredSourcesProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', 300);
 
   const {
@@ -47,7 +47,8 @@ export const useFetchInfiniteFilteredSources = ({
       apiClient.get(API_CONFIG.sources.default, {
         queryParams: {
           search: debouncedSearch,
-          enabled,
+          enabled:
+            enabled === 'true' ? true : enabled === 'false' ? false : undefined,
           sort_by,
           sort_order,
           page: pageParam,
@@ -64,14 +65,24 @@ export const useFetchInfiniteFilteredSources = ({
   });
 
   const flattenedData = useMemo(() => {
-    if (!data?.pages) return { items: [] };
+    if (!data?.pages?.length) {
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        per_page: per_page ?? 10,
+        total_pages: 0,
+        next_page: null as number | null,
+        prev_page: null as number | null,
+      };
+    }
 
     const allItems = data.pages.flatMap((page) => page.items || []);
     return {
       ...data.pages[0],
       items: allItems,
     };
-  }, [data]);
+  }, [data, per_page]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -104,6 +115,7 @@ export const useFetchInfiniteFilteredSources = ({
     error,
     refetch,
     fetchNextPage,
+    hasNextPage,
     loadMoreRef,
     isFetchingNextPage,
   };

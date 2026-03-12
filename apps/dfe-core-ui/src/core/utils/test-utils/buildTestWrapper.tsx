@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
+import { ListSourcesProvider } from '@/Sources/components/ListSources/context';
+import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type WrapperComponent = ({
@@ -53,6 +55,27 @@ class TestWrapperBuilder {
   withTheme() {
     this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
       return <ThemeProvider>{children}</ThemeProvider>;
+    });
+    return this;
+  }
+
+  /**
+   * Adds ListSourcesProvider to the test wrapper
+   * @example
+   *  const { wrapper } = buildTestWrapper().withListSourcesProvider()
+   */
+
+  withListSourcesProvider({
+    defaultFilters,
+  }: {
+    defaultFilters?: UseFetchInfiniteFilteredSourcesProps;
+  }) {
+    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
+      return (
+        <ListSourcesProvider defaultFilters={defaultFilters}>
+          {children}
+        </ListSourcesProvider>
+      );
     });
     return this;
   }

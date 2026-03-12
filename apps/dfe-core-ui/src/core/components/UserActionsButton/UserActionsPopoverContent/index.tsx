@@ -1,6 +1,5 @@
-import { IconWrapper } from '@/core/components/IconWrapper';
 import { useLogout } from '@/core/hooks/useLogout';
-import { IconLogout as LogoutOutlined } from '@dfe/icons';
+import { IconLogout } from '@dfe/icons';
 import { Button } from 'antd';
 
 export const UserActionsPopoverContent = () => {
@@ -10,7 +9,7 @@ export const UserActionsPopoverContent = () => {
       <Button
         color="default"
         variant="outlined"
-        icon={<IconWrapper icon={<LogoutOutlined />} />}
+        icon={<IconLogout />}
         onClick={handleLogout}
       >
         Logout

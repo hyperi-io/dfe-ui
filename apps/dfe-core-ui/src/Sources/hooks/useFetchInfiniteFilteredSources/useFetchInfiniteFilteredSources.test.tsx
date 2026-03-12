@@ -42,7 +42,15 @@ describe('useFetchInfiniteFilteredSources', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.data).toEqual({ items: [] });
+      expect(result.current.data).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+        total_pages: 0,
+        next_page: null,
+        prev_page: null,
+      });
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
     });
@@ -99,6 +107,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         error: null,
         refetch: expect.any(Function),
         fetchNextPage: expect.any(Function),
+        hasNextPage: expect.any(Boolean),
         isFetchingNextPage: false,
       });
       expect(result.current.loadMoreRef).toBeDefined();
@@ -247,7 +256,15 @@ describe('useFetchInfiniteFilteredSources', () => {
       expect(result.current.isError).toBe(true);
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
-      expect(result.current.data).toEqual({ items: [] });
+      expect(result.current.data).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+        total_pages: 0,
+        next_page: null,
+        prev_page: null,
+      });
     });
   });
 
@@ -269,7 +286,7 @@ describe('useFetchInfiniteFilteredSources', () => {
 
     it('should include enabled filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSources({ enabled: true }),
+        () => useFetchInfiniteFilteredSources({ enabled: 'true' }),
         {
           wrapper,
         },
@@ -320,7 +337,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         () =>
           useFetchInfiniteFilteredSources({
             search: 'test',
-            enabled: true,
+            enabled: 'true',
             sort_by: 'source',
             sort_order: 'asc',
 
