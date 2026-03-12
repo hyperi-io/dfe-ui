@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type WrapperComponent = ({
@@ -39,6 +40,20 @@ class TestWrapperBuilder {
       );
     });
 
+    return this;
+  }
+
+  /**
+   * Adds ThemeProvider to the test wrapper
+   *
+   * @example
+   *  const { wrapper } = buildTestWrapper().withTheme()
+   */
+
+  withTheme() {
+    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
+      return <ThemeProvider>{children}</ThemeProvider>;
+    });
     return this;
   }
 

@@ -1,5 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -23,13 +23,7 @@ beforeAll(() =>
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const wrapper = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <QueryClientProvider client={new QueryClient()}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateRule', () => {
   const requestBody = {

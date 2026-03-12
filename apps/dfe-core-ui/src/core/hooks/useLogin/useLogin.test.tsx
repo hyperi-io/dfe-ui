@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useLogin } from '.';
@@ -25,13 +25,7 @@ afterEach(() => {
   mockSignIn.mockReset();
 });
 
-const wrapper = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <QueryClientProvider client={new QueryClient()}>
-      {children}
-    </QueryClientProvider>
-  );
-};
+const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useAuthMe', () => {
   test('should return user', async () => {
