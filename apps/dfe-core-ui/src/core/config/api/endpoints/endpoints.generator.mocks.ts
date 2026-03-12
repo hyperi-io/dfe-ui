@@ -138,15 +138,55 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     source: {
-      mockedUrl: (name: string) => `/api/v1/sources/${name}`,
+      mockedUrl: '/api/v1/sources/{name}',
       get: {
         success: () => {
           console.error('Not implemented');
         },
       },
       put: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            source: 'string',
+            message: 'ok',
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SourceResponse'];
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = {
+            detail: [
+              {
+                loc: ['string', 0],
+                msg: 'string',
+                type: 'string',
+                input: 'string',
+                ctx: {},
+              },
+            ],
+          },
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       delete: {
@@ -182,8 +222,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     instance: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}`,
+      mockedUrl: '/api/v1/services/{service}/{instance}',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -201,8 +240,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     validate: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}/validate`,
+      mockedUrl: '/api/v1/services/{service}/{instance}/validate',
       post: {
         success: () => {
           console.error('Not implemented');
@@ -210,8 +248,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     history: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}/history`,
+      mockedUrl: '/api/v1/services/{service}/{instance}/history',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -237,8 +274,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     deployment: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}`,
+      mockedUrl: '/api/v1/deployments/{service}/{instance}',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -256,8 +292,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     validate: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}/validate`,
+      mockedUrl: '/api/v1/deployments/{service}/{instance}/validate',
       post: {
         success: () => {
           console.error('Not implemented');
@@ -265,8 +300,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     history: {
-      mockedUrl: (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}/history`,
+      mockedUrl: '/api/v1/deployments/{service}/{instance}/history',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -274,8 +308,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     applySize: {
-      mockedUrl: (service: string, instance: string, size: string) =>
-        `/api/v1/deployments/${service}/${instance}/size/${size}`,
+      mockedUrl: '/api/v1/deployments/{service}/{instance}/size/{size}',
       post: {
         success: () => {
           console.error('Not implemented');
@@ -306,7 +339,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     standard: {
-      mockedUrl: (standard: string) => `/api/v1/field-maps/${standard}`,
+      mockedUrl: '/api/v1/field-maps/{standard}',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -314,8 +347,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     source: {
-      mockedUrl: (standard: string, source: string) =>
-        `/api/v1/field-maps/${standard}/${source}`,
+      mockedUrl: '/api/v1/field-maps/{standard}/{source}',
       get: {
         success: () => {
           console.error('Not implemented');
@@ -460,7 +492,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     destination: {
-      mockedUrl: (name: string) => `/api/v1/alerts/destinations/${name}`,
+      mockedUrl: '/api/v1/alerts/destinations/{name}',
       get: {
         success: () => {
           console.error('Not implemented');
