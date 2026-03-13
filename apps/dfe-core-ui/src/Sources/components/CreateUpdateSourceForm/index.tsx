@@ -1,6 +1,8 @@
+import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
-import { Button, Form, FormProps, Input, Select, Switch } from 'antd';
+import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';
 
@@ -9,9 +11,18 @@ const formSchema = z.object({
   display_name: z.string().min(1, { message: 'Display name is required' }),
   description: z.string().nullable().optional(),
   enabled: z.boolean().optional(),
-  header_type: z.string().nullable().optional(),
-  has_transform: z.boolean().optional(),
-  has_fetcher: z.boolean().optional(),
+  'header.type': z.string().nullable().optional(),
+  'header.version': z.string().nullable().optional(),
+  match: z.string().nullable().optional(),
+  'schema_config.meta_schema': z.string().nullable().optional(),
+  'schema_config.meta_schema_version': z.string().nullable().optional(),
+  'schema_config.derived_schema': z.string().nullable().optional(),
+  'schema_config.additional_fields': z.array(z.string()).nullable().optional(),
+  'schema_config.ttl_days': z.number().nullable().optional(),
+  'schema_config.engine': z.string().nullable().optional(),
+  transform: z.boolean().optional(),
+  fetcher: z.boolean().optional(),
+  sigma: z.string().nullable().optional(),
   mapping_standards: z.array(z.string()).optional(),
 });
 
@@ -19,9 +30,10 @@ export type CreateUpdateSourceFormData = z.infer<typeof formSchema>;
 
 type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   onFinish: (values: CreateUpdateSourceFormData) => void;
-  isPending?: boolean;
-  error?: Error;
+  isPending: boolean;
+  error: Error | null;
   resetFormFields?: boolean;
+  buttonLabel?: string;
 };
 
 export const CreateUpdateSourceForm = ({
@@ -30,6 +42,7 @@ export const CreateUpdateSourceForm = ({
   isPending = false,
   error,
   resetFormFields,
+  buttonLabel = 'Save',
   ...props
 }: CreateUpdateSourceFormProps) => {
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
@@ -59,7 +72,7 @@ export const CreateUpdateSourceForm = ({
       </Form.Item>
       <div className="flex gap-x-2">
         <Form.Item
-          className="grow"
+          className="w-full"
           name="source"
           label="Source"
           rules={[formValidation]}
@@ -83,20 +96,125 @@ export const CreateUpdateSourceForm = ({
       >
         <Input.TextArea />
       </Form.Item>
-
-      <Form.Item
-        name="header_type"
-        label="Header Type"
-        rules={[formValidation]}
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        title="Header"
+        defaultOpen={true}
       >
-        <Select
-          options={[
-            { label: 'Text', value: 'text' },
-            { label: 'JSON', value: 'json' },
-          ]}
-          allowClear
-        />
-      </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="header.type"
+          label="Header Type"
+          rules={[formValidation]}
+        >
+          <Select
+            options={[
+              { label: 'Timeseries', value: 'time_series' },
+              { label: 'Minimal', value: 'minimal' },
+              { label: 'Passthrough', value: 'passthrough' },
+            ]}
+            allowClear
+          />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="header.version"
+          label="Header Version"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        title="Match"
+        defaultOpen={true}
+      >
+        <p className="text-sm text-error font-bold">TODO: Match form items</p>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'grid grid-cols-3 gap-2' }}
+        title="Schema Config"
+        defaultOpen={true}
+      >
+        <Form.Item
+          className="w-full"
+          name="schema_config.meta_schema"
+          label="Meta Schema"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="schema_config.meta_schema_version"
+          label="Meta Schema Version"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="schema_config.derived_schema"
+          label="Derived Schema"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="schema_config.additional_fields"
+          label="Additional Fields"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          className="w-full"
+          name="schema_config.engine"
+          label="Engine"
+          rules={[formValidation]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name="schema_config.ttl_days"
+          label="TTL Days"
+          rules={[formValidation]}
+        >
+          <InputNumber />
+        </Form.Item>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        title="Transform"
+        defaultOpen={true}
+      >
+        <p className="text-sm text-error font-bold">
+          TODO: Transform form items
+        </p>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        title="Fetcher"
+        defaultOpen={true}
+      >
+        <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        title="Sigma"
+        defaultOpen={true}
+      >
+        <p className="text-sm text-error font-bold">TODO: Sigma form items</p>
+      </SimpleCollapse>
 
       <Form.Item
         name="mapping_standards"
@@ -111,27 +229,6 @@ export const CreateUpdateSourceForm = ({
         />
       </Form.Item>
 
-      <div className="flex gap-x-2">
-        <Form.Item
-          className="grow"
-          name="has_transform"
-          label="Has Transform"
-          rules={[formValidation]}
-          layout="horizontal"
-        >
-          <Switch />
-        </Form.Item>
-        <Form.Item
-          className="grow"
-          name="has_fetcher"
-          label="Has Fetcher"
-          rules={[formValidation]}
-          layout="horizontal"
-        >
-          <Switch />
-        </Form.Item>
-      </div>
-
       {error && (
         <Form.Item>
           <FormNotification
@@ -142,13 +239,16 @@ export const CreateUpdateSourceForm = ({
       )}
 
       <Form.Item className="flex justify-end">
+        <Button className="mr-2" type="default" htmlType="reset">
+          Reset Form
+        </Button>
         <Button
           loading={isPending}
           disabled={isPending}
           type="primary"
           htmlType="submit"
         >
-          Save
+          {buttonLabel}
         </Button>
       </Form.Item>
     </Form>

@@ -7,13 +7,21 @@ interface SimpleCollapseProps {
   title: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  defaultOpen?: boolean;
+  classNames?: {
+    container?: string;
+    title?: string;
+    content?: string;
+  };
 }
 export const SimpleCollapse = ({
   title,
   className,
   children,
+  defaultOpen = false,
+  classNames,
 }: SimpleCollapseProps) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div
       className={cn(
@@ -22,9 +30,12 @@ export const SimpleCollapse = ({
         'border-b border-foreground/10 dark:border-dark-foreground/10',
         'p-2',
         className,
+        classNames?.container,
       )}
     >
-      <div className="flex justify-between items-center">
+      <div
+        className={cn('flex justify-between items-center', classNames?.title)}
+      >
         {title}
         <Button
           aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
@@ -38,7 +49,7 @@ export const SimpleCollapse = ({
           )}
         </Button>
       </div>
-      {open && children}
+      {open && <div className={classNames?.content}>{children}</div>}
     </div>
   );
 };

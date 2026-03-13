@@ -31,8 +31,9 @@ export const CreateSourceDrawer = () => {
   return (
     <>
       <Button
-        type="primary"
-        icon={<IconPlus />}
+        type="default"
+        className="border border-tertiary text-tertiary"
+        icon={<IconPlus className="text-tertiary" />}
         onClick={() => setIsDrawerVisible(true)}
       >
         {title}
@@ -40,6 +41,7 @@ export const CreateSourceDrawer = () => {
       <Drawer
         title={title}
         open={isDrawerVisible}
+        size="60%"
         onClose={() => {
           setIsDrawerVisible(false);
         }}
@@ -48,7 +50,8 @@ export const CreateSourceDrawer = () => {
           onFinish={handleCreateSource}
           onValuesChange={resetCreateSource}
           isPending={isPending}
-          error={error ?? undefined}
+          error={error}
+          buttonLabel={title}
         />
       </Drawer>
     </>
