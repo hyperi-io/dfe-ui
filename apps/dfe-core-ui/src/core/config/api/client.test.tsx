@@ -94,6 +94,21 @@ describe('createApiClient', () => {
     expect(capturedUrl).toContain('sort_order=asc');
   });
 
+  test('delete returns undefined for 204 No Content (empty body)', async () => {
+    server.use(
+      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
+        new Response(null, { status: 204 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.delete('/api/v1/sources/{name}', {
+      pathParams: { name: 'my-source' },
+    });
+
+    expect(data).toBeUndefined();
+  });
+
   test('getAuthHeaders are merged into request', async () => {
     const getAuthHeaders = vi.fn().mockResolvedValue({
       Authorization: 'Bearer token123',
@@ -136,6 +151,51 @@ describe('createApiClient', () => {
       expect.any(Object),
     );
     expect(data).toEqual({ version: '1.0' });
+  });
+
+  test('delete returns undefined for 204 No Content (empty body)', async () => {
+    server.use(
+      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
+        new HttpResponse(null, { status: 204 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.delete('/api/v1/sources/{name}', {
+      pathParams: { name: 'my-source' },
+    });
+
+    expect(data).toBeUndefined();
+  });
+
+  test('delete returns undefined for 204 No Content (empty body)', async () => {
+    server.use(
+      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
+        new Response(null, { status: 204 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.delete('/api/v1/sources/{name}', {
+      pathParams: { name: 'my-source' },
+    });
+
+    expect(data).toBeUndefined();
+  });
+
+  test('delete returns undefined for 204 No Content (empty body)', async () => {
+    server.use(
+      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
+        new Response(null, { status: 204 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.delete('/api/v1/sources/{name}', {
+      pathParams: { name: 'my-source' },
+    });
+
+    expect(data).toBeUndefined();
   });
 
   test('throws ApiError on non-ok response', async () => {

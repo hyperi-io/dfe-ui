@@ -122,6 +122,13 @@ export function createApiClient(config: ApiClientConfig) {
     const fetchFn = customFetch ?? globalThis.fetch;
     const res = await fetchFn(url, init);
 
+    // 204 No Content - no body to parse
+    if (res.status === 204) {
+      return undefined as unknown as Promise<
+        SuccessResponseBody<OperationFor<Path, Method>>
+      >;
+    }
+
     if (!res.ok) {
       const text = await res.text();
       let detail: unknown = text;
@@ -134,6 +141,13 @@ export function createApiClient(config: ApiClientConfig) {
       }
 
       throw new ApiError(res.status, res.statusText, detail);
+    }
+
+    // 204 No Content has an empty body - do not attempt to parse JSON
+    if (res.status === 204) {
+      return undefined as unknown as Promise<
+        SuccessResponseBody<OperationFor<Path, Method>>
+      >;
     }
 
     const contentType = res.headers.get('Content-Type');
