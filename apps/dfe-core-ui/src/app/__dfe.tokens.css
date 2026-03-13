@@ -2,7 +2,7 @@
   :root {
     --background: #ffffff;
     --foreground: #171717;
-    --foreground-muted: #222222;
+    --foreground-muted: #545454;
     --background-muted: #f5f5f5;
     --background-secondary: #e5e7eb;
 
@@ -21,7 +21,7 @@
     :root {
       --background: #141414;
       --foreground: #ededed;
-      --foreground-muted: #cccccc;
+      --foreground-muted: #a3a2a2;
       --background-muted: #000000;
       --background-secondary: #303030;
     }
