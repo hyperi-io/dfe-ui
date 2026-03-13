@@ -34,8 +34,9 @@ export const authOptions: NextAuthOptions = {
           },
         });
         const roles: string[] =
-          meRes.ok && meRes.headers.get('content-type')?.includes('application/json')
-            ? ((await meRes.json()) as { roles?: string[] }).roles ?? []
+          meRes.ok &&
+          meRes.headers.get('content-type')?.includes('application/json')
+            ? (((await meRes.json()) as { roles?: string[] }).roles ?? [])
             : [];
 
         return {

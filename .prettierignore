@@ -3,3 +3,6 @@ build
 coverage
 .turbo
 .next
+packages/dfe-engine-types/*
+packages/hyperi-icons/*
+

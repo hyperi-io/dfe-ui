@@ -43,13 +43,17 @@ async function processDirectory(dir, suffix = "") {
   const icons = [];
 
   for (const file of files) {
-    const baseName = file.replace(".svg", "");
+    // Validate filename contains no path separators (satisfies SAST scanners)
+    const basename = path.basename(file);
+    const baseName = basename.replace(".svg", "");
     const componentName = "Icon" + toPascalCase(baseName) + suffix;
-    const svgContent = fs.readFileSync(path.join(dir, file), "utf-8");
+    const svgContent = fs.readFileSync(path.join(dir, basename), "utf-8");
 
     try {
       const source = await generateComponentSource(componentName, svgContent);
-      fs.writeFileSync(path.join(ICONS_DIR, `${componentName}.tsx`), source);
+      const outFile = path.join(ICONS_DIR, `${componentName}.tsx`);
+      if (!outFile.startsWith(ICONS_DIR)) throw new Error("Invalid output path");
+      fs.writeFileSync(outFile, source);
       icons.push(componentName);
     } catch (err) {
       console.warn(`  skip ${file}: ${err.message}`);
