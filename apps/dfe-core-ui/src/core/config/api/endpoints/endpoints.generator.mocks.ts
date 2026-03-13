@@ -190,8 +190,39 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
       delete: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({ name = 'source' }: { name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json({});
+            },
+          );
+        },
+        error: ({
+          mockedResponse = {
+            detail: [
+              {
+                loc: ['string', 0],
+                msg: 'string',
+                type: 'string',
+                input: 'string',
+                ctx: {},
+              },
+            ],
+          },
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
