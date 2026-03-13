@@ -9,7 +9,7 @@
   },
   "scripts": {
     "clean": "rm -rf types",
-    "generate": "npm run clean && openapi-typescript ./specs/openapi.json -o ./types/index.d.ts"
+    "generate": "yarn clean && openapi-typescript ./specs/openapi.json -o ./types/index.d.ts"
   },
   "devDependencies": {
     "openapi-typescript": "^7.13.0",
