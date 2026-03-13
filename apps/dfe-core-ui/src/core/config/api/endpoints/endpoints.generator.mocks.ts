@@ -140,8 +140,19 @@ export const API_CONFIG_MOCKS = Object.freeze({
     source: {
       mockedUrl: '/api/v1/sources/{name}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {},
+          name = 'source',
+        }: {
+          mockedResponse?: object;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
       put: {
