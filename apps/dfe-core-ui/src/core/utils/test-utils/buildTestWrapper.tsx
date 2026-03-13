@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
-import { ListSourcesProvider } from '@/Sources/components/ListSources/context';
+import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

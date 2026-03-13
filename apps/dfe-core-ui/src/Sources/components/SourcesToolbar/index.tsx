@@ -4,8 +4,8 @@ import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ListSourcesProvider } from '../../contexts/ListSourcesContext';
 import { CreateSourceDrawer } from '../CreateSourceDrawer';
-import { ListSourcesProvider } from '../ListSources/context';
 
 export const SourcesToolbar = () => {
   const pathname = usePathname();

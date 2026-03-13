@@ -1,10 +1,12 @@
-import { Select } from 'antd';
+import { cn } from '@/core/utils/style';
+import { IconSortAscending, IconSortDescending } from '@dfe/icons';
+import { Button, Select } from 'antd';
+import { useState } from 'react';
 
 interface SortActionsProps {
   sortByValue?: string;
   sortDirectionValue?: string;
   sortByOptions?: { label: string; value: string }[];
-  sortDirectionOptions: { label: string; value: string }[];
   onChange: ({
     sortBy,
     sortDirection,
@@ -12,34 +14,48 @@ interface SortActionsProps {
     sortBy?: string;
     sortDirection?: string;
   }) => void;
+  className?: string;
 }
 
 export const SortActions = ({
   sortByValue,
   sortDirectionValue,
   sortByOptions,
-  sortDirectionOptions,
   onChange,
+  className,
 }: SortActionsProps) => {
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    (sortDirectionValue as 'asc' | 'desc') ?? 'asc',
+  );
+
   return (
-    <div className="flex gap-2 items-center">
+    <div className={cn('flex gap-2 items-center', className)}>
       {sortByOptions && (
         <Select
-          className="w-40"
+          size="small"
+          className="w-full"
           value={sortByValue}
           options={sortByOptions}
           onChange={(value) => onChange({ sortBy: value })}
           placeholder="Sort by"
-          allowClear
         />
       )}
-      <Select
-        className="w-40"
-        value={sortDirectionValue}
-        options={sortDirectionOptions}
-        onChange={(value) => onChange({ sortDirection: value })}
-        placeholder="Sort direction"
-        allowClear
+      <Button
+        size="small"
+        className="w-10"
+        icon={
+          sortDirection === 'asc' ? (
+            <IconSortDescending />
+          ) : (
+            <IconSortAscending />
+          )
+        }
+        onClick={() => {
+          setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+          onChange({
+            sortDirection,
+          });
+        }}
       />
     </div>
   );

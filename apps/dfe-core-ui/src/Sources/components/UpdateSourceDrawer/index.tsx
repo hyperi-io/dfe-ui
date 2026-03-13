@@ -4,11 +4,11 @@ import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { IconEdit } from '@dfe/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
+import { useListSourcesContext } from '../../contexts/ListSourcesContext';
 import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
 } from '../CreateUpdateSourceForm';
-import { useListSourcesContext } from '../ListSources/context';
 
 interface UpdateSourceDrawerProps {
   source: SourceSummary;
