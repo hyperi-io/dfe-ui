@@ -27,7 +27,7 @@ export const SourceDetail = () => {
     onSuccess: () => {
       refetchSources();
       api.success({
-        message: 'Source updated successfully',
+        title: 'Source updated successfully',
         placement: 'bottomLeft',
       });
     },
