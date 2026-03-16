@@ -642,6 +642,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transforms/compile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Compile Transform
+         * @description Compile user source code to a WASM binary.
+         *
+         *     Proxies to the dfe-transform-compiler service. The response includes
+         *     a base64-encoded WASM binary that can be passed directly to /test.
+         */
+        post: operations["compile_transform_api_v1_transforms_compile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transforms/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Transform
+         * @description Run a compiled WASM transform against sample records.
+         *
+         *     Proxies to the dfe-transform-wasm service's /test endpoint.
+         *     The wasm_base64 field should come directly from /compile.
+         */
+        post: operations["test_transform_api_v1_transforms_test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -721,6 +767,28 @@ export interface components {
                 [key: string]: string;
             }[];
         };
+        /** CompileRequest */
+        CompileRequest: {
+            /**
+             * Language
+             * @enum {string}
+             */
+            language: "rust" | "go" | "assemblyscript";
+            /**
+             * Files
+             * @description Source files. Key = filename, value = source content.
+             */
+            files: {
+                [key: string]: string;
+            };
+        };
+        /** CompileResponse */
+        CompileResponse: {
+            /** Wasm Base64 */
+            wasm_base64: string;
+            /** Wasm Bytes */
+            wasm_bytes: number;
+        };
         /** ConfigHistoryEntry */
         ConfigHistoryEntry: {
             /** Commit */
@@ -773,6 +841,48 @@ export interface components {
             keda_enabled?: boolean | null;
             /** Updated At */
             updated_at?: string | null;
+        };
+        /** EmittedRecord */
+        EmittedRecord: {
+            /** Key */
+            key: string;
+            /** Value */
+            value: string;
+            /** Headers */
+            headers?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * FetcherAuth
+         * @description Fetcher authentication configuration.
+         */
+        FetcherAuth: {
+            /**
+             * Type
+             * @description Auth type (oauth2, api_key, basic)
+             */
+            type: string;
+            /**
+             * Token Url
+             * @description OAuth2 token URL
+             */
+            token_url?: string | null;
+            /**
+             * Client Id
+             * @description OAuth2 client ID
+             */
+            client_id?: string | null;
+            /**
+             * Client Secret
+             * @description OAuth2 client secret
+             */
+            client_secret?: string | null;
+            /**
+             * Api Key
+             * @description API key
+             */
+            api_key?: string | null;
         };
         /** FieldMapSummary */
         FieldMapSummary: {
@@ -1049,6 +1159,25 @@ export interface components {
             /** Created At */
             created_at: string;
         };
+        /** SampleRecord */
+        SampleRecord: {
+            /**
+             * Key
+             * @default
+             */
+            key: string;
+            /** Value */
+            value: string;
+            /**
+             * Timestamp
+             * @default 0
+             */
+            timestamp: number;
+            /** Headers */
+            headers?: {
+                [key: string]: string;
+            };
+        };
         /** ServiceConfigSummary */
         ServiceConfigSummary: {
             /** Service */
@@ -1101,6 +1230,113 @@ export interface components {
             };
         };
         /**
+         * Source
+         * @description The top-level data entity in the DFE platform.
+         *
+         *     A Source represents a distinct data stream entering the platform.
+         *     Everything flows from the _source label.
+         *
+         *     See docs/SOURCE.md for the full specification.
+         */
+        Source: {
+            /**
+             * Source
+             * @description The _source label — immutable identifier
+             */
+            source: string;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * Enabled
+             * @description Whether the source is active
+             * @default true
+             */
+            enabled: boolean;
+            /** @description Common schema header configuration */
+            header?: components["schemas"]["SourceHeader"];
+            /** @description Receiver match rule */
+            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Schema configuration */
+            schema?: components["schemas"]["SourceSchema"];
+            /** @description Transform stage (optional) */
+            transform?: components["schemas"]["SourceTransform"] | null;
+            /** @description SaaS API fetcher (optional) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Sigma field mappings (optional) */
+            sigma?: components["schemas"]["SourceSigma"] | null;
+            /**
+             * Mapping Standards
+             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
+             */
+            mapping_standards?: string[];
+        };
+        /**
+         * SourceFetcher
+         * @description Fetcher configuration for SaaS API pull sources.
+         */
+        SourceFetcher: {
+            /**
+             * Source Type
+             * @description Fetcher type (crowdstrike, m365, etc.)
+             */
+            source_type: string;
+            /**
+             * Base Url
+             * @description API base URL
+             */
+            base_url?: string | null;
+            /** @description Authentication config */
+            auth?: components["schemas"]["FetcherAuth"] | null;
+            /**
+             * Poll Interval Secs
+             * @description Polling interval in seconds
+             * @default 300
+             */
+            poll_interval_secs: number;
+        };
+        /**
+         * SourceHeader
+         * @description Common schema header configuration.
+         */
+        SourceHeader: {
+            /**
+             * Type
+             * @description Profile name (time_series, minimal, passthrough)
+             * @default time_series
+             */
+            type: string;
+            /**
+             * Version
+             * @description Common header version (semver)
+             * @default 1.0.0
+             */
+            version: string;
+        };
+        /**
+         * SourceMatch
+         * @description Receiver match rule — how the receiver identifies this source.
+         */
+        SourceMatch: {
+            /**
+             * Field
+             * @description JSON field to inspect
+             */
+            field: string;
+            /**
+             * Value
+             * @description Expected value (exact match)
+             */
+            value: string;
+        };
+        /**
          * SourceResponse
          * @description Full source after create/update.
          */
@@ -1112,6 +1348,61 @@ export interface components {
              * @default ok
              */
             message: string;
+        };
+        /**
+         * SourceSchema
+         * @description Schema configuration for the source's ClickHouse table.
+         */
+        SourceSchema: {
+            /**
+             * Meta Schema
+             * @description Base field definitions (YAML file reference)
+             */
+            meta_schema?: string | null;
+            /**
+             * Meta Schema Version
+             * @description Meta schema version (semver)
+             */
+            meta_schema_version?: string | null;
+            /**
+             * Derived Schema
+             * @description Source-specific field overrides (optional YAML reference)
+             */
+            derived_schema?: string | null;
+            /**
+             * Additional Fields
+             * @description Extra fields/indexes (optional YAML reference)
+             */
+            additional_fields?: string | null;
+            /**
+             * Ttl Days
+             * @description Data retention in days
+             */
+            ttl_days?: number | null;
+            /**
+             * Engine
+             * @description Table engine (MergeTree, ReplicatedMergeTree, SharedMergeTree)
+             * @default MergeTree
+             */
+            engine: string;
+        };
+        /**
+         * SourceSigma
+         * @description Sigma field mapping configuration for this source.
+         */
+        SourceSigma: {
+            /**
+             * Taxonomy
+             * @description Built-in mapping set (e.g. 'windows')
+             */
+            taxonomy?: string | null;
+            /**
+             * Custom Mappings
+             * @description Per-source field overrides (SigmaField: column_name)
+             */
+            custom_mappings?: {
+                [key: string]: string;
+            };
         };
         /**
          * SourceSummary
@@ -1147,6 +1438,34 @@ export interface components {
             /** Mapping Standards */
             mapping_standards?: string[];
         };
+        /**
+         * SourceTransform
+         * @description Transform stage configuration (vector or wasm).
+         */
+        SourceTransform: {
+            /**
+             * Engine
+             * @description Transform engine (vector or wasm)
+             */
+            engine: string;
+            /**
+             * Config File
+             * @description Path to engine-specific config
+             */
+            config_file?: string | null;
+            /**
+             * Env
+             * @description Per-transform ENV overrides
+             */
+            env?: {
+                [key: string]: string;
+            };
+            /**
+             * Files
+             * @description Enrichment files (CSV, MMDB)
+             */
+            files?: string[];
+        };
         /** SqlValidationError */
         SqlValidationError: {
             /** Message */
@@ -1170,6 +1489,40 @@ export interface components {
             valid: boolean;
             /** Errors */
             errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /** TestRequest */
+        TestRequest: {
+            /**
+             * Wasm Base64
+             * @description Base64-encoded WASM binary from /compile
+             */
+            wasm_base64: string;
+            /**
+             * Records
+             * @description Sample input records
+             */
+            records: components["schemas"]["SampleRecord"][];
+            /**
+             * Source Format
+             * @default json
+             * @enum {string}
+             */
+            source_format: "json" | "msgpack";
+            /**
+             * Sink Format
+             * @default json
+             * @enum {string}
+             */
+            sink_format: "json" | "msgpack";
+        };
+        /** TestResponse */
+        TestResponse: {
+            /** Emitted */
+            emitted: components["schemas"]["EmittedRecord"][];
+            /** Duration Ms */
+            duration_ms: number;
+            /** Wasm Memory Bytes */
+            wasm_memory_bytes: number;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -1476,7 +1829,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Source"];
                 };
             };
             /** @description Validation Error */
@@ -2570,6 +2923,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsSummary"];
+                };
+            };
+        };
+    };
+    compile_transform_api_v1_transforms_compile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompileRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_transform_api_v1_transforms_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
