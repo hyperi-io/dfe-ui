@@ -35,9 +35,14 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   error: Error | null;
   resetFormFields?: boolean;
   buttonLabel?: string;
+  disabledFields?: {
+    source?: boolean;
+    // Add other disabled fields here as necessary
+  };
 };
 
 export const CreateUpdateSourceForm = ({
+  disabledFields,
   initialValues,
   onFinish,
   isPending = false,
@@ -71,7 +76,7 @@ export const CreateUpdateSourceForm = ({
           label="Source"
           rules={[formValidation]}
         >
-          <Input />
+          <Input disabled={!!disabledFields?.source} />
         </Form.Item>
         <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
           <Switch />

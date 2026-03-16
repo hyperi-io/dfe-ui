@@ -11,7 +11,8 @@ import { EmptyDetail } from './EmptyDetail';
 
 export const SourceDetail = () => {
   const [api, contextHolder] = notification.useNotification();
-  const { selectedSourceName: source_name } = useListSourcesContext();
+  const { selectedSourceName: source_name, refetch: refetchSources } =
+    useListSourcesContext();
   const {
     data: sourceDetailData,
     isLoading: isFetchingSourceDetail,
@@ -24,6 +25,7 @@ export const SourceDetail = () => {
     error: updateSourceError,
   } = useUpdateSource({
     onSuccess: () => {
+      refetchSources();
       api.success({
         message: 'Source updated successfully',
         placement: 'bottomLeft',
@@ -55,6 +57,9 @@ export const SourceDetail = () => {
     <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4">
       {contextHolder}
       <CreateUpdateSourceForm
+        disabledFields={{
+          source: true,
+        }}
         initialValues={sourceDetailData ?? {}}
         onFinish={handleUpdateSource}
         isPending={isUpdatingSource}
