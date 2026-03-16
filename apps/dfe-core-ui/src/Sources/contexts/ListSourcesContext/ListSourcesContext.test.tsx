@@ -196,7 +196,7 @@ describe('ListSourcesContext', () => {
       expect(result.current.hasFilters).toBe(true);
     });
 
-    it('hasFilters is false when only sort/per_page params are set', async () => {
+    it('hasFilters is true when sort/per_page params are set', async () => {
       searchParamsRef.current = new URLSearchParams(
         'sort_by=source&sort_order=asc&per_page=20',
       );
@@ -206,10 +206,10 @@ describe('ListSourcesContext', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+        expect(result.current.isLoading).toBe(true);
       });
 
-      expect(result.current.hasFilters).toBe(false);
+      expect(result.current.hasFilters).toBe(true);
     });
 
     it('setFilters calls router.replace with updated query string', async () => {

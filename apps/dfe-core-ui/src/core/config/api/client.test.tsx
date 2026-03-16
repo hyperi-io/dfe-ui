@@ -96,8 +96,9 @@ describe('createApiClient', () => {
 
   test('delete returns undefined for 204 No Content (empty body)', async () => {
     server.use(
-      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
-        new Response(null, { status: 204 }),
+      http.delete(
+        `${BASE_URL}/api/v1/sources/my-source`,
+        () => new Response(null, { status: 204 }),
       ),
     );
 
@@ -155,8 +156,9 @@ describe('createApiClient', () => {
 
   test('delete returns undefined for 204 No Content (empty body)', async () => {
     server.use(
-      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
-        new HttpResponse(null, { status: 204 }),
+      http.delete(
+        `${BASE_URL}/api/v1/sources/my-source`,
+        () => new HttpResponse(null, { status: 204 }),
       ),
     );
 
@@ -170,8 +172,9 @@ describe('createApiClient', () => {
 
   test('delete returns undefined for 204 No Content (empty body)', async () => {
     server.use(
-      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
-        new Response(null, { status: 204 }),
+      http.delete(
+        `${BASE_URL}/api/v1/sources/my-source`,
+        () => new Response(null, { status: 204 }),
       ),
     );
 
@@ -185,8 +188,9 @@ describe('createApiClient', () => {
 
   test('delete returns undefined for 204 No Content (empty body)', async () => {
     server.use(
-      http.delete(`${BASE_URL}/api/v1/sources/my-source`, () =>
-        new Response(null, { status: 204 }),
+      http.delete(
+        `${BASE_URL}/api/v1/sources/my-source`,
+        () => new Response(null, { status: 204 }),
       ),
     );
 
