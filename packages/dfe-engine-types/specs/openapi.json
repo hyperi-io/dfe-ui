@@ -3,12 +3,14 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.5.0"
+    "version": "1.6.9.dev1"
   },
   "paths": {
     "/api/v1/auth/login": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Login",
         "description": "Authenticate with local credentials and receive a JWT token.",
         "operationId": "login_api_v1_auth_login_post",
@@ -53,7 +55,9 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Refresh Token",
         "description": "Refresh the current JWT token. Requires a valid existing token.",
         "operationId": "refresh_token_api_v1_auth_refresh_post",
@@ -78,7 +82,9 @@
     },
     "/api/v1/auth/me": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Get Me",
         "description": "Get the current authenticated user's info.",
         "operationId": "get_me_api_v1_auth_me_get",
@@ -103,7 +109,9 @@
     },
     "/api/v1/auth/permissions": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Get Permissions",
         "description": "Get resolved permissions for the current user's roles.",
         "operationId": "get_permissions_api_v1_auth_permissions_get",
@@ -128,7 +136,9 @@
     },
     "/api/v1/sources": {
       "get": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "List Sources",
         "description": "List sources with pagination, search, and filtering.",
         "operationId": "list_sources_api_v1_sources_get",
@@ -256,7 +266,9 @@
         ]
       },
       "post": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Create Source",
         "description": "Create a new source from a source definition dict.",
         "operationId": "create_source_api_v1_sources_post",
@@ -303,7 +315,9 @@
     },
     "/api/v1/sources/{name}": {
       "get": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Get Source",
         "description": "Get a full source definition by name.",
         "operationId": "get_source_api_v1_sources__name__get",
@@ -323,7 +337,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Source"
+                }
               }
             }
           },
@@ -345,7 +361,9 @@
         ]
       },
       "put": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Update Source",
         "description": "Update an existing source definition.",
         "operationId": "update_source_api_v1_sources__name__put",
@@ -401,7 +419,9 @@
         ]
       },
       "delete": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Delete Source",
         "description": "Delete a source by name.",
         "operationId": "delete_source_api_v1_sources__name__delete",
@@ -440,7 +460,9 @@
     },
     "/api/v1/sources/bulk": {
       "post": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Bulk Action",
         "description": "Perform a bulk action (enable, disable, delete) on multiple sources.",
         "operationId": "bulk_action_api_v1_sources_bulk_post",
@@ -485,7 +507,9 @@
     },
     "/api/v1/sources/seed": {
       "post": {
-        "tags": ["Sources"],
+        "tags": [
+          "Sources"
+        ],
         "summary": "Seed Sources",
         "description": "Seed built-in default source definitions. Non-destructive (skips existing).",
         "operationId": "seed_sources_api_v1_sources_seed_post",
@@ -510,7 +534,9 @@
     },
     "/api/v1/services": {
       "get": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "List Service Configs",
         "description": "List service configs with optional filtering.",
         "operationId": "list_service_configs_api_v1_services_get",
@@ -640,7 +666,9 @@
     },
     "/api/v1/services/{service}/{instance}": {
       "get": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Get Service Config",
         "description": "Get a full service config by service + instance.",
         "operationId": "get_service_config_api_v1_services__service___instance__get",
@@ -691,7 +719,9 @@
         ]
       },
       "put": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Save Service Config",
         "description": "Create or update a service config.",
         "operationId": "save_service_config_api_v1_services__service___instance__put",
@@ -754,7 +784,9 @@
         ]
       },
       "delete": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Delete Service Config",
         "description": "Delete a service config.",
         "operationId": "delete_service_config_api_v1_services__service___instance__delete",
@@ -802,7 +834,9 @@
     },
     "/api/v1/services/{service}/{instance}/validate": {
       "post": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Validate Service Config",
         "description": "Dry-run validate a service config without saving.",
         "operationId": "validate_service_config_api_v1_services__service___instance__validate_post",
@@ -869,7 +903,9 @@
     },
     "/api/v1/services/{service}/{instance}/history": {
       "get": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Get Service Config History",
         "description": "Get git history for a service config (git-backed registries only).",
         "operationId": "get_service_config_history_api_v1_services__service___instance__history_get",
@@ -940,7 +976,9 @@
     },
     "/api/v1/services/seed": {
       "post": {
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "summary": "Seed Service Configs",
         "description": "Seed built-in default service configs. Non-destructive.",
         "operationId": "seed_service_configs_api_v1_services_seed_post",
@@ -965,7 +1003,9 @@
     },
     "/api/v1/deployments": {
       "get": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "List Deployments",
         "description": "List deployment configs with optional filtering.",
         "operationId": "list_deployments_api_v1_deployments_get",
@@ -1095,7 +1135,9 @@
     },
     "/api/v1/deployments/{service}/{instance}": {
       "get": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Get Deployment",
         "description": "Get a full deployment config by service + instance.",
         "operationId": "get_deployment_api_v1_deployments__service___instance__get",
@@ -1146,7 +1188,9 @@
         ]
       },
       "put": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Save Deployment",
         "description": "Create or update a deployment config.",
         "operationId": "save_deployment_api_v1_deployments__service___instance__put",
@@ -1209,7 +1253,9 @@
         ]
       },
       "delete": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Delete Deployment",
         "description": "Delete a deployment config.",
         "operationId": "delete_deployment_api_v1_deployments__service___instance__delete",
@@ -1257,7 +1303,9 @@
     },
     "/api/v1/deployments/{service}/{instance}/validate": {
       "post": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Validate Deployment",
         "description": "Dry-run validate a deployment config without saving.",
         "operationId": "validate_deployment_api_v1_deployments__service___instance__validate_post",
@@ -1324,7 +1372,9 @@
     },
     "/api/v1/deployments/{service}/{instance}/history": {
       "get": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Get Deployment History",
         "description": "Get git history for a deployment config.",
         "operationId": "get_deployment_history_api_v1_deployments__service___instance__history_get",
@@ -1395,7 +1445,9 @@
     },
     "/api/v1/deployments/{service}/{instance}/size/{size}": {
       "post": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Apply Size",
         "description": "Apply a t-shirt size to a deployment config.\n\nUpdates replicas, resources, and KEDA thresholds for the given size.\nReturns any service config overrides that should also be applied\n(e.g. buffer sizes) \u2014 the caller may optionally PUT these to\n/api/v1/services/{service}/{instance}.",
         "operationId": "apply_size_api_v1_deployments__service___instance__size__size__post",
@@ -1459,7 +1511,9 @@
     },
     "/api/v1/deployments/seed": {
       "post": {
-        "tags": ["Deployments"],
+        "tags": [
+          "Deployments"
+        ],
         "summary": "Seed Deployments",
         "description": "Seed built-in default deployment configs. Non-destructive.",
         "operationId": "seed_deployments_api_v1_deployments_seed_post",
@@ -1484,7 +1538,9 @@
     },
     "/api/v1/field-maps": {
       "get": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "List Field Maps",
         "description": "List field maps with optional filtering.",
         "operationId": "list_field_maps_api_v1_field_maps_get",
@@ -1612,7 +1668,9 @@
         ]
       },
       "post": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "Create Field Map",
         "description": "Create or update a field map.",
         "operationId": "create_field_map_api_v1_field_maps_post",
@@ -1657,7 +1715,9 @@
     },
     "/api/v1/field-maps/{standard}": {
       "get": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "Get Default Field Map",
         "description": "Get the default field map for a standard (no source-specific overrides).",
         "operationId": "get_default_field_map_api_v1_field_maps__standard__get",
@@ -1701,7 +1761,9 @@
     },
     "/api/v1/field-maps/{standard}/{source}": {
       "get": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "Get Source Field Map",
         "description": "Get the source-specific field map override.",
         "operationId": "get_source_field_map_api_v1_field_maps__standard___source__get",
@@ -1752,7 +1814,9 @@
         ]
       },
       "delete": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "Delete Source Field Map",
         "description": "Delete a source-specific field map override.",
         "operationId": "delete_source_field_map_api_v1_field_maps__standard___source__delete",
@@ -1800,7 +1864,9 @@
     },
     "/api/v1/field-maps/seed": {
       "post": {
-        "tags": ["Field Maps"],
+        "tags": [
+          "Field Maps"
+        ],
         "summary": "Seed Field Maps",
         "description": "Seed built-in default field maps. Non-destructive.",
         "operationId": "seed_field_maps_api_v1_field_maps_seed_post",
@@ -1825,7 +1891,9 @@
     },
     "/api/v1/rules": {
       "post": {
-        "tags": ["Rules"],
+        "tags": [
+          "Rules"
+        ],
         "summary": "Create Rule",
         "description": "Create a new hunt rule via RuleCreationService.\n\nThe service sanitizes the SQL, applies CEL\u2192SQL transpilation,\nvalidates column references, and optionally estimates query cost.",
         "operationId": "create_rule_api_v1_rules_post",
@@ -1870,7 +1938,9 @@
     },
     "/api/v1/rules/validate": {
       "post": {
-        "tags": ["Rules"],
+        "tags": [
+          "Rules"
+        ],
         "summary": "Validate Rule Sql",
         "description": "Validate a SQL WHERE fragment without creating a rule.\n\nReturns any syntax errors or validation issues found.",
         "operationId": "validate_rule_sql_api_v1_rules_validate_post",
@@ -1915,7 +1985,9 @@
     },
     "/api/v1/alerts/destinations": {
       "get": {
-        "tags": ["Alerts"],
+        "tags": [
+          "Alerts"
+        ],
         "summary": "List Destinations",
         "description": "List alert destinations.",
         "operationId": "list_destinations_api_v1_alerts_destinations_get",
@@ -2025,7 +2097,9 @@
         ]
       },
       "post": {
-        "tags": ["Alerts"],
+        "tags": [
+          "Alerts"
+        ],
         "summary": "Create Destination",
         "description": "Create an alert destination.",
         "operationId": "create_destination_api_v1_alerts_destinations_post",
@@ -2070,7 +2144,9 @@
     },
     "/api/v1/alerts/destinations/{name}": {
       "get": {
-        "tags": ["Alerts"],
+        "tags": [
+          "Alerts"
+        ],
         "summary": "Get Destination",
         "description": "Get an alert destination by name.",
         "operationId": "get_destination_api_v1_alerts_destinations__name__get",
@@ -2114,7 +2190,9 @@
         ]
       },
       "put": {
-        "tags": ["Alerts"],
+        "tags": [
+          "Alerts"
+        ],
         "summary": "Update Destination",
         "description": "Update an alert destination.",
         "operationId": "update_destination_api_v1_alerts_destinations__name__put",
@@ -2168,7 +2246,9 @@
         ]
       },
       "delete": {
-        "tags": ["Alerts"],
+        "tags": [
+          "Alerts"
+        ],
         "summary": "Delete Destination",
         "description": "Delete an alert destination.",
         "operationId": "delete_destination_api_v1_alerts_destinations__name__delete",
@@ -2207,7 +2287,9 @@
     },
     "/api/v1/system/version": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Get Version",
         "description": "Get engine version info.",
         "operationId": "get_version_api_v1_system_version_get",
@@ -2232,7 +2314,9 @@
     },
     "/api/v1/system/settings": {
       "get": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Get Settings",
         "description": "Get a redacted summary of current settings. No secrets exposed.",
         "operationId": "get_settings_api_v1_system_settings_get",
@@ -2243,6 +2327,100 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SettingsSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transforms/compile": {
+      "post": {
+        "tags": [
+          "Transforms"
+        ],
+        "summary": "Compile Transform",
+        "description": "Compile user source code to a WASM binary.\n\nProxies to the dfe-transform-compiler service. The response includes\na base64-encoded WASM binary that can be passed directly to /test.",
+        "operationId": "compile_transform_api_v1_transforms_compile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transforms/test": {
+      "post": {
+        "tags": [
+          "Transforms"
+        ],
+        "summary": "Test Transform",
+        "description": "Run a compiled WASM transform against sample records.\n\nProxies to the dfe-transform-wasm service's /test endpoint.\nThe wasm_base64 field should come directly from /compile.",
+        "operationId": "test_transform_api_v1_transforms_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2283,7 +2461,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "url"],
+        "required": [
+          "name",
+          "url"
+        ],
         "title": "AlertDestination"
       },
       "AlertDestinationSummary": {
@@ -2310,7 +2491,9 @@
           }
         },
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "title": "AlertDestinationSummary"
       },
       "BulkActionRequest": {
@@ -2330,7 +2513,10 @@
           }
         },
         "type": "object",
-        "required": ["action", "sources"],
+        "required": [
+          "action",
+          "sources"
+        ],
         "title": "BulkActionRequest",
         "description": "Bulk operation on multiple sources."
       },
@@ -2359,9 +2545,56 @@
           }
         },
         "type": "object",
-        "required": ["action"],
+        "required": [
+          "action"
+        ],
         "title": "BulkActionResponse",
         "description": "Result of a bulk operation."
+      },
+      "CompileRequest": {
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": [
+              "rust",
+              "go",
+              "assemblyscript"
+            ],
+            "title": "Language"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Files",
+            "description": "Source files. Key = filename, value = source content."
+          }
+        },
+        "type": "object",
+        "required": [
+          "language",
+          "files"
+        ],
+        "title": "CompileRequest"
+      },
+      "CompileResponse": {
+        "properties": {
+          "wasm_base64": {
+            "type": "string",
+            "title": "Wasm Base64"
+          },
+          "wasm_bytes": {
+            "type": "integer",
+            "title": "Wasm Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "wasm_base64",
+          "wasm_bytes"
+        ],
+        "title": "CompileResponse"
       },
       "ConfigHistoryEntry": {
         "properties": {
@@ -2383,7 +2616,12 @@
           }
         },
         "type": "object",
-        "required": ["commit", "message", "author", "date"],
+        "required": [
+          "commit",
+          "message",
+          "author",
+          "date"
+        ],
         "title": "ConfigHistoryEntry"
       },
       "CostEstimate": {
@@ -2457,7 +2695,12 @@
           }
         },
         "type": "object",
-        "required": ["commit", "message", "author", "date"],
+        "required": [
+          "commit",
+          "message",
+          "author",
+          "date"
+        ],
         "title": "DeploymentHistoryEntry"
       },
       "DeploymentSummary": {
@@ -2516,8 +2759,99 @@
           }
         },
         "type": "object",
-        "required": ["service", "instance"],
+        "required": [
+          "service",
+          "instance"
+        ],
         "title": "DeploymentSummary"
+      },
+      "EmittedRecord": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "EmittedRecord"
+      },
+      "FetcherAuth": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Auth type (oauth2, api_key, basic)"
+          },
+          "token_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token Url",
+            "description": "OAuth2 token URL"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id",
+            "description": "OAuth2 client ID"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret",
+            "description": "OAuth2 client secret"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key",
+            "description": "API key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "FetcherAuth",
+        "description": "Fetcher authentication configuration."
       },
       "FieldMapSummary": {
         "properties": {
@@ -2570,7 +2904,9 @@
           }
         },
         "type": "object",
-        "required": ["standard"],
+        "required": [
+          "standard"
+        ],
         "title": "FieldMapSummary"
       },
       "HTTPValidationError": {
@@ -2600,7 +2936,10 @@
           }
         },
         "type": "object",
-        "required": ["username", "password"],
+        "required": [
+          "username",
+          "password"
+        ],
         "title": "LoginRequest"
       },
       "PaginatedResponse_AlertDestinationSummary_": {
@@ -2953,7 +3292,10 @@
           }
         },
         "type": "object",
-        "required": ["roles", "permissions"],
+        "required": [
+          "roles",
+          "permissions"
+        ],
         "title": "PermissionsResponse"
       },
       "RuleCreateRequest": {
@@ -3030,7 +3372,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "user_sql"],
+        "required": [
+          "name",
+          "user_sql"
+        ],
         "title": "RuleCreateRequest",
         "description": "Create a hunt rule via RuleCreationService."
       },
@@ -3063,7 +3408,9 @@
           }
         },
         "type": "object",
-        "required": ["rule"],
+        "required": [
+          "rule"
+        ],
         "title": "RuleCreateResponse"
       },
       "RuleResponse": {
@@ -3166,6 +3513,36 @@
         ],
         "title": "RuleResponse"
       },
+      "SampleRecord": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "default": ""
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "timestamp": {
+            "type": "integer",
+            "title": "Timestamp",
+            "default": 0
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "SampleRecord"
+      },
       "ServiceConfigSummary": {
         "properties": {
           "service": {
@@ -3189,7 +3566,10 @@
           }
         },
         "type": "object",
-        "required": ["service", "instance"],
+        "required": [
+          "service",
+          "instance"
+        ],
         "title": "ServiceConfigSummary"
       },
       "SettingsSummary": {
@@ -3276,8 +3656,201 @@
           }
         },
         "type": "object",
-        "required": ["service", "instance", "size"],
+        "required": [
+          "service",
+          "instance",
+          "size"
+        ],
         "title": "SizeResponse"
+      },
+      "Source": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "The _source label \u2014 immutable identifier"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "Human-readable display name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Source description"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Whether the source is active",
+            "default": true
+          },
+          "header": {
+            "$ref": "#/components/schemas/SourceHeader",
+            "description": "Common schema header configuration"
+          },
+          "match": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceMatch"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Receiver match rule"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/SourceSchema",
+            "description": "Schema configuration"
+          },
+          "transform": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceTransform"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Transform stage (optional)"
+          },
+          "fetcher": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceFetcher"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "SaaS API fetcher (optional)"
+          },
+          "sigma": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceSigma"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sigma field mappings (optional)"
+          },
+          "mapping_standards": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mapping Standards",
+            "description": "Standards to generate mapping views for (e.g. sigma, ecs, cim)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "title": "Source",
+        "description": "The top-level data entity in the DFE platform.\n\nA Source represents a distinct data stream entering the platform.\nEverything flows from the _source label.\n\nSee docs/SOURCE.md for the full specification."
+      },
+      "SourceFetcher": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "title": "Source Type",
+            "description": "Fetcher type (crowdstrike, m365, etc.)"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url",
+            "description": "API base URL"
+          },
+          "auth": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FetcherAuth"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Authentication config"
+          },
+          "poll_interval_secs": {
+            "type": "integer",
+            "title": "Poll Interval Secs",
+            "description": "Polling interval in seconds",
+            "default": 300
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_type"
+        ],
+        "title": "SourceFetcher",
+        "description": "Fetcher configuration for SaaS API pull sources."
+      },
+      "SourceHeader": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Profile name (time_series, minimal, passthrough)",
+            "default": "time_series"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Common header version (semver)",
+            "default": "1.0.0"
+          }
+        },
+        "type": "object",
+        "title": "SourceHeader",
+        "description": "Common schema header configuration."
+      },
+      "SourceMatch": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "description": "JSON field to inspect"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Expected value (exact match)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "value"
+        ],
+        "title": "SourceMatch",
+        "description": "Receiver match rule \u2014 how the receiver identifies this source."
       },
       "SourceResponse": {
         "properties": {
@@ -3292,9 +3865,111 @@
           }
         },
         "type": "object",
-        "required": ["source"],
+        "required": [
+          "source"
+        ],
         "title": "SourceResponse",
         "description": "Full source after create/update."
+      },
+      "SourceSchema": {
+        "properties": {
+          "meta_schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta Schema",
+            "description": "Base field definitions (YAML file reference)"
+          },
+          "meta_schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta Schema Version",
+            "description": "Meta schema version (semver)"
+          },
+          "derived_schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Derived Schema",
+            "description": "Source-specific field overrides (optional YAML reference)"
+          },
+          "additional_fields": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Additional Fields",
+            "description": "Extra fields/indexes (optional YAML reference)"
+          },
+          "ttl_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl Days",
+            "description": "Data retention in days"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine",
+            "description": "Table engine (MergeTree, ReplicatedMergeTree, SharedMergeTree)",
+            "default": "MergeTree"
+          }
+        },
+        "type": "object",
+        "title": "SourceSchema",
+        "description": "Schema configuration for the source's ClickHouse table."
+      },
+      "SourceSigma": {
+        "properties": {
+          "taxonomy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxonomy",
+            "description": "Built-in mapping set (e.g. 'windows')"
+          },
+          "custom_mappings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Custom Mappings",
+            "description": "Per-source field overrides (SigmaField: column_name)"
+          }
+        },
+        "type": "object",
+        "title": "SourceSigma",
+        "description": "Sigma field mapping configuration for this source."
       },
       "SourceSummary": {
         "properties": {
@@ -3360,9 +4035,54 @@
           }
         },
         "type": "object",
-        "required": ["source"],
+        "required": [
+          "source"
+        ],
         "title": "SourceSummary",
         "description": "Lightweight source listing (for paginated list)."
+      },
+      "SourceTransform": {
+        "properties": {
+          "engine": {
+            "type": "string",
+            "title": "Engine",
+            "description": "Transform engine (vector or wasm)"
+          },
+          "config_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config File",
+            "description": "Path to engine-specific config"
+          },
+          "env": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Env",
+            "description": "Per-transform ENV overrides"
+          },
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "Enrichment files (CSV, MMDB)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "engine"
+        ],
+        "title": "SourceTransform",
+        "description": "Transform stage configuration (vector or wasm)."
       },
       "SqlValidationError": {
         "properties": {
@@ -3394,7 +4114,9 @@
           }
         },
         "type": "object",
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "title": "SqlValidationError"
       },
       "SqlValidationRequest": {
@@ -3406,7 +4128,9 @@
           }
         },
         "type": "object",
-        "required": ["sql"],
+        "required": [
+          "sql"
+        ],
         "title": "SqlValidationRequest"
       },
       "SqlValidationResponse": {
@@ -3424,8 +4148,77 @@
           }
         },
         "type": "object",
-        "required": ["valid"],
+        "required": [
+          "valid"
+        ],
         "title": "SqlValidationResponse"
+      },
+      "TestRequest": {
+        "properties": {
+          "wasm_base64": {
+            "type": "string",
+            "title": "Wasm Base64",
+            "description": "Base64-encoded WASM binary from /compile"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/SampleRecord"
+            },
+            "type": "array",
+            "title": "Records",
+            "description": "Sample input records"
+          },
+          "source_format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "msgpack"
+            ],
+            "title": "Source Format",
+            "default": "json"
+          },
+          "sink_format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "msgpack"
+            ],
+            "title": "Sink Format",
+            "default": "json"
+          }
+        },
+        "type": "object",
+        "required": [
+          "wasm_base64",
+          "records"
+        ],
+        "title": "TestRequest"
+      },
+      "TestResponse": {
+        "properties": {
+          "emitted": {
+            "items": {
+              "$ref": "#/components/schemas/EmittedRecord"
+            },
+            "type": "array",
+            "title": "Emitted"
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms"
+          },
+          "wasm_memory_bytes": {
+            "type": "integer",
+            "title": "Wasm Memory Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "emitted",
+          "duration_ms",
+          "wasm_memory_bytes"
+        ],
+        "title": "TestResponse"
       },
       "TokenResponse": {
         "properties": {
@@ -3459,7 +4252,12 @@
           }
         },
         "type": "object",
-        "required": ["access_token", "expires_in", "user_id", "roles"],
+        "required": [
+          "access_token",
+          "expires_in",
+          "user_id",
+          "roles"
+        ],
         "title": "TokenResponse"
       },
       "UserResponse": {
@@ -3495,7 +4293,11 @@
           }
         },
         "type": "object",
-        "required": ["org_id", "user_id", "roles"],
+        "required": [
+          "org_id",
+          "user_id",
+          "roles"
+        ],
         "title": "UserResponse"
       },
       "ValidationError": {
@@ -3531,7 +4333,11 @@
           }
         },
         "type": "object",
-        "required": ["loc", "msg", "type"],
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
         "title": "ValidationError"
       },
       "VersionResponse": {
@@ -3548,7 +4354,10 @@
           }
         },
         "type": "object",
-        "required": ["version", "python_version"],
+        "required": [
+          "version",
+          "python_version"
+        ],
         "title": "VersionResponse"
       },
       "dfe_engine__api__v1__deployments__SeedResponse": {
@@ -3559,7 +4368,9 @@
           }
         },
         "type": "object",
-        "required": ["seeded"],
+        "required": [
+          "seeded"
+        ],
         "title": "SeedResponse"
       },
       "dfe_engine__api__v1__deployments__ValidationResult": {
@@ -3584,7 +4395,9 @@
           }
         },
         "type": "object",
-        "required": ["valid"],
+        "required": [
+          "valid"
+        ],
         "title": "ValidationResult"
       },
       "dfe_engine__api__v1__fieldmaps__SeedResponse": {
@@ -3595,7 +4408,9 @@
           }
         },
         "type": "object",
-        "required": ["seeded"],
+        "required": [
+          "seeded"
+        ],
         "title": "SeedResponse"
       },
       "dfe_engine__api__v1__services__SeedResponse": {
@@ -3606,7 +4421,9 @@
           }
         },
         "type": "object",
-        "required": ["seeded"],
+        "required": [
+          "seeded"
+        ],
         "title": "SeedResponse"
       },
       "dfe_engine__api__v1__services__ValidationResult": {
@@ -3624,7 +4441,9 @@
           }
         },
         "type": "object",
-        "required": ["valid"],
+        "required": [
+          "valid"
+        ],
         "title": "ValidationResult"
       },
       "dfe_engine__api__v1__sources__SeedResponse": {
@@ -3636,7 +4455,9 @@
           }
         },
         "type": "object",
-        "required": ["seeded"],
+        "required": [
+          "seeded"
+        ],
         "title": "SeedResponse",
         "description": "Result of seeding built-in sources."
       }
