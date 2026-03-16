@@ -1,6 +1,7 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
 import {
   IconChartDots,
+  IconDatabase,
   IconLayoutGrid,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
@@ -61,6 +62,20 @@ export const featureFlagSidebarMenuItems = [
         },
       ]
     : []),
+  {
+    key: '/sources',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/sources',
+          icon: <IconWrapper icon={<IconDatabase />} />,
+          label: 'Sources',
+          external: false,
+        }}
+      />
+    ),
+  },
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (

@@ -13,9 +13,8 @@ export const useCreateRule = ({
   onError,
 }: UseCreateRuleProps = {}) => {
   const { data, mutate, reset, isPending, error } = useMutation({
-    mutationFn: (rule: RuleCreateRequest) => {
-      return apiClient.post(API_CONFIG.rules.default, { body: rule });
-    },
+    mutationFn: (rule: RuleCreateRequest) =>
+      apiClient.post(API_CONFIG.rules.default, { body: rule }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

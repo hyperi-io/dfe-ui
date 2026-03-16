@@ -1,20 +1,6 @@
-import { paths } from '@dfe/dfe-engine-types';
-import { KeysWithSubstring, ReplaceParams } from './type.utils';
+import type { paths } from '@dfe/dfe-engine-types';
 
-/** Union of all path keys that contain `{param}` placeholders. */
-type DynamicPathPattern = KeysWithSubstring<paths, '{'>;
-
-/** `{param}` placeholders resolved to `${string}` template literals for runtime matching. */
-type DynamicPathResolved = ReplaceParams<DynamicPathPattern>;
-
-/** Ensures path builder return type matches a known path pattern so typos (e.g. services123) error. */
-function pathBuilder<P extends DynamicPathResolved>(
-  fn: (...args: string[]) => P,
-): (...args: string[]) => P {
-  return fn;
-}
-
-const config = {
+export const API_CONFIG = Object.freeze({
   auth: {
     login: '/api/v1/auth/login',
     refresh: '/api/v1/auth/refresh',
@@ -23,55 +9,29 @@ const config = {
   },
   sources: {
     default: '/api/v1/sources',
-    source: pathBuilder((name: string) => `/api/v1/sources/${name}`),
+    source: '/api/v1/sources/{name}',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
   },
   services: {
     default: '/api/v1/services',
-    instance: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}`,
-    ),
-    validate: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}/validate`,
-    ),
-    history: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/services/${service}/${instance}/history`,
-    ),
+    instance: '/api/v1/services/{service}/{instance}',
+    validate: '/api/v1/services/{service}/{instance}/validate',
+    history: '/api/v1/services/{service}/{instance}/history',
     seed: '/api/v1/services/seed',
   },
   deployments: {
     default: '/api/v1/deployments',
-    deployment: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}`,
-    ),
-    validate: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}/validate`,
-    ),
-    history: pathBuilder(
-      (service: string, instance: string) =>
-        `/api/v1/deployments/${service}/${instance}/history`,
-    ),
-    applySize: pathBuilder(
-      (service: string, instance: string, size: string) =>
-        `/api/v1/deployments/${service}/${instance}/size/${size}`,
-    ),
+    deployment: '/api/v1/deployments/{service}/{instance}',
+    validate: '/api/v1/deployments/{service}/{instance}/validate',
+    history: '/api/v1/deployments/{service}/{instance}/history',
+    applySize: '/api/v1/deployments/{service}/{instance}/size/{size}',
     seed: '/api/v1/deployments/seed',
   },
   fieldMaps: {
     default: '/api/v1/field-maps',
-    standard: pathBuilder(
-      (standard: string) => `/api/v1/field-maps/${standard}`,
-    ),
-    source: pathBuilder(
-      (standard: string, source: string) =>
-        `/api/v1/field-maps/${standard}/${source}`,
-    ),
+    standard: '/api/v1/field-maps/{standard}',
+    source: '/api/v1/field-maps/{standard}/{source}',
     seed: '/api/v1/field-maps/seed',
   },
   rules: {
@@ -80,20 +40,10 @@ const config = {
   },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
-    destination: pathBuilder(
-      (name: string) => `/api/v1/alerts/destinations/${name}`,
-    ),
+    destination: '/api/v1/alerts/destinations/{name}',
   },
   system: {
     version: '/api/v1/system/version',
     settings: '/api/v1/system/settings',
   },
-} satisfies {
-  [key: string]: {
-    [key: string]:
-      | keyof paths
-      | ((...args: string[]) => keyof paths | DynamicPathResolved);
-  };
-};
-
-export const API_CONFIG = Object.freeze(config);
+} as const satisfies Record<string, Record<string, keyof paths>>);

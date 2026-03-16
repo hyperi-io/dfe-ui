@@ -1,13 +1,10 @@
-import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { SidebarMenu } from './index';
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider>{children}</ThemeProvider>
-);
+const { wrapper } = buildTestWrapper().withTheme();
 
 describe('SidebarMenu', () => {
   describe('collapsed is false', () => {
@@ -22,6 +19,7 @@ describe('SidebarMenu', () => {
         'Search',
         'Chart Explorer',
         'Dashboards',
+        'Sources',
         'Rules',
       ]);
     });
