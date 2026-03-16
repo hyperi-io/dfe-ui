@@ -57,6 +57,7 @@ export const SourceDetail = () => {
     <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4">
       {contextHolder}
       <CreateUpdateSourceForm
+        key={source_name ?? 'empty'}
         disabledFields={{
           source: true,
         }}
