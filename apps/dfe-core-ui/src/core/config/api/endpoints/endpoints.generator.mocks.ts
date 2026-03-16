@@ -141,16 +141,42 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/sources/{name}',
       get: {
         success: ({
-          mockedResponse = {},
+          mockedResponse = { source: 'source', enabled: true },
           name = 'source',
         }: {
-          mockedResponse?: object;
+          mockedResponse?: components['schemas']['Source'];
           name?: string;
         } = {}) => {
           return http.get(
             API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = {
+            detail: [
+              {
+                loc: ['string', 0],
+                msg: 'string',
+                type: 'string',
+                input: 'string',
+                ctx: {},
+              },
+            ],
+          },
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
             },
           );
         },

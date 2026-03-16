@@ -69,8 +69,8 @@ export interface ListSourcesContextValue {
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
-  selectedSourceName: string | undefined;
-  setSelectedSourceName: (source: string) => void;
+  selectedSourceName: string | null;
+  setSelectedSourceName: (source: string | null) => void;
 }
 
 const DEFAULT_SOURCE_LIST_RESPONSE: SourceListResponse = {
@@ -94,9 +94,9 @@ export const ListSourcesProvider = ({
   children,
   defaultFilters = {},
 }: ListSourcesProviderProps) => {
-  const [selectedSourceName, setSelectedSourceName] = useState<
-    string | undefined
-  >(undefined);
+  const [selectedSourceName, setSelectedSourceName] = useState<string | null>(
+    null,
+  );
   const [pendingFilters, setPendingFilters] =
     useState<UseFetchInfiniteFilteredSourcesProps | null>(null);
   const searchParams = useSearchParams();
@@ -146,9 +146,12 @@ export const ListSourcesProvider = ({
   );
 
   const handleSetSelectedSourceName = useCallback(
-    (source: string) => {
+    (source: string | null) => {
       setSelectedSourceName(source);
-      const query = filtersToSearchString({ ...filters, source_name: source });
+      const query = filtersToSearchString({
+        ...filters,
+        source_name: source ?? '',
+      });
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
     [router, pathname, filters, setSelectedSourceName],

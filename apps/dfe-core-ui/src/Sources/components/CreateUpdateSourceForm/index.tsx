@@ -2,12 +2,13 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  source: z.string().min(1, { message: 'Name is required' }),
+  source: sourceNameValidator,
   display_name: z.string().min(1, { message: 'Display name is required' }),
   description: z.string().nullable().optional(),
   enabled: z.boolean().optional(),

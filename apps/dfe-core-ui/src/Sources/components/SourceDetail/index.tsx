@@ -7,6 +7,7 @@ import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
 } from '../CreateUpdateSourceForm';
+import { EmptyDetail } from './EmptyDetail';
 
 export const SourceDetail = () => {
   const [api, contextHolder] = notification.useNotification();
@@ -46,6 +47,10 @@ export const SourceDetail = () => {
         description={fetchSourceDetailError.message}
       />
     );
+
+  if (!sourceDetailData) {
+    return <EmptyDetail />;
+  }
   return (
     <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4">
       {contextHolder}

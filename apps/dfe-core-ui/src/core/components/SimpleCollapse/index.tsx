@@ -1,6 +1,5 @@
 import { cn } from '@/core/utils/style';
 import { IconChevronDown, IconChevronUp } from '@dfe/icons';
-import { Button } from 'antd';
 import { useState } from 'react';
 
 interface SimpleCollapseProps {
@@ -33,22 +32,21 @@ export const SimpleCollapse = ({
         classNames?.container,
       )}
     >
-      <div
+      <button
+        aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+        type="button"
         className={cn('flex justify-between items-center', classNames?.title)}
+        onClick={() => setOpen(!open)}
       >
         {title}
-        <Button
-          aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
-          type="link"
-          onClick={() => setOpen(!open)}
-        >
+        <span onClick={() => setOpen(!open)}>
           {open ? (
             <IconChevronUp className="text-foreground dark:text-dark-foreground" />
           ) : (
             <IconChevronDown className="text-foreground dark:text-dark-foreground" />
           )}
-        </Button>
-      </div>
+        </span>
+      </button>
       {open && <div className={classNames?.content}>{children}</div>}
     </div>
   );
