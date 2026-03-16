@@ -28,10 +28,11 @@ export const DeleteSourceModal = ({
       <Button
         type="default"
         shape="circle"
+        size="small"
+        className="hover:border-error hover:text-error"
         aria-label={`Delete ${source}`}
         icon={<IconTrash />}
         onClick={() => setOpen(true)}
-        danger
       />
       <Modal
         title={`Delete ${source}`}

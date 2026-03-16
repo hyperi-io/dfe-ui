@@ -63,13 +63,6 @@ export const CreateUpdateSourceForm = ({
       layout="vertical"
       {...props}
     >
-      <Form.Item
-        name="display_name"
-        label="Display Name"
-        rules={[formValidation]}
-      >
-        <Input />
-      </Form.Item>
       <div className="flex gap-x-2">
         <Form.Item
           className="w-full"
@@ -79,15 +72,18 @@ export const CreateUpdateSourceForm = ({
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          className="min-w-32"
-          name="enabled"
-          label="Enabled"
-          rules={[formValidation]}
-        >
+        <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
           <Switch />
         </Form.Item>
       </div>
+
+      <Form.Item
+        name="display_name"
+        label="Display Name"
+        rules={[formValidation]}
+      >
+        <Input />
+      </Form.Item>
 
       <Form.Item
         name="description"
@@ -96,10 +92,28 @@ export const CreateUpdateSourceForm = ({
       >
         <Input.TextArea />
       </Form.Item>
+
+      <Form.Item
+        name="mapping_standards"
+        label="Mapping Standards"
+        rules={[formValidation]}
+      >
+        <Select
+          options={[]}
+          placeholder="Select mapping standards"
+          mode="multiple"
+          allowClear
+        />
+      </Form.Item>
+
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
         title="Header"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <Form.Item
           className="w-full"
@@ -127,17 +141,25 @@ export const CreateUpdateSourceForm = ({
       </SimpleCollapse>
 
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
         title="Match"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <p className="text-sm text-error font-bold">TODO: Match form items</p>
       </SimpleCollapse>
 
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'grid grid-cols-3 gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'grid grid-cols-3 gap-2',
+          title: 'font-semibold',
+        }}
         title="Schema Config"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <Form.Item
           className="w-full"
@@ -191,9 +213,13 @@ export const CreateUpdateSourceForm = ({
       </SimpleCollapse>
 
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
         title="Transform"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <p className="text-sm text-error font-bold">
           TODO: Transform form items
@@ -201,33 +227,28 @@ export const CreateUpdateSourceForm = ({
       </SimpleCollapse>
 
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
         title="Fetcher"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
       </SimpleCollapse>
 
       <SimpleCollapse
-        classNames={{ container: 'pt-0', content: 'flex gap-2' }}
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
         title="Sigma"
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <p className="text-sm text-error font-bold">TODO: Sigma form items</p>
       </SimpleCollapse>
-
-      <Form.Item
-        name="mapping_standards"
-        label="Mapping Standards"
-        rules={[formValidation]}
-      >
-        <Select
-          options={[]}
-          placeholder="Select mapping standards"
-          mode="multiple"
-          allowClear
-        />
-      </Form.Item>
 
       {error && (
         <Form.Item>
