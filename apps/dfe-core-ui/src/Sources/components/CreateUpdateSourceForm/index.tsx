@@ -15,12 +15,12 @@ const formSchema = z.object({
   'header.type': z.string().nullable().optional(),
   'header.version': z.string().nullable().optional(),
   match: z.string().nullable().optional(),
-  'schema_config.meta_schema': z.string().nullable().optional(),
-  'schema_config.meta_schema_version': z.string().nullable().optional(),
-  'schema_config.derived_schema': z.string().nullable().optional(),
-  'schema_config.additional_fields': z.array(z.string()).nullable().optional(),
-  'schema_config.ttl_days': z.number().nullable().optional(),
-  'schema_config.engine': z.string().nullable().optional(),
+  'schema.meta_schema': z.string().nullable().optional(),
+  'schema.meta_schema_version': z.string().nullable().optional(),
+  'schema.derived_schema': z.string().nullable().optional(),
+  'schema.additional_fields': z.array(z.string()).nullable().optional(),
+  'schema.ttl_days': z.number().nullable().optional(),
+  'schema.engine': z.string().nullable().optional(),
   transform: z.boolean().optional(),
   fetcher: z.boolean().optional(),
   sigma: z.string().nullable().optional(),
@@ -118,7 +118,7 @@ export const CreateUpdateSourceForm = ({
       >
         <Form.Item
           className="w-full"
-          name="header.type"
+          name={['header', 'type']}
           label="Header Type"
           rules={[formValidation]}
         >
@@ -133,7 +133,7 @@ export const CreateUpdateSourceForm = ({
         </Form.Item>
         <Form.Item
           className="w-full"
-          name="header.version"
+          name={['header', 'version']}
           label="Header Version"
           rules={[formValidation]}
         >
@@ -164,7 +164,7 @@ export const CreateUpdateSourceForm = ({
       >
         <Form.Item
           className="w-full"
-          name="schema_config.meta_schema"
+          name={['schema', 'meta_schema']}
           label="Meta Schema"
           rules={[formValidation]}
         >
@@ -172,7 +172,7 @@ export const CreateUpdateSourceForm = ({
         </Form.Item>
         <Form.Item
           className="w-full"
-          name="schema_config.meta_schema_version"
+          name={['schema', 'meta_schema_version']}
           label="Meta Schema Version"
           rules={[formValidation]}
         >
@@ -180,7 +180,7 @@ export const CreateUpdateSourceForm = ({
         </Form.Item>
         <Form.Item
           className="w-full"
-          name="schema_config.derived_schema"
+          name={['schema', 'derived_schema']}
           label="Derived Schema"
           rules={[formValidation]}
         >
@@ -188,7 +188,7 @@ export const CreateUpdateSourceForm = ({
         </Form.Item>
         <Form.Item
           className="w-full"
-          name="schema_config.additional_fields"
+          name={['schema', 'additional_fields']}
           label="Additional Fields"
           rules={[formValidation]}
         >
@@ -197,7 +197,7 @@ export const CreateUpdateSourceForm = ({
 
         <Form.Item
           className="w-full"
-          name="schema_config.engine"
+          name={['schema', 'engine']}
           label="Engine"
           rules={[formValidation]}
         >
@@ -205,7 +205,7 @@ export const CreateUpdateSourceForm = ({
         </Form.Item>
         <Form.Item
           className="w-full"
-          name="schema_config.ttl_days"
+          name={['schema', 'ttl_days']}
           label="TTL Days"
           rules={[formValidation]}
         >

@@ -113,6 +113,15 @@ export const ListSourcesProvider = ({
     startTransition(() => setPendingFilters(null));
   }, [searchParams]);
 
+  useEffect(() => {
+    const source_name = searchParams.get('source_name');
+    startTransition(() =>
+      setSelectedSourceName(
+        source_name && source_name !== '' ? source_name : null,
+      ),
+    );
+  }, [searchParams]);
+
   const hasFilters = useMemo(
     () => hasAnyFilters(pendingFilters ?? filters),
     [pendingFilters, filters],

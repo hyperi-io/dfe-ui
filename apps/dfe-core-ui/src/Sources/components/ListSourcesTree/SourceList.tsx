@@ -48,9 +48,9 @@ export const SourceList = ({ className }: { className?: string }) => {
     >
       <>
         {sources.map((source) => (
-          <li key={source.source} className="w-full pr-2">
+          <li key={source.source} className="w-full">
             <Tooltip destroyOnHidden title={source.description}>
-              <div className="flex items-center gap-2 mr-2">
+              <div className="flex items-center gap-2">
                 <button
                   className={cn(
                     'overflow-hidden',
