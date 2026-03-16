@@ -54,7 +54,11 @@ const filtersToSearchString = (f: ListSourcesQueryParams): string => {
 };
 
 const hasAnyFilters = (f: ListSourcesQueryParams) =>
-  f.search !== undefined || f.enabled !== undefined;
+  f.search !== undefined ||
+  f.enabled !== undefined ||
+  f.sort_by !== undefined ||
+  f.sort_order !== undefined ||
+  f.source_name !== undefined;
 
 export interface ListSourcesContextValue {
   data: SourceListResponse;

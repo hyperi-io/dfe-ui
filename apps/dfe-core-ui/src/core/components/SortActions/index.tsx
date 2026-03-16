@@ -1,7 +1,7 @@
 import { cn } from '@/core/utils/style';
 import { IconSortAscending, IconSortDescending } from '@dfe/icons';
 import { Button, Select } from 'antd';
-import { useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 
 interface SortActionsProps {
   sortByValue?: string;
@@ -17,6 +17,8 @@ interface SortActionsProps {
   className?: string;
 }
 
+const DEFAULT_DIRECTION = 'asc' as const;
+
 export const SortActions = ({
   sortByValue,
   sortDirectionValue,
@@ -25,8 +27,14 @@ export const SortActions = ({
   className,
 }: SortActionsProps) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
-    (sortDirectionValue as 'asc' | 'desc') ?? 'asc',
+    (sortDirectionValue as 'asc' | 'desc') ?? DEFAULT_DIRECTION,
   );
+
+  useEffect(() => {
+    if (sortDirectionValue === 'asc' || sortDirectionValue === 'desc') {
+      startTransition(() => setSortDirection(sortDirectionValue));
+    }
+  }, [sortDirectionValue]);
 
   return (
     <div className={cn('flex gap-2 items-center', className)}>
@@ -51,10 +59,9 @@ export const SortActions = ({
           )
         }
         onClick={() => {
-          setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-          onChange({
-            sortDirection,
-          });
+          const next = sortDirection === 'asc' ? 'desc' : 'asc';
+          setSortDirection(next);
+          onChange({ sortDirection: next });
         }}
       />
     </div>

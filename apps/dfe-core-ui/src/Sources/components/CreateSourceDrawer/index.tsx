@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import { IconPlus } from '@dfe/icons';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { useListSourcesContext } from '../../contexts/ListSourcesContext';
 import {
@@ -11,18 +11,25 @@ import {
 
 export const CreateSourceDrawer = () => {
   const title = 'Add Source';
+  const [api, contextHolder] = notification.useNotification();
 
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const { refetch: refetchSources } = useListSourcesContext();
+  const { refetch: refetchSources, setSelectedSourceName } =
+    useListSourcesContext();
   const {
     mutate: createSourceMutation,
     isPending,
     error,
     reset: resetCreateSource,
   } = useCreateSource({
-    onSuccess: () => {
+    onSuccess: ({ source }) => {
+      setSelectedSourceName(source);
       refetchSources();
       setIsDrawerVisible(false);
+      api.success({
+        title: 'Source created successfully',
+        placement: 'bottomLeft',
+      });
     },
   });
   const handleCreateSource = (values: CreateUpdateSourceFormData) => {
@@ -30,6 +37,7 @@ export const CreateSourceDrawer = () => {
   };
   return (
     <>
+      {contextHolder}
       <Button
         type="default"
         className="border border-tertiary text-tertiary"

@@ -65,6 +65,7 @@ export const SourceDetail = () => {
         isPending={isUpdatingSource}
         error={updateSourceError}
         buttonLabel="Update Source"
+        hasReset={true}
       />
     </div>
   );

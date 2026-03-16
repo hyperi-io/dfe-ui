@@ -39,6 +39,7 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
     source?: boolean;
     // Add other disabled fields here as necessary
   };
+  hasReset?: boolean;
 };
 
 export const CreateUpdateSourceForm = ({
@@ -49,6 +50,7 @@ export const CreateUpdateSourceForm = ({
   error,
   resetFormFields,
   buttonLabel = 'Save',
+  hasReset = false,
   ...props
 }: CreateUpdateSourceFormProps) => {
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
@@ -266,9 +268,11 @@ export const CreateUpdateSourceForm = ({
       )}
 
       <Form.Item className="flex justify-end">
-        <Button className="mr-2" type="default" htmlType="reset">
-          Reset Form
-        </Button>
+        {hasReset && (
+          <Button className="mr-2" type="default" htmlType="reset">
+            Reset Form
+          </Button>
+        )}
         <Button
           loading={isPending}
           disabled={isPending}
