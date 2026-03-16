@@ -13,9 +13,8 @@ export const useValidateRule = ({
   onError,
 }: UseValidateRuleProps = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: (rule: SqlValidationRequest) => {
-      return apiClient.post(API_CONFIG.rules.validate, { body: rule });
-    },
+    mutationFn: (rule: SqlValidationRequest) =>
+      apiClient.post(API_CONFIG.rules.validate, { body: rule }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },
