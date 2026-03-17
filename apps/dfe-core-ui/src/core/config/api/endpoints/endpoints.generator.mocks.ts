@@ -133,7 +133,54 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/sources/{name}',
       get: {
         success: ({
-          mockedResponse = { source: 'source', enabled: true },
+          mockedResponse = {
+            source: 'source',
+            enabled: true,
+            display_name: 'string',
+            description: 'string',
+            header: {
+              type: 'string',
+              version: 'string',
+            },
+            match: {
+              field: 'string',
+              value: 'string',
+            },
+            schema: {
+              meta_schema: 'string',
+              meta_schema_version: 'string',
+              derived_schema: 'string',
+              additional_fields: 'string',
+              ttl_days: 0,
+              engine: 'string',
+            },
+            transform: {
+              engine: 'string',
+              config_file: 'string',
+              env: {
+                string: 'string',
+              },
+              files: ['string'],
+            },
+            fetcher: {
+              source_type: 'string',
+              base_url: 'string',
+              auth: {
+                type: 'string',
+                token_url: 'string',
+                client_id: 'string',
+                client_secret: 'string',
+                api_key: 'string',
+              },
+              poll_interval_secs: 0,
+            },
+            sigma: {
+              taxonomy: 'string',
+              custom_mappings: {
+                string: 'string',
+              },
+            },
+          },
           name = 'source',
         }: {
           mockedResponse?: components['schemas']['Source'];
@@ -405,16 +452,68 @@ export const API_CONFIG_MOCKS = Object.freeze({
     standard: {
       mockedUrl: '/api/v1/field-maps/{standard}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'standard',
+            source: null,
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+          standard = 'standard',
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+          standard?: string;
+          source?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.fieldMaps.standard.mockedUrl.replace(
+              '{standard}',
+              standard,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
     },
     source: {
       mockedUrl: '/api/v1/field-maps/{standard}/{source}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'standard',
+            source: 'source',
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+          standard = 'standard',
+          source = 'source',
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+          standard?: string;
+          source?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.fieldMaps.source.mockedUrl
+              .replace('{standard}', standard)
+              .replace('{source}', source),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
       delete: {

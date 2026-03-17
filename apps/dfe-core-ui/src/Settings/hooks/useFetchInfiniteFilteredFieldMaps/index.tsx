@@ -24,6 +24,7 @@ export const useFetchInfiniteFilteredFieldMaps = ({
   per_page,
 }: UseFetchInfiniteFilteredFieldMapsProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', 300);
+  const debouncedStandard = useDebounce(standard ?? '', 300);
 
   const {
     data,
@@ -38,7 +39,7 @@ export const useFetchInfiniteFilteredFieldMaps = ({
     queryKey: [
       'field-maps',
       debouncedSearch,
-      standard,
+      debouncedStandard,
       sort_by,
       sort_order,
       per_page,
@@ -47,7 +48,7 @@ export const useFetchInfiniteFilteredFieldMaps = ({
       apiClient.get(API_CONFIG.fieldMaps.default, {
         queryParams: {
           search: debouncedSearch,
-          standard,
+          standard: debouncedStandard,
           sort_by,
           sort_order,
           page: pageParam,
