@@ -884,6 +884,56 @@ export interface components {
              */
             api_key?: string | null;
         };
+        /**
+         * FieldMap
+         * @description A mapping from a detection/analytics standard's fields to DFE columns.
+         *
+         *     Two-tier resolution: a default map applies to all sources for a
+         *     standard, and source-specific maps override individual entries.
+         *
+         *     Attributes:
+         *         standard: Standard identifier (e.g. "sigma", "ecs", "cim").
+         *         source: Source name this map applies to, or None for default map.
+         *         version: Standard version (e.g. "8.11" for ECS). Informational.
+         *         description: Human-readable description.
+         *         inherits: Reference to base map (e.g. "_default"). Declarative
+         *             — the resolver does not auto-fetch, caller is responsible.
+         *         mappings: Dict of standard_field → dfe_column_name.
+         */
+        FieldMap: {
+            /**
+             * Standard
+             * @description Standard identifier (sigma, ecs, cim)
+             */
+            standard: string;
+            /**
+             * Source
+             * @description Source name, or None for the default map
+             */
+            source?: string | null;
+            /**
+             * Version
+             * @description Standard version (e.g. '8.11' for ECS)
+             */
+            version?: string | null;
+            /**
+             * Description
+             * @description Human description
+             */
+            description?: string | null;
+            /**
+             * Inherits
+             * @description Reference to base map (declarative)
+             */
+            inherits?: string | null;
+            /**
+             * Mappings
+             * @description standard_field → dfe_column_name
+             */
+            mappings?: {
+                [key: string]: string;
+            };
+        };
         /** FieldMapSummary */
         FieldMapSummary: {
             /** Standard */
@@ -2514,9 +2564,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
+                "application/json": components["schemas"]["FieldMap"];
             };
         };
         responses: {
@@ -2526,7 +2574,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["FieldMap"];
                 };
             };
             /** @description Validation Error */
@@ -2557,7 +2605,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["FieldMap"];
                 };
             };
             /** @description Validation Error */
@@ -2589,7 +2637,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["FieldMap"];
                 };
             };
             /** @description Validation Error */
