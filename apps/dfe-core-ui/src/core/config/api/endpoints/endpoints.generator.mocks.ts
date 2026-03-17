@@ -444,8 +444,36 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'string',
+            source: 'string',
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
