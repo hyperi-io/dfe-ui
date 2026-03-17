@@ -2,7 +2,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
-import { notification, Spin } from 'antd';
+import { notification, Spin, Typography } from 'antd';
 import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
@@ -54,20 +54,23 @@ export const SourceDetail = () => {
     return <EmptyDetail />;
   }
   return (
-    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4">
+    <>
       {contextHolder}
-      <CreateUpdateSourceForm
-        key={source_name ?? 'empty'}
-        disabledFields={{
-          source: true,
-        }}
-        initialValues={sourceDetailData ?? {}}
-        onFinish={handleUpdateSource}
-        isPending={isUpdatingSource}
-        error={updateSourceError}
-        buttonLabel="Update Source"
-        hasReset={true}
-      />
-    </div>
+      <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+        <Typography.Title level={5}>Source Configuration</Typography.Title>
+        <CreateUpdateSourceForm
+          key={source_name ?? 'empty'}
+          disabledFields={{
+            source: true,
+          }}
+          initialValues={sourceDetailData ?? {}}
+          onFinish={handleUpdateSource}
+          isPending={isUpdatingSource}
+          error={updateSourceError}
+          buttonLabel="Update Source"
+          hasReset={true}
+        />
+      </div>
+    </>
   );
 };

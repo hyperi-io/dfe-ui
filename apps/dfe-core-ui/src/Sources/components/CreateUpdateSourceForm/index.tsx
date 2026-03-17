@@ -6,6 +6,7 @@ import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';
+import { FieldMapSelect } from '../FieldMapSelect';
 
 const formSchema = z.object({
   source: sourceNameValidator,
@@ -106,8 +107,7 @@ export const CreateUpdateSourceForm = ({
         label="Mapping Standards"
         rules={[formValidation]}
       >
-        <Select
-          options={[]}
+        <FieldMapSelect
           placeholder="Select mapping standards"
           mode="multiple"
           allowClear

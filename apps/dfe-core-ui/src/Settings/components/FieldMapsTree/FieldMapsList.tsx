@@ -1,5 +1,5 @@
+import { FieldMapSummary } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
-import { FieldMapSummary } from '@/Settings/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { Spin } from 'antd';
 import { useListFieldMapsContext } from '../../contexts/ListFieldMapsContext';
 import { EmptyList } from './EmptyList';

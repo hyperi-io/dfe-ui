@@ -1,10 +1,10 @@
 'use client';
 
-import { useFetchInfiniteFilteredFieldMaps } from '@/Settings/hooks/useFetchInfiniteFilteredFieldMaps';
+import { useFetchInfiniteFilteredFieldMaps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps';
 import type {
   FieldMapListResponse,
   UseFetchInfiniteFilteredFieldMapsProps,
-} from '@/Settings/hooks/useFetchInfiniteFilteredFieldMaps/types';
+} from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
