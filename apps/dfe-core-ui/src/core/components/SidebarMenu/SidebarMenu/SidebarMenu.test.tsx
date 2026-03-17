@@ -21,6 +21,7 @@ describe('SidebarMenu', () => {
         'Dashboards',
         'Sources',
         'Rules',
+        'Settings',
       ]);
     });
 

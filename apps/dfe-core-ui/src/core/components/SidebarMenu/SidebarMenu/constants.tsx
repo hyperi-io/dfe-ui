@@ -3,6 +3,7 @@ import {
   IconChartDots,
   IconDatabase,
   IconLayoutGrid,
+  IconSettings,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
 } from '@dfe/icons';
@@ -85,6 +86,20 @@ export const featureFlagSidebarMenuItems = [
           key: '/rules',
           icon: <IconWrapper icon={<SafetyCertificateOutlined />} />,
           label: 'Rules',
+          external: false,
+        }}
+      />
+    ),
+  },
+  {
+    key: '/settings',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/settings',
+          icon: <IconWrapper icon={<IconSettings />} />,
+          label: 'Settings',
           external: false,
         }}
       />
