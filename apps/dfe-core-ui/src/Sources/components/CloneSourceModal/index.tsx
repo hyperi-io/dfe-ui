@@ -80,7 +80,7 @@ export const CloneSourceModal = ({
               rules={[formValidation]}
               className="mb-2 w-full"
             >
-              <Input placeholder={`${source.source}-copy`} />
+              <Input placeholder={`${source.source}_copy`} />
             </Form.Item>
             <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
               <Switch />
