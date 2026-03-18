@@ -1,19 +1,20 @@
 import { useFetchInfiniteFilteredFieldMaps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps';
 import { Select, SelectProps } from 'antd';
-import uniqBy from 'lodash/uniqBy';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const SCROLL_LOAD_THRESHOLD = 50;
 
 export const FieldMapSelect = (props: SelectProps) => {
-  const [searchStandard, setSearchStandard] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
   const {
-    data: fieldMaps,
+    data: { items: fieldMaps = [] } = {},
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useFetchInfiniteFilteredFieldMaps({
-    standard: searchStandard,
+    search: search,
+    order_by: 'standard',
+    order_direction: 'asc',
   });
 
   const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -27,15 +28,19 @@ export const FieldMapSelect = (props: SelectProps) => {
     }
   };
 
+  const fieldMapsOptions = useMemo(() => {
+    return fieldMaps.map((fieldMap) => ({
+      label: `${fieldMap.standard}: ${fieldMap.source ?? '_default'}`,
+      value: `${fieldMap.standard}/${fieldMap.source ?? '_default'}`,
+    }));
+  }, [fieldMaps]);
+
   return (
     <Select
       placeholder="Select field map"
       {...props}
-      showSearch={{ onSearch: setSearchStandard }}
-      options={uniqBy(fieldMaps.items, 'standard').map((fieldMap) => ({
-        label: fieldMap.standard,
-        value: fieldMap.standard,
-      }))}
+      showSearch={{ onSearch: setSearch }}
+      options={fieldMapsOptions}
       onPopupScroll={handlePopupScroll}
     />
   );
