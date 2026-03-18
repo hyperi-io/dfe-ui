@@ -33,6 +33,9 @@ type CreateFieldMapFormProps = FormProps<CreateFieldMapFormData> & {
   resetFormFields?: boolean;
   buttonLabel?: string;
   hasReset?: boolean;
+  disabledFields?: {
+    source?: boolean;
+  };
 };
 
 export const CreateFieldMapForm = ({
@@ -43,6 +46,7 @@ export const CreateFieldMapForm = ({
   resetFormFields,
   buttonLabel = 'Save',
   hasReset = false,
+  disabledFields,
   ...props
 }: CreateFieldMapFormProps) => {
   const [form] = Form.useForm<CreateFieldMapFormData>();
@@ -66,11 +70,15 @@ export const CreateFieldMapForm = ({
       layout="vertical"
       {...props}
     >
-      <Form.Item name="standard" label="Standard" rules={[formValidation]}>
+      <Form.Item name="standard" label="Standard Name" rules={[formValidation]}>
         <Input placeholder="Enter standard" />
       </Form.Item>
       <Form.Item name="source" label="Source" rules={[formValidation]}>
-        <SourceSelect placeholder="Select source" allowClear />
+        <SourceSelect
+          placeholder="Select source"
+          allowClear
+          disabled={disabledFields?.source}
+        />
       </Form.Item>
       <Form.Item
         name="description"

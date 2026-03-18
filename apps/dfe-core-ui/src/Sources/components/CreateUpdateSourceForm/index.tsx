@@ -2,6 +2,8 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { CreateFieldMapDrawer } from '@/Settings/components/CreateFieldMapDrawer';
+import { ListFieldMapsProvider } from '@/Settings/contexts/ListFieldMapsContext';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
@@ -43,7 +45,7 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   hasReset?: boolean;
 };
 
-export const CreateUpdateSourceForm = ({
+export const CreateUpdateSourceFormBase = ({
   disabledFields,
   initialValues,
   onFinish,
@@ -79,7 +81,10 @@ export const CreateUpdateSourceForm = ({
           label="Source"
           rules={[formValidation]}
         >
-          <Input disabled={!!disabledFields?.source} />
+          <Input
+            placeholder="Enter source"
+            disabled={!!disabledFields?.source}
+          />
         </Form.Item>
         <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
           <Switch />
@@ -91,7 +96,7 @@ export const CreateUpdateSourceForm = ({
         label="Display Name"
         rules={[formValidation]}
       >
-        <Input />
+        <Input placeholder="Enter display name" />
       </Form.Item>
 
       <Form.Item
@@ -99,20 +104,51 @@ export const CreateUpdateSourceForm = ({
         label="Description"
         rules={[formValidation]}
       >
-        <Input.TextArea />
+        <Input.TextArea placeholder="Enter description" />
       </Form.Item>
 
-      <Form.Item
-        name="mapping_standards"
-        label="Mapping Standards"
-        rules={[formValidation]}
+      <SimpleCollapse
+        classNames={{
+          container: 'pt-0 flex gap-2 justify',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
+        title="Mapping Standards"
+        defaultOpen={true}
       >
-        <FieldMapSelect
-          placeholder="Select mapping standards"
-          mode="multiple"
-          allowClear
+        <Form.Item
+          name="mapping_standards"
+          className="w-full"
+          label="Mapping Standards"
+          rules={[formValidation]}
+        >
+          <FieldMapSelect
+            placeholder="Select mapping standards"
+            mode="multiple"
+            allowClear
+          />
+        </Form.Item>
+
+        <CreateFieldMapDrawer
+          title="Create New Standard"
+          className={{ trigger: 'mt-auto' }}
+          onSuccess={({ standard, source }) => {
+            form.setFieldsValue({
+              mapping_standards: [
+                ...form.getFieldValue('mapping_standards'),
+                `${standard}:${source}`,
+              ],
+            });
+          }}
+          initialValues={{
+            standard: '',
+            source: initialValues?.source,
+          }}
+          disabledFields={{
+            source: !!initialValues?.source,
+          }}
         />
-      </Form.Item>
+      </SimpleCollapse>
 
       <SimpleCollapse
         classNames={{
@@ -135,6 +171,7 @@ export const CreateUpdateSourceForm = ({
               { label: 'Minimal', value: 'minimal' },
               { label: 'Passthrough', value: 'passthrough' },
             ]}
+            placeholder="Select header type"
             allowClear
           />
         </Form.Item>
@@ -144,10 +181,11 @@ export const CreateUpdateSourceForm = ({
           label="Header Version"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter header version" />
         </Form.Item>
       </SimpleCollapse>
 
+      {/*  Source Type*/}
       <SimpleCollapse
         classNames={{
           container: 'pt-0',
@@ -187,7 +225,7 @@ export const CreateUpdateSourceForm = ({
           label="Meta Schema"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter meta schema" />
         </Form.Item>
         <Form.Item
           className="w-full"
@@ -195,7 +233,7 @@ export const CreateUpdateSourceForm = ({
           label="Meta Schema Version"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter meta schema version" />
         </Form.Item>
         <Form.Item
           className="w-full"
@@ -203,7 +241,7 @@ export const CreateUpdateSourceForm = ({
           label="Derived Schema"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter derived schema" />
         </Form.Item>
         <Form.Item
           className="w-full"
@@ -211,7 +249,7 @@ export const CreateUpdateSourceForm = ({
           label="Additional Fields"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter additional fields" />
         </Form.Item>
 
         <Form.Item
@@ -220,7 +258,7 @@ export const CreateUpdateSourceForm = ({
           label="Engine"
           rules={[formValidation]}
         >
-          <Input />
+          <Input placeholder="Enter engine" />
         </Form.Item>
         <Form.Item
           className="w-full"
@@ -228,7 +266,7 @@ export const CreateUpdateSourceForm = ({
           label="TTL Days"
           rules={[formValidation]}
         >
-          <InputNumber />
+          <InputNumber placeholder="Enter TTL days" />
         </Form.Item>
       </SimpleCollapse>
 
@@ -283,5 +321,13 @@ export const CreateUpdateSourceForm = ({
         </Button>
       </Form.Item>
     </Form>
+  );
+};
+
+export const CreateUpdateSourceForm = (props: CreateUpdateSourceFormProps) => {
+  return (
+    <ListFieldMapsProvider>
+      <CreateUpdateSourceFormBase {...props} />
+    </ListFieldMapsProvider>
   );
 };
