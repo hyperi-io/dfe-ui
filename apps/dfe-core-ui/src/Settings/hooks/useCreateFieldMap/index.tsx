@@ -12,7 +12,7 @@ export const useCreateFieldMap = ({
   onSuccess,
   onError,
 }: UseCreateFieldMapProps = {}) => {
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: (fieldMap: FieldMap) =>
       apiClient.post(API_CONFIG.fieldMaps.default, { body: fieldMap }),
     onSuccess: (data) => {
@@ -22,5 +22,5 @@ export const useCreateFieldMap = ({
       onError?.(error);
     },
   });
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };
