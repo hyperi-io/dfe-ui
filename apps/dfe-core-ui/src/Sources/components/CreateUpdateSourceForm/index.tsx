@@ -284,18 +284,6 @@ export const CreateUpdateSourceFormBase = ({
         </p>
       </SimpleCollapse>
 
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Sigma"
-        defaultOpen={false}
-      >
-        <p className="text-sm text-error font-bold">TODO: Sigma form items</p>
-      </SimpleCollapse>
-
       {error && (
         <Form.Item>
           <FormNotification
