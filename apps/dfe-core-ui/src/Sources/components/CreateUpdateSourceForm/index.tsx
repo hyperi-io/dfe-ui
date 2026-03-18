@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
@@ -154,10 +154,22 @@ export const CreateUpdateSourceForm = ({
           content: 'flex gap-2',
           title: 'font-semibold',
         }}
-        title="Match"
+        title="Receiver Routing"
         defaultOpen={false}
       >
         <p className="text-sm text-error font-bold">TODO: Match form items</p>
+      </SimpleCollapse>
+
+      <SimpleCollapse
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2',
+          title: 'font-semibold',
+        }}
+        title="Fetcher Configuration"
+        defaultOpen={false}
+      >
+        <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
       </SimpleCollapse>
 
       <SimpleCollapse
@@ -232,18 +244,6 @@ export const CreateUpdateSourceForm = ({
         <p className="text-sm text-error font-bold">
           TODO: Transform form items
         </p>
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Fetcher"
-        defaultOpen={false}
-      >
-        <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
       </SimpleCollapse>
 
       <SimpleCollapse

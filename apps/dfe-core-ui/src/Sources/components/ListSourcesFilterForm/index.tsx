@@ -1,6 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';

@@ -5,7 +5,7 @@ import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Form } from '@/core/components/Form';
 
 import { FormNotification } from '@/core/components/FormNotification';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconCopy } from '@dfe/icons';
 import { Button, Input, Modal, Switch } from 'antd';
 import { useState } from 'react';
