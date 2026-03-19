@@ -6,6 +6,7 @@ import type {
   UseFetchInfiniteFilteredFieldMapsProps,
 } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   createContext,
@@ -107,6 +108,7 @@ export const ListFieldMapsProvider = ({
   children,
   defaultFilters = {},
 }: ListFieldMapsProviderProps) => {
+  const queryClient = useQueryClient();
   const [selectedFieldMap, setSelectedFieldMap] = useState<{
     map_source: string | null;
     map_standard: string | null;
@@ -162,6 +164,7 @@ export const ListFieldMapsProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredFieldMapsProps) => {
+      void queryClient.cancelQueries({ queryKey: ['field-maps'] });
       const standard = searchParams.get('standard') ?? undefined;
       const search = searchParams.get('search') ?? undefined;
 
@@ -175,7 +178,7 @@ export const ListFieldMapsProvider = ({
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [router, pathname, filters, searchParams],
+    [queryClient, router, pathname, filters, searchParams],
   );
 
   const handleSetSelectedFieldMap = useCallback(

@@ -1,6 +1,5 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredFieldMapsProps } from './types';
@@ -23,9 +22,6 @@ export const useFetchInfiniteFilteredFieldMaps = ({
   sort_order,
   per_page,
 }: UseFetchInfiniteFilteredFieldMapsProps = {}) => {
-  const debouncedSearch = useDebounce(search ?? '', 300);
-  const debouncedStandard = useDebounce(standard ?? '', 300);
-
   const {
     data,
     isLoading,
@@ -36,24 +32,18 @@ export const useFetchInfiniteFilteredFieldMaps = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [
-      'field-maps',
-      debouncedSearch,
-      debouncedStandard,
-      sort_by,
-      sort_order,
-      per_page,
-    ],
-    queryFn: async ({ pageParam = 1 }) =>
+    queryKey: ['field-maps', search, standard, sort_by, sort_order, per_page],
+    queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.fieldMaps.default, {
         queryParams: {
-          search: debouncedSearch,
-          standard: debouncedStandard,
+          search: search,
+          standard: standard,
           sort_by,
           sort_order,
           page: pageParam,
           per_page,
         },
+        signal,
       }),
     getNextPageParam: (lastPage, allPages) => {
       const pageSize = per_page ?? lastPage.per_page;

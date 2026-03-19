@@ -6,6 +6,7 @@ import type {
   UseFetchInfiniteFilteredSourcesProps,
 } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   createContext,
@@ -98,6 +99,7 @@ export const ListSourcesProvider = ({
   children,
   defaultFilters = {},
 }: ListSourcesProviderProps) => {
+  const queryClient = useQueryClient();
   const [selectedSourceName, setSelectedSourceName] = useState<string | null>(
     null,
   );
@@ -109,7 +111,9 @@ export const ListSourcesProvider = ({
 
   const filters = useMemo<UseFetchInfiniteFilteredSourcesProps>(() => {
     const urlFilters = parseFiltersFromParams(searchParams);
-    return hasAnyFilters(urlFilters) ? urlFilters : defaultFilters;
+    return hasAnyFilters(urlFilters)
+      ? urlFilters
+      : { ...defaultFilters, ...urlFilters };
   }, [searchParams, defaultFilters]);
 
   // Clear optimistic filters when URL changes externally (e.g. browser back)
@@ -145,6 +149,7 @@ export const ListSourcesProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
+      void queryClient.cancelQueries({ queryKey: ['sources'] });
       const source_name = searchParams.get('source_name') ?? undefined;
       const updated: ListSourcesQueryParams = {
         ...filters,
@@ -155,7 +160,7 @@ export const ListSourcesProvider = ({
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [router, pathname, filters, searchParams],
+    [queryClient, router, pathname, filters, searchParams],
   );
 
   const handleSetSelectedSourceName = useCallback(
