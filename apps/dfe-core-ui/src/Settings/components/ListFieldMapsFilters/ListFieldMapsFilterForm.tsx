@@ -35,6 +35,10 @@ export const ListFieldMapsFilterForm = ({
 
   const handleResetFilters = () => {
     form.setFieldsValue({ standard: '', search: '' });
+    setFilters({
+      standard: undefined,
+      search: undefined,
+    });
   };
   useEffect(() => {
     form.setFieldsValue({

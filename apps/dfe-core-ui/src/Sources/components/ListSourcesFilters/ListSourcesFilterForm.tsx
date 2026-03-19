@@ -35,6 +35,10 @@ export const ListSourcesFilterForm = ({
 
   const handleResetFilters = () => {
     form.setFieldsValue({ enabled: undefined, search: '' });
+    setFilters({
+      search: undefined,
+      enabled: undefined,
+    });
   };
   useEffect(() => {
     form.setFieldsValue({
