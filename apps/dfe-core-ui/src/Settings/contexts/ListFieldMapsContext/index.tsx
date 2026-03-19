@@ -113,8 +113,6 @@ export const ListFieldMapsProvider = ({
     map_source: string | null;
     map_standard: string | null;
   } | null>(null);
-  const [pendingFilters, setPendingFilters] =
-    useState<UseFetchInfiniteFilteredFieldMapsProps | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -123,11 +121,6 @@ export const ListFieldMapsProvider = ({
     const urlFilters = parseFiltersFromParams(searchParams);
     return hasAnyFilters(urlFilters) ? urlFilters : defaultFilters;
   }, [searchParams, defaultFilters]);
-
-  // Clear optimistic filters when URL changes externally (e.g. browser back)
-  useEffect(() => {
-    startTransition(() => setPendingFilters(null));
-  }, [searchParams]);
 
   useEffect(() => {
     const map_standard = searchParams.get('map_standard');
@@ -140,10 +133,7 @@ export const ListFieldMapsProvider = ({
     );
   }, [searchParams]);
 
-  const hasFilters = useMemo(
-    () => hasAnyFilters(pendingFilters ?? filters),
-    [pendingFilters, filters],
-  );
+  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
 
   const {
     data = DEFAULT_FIELD_MAP_LIST_RESPONSE,
@@ -165,20 +155,15 @@ export const ListFieldMapsProvider = ({
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredFieldMapsProps) => {
       void queryClient.cancelQueries({ queryKey: ['field-maps'] });
-      const standard = searchParams.get('standard') ?? undefined;
-      const search = searchParams.get('search') ?? undefined;
 
       const updated: ListFieldMapsQueryParams = {
         ...filters,
         ...newFilters,
-        ...(standard && { standard }),
-        ...(search && { search }),
       };
-      setPendingFilters(updated);
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [queryClient, router, pathname, filters, searchParams],
+    [queryClient, router, pathname, filters],
   );
 
   const handleSetSelectedFieldMap = useCallback(
