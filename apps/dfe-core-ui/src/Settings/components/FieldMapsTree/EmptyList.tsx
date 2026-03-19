@@ -1,7 +1,8 @@
+import { UseFetchInfiniteFilteredFieldMapsProps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
-import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { IconInfoCircle } from '@dfe/icons';
 import { Button } from 'antd';
+import { CreateFieldMapDrawer } from '../CreateFieldMapDrawer';
 
 export const EmptyList = ({
   hasFilters,
@@ -10,8 +11,8 @@ export const EmptyList = ({
   className,
 }: {
   hasFilters: boolean;
-  setFilters: (filters: UseFetchInfiniteFilteredSourcesProps) => void;
-  defaultFilters: UseFetchInfiniteFilteredSourcesProps;
+  setFilters: (filters: UseFetchInfiniteFilteredFieldMapsProps) => void;
+  defaultFilters: UseFetchInfiniteFilteredFieldMapsProps;
   className?: string;
 }) => {
   return (
@@ -24,12 +25,14 @@ export const EmptyList = ({
       <IconInfoCircle className="w-6 h-6 text-foreground" />
       <div className="flex flex-col">
         <h2 className="text-md font-medium">
-          {hasFilters ? 'No sources match your filters' : 'No sources found'}
+          {hasFilters
+            ? 'No field maps match your filters'
+            : 'No field maps found'}
         </h2>
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
           {hasFilters
-            ? 'Please update your filters to see sources.'
-            : 'Please add a source to get started.'}
+            ? 'Please update your filters to see field maps.'
+            : 'Please add a field map to get started.'}
         </p>
       </div>
       {hasFilters ? (
@@ -37,8 +40,7 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        // <CreateSourceDrawer />
-        <div>TODO: Create Field Map Drawer</div>
+        <CreateFieldMapDrawer />
       )}
     </div>
   );
