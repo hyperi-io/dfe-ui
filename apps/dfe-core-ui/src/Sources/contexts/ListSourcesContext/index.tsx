@@ -39,9 +39,7 @@ const parseFiltersFromParams = (
       : undefined;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
-  const per_pageParam = params.get('per_page');
-  const per_page = per_pageParam ? parseInt(per_pageParam, 10) : undefined;
-  return { search, enabled, sort_by, sort_order, per_page };
+  return { search, enabled, sort_by, sort_order };
 };
 
 const filtersToSearchString = (f: ListSourcesQueryParams): string => {
