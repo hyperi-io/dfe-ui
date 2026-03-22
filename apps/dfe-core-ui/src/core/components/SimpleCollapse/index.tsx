@@ -1,10 +1,22 @@
+'use client';
+
 import { cn } from '@/core/utils/style';
 import { IconChevronDown, IconChevronUp } from '@dfe/icons';
-import { useState } from 'react';
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useState,
+  type ReactNode,
+} from 'react';
+
+export interface SimpleCollapseRenderProps {
+  setOpen: (open: boolean) => void;
+}
 
 interface SimpleCollapseProps {
   title: React.ReactNode;
-  children: React.ReactNode;
+  children: ReactNode | ((props: SimpleCollapseRenderProps) => ReactNode);
   className?: string;
   defaultOpen?: boolean;
   classNames?: {
@@ -21,6 +33,24 @@ export const SimpleCollapse = ({
   classNames,
 }: SimpleCollapseProps) => {
   const [open, setOpen] = useState(defaultOpen);
+  const collapseProps: SimpleCollapseRenderProps = { setOpen };
+
+  const content =
+    typeof children === 'function'
+      ? children(collapseProps)
+      : (() => {
+          const childCount = Children.count(children);
+          return childCount === 1 &&
+            isValidElement(Children.toArray(children)[0])
+            ? cloneElement(
+                Children.toArray(children)[0] as React.ReactElement<{
+                  setOpen?: (open: boolean) => void;
+                }>,
+                { setOpen },
+              )
+            : children;
+        })();
+
   return (
     <div
       className={cn(
@@ -47,7 +77,7 @@ export const SimpleCollapse = ({
           )}
         </span>
       </button>
-      {open && <div className={classNames?.content}>{children}</div>}
+      {open && <div className={classNames?.content}>{content}</div>}
     </div>
   );
 };

@@ -49,6 +49,7 @@ type RequestOptions<Path extends keyof paths, Method extends HttpMethod> =
           pathParams?: PathParams<Op>;
           queryParams?: QueryParams<Op>;
           body?: RequestBody<Op>;
+          signal?: AbortSignal;
         }
     : never;
 
@@ -96,7 +97,10 @@ export function createApiClient(config: ApiClientConfig) {
     method: Method,
     options?: RequestOptions<Path, Method>,
   ): Promise<SuccessResponseBody<OperationFor<Path, Method>>> {
-    const { pathParams, queryParams, body } = options ?? {};
+    const { pathParams, queryParams, body, signal } = options ?? {};
+    if (signal?.aborted) {
+      throw new DOMException('Request was aborted', 'AbortError');
+    }
     const resolvedPath = applyPathParams(
       path as string,
       pathParams as Record<string, string> | undefined,
@@ -117,6 +121,7 @@ export function createApiClient(config: ApiClientConfig) {
       headers,
       ...(body !== undefined &&
         method !== 'get' && { body: JSON.stringify(body) }),
+      ...(signal !== undefined && { signal }),
     };
 
     const fetchFn = customFetch ?? globalThis.fetch;

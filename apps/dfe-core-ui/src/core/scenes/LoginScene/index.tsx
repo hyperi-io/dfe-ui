@@ -5,7 +5,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useLogin } from '@/core/hooks/useLogin';
 import { cn } from '@/core/utils/style';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Button, Input } from 'antd';
 import Image from 'next/image';

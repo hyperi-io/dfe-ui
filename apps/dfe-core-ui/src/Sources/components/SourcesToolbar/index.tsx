@@ -2,10 +2,10 @@
 
 import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
+import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
+import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ListSourcesProvider } from '../../contexts/ListSourcesContext';
-import { CreateSourceDrawer } from '../CreateSourceDrawer';
 
 export const SourcesToolbar = () => {
   const pathname = usePathname();

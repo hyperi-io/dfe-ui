@@ -1,13 +1,13 @@
 import { Drawer } from '@/core/components/Drawer';
+import {
+  CreateUpdateSourceForm,
+  CreateUpdateSourceFormData,
+} from '@/Sources/components/CreateUpdateSourceForm';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import { IconPlus } from '@dfe/icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { useListSourcesContext } from '../../contexts/ListSourcesContext';
-import {
-  CreateUpdateSourceForm,
-  CreateUpdateSourceFormData,
-} from '../CreateUpdateSourceForm';
 
 export const CreateSourceDrawer = () => {
   const title = 'Add Source';

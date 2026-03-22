@@ -1,10 +1,10 @@
 import { cn } from '@/core/utils/style';
+import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
+import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
+import { EmptyList } from '@/Sources/components/ListSourcesTree/EmptyList';
+import { ErrorList } from '@/Sources/components/ListSourcesTree/ErrorList';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { Spin, Tooltip } from 'antd';
-import { useListSourcesContext } from '../../contexts/ListSourcesContext';
-import { CloneSourceModal } from '../CloneSourceModal';
-import { DeleteSourceModal } from '../DeleteSourceModal';
-import { EmptyList } from './EmptyList';
-import { ErrorList } from './ErrorList';
 
 export const SourceList = ({ className }: { className?: string }) => {
   const {

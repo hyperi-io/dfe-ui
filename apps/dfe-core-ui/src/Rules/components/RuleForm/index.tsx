@@ -12,10 +12,10 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolved';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import z from 'zod';
-import { AdvancedSettings } from './AdvancedSettings';
 import { ResponsePopover } from './ResponsePopover';
+import { RuleSettings } from './RuleSettings';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
@@ -119,7 +119,9 @@ export const RuleForm = ({
         onFinish={handleCreateCustomRule}
         onValuesChange={resetCreateRule}
       >
-        <AdvancedSettings formValidation={formValidation} />
+        <RuleSettings formValidation={formValidation}>
+          {/* <AdvancedSettings formValidation={formValidation} /> */}
+        </RuleSettings>
 
         <ContentCard className="flex flex-col gap-y-2">
           <Form.Item
