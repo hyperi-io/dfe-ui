@@ -46,7 +46,7 @@ export const CreateFieldMapDrawer = ({
       setIsDrawerVisible(false);
       onSuccess?.(data);
       api.success({
-        title: 'Source created successfully',
+        title: 'Field map created successfully',
         placement: 'bottomLeft',
       });
     },

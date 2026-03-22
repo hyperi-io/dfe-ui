@@ -1,4 +1,5 @@
 import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
+import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { UseFetchInfiniteFilteredFieldMapsProps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@dfe/icons';
@@ -15,6 +16,7 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredFieldMapsProps;
   className?: string;
 }) => {
+  const { setSelectedFieldMap } = useListFieldMapsContext();
   return (
     <div
       className={cn(
@@ -40,7 +42,15 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <CreateFieldMapDrawer />
+        <CreateFieldMapDrawer
+          title="Add Field Map"
+          onSuccess={({ standard, source }) => {
+            setSelectedFieldMap({
+              map_source: source ?? null,
+              map_standard: standard,
+            });
+          }}
+        />
       )}
     </div>
   );
