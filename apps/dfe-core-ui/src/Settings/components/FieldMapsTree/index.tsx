@@ -1,4 +1,4 @@
-import { ListFieldMapsFilters } from '../ListFieldMapsFilters';
+import { ListFieldMapsFilters } from '@/Settings/components/ListFieldMapsFilters';
 import { FieldMapsList } from './FieldMapsList';
 
 export const FieldMapsTree = () => {

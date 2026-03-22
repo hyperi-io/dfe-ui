@@ -1,5 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { useListSourcesContext } from '../../contexts/ListSourcesContext';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { ListSourcesFilterForm } from './ListSourcesFilterForm';
 
 export const ListSourcesFilters = () => {

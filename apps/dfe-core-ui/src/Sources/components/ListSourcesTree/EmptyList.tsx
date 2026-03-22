@@ -1,8 +1,8 @@
 import { cn } from '@/core/utils/style';
+import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { IconInfoCircle } from '@dfe/icons';
 import { Button } from 'antd';
-import { CreateSourceDrawer } from '../CreateSourceDrawer';
 
 export const EmptyList = ({
   hasFilters,

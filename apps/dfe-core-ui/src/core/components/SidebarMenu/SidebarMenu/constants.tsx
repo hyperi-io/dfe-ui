@@ -1,4 +1,5 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
+import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconChartDots,
   IconDatabase,
@@ -7,7 +8,6 @@ import {
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
 } from '@dfe/icons';
-import { SidebarLink } from '../SidebarLink';
 
 interface SidebarMenuProps {
   collapsed: boolean;

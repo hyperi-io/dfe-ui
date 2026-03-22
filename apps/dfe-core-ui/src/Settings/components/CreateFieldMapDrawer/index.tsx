@@ -1,15 +1,15 @@
 import { Drawer } from '@/core/components/Drawer';
 import { cn } from '@/core/utils/style';
+import {
+  CreateFieldMapForm,
+  CreateFieldMapFormData,
+} from '@/Settings/components/CreateFieldMapForm';
 import { useListFieldMapsContext } from '@/Settings/contexts/ListFieldMapsContext';
 import { useCreateFieldMap } from '@/Settings/hooks/useCreateFieldMap';
 import { FieldMap } from '@/Settings/hooks/useCreateFieldMap/types';
 import { IconPlus } from '@dfe/icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import {
-  CreateFieldMapForm,
-  CreateFieldMapFormData,
-} from '../CreateFieldMapForm';
 
 interface CreateFieldMapDrawerProps {
   className?: {

@@ -1,4 +1,4 @@
-import { ListSourcesFilters } from '../ListSourcesFilters';
+import { ListSourcesFilters } from '@/Sources/components/ListSourcesFilters';
 import { SourceList } from './SourceList';
 
 export const ListSourcesTree = () => {

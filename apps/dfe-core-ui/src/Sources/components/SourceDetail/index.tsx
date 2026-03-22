@@ -1,12 +1,12 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
+import {
+  CreateUpdateSourceForm,
+  CreateUpdateSourceFormData,
+} from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { notification, Spin, Typography } from 'antd';
-import {
-  CreateUpdateSourceForm,
-  CreateUpdateSourceFormData,
-} from '../CreateUpdateSourceForm';
 import { EmptyDetail } from './EmptyDetail';
 
 export const SourceDetail = () => {

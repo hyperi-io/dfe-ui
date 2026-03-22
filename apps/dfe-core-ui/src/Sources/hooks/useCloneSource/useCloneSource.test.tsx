@@ -1,5 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -11,7 +12,6 @@ import {
   vi,
 } from 'vitest';
 import { useCloneSource } from '.';
-import { SourceCreateResponse } from '../useCreateSource/types';
 import { server } from './useCloneSource.mocks';
 
 beforeAll(() =>

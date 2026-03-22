@@ -1,8 +1,8 @@
 import { UseFetchInfiniteFilteredFieldMapsProps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
+import { CreateFieldMapDrawer } from '@/Settings/components/CreateFieldMapDrawer';
 import { IconInfoCircle } from '@dfe/icons';
 import { Button } from 'antd';
-import { CreateFieldMapDrawer } from '../CreateFieldMapDrawer';
 
 export const EmptyList = ({
   hasFilters,

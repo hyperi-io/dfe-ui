@@ -2,13 +2,13 @@
 
 import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
+import { CreateFieldMapDrawer } from '@/Settings/components/CreateFieldMapDrawer';
 import {
   ListFieldMapsProvider,
   useListFieldMapsContext,
 } from '@/Settings/contexts/ListFieldMapsContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CreateFieldMapDrawer } from '../CreateFieldMapDrawer';
 
 export const SettingsToolbarBase = () => {
   const pathname = usePathname();

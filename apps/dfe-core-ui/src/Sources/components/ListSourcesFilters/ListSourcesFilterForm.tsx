@@ -1,10 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { Button, Input, Select } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';
-import { useListSourcesContext } from '../../contexts/ListSourcesContext';
 
 const formSchema = z.object({
   search: z.string().optional(),

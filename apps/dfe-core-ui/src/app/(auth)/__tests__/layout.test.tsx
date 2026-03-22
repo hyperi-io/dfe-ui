@@ -1,6 +1,6 @@
+import Layout from '@/app/(auth)/layout';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import Layout from '../layout';
 
 const getServerSession = vi.mocked(
   (await import('next-auth')).getServerSession,
