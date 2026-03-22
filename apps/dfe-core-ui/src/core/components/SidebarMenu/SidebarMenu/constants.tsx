@@ -4,7 +4,6 @@ import {
   IconChartDots,
   IconDatabase,
   IconLayoutGrid,
-  IconSettings,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
 } from '@dfe/icons';
@@ -91,18 +90,19 @@ export const featureFlagSidebarMenuItems = [
       />
     ),
   },
-  {
-    key: '/settings',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/settings',
-          icon: <IconWrapper icon={<IconSettings />} />,
-          label: 'Settings',
-          external: false,
-        }}
-      />
-    ),
-  },
+  // TODO: Add back once field maps view is implemented
+  // {
+  //   key: '/settings',
+  //   Component: ({ collapsed }: SidebarMenuProps) => (
+  //     <SidebarLink
+  //       collapsed={collapsed}
+  //       item={{
+  //         key: '/settings',
+  //         icon: <IconWrapper icon={<IconSettings />} />,
+  //         label: 'Settings',
+  //         external: false,
+  //       }}
+  //     />
+  //   ),
+  // },
 ];
