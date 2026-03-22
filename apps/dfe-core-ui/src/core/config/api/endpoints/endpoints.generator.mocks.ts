@@ -2,6 +2,18 @@
 import { components } from '@dfe/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
+const DEFAULT_VALIDATION_ERROR = {
+  detail: [
+    {
+      loc: ['string', 0],
+      msg: 'string',
+      type: 'string',
+      input: 'string',
+      ctx: {},
+    },
+  ],
+};
+
 export const API_CONFIG_MOCKS = Object.freeze({
   auth: {
     login: {
@@ -80,17 +92,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             return HttpResponse.json(mockedResponse);
           }),
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
@@ -115,17 +117,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
@@ -141,7 +133,54 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/sources/{name}',
       get: {
         success: ({
-          mockedResponse = { source: 'source', enabled: true },
+          mockedResponse = {
+            source: 'source',
+            enabled: true,
+            display_name: 'string',
+            description: 'string',
+            header: {
+              type: 'string',
+              version: 'string',
+            },
+            match: {
+              field: 'string',
+              value: 'string',
+            },
+            schema: {
+              meta_schema: 'string',
+              meta_schema_version: 'string',
+              derived_schema: 'string',
+              additional_fields: 'string',
+              ttl_days: 0,
+              engine: 'string',
+            },
+            transform: {
+              engine: 'string',
+              config_file: 'string',
+              env: {
+                string: 'string',
+              },
+              files: ['string'],
+            },
+            fetcher: {
+              source_type: 'string',
+              base_url: 'string',
+              auth: {
+                type: 'string',
+                token_url: 'string',
+                client_id: 'string',
+                client_secret: 'string',
+                api_key: 'string',
+              },
+              poll_interval_secs: 0,
+            },
+            sigma: {
+              taxonomy: 'string',
+              custom_mappings: {
+                string: 'string',
+              },
+            },
+          },
           name = 'source',
         }: {
           mockedResponse?: components['schemas']['Source'];
@@ -155,17 +194,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
           name = 'source',
         }: {
@@ -200,17 +229,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
           name = 'source',
         }: {
@@ -236,17 +255,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
           name = 'source',
         }: {
@@ -396,29 +405,143 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/field-maps',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                standard: 'string',
+                source: 'string',
+                is_default: false,
+                version: 'string',
+                mapping_count: 0,
+                updated_at: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_FieldMapSummary_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'string',
+            source: 'string',
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
     standard: {
       mockedUrl: '/api/v1/field-maps/{standard}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'standard',
+            source: null,
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+          standard = 'standard',
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+          standard?: string;
+          source?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.fieldMaps.standard.mockedUrl.replace(
+              '{standard}',
+              standard,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
     },
     source: {
       mockedUrl: '/api/v1/field-maps/{standard}/{source}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            standard: 'standard',
+            source: 'source',
+            version: 'string',
+            description: 'string',
+            inherits: 'string',
+            mappings: {
+              additionalProp1: 'string',
+              additionalProp2: 'string',
+              additionalProp3: 'string',
+            },
+          },
+          standard = 'standard',
+          source = 'source',
+        }: {
+          mockedResponse?: components['schemas']['FieldMap'];
+          standard?: string;
+          source?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.fieldMaps.source.mockedUrl
+              .replace('{standard}', standard)
+              .replace('{source}', source),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
       delete: {
@@ -481,17 +604,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             return HttpResponse.json(mockedResponse);
           }),
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
@@ -523,17 +636,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             return HttpResponse.json(mockedResponse);
           }),
         error: ({
-          mockedResponse = {
-            detail: [
-              {
-                loc: ['string', 0],
-                msg: 'string',
-                type: 'string',
-                input: 'string',
-                ctx: {},
-              },
-            ],
-          },
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];

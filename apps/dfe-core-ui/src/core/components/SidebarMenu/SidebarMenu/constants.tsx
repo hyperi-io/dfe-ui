@@ -1,4 +1,5 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
+import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconChartDots,
   IconDatabase,
@@ -6,7 +7,6 @@ import {
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
 } from '@dfe/icons';
-import { SidebarLink } from '../SidebarLink';
 
 interface SidebarMenuProps {
   collapsed: boolean;
@@ -90,4 +90,19 @@ export const featureFlagSidebarMenuItems = [
       />
     ),
   },
+  // TODO: Add back once field maps view is implemented
+  // {
+  //   key: '/settings',
+  //   Component: ({ collapsed }: SidebarMenuProps) => (
+  //     <SidebarLink
+  //       collapsed={collapsed}
+  //       item={{
+  //         key: '/settings',
+  //         icon: <IconWrapper icon={<IconSettings />} />,
+  //         label: 'Settings',
+  //         external: false,
+  //       }}
+  //     />
+  //   ),
+  // },
 ];

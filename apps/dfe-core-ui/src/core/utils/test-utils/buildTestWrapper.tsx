@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
+import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
-import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type WrapperComponent = ({

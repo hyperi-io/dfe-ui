@@ -1,6 +1,6 @@
+import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { server } from '@/core/hooks/useFetchInfiniteFilteredSources/useFetchInfiniteFilteredSources.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
-import { server } from '@/Sources/hooks/useFetchInfiniteFilteredSources/useFetchInfiniteFilteredSources.mocks';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -87,7 +87,6 @@ describe('ListSourcesContext', () => {
           items: expect.any(Array),
           total: expect.any(Number),
           page: expect.any(Number),
-          per_page: expect.any(Number),
         }),
         filters: expect.any(Object),
         hasFilters: expect.any(Boolean),
@@ -105,7 +104,7 @@ describe('ListSourcesContext', () => {
 
     it('parses filters from URL search params', async () => {
       searchParamsRef.current = new URLSearchParams(
-        'search=foo&enabled=true&sort_by=source&sort_order=asc&per_page=25',
+        'search=foo&enabled=true&sort_by=source&sort_order=asc',
       );
 
       const { result } = renderHook(() => useListSourcesContext(), {
@@ -121,7 +120,6 @@ describe('ListSourcesContext', () => {
         enabled: 'true',
         sort_by: 'source',
         sort_order: 'asc',
-        per_page: 25,
       });
     });
 
@@ -144,8 +142,10 @@ describe('ListSourcesContext', () => {
       });
 
       expect(result.current.filters).toEqual({
-        search: 'default-search',
-        enabled: 'true',
+        search: undefined,
+        enabled: undefined,
+        sort_by: undefined,
+        sort_order: undefined,
       });
     });
 
@@ -196,9 +196,9 @@ describe('ListSourcesContext', () => {
       expect(result.current.hasFilters).toBe(true);
     });
 
-    it('hasFilters is true when sort/per_page params are set', async () => {
+    it('hasFilters is true when sort params are set', async () => {
       searchParamsRef.current = new URLSearchParams(
-        'sort_by=source&sort_order=asc&per_page=20',
+        'sort_by=source&sort_order=asc',
       );
 
       const { result } = renderHook(() => useListSourcesContext(), {

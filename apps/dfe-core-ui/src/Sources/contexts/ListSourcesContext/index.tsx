@@ -1,11 +1,12 @@
 'use client';
 
-import { useFetchInfiniteFilteredSources } from '@/Sources/hooks/useFetchInfiniteFilteredSources';
+import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import type {
   SourceListResponse,
   UseFetchInfiniteFilteredSourcesProps,
-} from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
+} from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   createContext,
@@ -38,9 +39,7 @@ const parseFiltersFromParams = (
       : undefined;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
-  const per_pageParam = params.get('per_page');
-  const per_page = per_pageParam ? parseInt(per_pageParam, 10) : undefined;
-  return { search, enabled, sort_by, sort_order, per_page };
+  return { search, enabled, sort_by, sort_order };
 };
 
 const filtersToSearchString = (f: ListSourcesQueryParams): string => {
@@ -98,24 +97,20 @@ export const ListSourcesProvider = ({
   children,
   defaultFilters = {},
 }: ListSourcesProviderProps) => {
+  const queryClient = useQueryClient();
   const [selectedSourceName, setSelectedSourceName] = useState<string | null>(
     null,
   );
-  const [pendingFilters, setPendingFilters] =
-    useState<UseFetchInfiniteFilteredSourcesProps | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   const filters = useMemo<UseFetchInfiniteFilteredSourcesProps>(() => {
     const urlFilters = parseFiltersFromParams(searchParams);
-    return hasAnyFilters(urlFilters) ? urlFilters : defaultFilters;
+    return hasAnyFilters(urlFilters)
+      ? urlFilters
+      : { ...defaultFilters, ...urlFilters };
   }, [searchParams, defaultFilters]);
-
-  // Clear optimistic filters when URL changes externally (e.g. browser back)
-  useEffect(() => {
-    startTransition(() => setPendingFilters(null));
-  }, [searchParams]);
 
   useEffect(() => {
     const source_name = searchParams.get('source_name');
@@ -126,10 +121,7 @@ export const ListSourcesProvider = ({
     );
   }, [searchParams]);
 
-  const hasFilters = useMemo(
-    () => hasAnyFilters(pendingFilters ?? filters),
-    [pendingFilters, filters],
-  );
+  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
 
   const {
     data = DEFAULT_SOURCE_LIST_RESPONSE,
@@ -145,17 +137,16 @@ export const ListSourcesProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
-      const source_name = searchParams.get('source_name') ?? undefined;
+      void queryClient.cancelQueries({ queryKey: ['sources'] });
       const updated: ListSourcesQueryParams = {
         ...filters,
         ...newFilters,
-        ...(source_name && { source_name }),
       };
-      setPendingFilters(updated);
+
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [router, pathname, filters, searchParams],
+    [queryClient, router, pathname, filters],
   );
 
   const handleSetSelectedSourceName = useCallback(

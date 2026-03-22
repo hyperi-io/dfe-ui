@@ -1,9 +1,9 @@
-import { useCreateSource } from '../useCreateSource';
+import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import {
   SourceCreateRequestBody,
   SourceCreateResponse,
-} from '../useCreateSource/types';
-import { useFetchSourceDetail } from '../useFetchSourceDetail';
+} from '@/Sources/hooks/useCreateSource/types';
+import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 
 export const useCloneSource = ({
   onSuccess,

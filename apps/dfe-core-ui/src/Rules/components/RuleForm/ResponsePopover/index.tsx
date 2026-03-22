@@ -1,7 +1,7 @@
 import { Modal } from '@/core/components/Modal';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { IconAlertCircle, IconInfoCircle } from '@dfe/icons';
+import { IconAlertCircle } from '@dfe/icons';
 import { useState } from 'react';
 
 interface ResponsePopoverProps {
@@ -19,7 +19,12 @@ export const ResponsePopover = ({
     onClose?.();
   };
 
-  const { rule, sanitize_summary, sql_errors, cost_estimate } = response ?? {};
+  const {
+    rule,
+    sanitize_summary: _sanitize_summary,
+    sql_errors,
+    cost_estimate: _cost_estimate,
+  } = response ?? {};
   return (
     <Modal
       open={open}
@@ -94,7 +99,7 @@ export const ResponsePopover = ({
           </ul>
         </SimpleCollapse>
       )}
-      {cost_estimate && (
+      {/* {cost_estimate && (
         <SimpleCollapse
           title={
             <span className="flex items-center gap-x-2">
@@ -125,9 +130,9 @@ export const ResponsePopover = ({
             </>
           )}
         </SimpleCollapse>
-      )}
+      )} */}
 
-      {sanitize_summary && Object.keys(sanitize_summary)?.length > 0 && (
+      {/* {sanitize_summary && Object.keys(sanitize_summary)?.length > 0 && (
         <SimpleCollapse
           title={
             <span className="flex items-center gap-x-2">
@@ -144,7 +149,7 @@ export const ResponsePopover = ({
             </div>
           ))}
         </SimpleCollapse>
-      )}
+      )} */}
     </Modal>
   );
 };

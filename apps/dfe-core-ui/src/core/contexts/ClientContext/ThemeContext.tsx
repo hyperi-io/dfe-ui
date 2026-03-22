@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  startTransition,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 // Light/Dark mode type
 type ColorMode = 'light' | 'dark';
@@ -16,14 +22,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // Initialize color mode from localStorage or default to 'light'
-  const [colorMode, setColorMode] = useState<ColorMode>(() => {
-    if (typeof window === 'undefined') return 'light';
-    const savedColorMode = localStorage.getItem('app-color-mode');
-    return (savedColorMode as ColorMode) || 'light';
-  });
+  // Always initialize to 'light' so server and client match during hydration.
+  const [colorMode, setColorMode] = useState<ColorMode>('light');
 
-  // Save color mode to localStorage when it changes
+  // Restore saved preference from localStorage after hydration (client-only)
+  useEffect(() => {
+    const saved = localStorage.getItem('app-color-mode') as ColorMode | null;
+    if (saved && (saved === 'light' || saved === 'dark')) {
+      startTransition(() => setColorMode(saved));
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('app-color-mode', colorMode);
 

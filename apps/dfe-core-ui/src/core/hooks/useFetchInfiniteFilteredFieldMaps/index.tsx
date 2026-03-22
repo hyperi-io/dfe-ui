@@ -1,30 +1,27 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { UseFetchInfiniteFilteredSourcesProps } from './types';
+import { UseFetchInfiniteFilteredFieldMapsProps } from './types';
 
-/** useFetchInfiniteFilteredSources props */
+/** useFetchInfiniteFilteredFieldMaps props */
 /**
- * @param search - The search query to filter the sources by name and description.
- * @param enabled - Whether the sources are enabled.
- * @param sort_by - The field to sort the sources by (source, display_name, enabled).
- * @param sort_order - The order to sort the sources by.
- * @param per_page - The number of sources to fetch per page.
+ * @param standard - The standard to filter the field maps by.
+ * @param search - The search query to filter the field maps by standard and source names.
+ * @param sort_by - The field to sort the field maps by (standard, source, mapping_count).
+ * @param sort_order - The order to sort the field maps by.
+ * @param per_page - The number of field maps to fetch per page.
  */
 /**
- * @returns A list of sources.
+ * @returns A list of field maps.
  */
-export const useFetchInfiniteFilteredSources = ({
+export const useFetchInfiniteFilteredFieldMaps = ({
   search,
-  enabled,
+  standard,
   sort_by,
   sort_order,
   per_page,
-}: UseFetchInfiniteFilteredSourcesProps = {}) => {
-  const debouncedSearch = useDebounce(search ?? '', 300);
-
+}: UseFetchInfiniteFilteredFieldMapsProps = {}) => {
   const {
     data,
     isLoading,
@@ -35,25 +32,18 @@ export const useFetchInfiniteFilteredSources = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [
-      'sources',
-      debouncedSearch,
-      enabled,
-      sort_by,
-      sort_order,
-      per_page,
-    ],
-    queryFn: async ({ pageParam = 1 }) =>
-      apiClient.get(API_CONFIG.sources.default, {
+    queryKey: ['field-maps', search, standard, sort_by, sort_order, per_page],
+    queryFn: async ({ pageParam = 1, signal }) =>
+      apiClient.get(API_CONFIG.fieldMaps.default, {
         queryParams: {
-          search: debouncedSearch,
-          enabled:
-            enabled === 'true' ? true : enabled === 'false' ? false : undefined,
+          search: search,
+          standard: standard,
           sort_by,
           sort_order,
           page: pageParam,
           per_page,
         },
+        signal,
       }),
     getNextPageParam: (lastPage, allPages) => {
       const pageSize = per_page ?? lastPage.per_page;
