@@ -1,4 +1,4 @@
-import { useFetchInfiniteFilteredSources } from '@/Sources/hooks/useFetchInfiniteFilteredSources';
+import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 

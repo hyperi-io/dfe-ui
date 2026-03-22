@@ -1,6 +1,6 @@
+import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { server } from '@/core/hooks/useFetchInfiniteFilteredSources/useFetchInfiniteFilteredSources.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { UseFetchInfiniteFilteredSourcesProps } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
-import { server } from '@/Sources/hooks/useFetchInfiniteFilteredSources/useFetchInfiniteFilteredSources.mocks';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,

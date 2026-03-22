@@ -1,5 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { useListFieldMapsContext } from '@/Settings/contexts/ListFieldMapsContext';
+import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { ListFieldMapsFilterForm } from './ListFieldMapsFilterForm';
 
 export const ListFieldMapsFilters = () => {

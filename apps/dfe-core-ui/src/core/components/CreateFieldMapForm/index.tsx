@@ -1,8 +1,8 @@
+import { FieldMapSelect } from '@/core/components/FieldMapSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { SourceSelect } from '@/Settings/components/SourceSelect';
-import { FieldMapSelect } from '@/Sources/components/FieldMapSelect';
 import { Button, FormProps, Input } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';

@@ -1,10 +1,10 @@
+import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
+import { FieldMapSelect } from '@/core/components/FieldMapSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { CreateFieldMapDrawer } from '@/Settings/components/CreateFieldMapDrawer';
-import { ListFieldMapsProvider } from '@/Settings/contexts/ListFieldMapsContext';
-import { FieldMapSelect } from '@/Sources/components/FieldMapSelect';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';

@@ -1,12 +1,12 @@
 'use client';
 
+import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
-import { cn } from '@/core/utils/style';
-import { CreateFieldMapDrawer } from '@/Settings/components/CreateFieldMapDrawer';
 import {
   ListFieldMapsProvider,
   useListFieldMapsContext,
-} from '@/Settings/contexts/ListFieldMapsContext';
+} from '@/core/contexts/ListFieldMapsContext';
+import { cn } from '@/core/utils/style';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

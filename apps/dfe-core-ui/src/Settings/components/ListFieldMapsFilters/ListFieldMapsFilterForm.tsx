@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
+import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { useListFieldMapsContext } from '@/Settings/contexts/ListFieldMapsContext';
 import { Button, Input } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';

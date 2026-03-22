@@ -1,10 +1,10 @@
 'use client';
 
-import { useFetchInfiniteFilteredSources } from '@/Sources/hooks/useFetchInfiniteFilteredSources';
+import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import type {
   SourceListResponse,
   UseFetchInfiniteFilteredSourcesProps,
-} from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
+} from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';

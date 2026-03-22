@@ -1,8 +1,8 @@
 import { useCloneSource } from '@/Sources/hooks/useCloneSource';
 import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
-import type { SourceSummary } from '@/Sources/hooks/useFetchInfiniteFilteredSources/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Form } from '@/core/components/Form';
+import type { SourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';

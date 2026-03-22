@@ -1,12 +1,12 @@
-import { Drawer } from '@/core/components/Drawer';
-import { cn } from '@/core/utils/style';
 import {
   CreateFieldMapForm,
   CreateFieldMapFormData,
-} from '@/Settings/components/CreateFieldMapForm';
-import { useListFieldMapsContext } from '@/Settings/contexts/ListFieldMapsContext';
-import { useCreateFieldMap } from '@/Settings/hooks/useCreateFieldMap';
-import { FieldMap } from '@/Settings/hooks/useCreateFieldMap/types';
+} from '@/core/components/CreateFieldMapForm';
+import { Drawer } from '@/core/components/Drawer';
+import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
+import { useCreateFieldMap } from '@/core/hooks/useCreateFieldMap';
+import { FieldMap } from '@/core/hooks/useCreateFieldMap/types';
+import { cn } from '@/core/utils/style';
 import { IconPlus } from '@dfe/icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
