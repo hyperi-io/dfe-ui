@@ -74,42 +74,52 @@ export const CreateUpdateSourceFormBase = ({
       layout="vertical"
       {...props}
     >
-      <div className="flex gap-x-2">
+      <SimpleCollapse
+        classNames={{
+          container: 'pt-0',
+          content: 'flex gap-2 flex flex-col flex-wrap w-full',
+          title: 'font-semibold',
+        }}
+        title="Source Details"
+        defaultOpen={true}
+      >
+        <div className="flex gap-x-2">
+          <Form.Item
+            className="w-full"
+            name="source"
+            label="Source"
+            rules={[formValidation]}
+          >
+            <Input
+              placeholder="Enter source"
+              disabled={!!disabledFields?.source}
+            />
+          </Form.Item>
+          <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
+            <Switch />
+          </Form.Item>
+        </div>
+
         <Form.Item
-          className="w-full"
-          name="source"
-          label="Source"
+          name="display_name"
+          label="Display Name"
           rules={[formValidation]}
         >
-          <Input
-            placeholder="Enter source"
-            disabled={!!disabledFields?.source}
-          />
+          <Input placeholder="Enter display name" />
         </Form.Item>
-        <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
-          <Switch />
+
+        <Form.Item
+          name="description"
+          label="Description"
+          rules={[formValidation]}
+        >
+          <Input.TextArea placeholder="Enter description" />
         </Form.Item>
-      </div>
-
-      <Form.Item
-        name="display_name"
-        label="Display Name"
-        rules={[formValidation]}
-      >
-        <Input placeholder="Enter display name" />
-      </Form.Item>
-
-      <Form.Item
-        name="description"
-        label="Description"
-        rules={[formValidation]}
-      >
-        <Input.TextArea placeholder="Enter description" />
-      </Form.Item>
+      </SimpleCollapse>
 
       <SimpleCollapse
         classNames={{
-          container: 'pt-0 flex gap-2 justify',
+          container: 'pt-0 flex gap-2',
           content: 'flex gap-2',
           title: 'font-semibold',
         }}
@@ -189,24 +199,16 @@ export const CreateUpdateSourceFormBase = ({
       <SimpleCollapse
         classNames={{
           container: 'pt-0',
-          content: 'flex gap-2',
           title: 'font-semibold',
         }}
-        title="Receiver Routing"
+        title="Source Type"
         defaultOpen={false}
       >
+        <p className="text-sm text-error font-bold">
+          Progressive disclosure: Select source type (receiver/fetcher/custom
+          topic)
+        </p>
         <p className="text-sm text-error font-bold">TODO: Match form items</p>
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Fetcher Configuration"
-        defaultOpen={false}
-      >
         <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
       </SimpleCollapse>
 
