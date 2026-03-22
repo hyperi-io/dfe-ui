@@ -2,13 +2,7 @@
 
 import { cn } from '@/core/utils/style';
 import { IconChevronDown, IconChevronUp } from '@dfe/icons';
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useState, type ReactNode } from 'react';
 
 export interface SimpleCollapseRenderProps {
   setOpen: (open: boolean) => void;
@@ -36,20 +30,7 @@ export const SimpleCollapse = ({
   const collapseProps: SimpleCollapseRenderProps = { setOpen };
 
   const content =
-    typeof children === 'function'
-      ? children(collapseProps)
-      : (() => {
-          const childCount = Children.count(children);
-          return childCount === 1 &&
-            isValidElement(Children.toArray(children)[0])
-            ? cloneElement(
-                Children.toArray(children)[0] as React.ReactElement<{
-                  setOpen?: (open: boolean) => void;
-                }>,
-                { setOpen },
-              )
-            : children;
-        })();
+    typeof children === 'function' ? children(collapseProps) : children;
 
   return (
     <div
