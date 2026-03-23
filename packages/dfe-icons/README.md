@@ -1,4 +1,4 @@
-# @dfe/icons
+# @repo/dfe-icons
 
 React icon components built from [Tabler Icons](https://tabler.io/icons) SVG source, with support for adding custom icons alongside the upstream set.
 
@@ -18,7 +18,7 @@ Source directories are auto-discovered. The upstream Tabler icons live in `svg/o
 ## Usage
 
 ```tsx
-import { IconZoom, IconAlarmFilled, IconFileTypeYml } from '@dfe/icons';
+import { IconZoom, IconAlarmFilled, IconFileTypeYml } from '@repo/dfe-icons';
 
 function Example() {
   return (
@@ -45,7 +45,7 @@ Every component is a `React.forwardRef` wrapping an `<svg>` element, so it accep
 3. Import the new component by its PascalCase name:
 
    ```tsx
-   import { IconMyNewIcon } from '@dfe/icons';
+   import { IconMyNewIcon } from '@repo/dfe-icons';
    ```
 
 The SVG should follow the same 24×24 viewBox convention used by Tabler:

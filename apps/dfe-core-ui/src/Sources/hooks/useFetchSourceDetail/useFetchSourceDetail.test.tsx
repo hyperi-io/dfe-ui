@@ -1,5 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@dfe/dfe-engine-types';
+import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchSourceDetail } from '.';

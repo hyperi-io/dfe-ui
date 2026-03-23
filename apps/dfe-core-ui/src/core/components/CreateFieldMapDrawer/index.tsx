@@ -7,7 +7,7 @@ import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useCreateFieldMap } from '@/core/hooks/useCreateFieldMap';
 import { FieldMap } from '@/core/hooks/useCreateFieldMap/types';
 import { cn } from '@/core/utils/style';
-import { IconPlus } from '@dfe/icons';
+import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 

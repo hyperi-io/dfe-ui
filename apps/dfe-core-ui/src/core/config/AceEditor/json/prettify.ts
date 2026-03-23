@@ -1,4 +1,4 @@
-import { devLogger } from '@dfe/dev-logger';
+import { devLogger } from '@repo/dev-logger';
 
 interface PrettifyJSONProps {
   value: string;

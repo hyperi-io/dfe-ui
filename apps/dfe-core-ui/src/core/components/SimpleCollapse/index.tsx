@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/core/utils/style';
-import { IconChevronDown, IconChevronUp } from '@dfe/icons';
+import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { useState, type ReactNode } from 'react';
 
 export interface SimpleCollapseRenderProps {

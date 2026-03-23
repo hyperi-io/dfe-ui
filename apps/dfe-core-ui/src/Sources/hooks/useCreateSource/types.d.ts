@@ -1,4 +1,4 @@
-import { components } from '@dfe/dfe-engine-types';
+import { components } from '@repo/dfe-engine-types';
 
 export type SourceCreateRequestBody = {
   source: string;

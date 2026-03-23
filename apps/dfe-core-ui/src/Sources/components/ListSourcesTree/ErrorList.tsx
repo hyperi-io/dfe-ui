@@ -1,5 +1,5 @@
 import { cn } from '@/core/utils/style';
-import { IconAlertCircle } from '@dfe/icons';
+import { IconAlertCircle } from '@repo/dfe-icons';
 
 export const ErrorList = ({
   message,

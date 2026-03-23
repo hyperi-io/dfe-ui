@@ -1,6 +1,6 @@
+import { IconSettings, IconUser } from '@repo/dfe-icons';
 import type { Meta, StoryObj } from '@storybook/react';
 import { IconWrapper } from './index';
-import { IconUser, IconSettings } from '@dfe/icons';
 
 const meta: Meta<typeof IconWrapper> = {
   title: 'Core/IconWrapper',

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { components } from '@dfe/dfe-engine-types';
+import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
 const DEFAULT_VALIDATION_ERROR = {

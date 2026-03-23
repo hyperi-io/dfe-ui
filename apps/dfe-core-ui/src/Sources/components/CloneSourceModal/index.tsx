@@ -6,7 +6,7 @@ import type { SourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { IconCopy } from '@dfe/icons';
+import { IconCopy } from '@repo/dfe-icons';
 import { Button, Input, Modal, Switch } from 'antd';
 import { useState } from 'react';
 import z from 'zod';

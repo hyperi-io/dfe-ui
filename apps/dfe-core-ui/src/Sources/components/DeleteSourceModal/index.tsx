@@ -1,7 +1,7 @@
 import { useDeleteSource } from '@/Sources/hooks/useDeleteSource';
 
 import { FormNotification } from '@/core/components/FormNotification';
-import { IconTrash } from '@dfe/icons';
+import { IconTrash } from '@repo/dfe-icons';
 import { Button, Modal } from 'antd';
 import { useState } from 'react';
 

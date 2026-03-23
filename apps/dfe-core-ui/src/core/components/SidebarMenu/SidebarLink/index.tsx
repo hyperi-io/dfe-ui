@@ -1,5 +1,5 @@
 import { cn } from '@/core/utils/style';
-import type { IconComponent } from '@dfe/icons';
+import type { IconComponent } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 import Link from 'next/link';
 

@@ -1,5 +1,5 @@
 import { ContentCard } from '@/core/components/ContentCard';
-import { IconChevronDown, IconChevronUp } from '@dfe/icons';
+import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, Form, FormRule, Input, Switch } from 'antd';
 import { useState } from 'react';
 
