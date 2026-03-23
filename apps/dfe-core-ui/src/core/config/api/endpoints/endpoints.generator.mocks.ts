@@ -293,8 +293,39 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/services',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                service: 'string',
+                instance: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_ServiceConfigSummary_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
