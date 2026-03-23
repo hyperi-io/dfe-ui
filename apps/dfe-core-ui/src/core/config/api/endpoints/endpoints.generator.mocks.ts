@@ -332,8 +332,47 @@ export const API_CONFIG_MOCKS = Object.freeze({
     instance: {
       mockedUrl: '/api/v1/services/{service}/{instance}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            service: 'service',
+            instance: 'instance',
+            updated_at: '2021-01-01T00:00:00Z',
+          },
+          service = 'service',
+          instance = 'instance',
+        }: {
+          mockedResponse?: object;
+          service?: string;
+          instance?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.services.instance.mockedUrl
+              .replace('{service}', service)
+              .replace('{instance}', instance),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          service = 'string',
+          instance = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          service?: string;
+          instance?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.services.instance.mockedUrl
+              .replace('{service}', service)
+              .replace('{instance}', instance),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       put: {
