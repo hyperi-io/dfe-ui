@@ -1,7 +1,9 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { useMutation } from '@tanstack/react-query';
-import { SourceUpdateRequestBody, SourceUpdateResponse } from './types';
+import { transformSourceFormDataToRequestBody } from './helpers';
+import { SourceUpdateResponse } from './types';
 
 interface UseUpdateSourceProps {
   onSuccess?: (data: SourceUpdateResponse) => void;
@@ -13,11 +15,13 @@ export const useUpdateSource = ({
   onError,
 }: UseUpdateSourceProps = {}) => {
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: (source: SourceUpdateRequestBody) =>
-      apiClient.put(API_CONFIG.sources.source, {
-        body: source,
+    mutationFn: (source: CreateUpdateSourceFormData) => {
+      const transformedSource = transformSourceFormDataToRequestBody(source);
+      return apiClient.put(API_CONFIG.sources.source, {
+        body: transformedSource,
         pathParams: { name: source.source },
-      }),
+      });
+    },
     onSuccess: (data) => {
       onSuccess?.(data);
     },

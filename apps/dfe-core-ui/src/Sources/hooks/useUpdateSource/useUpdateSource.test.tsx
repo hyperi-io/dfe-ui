@@ -11,8 +11,9 @@ import {
   test,
   vi,
 } from 'vitest';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { useUpdateSource } from '.';
-import { SourceUpdateRequestBody, SourceUpdateResponse } from './types';
+import { SourceUpdateResponse } from './types';
 import { server } from './useUpdateSource.mocks';
 
 beforeAll(() =>
@@ -26,14 +27,26 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateSource', () => {
-  const requestBody: SourceUpdateRequestBody = {
+  const requestBody: CreateUpdateSourceFormData = {
     source: 'source',
     display_name: 'string',
     description: 'string',
     enabled: true,
-    header_type: 'string',
-    has_transform: false,
-    has_fetcher: false,
+    header: {
+      type: 'string',
+      version: 'string',
+    },
+    fetcher: {
+      source_type: 'string',
+      base_url: 'string',
+      auth: {
+        type: 'string',
+        token_url: 'string',
+        client_id: 'string',
+        client_secret: 'string',
+      },
+      poll_interval_secs: 0,
+    },
     mapping_standards: ['string'],
   };
   describe('onSuccess', () => {
