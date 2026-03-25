@@ -1,4 +1,4 @@
-import type { paths } from '@dfe/dfe-engine-types';
+import type { paths } from '@repo/dfe-engine-types';
 
 export const API_CONFIG = Object.freeze({
   auth: {

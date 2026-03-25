@@ -1,4 +1,4 @@
-import { IconUser } from '@dfe/icons';
+import { IconUser } from '@repo/dfe-icons';
 import { Button, Popover } from 'antd';
 import { UserActionsPopoverContent } from './UserActionsPopoverContent';
 

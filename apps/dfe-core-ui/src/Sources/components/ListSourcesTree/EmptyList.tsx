@@ -1,7 +1,7 @@
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
 import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
-import { IconInfoCircle } from '@dfe/icons';
+import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 export const EmptyList = ({

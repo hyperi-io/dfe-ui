@@ -18,6 +18,11 @@ export const SettingsToolbarBase = () => {
       label: 'Field Maps',
       disabled: false,
     },
+    {
+      path: '/settings/services',
+      label: 'Services',
+      disabled: false,
+    },
   ];
 
   const isSelected = (path: string) => pathname === path;

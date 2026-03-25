@@ -5,35 +5,19 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
-import z from 'zod';
+import {
+  formSchema,
+  type CreateUpdateSourceFormData,
+} from './sourceForm.schema';
+import { SourceTypeProgressiveDisclosure } from './SourceTypeProgressiveDisclosure';
 
-const formSchema = z.object({
-  source: sourceNameValidator,
-  display_name: z.string().min(1, { message: 'Display name is required' }),
-  description: z.string().nullable().optional(),
-  enabled: z.boolean().optional(),
-  'header.type': z.string().nullable().optional(),
-  'header.version': z.string().nullable().optional(),
-  match: z.string().nullable().optional(),
-  'schema.meta_schema': z.string().nullable().optional(),
-  'schema.meta_schema_version': z.string().nullable().optional(),
-  'schema.derived_schema': z.string().nullable().optional(),
-  'schema.additional_fields': z.array(z.string()).nullable().optional(),
-  'schema.ttl_days': z.number().nullable().optional(),
-  'schema.engine': z.string().nullable().optional(),
-  transform: z.boolean().optional(),
-  fetcher: z.boolean().optional(),
-  sigma: z.string().nullable().optional(),
-  mapping_standards: z.array(z.string()).optional(),
-});
-
-export type CreateUpdateSourceFormData = z.infer<typeof formSchema>;
+export { formSchema, type CreateUpdateSourceFormData };
 
 type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   onFinish: (values: CreateUpdateSourceFormData) => void;
+  initialValues?: CreateUpdateSourceFormData;
   isPending: boolean;
   error: Error | null;
   resetFormFields?: boolean;
@@ -195,7 +179,6 @@ export const CreateUpdateSourceFormBase = ({
         </Form.Item>
       </SimpleCollapse>
 
-      {/*  Source Type*/}
       <SimpleCollapse
         classNames={{
           container: 'pt-0',
@@ -204,12 +187,10 @@ export const CreateUpdateSourceFormBase = ({
         title="Source Type"
         defaultOpen={false}
       >
-        <p className="text-sm text-error font-bold">
-          Progressive disclosure: Select source type (receiver/fetcher/custom
-          topic)
-        </p>
-        <p className="text-sm text-error font-bold">TODO: Match form items</p>
-        <p className="text-sm text-error font-bold">TODO: Fetcher form items</p>
+        <SourceTypeProgressiveDisclosure
+          formValidation={formValidation}
+          form={form}
+        />
       </SimpleCollapse>
 
       <SimpleCollapse

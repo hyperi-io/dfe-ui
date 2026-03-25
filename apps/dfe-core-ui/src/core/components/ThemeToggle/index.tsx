@@ -1,6 +1,6 @@
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { cn } from '@/core/utils/style';
-import { IconMoon, IconSun } from '@dfe/icons';
+import { IconMoon, IconSun } from '@repo/dfe-icons';
 import { Button, Tooltip } from 'antd';
 
 interface ThemeToggleProps {

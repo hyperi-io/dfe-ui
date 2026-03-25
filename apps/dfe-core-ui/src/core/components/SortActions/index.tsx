@@ -1,5 +1,5 @@
 import { cn } from '@/core/utils/style';
-import { IconSortAscending, IconSortDescending } from '@dfe/icons';
+import { IconSortAscending, IconSortDescending } from '@repo/dfe-icons';
 import { Button, Select } from 'antd';
 import { startTransition, useEffect, useState } from 'react';
 
