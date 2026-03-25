@@ -1,3 +1,4 @@
+import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceRequestBodyToFormData } from './transformSourceRequestBodyToFormData';
 
@@ -27,6 +28,39 @@ describe('transformSourceInitialValues', () => {
         },
         poll_interval_secs: 300,
       },
+    });
+  });
+
+  test('when fetcher is an empty object, should return fetcher: null', () => {
+    const source: SourceDetail = {
+      source: 'source',
+      display_name: 'display name',
+      enabled: false,
+      // @ts-expect-error - test case
+      fetcher: {},
+    };
+    const result = transformSourceRequestBodyToFormData(source);
+    expect(result).toEqual({
+      source: 'source',
+      display_name: 'display name',
+      enabled: false,
+      fetcher: null,
+    });
+  });
+
+  test('when fetcher is null, should return fetcher: null', () => {
+    const source: SourceDetail = {
+      source: 'source',
+      display_name: 'display name',
+      enabled: false,
+      fetcher: null,
+    };
+    const result = transformSourceRequestBodyToFormData(source);
+    expect(result).toEqual({
+      source: 'source',
+      display_name: 'display name',
+      enabled: false,
+      fetcher: null,
     });
   });
 });

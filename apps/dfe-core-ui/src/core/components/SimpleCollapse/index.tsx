@@ -18,6 +18,7 @@ interface SimpleCollapseProps {
     title?: string;
     content?: string;
   };
+  destroyOnClose?: boolean;
 }
 export const SimpleCollapse = ({
   title,
@@ -25,6 +26,7 @@ export const SimpleCollapse = ({
   children,
   defaultOpen = false,
   classNames,
+  destroyOnClose = false,
 }: SimpleCollapseProps) => {
   const [open, setOpen] = useState(defaultOpen);
   const collapseProps: SimpleCollapseRenderProps = { setOpen };
@@ -59,6 +61,11 @@ export const SimpleCollapse = ({
         </span>
       </button>
       {open && <div className={classNames?.content}>{content}</div>}
+      {!destroyOnClose && !open && (
+        <div aria-hidden={true} className={cn(classNames?.content, 'hidden')}>
+          {content}
+        </div>
+      )}
     </div>
   );
 };

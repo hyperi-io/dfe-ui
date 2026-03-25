@@ -30,15 +30,21 @@ export const transformSourceRequestBodyToFormData = (
           config_file: source?.transform?.config_file ?? null,
         }
       : undefined,
-    fetcher: {
-      ...source?.fetcher,
-      base_url: source?.fetcher?.base_url ?? '',
-      poll_interval_secs: source?.fetcher?.poll_interval_secs ?? 0,
-      auth: {
-        ...source?.fetcher?.auth,
-        type: source?.fetcher?.auth ? source?.fetcher?.auth?.type : 'none',
-      },
-    },
+    // If the fetcher is present it transforms the auth type to none if it is null
+    fetcher:
+      Object.keys(source?.fetcher ?? {}).length > 0
+        ? {
+            ...source?.fetcher,
+            base_url: source?.fetcher?.base_url ?? '',
+            poll_interval_secs: source?.fetcher?.poll_interval_secs ?? 0,
+            auth: {
+              ...source?.fetcher?.auth,
+              type: source?.fetcher?.auth
+                ? source?.fetcher?.auth?.type
+                : 'none',
+            },
+          }
+        : null,
   };
   return transformedSource;
 };
