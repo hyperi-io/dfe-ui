@@ -5,6 +5,7 @@ import {
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
+import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
@@ -33,7 +34,8 @@ export const CreateSourceDrawer = () => {
     },
   });
   const handleCreateSource = (values: CreateUpdateSourceFormData) => {
-    createSourceMutation(values);
+    const transformedValues = transformSourceFormDataToRequestBody(values);
+    createSourceMutation(transformedValues);
   };
   return (
     <>

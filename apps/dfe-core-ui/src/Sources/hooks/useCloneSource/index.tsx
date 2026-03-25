@@ -1,8 +1,6 @@
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
-import {
-  SourceCreateRequestBody,
-  SourceCreateResponse,
-} from '@/Sources/hooks/useCreateSource/types';
+import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 
 export const useCloneSource = ({
@@ -33,17 +31,18 @@ export const useCloneSource = ({
 
   const handleMutate = (
     values: Pick<
-      SourceCreateRequestBody,
+      CreateUpdateSourceFormData,
       'source' | 'display_name' | 'enabled'
     >,
   ) => {
     if (!sourceDetailData?.source) {
       throw new Error('Unable to clone source');
     }
-    const body: SourceCreateRequestBody = {
+    const body = {
       ...sourceDetailData,
       ...values,
     };
+
     mutate(body);
   };
 

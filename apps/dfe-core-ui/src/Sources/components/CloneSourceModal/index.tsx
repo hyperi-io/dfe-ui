@@ -14,6 +14,7 @@ import z from 'zod';
 const formSchema = z.object({
   source: sourceNameValidator,
   display_name: z.string().min(1, { message: 'Display name is required' }),
+  enabled: z.boolean({ message: 'Enabled is required' }),
 });
 
 type FormData = z.infer<typeof formSchema>;

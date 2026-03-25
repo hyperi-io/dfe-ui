@@ -5,83 +5,19 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
 import { useEffect } from 'react';
-import z from 'zod';
-import { transformSourceInitialValues } from './helpers';
+import {
+  formSchema,
+  type CreateUpdateSourceFormData,
+} from './sourceForm.schema';
 import { SourceTypeProgressiveDisclosure } from './SourceTypeProgressiveDisclosure';
 
-const formSchema = z.object({
-  source: sourceNameValidator,
-  display_name: z
-    .string({ message: 'Display name is required' })
-    .min(1, { message: 'Display name is required' }),
-  description: z.string().optional(),
-  enabled: z.boolean().optional(),
-  header: z
-    .object({
-      type: z.string().optional(),
-      version: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-  match: z
-    .object({
-      field: z.string().optional(),
-      value: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-  schema: z
-    .object({
-      meta_schema: z.string().optional(),
-      meta_schema_version: z.string().optional(),
-      derived_schema: z.string().optional(),
-      additional_fields: z.array(z.string()).optional(),
-      ttl_days: z.number().optional(),
-      engine: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-  transform: z
-    .object({
-      engine: z.string().optional(),
-      config_file: z.string().optional(),
-      env: z.record(z.string(), z.string()).optional(),
-      files: z.array(z.string()).optional(),
-    })
-    .nullable()
-    .optional(),
-  fetcher: z
-    .object({
-      source_type: z.string().optional(),
-      base_url: z.string().optional(),
-      auth: z
-        .object({
-          type: z.string().optional(),
-          token_url: z.string().optional(),
-          client_id: z.string().optional(),
-          client_secret: z.string().optional(),
-          api_key: z.string().optional(),
-          bearer_token: z.string().optional(),
-          username: z.string().optional(),
-          password: z.string().optional(),
-        })
-        .optional(),
-      poll_interval_secs: z.number().optional(),
-    })
-    .nullable()
-    .optional(),
-  mapping_standards: z.array(z.string()).optional(),
-});
-
-export type CreateUpdateSourceFormData = z.infer<typeof formSchema>;
+export { formSchema, type CreateUpdateSourceFormData };
 
 type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   onFinish: (values: CreateUpdateSourceFormData) => void;
-  initialValues?: SourceDetail;
+  initialValues?: CreateUpdateSourceFormData;
   isPending: boolean;
   error: Error | null;
   resetFormFields?: boolean;
@@ -114,13 +50,11 @@ export const CreateUpdateSourceFormBase = ({
     }
   }, [resetFormFields, form]);
 
-  const transformedInitialValues = transformSourceInitialValues(initialValues);
-
   return (
     <Form
       form={form}
       onFinish={onFinish}
-      initialValues={transformedInitialValues}
+      initialValues={initialValues}
       layout="vertical"
       {...props}
     >
