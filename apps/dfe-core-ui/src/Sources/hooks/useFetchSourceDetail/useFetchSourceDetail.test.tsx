@@ -23,7 +23,7 @@ describe('.useFetchSourceDetail', () => {
         { wrapper },
       );
 
-      const response: components['schemas']['Source'] = {
+      const response: components['schemas']['Source-Output'] = {
         source: 'source',
         enabled: true,
         display_name: 'string',

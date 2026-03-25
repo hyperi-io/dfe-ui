@@ -183,7 +183,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['Source'];
+          mockedResponse?: components['schemas']['Source-Output'];
           name?: string;
         } = {}) => {
           return http.get(
