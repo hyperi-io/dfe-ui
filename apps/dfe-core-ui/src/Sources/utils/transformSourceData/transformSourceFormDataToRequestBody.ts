@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { SourceUpdateRequestBody } from './types';
+import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 
 /*
  * Transforms the source form data to a request body for the update source API.
@@ -13,17 +13,18 @@ import { SourceUpdateRequestBody } from './types';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): SourceUpdateRequestBody => {
-  return {
-    ...source,
+  const { fetcher, ...rest } = source;
+  const transformedSource: SourceUpdateRequestBody = {
+    ...rest,
     fetcher:
-      Object.keys(source?.fetcher ?? {}).length > 0
+      Object.keys(fetcher ?? {}).length > 0
         ? {
-            ...source?.fetcher,
-            auth:
-              source?.fetcher?.auth?.type === 'none'
-                ? null
-                : source?.fetcher?.auth,
+            ...fetcher,
+            auth: fetcher?.auth?.type === 'none' ? null : fetcher?.auth,
+            source_type: fetcher?.source_type ?? '',
+            poll_interval_secs: fetcher?.poll_interval_secs ?? 0,
           }
         : null,
   };
+  return transformedSource;
 };

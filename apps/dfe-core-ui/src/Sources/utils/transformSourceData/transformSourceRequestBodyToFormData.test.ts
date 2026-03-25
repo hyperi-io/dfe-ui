@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { transformSourceInitialValues } from './helpers';
+import { transformSourceRequestBodyToFormData } from './transformSourceRequestBodyToFormData';
 
 describe('transformSourceInitialValues', () => {
   test('when fetcher.auth is null, should return fetcher.auth.type: none', () => {
@@ -14,7 +14,7 @@ describe('transformSourceInitialValues', () => {
         poll_interval_secs: 300,
       },
     };
-    const result = transformSourceInitialValues(source);
+    const result = transformSourceRequestBodyToFormData(source);
     expect(result).toEqual({
       source: 'source',
       display_name: 'display name',
