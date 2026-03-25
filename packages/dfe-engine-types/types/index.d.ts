@@ -885,6 +885,28 @@ export interface components {
             api_key?: string | null;
         };
         /**
+         * FieldError
+         * @description A validation error on a specific field.
+         */
+        FieldError: {
+            /**
+             * Field
+             * @description Dotted path to the invalid field
+             */
+            field: string;
+            /**
+             * Message
+             * @description Human-readable error message
+             */
+            message: string;
+            /**
+             * Code
+             * @description Machine-readable error code
+             * @default validation_error
+             */
+            code: string;
+        };
+        /**
          * FieldMap
          * @description A mapping from a detection/analytics standard's fields to DFE columns.
          *
@@ -973,6 +995,51 @@ export interface components {
              */
             password: string;
         };
+        /**
+         * MatchConflictContext
+         * @description Structured context for duplicate receiver match (field + value).
+         */
+        MatchConflictContext: {
+            /**
+             * Source
+             * @description Source identifier being saved
+             */
+            source: string;
+            /**
+             * Conflicting Source
+             * @description Other enabled source that already uses this (field, value) pair
+             */
+            conflicting_source: string;
+            /**
+             * Field
+             * @description Receiver match JSON field name
+             */
+            field: string;
+            /**
+             * Value
+             * @description Receiver match expected value
+             */
+            value: string;
+        };
+        /**
+         * MatchConflictErrorResponse
+         * @description 409 when two enabled sources share the same receiver match rule.
+         */
+        MatchConflictErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            code: "match_conflict";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["MatchConflictContext"];
+        };
         /** PaginatedResponse[AlertDestinationSummary] */
         PaginatedResponse_AlertDestinationSummary_: {
             /** Items */
@@ -995,7 +1062,7 @@ export interface components {
             /** Total Pages */
             readonly total_pages: number;
             /** Next Page */
-            readonly next_page: number | null;
+            readonly next_page: number | string;
             /** Prev Page */
             readonly prev_page: number | null;
         };
@@ -1434,6 +1501,24 @@ export interface components {
              * @description Expected value (exact match)
              */
             value: string;
+        };
+        /**
+         * SourceNameConflictErrorResponse
+         * @description 409 when POST /sources and the source name already exists.
+         */
+        SourceNameConflictErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            code: "conflict";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
         };
         /**
          * SourceResponse
@@ -1898,6 +1983,15 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
+            /** @description Source name already exists (code conflict), or receiver match duplicates another enabled source (code match_conflict) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -1962,6 +2056,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description Receiver match duplicates another enabled source */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
