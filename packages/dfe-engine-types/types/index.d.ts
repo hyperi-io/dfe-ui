@@ -99,7 +99,7 @@ export interface paths {
         put?: never;
         /**
          * Create Source
-         * @description Create a new source from a source definition dict.
+         * @description Create a new source from a source definition.
          */
         post: operations["create_source_api_v1_sources_post"];
         delete?: never;
@@ -1288,7 +1288,56 @@ export interface components {
          *
          *     See docs/SOURCE.md for the full specification.
          */
-        Source: {
+        "Source-Input": {
+            /**
+             * Source
+             * @description The _source label — immutable identifier
+             */
+            source: string;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * Enabled
+             * @description Whether the source is active
+             * @default true
+             */
+            enabled: boolean;
+            /** @description Common schema header configuration */
+            header?: components["schemas"]["SourceHeader"];
+            /** @description Receiver match rule */
+            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Schema configuration */
+            schema?: components["schemas"]["SourceSchema"];
+            /** @description Transform stage (optional) */
+            transform?: components["schemas"]["SourceTransform"] | null;
+            /** @description SaaS API fetcher (optional) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Sigma field mappings (optional) */
+            sigma?: components["schemas"]["SourceSigma"] | null;
+            /**
+             * Mapping Standards
+             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
+             */
+            mapping_standards?: string[];
+        };
+        /**
+         * Source
+         * @description The top-level data entity in the DFE platform.
+         *
+         *     A Source represents a distinct data stream entering the platform.
+         *     Everything flows from the _source label.
+         *
+         *     See docs/SOURCE.md for the full specification.
+         */
+        "Source-Output": {
             /**
              * Source
              * @description The _source label — immutable identifier
@@ -1836,9 +1885,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
+                "application/json": components["schemas"]["Source-Input"];
             };
         };
         responses: {
@@ -1879,7 +1926,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Source"];
+                    "application/json": components["schemas"]["Source-Output"];
                 };
             };
             /** @description Validation Error */
@@ -1904,9 +1951,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
+                "application/json": components["schemas"]["Source-Input"];
             };
         };
         responses: {
