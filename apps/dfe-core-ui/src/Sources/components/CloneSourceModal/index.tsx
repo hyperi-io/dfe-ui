@@ -6,7 +6,7 @@ import type { SourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { IconCopy } from '@dfe/icons';
+import { IconCopy } from '@repo/dfe-icons';
 import { Button, Input, Modal, Switch } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
@@ -14,6 +14,7 @@ import z from 'zod';
 const formSchema = z.object({
   source: sourceNameValidator,
   display_name: z.string().min(1, { message: 'Display name is required' }),
+  enabled: z.boolean({ message: 'Enabled is required' }),
 });
 
 type FormData = z.infer<typeof formSchema>;

@@ -6,7 +6,7 @@ import {
   IconLayoutGrid,
   IconTable,
   IconShieldCheck as SafetyCertificateOutlined,
-} from '@dfe/icons';
+} from '@repo/dfe-icons';
 
 interface SidebarMenuProps {
   collapsed: boolean;

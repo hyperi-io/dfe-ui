@@ -1,14 +1,8 @@
 'use client';
 
 import { cn } from '@/core/utils/style';
-import { IconChevronDown, IconChevronUp } from '@dfe/icons';
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useState,
-  type ReactNode,
-} from 'react';
+import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
+import { useState, type ReactNode } from 'react';
 
 export interface SimpleCollapseRenderProps {
   setOpen: (open: boolean) => void;
@@ -24,6 +18,7 @@ interface SimpleCollapseProps {
     title?: string;
     content?: string;
   };
+  destroyOnClose?: boolean;
 }
 export const SimpleCollapse = ({
   title,
@@ -31,25 +26,13 @@ export const SimpleCollapse = ({
   children,
   defaultOpen = false,
   classNames,
+  destroyOnClose = false,
 }: SimpleCollapseProps) => {
   const [open, setOpen] = useState(defaultOpen);
   const collapseProps: SimpleCollapseRenderProps = { setOpen };
 
   const content =
-    typeof children === 'function'
-      ? children(collapseProps)
-      : (() => {
-          const childCount = Children.count(children);
-          return childCount === 1 &&
-            isValidElement(Children.toArray(children)[0])
-            ? cloneElement(
-                Children.toArray(children)[0] as React.ReactElement<{
-                  setOpen?: (open: boolean) => void;
-                }>,
-                { setOpen },
-              )
-            : children;
-        })();
+    typeof children === 'function' ? children(collapseProps) : children;
 
   return (
     <div
@@ -78,6 +61,11 @@ export const SimpleCollapse = ({
         </span>
       </button>
       {open && <div className={classNames?.content}>{content}</div>}
+      {!destroyOnClose && !open && (
+        <div aria-hidden={true} className={cn(classNames?.content, 'hidden')}>
+          {content}
+        </div>
+      )}
     </div>
   );
 };

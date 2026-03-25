@@ -1,4 +1,4 @@
-import { IconDeviceFloppy } from '@dfe/icons';
+import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, Form } from 'antd';
 import { useEffect } from 'react';
 

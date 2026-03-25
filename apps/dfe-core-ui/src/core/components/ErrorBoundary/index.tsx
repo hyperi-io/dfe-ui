@@ -1,5 +1,5 @@
 import { GenericErrorPage } from '@/core/components/GenericError';
-import { devLogger } from '@dfe/dev-logger';
+import { devLogger } from '@repo/dev-logger';
 import * as React from 'react';
 
 interface ErrorBoundaryState {

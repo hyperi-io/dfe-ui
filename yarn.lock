@@ -1488,42 +1488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dfe/dev-logger@npm:*, @dfe/dev-logger@workspace:packages/dev-logger":
-  version: 0.0.0-use.local
-  resolution: "@dfe/dev-logger@workspace:packages/dev-logger"
-  dependencies:
-    "@repo/typescript-config": "workspace:*"
-    typescript: "npm:5.9.2"
-  languageName: unknown
-  linkType: soft
-
-"@dfe/dfe-engine-types@npm:*, @dfe/dfe-engine-types@workspace:packages/dfe-engine-types":
-  version: 0.0.0-use.local
-  resolution: "@dfe/dfe-engine-types@workspace:packages/dfe-engine-types"
-  dependencies:
-    openapi-typescript: "npm:^7.13.0"
-    typescript: "npm:^5.9.2"
-  languageName: unknown
-  linkType: soft
-
-"@dfe/icons@npm:*, @dfe/icons@workspace:packages/dfe-icons":
-  version: 0.0.0-use.local
-  resolution: "@dfe/icons@workspace:packages/dfe-icons"
-  dependencies:
-    "@repo/typescript-config": "workspace:*"
-    "@storybook/react": "npm:^10.2.15"
-    "@storybook/react-vite": "npm:^10.2.15"
-    "@svgr/cli": "npm:^8.1.0"
-    "@types/react": "npm:19.2.2"
-    "@types/react-dom": "npm:19.2.2"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
-    storybook: "npm:^10.2.15"
-    typescript: "npm:5.9.2"
-    vite: "npm:^7.3.1"
-  languageName: unknown
-  linkType: soft
-
 "@emnapi/core@npm:^1.4.3, @emnapi/core@npm:^1.7.1, @emnapi/core@npm:^1.8.1":
   version: 1.8.1
   resolution: "@emnapi/core@npm:1.8.1"
@@ -3143,6 +3107,42 @@ __metadata:
   checksum: 10c0/325c548448dacfa5650dd315b14fbc71dedfc1ca137d071dceb023d0eae65386dc7ab460d28da3d41d4ab05797c64e44a04ebbffb93c15c8e9b03d5fd4b2d05b
   languageName: node
   linkType: hard
+
+"@repo/dev-logger@npm:*, @repo/dev-logger@workspace:packages/dev-logger":
+  version: 0.0.0-use.local
+  resolution: "@repo/dev-logger@workspace:packages/dev-logger"
+  dependencies:
+    "@repo/typescript-config": "workspace:*"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@repo/dfe-engine-types@npm:*, @repo/dfe-engine-types@workspace:packages/dfe-engine-types":
+  version: 0.0.0-use.local
+  resolution: "@repo/dfe-engine-types@workspace:packages/dfe-engine-types"
+  dependencies:
+    openapi-typescript: "npm:^7.13.0"
+    typescript: "npm:^5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@repo/dfe-icons@npm:*, @repo/dfe-icons@workspace:packages/dfe-icons":
+  version: 0.0.0-use.local
+  resolution: "@repo/dfe-icons@workspace:packages/dfe-icons"
+  dependencies:
+    "@repo/typescript-config": "workspace:*"
+    "@storybook/react": "npm:^10.2.15"
+    "@storybook/react-vite": "npm:^10.2.15"
+    "@svgr/cli": "npm:^8.1.0"
+    "@types/react": "npm:19.2.2"
+    "@types/react-dom": "npm:19.2.2"
+    react: "npm:^19.2.0"
+    react-dom: "npm:^19.2.0"
+    storybook: "npm:^10.2.15"
+    typescript: "npm:5.9.2"
+    vite: "npm:^7.3.1"
+  languageName: unknown
+  linkType: soft
 
 "@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
@@ -6428,9 +6428,9 @@ __metadata:
   dependencies:
     "@ant-design/cssinjs": "npm:^2.1.2"
     "@ant-design/nextjs-registry": "npm:^1.3.0"
-    "@dfe/dev-logger": "npm:*"
-    "@dfe/dfe-engine-types": "npm:*"
-    "@dfe/icons": "npm:*"
+    "@repo/dev-logger": "npm:*"
+    "@repo/dfe-engine-types": "npm:*"
+    "@repo/dfe-icons": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@storybook/nextjs": "npm:^10.2.15"
     "@storybook/react": "npm:^10.2.15"

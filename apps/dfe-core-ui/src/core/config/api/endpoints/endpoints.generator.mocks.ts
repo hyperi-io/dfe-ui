@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { components } from '@dfe/dfe-engine-types';
+import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
 const DEFAULT_VALIDATION_ERROR = {
@@ -183,7 +183,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['Source'];
+          mockedResponse?: components['schemas']['Source-Output'];
           name?: string;
         } = {}) => {
           return http.get(
@@ -293,16 +293,86 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/services',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                service: 'string',
+                instance: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_ServiceConfigSummary_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
     instance: {
       mockedUrl: '/api/v1/services/{service}/{instance}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            service: 'service',
+            instance: 'instance',
+            updated_at: '2021-01-01T00:00:00Z',
+          },
+          service = 'service',
+          instance = 'instance',
+        }: {
+          mockedResponse?: object;
+          service?: string;
+          instance?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.services.instance.mockedUrl
+              .replace('{service}', service)
+              .replace('{instance}', instance),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          service = 'string',
+          instance = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          service?: string;
+          instance?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.services.instance.mockedUrl
+              .replace('{service}', service)
+              .replace('{instance}', instance),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       put: {

@@ -1,7 +1,7 @@
 import { Modal } from '@/core/components/Modal';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { IconAlertCircle } from '@dfe/icons';
+import { IconAlertCircle } from '@repo/dfe-icons';
 import { useState } from 'react';
 
 interface ResponsePopoverProps {

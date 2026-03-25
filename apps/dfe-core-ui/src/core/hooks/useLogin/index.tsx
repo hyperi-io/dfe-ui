@@ -1,4 +1,4 @@
-import { components } from '@dfe/dfe-engine-types';
+import { components } from '@repo/dfe-engine-types';
 import { useMutation } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';

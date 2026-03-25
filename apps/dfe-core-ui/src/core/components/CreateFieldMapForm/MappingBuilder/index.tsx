@@ -1,5 +1,5 @@
 import { Form } from '@/core/components/Form';
-import { IconPlus, IconTrash } from '@dfe/icons';
+import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input } from 'antd';
 
 export const MappingBuilder = ({

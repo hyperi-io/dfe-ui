@@ -2,7 +2,7 @@ import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { UseFetchInfiniteFilteredFieldMapsProps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
-import { IconInfoCircle } from '@dfe/icons';
+import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 export const EmptyList = ({

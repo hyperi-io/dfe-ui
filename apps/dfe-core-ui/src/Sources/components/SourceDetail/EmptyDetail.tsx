@@ -1,4 +1,4 @@
-import { IconInfoCircle } from '@dfe/icons';
+import { IconInfoCircle } from '@repo/dfe-icons';
 
 export const EmptyDetail = () => {
   return (

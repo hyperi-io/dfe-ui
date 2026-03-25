@@ -9,6 +9,8 @@ import {
   useFetchSourceDetail,
 } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
+import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
+import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';
 import { notification, Spin, Typography } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
@@ -28,6 +30,7 @@ export const SourceDetail = () => {
     mutate: updateSource,
     isPending: isUpdatingSource,
     error: updateSourceError,
+    reset: resetUpdateSource,
   } = useUpdateSource({
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -42,7 +45,8 @@ export const SourceDetail = () => {
   });
 
   const handleUpdateSource = (values: CreateUpdateSourceFormData) => {
-    updateSource(values);
+    const transformedValues = transformSourceFormDataToRequestBody(values);
+    updateSource(transformedValues);
   };
   if (isFetchingSourceDetail)
     return (
@@ -61,6 +65,7 @@ export const SourceDetail = () => {
   if (!sourceDetailData) {
     return <EmptyDetail />;
   }
+  const initialValues = transformSourceRequestBodyToFormData(sourceDetailData);
   return (
     <>
       {contextHolder}
@@ -71,8 +76,9 @@ export const SourceDetail = () => {
           disabledFields={{
             source: true,
           }}
-          initialValues={sourceDetailData ?? {}}
+          initialValues={initialValues}
           onFinish={handleUpdateSource}
+          onValuesChange={resetUpdateSource}
           isPending={isUpdatingSource}
           error={updateSourceError}
           buttonLabel="Update Source"

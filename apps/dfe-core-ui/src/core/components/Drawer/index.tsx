@@ -1,4 +1,4 @@
-import { IconX } from '@dfe/icons';
+import { IconX } from '@repo/dfe-icons';
 import {
   Drawer as AntdDrawer,
   Button,

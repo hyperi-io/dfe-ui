@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/core/utils/style';
-import { IconAlertCircle, IconCheck, IconX } from '@dfe/icons';
+import { IconAlertCircle, IconCheck, IconX } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 

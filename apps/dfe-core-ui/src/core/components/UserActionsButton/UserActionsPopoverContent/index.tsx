@@ -1,5 +1,5 @@
 import { useLogout } from '@/core/hooks/useLogout';
-import { IconLogout } from '@dfe/icons';
+import { IconLogout } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 export const UserActionsPopoverContent = () => {
