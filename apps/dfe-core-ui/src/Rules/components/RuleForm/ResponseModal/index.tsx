@@ -4,15 +4,12 @@ import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { useState } from 'react';
 
-interface ResponsePopoverProps {
+interface ResponseModalProps {
   response?: RuleCreateResponse | null;
   onClose?: () => void;
 }
 
-export const ResponsePopover = ({
-  response,
-  onClose,
-}: ResponsePopoverProps) => {
+export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
   const [open, setOpen] = useState(!!response);
   const handleClose = () => {
     setOpen(false);
@@ -76,7 +73,7 @@ export const ResponsePopover = ({
             </span>
           }
         >
-          <ul className="list-disc list-inside text-xs ">
+          <ul className="text-xs list-disc list-inside ">
             {rule.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
@@ -92,7 +89,7 @@ export const ResponsePopover = ({
             </span>
           }
         >
-          <ul className="list-disc list-inside text-xs">
+          <ul className="text-xs list-disc list-inside">
             {sql_errors.map((error) => (
               <li key={error.message}>{error.message}</li>
             ))}
@@ -122,7 +119,7 @@ export const ResponsePopover = ({
               <span className="flex items-center gap-x-2 text-warning">
                 <IconAlertCircle /> Cost Estimate Warnings
               </span>
-              <ul className="list-disc list-inside text-xs">
+              <ul className="text-xs list-disc list-inside">
                 {cost_estimate.warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}

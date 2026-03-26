@@ -9,7 +9,7 @@ export const useTestTransform = ({
 }: {
   onSuccess?: (data: TestTransformResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: async (transform: TestTransformRequest) =>
       apiClient.post(API_CONFIG.transforms.test, { body: transform }),

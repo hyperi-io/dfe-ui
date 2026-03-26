@@ -9,7 +9,7 @@ export const useCompileTransform = ({
 }: {
   onSuccess?: (data: CompileTransformResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: async (transform: CompileTransformRequest) =>
       apiClient.post(API_CONFIG.transforms.compile, { body: transform }),

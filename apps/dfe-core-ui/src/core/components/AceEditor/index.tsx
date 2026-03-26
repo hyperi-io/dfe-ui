@@ -42,9 +42,10 @@ export const AceEditor = ({
         className,
       )}
       wrapEnabled
-      editorProps={{ $blockScrolling: true }}
+      editorProps={{ $blockScrolling: true, $useWorker: true }}
       theme={colorMode === 'light' ? 'github_light_default' : 'github_dark'}
       enableSnippets
+      enableBasicAutocompletion
       enableLiveAutocompletion
       onLoad={(editor) => {
         editor.commands.addCommand({

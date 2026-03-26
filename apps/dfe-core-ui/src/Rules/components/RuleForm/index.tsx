@@ -14,7 +14,7 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import z from 'zod';
-import { ResponsePopover } from './ResponsePopover';
+import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
 
 const formSchema = z.object({
@@ -168,7 +168,7 @@ export const RuleForm = ({
         </ContentCard>
       </Form>
       {createRuleResponse != null && (
-        <ResponsePopover
+        <ResponseModal
           response={createRuleResponse}
           onClose={resetCreateRule}
         />
