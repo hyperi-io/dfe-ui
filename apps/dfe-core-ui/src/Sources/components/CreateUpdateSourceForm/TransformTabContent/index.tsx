@@ -1,11 +1,48 @@
-import { FormRule } from 'antd';
+import { Form } from '@/core/components/Form';
+import { FormRule, Input, Select } from 'antd';
+import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
 
 export const TransformTabContent = ({
-  formValidation: _,
+  formValidation,
 }: {
   formValidation: FormRule;
 }) => (
-  <div>
-    <p className="text-sm text-error font-bold">TODO: Transform form items</p>
+  <div className="flex flex-col gap-2">
+    <div className="grid grid-cols-2 gap-2">
+      <Form.Item
+        name={['transform', 'engine']}
+        label="Engine"
+        rules={[formValidation]}
+      >
+        <Select
+          placeholder="Select engine"
+          options={[
+            { label: 'Vector', value: 'vector' },
+            { label: 'Wasm', value: 'wasm' },
+          ]}
+          allowClear
+        />
+      </Form.Item>
+      <Form.Item
+        name={['transform', 'config_file']}
+        label="Config File"
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter config file" allowClear />
+      </Form.Item>
+    </div>
+    <Form.Item
+      name={['transform', 'files']}
+      label="Files"
+      rules={[formValidation]}
+    >
+      <Select
+        placeholder="Select files"
+        mode="multiple"
+        options={[]}
+        allowClear
+      />
+    </Form.Item>
+    <EnvKeyValueBuilder formValidation={formValidation} />
   </div>
 );

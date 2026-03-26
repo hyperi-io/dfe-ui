@@ -112,7 +112,7 @@ const transformTabSchema = {
   transform: z
     .object({
       engine: z.string({ message: 'Engine is required' }),
-      config_file: z.string().nullable(),
+      config_file: z.string().optional().nullable(),
       env: z.record(z.string(), z.string()).optional(),
       files: z.array(z.string()).optional(),
     })
