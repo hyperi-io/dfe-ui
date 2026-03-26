@@ -7,7 +7,7 @@ import { getInitialSourceType } from './helpers';
 
 type SourceType = 'receiver' | 'fetcher';
 
-export const SourceTypeProgressiveDisclosure = ({
+export const SourceTypeTabContent = ({
   formValidation,
   form,
 }: {
