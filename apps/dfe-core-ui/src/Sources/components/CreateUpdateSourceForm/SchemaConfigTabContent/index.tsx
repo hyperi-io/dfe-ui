@@ -6,7 +6,32 @@ export const SchemaConfigTabContent = ({
 }: {
   formValidation: FormRule;
 }) => (
-  <div className="grid grid-cols-3 gap-2">
+  <div className="grid grid-cols-2 gap-2">
+    <Form.Item
+      className="w-full"
+      name={['header', 'type']}
+      label="Header Type"
+      rules={[formValidation]}
+    >
+      <Select
+        options={[
+          { label: 'Timeseries', value: 'time_series' },
+          { label: 'Minimal', value: 'minimal' },
+          { label: 'Passthrough', value: 'passthrough' },
+        ]}
+        placeholder="Select header type"
+        allowClear
+      />
+    </Form.Item>
+    <Form.Item
+      className="w-full"
+      name={['header', 'version']}
+      label="Header Version"
+      rules={[formValidation]}
+    >
+      <Input placeholder="Enter header version" />
+    </Form.Item>
+
     <Form.Item
       className="w-full"
       name={['schema', 'meta_schema']}

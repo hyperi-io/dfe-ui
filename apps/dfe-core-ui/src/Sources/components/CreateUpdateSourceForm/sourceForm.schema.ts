@@ -14,15 +14,6 @@ const mappingStandardsTabSchema = {
   mapping_standards: z.array(z.string()).optional(),
 };
 
-const headerTabSchema = {
-  header: z
-    .object({
-      type: z.string({ message: 'Header type is required' }),
-      version: z.string({ message: 'Header version is required' }),
-    })
-    .optional(),
-};
-
 const sourceTypeTabSchema = {
   match: z
     .object({
@@ -106,6 +97,12 @@ const schemaConfigTabSchema = {
       engine: z.string({ message: 'Engine is required' }),
     })
     .optional(),
+  header: z
+    .object({
+      type: z.string({ message: 'Header type is required' }),
+      version: z.string({ message: 'Header version is required' }),
+    })
+    .optional(),
 };
 
 const transformTabSchema = {
@@ -123,7 +120,6 @@ const transformTabSchema = {
 export const formSchema = z.object({
   ...sourceDetailsTabSchema,
   ...mappingStandardsTabSchema,
-  ...headerTabSchema,
   ...sourceTypeTabSchema,
   ...schemaConfigTabSchema,
   ...transformTabSchema,
@@ -133,7 +129,6 @@ export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
 
 const sourceDetailsTabFormKeys = Object.keys(sourceDetailsTabSchema);
 const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
-const headerTabFormKeys = Object.keys(headerTabSchema);
 const sourceTypeTabFormKeys = Object.keys(sourceTypeTabSchema);
 const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
 const transformTabFormKeys = Object.keys(transformTabSchema);
@@ -141,7 +136,6 @@ const transformTabFormKeys = Object.keys(transformTabSchema);
 export const TAB_FORM_VALIDATION_KEY_MAP = {
   sourceDetails: sourceDetailsTabFormKeys,
   mappingStandards: mappingStandardsTabFormKeys,
-  header: headerTabFormKeys,
   sourceType: sourceTypeTabFormKeys,
   schemaConfig: schemaConfigTabFormKeys,
   transform: transformTabFormKeys,

@@ -4,7 +4,6 @@ import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
-import { HeaderTabContent } from './HeaderTabContent';
 import { getValidationErrors, type FormValidationErrors } from './helpers';
 import { MappingStandardsTabContent } from './MappingStandardsTabContent';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
@@ -36,11 +35,10 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
 };
 
 const TAB_LABEL_MAP = {
-  sourceDetails: 'Source Details',
-  mappingStandards: 'Mapping Standards',
-  header: 'Header',
-  sourceType: 'Source Type',
-  schemaConfig: 'Schema Config',
+  sourceDetails: 'Details',
+  mappingStandards: 'Mapping',
+  sourceType: 'Origin',
+  schemaConfig: 'Meta Schema',
   transform: 'Transform',
 };
 
@@ -61,7 +59,6 @@ export const CreateUpdateSourceFormBase = ({
     useState<FormValidationErrors>({
       sourceDetails: [],
       mappingStandards: [],
-      header: [],
       sourceType: [],
       schemaConfig: [],
       transform: [],
@@ -111,10 +108,10 @@ export const CreateUpdateSourceFormBase = ({
         destroyOnHidden={false}
         items={[
           {
-            key: 'source-details',
+            key: 'sourceDetails',
             label: (
               <TabLabel
-                label="Source Details"
+                label="Details"
                 validationErrors={validationErrors?.sourceDetails}
               />
             ),
@@ -127,38 +124,10 @@ export const CreateUpdateSourceFormBase = ({
             ),
           },
           {
-            key: 'mapping-standards',
+            key: 'sourceType',
             label: (
               <TabLabel
-                label="Mapping Standards"
-                validationErrors={validationErrors?.mappingStandards}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <MappingStandardsTabContent
-                formValidation={formValidation}
-                initialValues={initialValues}
-                form={form}
-              />
-            ),
-          },
-          {
-            key: 'header',
-            label: (
-              <TabLabel
-                label="Header"
-                validationErrors={validationErrors?.header}
-              />
-            ),
-            forceRender: true,
-            children: <HeaderTabContent formValidation={formValidation} />,
-          },
-          {
-            key: 'source-type',
-            label: (
-              <TabLabel
-                label="Source Type"
+                label="Origin"
                 validationErrors={validationErrors?.sourceType}
               />
             ),
@@ -171,19 +140,6 @@ export const CreateUpdateSourceFormBase = ({
             ),
           },
           {
-            key: 'schema-config',
-            label: (
-              <TabLabel
-                label="Schema Config"
-                validationErrors={validationErrors?.schemaConfig}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <SchemaConfigTabContent formValidation={formValidation} />
-            ),
-          },
-          {
             key: 'transform',
             label: (
               <TabLabel
@@ -193,6 +149,37 @@ export const CreateUpdateSourceFormBase = ({
             ),
             forceRender: true,
             children: <TransformTabContent formValidation={formValidation} />,
+          },
+
+          {
+            key: 'schemaConfig',
+            label: (
+              <TabLabel
+                label="Meta Schema"
+                validationErrors={validationErrors?.schemaConfig}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SchemaConfigTabContent formValidation={formValidation} />
+            ),
+          },
+          {
+            key: 'mappingStandards',
+            label: (
+              <TabLabel
+                label="Mapping"
+                validationErrors={validationErrors?.mappingStandards}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <MappingStandardsTabContent
+                formValidation={formValidation}
+                initialValues={initialValues}
+                form={form}
+              />
+            ),
           },
         ]}
       />

@@ -17,7 +17,26 @@ export const TransformTabContent = ({
         <Select
           placeholder="Select engine"
           options={[
+            {
+              disabled: true,
+              label: (
+                <span className="text-foreground-muted/40 dark:text-foreground-muted/40">
+                  Elastic - Coming soon!
+                </span>
+              ),
+              value: 'elastic',
+            },
+            {
+              disabled: true,
+              label: (
+                <span className="text-foreground-muted/40 dark:text-foreground-muted/40">
+                  Splack - Coming soon!
+                </span>
+              ),
+              value: 'splack',
+            },
             { label: 'Vector', value: 'vector' },
+            { label: 'VRL', value: 'vrl' },
             { label: 'Wasm', value: 'wasm' },
           ]}
           allowClear
