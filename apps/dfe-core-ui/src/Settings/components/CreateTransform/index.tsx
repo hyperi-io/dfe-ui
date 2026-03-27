@@ -1,4 +1,3 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { Form } from '@/core/components/Form';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -7,9 +6,7 @@ import { Button, Input, Select } from 'antd';
 import z from 'zod';
 import { ResponseModal } from './ResponseModal';
 
-import 'ace-builds/src-noconflict/mode-golang';
-import 'ace-builds/src-noconflict/mode-rust';
-import 'ace-builds/src-noconflict/mode-typescript';
+import { TransformAceEditor } from './TransformAceEditor';
 
 const transformCompileSchema = z.object({
   name: z
@@ -113,10 +110,7 @@ export const CreateTransform = () => {
             }
             rules={[transformCompileValidation]}
           >
-            <AceEditor
-              mode={aceMode(fileLanguage)}
-              height={`${componentHeight}px`}
-            />
+            <TransformAceEditor height={`${componentHeight}px`} />
           </Form.Item>
         </div>
 
