@@ -4,12 +4,17 @@ import { Ace } from 'ace-builds';
 import { useState } from 'react';
 
 import { cn } from '@/core/utils/style';
-import 'ace-builds/src-noconflict/mode-json';
+
+import 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-javascript';
+
 import { Splitter as AntdSplitter, Button } from 'antd';
 
 type Annotation = Ace.Annotation;
 
-export const TransformAceEditor = ({ height }: { height: string }) => {
+export const TransformAceEditor = ({
+  ...props
+}: React.ComponentProps<typeof AceEditor>) => {
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const hasErrors = annotations.some(
@@ -26,7 +31,10 @@ export const TransformAceEditor = ({ height }: { height: string }) => {
           <div className="relative flex w-full h-full gap-x-2">
             {(hasErrors || hasWarnings) && (
               <Button
-                className="absolute top-2 right-2 z-100"
+                className={cn(
+                  'absolute top-2 right-2 z-100',
+                  !hasErrors && hasWarnings && 'bg-warning',
+                )}
                 aria-label="View lint errors"
                 type="primary"
                 shape="circle"
@@ -40,8 +48,8 @@ export const TransformAceEditor = ({ height }: { height: string }) => {
             )}
             <AceEditor
               onValidate={(annotations) => setAnnotations(annotations)}
-              mode="json"
-              height={height}
+              {...props}
+              mode="javascript"
             />
           </div>
         </AntdSplitter.Panel>
@@ -49,8 +57,10 @@ export const TransformAceEditor = ({ height }: { height: string }) => {
           <AntdSplitter.Panel min="20%" max="60%" defaultSize="20%">
             <div className="min-h-full p-4 bg-dark-background text-dark-foreground">
               <ul>
-                {annotations.map((annotation) => (
-                  <li key={annotation.row}>
+                {annotations.map((annotation, index) => (
+                  <li
+                    key={`annotation-${index}-${annotation.row}-${annotation.column}`}
+                  >
                     <dl className="inline-flex font-mono gap-x-2">
                       <dt
                         className={cn(
