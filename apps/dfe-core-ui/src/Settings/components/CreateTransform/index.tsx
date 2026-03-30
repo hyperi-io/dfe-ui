@@ -6,6 +6,7 @@ import { Button, Input, Select } from 'antd';
 import z from 'zod';
 import { ResponseModal } from './ResponseModal';
 
+import { FormNotification } from '@/core/components/FormNotification';
 import { TransformAceEditor } from './TransformAceEditor';
 
 const transformCompileSchema = z.object({
@@ -15,7 +16,9 @@ const transformCompileSchema = z.object({
   language: z.enum(['rust', 'go', 'assemblyscript']),
   files: z.record(
     z.string(),
-    z.string().min(1, { message: 'File content is required' }),
+    z
+      .string({ message: 'File content is required' })
+      .min(1, { message: 'File content is required' }),
   ),
 });
 
@@ -50,6 +53,7 @@ export const CreateTransform = () => {
     mutate: compileTransform,
     isPending,
     reset: resetCompileTransform,
+    error: compileTransformError,
   } = useCompileTransform();
   const handleFinish = (values: TransformCompileFormData) => {
     compileTransform(values);
@@ -91,28 +95,33 @@ export const CreateTransform = () => {
           </Form.Item>
         </div>
 
-        <div className="relative">
-          <span className="absolute top-0 right-0 mt-1.5 text-xs text-foreground-muted dark:text-foreground-muted">
-            EditorMode: {aceMode(fileLanguage)}
-          </span>
-          <Form.Item
-            name={['files', fileName]}
-            className="label:w-full"
-            label={
-              <span className="text-sm text-foreground-muted dark:text-foreground-muted">
-                {fileName}.
-                {
-                  fileExtensionMap[
-                    fileLanguage as keyof typeof fileExtensionMap
-                  ]
-                }
-              </span>
+        <Form.Item
+          name={['files', fileName]}
+          className="[&_label]:w-full"
+          label={
+            <div className="text-foreground-muted/40 dark:text-foreground-muted/40 flex items-center justify-between w-full">
+              <p>{`${fileName}.${fileExtensionMap[fileLanguage as keyof typeof fileExtensionMap]}`}</p>
+
+              <p>Editor mode: {aceMode(fileLanguage)}</p>
+            </div>
+          }
+          rules={[transformCompileValidation]}
+        >
+          <TransformAceEditor
+            downloadFileName={`${fileName}.${fileExtensionMap[fileLanguage as keyof typeof fileExtensionMap]}`}
+            mode={aceMode(fileLanguage)}
+            height={`${componentHeight}px`}
+          />
+        </Form.Item>
+
+        {compileTransformError && (
+          <FormNotification
+            type="error"
+            text={
+              compileTransformError?.message ?? 'An unexpected error occurred'
             }
-            rules={[transformCompileValidation]}
-          >
-            <TransformAceEditor height={`${componentHeight}px`} />
-          </Form.Item>
-        </div>
+          />
+        )}
 
         <Form.Item className="flex justify-end">
           <Button
