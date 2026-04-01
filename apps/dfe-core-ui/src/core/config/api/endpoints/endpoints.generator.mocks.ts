@@ -769,5 +769,80 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  transforms: {
+    compile: {
+      mockedUrl: '/api/v1/transforms/compile',
+      post: {
+        success: ({
+          mockedResponse = {
+            wasm_base64: 'string',
+            wasm_bytes: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['CompileResponse'];
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.transforms.compile.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.transforms.compile.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    test: {
+      mockedUrl: '/api/v1/transforms/test',
+      post: {
+        success: ({
+          mockedResponse = {
+            emitted: [
+              {
+                key: 'string',
+                value: 'string',
+                headers: {
+                  additionalProp1: 'string',
+                  additionalProp2: 'string',
+                  additionalProp3: 'string',
+                },
+              },
+            ],
+            duration_ms: 0,
+            wasm_memory_bytes: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['TestResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+  },
 });
 /* eslint-enable no-console */

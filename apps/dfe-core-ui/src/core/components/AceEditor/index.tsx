@@ -7,24 +7,35 @@ import ReactAceEditor from 'react-ace';
 
 import { cn } from '@/core/utils/style';
 import 'ace-builds/src-noconflict/ext-beautify';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-github_dark';
 import 'ace-builds/src-noconflict/theme-github_light_default';
-
-interface AceEditorProps extends React.ComponentProps<typeof ReactAceEditor> {
+interface AceEditorProps extends React.ComponentPropsWithRef<
+  typeof ReactAceEditor
+> {
   'aria-invalid'?: boolean;
 }
 
 export const AceEditor = ({
   className,
   'aria-invalid': ariaInvalid,
+  editorProps,
+  onLoad,
   ...props
 }: AceEditorProps) => {
   const { colorMode } = useTheme();
 
   const beautifyContent = (editor: Editor) => {
     aceBeautify.beautify(editor.getSession());
+  };
+
+  const handleOnLoad = (editor: Editor) => {
+    if (onLoad) {
+      onLoad(editor);
+    }
+    beautifyContent(editor);
   };
 
   return (
@@ -42,17 +53,12 @@ export const AceEditor = ({
         className,
       )}
       wrapEnabled
-      editorProps={{ $blockScrolling: true }}
+      editorProps={{ ...editorProps, $blockScrolling: true }}
       theme={colorMode === 'light' ? 'github_light_default' : 'github_dark'}
       enableSnippets
+      enableBasicAutocompletion
       enableLiveAutocompletion
-      onLoad={(editor) => {
-        editor.commands.addCommand({
-          name: 'beautify',
-          bindKey: { win: 'Ctrl-Shift-B', mac: 'Command-Shift-B' },
-          exec: (editor: Editor) => beautifyContent(editor),
-        });
-      }}
+      onLoad={handleOnLoad}
       {...props}
     />
   );

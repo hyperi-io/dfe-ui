@@ -46,4 +46,8 @@ export const API_CONFIG = Object.freeze({
     version: '/api/v1/system/version',
     settings: '/api/v1/system/settings',
   },
+  transforms: {
+    compile: '/api/v1/transforms/compile',
+    test: '/api/v1/transforms/test',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);

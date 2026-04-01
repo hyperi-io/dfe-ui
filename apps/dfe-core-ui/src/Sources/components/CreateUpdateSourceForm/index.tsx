@@ -1,19 +1,27 @@
-import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
-import { FieldMapSelect } from '@/core/components/FieldMapSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { Button, FormProps, Input, InputNumber, Select, Switch } from 'antd';
-import { useEffect } from 'react';
+import { Button, FormProps, Tabs } from 'antd';
+import { useEffect, useState } from 'react';
+import { getValidationErrors, type FormValidationErrors } from './helpers';
+import { MappingStandardsTabContent } from './MappingStandardsTabContent';
+import { SchemaConfigTabContent } from './SchemaConfigTabContent';
+import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
-import { SourceTypeProgressiveDisclosure } from './SourceTypeProgressiveDisclosure';
+import { SourceTypeTabContent } from './SourceTypeTabContent';
+import { TabLabel } from './TabLabel';
+import { TransformTabContent } from './TransformTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
+
+export interface DisabledFields {
+  source?: boolean;
+  // Add other disabled fields here as necessary
+}
 
 type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   onFinish: (values: CreateUpdateSourceFormData) => void;
@@ -22,11 +30,16 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   error: Error | null;
   resetFormFields?: boolean;
   buttonLabel?: string;
-  disabledFields?: {
-    source?: boolean;
-    // Add other disabled fields here as necessary
-  };
+  disabledFields?: DisabledFields;
   hasReset?: boolean;
+};
+
+const TAB_LABEL_MAP = {
+  sourceDetails: 'Details',
+  mappingStandards: 'Mapping',
+  sourceType: 'Origin',
+  schemaConfig: 'Meta Schema',
+  transform: 'Transform',
 };
 
 export const CreateUpdateSourceFormBase = ({
@@ -38,8 +51,18 @@ export const CreateUpdateSourceFormBase = ({
   resetFormFields,
   buttonLabel = 'Save',
   hasReset = false,
+  onFinishFailed,
+  onFieldsChange,
   ...props
 }: CreateUpdateSourceFormProps) => {
+  const [validationErrors, setValidationErrors] =
+    useState<FormValidationErrors>({
+      sourceDetails: [],
+      mappingStandards: [],
+      sourceType: [],
+      schemaConfig: [],
+      transform: [],
+    });
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateSourceFormData>(formSchema);
@@ -50,228 +73,142 @@ export const CreateUpdateSourceFormBase = ({
     }
   }, [resetFormFields, form]);
 
+  const handleFieldsChange: NonNullable<
+    FormProps<CreateUpdateSourceFormData>['onFieldsChange']
+  > = (changedFields, allFields) => {
+    const validationErrors = getValidationErrors({ formFields: allFields });
+    setValidationErrors(validationErrors);
+    onFieldsChange?.(changedFields, allFields);
+  };
+
+  const handleFinishFailed: NonNullable<
+    FormProps<CreateUpdateSourceFormData>['onFinishFailed']
+  > = (errorInfo) => {
+    const validationErrors = getValidationErrors({
+      formFields: errorInfo.errorFields ?? [],
+    });
+    setValidationErrors(validationErrors);
+    onFinishFailed?.(errorInfo);
+  };
+
   return (
     <Form
       form={form}
       onFinish={onFinish}
-      initialValues={initialValues}
+      initialValues={{
+        ...initialValues,
+        enabled: true,
+      }}
       layout="vertical"
+      onFinishFailed={handleFinishFailed}
+      onFieldsChange={handleFieldsChange}
       {...props}
     >
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2 flex flex-col flex-wrap w-full',
-          title: 'font-semibold',
-        }}
-        title="Source Details"
-        defaultOpen={true}
-      >
-        <div className="flex gap-x-2">
-          <Form.Item
-            className="w-full"
-            name="source"
-            label="Source"
-            rules={[formValidation]}
-          >
-            <Input
-              placeholder="Enter source"
-              disabled={!!disabledFields?.source}
-            />
-          </Form.Item>
-          <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
-            <Switch />
-          </Form.Item>
-        </div>
+      <Tabs
+        destroyOnHidden={false}
+        items={[
+          {
+            key: 'sourceDetails',
+            label: (
+              <TabLabel
+                label="Details"
+                validationErrors={validationErrors?.sourceDetails}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SourceDetailsTabContent
+                formValidation={formValidation}
+                disabledFields={disabledFields}
+              />
+            ),
+          },
+          {
+            key: 'sourceType',
+            label: (
+              <TabLabel
+                label="Origin"
+                validationErrors={validationErrors?.sourceType}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SourceTypeTabContent
+                formValidation={formValidation}
+                form={form}
+              />
+            ),
+          },
+          {
+            key: 'transform',
+            label: (
+              <TabLabel
+                label="Transform"
+                validationErrors={validationErrors?.transform}
+              />
+            ),
+            forceRender: true,
+            children: <TransformTabContent formValidation={formValidation} />,
+          },
 
-        <Form.Item
-          name="display_name"
-          label="Display Name"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter display name" />
-        </Form.Item>
-
-        <Form.Item
-          name="description"
-          label="Description"
-          rules={[formValidation]}
-        >
-          <Input.TextArea placeholder="Enter description" />
-        </Form.Item>
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0 flex gap-2',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Mapping Standards"
-        defaultOpen={true}
-      >
-        <Form.Item
-          name="mapping_standards"
-          className="w-full"
-          label="Mapping Standards"
-          rules={[formValidation]}
-        >
-          <FieldMapSelect
-            placeholder="Select mapping standards"
-            mode="multiple"
-            allowClear
-          />
-        </Form.Item>
-
-        <CreateFieldMapDrawer
-          title="Create New Standard"
-          className={{ trigger: 'mt-auto' }}
-          onSuccess={({ standard, source }) => {
-            form.setFieldsValue({
-              mapping_standards: [
-                ...form.getFieldValue('mapping_standards'),
-                `${standard}:${source}`,
-              ],
-            });
-          }}
-          initialValues={{
-            standard: '',
-            source: initialValues?.source,
-          }}
-          disabledFields={{
-            source: !!initialValues?.source,
-          }}
-        />
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Header"
-        defaultOpen={false}
-      >
-        <Form.Item
-          className="w-full"
-          name={['header', 'type']}
-          label="Header Type"
-          rules={[formValidation]}
-        >
-          <Select
-            options={[
-              { label: 'Timeseries', value: 'time_series' },
-              { label: 'Minimal', value: 'minimal' },
-              { label: 'Passthrough', value: 'passthrough' },
-            ]}
-            placeholder="Select header type"
-            allowClear
-          />
-        </Form.Item>
-        <Form.Item
-          className="w-full"
-          name={['header', 'version']}
-          label="Header Version"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter header version" />
-        </Form.Item>
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          title: 'font-semibold',
-        }}
-        title="Source Type"
-        defaultOpen={false}
-      >
-        <SourceTypeProgressiveDisclosure
-          formValidation={formValidation}
-          form={form}
-        />
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'grid grid-cols-3 gap-2',
-          title: 'font-semibold',
-        }}
-        title="Schema Config"
-        defaultOpen={false}
-      >
-        <Form.Item
-          className="w-full"
-          name={['schema', 'meta_schema']}
-          label="Meta Schema"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter meta schema" />
-        </Form.Item>
-        <Form.Item
-          className="w-full"
-          name={['schema', 'meta_schema_version']}
-          label="Meta Schema Version"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter meta schema version" />
-        </Form.Item>
-        <Form.Item
-          className="w-full"
-          name={['schema', 'derived_schema']}
-          label="Derived Schema"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter derived schema" />
-        </Form.Item>
-        <Form.Item
-          className="w-full"
-          name={['schema', 'additional_fields']}
-          label="Additional Fields"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter additional fields" />
-        </Form.Item>
-
-        <Form.Item
-          className="w-full"
-          name={['schema', 'engine']}
-          label="Engine"
-          rules={[formValidation]}
-        >
-          <Input placeholder="Enter engine" />
-        </Form.Item>
-        <Form.Item
-          className="w-full"
-          name={['schema', 'ttl_days']}
-          label="TTL Days"
-          rules={[formValidation]}
-        >
-          <InputNumber placeholder="Enter TTL days" />
-        </Form.Item>
-      </SimpleCollapse>
-
-      <SimpleCollapse
-        classNames={{
-          container: 'pt-0',
-          content: 'flex gap-2',
-          title: 'font-semibold',
-        }}
-        title="Transform"
-        defaultOpen={false}
-      >
-        <p className="text-sm text-error font-bold">
-          TODO: Transform form items
-        </p>
-      </SimpleCollapse>
+          {
+            key: 'schemaConfig',
+            label: (
+              <TabLabel
+                label="Meta Schema"
+                validationErrors={validationErrors?.schemaConfig}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SchemaConfigTabContent formValidation={formValidation} />
+            ),
+          },
+          {
+            key: 'mappingStandards',
+            label: (
+              <TabLabel
+                label="Mapping"
+                validationErrors={validationErrors?.mappingStandards}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <MappingStandardsTabContent
+                formValidation={formValidation}
+                initialValues={initialValues}
+                form={form}
+              />
+            ),
+          },
+        ]}
+      />
 
       {error && (
         <Form.Item>
           <FormNotification
             type="error"
             text={error.message ?? 'An unexpected error occurred'}
+          />
+        </Form.Item>
+      )}
+
+      {Object.values(validationErrors).some((errors) => errors.length > 0) && (
+        <Form.Item>
+          <FormNotification
+            type="warning"
+            text={
+              <>
+                There are validation errors in the following tabs:
+                {Object.keys(validationErrors)
+                  .map(
+                    (key) => TAB_LABEL_MAP[key as keyof typeof TAB_LABEL_MAP],
+                  )
+                  .join(', ')}
+                .<br />
+                Please address the errors and try again.
+              </>
+            }
           />
         </Form.Item>
       )}

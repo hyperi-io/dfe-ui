@@ -3,42 +3,22 @@ import z from 'zod';
 
 const AUTH_TYPES = ['none', 'oauth2', 'api_key'] as const;
 
-export const formSchema = z.object({
+const sourceDetailsTabSchema = {
   source: sourceNameValidator,
   display_name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   enabled: z.boolean({ message: 'Enabled is required' }),
-  header: z
-    .object({
-      type: z.string(),
-      version: z.string(),
-    })
-    .optional(),
+};
+
+const mappingStandardsTabSchema = {
+  mapping_standards: z.array(z.string()).optional(),
+};
+
+const sourceTypeTabSchema = {
   match: z
     .object({
       field: z.string({ message: 'Field is required' }),
       value: z.string({ message: 'Value is required' }),
-    })
-    .optional()
-    .nullable(),
-  schema: z
-    .object({
-      meta_schema: z.string({ message: 'Meta schema is required' }),
-      meta_schema_version: z.string({
-        message: 'Meta schema version is required',
-      }),
-      derived_schema: z.string().optional().nullable(),
-      additional_fields: z.string().optional().nullable(),
-      ttl_days: z.number().optional().nullable(),
-      engine: z.string({ message: 'Engine is required' }),
-    })
-    .optional(),
-  transform: z
-    .object({
-      engine: z.string({ message: 'Engine is required' }),
-      config_file: z.string().nullable(),
-      env: z.record(z.string(), z.string()).optional(),
-      files: z.array(z.string()).optional(),
     })
     .optional()
     .nullable(),
@@ -102,7 +82,61 @@ export const formSchema = z.object({
     })
     .optional()
     .nullable(),
-  mapping_standards: z.array(z.string()).optional(),
+};
+
+const schemaConfigTabSchema = {
+  schema: z
+    .object({
+      meta_schema: z.string({ message: 'Meta schema is required' }),
+      meta_schema_version: z.string({
+        message: 'Meta schema version is required',
+      }),
+      derived_schema: z.string().optional().nullable(),
+      additional_fields: z.string().optional().nullable(),
+      ttl_days: z.number().optional().nullable(),
+      engine: z.string({ message: 'Engine is required' }),
+    })
+    .optional(),
+  header: z
+    .object({
+      type: z.string({ message: 'Header type is required' }),
+      version: z.string({ message: 'Header version is required' }),
+    })
+    .optional(),
+};
+
+const transformTabSchema = {
+  transform: z
+    .object({
+      engine: z.string({ message: 'Engine is required' }),
+      config_file: z.string().optional().nullable(),
+      env: z.record(z.string(), z.string()).optional(),
+      files: z.array(z.string()).optional(),
+    })
+    .optional()
+    .nullable(),
+};
+
+export const formSchema = z.object({
+  ...sourceDetailsTabSchema,
+  ...mappingStandardsTabSchema,
+  ...sourceTypeTabSchema,
+  ...schemaConfigTabSchema,
+  ...transformTabSchema,
 });
 
 export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
+
+const sourceDetailsTabFormKeys = Object.keys(sourceDetailsTabSchema);
+const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
+const sourceTypeTabFormKeys = Object.keys(sourceTypeTabSchema);
+const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
+const transformTabFormKeys = Object.keys(transformTabSchema);
+
+export const TAB_FORM_VALIDATION_KEY_MAP = {
+  sourceDetails: sourceDetailsTabFormKeys,
+  mappingStandards: mappingStandardsTabFormKeys,
+  sourceType: sourceTypeTabFormKeys,
+  schemaConfig: schemaConfigTabFormKeys,
+  transform: transformTabFormKeys,
+};

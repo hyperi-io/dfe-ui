@@ -23,6 +23,11 @@ export const SettingsToolbarBase = () => {
       label: 'Services',
       disabled: false,
     },
+    {
+      path: '/settings/transforms',
+      label: 'Transforms',
+      disabled: false,
+    },
   ];
 
   const isSelected = (path: string) => pathname === path;
