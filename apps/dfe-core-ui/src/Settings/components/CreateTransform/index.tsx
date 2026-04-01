@@ -7,7 +7,7 @@ import z from 'zod';
 import { ResponseModal } from './ResponseModal';
 
 import { FormNotification } from '@/core/components/FormNotification';
-import { TransformAceEditor } from './TransformAceEditor';
+import { TransformMonacoEditor } from './TransformMonacoEditor';
 
 const transformCompileSchema = z.object({
   name: z
@@ -30,12 +30,12 @@ const fileExtensionMap = {
   assemblyscript: 'ts',
 };
 
-const aceMode = (language: 'rust' | 'go' | 'assemblyscript') => {
+const monacoLanguage = (language: 'rust' | 'go' | 'assemblyscript') => {
   switch (language) {
     case 'rust':
       return 'rust';
     case 'go':
-      return 'golang';
+      return 'go';
     case 'assemblyscript':
       return 'typescript';
   }
@@ -102,15 +102,14 @@ export const CreateTransform = () => {
             <div className="text-foreground-muted/40 dark:text-foreground-muted/40 flex items-center justify-between w-full">
               <p>{`${fileName}.${fileExtensionMap[fileLanguage as keyof typeof fileExtensionMap]}`}</p>
 
-              <p>Editor mode: {aceMode(fileLanguage)}</p>
+              <p>Editor mode: {monacoLanguage(fileLanguage)}</p>
             </div>
           }
           rules={[transformCompileValidation]}
         >
-          <TransformAceEditor
-            downloadFileName={`${fileName}.${fileExtensionMap[fileLanguage as keyof typeof fileExtensionMap]}`}
-            mode={aceMode(fileLanguage)}
+          <TransformMonacoEditor
             height={`${componentHeight}px`}
+            language={monacoLanguage(fileLanguage)}
           />
         </Form.Item>
 

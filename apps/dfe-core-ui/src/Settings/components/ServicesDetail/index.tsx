@@ -1,4 +1,4 @@
-import { AceEditor } from '@/core/components/AceEditor';
+import { AceEditor } from '@/core/components/Editor/AceEditor';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListServicesContext } from '@/core/contexts/ListServicesContext';
