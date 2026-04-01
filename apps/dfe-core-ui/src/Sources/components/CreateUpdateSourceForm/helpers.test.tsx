@@ -37,9 +37,10 @@ const ERROR_FIELDS = [
 const expectedResponse = {
   sourceDetails: ['Source is required'],
   mappingStandards: [],
-  header: ['Header type is required', 'Header version is required'],
   sourceType: [],
   schemaConfig: [
+    'Header type is required',
+    'Header version is required',
     'Meta schema is required',
     'Meta schema version is required',
     'Engine is required',
