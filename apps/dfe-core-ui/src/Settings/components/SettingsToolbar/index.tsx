@@ -1,11 +1,7 @@
 'use client';
 
-import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
-import {
-  ListFieldMapsProvider,
-  useListFieldMapsContext,
-} from '@/core/contexts/ListFieldMapsContext';
+import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { cn } from '@/core/utils/style';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,24 +10,13 @@ export const SettingsToolbarBase = () => {
   const pathname = usePathname();
   const routes = [
     {
-      path: '/settings/field-maps',
-      label: 'Field Maps',
-      disabled: false,
-    },
-    {
-      path: '/settings/services',
-      label: 'Services',
-      disabled: false,
-    },
-    {
-      path: '/settings/transforms',
-      label: 'Transforms',
+      path: '/settings/admin',
+      label: 'Admin Controls',
       disabled: false,
     },
   ];
 
   const isSelected = (path: string) => pathname === path;
-  const { setSelectedFieldMap } = useListFieldMapsContext();
 
   return (
     <ListFieldMapsProvider>
@@ -54,17 +39,6 @@ export const SettingsToolbarBase = () => {
             </Link>
           ))}
         </nav>
-
-        {pathname === '/settings/field-maps' && (
-          <CreateFieldMapDrawer
-            onSuccess={({ standard, source }) => {
-              setSelectedFieldMap({
-                map_source: source ?? null,
-                map_standard: standard,
-              });
-            }}
-          />
-        )}
       </Toolbar>
     </ListFieldMapsProvider>
   );

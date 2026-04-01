@@ -22,6 +22,7 @@ describe('SidebarMenu', () => {
         'Sources',
         'Schemas',
         'Rules',
+        'Settings',
       ]);
     });
 
