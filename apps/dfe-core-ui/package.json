@@ -9,7 +9,8 @@
     "lint": "tsc --noEmit && eslint",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest --ui --coverage.enabled",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui --coverage.enabled",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
