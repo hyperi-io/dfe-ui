@@ -4,6 +4,7 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { FeatureFlag, On } from '@/core/components/FeatureFlag';
 import { FeatureFlags } from '@/core/components/FeatureFlag/featureFlag.constants';
 import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
+import { AuditDashboard } from '@/Settings/components/AuditDashboard';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
 import { OrganisationManagement } from '@/Settings/components/OrganisationManagement';
 import { RoleManagement } from '@/Settings/components/RoleManagement';
@@ -69,6 +70,16 @@ export const AdminControlsScene = () => {
                 />
               ),
               children: <UserManagement />,
+            },
+            {
+              key: 'audit',
+              label: (
+                <AdminTabLabel
+                  label="Audit"
+                  description="View audit logs, security events and usage metrics."
+                />
+              ),
+              children: <AuditDashboard />,
             },
           ]}
         />

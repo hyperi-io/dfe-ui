@@ -10,7 +10,7 @@ import { SpendLimitsContent } from './SpendLimitsContent';
 
 export const OrganisationManagement = () => {
   const [search, setSearch] = useState('');
-  const [companyLimit, setCompanyLimit] = useState(4);
+  const [companyLimit, setCompanyLimit] = useState(3);
   const filteredOrganisations = ORGANISATION_LIST_RESPONSE.filter(
     (organisation) =>
       organisation.name.toLowerCase().includes(search.toLowerCase()),
@@ -34,7 +34,7 @@ export const OrganisationManagement = () => {
           />
         }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredOrganisations.slice(0, companyLimit).map((organisation) => (
             <li key={organisation.id}>
               <OrganisationCard

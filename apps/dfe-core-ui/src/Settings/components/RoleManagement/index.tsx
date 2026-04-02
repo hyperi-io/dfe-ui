@@ -13,8 +13,8 @@ export const RoleManagement = () => {
   const [customRoleSearch, setCustomRoleSearch] = useState('');
   const [preDefinedRoleSearch, setPreDefinedRoleSearch] = useState('');
 
-  const [customRoleLimit, setCustomRoleLimit] = useState(4);
-  const [preDefinedRoleLimit, setPreDefinedRoleLimit] = useState(4);
+  const [customRoleLimit, setCustomRoleLimit] = useState(3);
+  const [preDefinedRoleLimit, setPreDefinedRoleLimit] = useState(3);
 
   const filteredCustomRoles = CUSTOM_ROLE_LIST_RESPONSE.filter(
     (role) =>
@@ -55,7 +55,7 @@ export const RoleManagement = () => {
           />
         }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredCustomRoles.slice(0, customRoleLimit).map((role) => (
             <li key={role.id}>
               <RoleCard role={role} />
@@ -88,7 +88,7 @@ export const RoleManagement = () => {
           />
         }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredPreDefinedRoles.slice(0, preDefinedRoleLimit).map((role) => (
             <li key={role.id}>
               <RoleCard role={role} />

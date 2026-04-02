@@ -1,4 +1,5 @@
 import { Tabs } from 'antd';
+import { AdminTabLabel } from '../AdminTabLabel';
 import { OrganisationGroups } from './OrganisationGroups';
 import { UserGroups } from './UserGroups';
 
@@ -10,24 +11,22 @@ export const GroupManagement = () => {
         {
           key: 'user-groups',
           label: (
-            <div className="flex flex-col gap-1 text-left w-full h-full">
-              <p className="text-base font-semibold">User Groups</p>
-              <span className="text-foreground/50 dark:text-dark-foreground/50 text-xs whitespace-normal">
-                Configure custom groups and members.
-              </span>
-            </div>
+            <AdminTabLabel
+              className="max-w-full"
+              label="User Groups"
+              description="Configure custom groups and members."
+            />
           ),
           children: <UserGroups />,
         },
         {
           key: 'organisation-groups',
           label: (
-            <div className="flex flex-col gap-1 text-left w-full h-full">
-              <p className="text-base font-semibold">Organisation Groups</p>
-              <span className="text-foreground/50 dark:text-dark-foreground/50 text-xs whitespace-normal">
-                Configure custom groups and organisations.
-              </span>
-            </div>
+            <AdminTabLabel
+              className="max-w-full"
+              label="Organisation Groups"
+              description="Configure custom groups and organisations."
+            />
           ),
           children: <OrganisationGroups />,
         },

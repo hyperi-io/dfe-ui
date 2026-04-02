@@ -1,3 +1,4 @@
+import { cn } from '@/core/utils/style';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { Role } from '@/Settings/mocks/role.data';
 import { IconLockFilled } from '@repo/dfe-icons';
@@ -41,12 +42,18 @@ export const RoleCard = ({ role }: { role: Role }) => {
               No permissions assigned
             </li>
           )}
-          {role.permissions && role.permissions.length > PERMISSION_LIMIT && (
-            <li className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 mb-auto">
-              +{role.permissions.length - PERMISSION_LIMIT} more
-            </li>
-          )}
         </ul>
+        {role.permissions && role.permissions.length > PERMISSION_LIMIT && (
+          <span
+            className={cn(
+              'text-xs absolute bottom-4 right-4',
+              'bg-background dark:bg-dark-background',
+              'rounded-md px-2 py-0.5 border border-foreground/10 dark:border-dark-foreground/10',
+            )}
+          >
+            {`+ ${role.permissions.length - PERMISSION_LIMIT} more`}
+          </span>
+        )}
       </div>
       {role.predefined && (
         <span className="absolute bottom-1 right-1 bg-brand-primary dark:bg-secondary rounded-full p-1 text-white text-xs">
