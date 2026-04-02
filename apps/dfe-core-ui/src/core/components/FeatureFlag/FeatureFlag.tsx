@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useMemo } from 'react';
 import { useFeatureFlags } from './hooks/useFeatureFlags';
 

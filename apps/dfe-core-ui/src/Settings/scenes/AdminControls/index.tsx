@@ -16,7 +16,7 @@ export const AdminControlsScene = () => {
     <>
       <FeatureFlag feature={FeatureFlags.DevAlerts}>
         <On>
-          <div className="bg-background">
+          <div className="absolute top-2 right-2">
             <p className="text-sm flex items-center gap-2 bg-error/10 border border-error text-error p-2 rounded-md m-2">
               <IconAlertCircle />
               All data on this page is mocked.
