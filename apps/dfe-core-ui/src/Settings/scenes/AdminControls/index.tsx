@@ -1,7 +1,7 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
-import { FeatureFlag, On } from '@/core/components/FeatureFlag';
+import { FeatureFlag } from '@/core/components/FeatureFlag';
 import { FeatureFlags } from '@/core/components/FeatureFlag/featureFlag.constants';
 import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { AuditDashboard } from '@/Settings/components/AuditDashboard';
@@ -16,14 +16,14 @@ export const AdminControlsScene = () => {
   return (
     <>
       <FeatureFlag feature={FeatureFlags.DevAlerts}>
-        <On>
+        <FeatureFlag.On>
           <div className="absolute top-2 right-2">
             <p className="text-sm flex items-center gap-2 bg-error/10 border border-error text-error p-2 rounded-md m-2">
               <IconAlertCircle />
               All data on this page is mocked.
             </p>
           </div>
-        </On>
+        </FeatureFlag.On>
       </FeatureFlag>
 
       <MainContentCard className="pl-0">
