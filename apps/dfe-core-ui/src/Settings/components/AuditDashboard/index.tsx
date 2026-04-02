@@ -12,17 +12,6 @@ export const AuditDashboard = () => {
       className="[&_.ant-tabs-nav-list]:w-full [&_.ant-tabs-tab]:w-full"
       items={[
         {
-          key: 'usage-metrics',
-          label: (
-            <AdminTabLabel
-              className="max-w-full"
-              label="Usage Metrics"
-              description="View user and organisation usage trends."
-            />
-          ),
-          children: <UsageMetrics />,
-        },
-        {
           key: 'audit-logs',
           label: (
             <AdminTabLabel
@@ -43,6 +32,17 @@ export const AuditDashboard = () => {
             />
           ),
           children: <SecurityEvents />,
+        },
+        {
+          key: 'usage-metrics',
+          label: (
+            <AdminTabLabel
+              className="max-w-full"
+              label="Usage Metrics"
+              description="View user and organisation usage trends."
+            />
+          ),
+          children: <UsageMetrics />,
         },
       ]}
     />
