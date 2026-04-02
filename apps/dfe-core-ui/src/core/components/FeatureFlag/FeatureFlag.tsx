@@ -3,7 +3,7 @@
 import { createContext, useMemo } from 'react';
 import { useFeatureFlags } from './hooks/useFeatureFlags';
 
-interface FeatureFlagProps {
+export interface FeatureFlagProps {
   children: React.ReactNode;
   feature: string;
 }
