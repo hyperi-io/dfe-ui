@@ -3,14 +3,13 @@
 import { CreateOrganisationDrawer } from '@/Settings/components/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { ORGANISATION_LIST_RESPONSE } from '@/Settings/mocks/organisation.data';
-import { Button, Input } from 'antd';
+import { Input } from 'antd';
 import { useState } from 'react';
 import { OrganisationCard } from './OrganisationCard';
-import { SpendLimitsContent } from './SpendLimitsContent';
 
 export const OrganisationManagement = () => {
   const [search, setSearch] = useState('');
-  const [companyLimit, setCompanyLimit] = useState(3);
+  // const [companyLimit, setCompanyLimit] = useState(3);
   const filteredOrganisations = ORGANISATION_LIST_RESPONSE.filter(
     (organisation) =>
       organisation.name.toLowerCase().includes(search.toLowerCase()),
@@ -35,7 +34,7 @@ export const OrganisationManagement = () => {
         }
       >
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredOrganisations.slice(0, companyLimit).map((organisation) => (
+          {filteredOrganisations.map((organisation) => (
             <li key={organisation.id}>
               <OrganisationCard
                 key={organisation.id}
@@ -44,7 +43,7 @@ export const OrganisationManagement = () => {
             </li>
           ))}
         </ul>
-        {companyLimit < filteredOrganisations.length && (
+        {/* {companyLimit < filteredOrganisations.length && (
           <Button
             type="link"
             className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
@@ -52,9 +51,9 @@ export const OrganisationManagement = () => {
           >
             Show more
           </Button>
-        )}
+        )} */}
       </SectionCard>
-      <SectionCard
+      {/* <SectionCard
         className="mb-0"
         title={
           <span className="flex items-center gap-4">
@@ -67,7 +66,7 @@ export const OrganisationManagement = () => {
         description="View and configure spend limits and quotas for each organisation."
       >
         <SpendLimitsContent />
-      </SectionCard>
+      </SectionCard> */}
     </div>
   );
 };
