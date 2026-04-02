@@ -1,5 +1,6 @@
 import hyperILogo from '@/core/assets/images/logo/primary-logo-mark.svg';
 import type { StaticImageData } from 'next/image';
+import { v4 as uuidv4 } from 'uuid';
 
 interface OrganisationRequest {
   name: string;
@@ -23,7 +24,7 @@ const createOrganisation = ({
     owner,
     logo: logo ?? hyperILogo,
     brandColor: brandColor ?? '#f1f1f1',
-    id: crypto.randomUUID(),
+    id: uuidv4(),
   };
 };
 export const ORGANISATION_LIST_RESPONSE = [
