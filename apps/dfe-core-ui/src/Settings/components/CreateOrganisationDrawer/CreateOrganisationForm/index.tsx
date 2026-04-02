@@ -1,21 +1,7 @@
-import { Form } from '@/core/components/Form';
-import { Input } from 'antd';
-
 export const CreateOrganisationForm = () => {
   return (
-    <Form>
-      <Form.Item
-        name="name"
-        label="Name"
-        rules={[
-          {
-            required: true,
-            message: 'Please enter the name of the organisation',
-          },
-        ]}
-      >
-        <Input />
-      </Form.Item>
-    </Form>
+    <div className="border border-error rounded-md p-4 text-error bg-error/10">
+      Implement CreateOrganisationForm
+    </div>
   );
 };
