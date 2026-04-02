@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 interface RoleRequest {
   name: string;
   description?: string;
@@ -20,7 +22,7 @@ const createRole = ({
     description,
     permissions,
     predefined,
-    id: crypto.randomUUID(),
+    id: uuidv4(),
   };
 };
 export const CUSTOM_ROLE_LIST_RESPONSE = [
