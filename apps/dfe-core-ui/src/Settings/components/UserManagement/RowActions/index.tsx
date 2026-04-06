@@ -1,23 +1,29 @@
-import { IconMenu2 } from '@repo/dfe-icons';
-import { Button, Popover } from 'antd';
+import { PopoverMenu } from '../../PopoverMenu';
 import { DeleteUserDrawer } from '../DeleteUserDrawer';
+import { DeReactivateUser } from '../DeReactivateUser';
 import { EditUserDrawer } from '../EditUserDrawer';
 import { ViewUserDrawer } from '../ViewUserDrawer';
 
-export const RowActions = ({ name }: { name: string | undefined }) => {
+export const RowActions = ({
+  name,
+  isActive,
+}: {
+  name: string | undefined;
+  isActive: boolean;
+}) => {
   return (
-    <Popover
-      destroyOnHidden
-      trigger="click"
-      content={
-        <div className="flex gap-2 items-center">
-          <ViewUserDrawer title={`View ${name}`} />
-          <EditUserDrawer title={`Edit ${name}`} />
-          <DeleteUserDrawer title={`Delete ${name}`} />
-        </div>
-      }
-    >
-      <Button type="default" icon={<IconMenu2 />} shape="circle" />
-    </Popover>
+    <PopoverMenu
+      options={[
+        <ViewUserDrawer title={`View ${name}`} />,
+        <EditUserDrawer title={`Edit ${name}`} />,
+        <DeReactivateUser isActive={isActive} />,
+        <DeleteUserDrawer
+          title={`Delete ${name}`}
+          isActive={isActive}
+          name={name ?? 'User'}
+        />,
+      ]}
+      ariaLabel="User actions"
+    />
   );
 };

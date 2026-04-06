@@ -14,6 +14,7 @@ export const RoleCard = ({ role }: { role: Role }) => {
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
       <div className="flex flex-col gap-1">
         <PopoverMenu
+          className="absolute top-1 right-1"
           ariaLabel="Role actions"
           options={[
             <ViewRoleDetailsDrawer />,

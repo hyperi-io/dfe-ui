@@ -14,6 +14,7 @@ export const OrganisationCard = ({
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative">
       <PopoverMenu
+        className="absolute top-1 right-1"
         ariaLabel="Organisation actions"
         options={[
           <ViewOrganisationDrawer />,

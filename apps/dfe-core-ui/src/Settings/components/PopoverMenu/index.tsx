@@ -30,7 +30,7 @@ export const PopoverMenu = ({
     >
       <Button
         aria-label={ariaLabel}
-        className={cn('absolute top-1 right-1', className)}
+        className={cn(className)}
         type="default"
         size="small"
         shape="circle"
