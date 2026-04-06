@@ -8,12 +8,13 @@ export const ViewUserDrawer = ({ title = 'View User' }: { title?: string }) => {
   return (
     <>
       <Button
-        shape="circle"
         aria-label={title}
-        type="default"
+        type="text"
         icon={<IconEye />}
         onClick={() => setOpen(true)}
-      />
+      >
+        {title}
+      </Button>
       <Drawer title={title} open={open} onClose={() => setOpen(false)}>
         <div className="border border-error text-error bg-error/10 rounded-md p-4">
           Implement ViewUserDrawer

@@ -80,7 +80,11 @@ const USER_DATA_COLUMNS = [
     title: 'Actions',
     dataIndex: 'actions',
     key: 'actions',
-    render: (_: unknown, record: User) => <RowActions name={record.name} />,
+    width: 85,
+    align: 'center' as const,
+    render: (_: unknown, record: User) => (
+      <RowActions name={record.name} isActive={record.is_active ?? true} />
+    ),
   },
 ];
 
