@@ -1,11 +1,11 @@
 import { cn } from '@/core/utils/style';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
+import { CloneRoleDrawer } from '@/Settings/components/RoleManagement/CloneRoleDrawer';
+import { DeleteRoleDrawer } from '@/Settings/components/RoleManagement/DeleteRoleDrawer';
+import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDrawer';
+import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
 import { Role } from '@/Settings/mocks/role.data';
 import { IconLockFilled } from '@repo/dfe-icons';
-import { CloneRoleDrawer } from '../CloneRoleDrawer';
-import { DeleteRoleDrawer } from '../DeleteRoleDrawer';
-import { EditRoleDrawer } from '../EditRoleDrawer';
-import { ViewRoleDetailsDrawer } from '../ViewRoleDetailsDrawer';
 
 const PERMISSION_LIMIT = 4;
 
@@ -17,10 +17,16 @@ export const RoleCard = ({ role }: { role: Role }) => {
           className="absolute top-1 right-1"
           ariaLabel="Role actions"
           options={[
-            <ViewRoleDetailsDrawer />,
-            <EditRoleDrawer disabled={role.predefined ?? false} />,
-            <CloneRoleDrawer />,
-            <DeleteRoleDrawer disabled={role.predefined ?? false} />,
+            <ViewRoleDetailsDrawer key="view-role-details" />,
+            <EditRoleDrawer
+              key="edit-role"
+              disabled={role.predefined ?? false}
+            />,
+            <CloneRoleDrawer key="clone-role" />,
+            <DeleteRoleDrawer
+              key="delete-role"
+              disabled={role.predefined ?? false}
+            />,
           ]}
         />
 

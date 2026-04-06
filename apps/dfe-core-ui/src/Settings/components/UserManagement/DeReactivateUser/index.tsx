@@ -12,7 +12,10 @@ export const DeReactivateUser = ({
       aria-label={actionTitle}
       type="text"
       icon={<IconLock />}
-      onClick={() => window.alert(actionTitle)}
+      onClick={() => {
+        // eslint-disable-next-line no-alert
+        window.alert(actionTitle);
+      }}
     >
       {actionTitle}
     </Button>
