@@ -3,11 +3,9 @@ import { User, USER_DATA } from '@/Settings/mocks/user.data';
 import { Input, Table, Tag, Tooltip } from 'antd';
 import { useState } from 'react';
 import { SectionCard } from '../SectionCard';
-import { DeleteUserDrawer } from './DeleteUserDrawer';
-import { EditUserDrawer } from './EditUserDrawer';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { LinkUserDrawer } from './LinkUserDrawer';
-import { ViewUserDrawer } from './ViewUserDrawer';
+import { RowActions } from './RowActions';
 
 const USER_DATA_COLUMNS = [
   {
@@ -19,7 +17,7 @@ const USER_DATA_COLUMNS = [
     dataIndex: 'email',
     key: 'email',
     title: 'Email',
-    width: 300,
+    width: 250,
   },
   {
     title: 'Roles',
@@ -40,6 +38,7 @@ const USER_DATA_COLUMNS = [
     title: 'Organisations',
     dataIndex: 'organisations',
     key: 'organisations',
+    width: 130,
     render: (organisations: string[]) =>
       organisations?.length ? (
         <Tooltip destroyOnHidden title={organisations.join(', ')}>
@@ -81,13 +80,7 @@ const USER_DATA_COLUMNS = [
     title: 'Actions',
     dataIndex: 'actions',
     key: 'actions',
-    render: (_: unknown, record: User) => (
-      <div className="flex gap-2 items-center">
-        <ViewUserDrawer title={`View ${record.name}`} />
-        <EditUserDrawer title={`Edit ${record.name}`} />
-        <DeleteUserDrawer title={`Delete ${record.name}`} />
-      </div>
-    ),
+    render: (_: unknown, record: User) => <RowActions name={record.name} />,
   },
 ];
 
@@ -124,6 +117,7 @@ export const UserManagement = () => {
         }
       >
         <Table
+          rowKey="id"
           scroll={{ y: componentHeight }}
           dataSource={filteredUsers}
           columns={USER_DATA_COLUMNS}
