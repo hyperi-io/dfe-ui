@@ -1,8 +1,8 @@
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { SectionCard } from '@/Settings/components/SectionCard';
 import { User, USER_DATA } from '@/Settings/mocks/user.data';
 import { Input, Table, Tag, Tooltip } from 'antd';
 import { useState } from 'react';
-import { SectionCard } from '../SectionCard';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { LinkUserDrawer } from './LinkUserDrawer';
 import { RowActions } from './RowActions';

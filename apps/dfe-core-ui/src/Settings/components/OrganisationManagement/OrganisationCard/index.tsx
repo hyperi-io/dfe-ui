@@ -1,10 +1,10 @@
+import { ArchiveOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ArchiveOrganisationDrawer';
+import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
+import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
+import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { Organisation } from '@/Settings/mocks/organisation.data';
 import { IconLockFilled } from '@repo/dfe-icons';
 import Image from 'next/image';
-import { PopoverMenu } from '../../PopoverMenu';
-import { ArchiveOrganisationDrawer } from '../ArchiveOrganisationDrawer';
-import { EditOrganisationDrawer } from '../EditOrganisationDrawer';
-import { ViewOrganisationDrawer } from '../ViewOrganisationDrawer';
 
 export const OrganisationCard = ({
   organisation,
@@ -17,9 +17,12 @@ export const OrganisationCard = ({
         className="absolute top-1 right-1"
         ariaLabel="Organisation actions"
         options={[
-          <ViewOrganisationDrawer />,
-          <EditOrganisationDrawer />,
-          <ArchiveOrganisationDrawer disabled={organisation.owner} />,
+          <ViewOrganisationDrawer key="view-organisation" />,
+          <EditOrganisationDrawer key="edit-organisation" />,
+          <ArchiveOrganisationDrawer
+            key="archive-organisation"
+            disabled={organisation.owner}
+          />,
         ]}
       />
 

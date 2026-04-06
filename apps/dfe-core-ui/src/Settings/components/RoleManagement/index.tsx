@@ -1,3 +1,5 @@
+import { CreateCustomRoleDrawer } from '@/Settings/components/CreateCustomRoleDrawer';
+import { SectionCard } from '@/Settings/components/SectionCard';
 import {
   CUSTOM_ROLE_LIST_RESPONSE,
   PREDEFINED_ROLE_LIST_RESPONSE,
@@ -5,8 +7,6 @@ import {
 import { IconLock } from '@repo/dfe-icons';
 import { Button, Input } from 'antd';
 import { useState } from 'react';
-import { CreateCustomRoleDrawer } from '../CreateCustomRoleDrawer';
-import { SectionCard } from '../SectionCard';
 import { RoleCard } from './RoleCard';
 
 export const RoleManagement = () => {

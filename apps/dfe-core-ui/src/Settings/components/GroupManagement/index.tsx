@@ -1,5 +1,5 @@
+import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { Tabs } from 'antd';
-import { AdminTabLabel } from '../AdminTabLabel';
 import { OrganisationGroups } from './OrganisationGroups';
 import { UserGroups } from './UserGroups';
 

@@ -1,7 +1,7 @@
 'use client';
 
+import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { Tabs } from 'antd';
-import { AdminTabLabel } from '../AdminTabLabel';
 import { AuditLogs } from './AuditLogs';
 import { SecurityEvents } from './SecurityEvents';
 import { UsageMetrics } from './UsageMetrics';

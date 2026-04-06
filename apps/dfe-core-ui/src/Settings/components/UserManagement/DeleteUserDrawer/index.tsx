@@ -6,11 +6,9 @@ import { useState } from 'react';
 export const DeleteUserDrawer = ({
   title = 'Delete user',
   isActive = true,
-  name = 'User',
 }: {
   title?: string;
   isActive: boolean;
-  name: string;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -25,6 +23,7 @@ export const DeleteUserDrawer = ({
       });
       return;
     }
+    // eslint-disable-next-line no-alert
     window.alert('User deleted successfully.');
   };
   return (
