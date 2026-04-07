@@ -10,11 +10,22 @@ import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const CreateSourceDrawer = () => {
+export const CreateSourceDrawer = ({
+  open,
+  onClose,
+}: {
+  open?: boolean;
+  onClose?: () => void;
+}) => {
   const title = 'Add Source';
   const [api, contextHolder] = notification.useNotification();
+  const [isDrawerVisible, setIsDrawerVisible] = useState(open);
 
-  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const handleClose = () => {
+    setIsDrawerVisible(false);
+    onClose?.();
+  };
+
   const { refetch: refetchSources, setSelectedSourceName } =
     useListSourcesContext();
   const {
@@ -52,9 +63,7 @@ export const CreateSourceDrawer = () => {
         title={title}
         open={isDrawerVisible}
         size="60%"
-        onClose={() => {
-          setIsDrawerVisible(false);
-        }}
+        onClose={handleClose}
       >
         <CreateUpdateSourceForm
           onFinish={handleCreateSource}
