@@ -24,7 +24,7 @@ const createAuditLog = (request: AuditLogRequest) => {
 
 export const AUDIT_LOGS_DATA = [
   createAuditLog({
-    user: 'John Wick',
+    user: 'Claire Bell',
     action: 'Login',
   }),
   createAuditLog({
@@ -32,39 +32,39 @@ export const AUDIT_LOGS_DATA = [
     action: 'Logout',
   }),
   createAuditLog({
-    user: 'John Wick',
+    user: 'Claire Bell',
     action: 'Create User: Amazon Lily',
   }),
   createAuditLog({
-    user: 'John Wick',
+    user: 'Claire Bell',
     action: 'Assign Role: Admin to Amazon Lily',
   }),
   createAuditLog({
-    user: 'John Wick',
+    user: 'Claire Bell',
     action: 'Create Organisation: One Piece',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Login',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Create Source: linux_audit',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Update Source: linux_audit',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Logout',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Login',
   }),
   createAuditLog({
-    user: 'Jim Beam',
+    user: 'Jeremy Light',
     action: 'Logout',
   }),
   createAuditLog({
