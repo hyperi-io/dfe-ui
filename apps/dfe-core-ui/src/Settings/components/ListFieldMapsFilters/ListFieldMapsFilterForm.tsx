@@ -3,7 +3,7 @@ import { SortActions } from '@/core/components/SortActions';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, Input } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -47,31 +47,32 @@ export const ListFieldMapsFilterForm = ({
     });
   }, [form, filters.search, filters.standard]);
 
+  const sortBySelectId = useId();
+
   return (
     <Form
       key={`${filters.search ?? ''}-${filters.standard ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
-      <div className="flex justify-between items-center flex-wrap gap-y-2">
-        <label htmlFor="sort-by">Sort by</label>
-
-        <SortActions
-          sortByValue={filters.sort_by}
-          sortDirectionValue={filters.sort_order}
-          sortByOptions={[
-            { label: 'Standard', value: 'standard' },
-            { label: 'Source', value: 'source' },
-            { label: 'Mapping Count', value: 'mapping_count' },
-          ]}
-          onChange={({ sortBy, sortDirection }) =>
-            setFilters({
-              ...(sortBy !== undefined && { sort_by: sortBy }),
-              ...(sortDirection !== undefined && { sort_order: sortDirection }),
-            })
-          }
-        />
-      </div>
+      <SortActions
+        id={{
+          select: sortBySelectId,
+        }}
+        sortByValue={filters.sort_by}
+        sortDirectionValue={filters.sort_order}
+        sortByOptions={[
+          { label: 'Standard', value: 'standard' },
+          { label: 'Source', value: 'source' },
+          { label: 'Mapping Count', value: 'mapping_count' },
+        ]}
+        onChange={({ sortBy, sortDirection }) =>
+          setFilters({
+            ...(sortBy !== undefined && { sort_by: sortBy }),
+            ...(sortDirection !== undefined && { sort_order: sortDirection }),
+          })
+        }
+      />
 
       <Form.Item
         name="search"
