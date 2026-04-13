@@ -84,6 +84,364 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Accounts
+         * @description List all accounts (admin only). No password hashes returned.
+         */
+        get: operations["list_accounts_api_v1_auth_accounts_get"];
+        put?: never;
+        /**
+         * Create Account
+         * @description Create a new local user account (admin only).
+         */
+        post: operations["create_account_api_v1_auth_accounts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accounts/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Account
+         * @description Get a single account by username (admin only).
+         */
+        get: operations["get_account_api_v1_auth_accounts__username__get"];
+        /**
+         * Update Account
+         * @description Update account groups or enabled status (admin only).
+         */
+        put: operations["update_account_api_v1_auth_accounts__username__put"];
+        post?: never;
+        /**
+         * Delete Account
+         * @description Delete an account (admin only).
+         */
+        delete: operations["delete_account_api_v1_auth_accounts__username__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accounts/{username}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Password
+         * @description Reset an account's password (admin only).
+         */
+        post: operations["reset_password_api_v1_auth_accounts__username__reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Groups
+         * @description List all groups (admin only).
+         */
+        get: operations["list_groups_api_v1_auth_groups_get"];
+        put?: never;
+        /**
+         * Create Group
+         * @description Create a new RBAC group (admin only).
+         */
+        post: operations["create_group_api_v1_auth_groups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/groups/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Group
+         * @description Get a single group by name (admin only).
+         */
+        get: operations["get_group_api_v1_auth_groups__name__get"];
+        /**
+         * Update Group
+         * @description Update group roles or description (admin only).
+         */
+        put: operations["update_group_api_v1_auth_groups__name__put"];
+        post?: never;
+        /**
+         * Delete Group
+         * @description Delete a group (admin only).
+         */
+        delete: operations["delete_group_api_v1_auth_groups__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/groups/{name}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Member
+         * @description Add a member to a group (admin only, idempotent).
+         */
+        post: operations["add_member_api_v1_auth_groups__name__members_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/groups/{name}/members/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove Member
+         * @description Remove a member from a group (admin only).
+         */
+        delete: operations["remove_member_api_v1_auth_groups__name__members__username__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Api Keys
+         * @description List all API keys (admin only). No key hashes or full keys returned.
+         */
+        get: operations["list_api_keys_api_v1_auth_api_keys_get"];
+        put?: never;
+        /**
+         * Create Api Key
+         * @description Create a new API key (admin only). Returns the full key exactly once.
+         */
+        post: operations["create_api_key_api_v1_auth_api_keys_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/api-keys/{short_token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke Api Key
+         * @description Revoke (delete) an API key by short token (admin only).
+         */
+        delete: operations["revoke_api_key_api_v1_auth_api_keys__short_token__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc-providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Providers
+         * @description List all OIDC providers (admin only).
+         */
+        get: operations["list_providers_api_v1_auth_oidc_providers_get"];
+        put?: never;
+        /**
+         * Create Provider
+         * @description Create a new OIDC provider configuration (admin only).
+         */
+        post: operations["create_provider_api_v1_auth_oidc_providers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc-providers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Provider
+         * @description Get a single OIDC provider by name (admin only).
+         */
+        get: operations["get_provider_api_v1_auth_oidc_providers__name__get"];
+        /**
+         * Update Provider
+         * @description Update an OIDC provider configuration (admin only).
+         */
+        put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
+        post?: never;
+        /**
+         * Delete Provider
+         * @description Detach an OIDC provider and report orphaned groups (admin only).
+         *
+         *     Does NOT delete groups — they become orphaned with their source_provider
+         *     still set to the deleted provider name.
+         */
+        delete: operations["delete_provider_api_v1_auth_oidc_providers__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc-providers/{name}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync Provider Groups
+         * @description Force group sync for an OIDC provider (admin only).
+         */
+        post: operations["sync_provider_groups_api_v1_auth_oidc_providers__name__sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc-providers/{name}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Test Provider
+         * @description Test connectivity to an OIDC provider (admin only).
+         */
+        get: operations["test_provider_api_v1_auth_oidc_providers__name__test_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Orgs
+         * @description List all organisations.
+         */
+        get: operations["list_orgs_api_v1_orgs_get"];
+        put?: never;
+        /**
+         * Create Org
+         * @description Create a new customer organisation (admin only).
+         *
+         *     If HyperDX integration is enabled, the lifecycle manager handles
+         *     team creation as part of org provisioning.  Failure is non-fatal.
+         */
+        post: operations["create_org_api_v1_orgs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orgs/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Org
+         * @description Get a single organisation by name.
+         */
+        get: operations["get_org_api_v1_orgs__name__get"];
+        /**
+         * Update Org
+         * @description Update an organisation (admin only).
+         */
+        put: operations["update_org_api_v1_orgs__name__put"];
+        post?: never;
+        /**
+         * Delete Org
+         * @description Delete an organisation (admin only).
+         */
+        delete: operations["delete_org_api_v1_orgs__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -602,6 +960,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/service-surfaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Service Surfaces
+         * @description List all known service surfaces.
+         */
+        get: operations["list_service_surfaces_api_v1_service_surfaces_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/service-surfaces/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Service Surface
+         * @description Get the full surface definition for a single service.
+         */
+        get: operations["get_service_surface_api_v1_service_surfaces__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/service-surfaces/{name}/metrics/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Service Manifest
+         * @description Re-fetch the metrics manifest from a running service.
+         *
+         *     Contacts the service's ``manifest_url`` to update its metrics_surface.
+         *     Returns the refresh result.  Does not fail if the service is unreachable
+         *     — returns ``refreshed=false`` instead.
+         */
+        post: operations["refresh_service_manifest_api_v1_service_surfaces__name__metrics_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/version": {
         parameters: {
             query?: never;
@@ -688,10 +1110,632 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hunts/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Engine Status
+         * @description Get the current status of the hunt scheduler.
+         */
+        get: operations["get_engine_status_api_v1_hunts_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hunts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Hunts
+         * @description List all configured hunts across all schedulers.
+         */
+        get: operations["list_hunts_api_v1_hunts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hunts/{name}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Trigger Hunt
+         * @description Trigger an ad-hoc hunt execution.
+         *
+         *     Returns 202 with a task_id that can be polled via ``GET /tasks/{task_id}``
+         *     or streamed via ``GET /tasks/{task_id}/stream``.
+         */
+        post: operations["trigger_hunt_api_v1_hunts__name__run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/queries/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Views
+         * @description List available parameterized views.
+         */
+        get: operations["list_views_api_v1_queries_views_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/queries/views/namespaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Namespaces
+         * @description List available view namespaces.
+         */
+        get: operations["list_namespaces_api_v1_queries_views_namespaces_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/queries/views/{label}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get View
+         * @description Get a specific view definition with parameters and metadata.
+         */
+        get: operations["get_view_api_v1_queries_views__label__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/queries/views/{label}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Execute View
+         * @description Execute a parameterized view and return JSON results.
+         *
+         *     The ``org_id`` parameter is always injected from the authenticated
+         *     user's context — it cannot be overridden by the client.
+         */
+        post: operations["execute_view_api_v1_queries_views__label__execute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/queries/raw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Execute Raw Query
+         * @description Execute a raw query against a registered datasource adapter.
+         *
+         *     This is the lower-level query path — for ad-hoc queries against
+         *     datasource adapters rather than parameterized views. Requires
+         *     ``query:execute`` permission.
+         */
+        post: operations["execute_raw_query_api_v1_queries_raw_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pipeline/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Templates
+         * @description List available Vector pipeline templates.
+         */
+        get: operations["list_templates_api_v1_pipeline_templates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pipeline/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build Pipeline
+         * @description Trigger pipeline manifest generation.
+         *
+         *     Returns 202 with a task_id that can be polled via ``GET /tasks/{task_id}``.
+         */
+        post: operations["build_pipeline_api_v1_pipeline_build_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Tasks
+         * @description List all tasks, optionally filtered by kind.
+         */
+        get: operations["list_tasks_api_v1_tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Task
+         * @description Get current status of a task.
+         */
+        get: operations["get_task_api_v1_tasks__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{task_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Task
+         * @description Cancel a running task.
+         */
+        post: operations["cancel_task_api_v1_tasks__task_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/databases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Databases
+         * @description List all ClickHouse databases.
+         */
+        get: operations["list_databases_api_v1_discovery_databases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Tables
+         * @description List tables in a ClickHouse database.
+         */
+        get: operations["list_tables_api_v1_discovery_tables_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/tables/{table_name}/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Columns
+         * @description List columns for a specific table.
+         */
+        get: operations["list_columns_api_v1_discovery_tables__table_name__columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Schema Columns
+         * @description Get columns for a source's schema.
+         */
+        get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build Schema
+         * @description Build complete schema (DDL) from a source definition.
+         *
+         *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
+         *     without executing it against ClickHouse.
+         */
+        post: operations["build_schema_api_v1_schemas__source_name__build_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/mappings/{source_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Field Mappings
+         * @description Get Sigma field mappings for a source.
+         */
+        get: operations["get_field_mappings_api_v1_sigma_mappings__source_name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/views/{source_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate Sigma View
+         * @description Generate Sigma view DDL for a source.
+         *
+         *     Returns the DDL string — does NOT execute it against ClickHouse.
+         */
+        post: operations["generate_sigma_view_api_v1_sigma_views__source_name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate All Sigma Views
+         * @description Generate Sigma view DDL for all sources.
+         */
+        post: operations["generate_all_sigma_views_api_v1_sigma_views_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/logsource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find Sources For Logsource
+         * @description Find sources matching a Sigma logsource selector.
+         */
+        get: operations["find_sources_for_logsource_api_v1_sigma_logsource_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cel/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate a CEL expression and classify its performance tier
+         * @description Returns syntax validity, performance tier, referenced fields, and a human-readable description of what the expression matches. Designed for live UI validation as the user types — completes in <1ms.
+         */
+        post: operations["check_cel_expression_api_v1_cel_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cel/check-batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate multiple CEL expressions in one call
+         * @description Batch version of /cel/check. Use when the UI needs to validate an entire filter list at once (e.g., on form submit). Max 100 expressions.
+         */
+        post: operations["check_cel_expressions_batch_api_v1_cel_check_batch_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liveness
+         * @description Liveness probe — is the process alive?
+         */
+        get: operations["liveness_health_live_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readiness
+         * @description Readiness probe — can the service handle traffic?
+         */
+        get: operations["readiness_health_ready_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health/startup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Startup
+         * @description Startup probe — has initialisation completed?
+         */
+        get: operations["startup_health_startup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * APIKeyCreatedResponse
+         * @description Returned exactly once at creation — includes the full key.
+         */
+        APIKeyCreatedResponse: {
+            /** Name */
+            name: string;
+            /** Short Token */
+            short_token: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Groups */
+            groups: string[];
+            /** Description */
+            description: string;
+            /** Created At */
+            created_at: string;
+            /**
+             * Full Key
+             * @description Full API key (shown once, cannot be recovered)
+             */
+            full_key: string;
+        };
+        /**
+         * APIKeyResponse
+         * @description API key metadata — key_hash is NEVER included.
+         */
+        APIKeyResponse: {
+            /** Name */
+            name: string;
+            /** Short Token */
+            short_token: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Groups */
+            groups: string[];
+            /** Description */
+            description: string;
+            /** Created At */
+            created_at: string;
+        };
+        /**
+         * AccountResponse
+         * @description Account detail — password_hash is NEVER included.
+         */
+        AccountResponse: {
+            /** Username */
+            username: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Groups */
+            groups: string[];
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
+        /** AddMemberRequest */
+        AddMemberRequest: {
+            /**
+             * Username
+             * @description Account username to add
+             */
+            username: string;
+        };
         /** AlertDestination */
         AlertDestination: {
             /**
@@ -767,6 +1811,130 @@ export interface components {
                 [key: string]: string;
             }[];
         };
+        /**
+         * CelCheckBatchRequest
+         * @description Request to validate multiple CEL expressions in one call.
+         */
+        CelCheckBatchRequest: {
+            /**
+             * Expressions
+             * @description List of CEL expressions to validate
+             */
+            expressions: string[];
+            /**
+             * Check Profile
+             * @default false
+             */
+            check_profile: boolean;
+        };
+        /**
+         * CelCheckBatchResponse
+         * @description Result of a batch CEL expression check.
+         */
+        CelCheckBatchResponse: {
+            /**
+             * Results
+             * @description One result per input expression, in the same order
+             */
+            results: components["schemas"]["CelCheckResponse"][];
+        };
+        /**
+         * CelCheckRequest
+         * @description Request to validate a single CEL expression.
+         */
+        CelCheckRequest: {
+            /**
+             * Expression
+             * @description CEL expression to validate
+             * @example has(_table)
+             * @example severity > 3 && source != "internal"
+             */
+            expression: string;
+            /**
+             * Check Profile
+             * @description If true, apply DFE profile restrictions (reject regex/iteration/time). Leave false for transport filters — Tier 3 is classification only, not rejection.
+             * @default false
+             */
+            check_profile: boolean;
+        };
+        /**
+         * CelCheckResponse
+         * @description Result of a single CEL expression check.
+         */
+        CelCheckResponse: {
+            /**
+             * Valid
+             * @description True if syntax is valid
+             */
+            valid: boolean;
+            /**
+             * Errors
+             * @description Syntax/profile errors (empty if valid)
+             */
+            errors?: string[];
+            /** @description Performance tier (null if invalid) */
+            tier?: components["schemas"]["FilterTier"] | null;
+            /**
+             * Tier Label
+             * @description Human-readable tier label (e.g., 'Tier 1 (SIMD)')
+             */
+            tier_label?: string | null;
+            /**
+             * Fields
+             * @description Fields referenced by the expression (Tier 2/3)
+             */
+            fields?: string[];
+            /**
+             * Op Kind
+             * @description Recognised Tier 1 operation kind (field_exists, field_equals, etc.)
+             */
+            op_kind?: string | null;
+            /**
+             * Op Field
+             * @description Field name in the Tier 1 operation
+             */
+            op_field?: string | null;
+            /**
+             * Op Value
+             * @description Comparison value in the Tier 1 operation
+             */
+            op_value?: string | null;
+            /**
+             * Description
+             * @description Human-readable description of what the expression matches
+             */
+            description?: string | null;
+            /**
+             * Opt In Required
+             * @description Config key that must be enabled for this expression's tier (Tier 2/3)
+             */
+            opt_in_required?: string | null;
+        };
+        /**
+         * ColumnInfo
+         * @description A column in a ClickHouse table.
+         */
+        ColumnInfo: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /**
+             * Default Kind
+             * @default
+             */
+            default_kind: string;
+            /**
+             * Default Expression
+             * @default
+             */
+            default_expression: string;
+            /**
+             * Comment
+             * @default
+             */
+            comment: string;
+        };
         /** CompileRequest */
         CompileRequest: {
             /**
@@ -800,6 +1968,24 @@ export interface components {
             /** Date */
             date: string;
         };
+        /**
+         * ConfigSurfaceEntry
+         * @description A single configurable setting for a Rust service.
+         */
+        ConfigSurfaceEntry: {
+            /**
+             * Type
+             * @default string
+             */
+            type: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Default */
+            default?: unknown;
+        };
         /** CostEstimate */
         CostEstimate: {
             /** Estimated Rows */
@@ -815,6 +2001,175 @@ export interface components {
             window_minutes: number;
             /** Warnings */
             warnings?: string[];
+        };
+        /** CreateAPIKeyRequest */
+        CreateAPIKeyRequest: {
+            /**
+             * Name
+             * @description Unique human-readable key name
+             */
+            name: string;
+            /**
+             * Groups
+             * @description RBAC group memberships
+             */
+            groups?: string[];
+            /**
+             * Description
+             * @description Optional description
+             * @default
+             */
+            description: string;
+        };
+        /** CreateAccountRequest */
+        CreateAccountRequest: {
+            /**
+             * Username
+             * @description Unique account name
+             */
+            username: string;
+            /**
+             * Password
+             * @description Plaintext password (bcrypt-hashed before storage)
+             */
+            password: string;
+            /**
+             * Groups
+             * @description Group memberships
+             */
+            groups?: string[];
+        };
+        /** CreateGroupRequest */
+        CreateGroupRequest: {
+            /**
+             * Name
+             * @description Unique group name
+             */
+            name: string;
+            /**
+             * Roles
+             * @description Roles assigned to all group members
+             */
+            roles: string[];
+            /**
+             * Description
+             * @description Human-readable description
+             * @default
+             */
+            description: string;
+        };
+        /** CreateOrgRequest */
+        CreateOrgRequest: {
+            /**
+             * Name
+             * @description Unique org name (used as identifier)
+             */
+            name: string;
+            /**
+             * Display Name
+             * @description Human-readable label
+             * @default
+             */
+            display_name: string;
+            /**
+             * Org Ids
+             * @description Tenant IDs for ClickHouse row-level security
+             */
+            org_ids?: string[];
+            /**
+             * Dedicated Database
+             * @description Whether to provision a dedicated ClickHouse database
+             * @default false
+             */
+            dedicated_database: boolean;
+        };
+        /** CreateProviderRequest */
+        CreateProviderRequest: {
+            /**
+             * Name
+             * @description Unique provider name (used as filename stem)
+             */
+            name: string;
+            /**
+             * Type
+             * @description Provider type: generic, google, entra_id, okta
+             */
+            type: string;
+            /**
+             * Display Name
+             * @description Human-readable label
+             * @default
+             */
+            display_name: string;
+            /**
+             * Issuer
+             * @description OIDC issuer URL
+             * @default
+             */
+            issuer: string;
+            /**
+             * Client Id Env
+             * @description Env var name for OIDC client ID
+             * @default
+             */
+            client_id_env: string;
+            groups?: components["schemas"]["GroupResolutionRequest"];
+        };
+        /**
+         * DDLResult
+         * @description Generated DDL output.
+         */
+        DDLResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Create Table
+             * @description CREATE TABLE DDL
+             */
+            create_table: string;
+            /**
+             * Views
+             * @description View name → DDL
+             */
+            views?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * DatabaseInfo
+         * @description Summary of a ClickHouse database.
+         */
+        DatabaseInfo: {
+            /** Name */
+            name: string;
+            /**
+             * Engine
+             * @default
+             */
+            engine: string;
+        };
+        /**
+         * DeploymentConfigDetail
+         * @description Full deployment config. Inner config is dynamic (schema-less mode).
+         */
+        DeploymentConfigDetail: {
+            /**
+             * Service
+             * @description Service type
+             */
+            service: string;
+            /**
+             * Instance
+             * @description Instance name
+             */
+            instance: string;
+            /**
+             * Config
+             * @description Deployment-specific configuration (resources, KEDA, etc.)
+             */
+            config: {
+                [key: string]: unknown;
+            };
         };
         /** DeploymentHistoryEntry */
         DeploymentHistoryEntry: {
@@ -841,6 +2196,13 @@ export interface components {
             keda_enabled?: boolean | null;
             /** Updated At */
             updated_at?: string | null;
+        };
+        /** DetachResponse */
+        DetachResponse: {
+            /** Deleted */
+            deleted: string;
+            /** Orphaned Groups */
+            orphaned_groups: components["schemas"]["OrphanedGroupInfo"][];
         };
         /** EmittedRecord */
         EmittedRecord: {
@@ -977,10 +2339,173 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /**
+         * FieldMapping
+         * @description A single Sigma field → column mapping.
+         */
+        FieldMapping: {
+            /** Sigma Field */
+            sigma_field: string;
+            /** Column Name */
+            column_name: string;
+        };
+        /**
+         * FilterTier
+         * @description Performance tier for a filter expression.
+         * @enum {string}
+         */
+        FilterTier: "tier1" | "tier2" | "tier3";
+        /** GroupResolutionRequest */
+        GroupResolutionRequest: {
+            /**
+             * Mode
+             * @description Group resolution mode: manual, token_claim, api
+             * @default manual
+             */
+            mode: string;
+            /**
+             * Claim Name
+             * @description Token claim name for group IDs
+             * @default groups
+             */
+            claim_name: string;
+            /**
+             * Sync Interval
+             * @description Seconds between API sync cycles
+             * @default 3600
+             */
+            sync_interval: number;
+            /**
+             * Service Account Json Env
+             * @description Env var for Google SA JSON
+             * @default
+             */
+            service_account_json_env: string;
+            /**
+             * Admin Email
+             * @description Google Workspace admin email
+             * @default
+             */
+            admin_email: string;
+            /**
+             * Domain
+             * @description Google Workspace domain
+             * @default
+             */
+            domain: string;
+            /**
+             * Tenant Id Env
+             * @description Env var for Entra ID tenant ID
+             * @default
+             */
+            tenant_id_env: string;
+            /**
+             * Client Secret Env
+             * @description Env var for Entra ID client secret
+             * @default
+             */
+            client_secret_env: string;
+            /**
+             * Api Token Env
+             * @description Env var for Okta API token
+             * @default
+             */
+            api_token_env: string;
+            /**
+             * Okta Domain
+             * @description Okta organisation domain
+             * @default
+             */
+            okta_domain: string;
+        };
+        /** GroupResolutionResponse */
+        GroupResolutionResponse: {
+            /** Mode */
+            mode: string;
+            /** Claim Name */
+            claim_name: string;
+            /** Sync Interval */
+            sync_interval: number;
+            /** Service Account Json Env */
+            service_account_json_env: string;
+            /** Admin Email */
+            admin_email: string;
+            /** Domain */
+            domain: string;
+            /** Tenant Id Env */
+            tenant_id_env: string;
+            /** Client Secret Env */
+            client_secret_env: string;
+            /** Api Token Env */
+            api_token_env: string;
+            /** Okta Domain */
+            okta_domain: string;
+        };
+        /** GroupResponse */
+        GroupResponse: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+            /** Roles */
+            roles: string[];
+            /** Members */
+            members: string[];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HuntEngineStatus
+         * @description Current state of the background hunt scheduler.
+         */
+        HuntEngineStatus: {
+            /**
+             * Running
+             * @description Whether the scheduler thread is alive
+             */
+            running: boolean;
+            /**
+             * Hunt Count
+             * @description Number of loaded hunts across all schedulers
+             * @default 0
+             */
+            hunt_count: number;
+            /**
+             * Scheduling Mode
+             * @description Scheduling mode (cron, adaptive)
+             * @default
+             */
+            scheduling_mode: string;
+        };
+        /**
+         * HuntSummary
+         * @description Summary of a configured hunt.
+         */
+        HuntSummary: {
+            /** Name */
+            name: string;
+            /** Customer */
+            customer: string;
+            /**
+             * Cron
+             * @description Cron schedule expression
+             */
+            cron: string;
+            /** Rules */
+            rules?: string[];
+            /**
+             * Source Table
+             * @default
+             */
+            source_table: string;
+            /**
+             * Target Table
+             * @default
+             */
+            target_table: string;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -994,6 +2519,39 @@ export interface components {
              * @description Plaintext password
              */
             password: string;
+        };
+        /**
+         * LogsourceMatch
+         * @description A source matching a Sigma logsource selector.
+         */
+        LogsourceMatch: {
+            /** Source */
+            source: string;
+            /**
+             * Display Name
+             * @default
+             */
+            display_name: string;
+        };
+        /**
+         * ManifestRefreshResponse
+         * @description Result of a manifest refresh attempt.
+         */
+        ManifestRefreshResponse: {
+            /** Service */
+            service: string;
+            /** Refreshed */
+            refreshed: boolean;
+            /**
+             * Discovered At
+             * @default
+             */
+            discovered_at: string;
+            /**
+             * Metrics Count
+             * @default 0
+             */
+            metrics_count: number;
         };
         /**
          * MatchConflictContext
@@ -1039,6 +2597,61 @@ export interface components {
             /** Errors */
             errors?: components["schemas"]["FieldError"][];
             context: components["schemas"]["MatchConflictContext"];
+        };
+        /**
+         * MetricEntry
+         * @description A single metric from the service's manifest.
+         */
+        MetricEntry: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Unit
+             * @default
+             */
+            unit: string;
+            /** Labels */
+            labels?: string[];
+            /**
+             * Group
+             * @default
+             */
+            group: string;
+        };
+        /** OrgResponse */
+        OrgResponse: {
+            /** Name */
+            name: string;
+            /** Display Name */
+            display_name: string;
+            /** Org Ids */
+            org_ids: string[];
+            /** Enabled */
+            enabled: boolean;
+            /** Dedicated Database */
+            dedicated_database: boolean;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
+        /** OrphanedGroupInfo */
+        OrphanedGroupInfo: {
+            /** Name */
+            name: string;
+            /** Source Provider */
+            source_provider: string;
+            /** Roles */
+            roles: string[];
+            /** Member Count */
+            member_count: number;
         };
         /** PaginatedResponse[AlertDestinationSummary] */
         PaginatedResponse_AlertDestinationSummary_: {
@@ -1184,6 +2797,233 @@ export interface components {
             permissions: string[];
         };
         /**
+         * PipelineBuildRequest
+         * @description Request to build pipeline manifests.
+         */
+        PipelineBuildRequest: {
+            /**
+             * Config Path
+             * @description Path to dfe_package.yaml (uses default if not provided)
+             */
+            config_path?: string | null;
+            /**
+             * Output Path
+             * @description Output directory for rendered manifests
+             */
+            output_path?: string | null;
+            /**
+             * Build Core
+             * @description Build core templates (vs custom only)
+             * @default false
+             */
+            build_core: boolean;
+        };
+        /**
+         * PipelineBuildResponse
+         * @description Response from triggering a pipeline build.
+         */
+        PipelineBuildResponse: {
+            /**
+             * Task Id
+             * @description Task ID for polling via /tasks/{task_id}
+             */
+            task_id: string;
+        };
+        /**
+         * PipelineTemplate
+         * @description A discovered pipeline template.
+         */
+        PipelineTemplate: {
+            /**
+             * Type
+             * @description Template type (core, custom)
+             */
+            type: string;
+            /**
+             * Name
+             * @description Template filename
+             */
+            name: string;
+        };
+        /**
+         * ProviderResponse
+         * @description Provider config — env var names are shown, never actual secret values.
+         */
+        ProviderResponse: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Display Name */
+            display_name: string;
+            /** Issuer */
+            issuer: string;
+            /** Client Id Env */
+            client_id_env: string;
+            groups: components["schemas"]["GroupResolutionResponse"];
+            /** Created At */
+            created_at: string;
+            /** Last Sync At */
+            last_sync_at: string;
+            /** Last Sync Status */
+            last_sync_status: string;
+            /** Sync Error */
+            sync_error: string;
+        };
+        /**
+         * QueryOptions
+         * @description Query execution options.
+         *
+         *     These are standard parameters available for all queries.
+         *     Server enforces maximums from query definition and global config.
+         *
+         *     Pagination modes:
+         *     - Offset-based: Use `limit` and `offset` for simple pagination
+         *     - Cursor-based: Use `cursor` for efficient pagination on large datasets
+         *     - Keyset: Use `after_key` with an order column for stable pagination
+         */
+        QueryOptions: {
+            /** Limit */
+            limit?: number | null;
+            /** Offset */
+            offset?: number | null;
+            /**
+             * Cursor
+             * @description Opaque cursor for cursor-based pagination (from previous response)
+             */
+            cursor?: string | null;
+            /**
+             * After Key
+             * @description Value to paginate after (requires order_by in query)
+             */
+            after_key?: unknown | null;
+            /**
+             * Order By
+             * @description Column to order by for keyset pagination
+             */
+            order_by?: string | null;
+            /**
+             * Order Dir
+             * @description Sort direction for ordering
+             * @default asc
+             * @enum {string}
+             */
+            order_dir: "asc" | "desc";
+            /**
+             * Time From
+             * @description ISO8601 datetime
+             */
+            time_from?: string | null;
+            /**
+             * Time To
+             * @description ISO8601 datetime
+             */
+            time_to?: string | null;
+            /** Timeout Seconds */
+            timeout_seconds?: number | null;
+            /**
+             * Include Explain
+             * @default false
+             */
+            include_explain: boolean;
+            /**
+             * Explain Parallel
+             * @default true
+             */
+            explain_parallel: boolean;
+            /**
+             * Cache
+             * @description Allow cached results
+             * @default true
+             */
+            cache: boolean;
+            /**
+             * Store
+             * @description Target store (database/schema/topic) - only if query allows
+             */
+            store?: string | null;
+        };
+        /**
+         * QueryResponse
+         * @description JSON response for query execution.
+         */
+        QueryResponse: {
+            /**
+             * Rows
+             * @description Result rows
+             */
+            rows: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Columns
+             * @description Column names
+             */
+            columns: string[];
+            /**
+             * Row Count
+             * @description Number of rows returned
+             */
+            row_count: number;
+            /**
+             * Query Duration Ms
+             * @description Execution time in milliseconds
+             */
+            query_duration_ms: number;
+            /**
+             * Has More
+             * @description Whether more rows are available
+             * @default false
+             */
+            has_more: boolean;
+            /**
+             * Next Offset
+             * @description Next offset for pagination
+             */
+            next_offset?: number | null;
+            /**
+             * Request Id
+             * @description Request correlation ID
+             */
+            request_id?: string | null;
+        };
+        /**
+         * RawQueryRequest
+         * @description Request for raw query execution against a datasource adapter.
+         */
+        RawQueryRequest: {
+            /**
+             * Datasource
+             * @description Datasource URI (e.g. 'clickhouse:default')
+             * @example clickhouse:default
+             */
+            datasource: string;
+            /**
+             * Query
+             * @description Query label or identifier
+             */
+            query: string;
+            /**
+             * Params
+             * @description Query parameters
+             */
+            params?: {
+                [key: string]: unknown;
+            } | null;
+            /** @description Execution options (limit, timeout, etc.) */
+            options?: components["schemas"]["QueryOptions"] | null;
+        };
+        /** ResetPasswordRequest */
+        ResetPasswordRequest: {
+            /**
+             * New Password
+             * @description New plaintext password
+             */
+            new_password: string;
+        };
+        /**
          * RuleCreateRequest
          * @description Create a hunt rule via RuleCreationService.
          */
@@ -1295,6 +3135,70 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /**
+         * SchemaBuildResult
+         * @description Result of building a schema from a source.
+         */
+        SchemaBuildResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Version
+             * @default
+             */
+            version: string;
+            /** Columns */
+            columns: components["schemas"]["SchemaColumn"][];
+            ddl?: components["schemas"]["DDLResult"] | null;
+        };
+        /**
+         * SchemaColumn
+         * @description A column in a schema definition.
+         */
+        SchemaColumn: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /**
+             * Use Case
+             * @default
+             */
+            use_case: string;
+            /**
+             * Attribute
+             * @default
+             */
+            attribute: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+        };
+        /**
+         * ServiceConfigDetail
+         * @description Full service config. Inner config is dynamic (schema-less mode).
+         */
+        ServiceConfigDetail: {
+            /**
+             * Service
+             * @description Service type (e.g. receiver, loader)
+             */
+            service: string;
+            /**
+             * Instance
+             * @description Instance name (e.g. production, staging)
+             */
+            instance: string;
+            /**
+             * Config
+             * @description Service-specific configuration
+             */
+            config: {
+                [key: string]: unknown;
+            };
+        };
         /** ServiceConfigSummary */
         ServiceConfigSummary: {
             /** Service */
@@ -1303,6 +3207,38 @@ export interface components {
             instance: string;
             /** Updated At */
             updated_at?: string | null;
+        };
+        /**
+         * ServiceSurface
+         * @description Complete surface definition for a Rust service.
+         *
+         *     Loaded from YAML files in the service-surfaces config directory.
+         *     One file per service (e.g. ``dfe-receiver.yaml``).
+         */
+        ServiceSurface: {
+            /** Service */
+            service: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Config Surface */
+            config_surface?: {
+                [key: string]: components["schemas"]["ConfigSurfaceEntry"];
+            };
+            /** Metrics Surface */
+            metrics_surface?: components["schemas"]["MetricEntry"][];
+            /**
+             * Manifest Url
+             * @default
+             */
+            manifest_url: string;
+            /**
+             * Discovered At
+             * @default
+             */
+            discovered_at: string;
         };
         /**
          * SettingsSummary
@@ -1329,6 +3265,19 @@ export interface components {
             api_port: number;
             /** Api Cors Origins */
             api_cors_origins: string[];
+        };
+        /**
+         * SigmaViewResult
+         * @description Generated Sigma view DDL for a source.
+         */
+        SigmaViewResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Ddl
+             * @description DDL for the view, or null if no mappings
+             */
+            ddl: string | null;
         };
         /** SizeResponse */
         SizeResponse: {
@@ -1485,6 +3434,18 @@ export interface components {
              * @default 1.0.0
              */
             version: string;
+        };
+        /**
+         * SourceMappingSummary
+         * @description Sigma mapping summary for a source.
+         */
+        SourceMappingSummary: {
+            /** Source Name */
+            source_name: string;
+            /** Field Count */
+            field_count: number;
+            /** Mappings */
+            mappings: components["schemas"]["FieldMapping"][];
         };
         /**
          * SourceMatch
@@ -1674,6 +3635,123 @@ export interface components {
             /** Errors */
             errors?: components["schemas"]["SqlValidationError"][];
         };
+        /**
+         * SurfaceSummary
+         * @description Compact summary for list endpoint.
+         */
+        SurfaceSummary: {
+            /** Service */
+            service: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Config Count
+             * @default 0
+             */
+            config_count: number;
+            /**
+             * Metrics Count
+             * @default 0
+             */
+            metrics_count: number;
+            /**
+             * Manifest Url
+             * @default
+             */
+            manifest_url: string;
+        };
+        /** SyncResponse */
+        SyncResponse: {
+            /** Created */
+            created: number;
+            /** Updated */
+            updated: number;
+            /** Total */
+            total: number;
+            /** Error */
+            error: string | null;
+        };
+        /**
+         * TableInfo
+         * @description Summary of a ClickHouse table.
+         */
+        TableInfo: {
+            /** Name */
+            name: string;
+            /** Database */
+            database: string;
+            /**
+             * Engine
+             * @default
+             */
+            engine: string;
+            /** Total Rows */
+            total_rows?: number | null;
+            /** Total Bytes */
+            total_bytes?: number | null;
+            /**
+             * Comment
+             * @default
+             */
+            comment: string;
+        };
+        /**
+         * TaskInfo
+         * @description Public view of a task.
+         */
+        TaskInfo: {
+            /**
+             * Id
+             * @description Unique task ID (UUID)
+             */
+            id: string;
+            /**
+             * Kind
+             * @description Task kind (e.g. 'hunt:execute', 'pipeline:generate')
+             */
+            kind: string;
+            status: components["schemas"]["TaskStatus"];
+            /**
+             * Created At
+             * @description ISO 8601 creation time
+             */
+            created_at: string;
+            /** Started At */
+            started_at?: string | null;
+            /** Completed At */
+            completed_at?: string | null;
+            /**
+             * Progress
+             * @description Progress percentage
+             * @default 0
+             */
+            progress: number;
+            /**
+             * Message
+             * @description Human-readable status message
+             * @default
+             */
+            message: string;
+            /**
+             * Result
+             * @description Task result (on completion)
+             */
+            result?: unknown | null;
+            /**
+             * Error
+             * @description Error message (on failure)
+             */
+            error?: string | null;
+        };
+        /**
+         * TaskStatus
+         * @description Task lifecycle states.
+         * @enum {string}
+         */
+        TaskStatus: "pending" | "running" | "completed" | "failed" | "cancelled";
         /** TestRequest */
         TestRequest: {
             /**
@@ -1698,15 +3776,6 @@ export interface components {
              * @enum {string}
              */
             sink_format: "json" | "msgpack";
-        };
-        /** TestResponse */
-        TestResponse: {
-            /** Emitted */
-            emitted: components["schemas"]["EmittedRecord"][];
-            /** Duration Ms */
-            duration_ms: number;
-            /** Wasm Memory Bytes */
-            wasm_memory_bytes: number;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -1735,6 +3804,103 @@ export interface components {
              * @description User roles
              */
             roles: string[];
+        };
+        /**
+         * TriggerRequest
+         * @description Request to trigger an ad-hoc hunt execution.
+         */
+        TriggerRequest: {
+            /**
+             * Customer
+             * @description Customer/org ID to run the hunt for
+             */
+            customer: string;
+        };
+        /**
+         * TriggerResponse
+         * @description Response from triggering an ad-hoc hunt.
+         */
+        TriggerResponse: {
+            /**
+             * Task Id
+             * @description Task ID for polling via /tasks/{task_id}
+             */
+            task_id: string;
+            /**
+             * Hunt Name
+             * @description Name of the triggered hunt
+             */
+            hunt_name: string;
+        };
+        /** UpdateAccountRequest */
+        UpdateAccountRequest: {
+            /**
+             * Groups
+             * @description Replace group memberships
+             */
+            groups?: string[] | null;
+            /**
+             * Enabled
+             * @description Enable or disable the account
+             */
+            enabled?: boolean | null;
+        };
+        /** UpdateGroupRequest */
+        UpdateGroupRequest: {
+            /**
+             * Roles
+             * @description Replace role list
+             */
+            roles?: string[] | null;
+            /**
+             * Description
+             * @description Replace description
+             */
+            description?: string | null;
+        };
+        /** UpdateOrgRequest */
+        UpdateOrgRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label
+             */
+            display_name?: string | null;
+            /**
+             * Org Ids
+             * @description Tenant IDs
+             */
+            org_ids?: string[] | null;
+            /**
+             * Enabled
+             * @description Enable or disable the org
+             */
+            enabled?: boolean | null;
+            /**
+             * Dedicated Database
+             * @description Enable or disable a dedicated ClickHouse database
+             */
+            dedicated_database?: boolean | null;
+            /**
+             * Confirm Merge
+             * @description Required when disabling dedicated_database — confirms data migration is handled
+             * @default false
+             */
+            confirm_merge: boolean;
+        };
+        /** UpdateProviderRequest */
+        UpdateProviderRequest: {
+            /**
+             * Enabled
+             * @description Enable or disable the provider
+             */
+            enabled?: boolean | null;
+            /**
+             * Display Name
+             * @description Human-readable label
+             */
+            display_name?: string | null;
+            /** @description Group resolution config */
+            groups?: components["schemas"]["GroupResolutionRequest"] | null;
         };
         /** UserResponse */
         UserResponse: {
@@ -1775,6 +3941,143 @@ export interface components {
              */
             python_version: string;
         };
+        /**
+         * ViewDefinition
+         * @description A parameterized view discovered from ClickHouse system.tables.
+         *
+         *     Views follow the naming convention: dfe_v_{namespace}_{name}
+         *     e.g. dfe_v_analytics_user_activity → label: analytics/user_activity
+         */
+        ViewDefinition: {
+            /**
+             * Name
+             * @description Full view name (e.g. dfe_v_analytics_user_activity)
+             */
+            name: string;
+            /**
+             * Label
+             * @description Derived label for API consumers (e.g. analytics/user_activity)
+             */
+            label: string;
+            /**
+             * Database
+             * @description ClickHouse database containing the view
+             */
+            database: string;
+            /** Parameters */
+            parameters?: components["schemas"]["ViewParameter"][];
+            /**
+             * Create Sql
+             * @description CREATE VIEW statement from system.tables
+             */
+            create_sql: string;
+            /**
+             * Modified At
+             * @description Last modification timestamp from system.tables
+             */
+            modified_at?: string | null;
+            /**
+             * Namespace
+             * @description Namespace derived from view name (e.g. analytics)
+             */
+            namespace: string;
+            /**
+             * Short Name
+             * @description Short name within namespace (e.g. user_activity)
+             */
+            short_name: string;
+            /**
+             * Description
+             * @description View description
+             */
+            description?: string | null;
+            /**
+             * Tenant Isolated
+             * @description Whether view contains org_id parameter for tenant isolation
+             * @default true
+             */
+            tenant_isolated: boolean;
+            /** Required Roles */
+            required_roles?: string[];
+        };
+        /**
+         * ViewExecuteRequest
+         * @description Request to execute a parameterized view.
+         */
+        ViewExecuteRequest: {
+            /**
+             * Params
+             * @description View parameters (validated against view definition)
+             */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** @description Execution options (limit, offset, timeout, etc.) */
+            options?: components["schemas"]["QueryOptions"] | null;
+        };
+        /**
+         * ViewParameter
+         * @description Parameter discovered from a ClickHouse parameterized view.
+         *
+         *     Extracted from the view's CREATE SQL by parsing {param:Type} patterns.
+         *     Provides type metadata across the full stack (ClickHouse → Python → TypeScript → HTML).
+         */
+        ViewParameter: {
+            /**
+             * Name
+             * @description Parameter name as declared in the view
+             */
+            name: string;
+            /**
+             * Clickhouse Type
+             * @description ClickHouse type (String, UInt64, DateTime64(3), Array(UInt64))
+             */
+            clickhouse_type: string;
+            /**
+             * Python Type
+             * @description Python type mapping (string, integer, float, datetime, date, uuid, boolean, array)
+             */
+            python_type: string;
+            /**
+             * Typescript Type
+             * @description TypeScript type mapping (string, number, boolean, string[], number[])
+             * @default string
+             */
+            typescript_type: string;
+            /**
+             * Input Type
+             * @description HTML input type hint (text, number, datetime-local, date, checkbox, select, multiselect)
+             * @default text
+             */
+            input_type: string;
+            /**
+             * Required
+             * @description Whether the parameter is required (all CH view params are required)
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Reserved
+             * @description If true, parameter is injected server-side (e.g. org_id) and hidden from UI
+             * @default false
+             */
+            reserved: boolean;
+            /**
+             * Description
+             * @description Human-readable description
+             */
+            description?: string | null;
+            /**
+             * Placeholder
+             * @description Example value for UI input fields
+             */
+            placeholder?: string | null;
+            /**
+             * Enum
+             * @description Allowed values (renders as dropdown in UI)
+             */
+            enum?: unknown[] | null;
+        };
         /** SeedResponse */
         dfe_engine__api__v1__deployments__SeedResponse: {
             /** Seeded */
@@ -1793,6 +4096,13 @@ export interface components {
         dfe_engine__api__v1__fieldmaps__SeedResponse: {
             /** Seeded */
             seeded: number;
+        };
+        /** TestResponse */
+        dfe_engine__api__v1__oidc_providers__TestResponse: {
+            /** Success */
+            success: boolean;
+            /** Message */
+            message: string;
         };
         /** SeedResponse */
         dfe_engine__api__v1__services__SeedResponse: {
@@ -1816,6 +4126,15 @@ export interface components {
              * @description Number of sources seeded
              */
             seeded: number;
+        };
+        /** TestResponse */
+        dfe_engine__api__v1__transforms__TestResponse: {
+            /** Emitted */
+            emitted: components["schemas"]["EmittedRecord"][];
+            /** Duration Ms */
+            duration_ms: number;
+            /** Wasm Memory Bytes */
+            wasm_memory_bytes: number;
         };
     };
     responses: never;
@@ -1915,6 +4234,846 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PermissionsResponse"];
+                };
+            };
+        };
+    };
+    list_accounts_api_v1_auth_accounts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"][];
+                };
+            };
+        };
+    };
+    create_account_api_v1_auth_accounts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_account_api_v1_auth_accounts__username__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_account_api_v1_auth_accounts__username__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_account_api_v1_auth_accounts__username__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_password_api_v1_auth_accounts__username__reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_groups_api_v1_auth_groups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"][];
+                };
+            };
+        };
+    };
+    create_group_api_v1_auth_groups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGroupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_group_api_v1_auth_groups__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_group_api_v1_auth_groups__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGroupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_group_api_v1_auth_groups__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_member_api_v1_auth_groups__name__members_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMemberRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_member_api_v1_auth_groups__name__members__username__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_api_keys_api_v1_auth_api_keys_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIKeyResponse"][];
+                };
+            };
+        };
+    };
+    create_api_key_api_v1_auth_api_keys_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAPIKeyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["APIKeyCreatedResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_api_key_api_v1_auth_api_keys__short_token__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                short_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_providers_api_v1_auth_oidc_providers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResponse"][];
+                };
+            };
+        };
+    };
+    create_provider_api_v1_auth_oidc_providers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProviderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_provider_api_v1_auth_oidc_providers__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_provider_api_v1_auth_oidc_providers__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProviderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_provider_api_v1_auth_oidc_providers__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetachResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_provider_groups_api_v1_auth_oidc_providers__name__sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_provider_api_v1_auth_oidc_providers__name__test_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__oidc_providers__TestResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_orgs_api_v1_orgs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgResponse"][];
+                };
+            };
+        };
+    };
+    create_org_api_v1_orgs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrgRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_org_api_v1_orgs__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_org_api_v1_orgs__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrgRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_org_api_v1_orgs__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2220,7 +5379,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ServiceConfigDetail"];
                 };
             };
             /** @description Validation Error */
@@ -2454,7 +5613,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DeploymentConfigDetail"];
                 };
             };
             /** @description Validation Error */
@@ -3083,6 +6242,88 @@ export interface operations {
             };
         };
     };
+    list_service_surfaces_api_v1_service_surfaces_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurfaceSummary"][];
+                };
+            };
+        };
+    };
+    get_service_surface_api_v1_service_surfaces__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceSurface"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_service_manifest_api_v1_service_surfaces__name__metrics_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManifestRefreshResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_version_api_v1_system_version_get: {
         parameters: {
             query?: never;
@@ -3175,7 +6416,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TestResponse"];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__transforms__TestResponse"];
                 };
             };
             /** @description Validation Error */
@@ -3185,6 +6426,790 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_engine_status_api_v1_hunts_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntEngineStatus"];
+                };
+            };
+        };
+    };
+    list_hunts_api_v1_hunts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntSummary"][];
+                };
+            };
+        };
+    };
+    trigger_hunt_api_v1_hunts__name__run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TriggerRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TriggerResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_views_api_v1_queries_views_get: {
+        parameters: {
+            query?: {
+                /** @description Filter by namespace */
+                namespace?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewDefinition"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_namespaces_api_v1_queries_views_namespaces_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    get_view_api_v1_queries_views__label__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                label: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    execute_view_api_v1_queries_views__label__execute_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                label: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewExecuteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    execute_raw_query_api_v1_queries_raw_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RawQueryRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_templates_api_v1_pipeline_templates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineTemplate"][];
+                };
+            };
+        };
+    };
+    build_pipeline_api_v1_pipeline_build_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineBuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineBuildResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tasks_api_v1_tasks_get: {
+        parameters: {
+            query?: {
+                /** @description Filter by task kind */
+                kind?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_task_api_v1_tasks__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_task_api_v1_tasks__task_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_databases_api_v1_discovery_databases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatabaseInfo"][];
+                };
+            };
+        };
+    };
+    list_tables_api_v1_discovery_tables_get: {
+        parameters: {
+            query?: {
+                /** @description Database to list tables from */
+                database?: string;
+                /** @description Filter by engine type */
+                engine?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_columns_api_v1_discovery_tables__table_name__columns_get: {
+        parameters: {
+            query?: {
+                /** @description Database containing the table */
+                database?: string;
+            };
+            header?: never;
+            path: {
+                table_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ColumnInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_schema_columns_api_v1_schemas__source_name__columns_get: {
+        parameters: {
+            query?: {
+                /** @description Schema version (latest if not specified) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaColumn"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    build_schema_api_v1_schemas__source_name__build_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaBuildResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_field_mappings_api_v1_sigma_mappings__source_name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceMappingSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_sigma_view_api_v1_sigma_views__source_name__post: {
+        parameters: {
+            query?: {
+                /** @description Target database */
+                database?: string;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SigmaViewResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_all_sigma_views_api_v1_sigma_views_post: {
+        parameters: {
+            query?: {
+                /** @description Target database */
+                database?: string;
+                /** @description Only generate for enabled sources */
+                enabled_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SigmaViewResult"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    find_sources_for_logsource_api_v1_sigma_logsource_get: {
+        parameters: {
+            query?: {
+                product?: string | null;
+                category?: string | null;
+                service?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogsourceMatch"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_cel_expression_api_v1_cel_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CelCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CelCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_cel_expressions_batch_api_v1_cel_check_batch_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CelCheckBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CelCheckBatchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    liveness_health_live_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    readiness_health_ready_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    startup_health_startup_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
