@@ -2,7 +2,7 @@
 
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
-import { ListSchemasDetail } from '@/Schemas/components/ListSchemasDetail';
+import { ListSchemaDetail } from '@/Schemas/components/ListSchemaDetail';
 import { ListSchemasTree } from '@/Schemas/components/ListSchemasTree';
 import { ListSchemasProvider } from '@/Schemas/contexts/ListSchemasContext';
 
@@ -12,7 +12,7 @@ export const SchemaListScene = () => {
       <ListSchemasProvider>
         <Splitter
           leftPanelContent={<ListSchemasTree />}
-          rightPanelContent={<ListSchemasDetail />}
+          rightPanelContent={<ListSchemaDetail />}
         />
       </ListSchemasProvider>
     </MainContentCard>
