@@ -824,7 +824,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             wasm_memory_bytes: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['TestResponse'];
+          mockedResponse?: components['schemas']['dfe_engine__api__v1__transforms__TestResponse'];
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
