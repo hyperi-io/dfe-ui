@@ -1442,6 +1442,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Schemas
+         * @description List all meta schemas with optional filtering.
+         */
+        get: operations["list_schemas_api_v1_schemas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/{source_name}/columns": {
         parameters: {
             query?: never;
@@ -2783,6 +2803,37 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /**
+         * PaginatedSchemaSummaryResponse
+         * @description Schema list: full ``schema_objects`` tree plus paginated ``items``.
+         */
+        PaginatedSchemaSummaryResponse: {
+            /** Items */
+            items: components["schemas"]["SchemaSummaryObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** @description All matching schemas as a path tree (not limited to current page) */
+            schema_objects: components["schemas"]["SchemaSummary"];
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PermissionsResponse */
         PermissionsResponse: {
             /**
@@ -3175,6 +3226,84 @@ export interface components {
              * @default
              */
             description: string;
+        };
+        /**
+         * SchemaSummary
+         * @description Tree node grouping schemas by path prefix (directory layout).
+         *
+         *     Wire input may use path segments as sibling keys alongside ``schemas``; those
+         *     map into ``children`` during validation. Serialized JSON uses explicit
+         *     ``schemas`` and ``children`` at every node.
+         *
+         *     Example (wire input shape)::
+         *
+         *         {
+         *             "children": {
+         *                 "azure": {
+         *                     "activity_log": {"schemas": [SchemaSummaryObject, ...]},
+         *                     "schemas": [],
+         *                 }
+         *             },
+         *             "schemas": [...],
+         *         }
+         */
+        SchemaSummary: {
+            /**
+             * Schemas
+             * @description Schema entries defined at this path level
+             */
+            schemas?: components["schemas"]["SchemaSummaryObject"][];
+            /**
+             * Children
+             * @description Further nesting keyed by path segment
+             */
+            children?: {
+                [key: string]: components["schemas"]["SchemaSummary"];
+            };
+        };
+        /**
+         * SchemaSummaryObject
+         * @description Summary of a schema.
+         *
+         *     Attributes:
+         *         name: Name of the schema.
+         *         description: Human description.
+         *         current: Current version of the schema.
+         *         versions: List of versions.
+         *         updated_at: Last updated timestamp.
+         *         column_count: Number of columns in the schema.
+         */
+        SchemaSummaryObject: {
+            /**
+             * Name
+             * @description Name of the schema
+             */
+            name: string;
+            /**
+             * Description
+             * @description Human description
+             */
+            description: string;
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description List of versions
+             */
+            versions: string[];
+            /**
+             * Updated At
+             * @description Last updated timestamp
+             */
+            updated_at: string;
+            /**
+             * Column Count
+             * @description Number of columns in the schema
+             */
+            column_count: number;
         };
         /**
          * ServiceConfigDetail
@@ -6878,6 +7007,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ColumnInfo"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_schemas_api_v1_schemas_get: {
+        parameters: {
+            query?: {
+                /** @description Search in path/description */
+                search?: string | null;
+                /** @description Sort field (path, description) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page */
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSchemaSummaryResponse"];
                 };
             };
             /** @description Validation Error */
