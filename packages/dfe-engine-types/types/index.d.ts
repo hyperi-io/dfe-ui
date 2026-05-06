@@ -1442,6 +1442,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Schemas
+         * @description List all meta schemas with optional filtering.
+         */
+        get: operations["list_schemas_api_v1_schemas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/{schema_path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Meta Schema
+         * @description Get one meta-schema definition by registry path (e.g. ``aws/cloudtrail``).
+         */
+        get: operations["get_meta_schema_api_v1_schemas_definitions__schema_path__get"];
+        put?: never;
+        /**
+         * Upsert Meta Schema
+         * @description Create or replace a meta-schema definition at the given registry path.
+         */
+        post: operations["upsert_meta_schema_api_v1_schemas_definitions__schema_path__post"];
+        /**
+         * Delete Meta Schema
+         * @description Delete a meta-schema definition by registry path.
+         */
+        delete: operations["delete_meta_schema_api_v1_schemas_definitions__schema_path__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/{source_name}/columns": {
         parameters: {
             query?: never;
@@ -2599,6 +2647,74 @@ export interface components {
             context: components["schemas"]["MatchConflictContext"];
         };
         /**
+         * MetaSchema
+         * @description A schema for a ClickHouse table.
+         *
+         *     Attributes:
+         *         current: Current version of the schema.
+         *         versions: Dictionary of versions and their metadata.
+         *         description: Human-readable description.
+         *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
+         */
+        "MetaSchema-Input": {
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Dictionary of versions and their metadata
+             */
+            versions: {
+                [key: string]: components["schemas"]["SchemaVersion-Input"];
+            };
+            /**
+             * Description
+             * @description Human description
+             */
+            description?: string | null;
+            /**
+             * Path
+             * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
+             */
+            path?: string | null;
+        };
+        /**
+         * MetaSchema
+         * @description A schema for a ClickHouse table.
+         *
+         *     Attributes:
+         *         current: Current version of the schema.
+         *         versions: Dictionary of versions and their metadata.
+         *         description: Human-readable description.
+         *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
+         */
+        "MetaSchema-Output": {
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Dictionary of versions and their metadata
+             */
+            versions: {
+                [key: string]: components["schemas"]["SchemaVersion-Output"];
+            };
+            /**
+             * Description
+             * @description Human description
+             */
+            description?: string | null;
+            /**
+             * Path
+             * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
+             */
+            path?: string | null;
+        };
+        /**
          * MetricEntry
          * @description A single metric from the service's manifest.
          */
@@ -2776,6 +2892,37 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /**
+         * PaginatedSchemaSummaryResponse
+         * @description Schema list: full ``schema_objects`` tree plus paginated ``items``.
+         */
+        PaginatedSchemaSummaryResponse: {
+            /** Items */
+            items: components["schemas"]["SchemaSummaryObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** @description All matching schemas as a path tree (not limited to current page) */
+            schema_objects: components["schemas"]["SchemaSummary"];
             /** Total Pages */
             readonly total_pages: number;
             /** Next Page */
@@ -3148,33 +3295,175 @@ export interface components {
              */
             version: string;
             /** Columns */
-            columns: components["schemas"]["SchemaColumn"][];
+            columns: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
             ddl?: components["schemas"]["DDLResult"] | null;
         };
         /**
          * SchemaColumn
-         * @description A column in a schema definition.
+         * @description A column in the schema.
          */
-        SchemaColumn: {
-            /** Name */
+        "SchemaColumn-Input": {
+            /**
+             * Name
+             * @description Name of the column
+             */
             name: string;
-            /** Type */
+            /**
+             * Type
+             * @description Type of the column
+             */
             type: string;
             /**
+             * Attribute
+             * @description Attributes of the column
+             */
+            attribute?: string[];
+            /**
              * Use Case
+             * @description Use case of the column
              * @default
              */
             use_case: string;
             /**
-             * Attribute
-             * @default
+             * Expr
+             * @description Expression for the column
              */
-            attribute: string;
+            expr: string;
+            /**
+             * Comment
+             * @description Comment for the column
+             */
+            comment?: string | null;
+        };
+        /**
+         * SchemaSummary
+         * @description Tree node grouping schemas by path prefix (directory layout).
+         *
+         *     Wire input may use path segments as sibling keys alongside ``schemas``; those
+         *     map into ``children`` during validation. Serialized JSON uses explicit
+         *     ``schemas`` and ``children`` at every node.
+         *
+         *     Example (wire input shape)::
+         *
+         *         {
+         *             "children": {
+         *                 "azure": {
+         *                     "activity_log": {"schemas": [SchemaSummaryObject, ...]},
+         *                     "schemas": [],
+         *                 }
+         *             },
+         *             "schemas": [...],
+         *         }
+         */
+        SchemaSummary: {
+            /**
+             * Schemas
+             * @description Schema entries defined at this path level
+             */
+            schemas?: components["schemas"]["SchemaSummaryObject"][];
+            /**
+             * Children
+             * @description Further nesting keyed by path segment
+             */
+            children?: {
+                [key: string]: components["schemas"]["SchemaSummary"];
+            };
+        };
+        /**
+         * SchemaSummaryObject
+         * @description Summary of a schema.
+         *
+         *     Attributes:
+         *         name: Name of the schema.
+         *         description: Human description.
+         *         current: Current version of the schema.
+         *         versions: List of versions.
+         *         updated_at: Last updated timestamp.
+         *         column_count: Number of columns in the schema.
+         */
+        SchemaSummaryObject: {
+            /**
+             * Name
+             * @description Name of the schema
+             */
+            name: string;
             /**
              * Description
-             * @default
+             * @description Human description
              */
             description: string;
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description List of versions
+             */
+            versions: string[];
+            /**
+             * Updated At
+             * @description Last updated timestamp
+             */
+            updated_at: string;
+            /**
+             * Column Count
+             * @description Number of columns in the schema
+             */
+            column_count: number;
+        };
+        /**
+         * SchemaVersion
+         * @description A version in the schema.
+         */
+        "SchemaVersion-Input": {
+            /**
+             * Date
+             * @description Date of the version
+             */
+            date: string;
+            /**
+             * Type
+             * @description Type of the version
+             */
+            type: string;
+            /**
+             * Summary
+             * @description Summary of the version
+             */
+            summary: string;
+            /**
+             * Columns
+             * @description List of columns in the version
+             */
+            columns: components["schemas"]["SchemaColumn-Input"][];
+        };
+        /**
+         * SchemaVersion
+         * @description A version in the schema.
+         */
+        "SchemaVersion-Output": {
+            /**
+             * Date
+             * @description Date of the version
+             */
+            date: string;
+            /**
+             * Type
+             * @description Type of the version
+             */
+            type: string;
+            /**
+             * Summary
+             * @description Summary of the version
+             */
+            summary: string;
+            /**
+             * Columns
+             * @description List of columns in the version
+             */
+            columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
         };
         /**
          * ServiceConfigDetail
@@ -4104,6 +4393,31 @@ export interface components {
             /** Message */
             message: string;
         };
+        /**
+         * SchemaColumn
+         * @description A column in a schema definition.
+         */
+        dfe_engine__api__v1__schemas__SchemaColumn: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /**
+             * Use Case
+             * @default
+             */
+            use_case: string;
+            /**
+             * Attribute
+             * @default
+             */
+            attribute: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+        };
         /** SeedResponse */
         dfe_engine__api__v1__services__SeedResponse: {
             /** Seeded */
@@ -4135,6 +4449,43 @@ export interface components {
             duration_ms: number;
             /** Wasm Memory Bytes */
             wasm_memory_bytes: number;
+        };
+        /**
+         * SchemaColumn
+         * @description A column in the schema.
+         */
+        dfe_engine__schema__models__SchemaColumn: {
+            /**
+             * Name
+             * @description Name of the column
+             */
+            name: string;
+            /**
+             * Type
+             * @description Type of the column
+             */
+            type: string;
+            /**
+             * Attribute
+             * @description Attributes of the column
+             */
+            attribute?: string[];
+            /**
+             * Use Case
+             * @description Use case of the column
+             * @default
+             */
+            use_case: string;
+            /**
+             * Expr
+             * @description Expression for the column
+             */
+            expr: string;
+            /**
+             * Comment
+             * @description Comment for the column
+             */
+            comment?: string | null;
         };
     };
     responses: never;
@@ -6891,6 +7242,144 @@ export interface operations {
             };
         };
     };
+    list_schemas_api_v1_schemas_get: {
+        parameters: {
+            query?: {
+                /** @description Search in path/description */
+                search?: string | null;
+                /** @description Sort field (path, description) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page */
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSchemaSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_meta_schema_api_v1_schemas_definitions__schema_path__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchema-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_meta_schema_api_v1_schemas_definitions__schema_path__post: {
+        parameters: {
+            query?: {
+                /** @description Optional git commit / change summary when the store is git-backed */
+                description?: string | null;
+            };
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetaSchema-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchema-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_meta_schema_api_v1_schemas_definitions__schema_path__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_schema_columns_api_v1_schemas__source_name__columns_get: {
         parameters: {
             query?: {
@@ -6911,7 +7400,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SchemaColumn"][];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
                 };
             };
             /** @description Validation Error */
