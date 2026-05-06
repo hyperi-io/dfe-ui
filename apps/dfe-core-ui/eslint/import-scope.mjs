@@ -18,7 +18,8 @@ const RULE_ID = 'no-restricted-imports';
 
 const noRelativeParentImports = {
   group: ['../**'],
-  message: 'Relative parent imports (../) are not allowed. Use @/ path aliases instead.',
+  message:
+    'Relative parent imports (../) are not allowed. Use @/ path aliases instead.',
 };
 
 const scopeImportOverrides = SCOPES.map((scope) => ({
@@ -48,7 +49,8 @@ const coreImportOverride = {
         patterns: [
           {
             group: SCOPES.flatMap((s) => [`@/${s}`, `@/${s}/**`]),
-            message: 'Core must not import from feature scopes. Use only @/core.',
+            message:
+              'Core must not import from feature scopes. Use only @/core.',
           },
           noRelativeParentImports,
         ],
