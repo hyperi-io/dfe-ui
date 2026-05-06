@@ -1,13 +1,31 @@
 #!/usr/bin/env node
 /**
- * Wraps `yarn audit` and translates npm's --audit-level to yarn's --severity.
- * hyperi-ci passes --audit-level=moderate; yarn audit expects --severity moderate.
+ * Runs `yarn npm audit` in the root and every workspace package.
+ * Translates npm's `--audit-level` (e.g. from hyperi-ci) to Yarn's `--severity`.
  */
-import { execSync } from "child_process";
+import { spawnSync } from 'child_process';
 
 const args = process.argv.slice(2).flatMap((arg) => {
   const match = arg.match(/^--audit-level=(.+)$/);
-  return match ? ["--severity", match[1]] : [arg];
+  return match ? ['--severity', match[1]] : [arg];
 });
 
-execSync("yarn", ["audit", ...args], { stdio: "inherit" });
+const yarnArgs = [
+  'workspaces',
+  'foreach',
+  '-Av',
+  'exec',
+  'yarn',
+  'npm',
+  'audit',
+  ...args,
+];
+
+const result = spawnSync('yarn', yarnArgs, { stdio: 'inherit' });
+
+if (result.error) {
+  console.error(result.error);
+  process.exit(1);
+}
+
+process.exit(result.status ?? 1);

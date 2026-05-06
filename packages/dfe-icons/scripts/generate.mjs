@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { transform } from "@svgr/core";
-import svgrConfig from "../.svgrrc.json" with { type: "json" };
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { transform } from '@svgr/core';
+import svgrConfig from '../.svgrrc.json' with { type: 'json' };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, "..");
-const SVG_DIR = path.join(ROOT, "svg");
-const SRC_DIR = path.join(ROOT, "src");
-const ICONS_DIR = path.join(SRC_DIR, "icons");
-const STORIES_DIR = path.join(ROOT, "stories");
+const ROOT = path.resolve(__dirname, '..');
+const SVG_DIR = path.join(ROOT, 'svg');
+const SRC_DIR = path.join(ROOT, 'src');
+const ICONS_DIR = path.join(SRC_DIR, 'icons');
+const STORIES_DIR = path.join(ROOT, 'stories');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -21,7 +21,7 @@ function toPascalCase(str) {
   return str
     .split(/[-_]/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
+    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -36,23 +36,27 @@ async function generateComponentSource(name, svgString) {
 // Directory processing
 // ---------------------------------------------------------------------------
 
-async function processDirectory(dir, suffix = "") {
+async function processDirectory(dir, suffix = '') {
   if (!fs.existsSync(dir)) return [];
 
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".svg")).sort();
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.svg'))
+    .sort();
   const icons = [];
 
   for (const file of files) {
     // Validate filename contains no path separators (satisfies SAST scanners)
     const basename = path.basename(file);
-    const baseName = basename.replace(".svg", "");
-    const componentName = "Icon" + toPascalCase(baseName) + suffix;
-    const svgContent = fs.readFileSync(path.join(dir, basename), "utf-8");
+    const baseName = basename.replace('.svg', '');
+    const componentName = 'Icon' + toPascalCase(baseName) + suffix;
+    const svgContent = fs.readFileSync(path.join(dir, basename), 'utf-8');
 
     try {
       const source = await generateComponentSource(componentName, svgContent);
       const outFile = path.join(ICONS_DIR, `${componentName}.tsx`);
-      if (!outFile.startsWith(ICONS_DIR)) throw new Error("Invalid output path");
+      if (!outFile.startsWith(ICONS_DIR))
+        throw new Error('Invalid output path');
       fs.writeFileSync(outFile, source);
       icons.push(componentName);
     } catch (err) {
@@ -151,7 +155,7 @@ export const Gallery: Story = {};
 // Main
 // ---------------------------------------------------------------------------
 
-console.log("Generating icon components…");
+console.log('Generating icon components…');
 
 fs.rmSync(SRC_DIR, { recursive: true, force: true });
 fs.mkdirSync(ICONS_DIR, { recursive: true });
@@ -159,7 +163,7 @@ fs.mkdirSync(STORIES_DIR, { recursive: true });
 
 // Auto-discover all subdirectories under svg/.
 // Only "filled" gets a "Filled" suffix; everything else has no suffix.
-const SUFFIX_MAP = { filled: "Filled" };
+const SUFFIX_MAP = { filled: 'Filled' };
 
 const subdirs = fs
   .readdirSync(SVG_DIR, { withFileTypes: true })
@@ -171,7 +175,7 @@ const stats = {};
 let allIcons = [];
 
 for (const dir of subdirs) {
-  const suffix = SUFFIX_MAP[dir] ?? "";
+  const suffix = SUFFIX_MAP[dir] ?? '';
   const icons = await processDirectory(path.join(SVG_DIR, dir), suffix);
   stats[dir] = icons.length;
   allIcons.push(...icons);
@@ -181,33 +185,35 @@ allIcons = allIcons.sort();
 
 // SVGR uses default exports; re-export as named exports for consumers.
 const indexLines = [
-  ...allIcons.map((name) => `export { default as ${name} } from "./icons/${name}";`),
-  "",
-  "// Single type for all icon names",
+  ...allIcons.map(
+    (name) => `export { default as ${name} } from "./icons/${name}";`,
+  ),
+  '',
+  '// Single type for all icon names',
   'export { iconManifest, type IconName } from "./manifest";',
   'export type IconComponent = import("react").ComponentType<import("react").SVGProps<SVGSVGElement>>;',
 ].filter(Boolean);
-fs.writeFileSync(path.join(SRC_DIR, "index.ts"), indexLines.join("\n") + "\n");
+fs.writeFileSync(path.join(SRC_DIR, 'index.ts'), indexLines.join('\n') + '\n');
 
 // Manifest for programmatic access
 const manifestContent = [
   `export const iconManifest = ${JSON.stringify(allIcons)} as const;`,
-  "",
-  "export type IconName = (typeof iconManifest)[number];",
-  "",
-].join("\n");
-fs.writeFileSync(path.join(SRC_DIR, "manifest.ts"), manifestContent);
+  '',
+  'export type IconName = (typeof iconManifest)[number];',
+  '',
+].join('\n');
+fs.writeFileSync(path.join(SRC_DIR, 'manifest.ts'), manifestContent);
 
 // Storybook story
 fs.writeFileSync(
-  path.join(STORIES_DIR, "AllIcons.stories.tsx"),
+  path.join(STORIES_DIR, 'AllIcons.stories.tsx'),
   generateStory(),
 );
 
 const breakdown = Object.entries(stats)
   .map(([dir, count]) => `${count} ${dir}`)
-  .join(", ");
+  .join(', ');
 console.log(`Done – ${allIcons.length} icons (${breakdown})`);
-console.log("  → src/index.ts");
-console.log("  → src/manifest.ts");
-console.log("  → stories/AllIcons.stories.tsx");
+console.log('  → src/index.ts');
+console.log('  → src/manifest.ts');
+console.log('  → stories/AllIcons.stories.tsx');
