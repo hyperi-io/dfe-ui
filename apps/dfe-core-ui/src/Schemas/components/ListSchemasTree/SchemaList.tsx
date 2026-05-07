@@ -2,14 +2,12 @@ import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { IconStarFilled } from '@repo/dfe-icons';
-import { Spin, Tooltip, Tree, Typography } from 'antd';
-import { useMemo } from 'react';
-import Highlighter from 'react-highlight-words';
+import { Spin, Tree } from 'antd';
+import { useTransformSchemaToTree } from './hooks/useTransformSchemaToTree';
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
-    data: { items: schemas },
+    data: { items: schemas, schema_objects: schemaObjects },
     error,
     loadMoreRef,
     isFetchingNextPage,
@@ -20,53 +18,11 @@ export const SchemaList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListSchemasContext();
 
-  const treeData = useMemo(
-    () =>
-      schemas.map((schema) => ({
-        key: schema.name,
-        title: (
-          <Typography.Text
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedSchemaPath(schema.name);
-              setSelectedSchemaVersion(
-                schema.current ?? schema.versions?.[0] ?? null,
-                schema.name,
-              );
-            }}
-            className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
-          >
-            <Highlighter
-              highlightClassName="bg-yellow-200"
-              searchWords={[filters.search ?? '']}
-              autoEscape
-              textToHighlight={schema.name}
-            />
-          </Typography.Text>
-        ),
-        children: schema.versions?.map((version: string) => ({
-          key: `${schema.name}.${version}`,
-          title: (
-            <Typography.Text
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedSchemaVersion(version, schema.name);
-              }}
-              className="cursor-pointer flex items-center gap-x-2"
-            >
-              {version}
-
-              {version === schema.current ? (
-                <Tooltip destroyOnHidden title="Current version">
-                  <IconStarFilled className="text-yellow-500" />
-                </Tooltip>
-              ) : null}
-            </Typography.Text>
-          ),
-        })),
-      })),
-    [schemas, setSelectedSchemaPath, filters.search, setSelectedSchemaVersion],
-  );
+  const treeData = useTransformSchemaToTree({
+    schemaObjects,
+    setSelectedSchemaPath,
+    setSelectedSchemaVersion,
+  });
 
   if (schemas.length === 0) {
     return (
@@ -93,7 +49,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
         className,
       )}
     >
-      <Tree blockNode defaultExpandAll treeData={treeData} />
+      <Tree blockNode treeData={treeData} />
       <div ref={loadMoreRef} className="h-4 flex justify-center">
         {isFetchingNextPage && <Spin size="small" />}
       </div>

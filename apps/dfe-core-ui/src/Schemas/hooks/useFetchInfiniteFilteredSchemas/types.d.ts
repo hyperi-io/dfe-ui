@@ -9,3 +9,5 @@ export interface UseFetchInfiniteFilteredSchemasProps {
 
 export type SchemaListResponse =
   components['schemas']['PaginatedSchemaSummaryResponse'];
+
+export type SchemaSummary = components['schemas']['SchemaSummary'];
