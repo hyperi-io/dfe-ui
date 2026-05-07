@@ -1,12 +1,16 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
-const SCHEMA_ITEM = {
-  path: 'string',
-  current_version: 'string',
+const SCHEMA_ITEM: components['schemas']['SchemaSummaryObject'] = {
+  name: 'string',
+  current: 'string',
+  versions: ['string'],
+  description: 'string',
+  updated_at: 'string',
   column_count: 0,
-} as const;
+};
 
 const TOTAL_ITEMS = 25;
 const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({

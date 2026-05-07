@@ -23,36 +23,40 @@ export const SchemaList = ({ className }: { className?: string }) => {
   const treeData = useMemo(
     () =>
       schemas.map((schema) => ({
-        key: schema.path,
+        key: schema.name,
         title: (
           <Typography.Text
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedSchemaPath(schema.path);
+              setSelectedSchemaPath(schema.name);
+              setSelectedSchemaVersion(
+                schema.current ?? schema.versions?.[0] ?? null,
+                schema.name,
+              );
             }}
             className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
           >
             <Highlighter
               highlightClassName="bg-yellow-200"
-              searchWords={[filters.search ?? '', filters.path_prefix ?? '']}
+              searchWords={[filters.search ?? '']}
               autoEscape
-              textToHighlight={schema.path}
+              textToHighlight={schema.name}
             />
           </Typography.Text>
         ),
-        children: schema.versions?.map((version) => ({
-          key: `${schema.path}.${version}`,
+        children: schema.versions?.map((version: string) => ({
+          key: `${schema.name}.${version}`,
           title: (
             <Typography.Text
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedSchemaVersion(version, schema.path);
+                setSelectedSchemaVersion(version, schema.name);
               }}
               className="cursor-pointer flex items-center gap-x-2"
             >
               {version}
 
-              {version === schema.current_version ? (
+              {version === schema.current ? (
                 <Tooltip destroyOnHidden title="Current version">
                   <IconStarFilled className="text-yellow-500" />
                 </Tooltip>
@@ -61,13 +65,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
           ),
         })),
       })),
-    [
-      schemas,
-      setSelectedSchemaPath,
-      filters.search,
-      filters.path_prefix,
-      setSelectedSchemaVersion,
-    ],
+    [schemas, setSelectedSchemaPath, filters.search, setSelectedSchemaVersion],
   );
 
   if (schemas.length === 0) {
@@ -79,7 +77,6 @@ export const SchemaList = ({ className }: { className?: string }) => {
         defaultFilters={{
           ...filters,
           search: undefined,
-          path_prefix: undefined,
         }}
       />
     );

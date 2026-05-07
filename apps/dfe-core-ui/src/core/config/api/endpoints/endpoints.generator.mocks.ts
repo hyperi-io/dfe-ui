@@ -852,8 +852,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             items: [
               {
-                path: 'string',
-                current_version: 'string',
+                name: 'string',
+                description: 'string',
+                current: 'string',
+                versions: ['string'],
+                updated_at: 'string',
                 column_count: 0,
               },
             ],
@@ -863,9 +866,18 @@ export const API_CONFIG_MOCKS = Object.freeze({
             total_pages: 0,
             next_page: 0,
             prev_page: 0,
+            schema_objects: {
+              schemas: [],
+              children: {
+                string: {
+                  schemas: [],
+                  children: {},
+                },
+              },
+            },
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_MetaSchemaListItem_'];
+          mockedResponse?: components['schemas']['PaginatedSchemaSummaryResponse'];
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -879,65 +891,39 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
-            return HttpResponse.json(mockedResponse, { status });
-          });
-        },
-      },
-      post: {
-        success: ({
-          mockedResponse = {
-            path: 'string',
-            current_version: 'string',
-          },
-        }: {
-          mockedResponse?: components['schemas']['CreateMetaSchemaResponse'];
-        } = {}) => {
-          return http.post(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
-            return HttpResponse.json(mockedResponse);
-          });
-        },
-        error: ({
-          mockedResponse = DEFAULT_VALIDATION_ERROR,
-          status = 422,
-        }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
-          status?: number;
-        } = {}) => {
-          return http.post(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse, { status });
           });
         },
       },
     },
     schema: {
-      mockedUrl: '/api/v1/schemas/meta/{schema_path}',
+      mockedUrl: '/api/v1/schemas/definitions/{schema_path}',
       get: {
         success: ({
           mockedResponse = {
             path: 'string',
-            current_version: 'string',
-            is_current: true,
-            columns: [
-              {
-                name: 'string',
+            current: 'string',
+            versions: {
+              string: {
+                date: 'string',
                 type: 'string',
-                attribute: ['string'],
-                use_case: 'string',
-                default: 'string',
-                order: 0,
-                expr: 'string',
-                description: 'string',
-                ch_override: 'string',
+                summary: 'string',
+                columns: [
+                  {
+                    name: 'string',
+                    type: 'string',
+                    attribute: ['string'],
+                    use_case: 'string',
+                    expr: 'string',
+                  },
+                ],
               },
-            ],
-            version_info: {
-              string: 'string',
             },
-            all_versions: ['string'],
+            description: 'string',
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaDetailResponse'];
+          mockedResponse?: components['schemas']['MetaSchema-Output'];
           schema_path?: string;
         } = {}) => {
           return http.get(
@@ -960,6 +946,64 @@ export const API_CONFIG_MOCKS = Object.freeze({
           schema_path?: string;
         } = {}) => {
           return http.get(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            versions: {
+              string: {
+                date: 'string',
+                type: 'string',
+                summary: 'string',
+                columns: [
+                  {
+                    name: 'string',
+                    type: 'string',
+                    attribute: ['string'],
+                    use_case: 'string',
+                    expr: 'string',
+                  },
+                ],
+              },
+            },
+            description: 'string',
+          },
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          schema_path?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          schema_path?: string;
+        } = {}) => {
+          return http.post(
             API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
               '{schema_path}',
               schema_path,

@@ -1,7 +1,5 @@
 import { components } from '@repo/dfe-engine-types';
 
-export type SchemaCreateRequest =
-  components['schemas']['CreateMetaSchemaRequest'];
+export type SchemaCreateRequest = components['schemas']['MetaSchema-Input'];
 
-export type SchemaCreateResponse =
-  components['schemas']['CreateMetaSchemaResponse'];
+export type SchemaCreateResponse = components['schemas']['MetaSchema-Output'];

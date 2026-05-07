@@ -11,6 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemas } from '.';
+import { SchemaListResponse } from './types';
 import { server } from './useFetchInfiniteFilteredSchemas.mocks';
 
 class MockIntersectionObserver {
@@ -42,15 +43,17 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.data).toEqual({
+      const expectedResponse: SchemaListResponse = {
         items: [],
+        schema_objects: {},
         total: 0,
         page: 1,
         per_page: 10,
         total_pages: 0,
         next_page: null,
         prev_page: null,
-      });
+      };
+      expect(result.current.data).toEqual(expectedResponse);
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
     });
@@ -69,8 +72,11 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.data).toBeDefined();
       expect(result.current.data.items).toHaveLength(10);
       expect(result.current.data.items[0]).toMatchObject({
-        path: 'string',
-        current_version: 'string',
+        name: 'string',
+        current: 'string',
+        versions: ['string'],
+        description: 'string',
+        updated_at: 'string',
         column_count: 0,
       });
       expect(result.current.isError).toBe(false);
@@ -135,8 +141,9 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       );
 
       // Data should be flattened - 20 items total
-      expect(result.current.data.items[0].path).toBe('string');
-      expect(result.current.data.items[10].path).toBe('string');
+      expect(result.current.data.items[0].name).toBe('string');
+      expect(result.current.data.items[10].name).toBe('string');
+      expect(result.current.data.items[19].name).toBe('string');
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -163,9 +170,9 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
       // Verify we have 20 items (pages 1 and 2)
       expect(result.current.data.items).toHaveLength(20);
-      expect(result.current.data.items[0].path).toBe('string');
-      expect(result.current.data.items[10].path).toBe('string');
-      expect(result.current.data.items[19].path).toBe('string');
+      expect(result.current.data.items[0].name).toBe('string');
+      expect(result.current.data.items[10].name).toBe('string');
+      expect(result.current.data.items[19].name).toBe('string');
     });
 
     it('should not have next page when all data is loaded', async () => {
@@ -251,15 +258,18 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.isError).toBe(true);
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
-      expect(result.current.data).toEqual({
+
+      const expectedResponse: SchemaListResponse = {
         items: [],
+        schema_objects: {},
         total: 0,
         page: 1,
         per_page: 10,
         total_pages: 0,
         next_page: null,
         prev_page: null,
-      });
+      };
+      expect(result.current.data).toEqual(expectedResponse);
     });
   });
 
@@ -267,21 +277,6 @@ describe('useFetchInfiniteFilteredSchemas', () => {
     it('should include search in query', async () => {
       const { result } = renderHook(
         () => useFetchInfiniteFilteredSchemas({ search: 'test' }),
-        {
-          wrapper,
-        },
-      );
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.data.items).toBeDefined();
-    });
-
-    it('should include path_prefix filter in query', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredSchemas({ path_prefix: 'test' }),
         {
           wrapper,
         },
@@ -332,7 +327,6 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         () =>
           useFetchInfiniteFilteredSchemas({
             search: 'test',
-            path_prefix: 'test',
             sort_by: 'path',
             sort_order: 'asc',
 
@@ -440,6 +434,10 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         API_CONFIG_MOCKS.schemas.default.get.success({
           mockedResponse: {
             items: [],
+            schema_objects: {
+              schemas: [],
+              children: {},
+            },
             total: 0,
             page: 0,
             per_page: 0,

@@ -44,16 +44,9 @@ const parseFiltersFromParams = (
   const searchParam = params.get('search');
   const search =
     searchParam === null || searchParam === '' ? undefined : searchParam;
-  const path_prefixParam = params.get('path_prefix');
-  const path_prefix =
-    path_prefixParam === null || path_prefixParam === ''
-      ? undefined
-      : path_prefixParam;
   const sortByParam = params.get('sort_by');
   const sort_by: UseFetchInfiniteFilteredSchemasProps['sort_by'] =
-    sortByParam === 'path' ||
-    sortByParam === 'current_version' ||
-    sortByParam === 'column_count'
+    sortByParam === 'path' || sortByParam === 'description'
       ? sortByParam
       : undefined;
   const sortOrderParam = params.get('sort_order');
@@ -63,7 +56,6 @@ const parseFiltersFromParams = (
       : undefined;
   return {
     search,
-    path_prefix,
     sort_by,
     sort_order,
     schema_path,
@@ -76,7 +68,6 @@ const filtersToSearchString = (f: ListSchemasQueryParams): string => {
   if (f.search) params.set('search', f.search);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
-  if (f.path_prefix) params.set('path_prefix', f.path_prefix);
   if (f.schema_path) params.set('schema_path', f.schema_path);
   if (f.schema_version) params.set('schema_version', f.schema_version);
   return params.toString();
@@ -84,7 +75,6 @@ const filtersToSearchString = (f: ListSchemasQueryParams): string => {
 
 const hasAnyFilters = (f: ListSchemasQueryParams) =>
   f.search !== undefined ||
-  f.path_prefix !== undefined ||
   f.sort_by !== undefined ||
   f.sort_order !== undefined;
 
@@ -112,6 +102,7 @@ export interface ListSchemasContextValue {
 
 const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
   items: [] as SchemaListResponse['items'],
+  schema_objects: {} as SchemaListResponse['schema_objects'],
   total: 0,
   page: 1,
   per_page: 10,

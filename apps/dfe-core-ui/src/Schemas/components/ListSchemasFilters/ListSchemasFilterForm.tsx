@@ -7,7 +7,6 @@ import z from 'zod';
 
 const formSchema = z.object({
   search: z.string().optional(),
-  path_prefix: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -24,31 +23,28 @@ export const ListSchemasFilterForm = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { search, path_prefix } = values;
+    const { search } = values;
     setFilters({
       search: search ?? undefined,
-      path_prefix: path_prefix ?? undefined,
     });
     onSuccess?.();
   };
 
   const handleResetFilters = () => {
-    form.setFieldsValue({ path_prefix: undefined, search: '' });
+    form.setFieldsValue({ search: '' });
     setFilters({
       search: undefined,
-      path_prefix: undefined,
     });
   };
   useEffect(() => {
     form.setFieldsValue({
       search: filters.search ?? '',
-      path_prefix: filters.path_prefix ?? undefined,
     });
-  }, [form, filters.search, filters.path_prefix]);
+  }, [form, filters.search]);
 
   return (
     <Form
-      key={`${filters.search ?? ''}-${filters.path_prefix ?? ''}`}
+      key={`${filters.search ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
@@ -59,13 +55,6 @@ export const ListSchemasFilterForm = ({
       >
         <Input placeholder="Enter name or description" />
       </Form.Item>
-      <Form.Item
-        name="path_prefix"
-        label="Filter by Path Prefix"
-        rules={[formValidation]}
-      >
-        <Input placeholder="Enter path prefix" />
-      </Form.Item>
 
       <Form.Item className="flex justify-end">
         <Button
@@ -74,7 +63,7 @@ export const ListSchemasFilterForm = ({
           size="small"
           htmlType="reset"
           onClick={handleResetFilters}
-          disabled={!filters.search && !filters.path_prefix}
+          disabled={!filters.search}
         >
           Reset Filters
         </Button>

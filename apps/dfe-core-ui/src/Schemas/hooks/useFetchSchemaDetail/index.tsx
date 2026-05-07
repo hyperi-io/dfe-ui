@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 
 export const useFetchSchemaDetail = ({
   schema_path,
-  version,
 }: {
   schema_path: string;
   version?: string | null;
@@ -14,7 +13,6 @@ export const useFetchSchemaDetail = ({
     queryFn: () =>
       apiClient.get(API_CONFIG.schemas.schema, {
         pathParams: { schema_path: schema_path ?? '' },
-        queryParams: { version },
       }),
     enabled: !!schema_path,
   });

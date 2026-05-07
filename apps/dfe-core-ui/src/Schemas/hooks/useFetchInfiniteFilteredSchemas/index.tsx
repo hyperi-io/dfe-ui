@@ -6,7 +6,6 @@ import { UseFetchInfiniteFilteredSchemasProps } from './types';
 
 /** useFetchInfiniteFilteredSchemas props */
 /**
- * @param path_prefix - The path prefix to filter the schemas by.
  * @param search - The search query to filter the schemas by path, version and version ids.
  * @param sort_by - The field to sort the schemas by (path, current_version, column_count).
  * @param sort_order - The order to sort the schemas by.
@@ -17,7 +16,6 @@ import { UseFetchInfiniteFilteredSchemasProps } from './types';
  */
 export const useFetchInfiniteFilteredSchemas = ({
   search,
-  path_prefix,
   sort_by,
   sort_order,
   per_page,
@@ -32,12 +30,11 @@ export const useFetchInfiniteFilteredSchemas = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['schemas', search, path_prefix, sort_by, sort_order, per_page],
+    queryKey: ['schemas', search, sort_by, sort_order, per_page],
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.schemas.default, {
         queryParams: {
           search: search,
-          path_prefix,
           sort_by,
           sort_order,
           page: pageParam,
@@ -58,6 +55,7 @@ export const useFetchInfiniteFilteredSchemas = ({
     if (!data?.pages?.length) {
       return {
         items: [],
+        schema_objects: {},
         total: 0,
         page: 1,
         per_page: per_page ?? 10,
@@ -68,9 +66,16 @@ export const useFetchInfiniteFilteredSchemas = ({
     }
 
     const allItems = data.pages.flatMap((page) => page.items || []);
+    const allSchemaObjects = data.pages.reduce((acc, page) => {
+      return {
+        ...acc,
+        ...page.schema_objects,
+      };
+    }, {});
     return {
       ...data.pages[0],
       items: allItems,
+      schema_objects: allSchemaObjects,
     };
   }, [data, per_page]);
 

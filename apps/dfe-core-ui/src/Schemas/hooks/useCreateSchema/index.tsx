@@ -14,7 +14,10 @@ export const useCreateSchema = ({
 }: UseCreateSchemaProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (schema: SchemaCreateRequest) =>
-      apiClient.post(API_CONFIG.schemas.default, { body: schema }),
+      apiClient.post(API_CONFIG.schemas.schema, {
+        body: schema,
+        pathParams: { schema_path: schema.path ?? '' },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

@@ -27,23 +27,25 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateSchema', () => {
   const requestBody: SchemaCreateRequest = {
-    path: 'string',
-    columns: [
-      {
-        name: 'string',
+    current: 'string',
+    path: 'path',
+    versions: {
+      string: {
+        date: 'string',
         type: 'string',
-        attribute: ['string'],
-        use_case: 'string',
-        default: 'string',
-        order: 0,
-        expr: 'string',
-        comment: 'string',
-        ch_override: 'string',
+        summary: 'string',
+        columns: [
+          {
+            name: 'string',
+            type: 'string',
+            attribute: ['string'],
+            use_case: 'string',
+            expr: 'string',
+          },
+        ],
       },
-    ],
-    initial_version: 'string',
-    version_type: 'string',
-    summary: 'string',
+    },
+    description: 'string',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -59,7 +61,24 @@ describe('.useCreateSchema', () => {
 
       const expectedResponse: SchemaCreateResponse = {
         path: 'string',
-        current_version: 'string',
+        description: 'string',
+        current: 'string',
+        versions: {
+          string: {
+            date: 'string',
+            type: 'string',
+            summary: 'string',
+            columns: [
+              {
+                name: 'string',
+                type: 'string',
+                attribute: ['string'],
+                use_case: 'string',
+                expr: 'string',
+              },
+            ],
+          },
+        },
       };
 
       await waitFor(() => {
@@ -83,7 +102,7 @@ describe('.useCreateSchema', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.schemas.default.post.error());
+      server.use(API_CONFIG_MOCKS.schemas.schema.post.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();

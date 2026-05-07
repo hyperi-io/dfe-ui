@@ -18,25 +18,24 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 describe('.useFetchSchemaDetail', () => {
   const response: MetaSchemaDetailResponse = {
     path: 'string',
-    current_version: 'string',
-    is_current: true,
-    columns: [
-      {
-        name: 'string',
+    current: 'string',
+    versions: {
+      string: {
+        date: 'string',
         type: 'string',
-        attribute: ['string'],
-        use_case: 'string',
-        default: 'string',
-        order: 0,
-        expr: 'string',
-        description: 'string',
-        ch_override: 'string',
+        summary: 'string',
+        columns: [
+          {
+            name: 'string',
+            type: 'string',
+            attribute: ['string'],
+            use_case: 'string',
+            expr: 'string',
+          },
+        ],
       },
-    ],
-    version_info: {
-      string: 'string',
     },
-    all_versions: ['string'],
+    description: 'string',
   };
 
   describe('only schema_path is provided', () => {
