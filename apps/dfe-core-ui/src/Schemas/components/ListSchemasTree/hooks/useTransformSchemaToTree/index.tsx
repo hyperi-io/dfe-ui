@@ -3,8 +3,7 @@ import { IconStarFilled } from '@repo/dfe-icons';
 import { Tooltip, TreeDataNode, Typography } from 'antd';
 import { useMemo } from 'react';
 
-const formatSegmentTitle = (segment: string): string =>
-  segment.split(/[._]/).filter(Boolean).join(' ');
+const formatSegmentTitle = (segment: string): string => segment;
 
 const buildVersionChildren = (
   schema: NonNullable<SchemaSummary['schemas']>[number],
