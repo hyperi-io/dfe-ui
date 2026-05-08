@@ -3,6 +3,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
+import { CreateSchemaForm } from './CreateSchemaForm';
 
 export const CreateSchemaDrawer = ({
   open,
@@ -37,9 +38,7 @@ export const CreateSchemaDrawer = ({
         size="60%"
         onClose={handleClose}
       >
-        <div className="border border-red-500 p-2 rounded-md">
-          Implement CreateSchemaDrawer
-        </div>
+        <CreateSchemaForm buttonLabel={title} />
       </Drawer>
     </>
   );

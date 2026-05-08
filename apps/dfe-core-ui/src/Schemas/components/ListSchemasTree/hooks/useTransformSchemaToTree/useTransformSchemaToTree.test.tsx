@@ -76,15 +76,15 @@ describe('useTransformSchemaToTree', () => {
 
     expect(tree).toHaveLength(1);
     expect(tree[0].key).toBe('azure');
-    expect(tree[0].title).toBe('Azure');
+    expect(tree[0].title).toBe('azure');
 
     const azureChildren = tree[0].children!;
     expect(azureChildren).toHaveLength(2);
     // Sorted alphabetically: activity_log before security_log
     expect(azureChildren[0].key).toBe('azure.activity_log');
-    expect(azureChildren[0].title).toBe('Activity Log');
+    expect(azureChildren[0].title).toBe('activity_log');
     expect(azureChildren[1].key).toBe('azure.security_log');
-    expect(azureChildren[1].title).toBe('Security Log');
+    expect(azureChildren[1].title).toBe('security_log');
 
     const activityLog = azureChildren[0].children!;
     expect(activityLog).toHaveLength(1);
