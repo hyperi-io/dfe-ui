@@ -1,5 +1,6 @@
+import { cn } from '@/core/utils/style';
 import { IconCheck, IconEdit, IconX } from '@repo/dfe-icons';
-import { Button, Select, SelectProps } from 'antd';
+import { Button, Select, SelectProps, Tag } from 'antd';
 import { ChangeEvent, useMemo, useState } from 'react';
 
 interface InlineEditSelectProps extends SelectProps {
@@ -41,6 +42,8 @@ export const InlineEditSelect = ({
     setIsEditing(true);
   };
 
+  const isMultiple = props.mode === 'multiple';
+
   return (
     <>
       {isEditing ? (
@@ -70,7 +73,9 @@ export const InlineEditSelect = ({
           />
         </div>
       ) : (
-        <div className="flex items-center gap-x-1">
+        <div
+          className={cn('flex items-center gap-1', isMultiple && 'flex-wrap')}
+        >
           {editable && (
             <Button
               icon={<IconEdit />}
@@ -79,7 +84,9 @@ export const InlineEditSelect = ({
               onClick={handleEdit}
             />
           )}
-          {resolved}
+          {isMultiple
+            ? resolved?.map((item: string) => <Tag key={item}>{item}</Tag>)
+            : resolved}
         </div>
       )}
     </>
