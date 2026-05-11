@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { CreateSchemaFormData } from './CreateSchemaForm';
 import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
+import { CreateSchemaFormData } from './CreateSchemaForm';
 
 const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
