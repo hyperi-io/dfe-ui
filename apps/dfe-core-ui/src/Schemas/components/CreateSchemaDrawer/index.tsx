@@ -1,9 +1,13 @@
 import { Drawer } from '@/core/components/Drawer';
 
+import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
+import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { CreateSchemaForm } from './CreateSchemaForm';
+import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
+import { CreateSchemaForm, CreateSchemaFormData } from './CreateSchemaForm';
 
 export const CreateSchemaDrawer = ({
   open,
@@ -13,12 +17,39 @@ export const CreateSchemaDrawer = ({
   onClose?: () => void;
 }) => {
   const title = 'Add Schema';
-  const [_api, contextHolder] = notification.useNotification();
+  const [api, contextHolder] = notification.useNotification();
   const [isDrawerVisible, setIsDrawerVisible] = useState(open);
 
   const handleClose = () => {
     setIsDrawerVisible(false);
     onClose?.();
+  };
+
+  const {
+    refetch: refetchSchemas,
+    setSelectedSchemaPath,
+    setSelectedSchemaVersion,
+  } = useListSchemasContext();
+
+  const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
+    {
+      onSuccess: ({ path, current }) => {
+        setSelectedSchemaPath(path ?? null);
+        setSelectedSchemaVersion(current);
+        refetchSchemas();
+        api.success({
+          title: 'Schema created successfully',
+          placement: 'bottomLeft',
+        });
+        handleClose();
+      },
+    },
+  );
+
+  const handleFinish = (values: CreateSchemaFormData) => {
+    const requestBody: SchemaCreateRequest =
+      transformFormDataToRequestBody(values);
+    createSchema(requestBody);
   };
 
   return (
@@ -35,10 +66,14 @@ export const CreateSchemaDrawer = ({
       <Drawer
         title={title}
         open={isDrawerVisible}
-        size="60%"
+        size="80%"
         onClose={handleClose}
       >
-        <CreateSchemaForm buttonLabel={title} />
+        <CreateSchemaForm
+          buttonLabel={title}
+          onFinish={handleFinish}
+          isPending={isCreatingSchema}
+        />
       </Drawer>
     </>
   );

@@ -29,3 +29,9 @@ export const USE_CASE_OPTIONS = [
   { label: 'Range', value: 'range' },
   { label: 'Bloom', value: 'bloom' },
 ];
+
+export const TYPE_OPTIONS = [
+  { label: 'Model', value: 'model' },
+  { label: 'Addition', value: 'addition' },
+  { label: 'Revision', value: 'revision' },
+];

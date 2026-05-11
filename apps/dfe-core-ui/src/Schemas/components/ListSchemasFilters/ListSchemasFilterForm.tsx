@@ -1,8 +1,9 @@
 import { Form } from '@/core/components/Form';
+import { SortActions } from '@/core/components/SortActions';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { Button, Input } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -42,12 +43,34 @@ export const ListSchemasFilterForm = ({
     });
   }, [form, filters.search]);
 
+  const sortBySelectId = useId();
   return (
     <Form
       key={`${filters.search ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
+      <SortActions
+        id={{
+          select: sortBySelectId,
+        }}
+        sortByValue={filters.sort_by}
+        sortDirectionValue={filters.sort_order}
+        sortByOptions={[
+          { label: 'Path', value: 'path' },
+          { label: 'Description', value: 'description' },
+        ]}
+        onChange={({ sortBy, sortDirection }) =>
+          setFilters({
+            ...(sortBy !== undefined && {
+              sort_by: sortBy as 'path' | 'description',
+            }),
+            ...(sortDirection !== undefined && {
+              sort_order: sortDirection as 'asc' | 'desc',
+            }),
+          })
+        }
+      />
       <Form.Item
         name="search"
         label="Filter by Keyword"

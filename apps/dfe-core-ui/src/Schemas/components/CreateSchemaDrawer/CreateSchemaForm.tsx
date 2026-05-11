@@ -3,11 +3,12 @@ import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { convertCsv, CsvRow } from '@/Schemas/server/actions/convertCsv';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
-import { Button, Input, Radio } from 'antd';
+import { Button, FormProps, Input, Radio, Select, Tabs } from 'antd';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 import { useState } from 'react';
 import z from 'zod';
 import { AddSchemaTable } from './AddSchemaTable';
+import { TYPE_OPTIONS } from './fieldOptions.constants';
 import { FileUploadDragger } from './FileUploadDragger';
 
 const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
@@ -31,15 +32,40 @@ const formSchema = z.object({
     .optional(),
   version: z
     .string()
+    .min(1, { message: 'Version is required' })
     .refine((v) => VERSION_REGEX.test(v), {
       message: 'Version must be in the format x.x.x',
-    })
-    .optional(),
+    }),
+  type: z.enum(['model', 'addition', 'revision']),
   description: z.string().optional(),
+  uploadedColumns: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        attribute: z.array(z.string()),
+        use_case: z.string(),
+        expr: z.string(),
+        comment: z.string().optional(),
+      }),
+    )
+    .optional(),
+  schemaColumns: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        attribute: z.array(z.string()),
+        use_case: z.string(),
+        expr: z.string(),
+        comment: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
-interface CreateSchemaFormProps {
+interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   hasReset?: boolean;
   isPending?: boolean;
   buttonLabel?: string;
@@ -49,6 +75,7 @@ export const CreateSchemaForm = ({
   hasReset = false,
   isPending = false,
   buttonLabel = 'Save',
+  onFinish,
 }: CreateSchemaFormProps) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
@@ -57,11 +84,6 @@ export const CreateSchemaForm = ({
   const [uploadedSchema, setUploadedSchema] = useState<CsvRow[]>([]);
   /** Remount CSV table after each successful convert so rows (and IDs) rebuild without a syncing effect */
   const [uploadedImportKey, setUploadedImportKey] = useState(0);
-
-  const onFinish = (_values: CreateSchemaFormData) => {
-    // const requestBody = transformFormDataToRequestBody(values);
-    // console.log('requestBody', requestBody);
-  };
 
   const hasUploadedSchema = uploadedSchema.length > 0;
 
@@ -78,13 +100,12 @@ export const CreateSchemaForm = ({
     }
   };
 
-  const watchColumnsSource = Form.useWatch('columnsSource', form);
-
   return (
     <Form
       className="h-[calc(100vh-120px)] css-custom-scrollbar"
       form={form}
       onFinish={onFinish}
+      preserve
     >
       <div className="flex gap-2 w-full">
         <Form.Item
@@ -92,7 +113,7 @@ export const CreateSchemaForm = ({
           name="path"
           rules={[formValidation]}
           label="Path"
-          tooltip="Prepends the file name in the "
+          tooltip="Prepends the file name in the directory structure"
         >
           <Input placeholder="Enter path" />
         </Form.Item>
@@ -104,6 +125,16 @@ export const CreateSchemaForm = ({
           rules={[formValidation]}
         >
           <Input placeholder="Enter name" />
+        </Form.Item>
+      </div>
+      <div className="flex gap-2 w-full">
+        <Form.Item
+          className="w-full"
+          name="type"
+          label="Type"
+          rules={[formValidation]}
+        >
+          <Select options={TYPE_OPTIONS} placeholder="Select type" />
         </Form.Item>
 
         <Form.Item
@@ -174,8 +205,12 @@ export const CreateSchemaForm = ({
                 <Radio.Button value="csv" className="w-1/2 text-center">
                   DFE CSV
                 </Radio.Button>
-                <Radio.Button value="json" className="w-1/2 text-center">
-                  ELASTIC INDEX TEMPLATE
+                <Radio.Button
+                  disabled
+                  value="json"
+                  className="w-1/2 text-center"
+                >
+                  ELASTIC INDEX TEMPLATE (Coming Soon!)
                 </Radio.Button>
               </Radio.Group>
             </Form.Item>
@@ -197,42 +232,45 @@ export const CreateSchemaForm = ({
       </div>
 
       {hasUploadedSchema && (
-        <>
-          <Form.Item name="columnsSource" initialValue="uploaded">
-            <Radio.Group className="flex flex-row w-full mt-3">
-              <Radio.Button value="uploaded" className="w-1/2 text-center">
-                Uploaded Schema
-              </Radio.Button>
-              <Radio.Button value="manual" className="w-1/2 text-center">
-                Additional Columns
-              </Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-          {watchColumnsSource === 'uploaded' && (
-            <Form.Item name="schemaColumns" label="Uploaded Schema">
-              <AddSchemaTable
-                key={uploadedImportKey}
-                initialValues={uploadedSchema}
-              />
-            </Form.Item>
-          )}
-          {watchColumnsSource === 'manual' && (
-            <Form.Item name="schemaColumns" label="Additional Columns">
-              <AddSchemaTable />
-            </Form.Item>
-          )}
-        </>
+        <Tabs
+          destroyOnHidden={false}
+          items={[
+            {
+              key: 'uploadedColumns',
+              label: 'Uploaded Columns',
+              forceRender: true,
+              children: (
+                <AddSchemaTable
+                  name="uploadedColumns"
+                  key={uploadedImportKey}
+                  initialValues={uploadedSchema}
+                />
+              ),
+            },
+            {
+              key: 'schemaColumns',
+              label: 'Additional Columns',
+              forceRender: true,
+              children: <AddSchemaTable name="schemaColumns" />,
+            },
+          ]}
+        />
       )}
 
       {!hasUploadedSchema && (
         <Form.Item name="schemaColumns" label="Schema Columns">
-          <AddSchemaTable />
+          <AddSchemaTable name="schemaColumns" />
         </Form.Item>
       )}
 
       <Form.Item className="flex justify-end">
         {hasReset && (
-          <Button className="mr-2" type="default" htmlType="reset">
+          <Button
+            className="mr-2"
+            type="default"
+            htmlType="reset"
+            disabled={isPending}
+          >
             Reset Form
           </Button>
         )}

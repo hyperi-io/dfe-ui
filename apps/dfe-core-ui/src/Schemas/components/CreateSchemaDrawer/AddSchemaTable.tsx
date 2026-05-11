@@ -41,8 +41,10 @@ function normalizeSchemaColumns(
 
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
+  name = 'columns',
 }: {
   initialValues?: Partial<SchemaColumn>[];
+  name?: string;
 }) => {
   const [schemaColumns, setSchemaColumns] = useState<SchemaColumn[]>(() =>
     normalizeSchemaColumns(initialValues),
@@ -105,7 +107,7 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'name']}
+            name={[name, record.id, 'name']}
             initialValue={record.name}
           >
             <InlineEditInput />
@@ -121,7 +123,7 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'type']}
+            name={[name, record.id, 'type']}
             initialValue={record.type}
           >
             <InlineEditSelect options={PRIMITIVE_OPTIONS} />
@@ -137,7 +139,7 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'use_case']}
+            name={[name, record.id, 'use_case']}
             initialValue={record.use_case}
           >
             <InlineEditSelect options={USE_CASE_OPTIONS} />
@@ -153,10 +155,10 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'attribute']}
+            name={[name, record.id, 'attribute']}
             initialValue={record.attribute}
           >
-            <InlineEditSelect options={ATTRIBUTE_OPTIONS} />
+            <InlineEditSelect mode="multiple" options={ATTRIBUTE_OPTIONS} />
           </Form.Item>
         );
       },
@@ -169,7 +171,7 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'expr']}
+            name={[name, record.id, 'expr']}
             initialValue={record.expr}
           >
             <InlineEditInput />
@@ -185,7 +187,7 @@ export const AddSchemaTable = ({
       render: (_: unknown, record: SchemaColumn) => {
         return (
           <Form.Item
-            name={['columns', record.id, 'comment']}
+            name={[name, record.id, 'comment']}
             initialValue={record.comment ?? ''}
           >
             <InlineEditInput />
