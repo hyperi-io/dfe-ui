@@ -7,7 +7,7 @@ import { Button, FormProps, Input, Radio, Select, Tabs } from 'antd';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 import { useState } from 'react';
 import z from 'zod';
-import { AddSchemaTable } from './AddSchemaTable';
+import { AddSchemaTable, rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './fieldOptions.constants';
 import { FileUploadDragger } from './FileUploadDragger';
 
@@ -38,30 +38,8 @@ const formSchema = z.object({
     }),
   type: z.enum(['model', 'addition', 'revision']),
   description: z.string().optional(),
-  uploadedColumns: z
-    .array(
-      z.object({
-        name: z.string(),
-        type: z.string(),
-        attribute: z.array(z.string()),
-        use_case: z.string(),
-        expr: z.string(),
-        comment: z.string().optional(),
-      }),
-    )
-    .optional(),
-  schemaColumns: z
-    .array(
-      z.object({
-        name: z.string(),
-        type: z.string(),
-        attribute: z.array(z.string()),
-        use_case: z.string(),
-        expr: z.string(),
-        comment: z.string().optional(),
-      }),
-    )
-    .optional(),
+  uploadedColumns: z.record(z.string(), rowSchema).optional(),
+  schemaColumns: z.record(z.string(), rowSchema).optional(),
 });
 export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
@@ -244,6 +222,7 @@ export const CreateSchemaForm = ({
                   name="uploadedColumns"
                   key={uploadedImportKey}
                   initialValues={uploadedSchema}
+                  formValidation={formValidation}
                 />
               ),
             },
@@ -251,7 +230,12 @@ export const CreateSchemaForm = ({
               key: 'schemaColumns',
               label: 'Additional Columns',
               forceRender: true,
-              children: <AddSchemaTable name="schemaColumns" />,
+              children: (
+                <AddSchemaTable
+                  name="schemaColumns"
+                  formValidation={formValidation}
+                />
+              ),
             },
           ]}
         />
@@ -259,7 +243,10 @@ export const CreateSchemaForm = ({
 
       {!hasUploadedSchema && (
         <Form.Item name="schemaColumns" label="Schema Columns">
-          <AddSchemaTable name="schemaColumns" />
+          <AddSchemaTable
+            name="schemaColumns"
+            formValidation={formValidation}
+          />
         </Form.Item>
       )}
 

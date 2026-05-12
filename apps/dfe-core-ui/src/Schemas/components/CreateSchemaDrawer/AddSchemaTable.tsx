@@ -4,9 +4,10 @@ import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { SchemaCreateRequestColumn } from '@/Schemas/hooks/useCreateSchema/types';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, Tooltip } from 'antd';
+import { Button, FormRule, Tooltip } from 'antd';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import z from 'zod';
 import {
   ATTRIBUTE_OPTIONS,
   PRIMITIVE_OPTIONS,
@@ -17,6 +18,15 @@ interface SchemaColumn extends SchemaCreateRequestColumn {
   id: string;
   uploaded?: boolean;
 }
+
+export const rowSchema = z.object({
+  name: z.string().min(1, { message: 'Name is required' }),
+  type: z.string().min(1, { message: 'Type is required' }),
+  attribute: z.array(z.string()).optional(),
+  use_case: z.string().min(1, { message: 'Use case is required' }),
+  expr: z.string().optional(),
+  comment: z.string().optional(),
+});
 
 /** Stable default so `useEffect` does not treat a new `[]` each render as an update. */
 const EMPTY_COLUMNS: Partial<SchemaColumn>[] = [];
@@ -42,9 +52,11 @@ function normalizeSchemaColumns(
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',
+  formValidation,
 }: {
   initialValues?: Partial<SchemaColumn>[];
   name?: string;
+  formValidation: FormRule;
 }) => {
   const [schemaColumns, setSchemaColumns] = useState<SchemaColumn[]>(() =>
     normalizeSchemaColumns(initialValues),
@@ -109,6 +121,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'name']}
             initialValue={record.name}
+            rules={[formValidation]}
           >
             <InlineEditInput />
           </Form.Item>
@@ -125,6 +138,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'type']}
             initialValue={record.type}
+            rules={[formValidation]}
           >
             <InlineEditSelect options={PRIMITIVE_OPTIONS} />
           </Form.Item>
@@ -141,6 +155,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'use_case']}
             initialValue={record.use_case}
+            rules={[formValidation]}
           >
             <InlineEditSelect options={USE_CASE_OPTIONS} />
           </Form.Item>
@@ -157,6 +172,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'attribute']}
             initialValue={record.attribute}
+            rules={[formValidation]}
           >
             <InlineEditSelect mode="multiple" options={ATTRIBUTE_OPTIONS} />
           </Form.Item>
@@ -173,6 +189,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'expr']}
             initialValue={record.expr}
+            rules={[formValidation]}
           >
             <InlineEditInput />
           </Form.Item>
@@ -189,6 +206,7 @@ export const AddSchemaTable = ({
           <Form.Item
             name={[name, record.id, 'comment']}
             initialValue={record.comment ?? ''}
+            rules={[formValidation]}
           >
             <InlineEditInput />
           </Form.Item>

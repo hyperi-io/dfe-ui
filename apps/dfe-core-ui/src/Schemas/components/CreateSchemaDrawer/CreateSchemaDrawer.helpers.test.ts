@@ -53,9 +53,9 @@ describe('transformFormDataToRequestBody', () => {
     expect(result.versions['1.0.0'].summary).toBe('');
   });
 
-  test('maps uploaded columns with source imported, then manual columns', () => {
-    const uploaded = [
-      {
+  test('maps uploaded columns then manual columns', () => {
+    const uploaded = {
+      upl_1: {
         name: 'col_a',
         type: 'String',
         attribute: ['nullable'],
@@ -63,9 +63,9 @@ describe('transformFormDataToRequestBody', () => {
         expr: '',
         comment: 'note',
       },
-    ];
-    const manual = [
-      {
+    };
+    const manual = {
+      man_1: {
         name: 'col_b',
         type: 'UInt64',
         attribute: [] as string[],
@@ -73,7 +73,7 @@ describe('transformFormDataToRequestBody', () => {
         expr: 'count()',
         comment: undefined as string | undefined,
       },
-    ];
+    };
     const result = transformFormDataToRequestBody({
       ...baseFormData(),
       uploadedColumns: uploaded,
@@ -87,7 +87,6 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'id',
         expr: '',
         comment: 'note',
-        source: 'imported',
       },
       {
         name: 'col_b',

@@ -14,25 +14,24 @@ export const transformFormDataToRequestBody = (
   formData: CreateSchemaFormData,
 ) => {
   const uploadedColumns: SchemaCreateRequestColumn[] = Object.values(
-    formData.uploadedColumns ?? [],
+    formData.uploadedColumns ?? {},
   ).map((column) => ({
     name: column.name,
     type: column.type,
     attribute: column.attribute,
     use_case: column.use_case,
-    expr: column.expr,
+    expr: column.expr ?? '',
     comment: column.comment,
-    source: 'imported',
   }));
 
   const schemaColumns: SchemaCreateRequestColumn[] = Object.values(
-    formData.schemaColumns ?? [],
+    formData.schemaColumns ?? {},
   ).map((column) => ({
     name: column.name,
     type: column.type,
     attribute: column.attribute,
     use_case: column.use_case,
-    expr: column.expr,
+    expr: column.expr ?? '',
     comment: column.comment,
   }));
 

@@ -1,6 +1,6 @@
 import { IconCheck, IconEdit, IconX } from '@repo/dfe-icons';
 import { Button, Input, InputProps } from 'antd';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, startTransition, useEffect, useState } from 'react';
 
 interface InlineEditInputProps extends InputProps {
   initialValue?: string;
@@ -32,6 +32,16 @@ export const InlineEditInput = ({
     setDraft(resolved);
     setIsEditing(true);
   };
+
+  // On error, set the input to edit mode to allow the user to correct the error
+  const hasError = props['aria-invalid'] === 'true';
+  useEffect(() => {
+    if (hasError) {
+      startTransition(() => {
+        setIsEditing(true);
+      });
+    }
+  }, [hasError, setIsEditing]);
 
   return (
     <>
