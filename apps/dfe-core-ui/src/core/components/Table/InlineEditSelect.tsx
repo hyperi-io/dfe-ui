@@ -12,7 +12,20 @@ import {
 interface InlineEditSelectProps extends SelectProps {
   initialValue?: string;
   editable?: boolean;
+  defaultEditing?: boolean;
 }
+
+const transformLabel = (label: string | string[]) => {
+  if (Array.isArray(label) && label.length === 0) {
+    return 'None';
+  }
+
+  if (Array.isArray(label) && label.length > 0) {
+    return label?.map((item: string) => <Tag key={item}>{item}</Tag>);
+  }
+
+  return label || 'None';
+};
 
 export const InlineEditSelect = ({
   value: propValue,
@@ -20,10 +33,11 @@ export const InlineEditSelect = ({
   onChange,
   editable = true,
   options,
+  defaultEditing = false,
   ...props
 }: InlineEditSelectProps) => {
   const resolved = propValue ?? initialValue;
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(defaultEditing);
   const [draft, setDraft] = useState(resolved);
 
   const [search, setSearch] = useState('');
@@ -48,7 +62,7 @@ export const InlineEditSelect = ({
     setIsEditing(true);
   };
 
-  const isMultiple = props.mode === 'multiple';
+  const isMultiple = props.mode === 'multiple' && Array.isArray(resolved);
 
   // On error, set the input to edit mode to allow the user to correct the error
   const hasError = props['aria-invalid'] === 'true';
@@ -100,9 +114,7 @@ export const InlineEditSelect = ({
               onClick={handleEdit}
             />
           )}
-          {isMultiple
-            ? resolved?.map((item: string) => <Tag key={item}>{item}</Tag>)
-            : resolved}
+          {transformLabel(resolved)}
         </div>
       )}
     </>

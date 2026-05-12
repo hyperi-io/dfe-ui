@@ -7,6 +7,10 @@ export interface CsvRow {
 }
 
 export const convertCsv = async (file: File): Promise<CsvRow[]> => {
+  if (!file) {
+    return [];
+  }
+
   if (!(file instanceof File)) {
     throw new Error('File is not a File');
   }

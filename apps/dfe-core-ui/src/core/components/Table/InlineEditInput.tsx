@@ -5,17 +5,23 @@ import { ChangeEvent, startTransition, useEffect, useState } from 'react';
 interface InlineEditInputProps extends InputProps {
   initialValue?: string;
   editable?: boolean;
+  defaultEditing?: boolean;
 }
+
+const transformLabel = (label: string) => {
+  return label || 'None';
+};
 
 export const InlineEditInput = ({
   value: propValue,
   initialValue = '',
   onChange,
   editable = true,
+  defaultEditing = false,
   ...props
 }: InlineEditInputProps) => {
   const resolved = (propValue ?? initialValue ?? '') as string;
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(defaultEditing);
   const [draft, setDraft] = useState(resolved);
 
   const handleUpdateValue = () => {
@@ -76,7 +82,7 @@ export const InlineEditInput = ({
               onClick={handleEdit}
             />
           )}
-          {resolved}
+          {transformLabel(resolved)}
         </div>
       )}
     </>

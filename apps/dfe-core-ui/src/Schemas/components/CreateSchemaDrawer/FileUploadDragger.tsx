@@ -14,8 +14,12 @@ export const FileUploadDragger = ({
   const [fileList, setFileList] = useState<RcFile[]>([]);
 
   const handleRemove = (file: UploadFile<RcFile>) => {
-    setFileList(fileList.filter((f) => f.uid !== file.uid));
+    const newFileList = fileList?.filter((f) => f.uid !== file.uid) ?? [];
+    setFileList(newFileList);
     onRemove?.(file);
+    onChange?.({
+      fileList: newFileList,
+    } as unknown as UploadChangeParam<UploadFile<RcFile>>);
   };
 
   const handleChange = (info: UploadChangeParam<UploadFile<RcFile>>) => {

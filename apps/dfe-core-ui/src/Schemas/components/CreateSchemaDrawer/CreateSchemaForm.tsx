@@ -57,8 +57,8 @@ export const CreateSchemaForm = ({
 }: CreateSchemaFormProps) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
-  const [viewMore, setViewMore] = useState(false);
-  const [fileUpload, setFileUpload] = useState(false);
+  const [showDescription, setShowDescription] = useState(true);
+  const [showFileUpload, setShowFileUpload] = useState(true);
   const [uploadedSchema, setUploadedSchema] = useState<CsvRow[]>([]);
   /** Remount CSV table after each successful convert so rows (and IDs) rebuild without a syncing effect */
   const [uploadedImportKey, setUploadedImportKey] = useState(0);
@@ -128,24 +128,24 @@ export const CreateSchemaForm = ({
       <div className="relative w-full">
         <button
           className="absolute top-0 right-0 z-2 cursor-pointer p-1"
-          onClick={() => setViewMore(!viewMore)}
+          onClick={() => setShowDescription(!showDescription)}
         >
-          {viewMore ? <IconChevronUp /> : <IconChevronDown />}
+          {showDescription ? <IconChevronUp /> : <IconChevronDown />}
         </button>
 
-        {!viewMore && (
+        {!showDescription && (
           <button
             className="cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2"
             onClick={(e) => {
               e.preventDefault();
-              setViewMore(true);
+              setShowDescription(true);
             }}
           >
             <label htmlFor="description">Description</label>
           </button>
         )}
 
-        {viewMore && (
+        {showDescription && (
           <Form.Item
             name="description"
             label="Description"
@@ -158,25 +158,25 @@ export const CreateSchemaForm = ({
       <div className="relative w-full">
         <button
           className="absolute top-0 right-0 z-2 cursor-pointer p-1"
-          onClick={() => setFileUpload(!fileUpload)}
+          onClick={() => setShowFileUpload(!showFileUpload)}
         >
-          {viewMore ? <IconChevronUp /> : <IconChevronDown />}
+          {showFileUpload ? <IconChevronUp /> : <IconChevronDown />}
         </button>
 
         <button
           className={cn(
             'cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2',
-            fileUpload && 'border-b-0 pb-0',
+            showFileUpload && 'border-b-0 pb-0',
           )}
           onClick={(e) => {
             e.preventDefault();
-            setFileUpload(true);
+            setShowFileUpload(true);
           }}
         >
           <p>Upload from file</p>
         </button>
 
-        {fileUpload && (
+        {showFileUpload && (
           <div className="flex flex-col gap-y-2">
             <Form.Item name="uploadType" initialValue="csv">
               <Radio.Group className="flex flex-row w-full mt-3">
@@ -223,6 +223,11 @@ export const CreateSchemaForm = ({
                   key={uploadedImportKey}
                   initialValues={uploadedSchema}
                   formValidation={formValidation}
+                  config={{
+                    defaultEditFields: false,
+                    defaultAddColumns: false,
+                    defaultRemoveColumns: true,
+                  }}
                 />
               ),
             },
@@ -232,6 +237,7 @@ export const CreateSchemaForm = ({
               forceRender: true,
               children: (
                 <AddSchemaTable
+                  key="schemaColumns"
                   name="schemaColumns"
                   formValidation={formValidation}
                 />
@@ -244,6 +250,7 @@ export const CreateSchemaForm = ({
       {!hasUploadedSchema && (
         <Form.Item name="schemaColumns" label="Schema Columns">
           <AddSchemaTable
+            key="schemaColumns"
             name="schemaColumns"
             formValidation={formValidation}
           />

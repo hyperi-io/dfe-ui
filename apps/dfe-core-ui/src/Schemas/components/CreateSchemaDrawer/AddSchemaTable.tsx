@@ -23,7 +23,7 @@ export const rowSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   type: z.string().min(1, { message: 'Type is required' }),
   attribute: z.array(z.string()).optional(),
-  use_case: z.string().min(1, { message: 'Use case is required' }),
+  use_case: z.string().optional(),
   expr: z.string().optional(),
   comment: z.string().optional(),
 });
@@ -38,14 +38,10 @@ function normalizeSchemaColumns(
     id: column.id ?? uuidv4(),
     name: column.name ?? '',
     type: column.type ?? '',
-    attribute: Array.isArray(column.attribute)
-      ? column.attribute
-      : column.attribute !== undefined && column.attribute !== ''
-        ? [column.attribute as string]
-        : [],
-    use_case: column.use_case === null ? '' : (column.use_case ?? ''),
-    expr: column.expr === null ? '' : (column.expr ?? ''),
-    comment: column.comment === null ? '' : (column.comment ?? null),
+    attribute: column.attribute ?? [],
+    use_case: column.use_case ?? '',
+    expr: column.expr ?? '',
+    comment: column.comment ?? '',
   }));
 }
 
@@ -53,10 +49,20 @@ export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',
   formValidation,
+  config = {
+    defaultEditFields: true,
+    defaultAddColumns: true,
+    defaultRemoveColumns: true,
+  },
 }: {
   initialValues?: Partial<SchemaColumn>[];
   name?: string;
   formValidation: FormRule;
+  config?: {
+    defaultEditFields?: boolean;
+    defaultAddColumns?: boolean;
+    defaultRemoveColumns?: boolean;
+  };
 }) => {
   const [schemaColumns, setSchemaColumns] = useState<SchemaColumn[]>(() =>
     normalizeSchemaColumns(initialValues),
@@ -76,14 +82,14 @@ export const AddSchemaTable = ({
         attribute: [],
         use_case: '',
         expr: '',
-        comment: null,
+        comment: '',
       },
     ]);
   };
 
   const columns = [
     {
-      title: (
+      title: config.defaultAddColumns ? (
         <Tooltip title="Add Column" destroyOnHidden>
           <Button
             icon={<IconPlus />}
@@ -93,12 +99,13 @@ export const AddSchemaTable = ({
             onClick={handleAddColumn}
           />
         </Tooltip>
-      ),
+      ) : null,
       dataIndex: 'delete',
       key: 'delete',
+      align: 'center' as const,
       width: 30,
       render: (_: unknown, record: SchemaColumn) => {
-        return (
+        return config.defaultRemoveColumns ? (
           <Tooltip title="Remove Column" destroyOnHidden>
             <Button
               icon={<IconTrash />}
@@ -108,7 +115,7 @@ export const AddSchemaTable = ({
               onClick={() => handleRemoveColumn(record.id)}
             />
           </Tooltip>
-        );
+        ) : null;
       },
     },
     {
@@ -123,7 +130,7 @@ export const AddSchemaTable = ({
             initialValue={record.name}
             rules={[formValidation]}
           >
-            <InlineEditInput />
+            <InlineEditInput defaultEditing={config.defaultEditFields} />
           </Form.Item>
         );
       },
@@ -140,7 +147,10 @@ export const AddSchemaTable = ({
             initialValue={record.type}
             rules={[formValidation]}
           >
-            <InlineEditSelect options={PRIMITIVE_OPTIONS} />
+            <InlineEditSelect
+              options={PRIMITIVE_OPTIONS}
+              defaultEditing={config.defaultEditFields}
+            />
           </Form.Item>
         );
       },
@@ -163,7 +173,7 @@ export const AddSchemaTable = ({
       },
     },
     {
-      title: 'Attribute',
+      title: 'Attributes',
       dataIndex: 'attribute',
       key: 'attribute',
       width: '16%',

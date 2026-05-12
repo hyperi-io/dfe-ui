@@ -19,7 +19,7 @@ export const transformFormDataToRequestBody = (
     name: column.name,
     type: column.type,
     attribute: column.attribute,
-    use_case: column.use_case,
+    use_case: column.use_case ?? '',
     expr: column.expr ?? '',
     comment: column.comment,
   }));
@@ -30,7 +30,7 @@ export const transformFormDataToRequestBody = (
     name: column.name,
     type: column.type,
     attribute: column.attribute,
-    use_case: column.use_case,
+    use_case: column.use_case ?? '',
     expr: column.expr ?? '',
     comment: column.comment,
   }));
