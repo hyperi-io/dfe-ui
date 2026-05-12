@@ -74,6 +74,16 @@ export const InlineEditSelect = ({
     }
   }, [hasError, setIsEditing]);
 
+  // On error, set the input to edit mode to allow the user to correct the error
+  const hasError = props['aria-invalid'] === 'true';
+  useEffect(() => {
+    if (hasError) {
+      startTransition(() => {
+        setIsEditing(true);
+      });
+    }
+  }, [hasError, setIsEditing]);
+
   return (
     <>
       {isEditing ? (
