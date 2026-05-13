@@ -1490,6 +1490,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas/elastic-converter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Elastic Converter
+         * @description Extract meta-schema columns from an Elasticsearch index template JSON file.
+         *
+         *     Accepts Beat-style exports with ``template.mappings.properties`` or API-style
+         *     ``mappings.properties``. Column layout follows curated YAML conventions
+         *     (snake_case ``name``, ``@source:`` dotted ``expr``).
+         *
+         *     Upload size is capped by ``api.elastic_converter_max_upload_bytes`` (reject with 413 and
+         *     ``upload_too_large`` when exceeded). Override with ``DFE_API_ELASTIC_CONVERTER_*``.
+         */
+        post: operations["elastic_converter_api_v1_schemas_elastic_converter_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/{source_name}/columns": {
         parameters: {
             query?: never;
@@ -1828,6 +1855,11 @@ export interface components {
              * @default
              */
             url_scheme: string;
+        };
+        /** Body_elastic_converter_api_v1_schemas_elastic_converter_post */
+        Body_elastic_converter_api_v1_schemas_elastic_converter_post: {
+            /** File */
+            file: string;
         };
         /**
          * BulkActionRequest
@@ -2262,6 +2294,37 @@ export interface components {
             headers?: {
                 [key: string]: string;
             };
+        };
+        /**
+         * ErrorResponse
+         * @description Unified error response.
+         *
+         *     All API errors return this shape. The UI can always parse:
+         *     - ``code`` for programmatic branching
+         *     - ``message`` for a human-readable summary
+         *     - ``errors`` for field-level validation details (422 only)
+         *     - ``context`` for optional structured data on specific errors (e.g. conflicts)
+         */
+        ErrorResponse: {
+            /**
+             * Code
+             * @description Machine-readable error code
+             */
+            code: string;
+            /**
+             * Message
+             * @description Human-readable error summary
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            /**
+             * Context
+             * @description Structured details for specific errors (e.g. match_conflict)
+             */
+            context?: {
+                [key: string]: unknown;
+            } | null;
         };
         /**
          * FetcherAuth
@@ -7368,6 +7431,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    elastic_converter_api_v1_schemas_elastic_converter_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_elastic_converter_api_v1_schemas_elastic_converter_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+                };
+            };
+            /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
