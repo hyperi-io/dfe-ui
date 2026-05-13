@@ -1,0 +1,1088 @@
+---
+category: Auto Attached
+description: typescript standards
+globs: "file:tsconfig.json,deep_file:tsconfig.json"
+---
+
+
+# TypeScript Standards — HyperI Projects
+
+## Quick Reference
+
+pnpm repos:
+```bash
+pnpm install          # Install deps
+pnpm build            # Build all
+pnpm test             # Run tests
+pnpm lint             # Lint all
+pnpm typecheck        # Type check only
+turbo run build       # Build with caching
+```
+
+yarn repos:
+```bash
+yarn                  # Install deps
+yarn build            # Build all
+yarn test             # Run tests
+yarn lint             # Lint all
+yarn typecheck        # Type check only
+yarn format           # Format with prettier
+turbo run build       # Build with caching
+```
+
+---
+
+## Editor and Tooling
+
+**Required extensions:** ESLint (`dbaeumer.vscode-eslint`), Prettier (`esbenp.prettier-vscode`)
+**Recommended:** Code Spell Checker, Tailwind CSS IntelliSense (when using Tailwind)
+
+Install Prettier at **workspace root**. `.vscode/settings.json`:
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.requireConfig": true
+}
+```
+
+---
+
+## Project Structure — Turborepo Monorepo
+
+Prefer **Turborepo**. UIs/APIs under `apps/`, shared libs under `packages/`. Prefer **Vite** where a bundler is needed. Use **ESLint** with shared configs.
+
+```text
+myproject/
+├── apps/
+│   ├── web/            # React frontend (Vite)
+│   └── server/         # Node.js backend
+├── packages/
+│   ├── shared/         # Shared types/utilities
+│   ├── eslint-config/  # Shared ESLint (base.js, react.js)
+│   └── typescript-config/ # Shared tsconfig (base.json, react.json)
+├── package.json
+├── pnpm-workspace.yaml # pnpm only
+├── yarn.lock           # yarn only
+└── turbo.json
+```
+
+---
+
+## App Directory Structure and Import Boundaries
+
+Organise by **view groups/flows**. Colocate hooks, components, context, helpers per area. **Shared** code under `/core`.
+
+**Do NOT import across feature scopes.** If needed in multiple scopes → move to `/core`. Exception: `core/utils/test-utils`.
+
+No relative parent imports (`../`) — use `@/` path aliases.
+
+Reference ESLint `no-restricted-imports` overrides:
+```javascript
+/**
+ * Import scope rule: only allow imports to current scope or @/core.
+ *
+ * - Feature scopes (@/Schemas, @/Sources, @/Rules, @/Settings) may only import
+ *   from their own scope or @/core.
+ * - Core (@/core) may only import from @/core.
+ * - Relative parent imports (../) are not allowed; use @/ path aliases.
+ */
+
+const ERROR = 'error';
+
+export const SCOPES = ['Schemas', 'Sources', 'Rules', 'Settings'];
+
+const otherScopes = (current) =>
+  SCOPES.filter((s) => s !== current).flatMap((s) => [`@/${s}`, `@/${s}/**`]);
+
+const RULE_ID = 'no-restricted-imports';
+
+const noRelativeParentImports = {
+  group: ['../**'],
+  message: 'Relative parent imports (../) are not allowed. Use @/ path aliases instead.',
+};
+
+const scopeImportOverrides = SCOPES.map((scope) => ({
+  files: [`src/${scope}/**/*.{ts,tsx}`],
+  rules: {
+    [RULE_ID]: [
+      ERROR,
+      {
+        patterns: [
+          {
+            group: otherScopes(scope),
+            message: `Imports from other scopes are not allowed. Use only @/${scope} or @/core.`,
+          },
+          noRelativeParentImports,
+        ],
+      },
+    ],
+  },
+}));
+
+const coreImportOverride = {
+  files: ['src/core/**/*.{ts,tsx}'],
+  rules: {
+    [RULE_ID]: [
+      ERROR,
+      {
+        patterns: [
+          {
+            group: SCOPES.flatMap((s) => [`@/${s}`, `@/${s}/**`]),
+            message: 'Core must not import from feature scopes. Use only @/core.',
+          },
+          noRelativeParentImports,
+        ],
+      },
+    ],
+  },
+};
+
+/**
+ * Test wrapper may import across scopes - it needs to wrap providers/components
+ * from different feature areas for tests.
+ */
+const testWrapperException = {
+  files: ['src/core/utils/test-utils/**/*.{ts,tsx}'],
+  rules: {
+    [RULE_ID]: 'off',
+  },
+};
+
+/**
+ * App and other src files: only restrict relative parent imports.
+ */
+const appAndOtherImportsOverride = {
+  files: ['src/**/*.{ts,tsx}'],
+  rules: {
+    [RULE_ID]: [
+      ERROR,
+      {
+        patterns: [noRelativeParentImports],
+      },
+    ],
+  },
+};
+
+/** Rule ID for import scope restrictions. */
+export { RULE_ID };
+
+/** ESLint config overrides for import scope restrictions. */
+export const importScopeOverrides = [
+  appAndOtherImportsOverride,
+  ...scopeImportOverrides,
+  coreImportOverride,
+  testWrapperException,
+];
+```
+
+---
+
+## TypeScript Configuration
+
+### Base Configuration (Strict Mode Required)
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  }
+}
+```
+
+### React/Vite Configuration
+
+```json
+{
+  "extends": "@repo/typescript-config/react.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src"]
+}
+```
+
+| Setting | Purpose |
+|---------|---------|
+| `strict: true` | All strict type checks |
+| `noUncheckedIndexedAccess` | Arrays return `T \| undefined` |
+| `verbatimModuleSyntax` | Preserves import/export for bundlers |
+| `moduleResolution: bundler` | For Vite/esbuild (not Node resolution) |
+| `noEmit: true` | Type check only, bundler handles output |
+
+---
+
+## ESLint Configuration (Flat Config)
+
+### Base
+
+```javascript
+// packages/eslint-config/base.js
+import js from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
+import turboPlugin from "eslint-plugin-turbo";
+
+export const config = [
+  js.configs.recommended,
+  eslintConfigPrettier,
+  ...tseslint.configs.recommended,
+  { plugins: { turbo: turboPlugin }, rules: { "turbo/no-undeclared-env-vars": "warn" } },
+  { ignores: ["dist/**", "node_modules/**"] },
+];
+```
+
+### React
+
+```javascript
+// packages/eslint-config/react.js
+import { config as baseConfig } from "./base.js";
+import reactPlugin from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+
+export default [
+  ...baseConfig,
+  {
+    plugins: { react: reactPlugin, "react-hooks": reactHooks, "react-refresh": reactRefresh },
+    rules: {
+      "react/react-in-jsx-scope": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "@typescript-eslint/no-unused-vars": ["error", {
+        argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_",
+      }],
+    },
+  },
+];
+```
+
+### App-Level
+
+```javascript
+// apps/web/eslint.config.js
+import { defineConfig, globalIgnores } from "eslint/config";
+import baseConfig from "@repo/eslint-config/react";
+export default defineConfig([globalIgnores(["dist"]), ...baseConfig]);
+```
+
+---
+
+## Effect-TS Patterns
+
+### Service Definition with Context.Tag
+
+```typescript
+export class DatabaseClient extends Context.Tag("DatabaseClient")<
+  DatabaseClient,
+  {
+    readonly query: <T>(sql: string, params: unknown[]) => Effect.Effect<T[], DatabaseError>;
+    readonly execute: (sql: string, params: unknown[]) => Effect.Effect<void, DatabaseError>;
+  }
+>() {}
+```
+
+### Effect.gen for Monadic Composition
+
+```typescript
+// ✅ Effect.gen for complex logic
+const processOrder = (orderId: string) =>
+  Effect.gen(function* () {
+    const order = yield* OrderRepository.findById(orderId);
+    const inventory = yield* InventoryService.check(order.items);
+    if (!inventory.available) {
+      return yield* Effect.fail(new InsufficientInventoryError({ orderId }));
+    }
+    const payment = yield* PaymentService.charge(order.total);
+    return { order, payment };
+  });
+
+// ✅ pipe for simple transformations
+const getOrderTotal = (orderId: string) =>
+  pipe(
+    OrderRepository.findById(orderId),
+    Effect.map((order) => order.total),
+    Effect.withSpan("getOrderTotal"),
+  );
+```
+
+### Error Handling with Match
+
+```typescript
+export class NotFoundError extends Schema.TaggedError<NotFoundError>()(
+  "NotFoundError", { resource: Schema.String, id: Schema.String }
+) {}
+
+export class ValidationError extends Schema.TaggedError<ValidationError>()(
+  "ValidationError", { field: Schema.String, message: Schema.String }
+) {}
+
+// Exhaustive error handling
+const handleError = (error: DomainError) =>
+  pipe(
+    Match.type<DomainError>(),
+    Match.tag("NotFoundError", (e) => ({ status: 404, message: `${e.resource} not found: ${e.id}` })),
+    Match.tag("ValidationError", (e) => ({ status: 400, message: `Invalid ${e.field}: ${e.message}` })),
+    Match.exhaustive,
+  )(error);
+```
+
+### Layer Composition
+
+```typescript
+const MainLayer = Layer.mergeAll(DatabaseClientLive, CacheClientLive, LoggerLive)
+  .pipe(Layer.provideMerge(ConfigLive));
+
+Effect.runPromise(main.pipe(Effect.provide(MainLayer)));
+```
+
+---
+
+## Schema Validation (@effect/schema)
+
+### Schema Definition
+
+```typescript
+export const User = Schema.Struct({
+  id: Schema.String,
+  email: Schema.String.pipe(Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)),
+  name: Schema.String.pipe(Schema.minLength(1)),
+  age: Schema.Number.pipe(Schema.int(), Schema.between(0, 150)),
+  role: Schema.Union(Schema.Literal("admin"), Schema.Literal("user"), Schema.Literal("guest")),
+  createdAt: Schema.Date,
+  metadata: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),
+});
+
+export type User = typeof User.Type;
+export type UserInput = typeof User.Encoded;
+```
+
+### Schema Transformations
+
+```typescript
+export const DateFromUnix = Schema.transform(
+  Schema.Number, Schema.Date,
+  { decode: (unix) => new Date(unix * 1000), encode: (date) => Math.floor(date.getTime() / 1000) }
+);
+```
+
+### Runtime Validation
+
+```typescript
+const parseUser = (input: unknown) =>
+  pipe(input, Schema.decodeUnknown(User),
+    Effect.mapError((error) => new ValidationError({ field: "user", message: String(error) })));
+```
+
+### API Error Schemas
+
+```typescript
+export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>()(
+  "UnauthorizedError", { message: Schema.String },
+  HttpApiSchema.annotations({ status: 401, description: "Authentication required" })
+) {}
+
+export class RateLimitError extends Schema.TaggedError<RateLimitError>()(
+  "RateLimitError", { retryAfter: Schema.Number },
+  HttpApiSchema.annotations({ status: 429, description: "Too many requests" })
+) {}
+```
+
+---
+
+## SQL Injection Prevention
+
+| ❌ Don't | ✅ Do | Why |
+|----------|-------|-----|
+| String interpolation in SQL | Parameterized queries (`$1`, `{name:Type}`) | SQL injection |
+
+```typescript
+// ❌ BAD
+const sql = `SELECT * FROM users WHERE id = '${userId}'`;
+
+// ✅ GOOD — Postgres
+const sql = `SELECT * FROM users WHERE id = $1`;
+db.query(sql, [userId]);
+
+// ✅ GOOD — ClickHouse
+const sql = `SELECT * FROM events WHERE {col_0:Identifier} = {val_0:String}`;
+client.query(sql, { col_0: filter.column, val_0: filter.value });
+```
+
+### ClickHouse Placeholder Types
+
+| Placeholder | Use For |
+|-------------|---------|
+| `{name:Identifier}` | Column/table names |
+| `{name:String}` | String values |
+| `{name:Int32}` | Integer values |
+| `{name:DateTime}` | Date/time values |
+| `{name:Array(String)}` | Array values |
+
+---
+
+## Testing
+
+### Stack and Tooling
+
+**Vitest** (runner), **React Testing Library** (components), **MSW** (HTTP mocks), **Storybook** (visual regression where used).
+
+### React, Hooks, and Storybook
+
+- Components with visual coverage: add Storybook stories
+- Hooks: test happy path, error paths, null/undefined inputs, conditional branches
+- Components: interaction tests for main happy path — drive selects/inputs/buttons, assert side effects
+
+### Prefer `userEvent` over `fireEvent`
+
+```typescript
+// ❌ fireEvent does not mirror real browser input timing
+fireEvent.click(screen.getByRole("button"));
+
+// ✅ async userEvent matches browser behaviour
+const user = userEvent.setup();
+await user.click(await screen.findByRole("button"));
+```
+
+### Queries and Test IDs
+
+Prefer roles, labels, accessible names. `data-testid` is last resort.
+
+### Directory Structure
+
+```text
+src/
+├── components/
+│   ├── UserCard.tsx
+│   └── UserCard.test.tsx      # Unit test co-located
+tests/
+├── common/setup.ts
+├── fixtures/sample_responses.json
+├── integration/
+├── e2e/
+└── smoke/startup.test.ts       # MANDATORY
+```
+
+### Startup Smoke Test (MANDATORY)
+
+```typescript
+describe("startup", () => {
+  it("boots with default config without crashing", async () => {
+    const app = await createApp();
+    expect(app).toBeDefined();
+    expect(app.isReady()).toBe(true);
+  });
+});
+```
+
+### CI Stage Mapping (hyperi-ci)
+
+| Location | CI Stage | Trigger |
+|----------|----------|---------|
+| `src/**/*.test.ts` | `quality` | Every push |
+| `tests/integration/` | `test` | Every push |
+| `tests/e2e/` | `test:e2e` | PR to `release` |
+| `tests/smoke/` | `test:smoke` | Every push |
+
+### Vitest Configuration
+
+```typescript
+export default defineConfig({
+  test: {
+    globals: true, environment: "node", include: ["**/*.test.ts"],
+    coverage: {
+      provider: "v8", reporter: ["text", "json", "html"],
+      thresholds: { lines: 80, functions: 80, branches: 80 },
+    },
+  },
+});
+```
+
+### Testing Effect Code
+
+```typescript
+const TestLayer = Layer.succeed(DatabaseClient, {
+  query: () => Effect.succeed([{ id: "1", name: "Test" }]),
+  execute: () => Effect.succeed(undefined),
+});
+
+it("should find user by id", async () => {
+  const result = await Effect.gen(function* () {
+    const service = yield* UserService;
+    return yield* service.findById("1");
+  }).pipe(Effect.provide(UserServiceLive), Effect.provide(TestLayer), Effect.runPromise);
+  expect(result).toEqual({ id: "1", name: "Test" });
+});
+```
+
+### Schema Testing
+
+Test decode valid input, reject invalid input, isomorphic encode/decode.
+
+---
+
+## React Patterns
+
+### Component Structure
+
+```typescript
+interface UserCardProps {
+  user: User;
+  onSelect?: (user: User) => void;
+}
+
+export const UserCard: FC<UserCardProps> = ({ user, onSelect }) => (
+  <div className={styles.card} onClick={() => onSelect?.(user)}>
+    <h3>{user.name}</h3>
+    <p>{user.email}</p>
+  </div>
+);
+```
+
+### Async State Pattern
+
+```typescript
+type AsyncState<T, E = Error> =
+  | { status: "idle" }
+  | { status: "loading"; data?: T }
+  | { status: "error"; error: E; data?: T }
+  | { status: "success"; data: T };
+```
+
+### Error Boundary with Effect Errors
+
+Use `Runtime.isFiberFailure` → extract `cause.error` → `Match.tag` for domain errors → fallback message.
+
+---
+
+## Turborepo Configuration
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "inputs": ["$TURBO_DEFAULT$", ".env*"], "outputs": ["dist/**", ".next/**"] },
+    "test": { "dependsOn": ["^build"], "inputs": ["$TURBO_DEFAULT$", ".env.test"], "outputs": ["coverage/**"] },
+    "lint": { "dependsOn": ["^build"], "outputs": [] },
+    "typecheck": { "dependsOn": ["^build"], "outputs": [] },
+    "dev": { "cache": false, "persistent": true }
+  }
+}
+```
+
+---
+
+## Naming Conventions
+
+| What | Convention | Example |
+|------|-----------|---------|
+| Variables/functions | camelCase | `userCount`, `calculateTotal` |
+| Types/interfaces/classes | PascalCase | `UserProfile`, `OrderService` |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRIES`, `API_BASE_URL` |
+| Private (convention) | `_` prefix | `_internalCache` |
+| Files (general) | kebab-case | `user-service.ts` |
+| React components | PascalCase | `UserCard.tsx` |
+| Tests | `.test.ts`/`.test.tsx` suffix | `user-service.test.ts` |
+
+---
+
+## Common Pitfalls
+
+### Type Narrowing
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `const user = data as User` | `Schema.decodeUnknownSync(User)(data)` or type guard |
+
+### Null Handling
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `user!.name` | `user?.name ?? "Unknown"` |
+
+### Array Index Access
+
+With `noUncheckedIndexedAccess: true`, `items[0]` is `T | undefined`. Use `items[0] ?? "default"` or `.at(0)` with check.
+
+### Promise Handling
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `fetchData();` (floating) | `await fetchData()` or `void fetchData()` |
+
+---
+
+## Build Configuration
+
+### Vite (Frontend)
+
+```typescript
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+  build: { sourcemap: true, rollupOptions: { output: { manualChunks: { vendor: ["react", "react-dom"] } } } },
+});
+```
+
+### esbuild (Backend)
+
+```bash
+esbuild src/main.ts --bundle --platform=node --target=node20 \
+  --outfile=dist/server.js --sourcemap --external:@effect/*
+```
+
+---
+
+## HTTP Client (@tanstack/react-query)
+
+When an API has no maintained SDK, generate a thin client and types from its OpenAPI spec. Regenerate whenever the spec changes — CI should fail `pnpm typecheck` if clients drift. Types propagate through `@tanstack/react-query` queries/mutations.
+
+---
+
+## HTTP Client (Effect Platform)
+
+```typescript
+// Basic
+const fetchUser = (userId: string) =>
+  pipe(
+    HttpClientRequest.get(`/api/users/${userId}`),
+    HttpClient.execute,
+    Effect.andThen((response) => response.json),
+    Effect.andThen(Schema.decodeUnknown(User)),
+  );
+
+// With retry + timeout
+pipe(
+  HttpClientRequest.get(url),
+  HttpClient.execute,
+  Effect.retry(Schedule.exponential("100 millis").pipe(
+    Schedule.compose(Schedule.recurs(3)), Schedule.jittered)),
+  Effect.timeout("30 seconds"),
+);
+
+// Authenticated client layer
+const AuthenticatedClient = Effect.gen(function* () {
+  const baseClient = yield* HttpClient.HttpClient;
+  const token = yield* Config.string("API_TOKEN");
+  return baseClient.pipe(
+    HttpClient.mapRequest(HttpClientRequest.setHeader("Authorization", `Bearer ${token}`)),
+    HttpClient.filterStatusOk,
+  );
+});
+```
+
+---
+
+## Configuration Management (HyperI Cascade)
+
+**Priority (highest → lowest):** CLI args → ENV vars → `.env` file → `config.{env}.json/yaml` → `config.json/yaml` → code defaults → hard-coded fallbacks
+
+### Effect Config
+
+```typescript
+const AppConfig = Config.all({
+  port: Config.number("PORT").pipe(Config.withDefault(3000)),
+  host: Config.string("HOST").pipe(Config.withDefault("localhost")),
+  databaseUrl: Config.string("DATABASE_URL"),
+  logLevel: Config.literal("debug", "info", "warn", "error")("LOG_LEVEL")
+    .pipe(Config.withDefault("info" as const)),
+});
+```
+
+### Secrets
+
+```typescript
+const password = Config.secret("DB_PASSWORD"); // Returns Secret type, never logged
+const value = Secret.value(config.password);    // Explicit unwrap
+```
+
+### .env Loading
+
+```typescript
+const ConfigLayer = PlatformConfigProvider.layerDotEnvAdd(".env")
+  .pipe(Layer.merge(ConfigProvider.fromEnv()));
+```
+
+---
+
+## Logging (HyperI Standard)
+
+| Context | Format | Colours |
+|---------|--------|---------|
+| Console (dev) | Human-friendly | Yes |
+| Container/CI | RFC 3339 JSON | No |
+| File | RFC 3339 plain | No |
+
+**RFC 3339 timestamp:** `2025-01-20T14:30:00.123Z`
+
+Use `Effect.log`, `Effect.logDebug`, `Effect.logWarning`, `Effect.logError` with structured data. Production: `Logger.json`. Add `Effect.withSpan` for tracing context.
+
+---
+
+## Stream Processing
+
+```typescript
+// Transform stream
+const doubled = Stream.fromIterable([1, 2, 3, 4, 5]).pipe(
+  Stream.map((n) => n * 2),
+  Stream.filter((n) => n > 4),
+);
+
+// Async with batching
+queryStream.pipe(
+  Stream.map((row) => row.json()),
+  Stream.mapEffect((event) => processEvent(event)),
+  Stream.grouped(100),
+  Stream.mapEffect((batch) => saveBatch(batch)),
+  Stream.runDrain,
+);
+
+// Rate limiting
+sourceStream.pipe(
+  Stream.schedule(Schedule.spaced(Duration.millis(100))),
+);
+```
+
+---
+
+## Caching
+
+```typescript
+// TTL cache
+const CachedJWTKeys = Effect.cachedWithTTL(
+  fetchAndDecodeJWKS(), Duration.hours(24),
+);
+
+// Request deduplication with batching
+const UserResolver = RequestResolver.makeBatched(
+  (requests: GetUser[]) => Effect.gen(function* () {
+    const users = yield* UserRepository.findByIds(requests.map((r) => r.id));
+    return requests.map((req) => {
+      const user = users.find((u) => u.id === req.id);
+      return user ? Request.succeed(req, user) : Request.fail(req, new UserNotFoundError({ id: req.id }));
+    });
+  }),
+);
+```
+
+---
+
+## Middleware Patterns
+
+### Logging Middleware
+
+```typescript
+const LoggingMiddleware = HttpMiddleware.make((app) =>
+  Effect.gen(function* () {
+    const request = yield* HttpServerRequest.HttpServerRequest;
+    const start = Date.now();
+    yield* Effect.logInfo("Request started", { method: request.method, url: request.url });
+    const response = yield* app;
+    yield* Effect.logInfo("Request completed", { duration: Date.now() - start });
+    return response;
+  }),
+);
+```
+
+### Authentication Middleware
+
+Extract `Bearer` token from header → `verifyToken` → `Effect.provideService(CurrentUser, user)`. Fail with `UnauthorizedError` if missing.
+
+---
+
+## Health Check Endpoints — The Probe Trinity (Backend Only)
+
+> **Applies to Node.js services deployed to K8s.** Skip for React/Vite frontends.
+
+| Probe | Path | Checks | Fails → |
+|-------|------|--------|---------|
+| **Startup** | `/healthz/startup` | App finished initialising | K8s kills + restarts pod |
+| **Liveness** | `/healthz/live` | Process is not deadlocked | K8s kills + restarts pod |
+| **Readiness** | `/healthz/ready` | Deps healthy AND ready flag set | K8s stops routing traffic |
+
+**Liveness must NEVER check dependencies.** If DB is down, restarting the app makes it worse.
+
+**Readiness must check dependencies AND an explicit ready flag** cleared during graceful shutdown.
+
+```typescript
+let ready = false;
+
+const probes = {
+  "/healthz/startup": () => ({ status: ready ? 200 : 503 }),
+  "/healthz/live":    () => ({ status: 200 }), // Always 200 if process is alive
+  "/healthz/ready":   async () => {
+    if (!ready) return { status: 503 };
+    const dbOk = await checkDb();
+    return { status: dbOk ? 200 : 503 };
+  },
+};
+
+// On startup complete:
+ready = true;
+
+// On SIGTERM (before draining):
+process.on("SIGTERM", () => { ready = false; /* then drain */ });
+```
+
+```yaml
+startupProbe:
+  httpGet: { path: /healthz/startup, port: 8080 }
+  failureThreshold: 30
+  periodSeconds: 2
+livenessProbe:
+  httpGet: { path: /healthz/live, port: 8080 }
+  periodSeconds: 10
+readinessProbe:
+  httpGet: { path: /healthz/ready, port: 8080 }
+  periodSeconds: 5
+```
+
+---
+
+## Error Recovery Patterns
+
+### Fallback Values
+
+```typescript
+const getUserWithFallback = (userId: string) =>
+  pipe(UserRepository.findById(userId),
+    Effect.orElseSucceed(() => ({ id: userId, name: "Unknown User", role: "guest" as const })));
+```
+
+### Circuit Breaker (Backend Only)
+
+> **Applies to Node.js services calling external APIs.** Frontend apps use different patterns (React Query, SWR).
+
+Three states: **CLOSED** → (failures ≥ threshold) → **OPEN** → (timeout expires) → **HALF_OPEN** → (probe succeeds) → **CLOSED**
+
+One circuit breaker **per downstream dependency**.
+
+### Bulkhead / Concurrency Limiter (Backend Only)
+
+> **Applies to Node.js services calling external APIs.** Frontend apps use different patterns (React Query, SWR).
+
+One semaphore per downstream dependency. Prevents one slow downstream from consuming all connections.
+
+### Resilience Anti-Patterns
+
+| ❌ Don't | ✅ Do | Why |
+|----------|-------|-----|
+| No timeout on HTTP calls | `Effect.timeout("30 seconds")` on every external call | Hung connection blocks indefinitely |
+| Retry without jitter | `Schedule.jittered` on every retry schedule | Thundering herd after outage recovery |
+| Global circuit breaker for all deps | One circuit breaker per downstream dependency | DB outage should not open the cache circuit |
+| Retry 4xx client errors | Only retry 5xx and network errors | 400/401/404 will never succeed on retry |
+
+### Graceful Degradation
+
+Optional dependencies (reviews, recommendations) → `Effect.catchAll(() => Effect.succeed([]))` + `Effect.timeout` → return empty on failure.
+
+---
+
+## Type Utilities
+
+### Branded Types
+
+```typescript
+type UserId = string & Brand.Brand<"UserId">;
+const UserId = Brand.nominal<UserId>();
+
+type Email = string & Brand.Brand<"Email">;
+const Email = Brand.refined<Email>(
+  (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s),
+  (s) => Brand.error(`Invalid email: ${s}`),
+);
+
+getUser("raw-string");       // ❌ Type error!
+getUser(UserId("user-123")); // ✅ OK
+```
+
+### Discriminated Unions
+
+Use `Schema.TaggedClass` + `Match.tag` with `Match.exhaustive` for pattern matching.
+
+---
+
+## Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `effect` | Functional effect system |
+| `@effect/schema` | Runtime validation |
+| `@effect/platform` | HTTP client, file system |
+| `typescript` | Type checking |
+| `react`, `react-dom` | UI framework |
+| `@tanstack/react-query` | Server state |
+| `vite` | Build tool |
+| `vitest` | Test runner |
+| `@testing-library/react` | React testing |
+| `happy-dom` | DOM implementation |
+
+---
+
+## Two-File Source-of-Truth Footgun
+
+Before editing config files, verify they're actually loaded:
+
+```bash
+npx tsc --showConfig | head -5
+npx eslint --print-config src/index.ts | head -20
+```
+
+Two copies = one rots. Delete the stale one. Common after `.eslintrc.json` → `eslint.config.js` or `tsconfig.json` → `tsconfig.build.json` migrations.
+
+---
+
+## Ratchet, Not Gate: Introducing Stricter Rules
+
+Never introduce a new ESLint rule or stricter `tsconfig` setting at `"error"` level in existing codebases.
+
+1. **Warn** — add as `"warn"`, CI stays green
+2. **Override legacy** — per-directory ESLint overrides suppress in legacy; new code is clean
+
+```javascript
+// eslint.config.js — ratchet pattern
+{
+  files: ["src/legacy/**/*.ts"],
+  rules: { "@typescript-eslint/no-floating-promises": "off" },
+},
+{
+  files: ["src/**/*.ts"],
+  rules: { "@typescript-eslint/no-floating-promises": "warn" },
+},
+```
+
+3. **Promote** — once legacy overrides empty, promote to `"error"`
+
+Same for `tsconfig` flags: enable in `tsconfig.strict.json` that only new packages extend, migrate old packages one at a time.
+
+---
+
+## AI Agentic Coding
+
+### DO NOT Generate
+
+```typescript
+// ❌ Using 'any'
+function process(data: any): any {
+// ✅ Use unknown or generics
+function process(data: unknown): Result {
+
+// ❌ Non-null assertion
+const value = obj.property!;
+// ✅ Null handling
+const value = obj.property ?? defaultValue;
+
+// ❌ Type assertion bypass
+const user = data as User;
+// ✅ Runtime validation or type guard
+const user = Schema.decodeUnknownSync(User)(data);
+
+// ❌ Floating promise
+fetchData().then(process);
+// ✅ Handle errors
+fetchData().then(process).catch(handleError);
+
+// ❌ == (loose equality) except null check
+if (value == "something") {
+// ✅ Strict equality
+if (value === "something") {
+```
+
+### Package Verification Required
+
+```typescript
+// ❌ Common AI hallucinations:
+import { something } from "ts-migrate-parser";     // DOES NOT EXIST
+import { helper } from "@effect/utils";            // Often wrong
+import { validate } from "express-validator-v2";   // Check version
+
+// ✅ Verify: npm view package-name versions
+```
+
+### Effect-TS Pitfalls
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `throw` inside Effect code | `yield* Effect.fail(new MyError())` |
+| `await` inside `Effect.gen` | `yield* Effect.tryPromise(() => ...)` |
+| `Effect.gen(() => { ... })` | `Effect.gen(function* () { yield* ... })` |
+
+### React Pitfalls
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `useEffect` without dependency array | Include `[deps]` |
+| `items.push(x); setItems(items)` | `setItems(prev => [...prev, x])` |
+
+### Cross-Repo Doc Drift
+
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| "`hyperi-ci` exports `function push(opts: PushOpts)`" | "`hyperi-ci` provides a `push` command that handles pre-checks and rebase" |
+| Mirror type definitions from another repo | Link to the source repo for current types |
+| Copy config schemas from upstream | Reference the upstream config docs by URL or file path |
+
+Two repos describing the same API → one rots. Always link out. Flag discrepancies in `STATE.md` under "Cross-repo drift".
+
+### Test Generation Traps — DT learning
+
+> **Derek's hard lessons learned from trusting AI-generated test suites.**
+> The tests looked great. CI was green. Production broke anyway.
+
+| Trap | What AI does | What you need |
+|------|-------------|---------------|
+| **Happy-path only** | Tests valid input, checks it works | Tests INVALID input, checks it throws correctly |
+| **Mirror tests** | Assertions that duplicate implementation logic | Assertions that check observable behaviour |
+| **Assertion-free tests** | Calls functions but never asserts | Every test MUST `expect()` something meaningful |
+| **Missing error paths** | No tests for thrown errors, rejected promises, null | Explicit tests for every error your code can throw |
+| **No boundary tests** | Values like 5 and 10 but not 0, Infinity, "", null, undefined | Boundary values: zero, empty string, null, undefined, NaN |
+| **Missing async tests** | Sequential-only tests for async code | Tests with AbortController, timeout, concurrent access |
+| **No startup smoke test** | Tests for individual functions, nothing for app boot | Mandatory smoke test with default config |
+
+#### Test Quality Checklist (Apply After AI Generation)
+
+- [ ] Every thrown error type has at least one test that triggers it
+- [ ] Zero, empty string, null, undefined, NaN inputs are tested
+- [ ] Invalid/malformed input is tested (not just valid input)
+- [ ] Async code has timeout and cancellation tests
+- [ ] The test actually fails when you break the implementation
+- [ ] Test names describe the scenario, not the function
+- [ ] No assertion-free tests
+- [ ] Startup smoke test exists
+
+**Treat AI-generated tests as drafts.** Add the edge cases, failure paths, and adversarial inputs yourself.
+
+---
+
+## Resources
+
+- TypeScript Handbook: <https://www.typescriptlang.org/docs/handbook/>
+- Effect Documentation: <https://effect.website/>
+- Turborepo Documentation: <https://turbo.build/repo/docs>
+- Vitest Documentation: <https://vitest.dev/>

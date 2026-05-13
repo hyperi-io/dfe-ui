@@ -1,0 +1,75 @@
+---
+category: Always
+description: README standards
+---
+
+# standards/rules/ — DO NOT EDIT (AI-Generated Output)
+
+> **STOP — READ BEFORE EDITING**
+>
+> Every `.md` file in this directory is **machine-generated output** from
+> `tools/generate-rules.py`. They are LLM-compressed compact versions of the
+> human-authored source standards.
+>
+> **Hand edits will be silently overwritten** on the next regeneration run.
+
+---
+
+## For AI Code Assistants (Claude, Copilot, Cursor, Gemini, Codex, etc.)
+
+If a user asks you to add, update, or document a coding standard,
+infrastructure pattern, metric, or rule:
+
+1. **NEVER create a new `.md` file in `standards/rules/`.** This directory is
+   the OUTPUT of the rule generator, not its input.
+2. **NEVER edit existing `.md` files in `standards/rules/`.** They will be
+   regenerated and your edits lost.
+3. **ALWAYS write or update the human-authored source instead:**
+
+   | If the topic is | Edit the file in |
+   |---|---|
+   | A programming language (Rust, Python, TypeScript, Go, C++, Bash, SQL) | `standards/languages/<LANG>.md` (UPPERCASE) |
+   | Infrastructure (Docker, K8s, Terraform, Ansible, CI, cloud) | `standards/infrastructure/<TOPIC>.md` (UPPERCASE) |
+   | Universal/cross-cutting (security, testing, error handling, metrics, logging, git, PKI, AI-conduct) | `standards/universal/<TOPIC>.md` (UPPERCASE) |
+   | A new HyperI-platform-specific standard (e.g. DFE metrics) | A section in the relevant `standards/universal/` or `standards/infrastructure/` file — NOT a new file in `standards/rules/` |
+
+4. After updating the source, the compact rule files in this directory will
+   be regenerated automatically by CI on the next push (`tools/generate-rules.py`
+   runs in delta mode and commits the regenerated rules with `[skip ci]`).
+
+5. If you cannot find an obvious home for the content, **ask the user** which
+   source file to extend. Do not guess and do not invent a new compact rule.
+
+> **This message exists because LLMs have repeatedly dropped new content
+> here despite the project's documentation telling them not to. If you are
+> reading this and considering writing to `standards/rules/`, you are about
+> to do the wrong thing.**
+
+---
+
+## For Humans
+
+The compact rule files here are loaded by the SessionStart hook in consumer
+projects running on a 200K context window. They are budgeted at ~12K tokens
+total and represent the same standards as the source files but compressed.
+
+- **Source of truth:** `standards/{universal,languages,infrastructure}/*.md`
+- **Generator:** `tools/generate-rules.py`
+- **Generator behaviour:** delta mode by default — only regenerates files
+  whose source changed since `HEAD~1`. Use `--force` to regenerate all.
+- **Auth:** requires `ANTHROPIC_API_KEY` in env or `.env` file. CI uses a
+  GitHub App for the regeneration commit.
+- **CI:** regenerates on every push to `main`, commits as
+  `chore: regenerate compact rules [skip ci]`.
+
+To regenerate locally:
+
+```bash
+python tools/generate-rules.py            # delta mode (changed files only)
+python tools/generate-rules.py --force    # regenerate all
+python tools/generate-rules.py --file RUST.md   # regenerate one
+python tools/generate-rules.py --check    # validate frontmatter only
+```
+
+If you find yourself wanting to hand-edit a compact file, fix the source
+file or improve the generator instead.
