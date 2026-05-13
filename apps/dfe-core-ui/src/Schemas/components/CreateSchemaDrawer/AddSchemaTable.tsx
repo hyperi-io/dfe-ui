@@ -1,5 +1,5 @@
 import { Form } from '@/core/components/Form';
-import { Table } from '@/core/components/Table';
+import { Table, TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { SchemaCreateRequestColumn } from '@/Schemas/hooks/useCreateSchema/types';
@@ -45,6 +45,16 @@ function normalizeSchemaColumns(
   }));
 }
 
+interface AddSchemaTableProps extends TableProps<SchemaColumn> {
+  initialValues?: Partial<SchemaColumn>[];
+  name?: string;
+  formValidation: FormRule;
+  config?: {
+    defaultEditFields?: boolean;
+    defaultAddColumns?: boolean;
+    defaultRemoveColumns?: boolean;
+  };
+}
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',
@@ -54,16 +64,8 @@ export const AddSchemaTable = ({
     defaultAddColumns: true,
     defaultRemoveColumns: true,
   },
-}: {
-  initialValues?: Partial<SchemaColumn>[];
-  name?: string;
-  formValidation: FormRule;
-  config?: {
-    defaultEditFields?: boolean;
-    defaultAddColumns?: boolean;
-    defaultRemoveColumns?: boolean;
-  };
-}) => {
+  ...tableProps
+}: AddSchemaTableProps) => {
   const [schemaColumns, setSchemaColumns] = useState<SchemaColumn[]>(() =>
     normalizeSchemaColumns(initialValues),
   );
@@ -248,6 +250,7 @@ export const AddSchemaTable = ({
           </div>
         ),
       }}
+      {...tableProps}
     />
   );
 };

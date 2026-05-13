@@ -30,7 +30,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useElasticConvert', () => {
   const requestBody: ElasticConverterRequest = {
-    file: 'string',
+    file: new File(['{}'], 'template.json', { type: 'application/json' }),
   };
 
   describe('onSuccess', () => {

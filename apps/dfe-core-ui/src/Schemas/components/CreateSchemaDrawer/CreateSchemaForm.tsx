@@ -1,7 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
+import { ElasticConverterResponse } from '@/Schemas/hooks/useElasticConvert/useElasticConvert';
 import { convertCsv, CsvRow } from '@/Schemas/server/actions/convertCsv';
+import { isJsonFile } from '@/Schemas/server/actions/convertCsv/csvConvert.helpers';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Radio, Select, Tabs } from 'antd';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
@@ -15,7 +18,8 @@ const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
 const VERSION_REGEX = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 
-const formSchema = z.object({
+/** Used for request body */
+const formSchemaRequest = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
@@ -41,6 +45,15 @@ const formSchema = z.object({
   uploadedColumns: z.record(z.string(), rowSchema).optional(),
   schemaColumns: z.record(z.string(), rowSchema).optional(),
 });
+
+/** Used for uploads and controls */
+const formSchemaControls = z.object({
+  uploadType: z.enum(['csv', 'json']),
+  file: z.instanceof(Object),
+});
+
+const formSchema = formSchemaRequest.merge(formSchemaControls);
+
 export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
 interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
@@ -48,6 +61,13 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   isPending?: boolean;
   buttonLabel?: string;
 }
+
+type UploadedSchema = CsvRow[] | ElasticConverterResponse;
+
+const getRcFileFromUploadInfo = (
+  info: UploadChangeParam<UploadFile<RcFile>>,
+): RcFile | undefined =>
+  info.file?.originFileObj ?? info.fileList.at(-1)?.originFileObj;
 
 export const CreateSchemaForm = ({
   hasReset = false,
@@ -59,22 +79,70 @@ export const CreateSchemaForm = ({
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
   const [showDescription, setShowDescription] = useState(true);
   const [showFileUpload, setShowFileUpload] = useState(true);
-  const [uploadedSchema, setUploadedSchema] = useState<CsvRow[]>([]);
+  const [uploadedSchema, setUploadedSchema] = useState<UploadedSchema>([]);
   /** Remount CSV table after each successful convert so rows (and IDs) rebuild without a syncing effect */
   const [uploadedImportKey, setUploadedImportKey] = useState(0);
+
+  const updateUploadedSchema = (values: UploadedSchema) => {
+    setUploadedSchema(values);
+    setUploadedImportKey((k) => k + 1);
+  };
+
+  const { mutate: convertElasticSchema } = useElasticConvert({
+    onSuccess: (data) => {
+      updateUploadedSchema(data);
+    },
+    onError: (error) => {
+      form.setFields([{ name: 'file', errors: [(error as Error).message] }]);
+      updateUploadedSchema([]);
+    },
+  });
 
   const hasUploadedSchema = uploadedSchema.length > 0;
 
   const watchUploadType = Form.useWatch('uploadType', form);
-  const handleFileChange = async (
-    info: UploadChangeParam<UploadFile<RcFile>>,
-  ) => {
+  const handleFileChange = (info: UploadChangeParam<UploadFile<RcFile>>) => {
+    /** Reset field error onChange */
+    form.setFields([{ name: 'file', errors: [] }]);
+
+    /** Get file from upload info */
+    const file = getRcFileFromUploadInfo(info);
+    if (!file) {
+      updateUploadedSchema([]);
+      return;
+    }
+
+    /** Convert CSV */
     if (watchUploadType === 'csv') {
-      const jsonSchema = await convertCsv(
-        info.fileList[0]?.originFileObj as unknown as File,
-      );
-      setUploadedSchema(jsonSchema);
-      setUploadedImportKey((k) => k + 1);
+      void (async () => {
+        try {
+          const jsonSchema = await convertCsv(file);
+          updateUploadedSchema(jsonSchema);
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : 'Could not convert CSV';
+          form.setFields([{ name: 'file', errors: [message] }]);
+          updateUploadedSchema([]);
+        }
+      })();
+    }
+
+    /** Convert Elastic Index Template */
+    if (watchUploadType === 'json') {
+      if (!isJsonFile(file)) {
+        form.setFields([
+          {
+            name: 'file',
+            errors: [
+              'Upload must be a JSON file (text/json or a .json filename).',
+            ],
+          },
+        ]);
+        updateUploadedSchema([]);
+        return;
+      }
+
+      convertElasticSchema({ file }); // Data upload happens in the mutation onSuccess
     }
   };
 
@@ -183,12 +251,8 @@ export const CreateSchemaForm = ({
                 <Radio.Button value="csv" className="w-1/2 text-center">
                   DFE CSV
                 </Radio.Button>
-                <Radio.Button
-                  disabled
-                  value="json"
-                  className="w-1/2 text-center"
-                >
-                  ELASTIC INDEX TEMPLATE (Coming Soon!)
+                <Radio.Button value="json" className="w-1/2 text-center">
+                  ELASTIC INDEX TEMPLATE
                 </Radio.Button>
               </Radio.Group>
             </Form.Item>
@@ -196,6 +260,7 @@ export const CreateSchemaForm = ({
             <Form.Item
               name="file"
               rules={[formValidation]}
+              validateTrigger="onSubmit"
               label={watchUploadType === 'csv' ? 'CSV File' : 'JSON File'}
             >
               <FileUploadDragger
@@ -227,6 +292,11 @@ export const CreateSchemaForm = ({
                     defaultEditFields: false,
                     defaultAddColumns: false,
                     defaultRemoveColumns: true,
+                  }}
+                  pagination={{
+                    defaultPageSize: 50,
+                    showSizeChanger: true,
+                    pageSizeOptions: [10, 25, 50, 100],
                   }}
                 />
               ),

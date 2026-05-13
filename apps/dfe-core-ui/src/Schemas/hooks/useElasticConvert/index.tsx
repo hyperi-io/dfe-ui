@@ -14,8 +14,15 @@ export const useElasticConvert = ({
   onError?: (error: Error) => void;
 } = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: (file: ElasticConverterRequest) =>
-      apiClient.post(API_CONFIG.schemas.elasticConvert, { body: file }),
+    mutationFn: async (payload: ElasticConverterRequest) => {
+      const formData = new FormData();
+      formData.append('file', payload.file);
+      const response = await apiClient.post(API_CONFIG.schemas.elasticConvert, {
+        body: formData,
+      });
+
+      return response;
+    },
     onSuccess: (data) => {
       onSuccess?.(data);
     },
