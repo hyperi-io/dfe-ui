@@ -1,3 +1,6 @@
+# Next.js generated types (often reformatted differently by Next vs Prettier)
+apps/dfe-core-ui/next-env.d.ts
+
 # Ignore artifacts:
 build
 coverage
