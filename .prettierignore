@@ -1,6 +1,9 @@
 # Next.js generated types (often reformatted differently by Next vs Prettier)
 apps/dfe-core-ui/next-env.d.ts
 
+# Package JSON files
+**/package.json
+
 # Ignore artifacts:
 build
 coverage
@@ -9,3 +12,8 @@ coverage
 packages/dfe-engine-types/*
 packages/hyperi-icons/*
 
+# Cursor and HyperI AI directories
+.cursor/
+hyperi-ai/
+STATE.md
+TODO.md

@@ -17,13 +17,13 @@
 
 **The following belong elsewhere:**
 
-| Data | Correct Location |
-|------|------------------|
+| Data            | Correct Location                      |
+| --------------- | ------------------------------------- |
 | Version numbers | `VERSION` file, `git describe --tags` |
-| Tasks/Progress | `TODO.md` |
-| Session history | Git log (`git log --oneline -10`) |
-| Changelog | `CHANGELOG.md` (semantic-release) |
-| Dates | Git commit timestamps |
+| Tasks/Progress  | `TODO.md`                             |
+| Session history | Git log (`git log --oneline -10`)     |
+| Changelog       | `CHANGELOG.md` (semantic-release)     |
+| Dates           | Git commit timestamps                 |
 
 **This file is for static project context only.**
 
