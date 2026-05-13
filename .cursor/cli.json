@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "contextFiles": [
+      "STATE.md",
+      "TODO.md",
+      "hyperi-ai/standards/STANDARDS.md"
+    ]
+  }
+}
