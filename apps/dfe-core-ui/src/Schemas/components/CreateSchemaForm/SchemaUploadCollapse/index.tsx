@@ -1,36 +1,13 @@
 import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { FileUploadDragger } from '@/Schemas/components/FileUploadDragger';
-import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
-import { ElasticConverterResponse } from '@/Schemas/hooks/useElasticConvert/useElasticConvert';
-import { convertCsv, CsvRow } from '@/Schemas/server/actions/convertCsv';
-import { isJsonFile } from '@/Schemas/server/actions/convertCsv/csvConvert.helpers';
+import { PreloadedSchema } from '@/Schemas/components/CreateSchemaForm/types';
+import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { FormInstance, FormRule, Radio, Tabs } from 'antd';
-import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { CreateSchemaFormData } from '..';
-
-/** Row in the upload tab after CSV / Elastic import; includes stable client keys. */
-type UploadedSchemaRow = {
-  id: string;
-  imported?: true;
-  name?: string;
-  type?: string;
-  attribute?: string[];
-  use_case?: string;
-  expr?: string;
-  comment?: string | null;
-};
-type UploadedSchema = UploadedSchemaRow[];
-type PreloadedSchema = CsvRow[] | ElasticConverterResponse;
-
-const getRcFileFromUploadInfo = (
-  info: UploadChangeParam<UploadFile<RcFile>>,
-): RcFile | undefined =>
-  info.file?.originFileObj ?? info.fileList.at(-1)?.originFileObj;
+import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 
 export const SchemaUploadCollapse = ({
   form,
@@ -40,77 +17,9 @@ export const SchemaUploadCollapse = ({
   formValidation: FormRule;
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(true);
-  const [uploadedSchema, setUploadedSchema] = useState<UploadedSchema>([]);
-  /** Remount CSV table after each successful convert so rows (and IDs) rebuild without a syncing effect */
-  const [uploadedImportKey, setUploadedImportKey] = useState(0);
-
-  const updateUploadedSchema = (values: PreloadedSchema) => {
-    const taggedValues: UploadedSchema = values.map((value) => ({
-      ...value,
-      id: uuidv4(),
-      imported: true as const,
-    }));
-    setUploadedSchema(taggedValues);
-    setUploadedImportKey((k) => k + 1);
-  };
-
-  const { mutate: convertElasticSchema } = useElasticConvert({
-    onSuccess: (data) => {
-      updateUploadedSchema(data);
-    },
-    onError: (error) => {
-      form.setFields([{ name: 'file', errors: [(error as Error).message] }]);
-      updateUploadedSchema([]);
-    },
-  });
+  const [uploadedSchema, setUploadedSchema] = useState<PreloadedSchema>([]);
 
   const hasUploadedSchema = uploadedSchema.length > 0;
-
-  const watchUploadType = Form.useWatch('uploadType', form);
-  const handleFileChange = (info: UploadChangeParam<UploadFile<RcFile>>) => {
-    /** Reset field error onChange */
-    form.setFields([{ name: 'file', errors: [] }]);
-
-    /** Get file from upload info */
-    const file = getRcFileFromUploadInfo(info);
-    if (!file) {
-      updateUploadedSchema([]);
-      return;
-    }
-
-    /** Convert CSV */
-    if (watchUploadType === 'csv') {
-      void (async () => {
-        try {
-          const jsonSchema = await convertCsv(file);
-          updateUploadedSchema(jsonSchema);
-        } catch (error: unknown) {
-          const message =
-            error instanceof Error ? error.message : 'Could not convert CSV';
-          form.setFields([{ name: 'file', errors: [message] }]);
-          updateUploadedSchema([]);
-        }
-      })();
-    }
-
-    /** Convert Elastic Index Template */
-    if (watchUploadType === 'json') {
-      if (!isJsonFile(file)) {
-        form.setFields([
-          {
-            name: 'file',
-            errors: [
-              'Upload must be a JSON file (text/json or a .json filename).',
-            ],
-          },
-        ]);
-        updateUploadedSchema([]);
-        return;
-      }
-
-      convertElasticSchema({ file }); // Data upload happens in the mutation onSuccess
-    }
-  };
 
   return (
     <>
@@ -148,19 +57,11 @@ export const SchemaUploadCollapse = ({
               </Radio.Group>
             </Form.Item>
 
-            <Form.Item
-              name="file"
-              rules={[formValidation]}
-              validateTrigger="onSubmit"
-              label={watchUploadType === 'csv' ? 'CSV File' : 'JSON File'}
-            >
-              <FileUploadDragger
-                maxCount={1}
-                multiple={false}
-                accept={watchUploadType === 'csv' ? '.csv' : '.json'}
-                onChange={handleFileChange}
-              />
-            </Form.Item>
+            <SchemaUploadFileSection
+              form={form}
+              formValidation={formValidation}
+              setUploadedSchema={setUploadedSchema}
+            />
           </div>
         )}
       </div>
@@ -174,21 +75,9 @@ export const SchemaUploadCollapse = ({
               label: 'Uploaded Columns',
               forceRender: true,
               children: (
-                <AddSchemaTable
-                  name="uploadedColumns"
-                  key={uploadedImportKey}
-                  initialValues={uploadedSchema}
+                <UploadedSchemaTable
+                  data={uploadedSchema}
                   formValidation={formValidation}
-                  config={{
-                    defaultEditFields: false,
-                    defaultAddColumns: false,
-                    defaultRemoveColumns: true,
-                  }}
-                  pagination={{
-                    defaultPageSize: 50,
-                    showSizeChanger: true,
-                    pageSizeOptions: [10, 25, 50, 100],
-                  }}
                 />
               ),
             },

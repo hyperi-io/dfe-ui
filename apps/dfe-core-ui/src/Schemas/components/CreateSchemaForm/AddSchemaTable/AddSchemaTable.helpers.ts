@@ -51,6 +51,8 @@ export const listItemFromPartial = (
   );
 
   return {
+    id: column.id ?? '',
+    imported: column.imported ?? false,
     name,
     type,
     attribute: normalizeAttribute(attributeRaw),

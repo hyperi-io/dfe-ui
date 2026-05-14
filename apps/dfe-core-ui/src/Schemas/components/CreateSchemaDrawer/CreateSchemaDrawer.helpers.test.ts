@@ -60,6 +60,7 @@ describe('transformFormDataToRequestBody', () => {
   test('maps uploaded columns then manual columns', () => {
     const uploaded = [
       {
+        id: '1',
         name: 'col_a',
         type: 'String',
         attribute: ['nullable'],
@@ -71,6 +72,7 @@ describe('transformFormDataToRequestBody', () => {
     ];
     const manual = [
       {
+        id: '2',
         name: 'col_b',
         type: 'UInt64',
         attribute: [] as string[],

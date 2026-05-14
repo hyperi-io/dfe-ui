@@ -29,6 +29,9 @@ export const rowSchema = z.object({
   use_case: z.string().optional(),
   expr: z.string().optional(),
   comment: z.string().optional(),
+  /** Used for form control of uploaded schema */
+  id: z.string(),
+  imported: z.boolean().optional(),
 });
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
@@ -52,6 +55,7 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
+  id: '',
   name: '',
   type: '',
   attribute: [],
