@@ -5,6 +5,7 @@ import type { SchemaColumnRow } from './types';
 describe('listItemFromPartial', () => {
   test('maps canonical row keys', () => {
     const column: SchemaColumnRow = {
+      id: '1',
       name: 'user_id',
       type: 'String',
       attribute: ['nullable'],
@@ -13,6 +14,7 @@ describe('listItemFromPartial', () => {
       comment: 'pk',
     };
     expect(listItemFromPartial(column)).toEqual({
+      id: '1',
       name: 'user_id',
       type: 'String',
       attribute: ['nullable'],
@@ -24,6 +26,7 @@ describe('listItemFromPartial', () => {
 
   test('reads PascalCase CSV-style keys (Name, Type, …)', () => {
     const column = {
+      id: '1',
       Name: 'count',
       Type: 'UInt64',
       Attribute: 'metric',
@@ -32,6 +35,7 @@ describe('listItemFromPartial', () => {
       Comment: '',
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column)).toEqual({
+      id: '1',
       name: 'count',
       type: 'UInt64',
       attribute: ['metric'],
@@ -100,6 +104,7 @@ describe('listItemFromPartial', () => {
 
   test('falls back to typed column fields when lookup is empty', () => {
     const column: SchemaColumnRow = {
+      id: '1',
       name: 'n',
       type: 't',
       use_case: 'fallback_use',
@@ -121,7 +126,8 @@ describe('listItemFromPartial', () => {
   });
 
   test('uses empty strings for missing name and type', () => {
-    expect(listItemFromPartial({})).toMatchObject({
+    expect(listItemFromPartial({ id: '1' })).toMatchObject({
+      id: '1',
       name: '',
       type: '',
       attribute: [],

@@ -1,6 +1,6 @@
 import { SchemaCreateRequestColumn } from '@/Schemas/hooks/useCreateSchema/types';
 
 export type SchemaColumnRow = Partial<SchemaCreateRequestColumn> & {
-  id?: string;
+  id: string;
   imported?: boolean;
 };
