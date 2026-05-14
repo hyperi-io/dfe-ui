@@ -1,25 +1,19 @@
 import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { PreloadedSchema } from '@/Schemas/components/CreateSchemaForm/types';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
 import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
-import { FormInstance, FormRule, Radio, Tabs } from 'antd';
+import { Radio, Tabs } from 'antd';
 import { useState } from 'react';
-import { CreateSchemaFormData } from '..';
 import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 
-export const SchemaUploadCollapse = ({
-  form,
-  formValidation,
-}: {
-  form: FormInstance<CreateSchemaFormData>;
-  formValidation: FormRule;
-}) => {
+export const SchemaUploadCollapse = () => {
+  const { formValidation, uploadedSchemaColumns } =
+    useCreateSchemaFormContext();
   const [showFileUpload, setShowFileUpload] = useState(true);
-  const [uploadedSchema, setUploadedSchema] = useState<PreloadedSchema>([]);
 
-  const hasUploadedSchema = uploadedSchema.length > 0;
+  const hasUploadedSchema = uploadedSchemaColumns.length > 0;
 
   return (
     <>
@@ -57,11 +51,7 @@ export const SchemaUploadCollapse = ({
               </Radio.Group>
             </Form.Item>
 
-            <SchemaUploadFileSection
-              form={form}
-              formValidation={formValidation}
-              setUploadedSchema={setUploadedSchema}
-            />
+            <SchemaUploadFileSection />
           </div>
         )}
       </div>
@@ -74,13 +64,7 @@ export const SchemaUploadCollapse = ({
               key: 'uploadedColumns',
               label: 'Uploaded Columns',
               forceRender: true,
-              children: (
-                <UploadedSchemaTable
-                  data={uploadedSchema}
-                  formValidation={formValidation}
-                  form={form}
-                />
-              ),
+              children: <UploadedSchemaTable />,
             },
             {
               key: 'schemaColumns',

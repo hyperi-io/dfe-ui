@@ -1,11 +1,14 @@
 import { Form } from '@/core/components/Form';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
 import { rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
+import {
+  CreateSchemaFormProvider,
+  useCreateSchemaFormContext,
+} from './CreateSchemaForm.context';
 import { SchemaUploadCollapse } from './SchemaUploadCollapse';
 
 const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
@@ -47,7 +50,7 @@ const formSchemaControls = {
   invalidColumns: z.array(rowSchema).optional(),
 };
 
-const formSchema = formSchemaRequest.extend(formSchemaControls);
+export const formSchema = formSchemaRequest.extend(formSchemaControls);
 
 export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
@@ -57,14 +60,13 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   buttonLabel?: string;
 }
 
-export const CreateSchemaForm = ({
+const CreateSchemaFormBase = ({
   hasReset = false,
   isPending = false,
   buttonLabel = 'Save',
   onFinish: onFinishProp,
 }: CreateSchemaFormProps) => {
-  const [form] = Form.useForm<CreateSchemaFormData>();
-  const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
+  const { form, formValidation } = useCreateSchemaFormContext();
   const [showDescription, setShowDescription] = useState(true);
 
   const onFinish = (values: CreateSchemaFormData) => {
@@ -149,7 +151,7 @@ export const CreateSchemaForm = ({
         )}
       </div>
 
-      <SchemaUploadCollapse form={form} formValidation={formValidation} />
+      <SchemaUploadCollapse />
 
       <Form.Item className="flex justify-end">
         {hasReset && (
@@ -172,5 +174,14 @@ export const CreateSchemaForm = ({
         </Button>
       </Form.Item>
     </Form>
+  );
+};
+
+export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
+  const [form] = Form.useForm<CreateSchemaFormData>();
+  return (
+    <CreateSchemaFormProvider form={form}>
+      <CreateSchemaFormBase {...props} />
+    </CreateSchemaFormProvider>
   );
 };

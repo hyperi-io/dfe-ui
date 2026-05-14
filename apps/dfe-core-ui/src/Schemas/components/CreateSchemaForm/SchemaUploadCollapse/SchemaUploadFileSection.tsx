@@ -1,13 +1,11 @@
 import { Form } from '@/core/components/Form';
-import { PreloadedSchema } from '@/Schemas/components/CreateSchemaForm/types';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
 import { FileUploadDragger } from '@/Schemas/components/FileUploadDragger';
 import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
 import { convertCsv } from '@/Schemas/server/actions/convertCsv';
 import { isJsonFile } from '@/Schemas/server/actions/convertCsv/csvConvert.helpers';
-import { FormInstance, FormRule } from 'antd';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
-import { Dispatch, SetStateAction } from 'react';
-import { CreateSchemaFormData } from '..';
+import { transformDataToUploadedSchemaRow } from './SchemaUploadFileSection.helpers';
 
 const getRcFileFromUploadInfo = (
   info: UploadChangeParam<UploadFile<RcFile>>,
@@ -15,22 +13,16 @@ const getRcFileFromUploadInfo = (
   info.file?.originFileObj ?? info.fileList.at(-1)?.originFileObj;
 
 /** Subscribes only this subtree to `uploadType` so Tabs / uploaded table do not rerender on radio change. */
-export const SchemaUploadFileSection = ({
-  form,
-  formValidation,
-  setUploadedSchema,
-}: {
-  form: FormInstance<CreateSchemaFormData>;
-  formValidation: FormRule;
-  setUploadedSchema: Dispatch<SetStateAction<PreloadedSchema>>;
-}) => {
+export const SchemaUploadFileSection = () => {
+  const { form, formValidation, handleSetUploadedSchemaColumns } =
+    useCreateSchemaFormContext();
   const { mutate: convertElasticSchema } = useElasticConvert({
     onSuccess: (data) => {
-      setUploadedSchema(data);
+      handleSetUploadedSchemaColumns(transformDataToUploadedSchemaRow(data));
     },
     onError: (error) => {
       form.setFields([{ name: 'file', errors: [(error as Error).message] }]);
-      setUploadedSchema([]);
+      handleSetUploadedSchemaColumns([]);
     },
   });
 
@@ -43,7 +35,7 @@ export const SchemaUploadFileSection = ({
     /** Get file from upload info */
     const file = getRcFileFromUploadInfo(info);
     if (!file) {
-      setUploadedSchema([]);
+      handleSetUploadedSchemaColumns([]);
       return;
     }
 
@@ -52,12 +44,14 @@ export const SchemaUploadFileSection = ({
       void (async () => {
         try {
           const jsonSchema = await convertCsv(file);
-          setUploadedSchema(jsonSchema);
+          handleSetUploadedSchemaColumns(
+            transformDataToUploadedSchemaRow(jsonSchema),
+          );
         } catch (error: unknown) {
           const message =
             error instanceof Error ? error.message : 'Could not convert CSV';
           form.setFields([{ name: 'file', errors: [message] }]);
-          setUploadedSchema([]);
+          handleSetUploadedSchemaColumns([]);
         }
       })();
     }
@@ -73,7 +67,7 @@ export const SchemaUploadFileSection = ({
             ],
           },
         ]);
-        setUploadedSchema([]);
+        handleSetUploadedSchemaColumns([]);
         return;
       }
 

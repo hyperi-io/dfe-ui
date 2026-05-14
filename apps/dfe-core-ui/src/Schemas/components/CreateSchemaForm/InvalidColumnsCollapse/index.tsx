@@ -3,11 +3,11 @@ import {
   RowSchema,
 } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import type { SchemaColumnRow } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/types';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
 import { IconAlertCircle } from '@repo/dfe-icons';
-import { FormInstance, FormRule } from 'antd';
+import { FormRule } from 'antd';
 import uniq from 'lodash/uniq';
 import z from 'zod';
-import { CreateSchemaFormData } from '..';
 
 /** Failed `rowSchema.safeParse` augmented with the raw row (e.g. upload import). */
 export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {
@@ -18,13 +18,12 @@ export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {
 
 export const InvalidColumnsCollapse = ({
   invalidColumns,
-  form,
   formValidation,
 }: {
   invalidColumns: InvalidColumns[];
   formValidation: FormRule;
-  form: FormInstance<CreateSchemaFormData>;
 }) => {
+  const { form } = useCreateSchemaFormContext();
   const initialValues = invalidColumns.map((column) => column.data);
 
   const invalidFields = uniq(
@@ -47,8 +46,7 @@ export const InvalidColumnsCollapse = ({
         initialValues={initialValues}
         formValidation={formValidation}
         config={{
-          defaultEditFields:
-            invalidFields.length > 0 ? invalidFields : false,
+          defaultEditFields: invalidFields.length > 0 ? invalidFields : false,
           defaultAddColumns: false,
           defaultRemoveColumns: true,
         }}
