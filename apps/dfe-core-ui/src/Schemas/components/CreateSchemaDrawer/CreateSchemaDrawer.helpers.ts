@@ -13,8 +13,8 @@ import { CreateSchemaFormData } from './CreateSchemaForm';
 export const transformFormDataToRequestBody = (
   formData: CreateSchemaFormData,
 ) => {
-  const uploadedColumns: SchemaCreateRequestColumn[] = Object.values(
-    formData.uploadedColumns ?? {},
+  const uploadedColumns: SchemaCreateRequestColumn[] = (
+    formData.uploadedColumns ?? []
   ).map((column) => ({
     name: column.name,
     type: column.type,
@@ -22,10 +22,11 @@ export const transformFormDataToRequestBody = (
     use_case: column.use_case ?? '',
     expr: column.expr ?? '',
     comment: column.comment,
+    imported: true,
   }));
 
-  const schemaColumns: SchemaCreateRequestColumn[] = Object.values(
-    formData.schemaColumns ?? {},
+  const schemaColumns: SchemaCreateRequestColumn[] = (
+    formData.schemaColumns ?? []
   ).map((column) => ({
     name: column.name,
     type: column.type,

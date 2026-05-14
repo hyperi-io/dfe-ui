@@ -9,6 +9,7 @@ import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Radio, Select, Tabs } from 'antd';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import z from 'zod';
 import { AddSchemaTable, rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './fieldOptions.constants';
@@ -18,7 +19,7 @@ const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
 const VERSION_REGEX = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 
-/** Used for request body */
+/** Used for building the request body */
 const formSchemaRequest = z.object({
   name: z
     .string()
@@ -42,17 +43,17 @@ const formSchemaRequest = z.object({
     }),
   type: z.enum(['model', 'addition', 'revision']),
   description: z.string().optional(),
-  uploadedColumns: z.record(z.string(), rowSchema).optional(),
-  schemaColumns: z.record(z.string(), rowSchema).optional(),
+  uploadedColumns: z.array(rowSchema).optional(),
+  schemaColumns: z.array(rowSchema).optional(),
 });
 
-/** Used for uploads and controls */
-const formSchemaControls = z.object({
+/** Used for state management and form controls */
+const formSchemaControls = {
   uploadType: z.enum(['csv', 'json']),
-  file: z.instanceof(Object),
-});
+  file: z.instanceof(Object).optional(),
+};
 
-const formSchema = formSchemaRequest.merge(formSchemaControls);
+const formSchema = formSchemaRequest.extend(formSchemaControls);
 
 export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
@@ -62,7 +63,19 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   buttonLabel?: string;
 }
 
-type UploadedSchema = CsvRow[] | ElasticConverterResponse;
+/** Row in the upload tab after CSV / Elastic import; includes stable client keys. */
+type UploadedSchemaRow = {
+  id: string;
+  imported?: true;
+  name?: string;
+  type?: string;
+  attribute?: string[];
+  use_case?: string;
+  expr?: string;
+  comment?: string | null;
+};
+type UploadedSchema = UploadedSchemaRow[];
+type PreloadedSchema = CsvRow[] | ElasticConverterResponse;
 
 const getRcFileFromUploadInfo = (
   info: UploadChangeParam<UploadFile<RcFile>>,
@@ -73,7 +86,7 @@ export const CreateSchemaForm = ({
   hasReset = false,
   isPending = false,
   buttonLabel = 'Save',
-  onFinish,
+  onFinish: onFinishProp,
 }: CreateSchemaFormProps) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
@@ -83,8 +96,13 @@ export const CreateSchemaForm = ({
   /** Remount CSV table after each successful convert so rows (and IDs) rebuild without a syncing effect */
   const [uploadedImportKey, setUploadedImportKey] = useState(0);
 
-  const updateUploadedSchema = (values: UploadedSchema) => {
-    setUploadedSchema(values);
+  const updateUploadedSchema = (values: PreloadedSchema) => {
+    const taggedValues: UploadedSchema = values.map((value) => ({
+      ...value,
+      id: uuidv4(),
+      imported: true as const,
+    }));
+    setUploadedSchema(taggedValues);
     setUploadedImportKey((k) => k + 1);
   };
 
@@ -144,6 +162,10 @@ export const CreateSchemaForm = ({
 
       convertElasticSchema({ file }); // Data upload happens in the mutation onSuccess
     }
+  };
+
+  const onFinish = (values: CreateSchemaFormData) => {
+    onFinishProp?.(values);
   };
 
   return (
@@ -318,13 +340,14 @@ export const CreateSchemaForm = ({
       )}
 
       {!hasUploadedSchema && (
-        <Form.Item name="schemaColumns" label="Schema Columns">
+        <>
+          <label htmlFor="schemaColumns">Schema Columns</label>
           <AddSchemaTable
             key="schemaColumns"
             name="schemaColumns"
             formValidation={formValidation}
           />
-        </Form.Item>
+        </>
       )}
 
       <Form.Item className="flex justify-end">

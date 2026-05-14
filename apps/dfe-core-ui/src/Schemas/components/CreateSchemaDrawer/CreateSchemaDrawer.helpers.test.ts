@@ -6,6 +6,10 @@ const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
   version: '1.0.0',
   type: 'model',
+  uploadType: 'csv',
+  file: new File([], 'test.csv'),
+  uploadedColumns: [],
+  schemaColumns: [],
 });
 
 describe('transformFormDataToRequestBody', () => {
@@ -54,18 +58,19 @@ describe('transformFormDataToRequestBody', () => {
   });
 
   test('maps uploaded columns then manual columns', () => {
-    const uploaded = {
-      upl_1: {
+    const uploaded = [
+      {
         name: 'col_a',
         type: 'String',
         attribute: ['nullable'],
         use_case: 'id',
         expr: '',
         comment: 'note',
+        imported: true,
       },
-    };
-    const manual = {
-      man_1: {
+    ];
+    const manual = [
+      {
         name: 'col_b',
         type: 'UInt64',
         attribute: [] as string[],
@@ -73,7 +78,7 @@ describe('transformFormDataToRequestBody', () => {
         expr: 'count()',
         comment: undefined as string | undefined,
       },
-    };
+    ];
     const result = transformFormDataToRequestBody({
       ...baseFormData(),
       uploadedColumns: uploaded,
