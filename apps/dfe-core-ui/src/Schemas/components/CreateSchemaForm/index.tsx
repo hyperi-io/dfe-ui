@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { FileUploadDragger } from '@/Schemas/components/FileUploadDragger';
 import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
 import { ElasticConverterResponse } from '@/Schemas/hooks/useElasticConvert/useElasticConvert';
 import { convertCsv, CsvRow } from '@/Schemas/server/actions/convertCsv';
@@ -12,8 +13,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import z from 'zod';
 import { AddSchemaTable, rowSchema } from './AddSchemaTable';
-import { TYPE_OPTIONS } from './fieldOptions.constants';
-import { FileUploadDragger } from './FileUploadDragger';
+import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 
 const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
