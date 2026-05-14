@@ -1,5 +1,9 @@
 import { Drawer } from '@/core/components/Drawer';
 
+import {
+  CreateSchemaForm,
+  CreateSchemaFormData,
+} from '@/Schemas/components/CreateSchemaForm';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
@@ -7,7 +11,6 @@ import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
-import { CreateSchemaForm, CreateSchemaFormData } from './CreateSchemaForm';
 
 export const CreateSchemaDrawer = ({
   open,

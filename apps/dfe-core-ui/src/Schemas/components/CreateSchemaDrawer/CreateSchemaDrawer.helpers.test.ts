@@ -1,6 +1,6 @@
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
-import { CreateSchemaFormData } from './CreateSchemaForm';
 
 const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
@@ -92,6 +92,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'id',
         expr: '',
         comment: 'note',
+        imported: true,
       },
       {
         name: 'col_b',

@@ -1,8 +1,8 @@
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm';
 import {
   SchemaCreateRequest,
   SchemaCreateRequestColumn,
 } from '@/Schemas/hooks/useCreateSchema/types';
-import { CreateSchemaFormData } from './CreateSchemaForm';
 
 /*
  * Transforms the form data to a request body for the create schema API.
