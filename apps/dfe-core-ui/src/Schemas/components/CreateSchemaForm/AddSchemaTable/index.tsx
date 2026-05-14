@@ -5,7 +5,7 @@ import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';
 import { listItemFromPartial } from './AddSchemaTable.helpers';
 import {
@@ -21,8 +21,7 @@ export const rowSchema = z.object({
     .string()
     .min(1, { message: 'Name is required' })
     .refine((v) => NAME_REGEX.test(v), {
-      message:
-        'Name must contain only letters, numbers, underscores, full stops, and hyphens',
+      message: 'Name must be a valid identifier',
     }),
   type: z.string().min(1, { message: 'Type is required' }),
   attribute: z.array(z.string()).optional(),
@@ -33,6 +32,7 @@ export const rowSchema = z.object({
   id: z.string(),
   imported: z.boolean().optional(),
 });
+export type RowSchema = z.infer<typeof rowSchema>;
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
 const EMPTY_COLUMNS: SchemaColumnRow[] = [];
@@ -48,10 +48,11 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   name?: string;
   formValidation: FormRule;
   config?: {
-    defaultEditFields?: boolean;
+    defaultEditFields?: boolean | (keyof RowSchema)[];
     defaultAddColumns?: boolean;
     defaultRemoveColumns?: boolean;
   };
+  onMount?: () => void;
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -73,6 +74,7 @@ export const AddSchemaTable = ({
     defaultAddColumns: true,
     defaultRemoveColumns: true,
   },
+  onMount,
   ...tableProps
 }: AddSchemaTableProps) => {
   const form = Form.useFormInstance();
@@ -85,6 +87,10 @@ export const AddSchemaTable = ({
       [name]: initialValues.map((col) => listItemFromPartial(col)),
     });
   }, [form, name, initialValues]);
+
+  useEffect(() => {
+    onMount?.();
+  }, [onMount]);
 
   return (
     <Form.List name={name}>
@@ -137,7 +143,13 @@ export const AddSchemaTable = ({
                   name={[rowIndex, 'name']}
                   rules={[formValidation]}
                 >
-                  <InlineEditInput defaultEditing={config.defaultEditFields} />
+                  <InlineEditInput
+                    defaultEditing={
+                      config.defaultEditFields === true ||
+                      (Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('name'))
+                    }
+                  />
                 </Form.Item>
               );
             },
@@ -157,7 +169,11 @@ export const AddSchemaTable = ({
                 >
                   <InlineEditSelect
                     options={PRIMITIVE_OPTIONS}
-                    defaultEditing={config.defaultEditFields}
+                    defaultEditing={
+                      config.defaultEditFields === true ||
+                      (Array.isArray(config.defaultEditFields) &&
+                        config.defaultEditFields.includes('type'))
+                    }
                   />
                 </Form.Item>
               );
@@ -176,7 +192,13 @@ export const AddSchemaTable = ({
                   name={[rowIndex, 'use_case']}
                   rules={[formValidation]}
                 >
-                  <InlineEditSelect options={USE_CASE_OPTIONS} />
+                  <InlineEditSelect
+                    options={USE_CASE_OPTIONS}
+                    defaultEditing={
+                      Array.isArray(config.defaultEditFields) &&
+                      config.defaultEditFields.includes('use_case')
+                    }
+                  />
                 </Form.Item>
               );
             },
@@ -197,6 +219,10 @@ export const AddSchemaTable = ({
                   <InlineEditSelect
                     mode="multiple"
                     options={ATTRIBUTE_OPTIONS}
+                    defaultEditing={
+                      Array.isArray(config.defaultEditFields) &&
+                      config.defaultEditFields.includes('attribute')
+                    }
                   />
                 </Form.Item>
               );
@@ -215,7 +241,12 @@ export const AddSchemaTable = ({
                   name={[rowIndex, 'expr']}
                   rules={[formValidation]}
                 >
-                  <InlineEditInput />
+                  <InlineEditInput
+                    defaultEditing={
+                      Array.isArray(config.defaultEditFields) &&
+                      config.defaultEditFields.includes('expr')
+                    }
+                  />
                 </Form.Item>
               );
             },
@@ -233,7 +264,12 @@ export const AddSchemaTable = ({
                   name={[rowIndex, 'comment']}
                   rules={[formValidation]}
                 >
-                  <InlineEditInput />
+                  <InlineEditInput
+                    defaultEditing={
+                      Array.isArray(config.defaultEditFields) &&
+                      config.defaultEditFields.includes('comment')
+                    }
+                  />
                 </Form.Item>
               );
             },

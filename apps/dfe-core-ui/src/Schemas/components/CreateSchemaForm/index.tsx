@@ -44,6 +44,7 @@ const formSchemaRequest = z.object({
 const formSchemaControls = {
   uploadType: z.enum(['csv', 'json']),
   file: z.instanceof(Object).optional(),
+  invalidColumns: z.array(rowSchema).optional(),
 };
 
 const formSchema = formSchemaRequest.extend(formSchemaControls);

@@ -78,6 +78,7 @@ export const SchemaUploadCollapse = ({
                 <UploadedSchemaTable
                   data={uploadedSchema}
                   formValidation={formValidation}
+                  form={form}
                 />
               ),
             },
