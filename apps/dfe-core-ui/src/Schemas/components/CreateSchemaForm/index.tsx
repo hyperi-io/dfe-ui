@@ -1,4 +1,5 @@
 import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
 import { useState } from 'react';
@@ -66,11 +67,49 @@ const CreateSchemaFormBase = ({
   buttonLabel = 'Save',
   onFinish: onFinishProp,
 }: CreateSchemaFormProps) => {
-  const { form, formValidation } = useCreateSchemaFormContext();
+  const {
+    form,
+    formValidation,
+    handleUpdateUploadedSchemaColumns,
+    uploadedSchemaColumns,
+    schemaColumns,
+    invalidUploadedSchemaColumns,
+  } = useCreateSchemaFormContext();
   const [showDescription, setShowDescription] = useState(true);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const onFinish = (values: CreateSchemaFormData) => {
-    onFinishProp?.(values);
+    const isUploadedColumnsValid = uploadedSchemaColumns
+      .map((column) => {
+        return rowSchema.safeParse(column);
+      })
+      .every((result) => result.success);
+
+    if (!isUploadedColumnsValid || invalidUploadedSchemaColumns.length > 0) {
+      setFormError(
+        'There are validation errors in the uploaded columns. Please fix them and try again.',
+      );
+      return;
+    }
+
+    const isSchemaColumnsValid = schemaColumns
+      .map((column) => {
+        return rowSchema.safeParse(column);
+      })
+      .every((result) => result.success);
+
+    if (!isSchemaColumnsValid) {
+      setFormError(
+        'There are validation errors in the schema columns. Please fix them and try again.',
+      );
+      return;
+    }
+
+    onFinishProp?.({
+      ...values,
+      uploadedColumns: uploadedSchemaColumns,
+      schemaColumns: schemaColumns,
+    });
   };
 
   return (
@@ -79,6 +118,10 @@ const CreateSchemaFormBase = ({
       form={form}
       onFinish={onFinish}
       preserve
+      onValuesChange={(changedValues) => {
+        setFormError(null);
+        handleUpdateUploadedSchemaColumns(changedValues as unknown);
+      }}
     >
       <div className="flex gap-2 w-full">
         <Form.Item
@@ -152,6 +195,8 @@ const CreateSchemaFormBase = ({
       </div>
 
       <SchemaUploadCollapse />
+
+      {formError && <FormNotification type="error" text={formError} />}
 
       <Form.Item className="flex justify-end">
         {hasReset && (

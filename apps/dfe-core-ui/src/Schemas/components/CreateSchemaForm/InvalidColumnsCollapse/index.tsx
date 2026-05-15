@@ -1,3 +1,4 @@
+import { Form } from '@/core/components/Form';
 import {
   AddSchemaTable,
   rowSchema,
@@ -6,7 +7,6 @@ import {
 import type { SchemaColumnRow } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/types';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
 import { IconAlertCircle } from '@repo/dfe-icons';
-import { Form } from '@/core/components/Form';
 import uniq from 'lodash/uniq';
 import { useEffect } from 'react';
 import z from 'zod';
@@ -22,6 +22,7 @@ export const InvalidColumnsCollapse = () => {
   const {
     form,
     handleUpdateInvalidUploadedSchemaColumn,
+    handleRemoveUploadedSchemaColumn,
     invalidUploadedSchemaColumns,
     formValidation,
   } = useCreateSchemaFormContext();
@@ -80,6 +81,11 @@ export const InvalidColumnsCollapse = () => {
           defaultRemoveColumns: true,
         }}
         pagination={false}
+        onRemoveRow={(row) =>
+          handleRemoveUploadedSchemaColumn(
+            typeof row?.id === 'string' ? row.id : undefined,
+          )
+        }
         onMount={() => {
           form.validateFields();
         }}

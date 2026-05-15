@@ -55,6 +55,7 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
     defaultRemoveColumns?: boolean;
   };
   onMount?: () => void;
+  onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -78,6 +79,7 @@ export const AddSchemaTable = ({
     defaultRemoveColumns: true,
   },
   onMount,
+  onRemoveRow,
   ...tableProps
 }: AddSchemaTableProps) => {
   const form = Form.useFormInstance();
@@ -135,7 +137,13 @@ export const AddSchemaTable = ({
                     size="small"
                     shape="circle"
                     type="default"
-                    onClick={() => remove(record.name)}
+                    onClick={() => {
+                      const rows = (form.getFieldValue(name) ??
+                        []) as SchemaColumnRow[];
+                      const rowSnapshot = rows[record.name as number];
+                      remove(record.name);
+                      onRemoveRow?.(rowSnapshot);
+                    }}
                   />
                 </Tooltip>
               ) : null;
