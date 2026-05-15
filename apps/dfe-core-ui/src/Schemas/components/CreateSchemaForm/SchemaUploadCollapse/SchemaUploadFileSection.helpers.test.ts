@@ -1,5 +1,9 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { transformDataToUploadedSchemaRow } from './SchemaUploadFileSection.helpers';
+
+vi.mock('uuid', () => ({
+  v4: vi.fn().mockReturnValue('1'),
+}));
 
 describe('transformDataToUploadedSchemaRow', () => {
   test('transforms data to uploaded schema row', () => {
