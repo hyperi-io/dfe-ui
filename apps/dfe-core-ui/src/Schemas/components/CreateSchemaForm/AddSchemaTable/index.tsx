@@ -3,7 +3,7 @@ import { Table, TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormRule, Tooltip } from 'antd';
+import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
 import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';
@@ -45,6 +45,8 @@ type SchemaColumnListRow = FormListFieldData & {
 
 export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   initialValues?: SchemaColumnRow[];
+  /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
+  resetListWhenEmpty?: boolean;
   name?: string;
   formValidation: FormRule;
   config?: {
@@ -68,6 +70,7 @@ const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',
+  resetListWhenEmpty = false,
   formValidation,
   config = {
     defaultEditFields: true,
@@ -79,14 +82,22 @@ export const AddSchemaTable = ({
 }: AddSchemaTableProps) => {
   const form = Form.useFormInstance();
 
+  /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */
+  const initialValuesSignature = JSON.stringify(initialValues);
+
   useLayoutEffect(() => {
     if (!initialValues.length) {
+      if (resetListWhenEmpty) {
+        form.setFieldsValue({ [name]: [] });
+      }
       return;
     }
     form.setFieldsValue({
       [name]: initialValues.map((col) => listItemFromPartial(col)),
     });
-  }, [form, name, initialValues]);
+    // Omit `initialValues` from deps: parents often pass a new array each render (e.g. `.map()`); `initialValuesSignature` gates sync.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when serialized content changes
+  }, [form, name, initialValuesSignature, resetListWhenEmpty]);
 
   useEffect(() => {
     onMount?.();
@@ -128,6 +139,20 @@ export const AddSchemaTable = ({
                   />
                 </Tooltip>
               ) : null;
+            },
+          },
+          /** Ant Design Form only persists fields registered via Form.Item — `id` must be stored for Form.List merges and promotion. */
+          {
+            title: '',
+            key: '__rowId',
+            width: 0,
+            render: (_: unknown, record: SchemaColumnListRow) => {
+              const { key: _rowKey, name: rowIndex, ...restField } = record;
+              return (
+                <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
+                  <Input type="hidden" />
+                </Form.Item>
+              );
             },
           },
           {

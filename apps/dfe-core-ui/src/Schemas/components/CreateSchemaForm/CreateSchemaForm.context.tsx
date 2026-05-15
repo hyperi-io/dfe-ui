@@ -4,15 +4,29 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import type { CreateSchemaFormData } from '.';
 import { formSchema } from '.';
 import { rowSchema, RowSchema } from './AddSchemaTable';
+import { listItemFromPartial } from './AddSchemaTable/AddSchemaTable.helpers';
 import { InvalidColumns } from './InvalidColumnsCollapse';
 import { UploadedSchemaRow } from './types';
+
+/** Revalidate nested `uploadedColumns` paths after programmatic merge — clears stale `Form.Item` errors. */
+const UPLOADED_ROW_FIELD_KEYS = [
+  'name',
+  'type',
+  'use_case',
+  'attribute',
+  'expr',
+  'comment',
+  'id',
+] as const;
 
 export type UploadInvalidSyncState = {
   initialInvalidIds: Set<string>;
@@ -24,11 +38,10 @@ export interface CreateSchemaFormContextValue {
   uploadedSchemaColumns: UploadedSchemaRow[];
   handleSetUploadedSchemaColumns: (columns: UploadedSchemaRow[]) => void;
   invalidUploadedSchemaColumns: InvalidColumns[];
-  handleSetInvalidUploadedSchemaColumns: (columns: InvalidColumns[]) => void;
   schemaColumns: RowSchema[];
   handleSetSchemaColumns: (columns: RowSchema[]) => void;
   formValidation: FormRule;
-  handleUpdateInvalidUploadedSchemaColumn: (column: InvalidColumns) => void;
+  handleUpdateInvalidUploadedSchemaColumn: (column: RowSchema) => void;
 }
 
 const CreateSchemaUploadContext =
@@ -49,6 +62,15 @@ export const CreateSchemaFormProvider = ({
   >([]);
   const [invalidUploadedSchemaColumns, setInvalidUploadedSchemaColumns] =
     useState<InvalidColumns[]>([]);
+
+  /** Latest columns for synchronous promotion writes (invalidate form + uploaded form fields together). */
+  const uploadedSchemaColumnsRef = useRef(uploadedSchemaColumns);
+  const invalidUploadedSchemaColumnsRef = useRef(invalidUploadedSchemaColumns);
+
+  useLayoutEffect(() => {
+    uploadedSchemaColumnsRef.current = uploadedSchemaColumns;
+    invalidUploadedSchemaColumnsRef.current = invalidUploadedSchemaColumns;
+  }, [uploadedSchemaColumns, invalidUploadedSchemaColumns]);
 
   const handleSetSchemaColumns = useCallback((columns: RowSchema[]) => {
     setSchemaColumns(columns);
@@ -75,28 +97,61 @@ export const CreateSchemaFormProvider = ({
     [],
   );
 
-  const handleSetInvalidUploadedSchemaColumns = useCallback(
-    (columns: InvalidColumns[]) => {
-      setInvalidUploadedSchemaColumns(columns);
-    },
-    [],
-  );
-
   const handleUpdateInvalidUploadedSchemaColumn = useCallback(
-    (column: InvalidColumns) => {
-      const validate = rowSchema.safeParse(column.data);
-      if (!validate.success) return;
+    (column: RowSchema) => {
+      const validatedColumn = rowSchema.safeParse(column);
+      if (!validatedColumn.success) {
+        setInvalidUploadedSchemaColumns((prev) => {
+          const idx = prev.findIndex((inv) => inv.data.id === column.id);
+          const entry = { ...validatedColumn, data: column };
+          if (idx === -1) {
+            return [...prev, entry];
+          }
+          const next = [...prev];
+          next[idx] = entry;
+          return next;
+        });
+        return;
+      }
 
-      const index = uploadedSchemaColumns.findIndex(
-        (value) => value.id === column.data.id,
+      const prevUploaded = uploadedSchemaColumnsRef.current;
+      const prevInvalid = invalidUploadedSchemaColumnsRef.current;
+      const replaceIndex = prevUploaded.findIndex(
+        (value) => value.id === column.id,
       );
-      if (index === -1) return;
+      if (replaceIndex === -1) return;
 
-      const updatedColumns = [...uploadedSchemaColumns];
-      updatedColumns[index] = validate.data;
-      setUploadedSchemaColumns(updatedColumns);
+      const nextUploaded = [...prevUploaded];
+      nextUploaded[replaceIndex] = validatedColumn.data;
+
+      const nextInvalid = prevInvalid.filter(
+        (inv) => inv.data.id !== column.id,
+      );
+
+      setUploadedSchemaColumns(nextUploaded);
+      setInvalidUploadedSchemaColumns(nextInvalid);
+      uploadedSchemaColumnsRef.current = nextUploaded;
+      invalidUploadedSchemaColumnsRef.current = nextInvalid;
+
+      form.setFieldsValue({
+        uploadedColumns: nextUploaded.map((c) => listItemFromPartial(c)),
+        invalidColumns:
+          nextInvalid.length > 0
+            ? nextInvalid.map((inv) => listItemFromPartial(inv.data))
+            : [],
+      });
+
+      queueMicrotask(() => {
+        void form.validateFields(
+          UPLOADED_ROW_FIELD_KEYS.map((k) => [
+            'uploadedColumns',
+            replaceIndex,
+            k,
+          ]),
+        );
+      });
     },
-    [uploadedSchemaColumns],
+    [form],
   );
 
   const value = useMemo(
@@ -105,7 +160,6 @@ export const CreateSchemaFormProvider = ({
       uploadedSchemaColumns,
       handleSetUploadedSchemaColumns,
       invalidUploadedSchemaColumns,
-      handleSetInvalidUploadedSchemaColumns,
       schemaColumns,
       handleSetSchemaColumns,
       formValidation,
@@ -116,7 +170,6 @@ export const CreateSchemaFormProvider = ({
       uploadedSchemaColumns,
       handleSetUploadedSchemaColumns,
       invalidUploadedSchemaColumns,
-      handleSetInvalidUploadedSchemaColumns,
       schemaColumns,
       handleSetSchemaColumns,
       formValidation,

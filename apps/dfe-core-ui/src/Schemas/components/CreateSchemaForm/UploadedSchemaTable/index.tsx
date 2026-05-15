@@ -11,12 +11,7 @@ export const UploadedSchemaTable = () => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      {invalidUploadedSchemaColumns.length > 0 && (
-        <InvalidColumnsCollapse
-          invalidColumns={invalidUploadedSchemaColumns}
-          formValidation={formValidation}
-        />
-      )}
+      {invalidUploadedSchemaColumns.length > 0 && <InvalidColumnsCollapse />}
 
       <AddSchemaTable
         name="uploadedColumns"
