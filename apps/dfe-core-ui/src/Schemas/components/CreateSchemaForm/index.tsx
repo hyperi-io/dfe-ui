@@ -107,8 +107,10 @@ const CreateSchemaFormBase = ({
 
     onFinishProp?.({
       ...values,
-      uploadedColumns: uploadedSchemaColumns,
-      schemaColumns: schemaColumns,
+      uploadedColumns: uploadedSchemaColumns.map((column) =>
+        rowSchema.parse(column),
+      ),
+      schemaColumns,
     });
   };
 
