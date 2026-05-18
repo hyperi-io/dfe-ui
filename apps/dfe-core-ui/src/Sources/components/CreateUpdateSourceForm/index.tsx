@@ -1,5 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { TabLabel } from '@/core/components/TabLabel';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Tabs } from 'antd';
@@ -13,7 +14,6 @@ import {
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
 import { SourceTypeTabContent } from './SourceTypeTabContent';
-import { TabLabel } from './TabLabel';
 import { TransformTabContent } from './TransformTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
