@@ -113,6 +113,17 @@ export const uploadedAndInvalidColumnListValidatePaths = (
   ...rowListFieldValidatePaths('invalidColumns', invalidRowCount),
 ];
 
+/** Paths for every column tab list — excludes schema-details fields (name, version, type, …). */
+export const allColumnTabListValidatePaths = (
+  uploadedRowCount: number,
+  invalidRowCount: number,
+  schemaColumnsRowCount: number,
+): (string | number)[][] => [
+  ...rowListFieldValidatePaths('uploadedColumns', uploadedRowCount),
+  ...rowListFieldValidatePaths('invalidColumns', invalidRowCount),
+  ...rowListFieldValidatePaths('schemaColumns', schemaColumnsRowCount),
+];
+
 /**
  *
  * @returns The empty validation errors.

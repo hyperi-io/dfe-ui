@@ -33,7 +33,7 @@ const CreateSchemaFormBase = ({
     invalidUploadedSchemaColumns,
     changedValuesTriggerInvalidTabErrors,
     recomputeValidationErrors,
-    handleValidate,
+    handleValidateColumnListsOnly,
   } = useCreateSchemaFormContext();
   const [showDescription, setShowDescription] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ const CreateSchemaFormBase = ({
       queueMicrotask(() => recomputeValidationErrors());
       return;
     }
-    queueMicrotask(() => handleValidate());
+    queueMicrotask(() => handleValidateColumnListsOnly());
   };
 
   return (

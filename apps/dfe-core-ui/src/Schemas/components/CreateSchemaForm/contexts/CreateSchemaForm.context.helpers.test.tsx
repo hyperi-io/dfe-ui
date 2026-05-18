@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { InvalidColumns } from './CreateSchemaForm.context.d';
 import {
   UPLOADED_ROW_FIELD_KEYS,
+  allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
   changedValuesMayAffectUploadedColumns,
   createEmptyValidationErrors,
@@ -53,6 +54,17 @@ describe('uploadedAndInvalidColumnListValidatePaths', () => {
     expect(a).toEqual([
       ...rowListFieldValidatePaths('uploadedColumns', 1),
       ...rowListFieldValidatePaths('invalidColumns', 1),
+    ]);
+  });
+});
+
+describe('allColumnTabListValidatePaths', () => {
+  test('includes schemaColumns paths after uploaded and invalid', () => {
+    const p = allColumnTabListValidatePaths(1, 0, 2);
+    expect(p).toEqual([
+      ...rowListFieldValidatePaths('uploadedColumns', 1),
+      ...rowListFieldValidatePaths('invalidColumns', 0),
+      ...rowListFieldValidatePaths('schemaColumns', 2),
     ]);
   });
 });

@@ -188,6 +188,43 @@ describe('CreateSchemaFormProvider', () => {
     });
   });
 
+  test('handleValidateColumnListsOnly validates column tab lists only', async () => {
+    const validateFields = vi.fn().mockResolvedValue(undefined);
+    const form = {
+      getFieldsError: vi.fn(() => []),
+      setFieldsValue: vi.fn(),
+      getFieldValue: vi.fn((key: string) => {
+        if (key === 'uploadedColumns') return [validRow('u1')];
+        if (key === 'invalidColumns') return [invalidZodRow('i1')];
+        if (key === 'schemaColumns') return [validRow('s1')];
+        return undefined;
+      }),
+      validateFields,
+    } as unknown as FormInstance<CreateSchemaFormData>;
+
+    const { result } = renderHook(() => useCreateSchemaFormContext(), {
+      wrapper: ({ children }) => (
+        <TestHarness form={form}>{children}</TestHarness>
+      ),
+    });
+
+    act(() => {
+      result.current.handleValidateColumnListsOnly();
+    });
+
+    await waitFor(() => {
+      expect(validateFields).toHaveBeenCalled();
+    });
+
+    const paths = validateFields.mock.calls[0]?.[0] as (string | number)[][];
+    expect(paths.every((p) => typeof p[0] === 'string')).toBe(true);
+    const roots = new Set(paths.map((p) => p[0] as string));
+    expect(roots).toEqual(
+      new Set(['uploadedColumns', 'invalidColumns', 'schemaColumns']),
+    );
+    expect(paths).toContainEqual(['uploadedColumns', 0, 'name']);
+  });
+
   test('layout validation effect no-ops when uploaded and invalid are both empty', async () => {
     const { form, mocks } = createMockForm();
     const { result } = renderHook(() => useCreateSchemaFormContext(), {

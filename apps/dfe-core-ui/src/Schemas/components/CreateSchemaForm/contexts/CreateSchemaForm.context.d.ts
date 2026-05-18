@@ -28,6 +28,8 @@ export interface CreateSchemaFormContextValue {
   changedValuesTriggerInvalidTabErrors: (changedValues: unknown) => boolean;
   recomputeValidationErrors: () => void;
   handleValidate: () => void;
+  /** Re-run list row rules only (uploaded / invalid / schema column tables), not schema-details fields. */
+  handleValidateColumnListsOnly: () => void;
 }
 
 export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {

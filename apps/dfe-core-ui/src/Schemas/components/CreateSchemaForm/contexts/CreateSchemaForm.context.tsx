@@ -26,6 +26,7 @@ import {
   type InvalidColumns,
 } from './CreateSchemaForm.context.d';
 import {
+  allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
   changedValuesMayAffectUploadedColumns,
   createEmptyValidationErrors,
@@ -76,14 +77,19 @@ export const CreateSchemaFormProvider = ({
     );
   }, [form]);
 
+  /**
+   * @param nameList `undefined` — validate entire form; `[]` — skip `validateFields`, only merge tab errors; non-empty — partial.
+   */
   const __internal_collectTabErrorsAfterValidate = useCallback(
     async (
       nameList?: (string | number)[][],
     ): Promise<SchemaFormValidationErrors> => {
       try {
-        await (nameList && nameList.length > 0
-          ? form.validateFields(nameList)
-          : form.validateFields());
+        if (nameList === undefined) {
+          await form.validateFields();
+        } else if (nameList.length > 0) {
+          await form.validateFields(nameList);
+        }
       } catch {
         /* rejected when rules fail — errors remain on fields */
       }
@@ -304,6 +310,20 @@ export const CreateSchemaFormProvider = ({
     void __internal_collectTabErrorsAfterValidate().then(setValidationErrors);
   }, [__internal_collectTabErrorsAfterValidate]);
 
+  const handleValidateColumnListsOnly = useCallback(() => {
+    const uploaded = form.getFieldValue('uploadedColumns');
+    const invalid = form.getFieldValue('invalidColumns');
+    const schemaCols = form.getFieldValue('schemaColumns');
+    const paths = allColumnTabListValidatePaths(
+      Array.isArray(uploaded) ? uploaded.length : 0,
+      Array.isArray(invalid) ? invalid.length : 0,
+      Array.isArray(schemaCols) ? schemaCols.length : 0,
+    );
+    void __internal_collectTabErrorsAfterValidate(paths).then(
+      setValidationErrors,
+    );
+  }, [form, __internal_collectTabErrorsAfterValidate]);
+
   const handleRemoveUploadedSchemaColumn = useCallback(
     (columnId: string | undefined) => {
       if (!columnId) return;
@@ -361,6 +381,7 @@ export const CreateSchemaFormProvider = ({
       changedValuesTriggerInvalidTabErrors,
       recomputeValidationErrors,
       handleValidate,
+      handleValidateColumnListsOnly,
     }),
     [
       form,
@@ -377,6 +398,7 @@ export const CreateSchemaFormProvider = ({
       changedValuesTriggerInvalidTabErrors,
       recomputeValidationErrors,
       handleValidate,
+      handleValidateColumnListsOnly,
     ],
   );
   return (
