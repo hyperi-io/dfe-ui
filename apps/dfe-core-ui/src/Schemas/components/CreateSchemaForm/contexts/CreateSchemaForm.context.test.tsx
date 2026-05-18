@@ -11,7 +11,10 @@ import {
   useCreateSchemaFormContext,
 } from './CreateSchemaForm.context';
 
-const validRow = (id: string, overrides: Partial<RowSchema> = {}): RowSchema => ({
+const validRow = (
+  id: string,
+  overrides: Partial<RowSchema> = {},
+): RowSchema => ({
   id,
   name: `col_${id}`,
   type: 'string',
@@ -26,10 +29,7 @@ const invalidZodRow = (id: string): RowSchema =>
     type: 'string',
   }) as RowSchema;
 
-const fieldErr = (
-  name: FieldError['name'],
-  message: string,
-): FieldError =>
+const fieldErr = (name: FieldError['name'], message: string): FieldError =>
   ({
     name,
     errors: [message],
@@ -161,9 +161,9 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.validationErrors.uploadedColumns.length).toBeGreaterThan(
-        0,
-      );
+      expect(
+        result.current.validationErrors.uploadedColumns.length,
+      ).toBeGreaterThan(0);
     });
   });
 
@@ -354,7 +354,9 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       act(() => {
-        result.current.handleUpdateInvalidUploadedSchemaColumn(validRow('missing'));
+        result.current.handleUpdateInvalidUploadedSchemaColumn(
+          validRow('missing'),
+        );
       });
 
       expect(mocks.setFieldsValue).not.toHaveBeenCalled();
@@ -415,7 +417,9 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       expect(result.current.invalidUploadedSchemaColumns).toHaveLength(1);
-      expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe('b1');
+      expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe(
+        'b1',
+      );
       expect(mocks.setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: expect.arrayContaining([
           expect.objectContaining({ id: 'a1', name: 'col_a1' }),
@@ -444,7 +448,9 @@ describe('CreateSchemaFormProvider', () => {
       const before = mocks.validateFields.mock.calls.length;
 
       act(() => {
-        result.current.handleUpdateInvalidUploadedSchemaColumn(invalidZodRow('new'));
+        result.current.handleUpdateInvalidUploadedSchemaColumn(
+          invalidZodRow('new'),
+        );
       });
 
       await waitFor(() => {
@@ -561,7 +567,9 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows([{ name: 'col_rowKey', type: 'string' }]);
 
       act(() => {
-        result.current.handleUpdateUploadedSchemaColumns({ uploadedColumns: [] });
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
       });
 
       await waitFor(() => {
@@ -590,10 +598,14 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows([null, 1, { id: 'nope' }]);
 
       act(() => {
-        result.current.handleUpdateUploadedSchemaColumns({ uploadedColumns: [] });
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
       });
 
-      expect(result.current.invalidUploadedSchemaColumns.length).toBeGreaterThan(0);
+      expect(
+        result.current.invalidUploadedSchemaColumns.length,
+      ).toBeGreaterThan(0);
     });
 
     test('still reconciles via row index when id is absent from form values array', async () => {
@@ -641,7 +653,9 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows([{ id: 'z1', name: 'bad name!', type: 'string' }]);
 
       act(() => {
-        result.current.handleUpdateUploadedSchemaColumns({ uploadedColumns: [] });
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
       });
 
       expect(result.current.invalidUploadedSchemaColumns).toHaveLength(1);
@@ -665,7 +679,9 @@ describe('CreateSchemaFormProvider', () => {
       const n = mocks.validateFields.mock.calls.length;
 
       act(() => {
-        result.current.handleUpdateUploadedSchemaColumns({ uploadedColumns: [] });
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
       });
 
       await waitFor(() => {
@@ -728,7 +744,9 @@ describe('CreateSchemaFormProvider', () => {
 
       expect(result.current.uploadedSchemaColumns).toEqual([invB]);
       expect(result.current.invalidUploadedSchemaColumns).toHaveLength(1);
-      expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe('my');
+      expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe(
+        'my',
+      );
       expect(mocks.setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: [expect.objectContaining({ id: 'my' })],
         invalidColumns: [expect.objectContaining({ id: 'my' })],
