@@ -68,6 +68,30 @@ const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
   comment: '',
 });
 
+/** Same shape as {@link defaultEmptyRow} — append-only adds skip preemptive validate.
+ * @param row - The row to check.
+ * @returns True if the row is a blank schema list row.
+ * @example
+ * isBlankSchemaListRow({ id: '', name: '', type: '', attribute: [], use_case: '', expr: '', comment: '', imported: false }) // true
+ * isBlankSchemaListRow({ id: '1', name: 'test', type: 'string', attribute: ['test'], use_case: 'test', expr: 'test', comment: 'test', imported: false }) // false
+ */
+export const isBlankSchemaListRow = (row: unknown): boolean => {
+  if (!row || typeof row !== 'object') return false;
+  const r = row as Record<string, unknown>;
+  const empty = (v: unknown) => v === '' || v === undefined || v === null;
+  const attrs = r.attribute;
+  return (
+    empty(r.id) &&
+    empty(r.name) &&
+    empty(r.type) &&
+    empty(r.use_case) &&
+    empty(r.expr) &&
+    empty(r.comment) &&
+    r.imported !== true &&
+    (attrs === undefined || (Array.isArray(attrs) && attrs.length === 0))
+  );
+};
+
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',

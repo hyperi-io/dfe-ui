@@ -4,19 +4,10 @@ import {
   rowSchema,
   RowSchema,
 } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import type { SchemaColumnRow } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/types';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import uniq from 'lodash/uniq';
-import { useEffect } from 'react';
-import z from 'zod';
-
-/** Failed `rowSchema.safeParse` augmented with the raw row (e.g. upload import). */
-export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {
-  success: false;
-  error: z.ZodError<RowSchema>;
-  data: T;
-};
+import { useCallback, useEffect } from 'react';
 
 export const InvalidColumnsCollapse = () => {
   const {
@@ -25,6 +16,7 @@ export const InvalidColumnsCollapse = () => {
     handleRemoveUploadedSchemaColumn,
     invalidUploadedSchemaColumns,
     formValidation,
+    handleValidate,
   } = useCreateSchemaFormContext();
   const initialValues = invalidUploadedSchemaColumns.map(
     (column) => column.data,
@@ -36,7 +28,15 @@ export const InvalidColumnsCollapse = () => {
     ),
   ) as (keyof RowSchema)[];
 
-  const watchInvalidColumns = Form.useWatch('invalidColumns', form);
+  const watchInvalidColumns = Form.useWatch(
+    (values) => values.invalidColumns,
+    form,
+  );
+
+  /** Stable ref: AddSchemaTable re-runs `onMount` when this identity changes. */
+  const validateOnInvalidTableMount = useCallback(() => {
+    handleValidate();
+  }, [handleValidate]);
 
   useEffect(() => {
     const validatedColumns = watchInvalidColumns?.map((column, index) => {
@@ -86,9 +86,7 @@ export const InvalidColumnsCollapse = () => {
             typeof row?.id === 'string' ? row.id : undefined,
           )
         }
-        onMount={() => {
-          form.validateFields();
-        }}
+        onMount={validateOnInvalidTableMount}
       />
     </div>
   );

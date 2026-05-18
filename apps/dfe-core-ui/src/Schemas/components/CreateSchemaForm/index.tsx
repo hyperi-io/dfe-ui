@@ -2,58 +2,15 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
-import { useState } from 'react';
-import z from 'zod';
-import { rowSchema } from './AddSchemaTable';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,
-} from './CreateSchemaForm.context';
+} from './contexts/CreateSchemaForm.context';
+import { CreateSchemaFormData } from './CreateSchemaForm.schema';
 import { SchemaUploadCollapse } from './SchemaUploadCollapse';
-
-const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
-const VERSION_REGEX = /^[0-9]+\.[0-9]+\.[0-9]+$/;
-
-/** Used for building the request body */
-const formSchemaRequest = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name is required' })
-    .refine((v) => NAME_REGEX.test(v), {
-      message:
-        'Name must contain only letters, numbers, underscores, and hyphens',
-    }),
-  path: z
-    .string()
-    .refine((v) => v && v.length > 0 && GROUP_REGEX.test(v), {
-      message:
-        'Groups must contain only letters, numbers, underscores, hyphens, and forward slashes',
-    })
-    .optional(),
-  version: z
-    .string()
-    .min(1, { message: 'Version is required' })
-    .refine((v) => VERSION_REGEX.test(v), {
-      message: 'Version must be in the format x.x.x',
-    }),
-  type: z.enum(['model', 'addition', 'revision']),
-  description: z.string().optional(),
-  uploadedColumns: z.array(rowSchema).optional(),
-  schemaColumns: z.array(rowSchema).optional(),
-});
-
-/** Used for state management and form controls */
-const formSchemaControls = {
-  uploadType: z.enum(['csv', 'json']),
-  file: z.instanceof(Object).optional(),
-  invalidColumns: z.array(rowSchema).optional(),
-};
-
-export const formSchema = formSchemaRequest.extend(formSchemaControls);
-
-export type CreateSchemaFormData = z.infer<typeof formSchema>;
 
 interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   hasReset?: boolean;
@@ -74,9 +31,18 @@ const CreateSchemaFormBase = ({
     uploadedSchemaColumns,
     schemaColumns,
     invalidUploadedSchemaColumns,
+    changedValuesTriggerInvalidTabErrors,
+    recomputeValidationErrors,
+    handleValidate,
   } = useCreateSchemaFormContext();
   const [showDescription, setShowDescription] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
+  const prevSchemaColumnsLengthRef = useRef(0);
+
+  useLayoutEffect(() => {
+    const cols = form.getFieldValue('schemaColumns');
+    prevSchemaColumnsLengthRef.current = Array.isArray(cols) ? cols.length : 0;
+  }, [form]);
 
   const onFinish = (values: CreateSchemaFormData) => {
     const isUploadedColumnsValid = uploadedSchemaColumns
@@ -114,15 +80,53 @@ const CreateSchemaFormBase = ({
     });
   };
 
+  const handleConditionalValidation = (
+    changedValues: unknown,
+    allValues: CreateSchemaFormData,
+  ) => {
+    const touchedLists = changedValuesTriggerInvalidTabErrors(changedValues);
+    const cv = changedValues as Record<string, unknown>;
+    const schemaCols = allValues.schemaColumns;
+    const nextLen = Array.isArray(schemaCols) ? schemaCols.length : 0;
+    const prevLen = prevSchemaColumnsLengthRef.current;
+
+    const onlySchemaColumnsChanged =
+      touchedLists &&
+      cv !== null &&
+      typeof cv === 'object' &&
+      Object.keys(cv).length === 1 &&
+      Object.hasOwn(cv, 'schemaColumns');
+
+    const appendedSingleBlankRow =
+      onlySchemaColumnsChanged &&
+      Array.isArray(schemaCols) &&
+      nextLen === prevLen + 1 &&
+      isBlankSchemaListRow(schemaCols[nextLen - 1]);
+
+    prevSchemaColumnsLengthRef.current = nextLen;
+
+    /** List validators are async — avoid preemptive full validate when Add Column appends one blank row. */
+    if (!touchedLists) {
+      queueMicrotask(() => recomputeValidationErrors());
+      return;
+    }
+    if (appendedSingleBlankRow) {
+      queueMicrotask(() => recomputeValidationErrors());
+      return;
+    }
+    queueMicrotask(() => handleValidate());
+  };
+
   return (
     <Form
       className="h-[calc(100vh-120px)] css-custom-scrollbar"
       form={form}
       onFinish={onFinish}
       preserve
-      onValuesChange={(changedValues) => {
+      onValuesChange={(changedValues, allValues) => {
         setFormError(null);
         handleUpdateUploadedSchemaColumns(changedValues as unknown);
+        handleConditionalValidation(changedValues, allValues);
       }}
     >
       <div className="flex gap-2 w-full">

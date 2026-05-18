@@ -1,7 +1,8 @@
 import { Form } from '@/core/components/Form';
+import { TabLabel } from '@/core/components/TabLabel';
 import { cn } from '@/core/utils/style';
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Radio, Tabs } from 'antd';
@@ -9,7 +10,7 @@ import { useState } from 'react';
 import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 
 export const SchemaUploadCollapse = () => {
-  const { formValidation, uploadedSchemaColumns } =
+  const { formValidation, uploadedSchemaColumns, validationErrors } =
     useCreateSchemaFormContext();
   const [showFileUpload, setShowFileUpload] = useState(true);
 
@@ -62,13 +63,23 @@ export const SchemaUploadCollapse = () => {
           items={[
             {
               key: 'uploadedColumns',
-              label: 'Uploaded Columns',
+              label: (
+                <TabLabel
+                  label="Uploaded Columns"
+                  validationErrors={validationErrors.uploadedColumns ?? []}
+                />
+              ),
               forceRender: true,
               children: <UploadedSchemaTable />,
             },
             {
               key: 'schemaColumns',
-              label: 'Additional Columns',
+              label: (
+                <TabLabel
+                  label="Additional Columns"
+                  validationErrors={validationErrors.schemaColumns ?? []}
+                />
+              ),
               forceRender: true,
               children: (
                 <AddSchemaTable

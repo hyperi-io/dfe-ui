@@ -1,5 +1,5 @@
 import { Form } from '@/core/components/Form';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import { FileUploadDragger } from '@/Schemas/components/FileUploadDragger';
 import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
 import { convertCsv } from '@/Schemas/server/actions/convertCsv';

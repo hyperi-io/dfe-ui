@@ -1,5 +1,5 @@
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.context';
+import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import { InvalidColumnsCollapse } from '@/Schemas/components/CreateSchemaForm/InvalidColumnsCollapse';
 
 export const UploadedSchemaTable = () => {

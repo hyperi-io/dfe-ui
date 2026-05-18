@@ -1,5 +1,16 @@
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import type { FormInstance, FormRule } from 'antd';
+import {
+  rowSchema,
+  RowSchema,
+} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
+import { listItemFromPartial } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import {
+  formSchema,
+  SchemaFormValidationErrors,
+  type CreateSchemaFormData,
+} from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
+import type { FormInstance } from 'antd';
 import {
   createContext,
   useCallback,
@@ -10,58 +21,18 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { CreateSchemaFormData } from '.';
-import { formSchema } from '.';
-import { rowSchema, RowSchema } from './AddSchemaTable';
-import { listItemFromPartial } from './AddSchemaTable/AddSchemaTable.helpers';
-import { InvalidColumns } from './InvalidColumnsCollapse';
-import { UploadedSchemaRow } from './types';
-
-/** Whether antd `onValuesChange` first arg includes edits under `uploadedColumns`. */
-const changedValuesMayAffectUploadedColumns = (changed: unknown): boolean => {
-  if (changed == null || typeof changed !== 'object') return false;
-  if (Array.isArray(changed)) {
-    return changed.some((entry) =>
-      changedValuesMayAffectUploadedColumns(entry),
-    );
-  }
-  const rec = changed as Record<string, unknown>;
-  if (Object.hasOwn(rec, 'uploadedColumns')) {
-    return true;
-  }
-  return Object.values(rec).some((v) =>
-    changedValuesMayAffectUploadedColumns(v),
-  );
-};
-
-/** Revalidate nested `uploadedColumns` paths after programmatic merge — clears stale `Form.Item` errors. */
-const UPLOADED_ROW_FIELD_KEYS = [
-  'name',
-  'type',
-  'use_case',
-  'attribute',
-  'expr',
-  'comment',
-  'id',
-] as const;
-
-export type UploadInvalidSyncState = {
-  initialInvalidIds: Set<string>;
-  invalidSectionActive: boolean;
-};
-
-export interface CreateSchemaFormContextValue {
-  form: FormInstance<CreateSchemaFormData>;
-  uploadedSchemaColumns: UploadedSchemaRow[];
-  handleSetUploadedSchemaColumns: (columns: UploadedSchemaRow[]) => void;
-  invalidUploadedSchemaColumns: InvalidColumns[];
-  schemaColumns: RowSchema[];
-  handleSetSchemaColumns: (columns: RowSchema[]) => void;
-  formValidation: FormRule;
-  handleUpdateInvalidUploadedSchemaColumn: (column: RowSchema) => void;
-  handleUpdateUploadedSchemaColumns: (changedValues: unknown) => void;
-  handleRemoveUploadedSchemaColumn: (columnId: string | undefined) => void;
-}
+import {
+  type CreateSchemaFormContextValue,
+  type InvalidColumns,
+} from './CreateSchemaForm.context.d';
+import {
+  changedValuesMayAffectTabLists,
+  changedValuesMayAffectUploadedColumns,
+  createEmptyValidationErrors,
+  mergeImportInvalidIntoUploadedTab,
+  transformFieldErrorsToTabErrors,
+  UPLOADED_ROW_FIELD_KEYS,
+} from './CreateSchemaForm.context.helpers';
 
 const CreateSchemaUploadContext =
   createContext<CreateSchemaFormContextValue | null>(null);
@@ -82,6 +53,9 @@ export const CreateSchemaFormProvider = ({
   const [invalidUploadedSchemaColumns, setInvalidUploadedSchemaColumns] =
     useState<InvalidColumns[]>([]);
 
+  const [validationErrors, setValidationErrors] =
+    useState<SchemaFormValidationErrors>(() => createEmptyValidationErrors());
+
   /** Latest columns for synchronous promotion writes (invalidate form + uploaded form fields together). */
   const uploadedSchemaColumnsRef = useRef(uploadedSchemaColumns);
   const invalidUploadedSchemaColumnsRef = useRef(invalidUploadedSchemaColumns);
@@ -90,6 +64,68 @@ export const CreateSchemaFormProvider = ({
     uploadedSchemaColumnsRef.current = uploadedSchemaColumns;
     invalidUploadedSchemaColumnsRef.current = invalidUploadedSchemaColumns;
   }, [uploadedSchemaColumns, invalidUploadedSchemaColumns]);
+
+  const recomputeValidationErrors = useCallback(() => {
+    const base = transformFieldErrorsToTabErrors(form.getFieldsError());
+    setValidationErrors(
+      mergeImportInvalidIntoUploadedTab(
+        base,
+        invalidUploadedSchemaColumnsRef.current,
+      ),
+    );
+  }, [form]);
+
+  const __internal_collectTabErrorsAfterValidate =
+    useCallback(async (): Promise<SchemaFormValidationErrors> => {
+      try {
+        await form.validateFields();
+      } catch {
+        /* rejected when rules fail — errors remain on fields */
+      }
+      const base = transformFieldErrorsToTabErrors(form.getFieldsError());
+      return mergeImportInvalidIntoUploadedTab(
+        base,
+        invalidUploadedSchemaColumnsRef.current,
+      );
+    }, [form]);
+
+  /**
+   * Tables sync uploaded rows into the form store in child `useLayoutEffect`.
+   * Parent layout runs after children, then we validate so nested list rules run
+   * and tab errors update (reading `getFieldsError()` during render does not).
+   */
+  useLayoutEffect(() => {
+    if (
+      uploadedSchemaColumns.length === 0 &&
+      invalidUploadedSchemaColumns.length === 0
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    queueMicrotask(() => {
+      void __internal_collectTabErrorsAfterValidate().then((next) => {
+        if (!cancelled) {
+          setValidationErrors(next);
+        }
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    __internal_collectTabErrorsAfterValidate,
+    uploadedSchemaColumns,
+    invalidUploadedSchemaColumns,
+  ]);
+
+  const changedValuesTriggerInvalidTabErrors = useCallback(
+    (changedValues: unknown) => {
+      return changedValuesMayAffectTabLists(changedValues);
+    },
+    [],
+  );
 
   const handleSetSchemaColumns = useCallback((columns: RowSchema[]) => {
     setSchemaColumns(columns);
@@ -119,6 +155,7 @@ export const CreateSchemaFormProvider = ({
   const handleUpdateInvalidUploadedSchemaColumn = useCallback(
     (column: RowSchema) => {
       const validatedColumn = rowSchema.safeParse(column);
+
       if (!validatedColumn.success) {
         setInvalidUploadedSchemaColumns((prev) => {
           const idx = prev.findIndex((inv) => inv.data.id === column.id);
@@ -129,6 +166,11 @@ export const CreateSchemaFormProvider = ({
           const next = [...prev];
           next[idx] = entry;
           return next;
+        });
+        queueMicrotask(() => {
+          void __internal_collectTabErrorsAfterValidate().then(
+            setValidationErrors,
+          );
         });
         return;
       }
@@ -149,6 +191,7 @@ export const CreateSchemaFormProvider = ({
 
       setUploadedSchemaColumns(nextUploaded);
       setInvalidUploadedSchemaColumns(nextInvalid);
+
       uploadedSchemaColumnsRef.current = nextUploaded;
       invalidUploadedSchemaColumnsRef.current = nextInvalid;
 
@@ -161,16 +204,28 @@ export const CreateSchemaFormProvider = ({
       });
 
       queueMicrotask(() => {
-        void form.validateFields(
-          UPLOADED_ROW_FIELD_KEYS.map((k) => [
-            'uploadedColumns',
-            replaceIndex,
-            k,
-          ]),
-        );
+        void (async () => {
+          try {
+            await form.validateFields(
+              UPLOADED_ROW_FIELD_KEYS.map((k) => [
+                'uploadedColumns',
+                replaceIndex,
+                k,
+              ]),
+            );
+          } catch {
+            /* noop */
+          }
+          setValidationErrors(
+            mergeImportInvalidIntoUploadedTab(
+              transformFieldErrorsToTabErrors(form.getFieldsError()),
+              invalidUploadedSchemaColumnsRef.current,
+            ),
+          );
+        })();
       });
     },
-    [form],
+    [form, __internal_collectTabErrorsAfterValidate],
   );
 
   const handleUpdateUploadedSchemaColumns = useCallback(
@@ -207,9 +262,22 @@ export const CreateSchemaFormProvider = ({
 
         handleUpdateInvalidUploadedSchemaColumn(parsed.data);
       }
+      queueMicrotask(() => {
+        void __internal_collectTabErrorsAfterValidate().then(
+          setValidationErrors,
+        );
+      });
     },
-    [form, handleUpdateInvalidUploadedSchemaColumn],
+    [
+      form,
+      handleUpdateInvalidUploadedSchemaColumn,
+      __internal_collectTabErrorsAfterValidate,
+    ],
   );
+
+  const handleValidate = useCallback(() => {
+    void __internal_collectTabErrorsAfterValidate().then(setValidationErrors);
+  }, [__internal_collectTabErrorsAfterValidate]);
 
   const handleRemoveUploadedSchemaColumn = useCallback(
     (columnId: string | undefined) => {
@@ -241,10 +309,12 @@ export const CreateSchemaFormProvider = ({
       });
 
       queueMicrotask(() => {
-        void form.validateFields();
+        void __internal_collectTabErrorsAfterValidate().then(
+          setValidationErrors,
+        );
       });
     },
-    [form],
+    [form, __internal_collectTabErrorsAfterValidate],
   );
 
   const value = useMemo(
@@ -259,6 +329,10 @@ export const CreateSchemaFormProvider = ({
       handleUpdateInvalidUploadedSchemaColumn,
       handleUpdateUploadedSchemaColumns,
       handleRemoveUploadedSchemaColumn,
+      validationErrors,
+      changedValuesTriggerInvalidTabErrors,
+      recomputeValidationErrors,
+      handleValidate,
     }),
     [
       form,
@@ -271,6 +345,10 @@ export const CreateSchemaFormProvider = ({
       handleUpdateInvalidUploadedSchemaColumn,
       handleUpdateUploadedSchemaColumns,
       handleRemoveUploadedSchemaColumn,
+      validationErrors,
+      changedValuesTriggerInvalidTabErrors,
+      recomputeValidationErrors,
+      handleValidate,
     ],
   );
   return (
