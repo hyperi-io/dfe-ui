@@ -82,6 +82,37 @@ export const UPLOADED_ROW_FIELD_KEYS = [
   'id',
 ] as const;
 
+export type ColumnListFormKey =
+  | 'uploadedColumns'
+  | 'invalidColumns'
+  | 'schemaColumns';
+
+/**
+ * Ant Design `validateFields` name paths for every cell in a column table list.
+ * Avoids running schema-details rules (name, version, schema type, etc.).
+ */
+export const rowListFieldValidatePaths = (
+  listKey: ColumnListFormKey,
+  rowCount: number,
+): (string | number)[][] => {
+  if (rowCount <= 0) return [];
+  const paths: (string | number)[][] = [];
+  for (let i = 0; i < rowCount; i++) {
+    for (const k of UPLOADED_ROW_FIELD_KEYS) {
+      paths.push([listKey, i, k]);
+    }
+  }
+  return paths;
+};
+
+export const uploadedAndInvalidColumnListValidatePaths = (
+  uploadedRowCount: number,
+  invalidRowCount: number,
+): (string | number)[][] => [
+  ...rowListFieldValidatePaths('uploadedColumns', uploadedRowCount),
+  ...rowListFieldValidatePaths('invalidColumns', invalidRowCount),
+];
+
 /**
  *
  * @returns The empty validation errors.

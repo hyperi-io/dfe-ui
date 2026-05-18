@@ -8,7 +8,9 @@ import {
   changedValuesMayAffectUploadedColumns,
   createEmptyValidationErrors,
   mergeImportInvalidIntoUploadedTab,
+  rowListFieldValidatePaths,
   transformFieldErrorsToTabErrors,
+  uploadedAndInvalidColumnListValidatePaths,
 } from './CreateSchemaForm.context.helpers';
 
 const emptyTabErrors = createEmptyValidationErrors();
@@ -28,6 +30,32 @@ const makeInvalidColumn = (messages: string[]): InvalidColumns[] =>
         data: {} as InvalidColumns['data'],
       }) as InvalidColumns,
   );
+
+describe('rowListFieldValidatePaths', () => {
+  test('returns empty list for non-positive row count', () => {
+    expect(rowListFieldValidatePaths('invalidColumns', 0)).toEqual([]);
+    expect(rowListFieldValidatePaths('invalidColumns', -1)).toEqual([]);
+  });
+
+  test('returns one path per row field in column order', () => {
+    expect(rowListFieldValidatePaths('invalidColumns', 1)).toEqual(
+      UPLOADED_ROW_FIELD_KEYS.map((k) => ['invalidColumns', 0, k]),
+    );
+    expect(rowListFieldValidatePaths('uploadedColumns', 2).length).toBe(
+      UPLOADED_ROW_FIELD_KEYS.length * 2,
+    );
+  });
+});
+
+describe('uploadedAndInvalidColumnListValidatePaths', () => {
+  test('concatenates uploaded and invalid list paths', () => {
+    const a = uploadedAndInvalidColumnListValidatePaths(1, 1);
+    expect(a).toEqual([
+      ...rowListFieldValidatePaths('uploadedColumns', 1),
+      ...rowListFieldValidatePaths('invalidColumns', 1),
+    ]);
+  });
+});
 
 describe('changedValuesMayAffectUploadedColumns', () => {
   test('returns false for null, non-objects, primitives, and empty nested objects without uploadedColumns', () => {

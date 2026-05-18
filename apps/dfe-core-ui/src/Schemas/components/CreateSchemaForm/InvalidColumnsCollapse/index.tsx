@@ -5,6 +5,7 @@ import {
   RowSchema,
 } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { rowListFieldValidatePaths } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import uniq from 'lodash/uniq';
 import { useCallback, useEffect } from 'react';
@@ -16,7 +17,7 @@ export const InvalidColumnsCollapse = () => {
     handleRemoveUploadedSchemaColumn,
     invalidUploadedSchemaColumns,
     formValidation,
-    handleValidate,
+    recomputeValidationErrors,
   } = useCreateSchemaFormContext();
   const initialValues = invalidUploadedSchemaColumns.map(
     (column) => column.data,
@@ -35,8 +36,22 @@ export const InvalidColumnsCollapse = () => {
 
   /** Stable ref: AddSchemaTable re-runs `onMount` when this identity changes. */
   const validateOnInvalidTableMount = useCallback(() => {
-    handleValidate();
-  }, [handleValidate]);
+    const paths = rowListFieldValidatePaths(
+      'invalidColumns',
+      invalidUploadedSchemaColumns.length,
+    );
+    if (paths.length === 0) {
+      return;
+    }
+    void (async () => {
+      try {
+        await form.validateFields(paths);
+      } catch {
+        /* rejected when rules fail — errors remain on fields */
+      }
+      recomputeValidationErrors();
+    })();
+  }, [form, invalidUploadedSchemaColumns.length, recomputeValidationErrors]);
 
   useEffect(() => {
     const validatedColumns = watchInvalidColumns?.map((column, index) => {

@@ -177,6 +177,7 @@ export const AddSchemaTable = ({
           {
             title: '',
             key: '__rowId',
+
             width: 0,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
@@ -191,7 +192,7 @@ export const AddSchemaTable = ({
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            width: '16%',
+            width: '20%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (

@@ -208,6 +208,36 @@ describe('CreateSchemaFormProvider', () => {
     expect(mocks.validateFields.mock.calls.length).toBe(0);
   });
 
+  test('layout effect validates with uploaded/invalid column list paths only', async () => {
+    const { form, mocks } = createMockForm();
+    const { result } = renderHook(() => useCreateSchemaFormContext(), {
+      wrapper: ({ children }) => (
+        <TestHarness form={form}>{children}</TestHarness>
+      ),
+    });
+
+    act(() => {
+      result.current.handleSetUploadedSchemaColumns([
+        validRow('u1'),
+        invalidZodRow('i1'),
+      ]);
+    });
+
+    await waitFor(() => {
+      expect(mocks.validateFields).toHaveBeenCalled();
+    });
+
+    const listArg = mocks.validateFields.mock.calls[0]?.[0] as unknown;
+    expect(Array.isArray(listArg)).toBe(true);
+    expect(listArg).toContainEqual(['uploadedColumns', 0, 'name']);
+    expect(listArg).toContainEqual(['invalidColumns', 0, 'name']);
+    expect(
+      (listArg as (string | number)[][]).every(
+        (p) => p[0] === 'uploadedColumns' || p[0] === 'invalidColumns',
+      ),
+    ).toBe(true);
+  });
+
   test('layout effect validates after uploaded columns change and respects unmount cancellation', async () => {
     const { form } = createMockForm();
     const { result, unmount } = renderHook(() => useCreateSchemaFormContext(), {

@@ -31,6 +31,7 @@ import {
   createEmptyValidationErrors,
   mergeImportInvalidIntoUploadedTab,
   transformFieldErrorsToTabErrors,
+  uploadedAndInvalidColumnListValidatePaths,
   UPLOADED_ROW_FIELD_KEYS,
 } from './CreateSchemaForm.context.helpers';
 
@@ -75,10 +76,14 @@ export const CreateSchemaFormProvider = ({
     );
   }, [form]);
 
-  const __internal_collectTabErrorsAfterValidate =
-    useCallback(async (): Promise<SchemaFormValidationErrors> => {
+  const __internal_collectTabErrorsAfterValidate = useCallback(
+    async (
+      nameList?: (string | number)[][],
+    ): Promise<SchemaFormValidationErrors> => {
       try {
-        await form.validateFields();
+        await (nameList && nameList.length > 0
+          ? form.validateFields(nameList)
+          : form.validateFields());
       } catch {
         /* rejected when rules fail — errors remain on fields */
       }
@@ -87,7 +92,9 @@ export const CreateSchemaFormProvider = ({
         base,
         invalidUploadedSchemaColumnsRef.current,
       );
-    }, [form]);
+    },
+    [form],
+  );
 
   /**
    * Tables sync uploaded rows into the form store in child `useLayoutEffect`.
@@ -102,13 +109,20 @@ export const CreateSchemaFormProvider = ({
       return;
     }
 
+    const columnListPaths = uploadedAndInvalidColumnListValidatePaths(
+      uploadedSchemaColumns.length,
+      invalidUploadedSchemaColumns.length,
+    );
+
     let cancelled = false;
     queueMicrotask(() => {
-      void __internal_collectTabErrorsAfterValidate().then((next) => {
-        if (!cancelled) {
-          setValidationErrors(next);
-        }
-      });
+      void __internal_collectTabErrorsAfterValidate(columnListPaths).then(
+        (next) => {
+          if (!cancelled) {
+            setValidationErrors(next);
+          }
+        },
+      );
     });
 
     return () => {
@@ -157,6 +171,11 @@ export const CreateSchemaFormProvider = ({
       const validatedColumn = rowSchema.safeParse(column);
 
       if (!validatedColumn.success) {
+        const prevInv = invalidUploadedSchemaColumnsRef.current;
+        const invIdx = prevInv.findIndex((inv) => inv.data.id === column.id);
+        const nextInvalidLen =
+          invIdx === -1 ? prevInv.length + 1 : prevInv.length;
+
         setInvalidUploadedSchemaColumns((prev) => {
           const idx = prev.findIndex((inv) => inv.data.id === column.id);
           const entry = { ...validatedColumn, data: column };
@@ -168,9 +187,12 @@ export const CreateSchemaFormProvider = ({
           return next;
         });
         queueMicrotask(() => {
-          void __internal_collectTabErrorsAfterValidate().then(
-            setValidationErrors,
-          );
+          void __internal_collectTabErrorsAfterValidate(
+            uploadedAndInvalidColumnListValidatePaths(
+              uploadedSchemaColumnsRef.current.length,
+              nextInvalidLen,
+            ),
+          ).then(setValidationErrors);
         });
         return;
       }
@@ -263,9 +285,12 @@ export const CreateSchemaFormProvider = ({
         handleUpdateInvalidUploadedSchemaColumn(parsed.data);
       }
       queueMicrotask(() => {
-        void __internal_collectTabErrorsAfterValidate().then(
-          setValidationErrors,
-        );
+        void __internal_collectTabErrorsAfterValidate(
+          uploadedAndInvalidColumnListValidatePaths(
+            uploadedSchemaColumnsRef.current.length,
+            invalidUploadedSchemaColumnsRef.current.length,
+          ),
+        ).then(setValidationErrors);
       });
     },
     [
@@ -309,9 +334,12 @@ export const CreateSchemaFormProvider = ({
       });
 
       queueMicrotask(() => {
-        void __internal_collectTabErrorsAfterValidate().then(
-          setValidationErrors,
-        );
+        void __internal_collectTabErrorsAfterValidate(
+          uploadedAndInvalidColumnListValidatePaths(
+            nextUploaded.length,
+            nextInvalid.length,
+          ),
+        ).then(setValidationErrors);
       });
     },
     [form, __internal_collectTabErrorsAfterValidate],
