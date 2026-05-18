@@ -1,4 +1,4 @@
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm';
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
 

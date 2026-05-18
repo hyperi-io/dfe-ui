@@ -1,9 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 
-import {
-  CreateSchemaForm,
-  CreateSchemaFormData,
-} from '@/Schemas/components/CreateSchemaForm';
+import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';

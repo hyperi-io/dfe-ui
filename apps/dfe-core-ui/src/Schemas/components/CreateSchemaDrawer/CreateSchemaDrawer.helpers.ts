@@ -1,4 +1,4 @@
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm';
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import {
   SchemaCreateRequest,
   SchemaCreateRequestColumn,
