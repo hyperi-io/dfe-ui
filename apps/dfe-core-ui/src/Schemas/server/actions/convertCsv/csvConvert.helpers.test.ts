@@ -5,8 +5,7 @@ const file = (
   name: string,
   content: BlobPart[],
   type: string | undefined = '',
-): File =>
-  new File(content, name, type !== undefined ? { type } : undefined);
+): File => new File(content, name, type !== undefined ? { type } : undefined);
 
 describe('isCsvFile', () => {
   test('returns true for text/csv MIME', () => {
@@ -30,9 +29,9 @@ describe('isCsvFile', () => {
   });
 
   test('returns true for .csv with application/octet-stream', () => {
-    expect(
-      isCsvFile(file('export.csv', [], 'application/octet-stream')),
-    ).toBe(true);
+    expect(isCsvFile(file('export.csv', [], 'application/octet-stream'))).toBe(
+      true,
+    );
   });
 
   test('returns true for .csv with text/plain', () => {

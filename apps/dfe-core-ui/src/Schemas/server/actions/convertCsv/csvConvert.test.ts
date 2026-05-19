@@ -45,8 +45,6 @@ describe('convertCsv', () => {
       throw new Error('internal parse failure');
     });
     const f = new File(['x'], 'data.csv', { type: 'text/csv' });
-    await expect(convertCsv(f)).rejects.toThrow(
-      'Could not parse CSV content.',
-    );
+    await expect(convertCsv(f)).rejects.toThrow('Could not parse CSV content.');
   });
 });
