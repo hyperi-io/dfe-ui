@@ -1,6 +1,7 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
+  IconArrowBounce,
   IconChartDots,
   IconDatabase,
   IconLayoutGrid,
@@ -69,13 +70,28 @@ export const featureFlagSidebarMenuItems = [
         collapsed={collapsed}
         item={{
           key: '/sources',
-          icon: <IconWrapper icon={<IconDatabase />} />,
+          icon: <IconWrapper icon={<IconArrowBounce />} />,
           label: 'Sources',
           external: false,
         }}
       />
     ),
   },
+  {
+    key: '/schemas',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/schemas',
+          icon: <IconWrapper icon={<IconDatabase />} />,
+          label: 'Schemas',
+          external: false,
+        }}
+      />
+    ),
+  },
+
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (

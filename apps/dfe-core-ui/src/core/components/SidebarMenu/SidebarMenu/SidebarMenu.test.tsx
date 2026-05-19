@@ -20,6 +20,7 @@ describe('SidebarMenu', () => {
         'Chart Explorer',
         'Dashboards',
         'Sources',
+        'Schemas',
         'Rules',
       ]);
     });
