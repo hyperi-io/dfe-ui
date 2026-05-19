@@ -50,4 +50,10 @@ export const API_CONFIG = Object.freeze({
     compile: '/api/v1/transforms/compile',
     test: '/api/v1/transforms/test',
   },
+  schemas: {
+    default: '/api/v1/schemas',
+    schema: '/api/v1/schemas/definitions/{schema_path}',
+    sourceColumns: '/api/v1/schemas/{source_name}/columns',
+    sourceBuild: '/api/v1/schemas/{source_name}/build',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);

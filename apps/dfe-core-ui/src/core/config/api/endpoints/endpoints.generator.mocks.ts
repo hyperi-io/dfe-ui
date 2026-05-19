@@ -844,5 +844,193 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  schemas: {
+    default: {
+      mockedUrl: '/api/v1/schemas',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                current: 'string',
+                versions: ['string'],
+                updated_at: 'string',
+                column_count: 0,
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+            schema_objects: {
+              schemas: [],
+              children: {
+                string: {
+                  schemas: [],
+                  children: {},
+                },
+              },
+            },
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedSchemaSummaryResponse'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    schema: {
+      mockedUrl: '/api/v1/schemas/definitions/{schema_path}',
+      get: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            versions: {
+              string: {
+                date: 'string',
+                type: 'string',
+                summary: 'string',
+                columns: [
+                  {
+                    name: 'string',
+                    type: 'string',
+                    attribute: ['string'],
+                    use_case: 'string',
+                    expr: 'string',
+                  },
+                ],
+              },
+            },
+            description: 'string',
+          },
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          schema_path?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          schema_path?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            versions: {
+              string: {
+                date: 'string',
+                type: 'string',
+                summary: 'string',
+                columns: [
+                  {
+                    name: 'string',
+                    type: 'string',
+                    attribute: ['string'],
+                    use_case: 'string',
+                    expr: 'string',
+                  },
+                ],
+              },
+            },
+            description: 'string',
+          },
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          schema_path?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          schema_path?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.schema.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    sourceColumns: {
+      mockedUrl: '/api/v1/schemas/{source_name}/columns',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    sourceBuild: {
+      mockedUrl: '/api/v1/schemas/{source_name}/build',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
 });
 /* eslint-enable no-console */
