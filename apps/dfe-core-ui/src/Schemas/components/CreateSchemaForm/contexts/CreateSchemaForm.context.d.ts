@@ -41,7 +41,7 @@ export interface CreateSchemaFormContextValue {
 }
 
 export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {
-  success: false;
+  success: boolean;
   error: z.ZodError<RowSchema>;
   data: T;
 };

@@ -41,8 +41,10 @@ const CreateSchemaUploadContext =
 
 export const CreateSchemaFormProvider = ({
   children,
+  testValue: testValueProp,
 }: {
   children: ReactNode;
+  testValue?: Partial<CreateSchemaFormContextValue>;
 }) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
@@ -473,8 +475,16 @@ export const CreateSchemaFormProvider = ({
       handleValidateColumnListsOnly,
     ],
   );
+
+  const contextValue =
+    process.env.NODE_ENV === 'test' && testValueProp
+      ? {
+          ...value,
+          ...testValueProp,
+        }
+      : value;
   return (
-    <CreateSchemaUploadContext.Provider value={value}>
+    <CreateSchemaUploadContext.Provider value={contextValue}>
       {children}
     </CreateSchemaUploadContext.Provider>
   );

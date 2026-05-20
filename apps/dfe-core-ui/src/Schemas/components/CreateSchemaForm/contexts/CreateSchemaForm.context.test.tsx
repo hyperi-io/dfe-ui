@@ -5,11 +5,16 @@ import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';
 import type { ReactNode } from 'react';
+import { z } from 'zod';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,
 } from './CreateSchemaForm.context';
+import type {
+  CreateSchemaFormContextValue,
+  InvalidColumns,
+} from './CreateSchemaForm.context.d';
 
 const validRow = (
   id: string,
@@ -35,47 +40,52 @@ const fieldErr = (name: FieldError['name'], message: string): FieldError =>
     errors: [message],
   }) as FieldError;
 
-const createMockForm = () => {
-  let fieldsError: FieldError[] = [];
-  let uploadedColumnsValue: unknown = [];
-
-  const form = {
-    getFieldsError: vi.fn(() => fieldsError),
-    setFieldsValue: vi.fn(),
-    getFieldValue: vi.fn((key: string) =>
-      key === 'uploadedColumns' ? uploadedColumnsValue : undefined,
-    ),
-    validateFields: vi.fn().mockResolvedValue(undefined),
-  };
-
-  return {
-    form: form as unknown as FormInstance<CreateSchemaFormData>,
-    setUploadedFormRows: (rows: unknown) => {
-      uploadedColumnsValue = rows;
-    },
-    setFieldsError: (next: FieldError[]) => {
-      fieldsError = next;
-    },
-    mocks: form,
-  };
-};
-
 afterEach(async () => {
   await act(async () => {
     await Promise.resolve();
     await Promise.resolve();
   });
+  vi.restoreAllMocks();
 });
 
-const TestHarness = ({
-  form,
-  children,
-}: {
-  form: FormInstance<CreateSchemaFormData>;
-  children: ReactNode;
-}) => (
-  <CreateSchemaFormProvider form={form}>{children}</CreateSchemaFormProvider>
+const TestHarness = ({ children }: { children: ReactNode }) => (
+  <CreateSchemaFormProvider>{children}</CreateSchemaFormProvider>
 );
+
+const renderContext = () =>
+  renderHook(() => useCreateSchemaFormContext(), {
+    wrapper: ({ children }) => <TestHarness>{children}</TestHarness>,
+  });
+
+const renderContextWithTestValue = (
+  testValue: Partial<CreateSchemaFormContextValue>,
+) =>
+  renderHook(() => useCreateSchemaFormContext(), {
+    wrapper: ({ children }) => (
+      <CreateSchemaFormProvider testValue={testValue}>
+        {children}
+      </CreateSchemaFormProvider>
+    ),
+  });
+
+const testValueInvalidColumns: InvalidColumns[] = [
+  {
+    success: false,
+    error: new z.ZodError([
+      { code: 'custom', path: [], message: 'testValue override' },
+    ]),
+    data: validRow('override-id'),
+  } as InvalidColumns,
+];
+
+const setUploadedFormRows = (
+  form: FormInstance<CreateSchemaFormData>,
+  rows: CreateSchemaFormData['uploadedColumns'],
+) => {
+  act(() => {
+    form.setFieldsValue({ uploadedColumns: rows });
+  });
+};
 
 describe('useCreateSchemaFormContext', () => {
   test('throws when used outside CreateSchemaFormProvider', () => {
@@ -87,12 +97,9 @@ describe('useCreateSchemaFormContext', () => {
 
 describe('CreateSchemaFormProvider', () => {
   test('exposes context value and updates schema columns', () => {
-    const { form } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    const form = result.current.form;
+    const setFieldsValueSpy = vi.spyOn(form, 'setFieldsValue');
 
     expect(result.current.schemaColumns).toEqual([]);
     expect(result.current.form).toBe(form);
@@ -102,16 +109,11 @@ describe('CreateSchemaFormProvider', () => {
       result.current.handleSetSchemaColumns([validRow('s1')]);
     });
     expect(result.current.schemaColumns).toEqual([validRow('s1')]);
-    expect(form.setFieldsValue).toHaveBeenCalled();
+    expect(setFieldsValueSpy).toHaveBeenCalled();
   });
 
   test('handleUpdateSchemaColumns syncs schemaColumns from form values', () => {
-    const { form } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
 
     const row = validRow('manual-1');
     act(() => {
@@ -124,12 +126,7 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('changedValuesTriggerInvalidTabErrors reflects tab list keys', () => {
-    const { form } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
 
     expect(result.current.changedValuesTriggerInvalidTabErrors({ x: 1 })).toBe(
       false,
@@ -142,12 +139,7 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('handleSetUploadedSchemaColumns keeps all rows and tracks zod-invalid rows', () => {
-    const { form } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
 
     const bad = invalidZodRow('i1');
     const good = validRow('g1');
@@ -162,14 +154,10 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('recomputeValidationErrors merges field errors with import invalid state', async () => {
-    const { form, setFieldsError } = createMockForm();
-    setFieldsError([fieldErr(['uploadedColumns', 0, 'name'], 'from form')]);
-
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    vi.spyOn(result.current.form, 'getFieldsError').mockReturnValue([
+      fieldErr(['uploadedColumns', 0, 'name'], 'from form'),
+    ]);
 
     act(() => {
       result.current.handleSetUploadedSchemaColumns([invalidZodRow('x')]);
@@ -187,14 +175,10 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('handleValidate refreshes validationErrors asynchronously', async () => {
-    const { form, setFieldsError } = createMockForm();
-    setFieldsError([fieldErr(['name'], 'detail err')]);
-
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    vi.spyOn(result.current.form, 'getFieldsError').mockReturnValue([
+      fieldErr(['name'], 'detail err'),
+    ]);
 
     act(() => {
       result.current.handleValidate();
@@ -208,24 +192,20 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('handleValidateColumnListsOnly validates column tab lists only', async () => {
-    const validateFields = vi.fn().mockResolvedValue(undefined);
-    const form = {
-      getFieldsError: vi.fn(() => []),
-      setFieldsValue: vi.fn(),
-      getFieldValue: vi.fn((key: string) => {
-        if (key === 'uploadedColumns') return [validRow('u1')];
-        if (key === 'invalidColumns') return [invalidZodRow('i1')];
-        if (key === 'schemaColumns') return [validRow('s1')];
-        return undefined;
-      }),
-      validateFields,
-    } as unknown as FormInstance<CreateSchemaFormData>;
+    const { result } = renderContext();
+    const form = result.current.form;
 
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
+    act(() => {
+      form.setFieldsValue({
+        uploadedColumns: [validRow('u1')],
+        invalidColumns: [invalidZodRow('i1')],
+        schemaColumns: [validRow('s1')],
+      });
     });
+
+    const validateFields = vi
+      .spyOn(form, 'validateFields')
+      .mockResolvedValue({} as never);
 
     act(() => {
       result.current.handleValidateColumnListsOnly();
@@ -245,12 +225,8 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('layout validation effect no-ops when uploaded and invalid are both empty', async () => {
-    const { form, mocks } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    const validateFields = vi.spyOn(result.current.form, 'validateFields');
 
     act(() => {
       result.current.handleSetUploadedSchemaColumns([]);
@@ -261,16 +237,12 @@ describe('CreateSchemaFormProvider', () => {
       await Promise.resolve();
     });
 
-    expect(mocks.validateFields.mock.calls.length).toBe(0);
+    expect(validateFields.mock.calls.length).toBe(0);
   });
 
   test('layout effect validates with uploaded/invalid column list paths only', async () => {
-    const { form, mocks } = createMockForm();
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    const validateFields = vi.spyOn(result.current.form, 'validateFields');
 
     act(() => {
       result.current.handleSetUploadedSchemaColumns([
@@ -280,10 +252,10 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     await waitFor(() => {
-      expect(mocks.validateFields).toHaveBeenCalled();
+      expect(validateFields).toHaveBeenCalled();
     });
 
-    const listArg = mocks.validateFields.mock.calls[0]?.[0] as unknown;
+    const listArg = validateFields.mock.calls[0]?.[0] as unknown;
     expect(Array.isArray(listArg)).toBe(true);
     expect(listArg).toContainEqual(['uploadedColumns', 0, 'name']);
     expect(listArg).toContainEqual(['invalidColumns', 0, 'name']);
@@ -295,12 +267,7 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('layout effect validates after uploaded columns change and respects unmount cancellation', async () => {
-    const { form } = createMockForm();
-    const { result, unmount } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result, unmount } = renderContext();
 
     act(() => {
       result.current.handleSetUploadedSchemaColumns([validRow('u1')]);
@@ -315,32 +282,23 @@ describe('CreateSchemaFormProvider', () => {
   });
 
   test('__internal_collectTabErrorsAfterValidate swallows validateFields rejection', async () => {
-    const { form, mocks } = createMockForm();
-    mocks.validateFields.mockRejectedValueOnce(new Error('fail'));
-
-    const { result } = renderHook(() => useCreateSchemaFormContext(), {
-      wrapper: ({ children }) => (
-        <TestHarness form={form}>{children}</TestHarness>
-      ),
-    });
+    const { result } = renderContext();
+    const form = result.current.form;
+    vi.spyOn(form, 'validateFields').mockRejectedValueOnce(new Error('fail'));
+    const getFieldsError = vi.spyOn(form, 'getFieldsError');
 
     act(() => {
       result.current.handleValidate();
     });
 
     await waitFor(() => {
-      expect(mocks.getFieldsError).toHaveBeenCalled();
+      expect(getFieldsError).toHaveBeenCalled();
     });
   });
 
   describe('handleUpdateInvalidUploadedSchemaColumn', () => {
     test('appends and replaces invalid entries by row id', async () => {
-      const { form } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
 
       const a = invalidZodRow('n1');
 
@@ -361,16 +319,14 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('returns early when fixed row id is not present in uploaded list', () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const setFieldsValue = vi.spyOn(result.current.form, 'setFieldsValue');
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([validRow('only')]);
       });
+
+      setFieldsValue.mockClear();
 
       act(() => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(
@@ -378,20 +334,12 @@ describe('CreateSchemaFormProvider', () => {
         );
       });
 
-      expect(mocks.setFieldsValue).not.toHaveBeenCalled();
+      expect(setFieldsValue).not.toHaveBeenCalled();
     });
 
     test('promotes valid row: updates state, form fields, and survives validateFields rejection', async () => {
-      const { form, mocks } = createMockForm();
-      act(() => {
-        mocks.validateFields.mockRejectedValueOnce(new Error('field invalid'));
-      });
-
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const broken = invalidZodRow('fix1');
       const fixed = validRow('fix1');
@@ -400,29 +348,31 @@ describe('CreateSchemaFormProvider', () => {
         result.current.handleSetUploadedSchemaColumns([broken]);
       });
 
+      const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
+      vi.spyOn(form, 'validateFields').mockRejectedValueOnce(
+        new Error('field invalid'),
+      );
+
       act(() => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(fixed);
       });
 
       expect(result.current.uploadedSchemaColumns).toEqual([fixed]);
       expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
-      expect(mocks.setFieldsValue).toHaveBeenCalledWith({
+      expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: expect.any(Array),
         invalidColumns: [],
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields).toHaveBeenCalled();
+        expect(form.validateFields).toHaveBeenCalled();
       });
     });
 
     test('promoting one row sets invalidColumns when other invalid imports remain', async () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
 
       const brokenA = invalidZodRow('a1');
       const brokenB = invalidZodRow('b1');
@@ -430,6 +380,10 @@ describe('CreateSchemaFormProvider', () => {
       act(() => {
         result.current.handleSetUploadedSchemaColumns([brokenA, brokenB]);
       });
+
+      setFieldsValue.mockClear();
+
+      const validateFields = vi.spyOn(form, 'validateFields');
 
       act(() => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(validRow('a1'));
@@ -439,7 +393,7 @@ describe('CreateSchemaFormProvider', () => {
       expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe(
         'b1',
       );
-      expect(mocks.setFieldsValue).toHaveBeenCalledWith({
+      expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: expect.arrayContaining([
           expect.objectContaining({ id: 'a1', name: 'col_a1' }),
           expect.objectContaining({ id: 'b1' }),
@@ -448,23 +402,20 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields).toHaveBeenCalled();
+        expect(validateFields).toHaveBeenCalled();
       });
     });
 
     test('schedules validation when row remains invalid', async () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const validateFields = vi.spyOn(form, 'validateFields');
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([validRow('v')]);
       });
 
-      const before = mocks.validateFields.mock.calls.length;
+      const before = validateFields.mock.calls.length;
 
       act(() => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(
@@ -473,43 +424,35 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields.mock.calls.length).toBeGreaterThan(before);
+        expect(validateFields.mock.calls.length).toBeGreaterThan(before);
       });
     });
   });
 
   describe('handleUpdateUploadedSchemaColumns', () => {
     test('returns when changed values do not mention uploaded columns tree', () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
-
-      mocks.getFieldValue.mockClear();
+      const { result } = renderContext();
+      const getFieldValue = vi.spyOn(result.current.form, 'getFieldValue');
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({ file: 1 });
       });
 
-      expect(mocks.getFieldValue).not.toHaveBeenCalled();
+      expect(getFieldValue).not.toHaveBeenCalled();
     });
 
     test('returns when form uploadedColumns is not an array', () => {
-      const { form } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const broken = invalidZodRow('b1');
       act(() => {
         result.current.handleSetUploadedSchemaColumns([broken]);
       });
 
-      vi.mocked(form.getFieldValue).mockReturnValueOnce({ not: 'array' });
+      vi.spyOn(form, 'getFieldValue').mockImplementation((key) =>
+        key === 'uploadedColumns' ? ({ not: 'array' } as never) : undefined,
+      );
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -519,19 +462,17 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('returns when there are no invalid imported rows tracked', () => {
-      const { form, setUploadedFormRows } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([validRow('only')]);
       });
 
-      setUploadedFormRows([{ id: 'only', name: 'col_only', type: 'string' }]);
-      const gfv = vi.mocked(form.getFieldValue);
+      setUploadedFormRows(form, [
+        { id: 'only', name: 'col_only', type: 'string' },
+      ]);
+      const getFieldValue = vi.spyOn(form, 'getFieldValue');
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -539,23 +480,20 @@ describe('CreateSchemaFormProvider', () => {
         });
       });
 
-      expect(gfv).toHaveBeenCalledWith('uploadedColumns');
+      expect(getFieldValue).toHaveBeenCalledWith('uploadedColumns');
     });
 
     test('merges form row into invalid import and promotes when row becomes valid', async () => {
-      const { form, setUploadedFormRows, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
 
       const badImport: UploadedSchemaRow = { id: 'm1', name: '', type: '' };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows([
+      setUploadedFormRows(form, [
         { id: 'm1', name: 'fixed_name', type: 'string', attribute: [] },
       ]);
 
@@ -569,23 +507,20 @@ describe('CreateSchemaFormProvider', () => {
         expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
       });
       expect(result.current.uploadedSchemaColumns[0]?.name).toBe('fixed_name');
-      expect(mocks.setFieldsValue).toHaveBeenCalled();
+      expect(setFieldsValue).toHaveBeenCalled();
     });
 
     test('uses same-index form row when entries omit id so byFormId is undefined', async () => {
-      const { form, setUploadedFormRows } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const badImport: UploadedSchemaRow = { id: 'rowKey', name: '', type: '' };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows([{ name: 'col_rowKey', type: 'string' }]);
+      // @ts-expect-error - test data
+      setUploadedFormRows(form, [{ name: 'col_rowKey', type: 'string' }]);
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -604,19 +539,16 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('skips invalid entries without id or with non-object form rows', () => {
-      const { form, setUploadedFormRows } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const noId = { name: 'x', type: 'string' } as RowSchema;
       act(() => {
         result.current.handleSetUploadedSchemaColumns([noId]);
       });
 
-      setUploadedFormRows([null, 1, { id: 'nope' }]);
+      // @ts-expect-error - test data
+      setUploadedFormRows(form, [null, 1, { id: 'nope' }]);
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -630,19 +562,16 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('still reconciles via row index when id is absent from form values array', async () => {
-      const { form, setUploadedFormRows } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const badImport: UploadedSchemaRow = { id: 'idx', name: '', type: '' };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows([
+      setUploadedFormRows(form, [
+        // @ts-expect-error - test data
         undefined,
         { name: 'from_index', type: 'string', id: 'idx' },
       ]);
@@ -659,19 +588,17 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('leaves invalid row when merged object still fails rowSchema', () => {
-      const { form, setUploadedFormRows } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
 
       const badImport: UploadedSchemaRow = { id: 'z1', name: '', type: '' };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows([{ id: 'z1', name: 'bad name!', type: 'string' }]);
+      setUploadedFormRows(form, [
+        { id: 'z1', name: 'bad name!', type: 'string' },
+      ]);
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -683,21 +610,18 @@ describe('CreateSchemaFormProvider', () => {
     });
 
     test('queues tab error collection after processing', async () => {
-      const { form, setUploadedFormRows, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const validateFields = vi.spyOn(form, 'validateFields');
 
       const badImport: UploadedSchemaRow = { id: 'q1', name: '', type: '' };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows([{ id: 'q1', name: 'still', type: '' }]);
+      setUploadedFormRows(form, [{ id: 'q1', name: 'still', type: '' }]);
 
-      const n = mocks.validateFields.mock.calls.length;
+      const n = validateFields.mock.calls.length;
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -706,58 +630,52 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields.mock.calls.length).toBeGreaterThan(n);
+        expect(validateFields.mock.calls.length).toBeGreaterThan(n);
       });
     });
   });
 
   describe('handleRemoveUploadedSchemaColumn', () => {
     test('no-ops without column id', () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const setFieldsValue = vi.spyOn(result.current.form, 'setFieldsValue');
 
       act(() => {
         result.current.handleRemoveUploadedSchemaColumn(undefined);
       });
-      expect(mocks.setFieldsValue).not.toHaveBeenCalled();
+      expect(setFieldsValue).not.toHaveBeenCalled();
     });
 
     test('no-ops when id is not in uploaded or invalid lists', () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const setFieldsValue = vi.spyOn(result.current.form, 'setFieldsValue');
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([validRow('a')]);
       });
 
+      setFieldsValue.mockClear();
+
       act(() => {
         result.current.handleRemoveUploadedSchemaColumn('ghost');
       });
-      expect(mocks.setFieldsValue).not.toHaveBeenCalled();
+      expect(setFieldsValue).not.toHaveBeenCalled();
     });
 
     test('removing one invalid row maps invalidColumns for remaining invalid', async () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
 
       const invA = invalidZodRow('mx');
       const invB = invalidZodRow('my');
+      const validateFields = vi.spyOn(form, 'validateFields');
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([invA, invB]);
       });
+
+      setFieldsValue.mockClear();
 
       act(() => {
         result.current.handleRemoveUploadedSchemaColumn('mx');
@@ -768,50 +686,45 @@ describe('CreateSchemaFormProvider', () => {
       expect(result.current.invalidUploadedSchemaColumns[0]?.data.id).toBe(
         'my',
       );
-      expect(mocks.setFieldsValue).toHaveBeenCalledWith({
+      expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: [expect.objectContaining({ id: 'my' })],
         invalidColumns: [expect.objectContaining({ id: 'my' })],
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields).toHaveBeenCalled();
+        expect(validateFields).toHaveBeenCalled();
       });
     });
 
     test('removes from uploaded and clears invalid form list when none left', async () => {
-      const { form, mocks } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
+      const form = result.current.form;
+      const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
+      const validateFields = vi.spyOn(form, 'validateFields');
 
       act(() => {
         result.current.handleSetUploadedSchemaColumns([validRow('r1')]);
       });
+
+      setFieldsValue.mockClear();
 
       act(() => {
         result.current.handleRemoveUploadedSchemaColumn('r1');
       });
 
       expect(result.current.uploadedSchemaColumns).toEqual([]);
-      expect(mocks.setFieldsValue).toHaveBeenCalledWith({
+      expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: [],
         invalidColumns: [],
       });
 
       await waitFor(() => {
-        expect(mocks.validateFields).toHaveBeenCalled();
+        expect(validateFields).toHaveBeenCalled();
       });
     });
 
     test('removes invalid-only row', () => {
-      const { form } = createMockForm();
-      const { result } = renderHook(() => useCreateSchemaFormContext(), {
-        wrapper: ({ children }) => (
-          <TestHarness form={form}>{children}</TestHarness>
-        ),
-      });
+      const { result } = renderContext();
 
       const inv = invalidZodRow('onlyInv');
       act(() => {
@@ -824,6 +737,47 @@ describe('CreateSchemaFormProvider', () => {
 
       expect(result.current.uploadedSchemaColumns).toEqual([]);
       expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
+    });
+  });
+
+  describe('testValue', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    test('overrides context value when testValue is provided and NODE_ENV is test', () => {
+      const { result } = renderContextWithTestValue({
+        invalidUploadedSchemaColumns: testValueInvalidColumns,
+      });
+
+      expect(result.current.invalidUploadedSchemaColumns).toEqual(
+        testValueInvalidColumns,
+      );
+    });
+
+    test('does not override context value when testValue is provided and NODE_ENV is not test', () => {
+      vi.stubEnv('NODE_ENV', 'production');
+
+      const { result } = renderContextWithTestValue({
+        invalidUploadedSchemaColumns: testValueInvalidColumns,
+      });
+
+      expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
+    });
+
+    test('merges testValue with live provider state for non-overridden fields', () => {
+      const { result } = renderContextWithTestValue({
+        invalidUploadedSchemaColumns: testValueInvalidColumns,
+      });
+
+      act(() => {
+        result.current.handleSetSchemaColumns([validRow('live-col')]);
+      });
+
+      expect(result.current.schemaColumns).toEqual([validRow('live-col')]);
+      expect(result.current.invalidUploadedSchemaColumns).toEqual(
+        testValueInvalidColumns,
+      );
     });
   });
 });

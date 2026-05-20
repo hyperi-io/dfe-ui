@@ -88,14 +88,28 @@ class TestWrapperBuilder {
    *    value: value,
    *  })
    */
-  withContext({
+  withContext<T>({
     provider: Provider,
+    value,
   }: {
-    provider: React.ComponentType<{ children: React.ReactNode }>;
+    provider: React.ComponentType<{ children: React.ReactNode; testValue?: T }>;
+    value?: T;
   }) {
     this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
-      return <Provider>{children}</Provider>;
+      return <Provider testValue={value}>{children}</Provider>;
     });
+    return this;
+  }
+
+  /**
+   * Adds a wrapper to the test wrapper
+   * @example
+   *  const { wrapper } = buildTestWrapper().withWrapper(({ children }) => (
+   *    <div data-testid="wrapper">{children}</div>
+   *  ))
+   */
+  withWrapper(wrapper: WrapperComponent) {
+    this.#wrapperList.push(wrapper);
     return this;
   }
 
