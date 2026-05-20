@@ -20,6 +20,7 @@ export const SchemaUploadCollapse = () => {
     <>
       <div className="relative w-full">
         <button
+          type="button"
           className="absolute top-0 right-0 z-2 cursor-pointer p-1"
           onClick={() => setShowFileUpload(!showFileUpload)}
         >
@@ -27,14 +28,12 @@ export const SchemaUploadCollapse = () => {
         </button>
 
         <button
+          type="button"
           className={cn(
             'cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2',
             showFileUpload && 'border-b-0 pb-0',
           )}
-          onClick={(e) => {
-            e.preventDefault();
-            setShowFileUpload(true);
-          }}
+          onClick={() => setShowFileUpload(true)}
         >
           <p>Upload from file</p>
         </button>

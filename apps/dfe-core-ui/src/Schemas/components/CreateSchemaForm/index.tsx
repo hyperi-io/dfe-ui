@@ -1,6 +1,5 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
 import { useState } from 'react';
 import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
@@ -32,7 +31,6 @@ const CreateSchemaFormBase = ({
     invalidUploadedSchemaColumns,
     handleFormValuesChange,
   } = useCreateSchemaFormContext();
-  const [showDescription, setShowDescription] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
 
   const onFinish = (values: CreateSchemaFormData) => {
@@ -128,36 +126,13 @@ const CreateSchemaFormBase = ({
         </Form.Item>
       </div>
 
-      <div className="relative w-full">
-        <button
-          className="absolute top-0 right-0 z-2 cursor-pointer p-1"
-          onClick={() => setShowDescription(!showDescription)}
-        >
-          {showDescription ? <IconChevronUp /> : <IconChevronDown />}
-        </button>
-
-        {!showDescription && (
-          <button
-            className="cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowDescription(true);
-            }}
-          >
-            <label htmlFor="description">Description</label>
-          </button>
-        )}
-
-        {showDescription && (
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[formValidation]}
-          >
-            <Input.TextArea placeholder="Enter description" />
-          </Form.Item>
-        )}
-      </div>
+      <Form.Item
+        name="description"
+        label="Description"
+        rules={[formValidation]}
+      >
+        <Input.TextArea placeholder="Enter description" />
+      </Form.Item>
 
       <SchemaUploadCollapse />
 
