@@ -21,12 +21,16 @@ type SuccessResponseBody<Op> = Op extends {
     ? R
     : never;
 
-/** Request body when present. */
+/** Request body when present (JSON or multipart; prefer FormData for multipart endpoints). */
 type RequestBody<Op> = Op extends {
   requestBody: { content: { 'application/json': infer B } };
 }
   ? B
-  : undefined;
+  : Op extends {
+        requestBody: { content: { 'multipart/form-data': infer B } };
+      }
+    ? B | FormData
+    : undefined;
 
 /** Path parameters when present. */
 type PathParams<Op> = Op extends { parameters: { path: infer P } }
@@ -111,8 +115,16 @@ export function createApiClient(config: ApiClientConfig) {
       queryParams as Record<string, unknown> | undefined,
     );
 
+    const formDataBody =
+      typeof FormData !== 'undefined' &&
+      body != null &&
+      typeof body === 'object' &&
+      (body as object) instanceof FormData
+        ? (body as FormData)
+        : undefined;
+
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      ...(formDataBody === undefined && { 'Content-Type': 'application/json' }),
       ...(await getAuthHeaders?.()),
     };
 
@@ -120,7 +132,9 @@ export function createApiClient(config: ApiClientConfig) {
       method,
       headers,
       ...(body !== undefined &&
-        method !== 'get' && { body: JSON.stringify(body) }),
+        method !== 'get' && {
+          body: formDataBody ?? JSON.stringify(body),
+        }),
       ...(signal !== undefined && { signal }),
     };
 

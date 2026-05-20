@@ -3,7 +3,7 @@
 import { isCsvFile, parseCsvToObjects } from './csvConvert.helpers';
 
 export interface CsvRow {
-  [key: string]: string;
+  [key: string]: string | boolean | string[];
 }
 
 export const convertCsv = async (file: File): Promise<CsvRow[]> => {
