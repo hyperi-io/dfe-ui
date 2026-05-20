@@ -1,6 +1,6 @@
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { InvalidColumnsCollapse } from '@/Schemas/components/CreateSchemaForm/InvalidColumnsCollapse';
+import { InvalidColumnsTable } from '@/Schemas/components/CreateSchemaForm/InvalidColumnsTable';
 
 export const UploadedSchemaTable = () => {
   const {
@@ -14,7 +14,7 @@ export const UploadedSchemaTable = () => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      {hasInvalidColumns && <InvalidColumnsCollapse />}
+      {hasInvalidColumns && <InvalidColumnsTable />}
 
       <div className="flex flex-col gap-y-2">
         {hasInvalidColumns && (

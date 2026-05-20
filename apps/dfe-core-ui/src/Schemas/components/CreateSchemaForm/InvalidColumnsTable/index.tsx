@@ -10,7 +10,7 @@ import { IconAlertCircle } from '@repo/dfe-icons';
 import uniq from 'lodash/uniq';
 import { useCallback, useEffect } from 'react';
 
-export const InvalidColumnsCollapse = () => {
+export const InvalidColumnsTable = () => {
   const {
     form,
     handleUpdateInvalidUploadedSchemaColumn,
