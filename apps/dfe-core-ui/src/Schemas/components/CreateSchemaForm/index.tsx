@@ -163,9 +163,8 @@ const CreateSchemaFormBase = ({
 };
 
 export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
-  const [form] = Form.useForm<CreateSchemaFormData>();
   return (
-    <CreateSchemaFormProvider form={form}>
+    <CreateSchemaFormProvider>
       <CreateSchemaFormBase {...props} />
     </CreateSchemaFormProvider>
   );

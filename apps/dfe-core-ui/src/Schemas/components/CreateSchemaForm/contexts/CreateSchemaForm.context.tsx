@@ -11,7 +11,7 @@ import {
   type CreateSchemaFormData,
 } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
-import type { FormInstance } from 'antd';
+import { Form } from 'antd';
 import {
   createContext,
   useCallback,
@@ -40,12 +40,11 @@ const CreateSchemaUploadContext =
   createContext<CreateSchemaFormContextValue | null>(null);
 
 export const CreateSchemaFormProvider = ({
-  form,
   children,
 }: {
-  form: FormInstance<CreateSchemaFormData>;
   children: ReactNode;
 }) => {
+  const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
 
   const [schemaColumns, setSchemaColumns] = useState<RowSchema[]>([]);

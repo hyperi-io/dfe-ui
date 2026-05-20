@@ -80,6 +80,25 @@ class TestWrapperBuilder {
     return this;
   }
 
+  /**
+   * Adds a context provider to the test wrapper
+   * @example
+   *  const { wrapper } = buildTestWrapper().withContext({
+   *    context: Context,
+   *    value: value,
+   *  })
+   */
+  withContext({
+    provider: Provider,
+  }: {
+    provider: React.ComponentType<{ children: React.ReactNode }>;
+  }) {
+    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
+      return <Provider>{children}</Provider>;
+    });
+    return this;
+  }
+
   #build(): WrapperComponent {
     return ({ children }: { children: React.ReactNode }) => {
       return this.#wrapperList.reduceRight(
