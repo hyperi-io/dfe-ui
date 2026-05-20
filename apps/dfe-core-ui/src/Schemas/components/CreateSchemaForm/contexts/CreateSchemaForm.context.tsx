@@ -1,5 +1,6 @@
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
+  isBlankSchemaListRow,
   rowSchema,
   RowSchema,
 } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
@@ -28,12 +29,11 @@ import {
 import {
   allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
-  changedValuesMayAffectUploadedColumns,
   createEmptyValidationErrors,
   mergeImportInvalidIntoUploadedTab,
   transformFieldErrorsToTabErrors,
-  uploadedAndInvalidColumnListValidatePaths,
   UPLOADED_ROW_FIELD_KEYS,
+  uploadedAndInvalidColumnListValidatePaths,
 } from './CreateSchemaForm.context.helpers';
 
 const CreateSchemaUploadContext =
@@ -61,11 +61,17 @@ export const CreateSchemaFormProvider = ({
   /** Latest columns for synchronous promotion writes (invalidate form + uploaded form fields together). */
   const uploadedSchemaColumnsRef = useRef(uploadedSchemaColumns);
   const invalidUploadedSchemaColumnsRef = useRef(invalidUploadedSchemaColumns);
+  const prevSchemaColumnsLengthRef = useRef(0);
 
   useLayoutEffect(() => {
     uploadedSchemaColumnsRef.current = uploadedSchemaColumns;
     invalidUploadedSchemaColumnsRef.current = invalidUploadedSchemaColumns;
   }, [uploadedSchemaColumns, invalidUploadedSchemaColumns]);
+
+  useLayoutEffect(() => {
+    const cols = form.getFieldValue('schemaColumns');
+    prevSchemaColumnsLengthRef.current = Array.isArray(cols) ? cols.length : 0;
+  }, [form]);
 
   const recomputeValidationErrors = useCallback(() => {
     const base = transformFieldErrorsToTabErrors(form.getFieldsError());
@@ -147,9 +153,26 @@ export const CreateSchemaFormProvider = ({
     [],
   );
 
-  const handleSetSchemaColumns = useCallback((columns: RowSchema[]) => {
-    setSchemaColumns(columns);
-  }, []);
+  const handleSetSchemaColumns = useCallback(
+    (columns: RowSchema[]) => {
+      setSchemaColumns(columns);
+      form.setFieldsValue({
+        schemaColumns: columns.map((c) => listItemFromPartial(c)),
+      });
+    },
+    [form],
+  );
+
+  const handleUpdateSchemaColumns = useCallback(
+    (changedValues: unknown, allValues: CreateSchemaFormData) => {
+      if (!changedValuesMayAffectTabLists(changedValues)) {
+        return;
+      }
+      const cols = allValues.schemaColumns;
+      setSchemaColumns(Array.isArray(cols) ? cols : []);
+    },
+    [],
+  );
 
   const handleSetUploadedSchemaColumns = useCallback(
     (columns: UploadedSchemaRow[]) => {
@@ -258,7 +281,7 @@ export const CreateSchemaFormProvider = ({
 
   const handleUpdateUploadedSchemaColumns = useCallback(
     (changedValues: unknown) => {
-      if (!changedValuesMayAffectUploadedColumns(changedValues)) {
+      if (!changedValuesMayAffectTabLists(changedValues)) {
         return;
       }
       const uploadedFormRows = form.getFieldValue('uploadedColumns') as unknown;
@@ -324,6 +347,52 @@ export const CreateSchemaFormProvider = ({
     );
   }, [form, __internal_collectTabErrorsAfterValidate]);
 
+  const handleFormValuesChange = useCallback(
+    (changedValues: unknown, allValues: CreateSchemaFormData) => {
+      handleUpdateUploadedSchemaColumns(changedValues);
+      handleUpdateSchemaColumns(changedValues, allValues);
+
+      const touchedLists = changedValuesTriggerInvalidTabErrors(changedValues);
+      const cv = changedValues as Record<string, unknown>;
+      const schemaCols = allValues.schemaColumns;
+      const nextLen = Array.isArray(schemaCols) ? schemaCols.length : 0;
+      const prevLen = prevSchemaColumnsLengthRef.current;
+
+      const onlySchemaColumnsChanged =
+        touchedLists &&
+        cv !== null &&
+        typeof cv === 'object' &&
+        Object.keys(cv).length === 1 &&
+        Object.hasOwn(cv, 'schemaColumns');
+
+      const appendedSingleBlankRow =
+        onlySchemaColumnsChanged &&
+        Array.isArray(schemaCols) &&
+        nextLen === prevLen + 1 &&
+        isBlankSchemaListRow(schemaCols[nextLen - 1]);
+
+      prevSchemaColumnsLengthRef.current = nextLen;
+
+      /** List validators are async — avoid preemptive full validate when Add Column appends one blank row. */
+      if (!touchedLists) {
+        queueMicrotask(() => recomputeValidationErrors());
+        return;
+      }
+      if (appendedSingleBlankRow) {
+        queueMicrotask(() => recomputeValidationErrors());
+        return;
+      }
+      queueMicrotask(() => handleValidateColumnListsOnly());
+    },
+    [
+      handleUpdateUploadedSchemaColumns,
+      handleUpdateSchemaColumns,
+      changedValuesTriggerInvalidTabErrors,
+      recomputeValidationErrors,
+      handleValidateColumnListsOnly,
+    ],
+  );
+
   const handleRemoveUploadedSchemaColumn = useCallback(
     (columnId: string | undefined) => {
       if (!columnId) return;
@@ -373,6 +442,8 @@ export const CreateSchemaFormProvider = ({
       invalidUploadedSchemaColumns,
       schemaColumns,
       handleSetSchemaColumns,
+      handleUpdateSchemaColumns,
+      handleFormValuesChange,
       formValidation,
       handleUpdateInvalidUploadedSchemaColumn,
       handleUpdateUploadedSchemaColumns,
@@ -390,6 +461,8 @@ export const CreateSchemaFormProvider = ({
       invalidUploadedSchemaColumns,
       schemaColumns,
       handleSetSchemaColumns,
+      handleUpdateSchemaColumns,
+      handleFormValuesChange,
       formValidation,
       handleUpdateInvalidUploadedSchemaColumn,
       handleUpdateUploadedSchemaColumns,

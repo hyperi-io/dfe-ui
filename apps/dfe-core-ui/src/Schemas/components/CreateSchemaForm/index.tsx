@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, FormProps, Input, Select } from 'antd';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
@@ -27,22 +27,13 @@ const CreateSchemaFormBase = ({
   const {
     form,
     formValidation,
-    handleUpdateUploadedSchemaColumns,
     uploadedSchemaColumns,
     schemaColumns,
     invalidUploadedSchemaColumns,
-    changedValuesTriggerInvalidTabErrors,
-    recomputeValidationErrors,
-    handleValidateColumnListsOnly,
+    handleFormValuesChange,
   } = useCreateSchemaFormContext();
   const [showDescription, setShowDescription] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
-  const prevSchemaColumnsLengthRef = useRef(0);
-
-  useLayoutEffect(() => {
-    const cols = form.getFieldValue('schemaColumns');
-    prevSchemaColumnsLengthRef.current = Array.isArray(cols) ? cols.length : 0;
-  }, [form]);
 
   const onFinish = (values: CreateSchemaFormData) => {
     const isUploadedColumnsValid = uploadedSchemaColumns
@@ -58,7 +49,11 @@ const CreateSchemaFormBase = ({
       return;
     }
 
-    const isSchemaColumnsValid = schemaColumns
+    const nonBlankSchemaColumns = schemaColumns.filter(
+      (row) => !isBlankSchemaListRow(row),
+    );
+
+    const isSchemaColumnsValid = nonBlankSchemaColumns
       .map((column) => {
         return rowSchema.safeParse(column);
       })
@@ -76,45 +71,10 @@ const CreateSchemaFormBase = ({
       uploadedColumns: uploadedSchemaColumns.map((column) =>
         rowSchema.parse(column),
       ),
-      schemaColumns,
+      schemaColumns: nonBlankSchemaColumns.map((column) =>
+        rowSchema.parse(column),
+      ),
     });
-  };
-
-  const handleConditionalValidation = (
-    changedValues: unknown,
-    allValues: CreateSchemaFormData,
-  ) => {
-    const touchedLists = changedValuesTriggerInvalidTabErrors(changedValues);
-    const cv = changedValues as Record<string, unknown>;
-    const schemaCols = allValues.schemaColumns;
-    const nextLen = Array.isArray(schemaCols) ? schemaCols.length : 0;
-    const prevLen = prevSchemaColumnsLengthRef.current;
-
-    const onlySchemaColumnsChanged =
-      touchedLists &&
-      cv !== null &&
-      typeof cv === 'object' &&
-      Object.keys(cv).length === 1 &&
-      Object.hasOwn(cv, 'schemaColumns');
-
-    const appendedSingleBlankRow =
-      onlySchemaColumnsChanged &&
-      Array.isArray(schemaCols) &&
-      nextLen === prevLen + 1 &&
-      isBlankSchemaListRow(schemaCols[nextLen - 1]);
-
-    prevSchemaColumnsLengthRef.current = nextLen;
-
-    /** List validators are async — avoid preemptive full validate when Add Column appends one blank row. */
-    if (!touchedLists) {
-      queueMicrotask(() => recomputeValidationErrors());
-      return;
-    }
-    if (appendedSingleBlankRow) {
-      queueMicrotask(() => recomputeValidationErrors());
-      return;
-    }
-    queueMicrotask(() => handleValidateColumnListsOnly());
   };
 
   return (
@@ -125,8 +85,7 @@ const CreateSchemaFormBase = ({
       preserve
       onValuesChange={(changedValues, allValues) => {
         setFormError(null);
-        handleUpdateUploadedSchemaColumns(changedValues as unknown);
-        handleConditionalValidation(changedValues, allValues);
+        handleFormValuesChange(changedValues, allValues);
       }}
     >
       <div className="flex gap-2 w-full">

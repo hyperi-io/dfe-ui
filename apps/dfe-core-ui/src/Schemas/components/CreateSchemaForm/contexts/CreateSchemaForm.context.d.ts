@@ -20,6 +20,14 @@ export interface CreateSchemaFormContextValue {
   invalidUploadedSchemaColumns: InvalidColumns[];
   schemaColumns: RowSchema[];
   handleSetSchemaColumns: (columns: RowSchema[]) => void;
+  handleUpdateSchemaColumns: (
+    changedValues: unknown,
+    allValues: CreateSchemaFormData,
+  ) => void;
+  handleFormValuesChange: (
+    changedValues: unknown,
+    allValues: CreateSchemaFormData,
+  ) => void;
   formValidation: FormRule;
   handleUpdateInvalidUploadedSchemaColumn: (column: RowSchema) => void;
   handleUpdateUploadedSchemaColumns: (changedValues: unknown) => void;

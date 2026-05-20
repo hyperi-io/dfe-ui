@@ -5,35 +5,6 @@ import {
 import { FieldError } from '@rc-component/form/es/interface';
 import { type InvalidColumns } from './CreateSchemaForm.context.d';
 
-/** Whether the changed values may affect the uploaded columns.
- *
- * @param changed - The changed values to check.
- * @returns Whether the changed values may affect the uploaded columns.
- * @example
- * changedValuesMayAffectUploadedColumns({ uploadedColumns: [{ id: '1', name: 'test' }] }) // true
- * changedValuesMayAffectUploadedColumns({ schemaColumns: [{ id: '1', name: 'test' }] }) // false
- * changedValuesMayAffectUploadedColumns({ invalidColumns: [{ id: '1', name: 'test' }] }) // false
- * changedValuesMayAffectUploadedColumns({ uploadType: 'csv', file: { name: 'test.csv' } }) // false
- * changedValuesMayAffectUploadedColumns({ uploadType: 'json', file: { name: 'test.json' } }) // false
- */
-export const changedValuesMayAffectUploadedColumns = (
-  changed: unknown,
-): boolean => {
-  if (changed == null || typeof changed !== 'object') return false;
-  if (Array.isArray(changed)) {
-    return changed.some((entry) =>
-      changedValuesMayAffectUploadedColumns(entry),
-    );
-  }
-  const rec = changed as Record<string, unknown>;
-  if (Object.hasOwn(rec, 'uploadedColumns')) {
-    return true;
-  }
-  return Object.values(rec).some((v) =>
-    changedValuesMayAffectUploadedColumns(v),
-  );
-};
-
 /**
  * Whether `onValuesChange` includes edits under column tabs (`schemaColumns` / upload lists).
  *

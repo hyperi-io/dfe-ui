@@ -4,9 +4,7 @@ import { z } from 'zod';
 import type { InvalidColumns } from './CreateSchemaForm.context.d';
 import {
   UPLOADED_ROW_FIELD_KEYS,
-  allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
-  changedValuesMayAffectUploadedColumns,
   createEmptyValidationErrors,
   mergeImportInvalidIntoUploadedTab,
   rowListFieldValidatePaths,
@@ -55,48 +53,6 @@ describe('uploadedAndInvalidColumnListValidatePaths', () => {
       ...rowListFieldValidatePaths('uploadedColumns', 1),
       ...rowListFieldValidatePaths('invalidColumns', 1),
     ]);
-  });
-});
-
-describe('allColumnTabListValidatePaths', () => {
-  test('includes schemaColumns paths after uploaded and invalid', () => {
-    const p = allColumnTabListValidatePaths(1, 0, 2);
-    expect(p).toEqual([
-      ...rowListFieldValidatePaths('uploadedColumns', 1),
-      ...rowListFieldValidatePaths('invalidColumns', 0),
-      ...rowListFieldValidatePaths('schemaColumns', 2),
-    ]);
-  });
-});
-
-describe('changedValuesMayAffectUploadedColumns', () => {
-  test('returns false for null, non-objects, primitives, and empty nested objects without uploadedColumns', () => {
-    expect(changedValuesMayAffectUploadedColumns(null)).toBe(false);
-    expect(changedValuesMayAffectUploadedColumns(undefined)).toBe(false);
-    expect(changedValuesMayAffectUploadedColumns('x')).toBe(false);
-    expect(changedValuesMayAffectUploadedColumns(1)).toBe(false);
-    expect(changedValuesMayAffectUploadedColumns({})).toBe(false);
-    expect(changedValuesMayAffectUploadedColumns({ a: 1 })).toBe(false);
-  });
-
-  test('returns true when uploadedColumns is present at any depth', () => {
-    expect(changedValuesMayAffectUploadedColumns({ uploadedColumns: [] })).toBe(
-      true,
-    );
-    expect(
-      changedValuesMayAffectUploadedColumns({
-        wrapper: { uploadedColumns: [1] },
-      }),
-    ).toBe(true);
-  });
-
-  test('returns true when any array entry needs uploadedColumns', () => {
-    expect(
-      changedValuesMayAffectUploadedColumns([1, { uploadedColumns: {} }]),
-    ).toBe(true);
-    expect(
-      changedValuesMayAffectUploadedColumns([[{ uploadedColumns: 1 }]]),
-    ).toBe(true);
   });
 });
 

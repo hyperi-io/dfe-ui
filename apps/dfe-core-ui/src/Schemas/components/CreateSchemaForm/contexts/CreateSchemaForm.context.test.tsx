@@ -1,11 +1,11 @@
+import type { RowSchema } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
+import type { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import type { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';
 import type { ReactNode } from 'react';
-import type { RowSchema } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import type { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import type { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
-import { describe, expect, test, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,
@@ -102,6 +102,25 @@ describe('CreateSchemaFormProvider', () => {
       result.current.handleSetSchemaColumns([validRow('s1')]);
     });
     expect(result.current.schemaColumns).toEqual([validRow('s1')]);
+    expect(form.setFieldsValue).toHaveBeenCalled();
+  });
+
+  test('handleUpdateSchemaColumns syncs schemaColumns from form values', () => {
+    const { form } = createMockForm();
+    const { result } = renderHook(() => useCreateSchemaFormContext(), {
+      wrapper: ({ children }) => (
+        <TestHarness form={form}>{children}</TestHarness>
+      ),
+    });
+
+    const row = validRow('manual-1');
+    act(() => {
+      result.current.handleUpdateSchemaColumns({ schemaColumns: [row] }, {
+        schemaColumns: [row],
+      } as CreateSchemaFormData);
+    });
+
+    expect(result.current.schemaColumns).toEqual([row]);
   });
 
   test('changedValuesTriggerInvalidTabErrors reflects tab list keys', () => {
@@ -467,6 +486,8 @@ describe('CreateSchemaFormProvider', () => {
           <TestHarness form={form}>{children}</TestHarness>
         ),
       });
+
+      mocks.getFieldValue.mockClear();
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({ file: 1 });
