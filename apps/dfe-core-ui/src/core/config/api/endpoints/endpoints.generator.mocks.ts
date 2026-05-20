@@ -1031,6 +1031,45 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
+    elasticConvert: {
+      mockedUrl: '/api/v1/schemas/elastic-converter',
+      post: {
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              type: 'string',
+              attribute: ['string'],
+              use_case: 'string',
+              expr: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
   },
 });
 /* eslint-enable no-console */

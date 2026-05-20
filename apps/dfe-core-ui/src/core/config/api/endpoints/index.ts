@@ -55,5 +55,6 @@ export const API_CONFIG = Object.freeze({
     schema: '/api/v1/schemas/definitions/{schema_path}',
     sourceColumns: '/api/v1/schemas/{source_name}/columns',
     sourceBuild: '/api/v1/schemas/{source_name}/build',
+    elasticConvert: '/api/v1/schemas/elastic-converter',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

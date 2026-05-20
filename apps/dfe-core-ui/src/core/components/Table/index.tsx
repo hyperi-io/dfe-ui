@@ -2,7 +2,8 @@ import { Table as AntdTable, TableProps as AntdTableProps } from 'antd';
 
 import { TableEmpty } from './TableEmpty';
 
-export const Table = <T extends object>(props: AntdTableProps<T>) => {
+export type TableProps<T extends object> = AntdTableProps<T>;
+export const Table = <T extends object>(props: TableProps<T>) => {
   return (
     <AntdTable
       size="small"

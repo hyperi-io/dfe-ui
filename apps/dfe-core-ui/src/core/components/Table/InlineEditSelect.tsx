@@ -1,19 +1,20 @@
 import { cn } from '@/core/utils/style';
 import { IconCheck, IconEdit, IconX } from '@repo/dfe-icons';
 import { Button, Select, SelectProps, Tag } from 'antd';
-import {
-  ChangeEvent,
-  startTransition,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 interface InlineEditSelectProps extends SelectProps {
   initialValue?: string;
   editable?: boolean;
   defaultEditing?: boolean;
 }
+
+const valueSignature = (v: unknown) =>
+  v === undefined || v === null
+    ? ''
+    : typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+      ? String(v)
+      : JSON.stringify(v);
 
 const transformLabel = (label: string | string[]) => {
   if (Array.isArray(label) && label.length === 0) {
@@ -40,6 +41,21 @@ export const InlineEditSelect = ({
   const [isEditing, setIsEditing] = useState(defaultEditing);
   const [draft, setDraft] = useState(resolved);
 
+  const resolvedSigRef = useRef<string | null>(null);
+  const resolvedSig = valueSignature(resolved);
+  useEffect(() => {
+    if (resolvedSigRef.current === null) {
+      resolvedSigRef.current = resolvedSig;
+      return;
+    }
+    if (resolvedSigRef.current === resolvedSig) {
+      return;
+    }
+    resolvedSigRef.current = resolvedSig;
+    queueMicrotask(() => setDraft(resolved));
+    queueMicrotask(() => setIsEditing(false));
+  }, [resolved, resolvedSig]);
+
   const [search, setSearch] = useState('');
   const filteredOptions = useMemo(() => {
     return options?.filter((option) =>
@@ -64,15 +80,17 @@ export const InlineEditSelect = ({
 
   const isMultiple = props.mode === 'multiple' && Array.isArray(resolved);
 
-  // On error, set the input to edit mode to allow the user to correct the error
   const hasError = props['aria-invalid'] === 'true';
+  const prevHadErrorRef = useRef(false);
   useEffect(() => {
-    if (hasError) {
-      startTransition(() => {
-        setIsEditing(true);
-      });
+    if (hasError && !prevHadErrorRef.current) {
+      queueMicrotask(() => setIsEditing(true));
     }
-  }, [hasError, setIsEditing]);
+    if (!hasError && prevHadErrorRef.current) {
+      queueMicrotask(() => setIsEditing(false));
+    }
+    prevHadErrorRef.current = hasError;
+  }, [hasError]);
 
   return (
     <>

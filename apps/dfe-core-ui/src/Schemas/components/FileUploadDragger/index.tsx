@@ -11,7 +11,7 @@ export const FileUploadDragger = ({
   beforeUpload,
   ...props
 }: FileUploadDraggerProps) => {
-  const [fileList, setFileList] = useState<RcFile[]>([]);
+  const [fileList, setFileList] = useState<UploadFile<RcFile>[]>([]);
 
   const handleRemove = (file: UploadFile<RcFile>) => {
     const newFileList = fileList?.filter((f) => f.uid !== file.uid) ?? [];
@@ -23,13 +23,19 @@ export const FileUploadDragger = ({
   };
 
   const handleChange = (info: UploadChangeParam<UploadFile<RcFile>>) => {
-    setFileList(info.fileList as unknown as RcFile[]);
+    setFileList(info.fileList as UploadFile<RcFile>[]);
     onChange?.(info as UploadChangeParam<UploadFile<RcFile>>);
   };
 
   const handleBeforeUpload = (file: RcFile) => {
-    setFileList([...fileList, { ...file, uid: file.name }]);
-    beforeUpload?.(file, fileList);
+    const entry: UploadFile<RcFile> = {
+      uid: file.uid,
+      name: file.name,
+      status: 'done',
+      originFileObj: file,
+    };
+    setFileList((prev) => [...prev, entry]);
+    beforeUpload?.(file, fileList as unknown as RcFile[]);
     return false;
   };
 

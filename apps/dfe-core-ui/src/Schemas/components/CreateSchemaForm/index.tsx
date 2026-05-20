@@ -1,0 +1,171 @@
+import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
+import { Button, FormProps, Input, Select } from 'antd';
+import { useState } from 'react';
+import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
+import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
+import {
+  CreateSchemaFormProvider,
+  useCreateSchemaFormContext,
+} from './contexts/CreateSchemaForm.context';
+import { CreateSchemaFormData } from './CreateSchemaForm.schema';
+import { SchemaUploadCollapse } from './SchemaUploadCollapse';
+
+interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
+  hasReset?: boolean;
+  isPending?: boolean;
+  buttonLabel?: string;
+}
+
+const CreateSchemaFormBase = ({
+  hasReset = false,
+  isPending = false,
+  buttonLabel = 'Save',
+  onFinish: onFinishProp,
+}: CreateSchemaFormProps) => {
+  const {
+    form,
+    formValidation,
+    uploadedSchemaColumns,
+    schemaColumns,
+    invalidUploadedSchemaColumns,
+    handleFormValuesChange,
+  } = useCreateSchemaFormContext();
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const onFinish = (values: CreateSchemaFormData) => {
+    const isUploadedColumnsValid = uploadedSchemaColumns
+      .map((column) => {
+        return rowSchema.safeParse(column);
+      })
+      .every((result) => result.success);
+
+    if (!isUploadedColumnsValid || invalidUploadedSchemaColumns.length > 0) {
+      setFormError(
+        'There are validation errors in the uploaded columns. Please fix them and try again.',
+      );
+      return;
+    }
+
+    const nonBlankSchemaColumns = schemaColumns.filter(
+      (row) => !isBlankSchemaListRow(row),
+    );
+
+    const isSchemaColumnsValid = nonBlankSchemaColumns
+      .map((column) => {
+        return rowSchema.safeParse(column);
+      })
+      .every((result) => result.success);
+
+    if (!isSchemaColumnsValid) {
+      setFormError(
+        'There are validation errors in the schema columns. Please fix them and try again.',
+      );
+      return;
+    }
+
+    onFinishProp?.({
+      ...values,
+      uploadedColumns: uploadedSchemaColumns.map((column) =>
+        rowSchema.parse(column),
+      ),
+      schemaColumns: nonBlankSchemaColumns.map((column) =>
+        rowSchema.parse(column),
+      ),
+    });
+  };
+
+  return (
+    <Form
+      className="h-[calc(100vh-120px)] css-custom-scrollbar"
+      form={form}
+      onFinish={onFinish}
+      preserve
+      onValuesChange={(changedValues, allValues) => {
+        setFormError(null);
+        handleFormValuesChange(changedValues, allValues);
+      }}
+    >
+      <div className="flex gap-2 w-full">
+        <Form.Item
+          className="w-full"
+          name="path"
+          rules={[formValidation]}
+          label="Path"
+          tooltip="Prepends the file name in the directory structure"
+        >
+          <Input placeholder="Enter path" />
+        </Form.Item>
+
+        <Form.Item
+          className="w-full"
+          name="name"
+          label="Name"
+          rules={[formValidation]}
+        >
+          <Input placeholder="Enter name" />
+        </Form.Item>
+      </div>
+      <div className="flex gap-2 w-full">
+        <Form.Item
+          className="w-full"
+          name="type"
+          label="Type"
+          rules={[formValidation]}
+        >
+          <Select options={TYPE_OPTIONS} placeholder="Select type" />
+        </Form.Item>
+
+        <Form.Item
+          className="w-full"
+          name="version"
+          label="Version"
+          rules={[formValidation]}
+        >
+          <Input placeholder="Enter version" />
+        </Form.Item>
+      </div>
+
+      <Form.Item
+        name="description"
+        label="Description"
+        rules={[formValidation]}
+      >
+        <Input.TextArea placeholder="Enter description" />
+      </Form.Item>
+
+      <SchemaUploadCollapse />
+
+      {formError && <FormNotification type="error" text={formError} />}
+
+      <Form.Item className="flex justify-end">
+        {hasReset && (
+          <Button
+            className="mr-2"
+            type="default"
+            htmlType="reset"
+            disabled={isPending}
+          >
+            Reset Form
+          </Button>
+        )}
+        <Button
+          loading={isPending}
+          disabled={isPending}
+          type="primary"
+          htmlType="submit"
+        >
+          {buttonLabel}
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+};
+
+export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
+  return (
+    <CreateSchemaFormProvider>
+      <CreateSchemaFormBase {...props} />
+    </CreateSchemaFormProvider>
+  );
+};

@@ -34,10 +34,6 @@ const FormWrapper = ({
 };
 
 export const Form = Object.assign(FormWrapper, {
+  ...AntdForm,
   Item: FormItem,
-  List: AntdForm.List,
-  ErrorList: AntdForm.ErrorList,
-  useForm: AntdForm.useForm,
-  useWatch: AntdForm.useWatch,
-  Provider: AntdForm.Provider,
 }) as AntdFormType;
