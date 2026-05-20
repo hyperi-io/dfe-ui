@@ -120,10 +120,7 @@ const getFileInput = (container: HTMLElement) => {
 };
 
 /** Bypass Upload `accept` filtering in jsdom (e.g. .txt while mode expects .csv). */
-const uploadFileToInput = (
-  container: HTMLElement,
-  file: File,
-) => {
+const uploadFileToInput = (container: HTMLElement, file: File) => {
   const input = getFileInput(container);
   fireEvent.change(input, { target: { files: [file] } });
 };
