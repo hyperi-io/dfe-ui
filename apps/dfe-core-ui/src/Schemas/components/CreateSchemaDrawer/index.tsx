@@ -2,13 +2,13 @@ import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
-import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
-import { IconPlus } from '@repo/dfe-icons';
+import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
+import { IconChevronsLeft, IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
 
 export const CreateSchemaDrawer = ({
   open,
@@ -17,12 +17,23 @@ export const CreateSchemaDrawer = ({
   open?: boolean;
   onClose?: () => void;
 }) => {
-  const title = 'Add Schema';
+  const [title, setTitle] = useState<React.ReactNode | string>('Add Schema');
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [reviewValues, setReviewValues] = useState<CreateSchemaFormData | null>(
+    null,
+  );
+
+  const buttonLabel = isReviewing ? 'Create Schema' : 'Review Schema';
+
   const [api, contextHolder] = notification.useNotification();
   const [isDrawerVisible, setIsDrawerVisible] = useState(open);
 
   const handleClose = () => {
     setIsDrawerVisible(false);
+    setReviewValues(null);
+    setIsReviewing(false);
+    setTitle('Add Schema');
+
     onClose?.();
   };
 
@@ -47,9 +58,25 @@ export const CreateSchemaDrawer = ({
     },
   );
 
-  const handleFinish = (values: CreateSchemaFormData) => {
-    const requestBody: SchemaCreateRequest =
-      transformFormDataToRequestBody(values);
+  const handleGoBack = () => {
+    setTitle('Add Schema');
+    setIsReviewing(false);
+    setReviewValues(null);
+  };
+
+  const handleReview = (values: CreateSchemaFormData) => {
+    setTitle(
+      <div className="flex items-center gap-2">
+        <Button icon={<IconChevronsLeft />} onClick={handleGoBack} />
+        Review Schema
+      </div>,
+    );
+    setIsReviewing(true);
+    setReviewValues(values);
+  };
+
+  const handleSubmit = (values: CreateSchemaFormData) => {
+    const { requestBody } = transformFormDataToRequestBody(values);
     createSchema(requestBody);
   };
 
@@ -70,19 +97,33 @@ export const CreateSchemaDrawer = ({
         size="80%"
         onClose={handleClose}
       >
-        <CreateSchemaForm
-          buttonLabel={title}
-          onFinish={handleFinish}
-          isPending={isCreatingSchema}
-          disabledFields={{
-            type: true,
-            version: true,
-          }}
-          initialValues={{
-            type: 'model',
-            version: '1.0.0',
-          }}
-        />
+        {isReviewing ? (
+          reviewValues && (
+            <ReviewForm
+              values={reviewValues}
+              buttonLabel={buttonLabel}
+              onFinish={handleSubmit}
+            />
+          )
+        ) : (
+          <CreateSchemaForm
+            buttonLabel={buttonLabel}
+            onFinish={handleReview}
+            isPending={isCreatingSchema}
+            disabledFields={{
+              type: true,
+              version: true,
+            }}
+            initialValues={
+              reviewValues
+                ? reviewValues
+                : {
+                    type: 'model',
+                    version: '1.0.0',
+                  }
+            }
+          />
+        )}
       </Drawer>
     </>
   );

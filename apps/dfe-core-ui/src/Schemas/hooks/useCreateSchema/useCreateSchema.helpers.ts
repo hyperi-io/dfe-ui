@@ -22,7 +22,6 @@ export const transformFormDataToRequestBody = (
     use_case: column.use_case ?? '',
     expr: column.expr ?? '',
     comment: column.comment,
-    imported: true,
   }));
 
   const schemaColumns: SchemaCreateRequestColumn[] = (
@@ -50,5 +49,5 @@ export const transformFormDataToRequestBody = (
     },
   };
 
-  return requestBody;
+  return { requestBody, uploadedColumns, schemaColumns };
 };

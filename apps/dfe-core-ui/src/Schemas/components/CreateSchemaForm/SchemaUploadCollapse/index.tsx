@@ -19,7 +19,7 @@ export const SchemaUploadCollapse = ({
 }) => {
   const [activeKey, setActiveKey] = useState<
     'uploadedColumns' | 'schemaColumns'
-  >('uploadedColumns');
+  >('schemaColumns');
   const { formValidation, uploadedSchemaColumns, validationErrors } =
     useCreateSchemaFormContext();
   const [showFileUpload, setShowFileUpload] = useState(true);
