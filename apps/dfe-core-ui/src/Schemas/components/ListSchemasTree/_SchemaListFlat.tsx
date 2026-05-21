@@ -13,8 +13,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
     error,
     loadMoreRef,
     isFetchingNextPage,
-    setSelectedSchemaPath,
-    setSelectedSchemaVersion,
+    setSelectedSchema,
     filters,
     hasFilters,
     setFilters,
@@ -28,11 +27,10 @@ export const SchemaList = ({ className }: { className?: string }) => {
           <Typography.Text
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedSchemaPath(schema.name);
-              setSelectedSchemaVersion(
-                schema.current ?? schema.versions?.[0] ?? null,
-                schema.name,
-              );
+              setSelectedSchema({
+                schema_path: schema.name,
+                schema_version: null,
+              });
             }}
             className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
           >
@@ -50,7 +48,10 @@ export const SchemaList = ({ className }: { className?: string }) => {
             <Typography.Text
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedSchemaVersion(version, schema.name);
+                setSelectedSchema({
+                  schema_path: schema.name,
+                  schema_version: version,
+                });
               }}
               className="cursor-pointer flex items-center gap-x-2"
             >
@@ -65,7 +66,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
           ),
         })),
       })),
-    [schemas, setSelectedSchemaPath, filters.search, setSelectedSchemaVersion],
+    [schemas, setSelectedSchema, filters.search],
   );
 
   if (schemas.length === 0) {

@@ -39,17 +39,16 @@ export const CreateSchemaDrawer = ({
     onClose?.();
   };
 
-  const {
-    refetch: refetchSchemas,
-    setSelectedSchemaPath,
-    setSelectedSchemaVersion,
-  } = useListSchemasContext();
+  const { refetch: refetchSchemas, setSelectedSchema } =
+    useListSchemasContext();
 
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
       onSuccess: ({ path, current }) => {
-        setSelectedSchemaPath(path ?? null);
-        setSelectedSchemaVersion(current);
+        setSelectedSchema({
+          schema_path: path ?? null,
+          schema_version: current,
+        });
         refetchSchemas();
         api.success({
           title: 'Schema created successfully',
