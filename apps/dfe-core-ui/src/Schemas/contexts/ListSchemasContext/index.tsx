@@ -92,12 +92,14 @@ export interface ListSchemasContextValue {
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
   selectedSchemaPath: string | null;
-  setSelectedSchemaPath: (schema_path: string | null) => void;
   selectedSchemaVersion: string | null;
-  setSelectedSchemaVersion: (
-    schema_version: string | null,
-    schema_path?: string | null,
-  ) => void;
+  setSelectedSchema: ({
+    schema_path,
+    schema_version,
+  }: {
+    schema_path: string | null;
+    schema_version: string | null;
+  }) => void;
 }
 
 const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
@@ -181,32 +183,24 @@ export const ListSchemasProvider = ({
     [queryClient, router, pathname, filters],
   );
 
-  const handleSetSelectedSchemaPath = useCallback(
-    (schema_path: string | null) => {
+  const handleSetSelectedSchema = useCallback(
+    ({
+      schema_path,
+      schema_version,
+    }: {
+      schema_path: string | null;
+      schema_version: string | null;
+    }) => {
       setSelectedSchemaPath(schema_path);
+      setSelectedSchemaVersion(schema_version);
       const query = filtersToSearchString({
         ...filters,
         schema_path: schema_path ?? '',
+        schema_version: schema_version ?? '',
       });
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
     [router, pathname, filters, setSelectedSchemaPath],
-  );
-
-  const handleSetSelectedSchemaVersion = useCallback(
-    (schema_version: string | null, schema_path?: string | null) => {
-      if (schema_path != null && schema_path !== '') {
-        setSelectedSchemaPath(schema_path);
-      }
-      setSelectedSchemaVersion(schema_version);
-      const query = filtersToSearchString({
-        ...filters,
-        schema_version: schema_version ?? '',
-        schema_path: schema_path ?? '',
-      });
-      router.replace(query ? `${pathname}?${query}` : pathname);
-    },
-    [router, pathname, filters, setSelectedSchemaVersion],
   );
 
   const value = useMemo<ListSchemasContextValue>(
@@ -224,9 +218,8 @@ export const ListSchemasProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSchemaPath,
-      setSelectedSchemaPath: handleSetSelectedSchemaPath,
+      setSelectedSchema: handleSetSelectedSchema,
       selectedSchemaVersion,
-      setSelectedSchemaVersion: handleSetSelectedSchemaVersion,
     }),
     [
       data,
@@ -242,9 +235,8 @@ export const ListSchemasProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSchemaPath,
-      handleSetSelectedSchemaPath,
+      handleSetSelectedSchema,
       selectedSchemaVersion,
-      handleSetSelectedSchemaVersion,
     ],
   );
 

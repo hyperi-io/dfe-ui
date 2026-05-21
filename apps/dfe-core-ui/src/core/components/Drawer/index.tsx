@@ -7,7 +7,7 @@ import {
 
 interface DrawerProps extends AntdDrawerProps {
   onClose?: () => void;
-  title: string;
+  title: React.ReactNode | string;
 }
 
 export const Drawer = ({ children, onClose, title, ...props }: DrawerProps) => {

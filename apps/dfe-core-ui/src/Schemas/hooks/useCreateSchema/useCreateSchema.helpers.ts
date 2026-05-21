@@ -18,11 +18,10 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    attribute: column.attribute,
+    ...(column.attribute ? { attribute: column.attribute } : {}),
     use_case: column.use_case ?? '',
     expr: column.expr ?? '',
-    comment: column.comment,
-    imported: true,
+    ...(column.comment ? { comment: column.comment } : {}),
   }));
 
   const schemaColumns: SchemaCreateRequestColumn[] = (
@@ -30,15 +29,14 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    attribute: column.attribute,
+    ...(column.attribute ? { attribute: column.attribute } : {}),
     use_case: column.use_case ?? '',
     expr: column.expr ?? '',
-    comment: column.comment,
+    ...(column.comment ? { comment: column.comment } : {}),
   }));
 
   const requestBody: SchemaCreateRequest = {
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
-    description: formData.description,
     current: formData.version,
     versions: {
       [formData.version]: {
@@ -50,5 +48,5 @@ export const transformFormDataToRequestBody = (
     },
   };
 
-  return requestBody;
+  return { requestBody, uploadedColumns, schemaColumns };
 };

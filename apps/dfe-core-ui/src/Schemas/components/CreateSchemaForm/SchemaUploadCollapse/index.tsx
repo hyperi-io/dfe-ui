@@ -3,13 +3,23 @@ import { TabLabel } from '@/core/components/TabLabel';
 import { cn } from '@/core/utils/style';
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Radio, Tabs } from 'antd';
 import { useState } from 'react';
 import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 
-export const SchemaUploadCollapse = () => {
+export const SchemaUploadCollapse = ({
+  disabledFields,
+}: {
+  disabledFields?: {
+    [key in keyof CreateSchemaFormData]?: boolean;
+  };
+}) => {
+  const [activeKey, setActiveKey] = useState<
+    'uploadedColumns' | 'schemaColumns'
+  >('schemaColumns');
   const { formValidation, uploadedSchemaColumns, validationErrors } =
     useCreateSchemaFormContext();
   const [showFileUpload, setShowFileUpload] = useState(true);
@@ -41,7 +51,10 @@ export const SchemaUploadCollapse = () => {
         {showFileUpload && (
           <div className="flex flex-col gap-y-2">
             <Form.Item name="uploadType" initialValue="csv">
-              <Radio.Group className="flex flex-row w-full mt-3">
+              <Radio.Group
+                className="flex flex-row w-full mt-3"
+                disabled={disabledFields?.uploadType}
+              >
                 <Radio.Button value="csv" className="w-1/2 text-center">
                   DFE CSV
                 </Radio.Button>
@@ -51,57 +64,56 @@ export const SchemaUploadCollapse = () => {
               </Radio.Group>
             </Form.Item>
 
-            <SchemaUploadFileSection />
+            <SchemaUploadFileSection
+              onUpload={() => setActiveKey('uploadedColumns')}
+            />
           </div>
         )}
       </div>
 
-      {hasUploadedSchema && (
-        <Tabs
-          destroyOnHidden={false}
-          items={[
-            {
-              key: 'uploadedColumns',
-              label: (
-                <TabLabel
-                  label="Uploaded Columns"
-                  validationErrors={validationErrors.uploadedColumns ?? []}
-                />
-              ),
-              forceRender: true,
-              children: <UploadedSchemaTable />,
-            },
-            {
-              key: 'schemaColumns',
-              label: (
-                <TabLabel
-                  label="Additional Columns"
-                  validationErrors={validationErrors.schemaColumns ?? []}
-                />
-              ),
-              forceRender: true,
-              children: (
-                <AddSchemaTable
-                  key="schemaColumns"
-                  name="schemaColumns"
-                  formValidation={formValidation}
-                />
-              ),
-            },
-          ]}
-        />
-      )}
-
-      {!hasUploadedSchema && (
-        <>
-          <label htmlFor="schemaColumns">Schema Columns</label>
-          <AddSchemaTable
-            key="schemaColumns"
-            name="schemaColumns"
-            formValidation={formValidation}
-          />
-        </>
-      )}
+      <Tabs
+        destroyOnHidden={false}
+        activeKey={activeKey}
+        onChange={(key) => {
+          setActiveKey(key as 'uploadedColumns' | 'schemaColumns');
+        }}
+        items={[
+          ...(hasUploadedSchema
+            ? [
+                {
+                  key: 'uploadedColumns',
+                  label: (
+                    <TabLabel
+                      label="Uploaded Columns"
+                      validationErrors={validationErrors.uploadedColumns ?? []}
+                    />
+                  ),
+                  forceRender: true,
+                  children: <UploadedSchemaTable />,
+                },
+              ]
+            : []),
+          {
+            key: 'schemaColumns',
+            label: (
+              <TabLabel
+                label={
+                  hasUploadedSchema ? 'Additional Columns' : 'Schema Columns'
+                }
+                validationErrors={validationErrors.schemaColumns ?? []}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <AddSchemaTable
+                key="schemaColumns"
+                name="schemaColumns"
+                formValidation={formValidation}
+              />
+            ),
+          },
+        ]}
+      />
     </>
   );
 };
