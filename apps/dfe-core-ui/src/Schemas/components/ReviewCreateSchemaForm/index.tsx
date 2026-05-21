@@ -6,7 +6,7 @@ import { TableLayout } from './TableLayout';
 import { YamlLayout } from './YamlLayout';
 
 export interface ReviewFormProps {
-  values: CreateSchemaFormData;
+  values: CreateSchemaFormData | null;
   onFinish?: (values: CreateSchemaFormData) => void;
   buttonLabel: string;
 }
@@ -19,6 +19,14 @@ export const ReviewForm = ({
   const [selectedLayout, setSelectedLayout] = useState<'table' | 'yaml'>(
     'table',
   );
+
+  if (!values) {
+    return (
+      <div className="text-foreground-muted dark:text-dark-foreground-muted">
+        Nothing to review.
+      </div>
+    );
+  }
 
   const { requestBody, uploadedColumns, schemaColumns } =
     transformFormDataToRequestBody(values);

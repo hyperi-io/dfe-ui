@@ -17,7 +17,9 @@ export const CreateSchemaDrawer = ({
   open?: boolean;
   onClose?: () => void;
 }) => {
-  const [title, setTitle] = useState<React.ReactNode | string>('Add Schema');
+  const [drawerTitle, setDrawerTitle] = useState<React.ReactNode | string>(
+    'Add Schema',
+  );
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewValues, setReviewValues] = useState<CreateSchemaFormData | null>(
     null,
@@ -32,7 +34,7 @@ export const CreateSchemaDrawer = ({
     setIsDrawerVisible(false);
     setReviewValues(null);
     setIsReviewing(false);
-    setTitle('Add Schema');
+    setDrawerTitle('Add Schema');
 
     onClose?.();
   };
@@ -59,13 +61,12 @@ export const CreateSchemaDrawer = ({
   );
 
   const handleGoBack = () => {
-    setTitle('Add Schema');
+    setDrawerTitle('Add Schema');
     setIsReviewing(false);
-    setReviewValues(null);
   };
 
   const handleReview = (values: CreateSchemaFormData) => {
-    setTitle(
+    setDrawerTitle(
       <div className="flex items-center gap-2">
         <Button icon={<IconChevronsLeft />} onClick={handleGoBack} />
         Review Schema
@@ -89,23 +90,15 @@ export const CreateSchemaDrawer = ({
         icon={<IconPlus className="text-tertiary" />}
         onClick={() => setIsDrawerVisible(true)}
       >
-        {title}
+        Add Schema
       </Button>
       <Drawer
-        title={title}
+        title={drawerTitle}
         open={isDrawerVisible}
         size="80%"
         onClose={handleClose}
       >
-        {isReviewing ? (
-          reviewValues && (
-            <ReviewForm
-              values={reviewValues}
-              buttonLabel={buttonLabel}
-              onFinish={handleSubmit}
-            />
-          )
-        ) : (
+        <div className={isReviewing ? 'hidden' : undefined}>
           <CreateSchemaForm
             buttonLabel={buttonLabel}
             onFinish={handleReview}
@@ -115,13 +108,18 @@ export const CreateSchemaDrawer = ({
               version: true,
             }}
             initialValues={
-              reviewValues
-                ? reviewValues
-                : {
-                    type: 'model',
-                    version: '1.0.0',
-                  }
+              reviewValues ?? {
+                type: 'model',
+                version: '1.0.0',
+              }
             }
+          />
+        </div>
+        {isReviewing && (
+          <ReviewForm
+            values={reviewValues}
+            buttonLabel={buttonLabel}
+            onFinish={handleSubmit}
           />
         )}
       </Drawer>
