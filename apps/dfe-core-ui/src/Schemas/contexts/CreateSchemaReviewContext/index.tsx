@@ -7,24 +7,16 @@ import {
 } from 'react';
 
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
-import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
 import { IconChevronsLeft } from '@repo/dfe-icons';
-import { Button, notification } from 'antd';
+import { Button } from 'antd';
 interface CreateSchemaReviewContextValue {
   isReviewing: boolean;
-  setIsReviewing: (isReviewing: boolean) => void;
   drawerTitle: React.ReactNode | string;
-  setDrawerTitle: (drawerTitle: React.ReactNode | string) => void;
   reviewValues: CreateSchemaFormData | null;
-  setReviewValues: (reviewValues: CreateSchemaFormData | null) => void;
   buttonLabel: string;
-  notificationContextHolder: React.ReactNode;
   handleGoBack: () => void;
   handleReview: (values: CreateSchemaFormData) => void;
-  handleSubmit: (values: CreateSchemaFormData) => void;
-  isCreatingSchema: boolean;
+  handleReset: () => void;
 }
 
 export const CreateSchemaReviewContext =
@@ -46,26 +38,11 @@ export const CreateSchemaReviewProvider = ({
 
   const buttonLabel = isReviewing ? 'Create Schema' : 'Review Schema';
 
-  const [api, notificationContextHolder] = notification.useNotification();
-
-  const { refetch: refetchSchemas, setSelectedSchema } =
-    useListSchemasContext();
-
-  const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
-    {
-      onSuccess: ({ path, current }) => {
-        setSelectedSchema({
-          schema_path: path ?? null,
-          schema_version: current,
-        });
-        refetchSchemas();
-        api.success({
-          title: 'Schema created successfully',
-          placement: 'bottomLeft',
-        });
-      },
-    },
-  );
+  const handleReset = useCallback(() => {
+    setDrawerTitle('Add Schema');
+    setIsReviewing(false);
+    setReviewValues(null);
+  }, [setDrawerTitle, setIsReviewing, setReviewValues]);
 
   const handleGoBack = useCallback(() => {
     setDrawerTitle('Add Schema');
@@ -94,42 +71,24 @@ export const CreateSchemaReviewProvider = ({
     [setDrawerTitle, setIsReviewing, setReviewValues, handleGoBack],
   );
 
-  const handleSubmit = useCallback(
-    (values: CreateSchemaFormData) => {
-      const { requestBody } = transformFormDataToRequestBody(values);
-      createSchema(requestBody);
-    },
-    [createSchema],
-  );
-
   const value = useMemo(
     () => ({
       isReviewing,
-      setIsReviewing,
       drawerTitle,
-      setDrawerTitle,
       reviewValues,
-      setReviewValues,
       buttonLabel,
-      notificationContextHolder,
       handleGoBack,
       handleReview,
-      handleSubmit,
-      isCreatingSchema,
+      handleReset,
     }),
     [
       isReviewing,
-      setIsReviewing,
       drawerTitle,
-      setDrawerTitle,
       reviewValues,
-      setReviewValues,
       buttonLabel,
-      notificationContextHolder,
       handleGoBack,
       handleReview,
-      handleSubmit,
-      isCreatingSchema,
+      handleReset,
     ],
   );
 
