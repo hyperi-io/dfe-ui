@@ -31,7 +31,10 @@ export const YamlLayout = ({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-foreground-muted dark:text-dark-foreground-muted">
-        File pathname: {path}.yaml
+        <span className="font-medium text-foreground/40 dark:text-dark-foreground/40">
+          File pathname:
+        </span>{' '}
+        {path}.yaml
       </p>
       <AceEditor value={yamlContent} mode="yaml" readOnly />
       <Button type="primary" className="ml-auto" onClick={handleFinish}>
