@@ -42,12 +42,12 @@ describe('transformFormDataToRequestBody', () => {
     expect(requestBody.path).toBe('aws/cloudtrail/my_schema');
   });
 
-  test('copies description to top-level and version summary', () => {
+  test('moves description to version summary', () => {
     const { requestBody } = transformFormDataToRequestBody({
       ...baseFormData(),
       description: 'Reads CloudTrail logs',
     });
-    expect(requestBody.description).toBe('Reads CloudTrail logs');
+    expect(requestBody.description).toBe(undefined);
     expect(requestBody.versions['1.0.0'].summary).toBe('Reads CloudTrail logs');
   });
 

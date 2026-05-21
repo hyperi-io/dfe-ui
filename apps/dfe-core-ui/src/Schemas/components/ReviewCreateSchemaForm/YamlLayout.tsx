@@ -15,13 +15,14 @@ export const YamlLayout = ({
   buttonLabel,
   onFinish,
 }: YamlLayoutProps) => {
+  const { path, ...restValues } = values;
   const yamlContent = useMemo(
     () =>
-      yaml.stringify(values, {
+      yaml.stringify(restValues, {
         indent: 2,
         lineWidth: 0,
       }),
-    [values],
+    [restValues],
   );
 
   const handleFinish = () => {
@@ -29,6 +30,9 @@ export const YamlLayout = ({
   };
   return (
     <div className="flex flex-col gap-2">
+      <p className="text-foreground-muted dark:text-dark-foreground-muted">
+        File pathname: {path}.yaml
+      </p>
       <AceEditor value={yamlContent} mode="yaml" readOnly />
       <Button type="primary" className="ml-auto" onClick={handleFinish}>
         {buttonLabel}

@@ -28,8 +28,7 @@ export const ReviewForm = ({
     );
   }
 
-  const { requestBody, uploadedColumns, schemaColumns } =
-    transformFormDataToRequestBody(values);
+  const { requestBody } = transformFormDataToRequestBody(values);
 
   const handleFinish = () => {
     onFinish?.(values);
@@ -52,9 +51,8 @@ export const ReviewForm = ({
 
       {selectedLayout === 'table' && (
         <TableLayout
-          values={requestBody}
-          uploadedColumns={uploadedColumns}
-          schemaColumns={schemaColumns}
+          formValues={values}
+          requestBody={requestBody}
           onFinish={handleFinish}
           buttonLabel={buttonLabel}
         />

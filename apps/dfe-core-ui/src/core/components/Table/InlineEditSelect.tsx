@@ -18,14 +18,24 @@ const valueSignature = (v: unknown) =>
 
 const transformLabel = (label: string | string[]) => {
   if (Array.isArray(label) && label.length === 0) {
-    return 'None';
+    return (
+      <span className="text-foreground/40 dark:text-dark-foreground/40">
+        None
+      </span>
+    );
   }
 
   if (Array.isArray(label) && label.length > 0) {
     return label?.map((item: string) => <Tag key={item}>{item}</Tag>);
   }
 
-  return label || 'None';
+  return label ? (
+    label
+  ) : (
+    <span className="text-foreground/40 dark:text-dark-foreground/40">
+      None
+    </span>
+  );
 };
 
 export const InlineEditSelect = ({

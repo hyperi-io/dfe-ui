@@ -68,7 +68,15 @@ export const CreateSchemaDrawer = ({
   const handleReview = (values: CreateSchemaFormData) => {
     setDrawerTitle(
       <div className="flex items-center gap-2">
-        <Button icon={<IconChevronsLeft />} onClick={handleGoBack} />
+        <Button
+          className="text-tertiary! hover:text-tertiary/70! p-0"
+          icon={<IconChevronsLeft />}
+          onClick={handleGoBack}
+          type="link"
+          color="blue"
+        >
+          Back
+        </Button>
         Review Schema
       </div>,
     );
