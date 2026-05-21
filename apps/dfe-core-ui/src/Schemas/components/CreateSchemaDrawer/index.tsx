@@ -74,6 +74,14 @@ export const CreateSchemaDrawer = ({
           buttonLabel={title}
           onFinish={handleFinish}
           isPending={isCreatingSchema}
+          disabledFields={{
+            type: true,
+            version: true,
+          }}
+          initialValues={{
+            type: 'model',
+            version: '1.0.0',
+          }}
         />
       </Drawer>
     </>

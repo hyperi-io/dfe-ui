@@ -13,7 +13,11 @@ const getRcFileFromUploadInfo = (
   info.file?.originFileObj ?? info.fileList.at(-1)?.originFileObj;
 
 /** Subscribes only this subtree to `uploadType` so Tabs / uploaded table do not rerender on radio change. */
-export const SchemaUploadFileSection = () => {
+export const SchemaUploadFileSection = ({
+  onUpload,
+}: {
+  onUpload?: () => void;
+}) => {
   const { form, formValidation, handleSetUploadedSchemaColumns } =
     useCreateSchemaFormContext();
   const { mutate: convertElasticSchema } = useElasticConvert({
@@ -73,6 +77,8 @@ export const SchemaUploadFileSection = () => {
 
       convertElasticSchema({ file }); // Data upload happens in the mutation onSuccess
     }
+
+    onUpload?.();
   };
 
   return (
