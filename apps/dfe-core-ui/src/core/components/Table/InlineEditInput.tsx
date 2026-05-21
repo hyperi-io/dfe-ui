@@ -9,7 +9,13 @@ interface InlineEditInputProps extends InputProps {
 }
 
 const transformLabel = (label: string) => {
-  return label || 'None';
+  return label ? (
+    label
+  ) : (
+    <span className="text-foreground/40 dark:text-dark-foreground/40">
+      None
+    </span>
+  );
 };
 
 const valueSignature = (v: unknown) =>

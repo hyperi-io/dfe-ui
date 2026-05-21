@@ -2,41 +2,58 @@ import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
+import {
+  CreateSchemaReviewProvider,
+  useCreateSchemaReviewContext,
+} from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
-import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
+import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { transformFormDataToRequestBody } from './CreateSchemaDrawer.helpers';
 
-export const CreateSchemaDrawer = ({
-  open,
-  onClose,
-}: {
+interface CreateSchemaDrawerProps {
   open?: boolean;
   onClose?: () => void;
-}) => {
-  const title = 'Add Schema';
-  const [api, contextHolder] = notification.useNotification();
-  const [isDrawerVisible, setIsDrawerVisible] = useState(open);
+}
+
+export const CreateSchemaDrawerBase = ({
+  open,
+  onClose,
+}: CreateSchemaDrawerProps) => {
+  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(
+    open ?? false,
+  );
+
+  const {
+    drawerTitle,
+    isReviewing,
+    buttonLabel,
+    reviewValues,
+    handleReview,
+    handleReset,
+  } = useCreateSchemaReviewContext();
+
+  const [api, notificationContextHolder] = notification.useNotification();
 
   const handleClose = () => {
     setIsDrawerVisible(false);
+    handleReset();
     onClose?.();
   };
 
-  const {
-    refetch: refetchSchemas,
-    setSelectedSchemaPath,
-    setSelectedSchemaVersion,
-  } = useListSchemasContext();
+  const { refetch: refetchSchemas, setSelectedSchema } =
+    useListSchemasContext();
 
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
       onSuccess: ({ path, current }) => {
-        setSelectedSchemaPath(path ?? null);
-        setSelectedSchemaVersion(current);
+        setSelectedSchema({
+          schema_path: path ?? null,
+          schema_version: current,
+        });
         refetchSchemas();
         api.success({
           title: 'Schema created successfully',
@@ -47,35 +64,61 @@ export const CreateSchemaDrawer = ({
     },
   );
 
-  const handleFinish = (values: CreateSchemaFormData) => {
-    const requestBody: SchemaCreateRequest =
-      transformFormDataToRequestBody(values);
+  const handleSubmit = (values: CreateSchemaFormData) => {
+    const { requestBody } = transformFormDataToRequestBody(values);
     createSchema(requestBody);
   };
 
   return (
     <>
-      {contextHolder}
+      {notificationContextHolder}
       <Button
         type="default"
         className="border border-tertiary text-tertiary"
         icon={<IconPlus className="text-tertiary" />}
         onClick={() => setIsDrawerVisible(true)}
       >
-        {title}
+        Add Schema
       </Button>
       <Drawer
-        title={title}
+        title={drawerTitle}
         open={isDrawerVisible}
         size="80%"
         onClose={handleClose}
       >
-        <CreateSchemaForm
-          buttonLabel={title}
-          onFinish={handleFinish}
-          isPending={isCreatingSchema}
-        />
+        <div className={isReviewing ? 'hidden' : undefined}>
+          <CreateSchemaForm
+            buttonLabel={buttonLabel}
+            onFinish={handleReview}
+            isPending={isCreatingSchema}
+            disabledFields={{
+              type: true,
+              version: true,
+            }}
+            initialValues={
+              reviewValues ?? {
+                type: 'model',
+                version: '1.0.0',
+              }
+            }
+          />
+        </div>
+        {isReviewing && (
+          <ReviewForm
+            values={reviewValues}
+            buttonLabel={buttonLabel}
+            onFinish={handleSubmit}
+          />
+        )}
       </Drawer>
     </>
+  );
+};
+
+export const CreateSchemaDrawer = ({ ...props }: CreateSchemaDrawerProps) => {
+  return (
+    <CreateSchemaReviewProvider>
+      <CreateSchemaDrawerBase {...props} />
+    </CreateSchemaReviewProvider>
   );
 };

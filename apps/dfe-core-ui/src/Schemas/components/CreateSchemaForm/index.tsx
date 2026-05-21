@@ -15,6 +15,10 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   hasReset?: boolean;
   isPending?: boolean;
   buttonLabel?: string;
+  disabledFields?: {
+    [key in keyof CreateSchemaFormData]?: boolean;
+  };
+  initialValues?: Partial<CreateSchemaFormData>;
 }
 
 const CreateSchemaFormBase = ({
@@ -22,6 +26,8 @@ const CreateSchemaFormBase = ({
   isPending = false,
   buttonLabel = 'Save',
   onFinish: onFinishProp,
+  initialValues,
+  disabledFields,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -85,6 +91,7 @@ const CreateSchemaFormBase = ({
         setFormError(null);
         handleFormValuesChange(changedValues, allValues);
       }}
+      initialValues={initialValues}
     >
       <div className="flex gap-2 w-full">
         <Form.Item
@@ -94,7 +101,7 @@ const CreateSchemaFormBase = ({
           label="Path"
           tooltip="Prepends the file name in the directory structure"
         >
-          <Input placeholder="Enter path" />
+          <Input placeholder="Enter path" disabled={disabledFields?.path} />
         </Form.Item>
 
         <Form.Item
@@ -103,7 +110,7 @@ const CreateSchemaFormBase = ({
           label="Name"
           rules={[formValidation]}
         >
-          <Input placeholder="Enter name" />
+          <Input placeholder="Enter name" disabled={disabledFields?.name} />
         </Form.Item>
       </div>
       <div className="flex gap-2 w-full">
@@ -113,7 +120,11 @@ const CreateSchemaFormBase = ({
           label="Type"
           rules={[formValidation]}
         >
-          <Select options={TYPE_OPTIONS} placeholder="Select type" />
+          <Select
+            options={TYPE_OPTIONS}
+            placeholder="Select type"
+            disabled={disabledFields?.type}
+          />
         </Form.Item>
 
         <Form.Item
@@ -122,7 +133,7 @@ const CreateSchemaFormBase = ({
           label="Version"
           rules={[formValidation]}
         >
-          <Input placeholder="Enter version" />
+          <Input disabled={disabledFields?.version} />
         </Form.Item>
       </div>
 
@@ -131,10 +142,13 @@ const CreateSchemaFormBase = ({
         label="Description"
         rules={[formValidation]}
       >
-        <Input.TextArea placeholder="Enter description" />
+        <Input.TextArea
+          placeholder="Enter description"
+          disabled={disabledFields?.description}
+        />
       </Form.Item>
 
-      <SchemaUploadCollapse />
+      <SchemaUploadCollapse disabledFields={disabledFields} />
 
       {formError && <FormNotification type="error" text={formError} />}
 

@@ -19,13 +19,11 @@ const baseSchema = (
 
 describe('useTransformSchemaToTree', () => {
   it('returns an empty tree for empty schema_objects', () => {
-    const setPath = vi.fn();
-    const setVersion = vi.fn();
+    const setSelectedSchema = vi.fn();
     const { result } = renderHook(() =>
       useTransformSchemaToTree({
         schemaObjects: {},
-        setSelectedSchemaPath: setPath,
-        setSelectedSchemaVersion: setVersion,
+        setSelectedSchema,
       }),
     );
 
@@ -33,8 +31,7 @@ describe('useTransformSchemaToTree', () => {
   });
 
   it('maps nested children and schemas into TreeDataNode keys and hierarchy', () => {
-    const setPath = vi.fn();
-    const setVersion = vi.fn();
+    const setSelectedSchema = vi.fn();
 
     const schema_objects: SchemaSummary = {
       children: {
@@ -67,8 +64,7 @@ describe('useTransformSchemaToTree', () => {
     const { result } = renderHook(() =>
       useTransformSchemaToTree({
         schemaObjects: schema_objects,
-        setSelectedSchemaPath: setPath,
-        setSelectedSchemaVersion: setVersion,
+        setSelectedSchema,
       }),
     );
 
@@ -107,8 +103,7 @@ describe('useTransformSchemaToTree', () => {
         schemaObjects: {
           schemas: [baseSchema({ name: 'solo.schema', versions: [] })],
         },
-        setSelectedSchemaPath: vi.fn(),
-        setSelectedSchemaVersion: vi.fn(),
+        setSelectedSchema: vi.fn(),
       }),
     );
 
@@ -121,29 +116,24 @@ describe('useTransformSchemaToTree', () => {
     const schema_objects: SchemaSummary = {
       schemas: [baseSchema({ name: 'a' })],
     };
-    const setPath = vi.fn();
-    const setVersion = vi.fn();
+    const setSelectedSchema = vi.fn();
 
     const { result, rerender } = renderHook(
       ({
         schema,
-        onPath,
-        onVersion,
+        onSelect,
       }: {
         schema: SchemaSummary;
-        onPath: typeof setPath;
-        onVersion: typeof setVersion;
+        onSelect: typeof setSelectedSchema;
       }) =>
         useTransformSchemaToTree({
           schemaObjects: schema,
-          setSelectedSchemaPath: onPath,
-          setSelectedSchemaVersion: onVersion,
+          setSelectedSchema: onSelect,
         }),
       {
         initialProps: {
           schema: schema_objects,
-          onPath: setPath,
-          onVersion: setVersion,
+          onSelect: setSelectedSchema,
         },
       },
     );
@@ -151,8 +141,7 @@ describe('useTransformSchemaToTree', () => {
     const first = result.current;
     rerender({
       schema: schema_objects,
-      onPath: setPath,
-      onVersion: setVersion,
+      onSelect: setSelectedSchema,
     });
     expect(result.current).toBe(first);
 
@@ -161,8 +150,7 @@ describe('useTransformSchemaToTree', () => {
     };
     rerender({
       schema: nextObjects,
-      onPath: setPath,
-      onVersion: setVersion,
+      onSelect: setSelectedSchema,
     });
     expect(result.current[0].key).toBe('b');
     expect(result.current).not.toBe(first);

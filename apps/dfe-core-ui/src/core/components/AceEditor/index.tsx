@@ -12,6 +12,13 @@ import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-github_dark';
 import 'ace-builds/src-noconflict/theme-github_light_default';
+const SUPPORTED_ACE_BEAUTIFY_MODES = new Set([
+  'css',
+  'html',
+  'javascript',
+  'php',
+]);
+
 interface AceEditorProps extends React.ComponentPropsWithRef<
   typeof ReactAceEditor
 > {
@@ -22,6 +29,7 @@ export const AceEditor = ({
   className,
   'aria-invalid': ariaInvalid,
   editorProps,
+  mode = 'json',
   onLoad,
   ...props
 }: AceEditorProps) => {
@@ -32,10 +40,20 @@ export const AceEditor = ({
   };
 
   const handleOnLoad = (editor: Editor) => {
-    if (onLoad) {
-      onLoad(editor);
+    onLoad?.(editor);
+
+    /**
+     * Only beautify if the mode is supported
+     * YAML is not supported by ace-beautify and is handled by the yaml library
+     * which is already beautified
+     *
+     * If beautify is run on YAML it strips the whitespace from the YAML file
+     * causing the YAML file to be invalid
+     */
+    const modeSlug = typeof mode === 'string' ? mode : '';
+    if (modeSlug && SUPPORTED_ACE_BEAUTIFY_MODES.has(modeSlug)) {
+      beautifyContent(editor);
     }
-    beautifyContent(editor);
   };
 
   return (
@@ -58,6 +76,7 @@ export const AceEditor = ({
       enableSnippets
       enableBasicAutocompletion
       enableLiveAutocompletion
+      mode={mode}
       onLoad={handleOnLoad}
       {...props}
     />

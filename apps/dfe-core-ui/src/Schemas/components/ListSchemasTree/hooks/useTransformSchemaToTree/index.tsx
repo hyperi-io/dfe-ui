@@ -7,11 +7,13 @@ const formatSegmentTitle = (segment: string): string => segment;
 
 const buildVersionChildren = (
   schema: NonNullable<SchemaSummary['schemas']>[number],
-  setSelectedSchemaPath: (schema_path: string | null) => void,
-  setSelectedSchemaVersion: (
-    schema_version: string | null,
-    schema_path?: string | null,
-  ) => void,
+  setSelectedSchema: ({
+    schema_path,
+    schema_version,
+  }: {
+    schema_path: string | null;
+    schema_version: string | null;
+  }) => void,
 ): TreeDataNode[] =>
   (schema.versions ?? []).map((version) => ({
     key: `${schema.name}.${version}`,
@@ -19,7 +21,10 @@ const buildVersionChildren = (
       <Typography.Text
         onClick={(e) => {
           e.stopPropagation();
-          setSelectedSchemaVersion(version, schema.name);
+          setSelectedSchema({
+            schema_path: schema.name,
+            schema_version: version,
+          });
         }}
         className="cursor-pointer flex items-center gap-x-2"
       >
@@ -37,31 +42,28 @@ const buildVersionChildren = (
 const schemaSummaryToTreeData = (
   node: SchemaSummary,
   pathSegments: string[],
-  setSelectedSchemaPath: (schema_path: string | null) => void,
-  setSelectedSchemaVersion: (
-    schema_version: string | null,
-    schema_path?: string | null,
-  ) => void,
+  setSelectedSchema: ({
+    schema_path,
+    schema_version,
+  }: {
+    schema_path: string | null;
+    schema_version: string | null;
+  }) => void,
 ): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
   for (const schema of node.schemas ?? []) {
-    const versionChildren = buildVersionChildren(
-      schema,
-      setSelectedSchemaPath,
-      setSelectedSchemaVersion,
-    );
+    const versionChildren = buildVersionChildren(schema, setSelectedSchema);
     out.push({
       key: schema.name,
       title: (
         <Typography.Text
           onClick={(e) => {
             e.stopPropagation();
-            setSelectedSchemaPath(schema.name);
-            setSelectedSchemaVersion(
-              schema.current ?? schema.versions?.[0] ?? null,
-              schema.name,
-            );
+            setSelectedSchema({
+              schema_path: schema.name,
+              schema_version: null,
+            });
           }}
           className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
         >
@@ -82,8 +84,7 @@ const schemaSummaryToTreeData = (
     const nested = schemaSummaryToTreeData(
       child,
       nextSegments,
-      setSelectedSchemaPath,
-      setSelectedSchemaVersion,
+      setSelectedSchema,
     );
 
     if (nested.length === 0) {
@@ -102,23 +103,18 @@ const schemaSummaryToTreeData = (
 
 export const useTransformSchemaToTree = ({
   schemaObjects,
-  setSelectedSchemaPath,
-  setSelectedSchemaVersion,
+  setSelectedSchema,
 }: {
   schemaObjects: SchemaSummary;
-  setSelectedSchemaPath: (schema_path: string | null) => void;
-  setSelectedSchemaVersion: (
-    schema_version: string | null,
-    schema_path?: string | null,
-  ) => void;
+  setSelectedSchema: ({
+    schema_path,
+    schema_version,
+  }: {
+    schema_path: string | null;
+    schema_version: string | null;
+  }) => void;
 }) =>
   useMemo(
-    () =>
-      schemaSummaryToTreeData(
-        schemaObjects,
-        [],
-        setSelectedSchemaPath,
-        setSelectedSchemaVersion,
-      ),
-    [schemaObjects, setSelectedSchemaPath, setSelectedSchemaVersion],
+    () => schemaSummaryToTreeData(schemaObjects, [], setSelectedSchema),
+    [schemaObjects, setSelectedSchema],
   );
