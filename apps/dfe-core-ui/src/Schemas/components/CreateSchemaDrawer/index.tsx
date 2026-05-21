@@ -34,6 +34,7 @@ export const CreateSchemaDrawerBase = ({
     reviewValues,
     handleReview,
     handleReset,
+    setFormErrorMessage,
   } = useCreateSchemaReviewContext();
 
   const [api, notificationContextHolder] = notification.useNotification();
@@ -60,6 +61,9 @@ export const CreateSchemaDrawerBase = ({
           placement: 'bottomLeft',
         });
         handleClose();
+      },
+      onError: (error) => {
+        setFormErrorMessage(error?.message ?? 'An unexpected error occurred');
       },
     },
   );
