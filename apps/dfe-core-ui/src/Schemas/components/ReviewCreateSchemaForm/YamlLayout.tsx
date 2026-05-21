@@ -1,4 +1,5 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { Button } from 'antd';
 import { useMemo } from 'react';
@@ -15,6 +16,8 @@ export const YamlLayout = ({
   buttonLabel,
   onFinish,
 }: YamlLayoutProps) => {
+  const { handleGoBack } = useCreateSchemaReviewContext();
+
   const { path, ...restValues } = values;
   const yamlContent = useMemo(
     () =>
@@ -37,9 +40,14 @@ export const YamlLayout = ({
         {path}.yaml
       </p>
       <AceEditor value={yamlContent} mode="yaml" readOnly />
-      <Button type="primary" className="ml-auto" onClick={handleFinish}>
-        {buttonLabel}
-      </Button>
+      <div className="flex flex-row gap-2 items-center ml-auto">
+        <Button type="default" onClick={handleGoBack}>
+          Back
+        </Button>
+        <Button type="primary" className="ml-auto" onClick={handleFinish}>
+          {buttonLabel}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
 import { Button, Select, Table, Tooltip } from 'antd';
@@ -40,6 +41,8 @@ export const TableLayout = ({
   buttonLabel,
 }: TableLayoutProps) => {
   const [showVersion, setShowVersion] = useState<string>(requestBody.current);
+
+  const { handleGoBack } = useCreateSchemaReviewContext();
 
   const { componentHeight } = useSetComponentHeight({
     offset: 380,
@@ -191,10 +194,14 @@ export const TableLayout = ({
         }}
         scroll={{ y: componentHeight }}
       />
-
-      <Button type="primary" className="ml-auto" onClick={handleFinish}>
-        {buttonLabel}
-      </Button>
+      <div className="flex flex-row gap-2 items-center ml-auto">
+        <Button type="default" onClick={handleGoBack}>
+          Back
+        </Button>
+        <Button type="primary" className="ml-auto" onClick={handleFinish}>
+          {buttonLabel}
+        </Button>
+      </div>
     </div>
   );
 };
