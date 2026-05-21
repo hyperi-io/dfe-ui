@@ -175,6 +175,7 @@ export const TableLayout = ({
       <Table
         columns={tableColumns}
         dataSource={allColumns}
+        rowKey="name"
         pagination={{
           defaultPageSize: 50,
           showSizeChanger: true,
