@@ -91,23 +91,40 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = (
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
       return {
-        items: [],
-        schema_objects: {},
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        path: '',
+        current: '',
+        selected: '',
+        versions: [] as string[],
+        version: {
+          date: '',
+          type: '',
+          summary: '',
+          columns: {
+            items: [],
+            total: 0,
+            page: 1,
+            per_page: per_page ?? 10,
+            total_pages: 0,
+            next_page: null as number | null,
+            prev_page: null as number | null,
+          },
+        },
       };
     }
 
+    const firstPage = data.pages[0];
     const allItems = data.pages.flatMap(
       (page) => page.version.columns.items || [],
     );
     return {
-      ...data.pages[0],
-      items: allItems,
+      ...firstPage,
+      version: {
+        ...firstPage.version,
+        columns: {
+          ...firstPage.version.columns,
+          items: allItems,
+        },
+      },
     };
   }, [data, per_page]);
 
