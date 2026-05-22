@@ -1,13 +1,14 @@
 import { cn } from '@/core/utils/style';
 import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
-import { IconStarFilled } from '@repo/dfe-icons';
+import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
 import { Tooltip, TreeDataNode, Typography } from 'antd';
 import { useMemo } from 'react';
 
 const selectedTitleClassName =
   'text-tertiary! dark:text-dark-foreground! font-semibold';
 
-const formatSegmentTitle = (segment: string): string => segment;
+const folderIcon = <IconFolder className="shrink-0" />;
+const fileIcon = <IconFile className="shrink-0" />;
 
 /** Folder keys (dot-separated) plus schema key when a version is selected. */
 export const getExpandedKeysForSchemaSelection = (
@@ -95,6 +96,7 @@ const schemaSummaryToTreeData = (
       selectedSchemaPath,
       selectedSchemaVersion,
     );
+    const schemaIsLeaf = versionChildren.length === 0;
     out.push({
       key: schema.name,
       title: (
@@ -113,11 +115,12 @@ const schemaSummaryToTreeData = (
               selectedTitleClassName,
           )}
         >
+          {fileIcon}
           {schema.name.split('/').pop()}
         </Typography.Text>
       ),
       children: versionChildren.length > 0 ? versionChildren : undefined,
-      isLeaf: versionChildren.length === 0,
+      isLeaf: schemaIsLeaf,
     });
   }
 
@@ -141,7 +144,12 @@ const schemaSummaryToTreeData = (
 
     out.push({
       key: nextSegments.join('.'),
-      title: formatSegmentTitle(segment),
+      title: (
+        <Typography.Text className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap">
+          {folderIcon}
+          {segment}
+        </Typography.Text>
+      ),
       children: nested,
     });
   }
