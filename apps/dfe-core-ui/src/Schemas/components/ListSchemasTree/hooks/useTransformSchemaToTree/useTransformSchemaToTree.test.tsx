@@ -16,6 +16,11 @@ const baseSchema = (
   ...overrides,
 });
 
+const defaultSelection = {
+  selectedSchemaPath: null as string | null,
+  selectedSchemaVersion: null as string | null,
+};
+
 describe('useTransformSchemaToTree', () => {
   it('returns an empty tree for empty schema_objects', () => {
     const setSelectedSchema = vi.fn();
@@ -23,6 +28,7 @@ describe('useTransformSchemaToTree', () => {
       useTransformSchemaToTree({
         schemaObjects: {},
         setSelectedSchema,
+        ...defaultSelection,
       }),
     );
 
@@ -64,6 +70,7 @@ describe('useTransformSchemaToTree', () => {
       useTransformSchemaToTree({
         schemaObjects: schema_objects,
         setSelectedSchema,
+        ...defaultSelection,
       }),
     );
 
@@ -103,6 +110,7 @@ describe('useTransformSchemaToTree', () => {
           schemas: [baseSchema({ name: 'solo.schema', versions: [] })],
         },
         setSelectedSchema: vi.fn(),
+        ...defaultSelection,
       }),
     );
 
@@ -128,6 +136,8 @@ describe('useTransformSchemaToTree', () => {
         useTransformSchemaToTree({
           schemaObjects: schema,
           setSelectedSchema: onSelect,
+          selectedSchemaPath: null,
+          selectedSchemaVersion: null,
         }),
       {
         initialProps: {

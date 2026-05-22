@@ -12,6 +12,8 @@ export const SchemaList = ({ className }: { className?: string }) => {
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSchema,
+    selectedSchemaPath,
+    selectedSchemaVersion,
     filters,
     hasFilters,
     setFilters,
@@ -20,6 +22,8 @@ export const SchemaList = ({ className }: { className?: string }) => {
   const treeData = useTransformSchemaToTree({
     schemaObjects,
     setSelectedSchema,
+    selectedSchemaPath,
+    selectedSchemaVersion,
   });
 
   if (schemas.length === 0) {
