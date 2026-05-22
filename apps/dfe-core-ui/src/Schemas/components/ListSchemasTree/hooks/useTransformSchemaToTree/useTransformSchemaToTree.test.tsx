@@ -2,7 +2,7 @@ import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/t
 import { components } from '@repo/dfe-engine-types';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { useTransformSchemaToTree } from '.';
+import { getExpandedKeysForSchemaSelection, useTransformSchemaToTree } from '.';
 
 type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
 
@@ -20,6 +20,29 @@ const defaultSelection = {
   selectedSchemaPath: null as string | null,
   selectedSchemaVersion: null as string | null,
 };
+
+describe('getExpandedKeysForSchemaSelection', () => {
+  it('returns folder keys and schema key for a nested path with a version', () => {
+    expect(
+      getExpandedKeysForSchemaSelection(
+        'azure/activity_log/schema1',
+        'v1',
+      ),
+    ).toEqual(['azure', 'azure.activity_log', 'azure/activity_log/schema1']);
+  });
+
+  it('returns only folder keys when no version is selected', () => {
+    expect(
+      getExpandedKeysForSchemaSelection('azure/activity_log/schema1', null),
+    ).toEqual(['azure', 'azure.activity_log']);
+  });
+
+  it('returns schema key only for a root-level schema with a version', () => {
+    expect(getExpandedKeysForSchemaSelection('solo.schema', 'v1')).toEqual([
+      'solo.schema',
+    ]);
+  });
+});
 
 describe('useTransformSchemaToTree', () => {
   it('returns an empty tree for empty schema_objects', () => {

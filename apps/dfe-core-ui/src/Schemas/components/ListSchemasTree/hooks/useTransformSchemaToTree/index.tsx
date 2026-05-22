@@ -9,6 +9,29 @@ const selectedTitleClassName =
 
 const formatSegmentTitle = (segment: string): string => segment;
 
+/** Folder keys (dot-separated) plus schema key when a version is selected. */
+export const getExpandedKeysForSchemaSelection = (
+  schemaPath: string | null,
+  schemaVersion: string | null,
+): string[] => {
+  if (!schemaPath) {
+    return [];
+  }
+
+  const segments = schemaPath.split('/');
+  const keys: string[] = [];
+
+  for (let i = 0; i < segments.length - 1; i++) {
+    keys.push(segments.slice(0, i + 1).join('.'));
+  }
+
+  if (schemaVersion) {
+    keys.push(schemaPath);
+  }
+
+  return keys;
+};
+
 const buildVersionChildren = (
   schema: NonNullable<SchemaSummary['schemas']>[number],
   setSelectedSchema: ({
@@ -85,7 +108,9 @@ const schemaSummaryToTreeData = (
           }}
           className={cn(
             'flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap',
-            selectedSchemaPath === schema.name && selectedTitleClassName,
+            selectedSchemaPath === schema.name &&
+              selectedSchemaVersion === schema.current &&
+              selectedTitleClassName,
           )}
         >
           {schema.name.split('/').pop()}
