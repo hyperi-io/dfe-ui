@@ -1,12 +1,11 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import * as csvHelpers from './csvConvert.helpers';
+import { describe, expect, test } from 'vitest';
 import { convertCsv } from './index';
 
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
 describe('convertCsv', () => {
+  test('returns empty array when file is missing', async () => {
+    await expect(convertCsv(undefined as unknown as File)).resolves.toEqual([]);
+  });
+
   test('throws when value is not a File', async () => {
     await expect(
       convertCsv(new Blob(['a']) as unknown as File),
@@ -40,11 +39,8 @@ describe('convertCsv', () => {
     ]);
   });
 
-  test('rethrows parse errors as a user-facing message', async () => {
-    vi.spyOn(csvHelpers, 'parseCsvToObjects').mockImplementation(() => {
-      throw new Error('internal parse failure');
-    });
-    const f = new File(['x'], 'data.csv', { type: 'text/csv' });
-    await expect(convertCsv(f)).rejects.toThrow('Could not parse CSV content.');
+  test('accepts .csv by filename when MIME is empty', async () => {
+    const f = new File(['k,v\na,b'], 'export.csv', { type: '' });
+    await expect(convertCsv(f)).resolves.toEqual([{ k: 'a', v: 'b' }]);
   });
 });

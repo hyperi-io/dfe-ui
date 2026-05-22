@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isCsvFile, parseCsvToObjects } from './csvConvert.helpers';
+import { isCsvFile, isJsonFile } from './csvConvert.helpers';
 
 const file = (
   name: string,
@@ -47,58 +47,42 @@ describe('isCsvFile', () => {
   });
 });
 
-describe('parseCsvToObjects', () => {
-  test('returns empty array for empty input', () => {
-    expect(parseCsvToObjects('')).toEqual([]);
+describe('isJsonFile', () => {
+  test('returns true for application/json MIME', () => {
+    expect(isJsonFile(file('data.xml', [], 'application/json'))).toBe(true);
   });
 
-  test('strips BOM and parses headers and rows', () => {
-    const csv = '\uFEFFname,value\na,1\nb,2';
-    expect(parseCsvToObjects(csv)).toEqual([
-      { name: 'a', value: '1' },
-      { name: 'b', value: '2' },
-    ]);
+  test('strips parameters from MIME (e.g. charset)', () => {
+    expect(
+      isJsonFile(file('x.json', [], 'application/json; charset=utf-8')),
+    ).toBe(true);
   });
 
-  test('trims header names', () => {
-    expect(parseCsvToObjects('  id  , label \n1,x')).toEqual([
-      { id: '1', label: 'x' },
-    ]);
+  test('returns false for non-JSON MIME when extension is not .json', () => {
+    expect(isJsonFile(file('data.txt', [], 'text/plain'))).toBe(false);
   });
 
-  test('skips columns with empty header keys', () => {
-    const result = parseCsvToObjects('a,,b\n1,2,3');
-    expect(result).toEqual([{ a: '1', b: '3' }]);
-    expect('' in result[0]!).toBe(false);
+  test('returns true for .json with empty type', () => {
+    expect(isJsonFile(file('export.json', [], ''))).toBe(true);
   });
 
-  test('handles quoted fields with commas', () => {
-    const csv = 'col\n"a, b"';
-    expect(parseCsvToObjects(csv)).toEqual([{ col: 'a, b' }]);
+  test('returns true for .json with application/octet-stream', () => {
+    expect(
+      isJsonFile(file('export.json', [], 'application/octet-stream')),
+    ).toBe(true);
   });
 
-  test('handles escaped quotes (doubled double-quotes)', () => {
-    const csv = 'col\n"""hello"""';
-    expect(parseCsvToObjects(csv)).toEqual([{ col: '"hello"' }]);
+  test('returns true for .json with text/plain', () => {
+    expect(isJsonFile(file('export.json', [], 'text/plain'))).toBe(true);
   });
 
-  test('handles newlines inside quoted fields', () => {
-    const csv = 'col\n"line1\nline2"';
-    expect(parseCsvToObjects(csv)).toEqual([{ col: 'line1\nline2' }]);
+  test('returns false for .json with unrelated MIME (e.g. image/png)', () => {
+    expect(isJsonFile(file('fake.json', [], 'image/png'))).toBe(false);
   });
 
-  test('ignores carriage returns outside quotes', () => {
-    const csv = 'a,b\r\n1,2\r\n';
-    expect(parseCsvToObjects(csv)).toEqual([{ a: '1', b: '2' }]);
-  });
-
-  test('drops trailing rows that are all empty cells', () => {
-    const csv = 'h\nv\n\n\n';
-    expect(parseCsvToObjects(csv)).toEqual([{ h: 'v' }]);
-  });
-
-  test('pads missing trailing columns with empty string', () => {
-    const csv = 'a,b,c\n1,2';
-    expect(parseCsvToObjects(csv)).toEqual([{ a: '1', b: '2', c: '' }]);
+  test('is case-insensitive on extension and MIME', () => {
+    expect(isJsonFile(file('Export.JSON', [], 'APPLICATION/JSON'))).toBe(
+      true,
+    );
   });
 });
