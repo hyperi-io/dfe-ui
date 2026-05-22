@@ -1,4 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { CreateSchemaReviewProvider } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { CreateSchemaForm } from './index';
@@ -9,7 +10,12 @@ vi.mock('./SchemaUploadCollapse', () => ({
   ),
 }));
 
-const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+const { wrapper } = buildTestWrapper()
+  .withTheme()
+  .withReactQuery()
+  .withWrapper(({ children }) => (
+    <CreateSchemaReviewProvider>{children}</CreateSchemaReviewProvider>
+  ));
 
 describe('CreateSchemaForm', () => {
   beforeEach(() => {
