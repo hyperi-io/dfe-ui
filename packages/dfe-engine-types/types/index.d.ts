@@ -1482,26 +1482,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/schemas/definitions/{schema_path}/versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add Meta Schema Version
-         * @description Add a new meta-schema version (bumps semver from current and sets it current).
-         */
-        post: operations["add_meta_schema_version_api_v1_schemas_definitions__schema_path__versions_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/schemas/definitions/{schema_path}": {
         parameters: {
             query?: never;
@@ -2806,23 +2786,6 @@ export interface components {
             path?: string | null;
         };
         /**
-         * MetaSchemaAddVersionRequest
-         * @description Add a new schema version (semver bump from current).
-         */
-        MetaSchemaAddVersionRequest: {
-            /**
-             * Type
-             * @description Change category (semver bump from current)
-             * @enum {string}
-             */
-            type: "model" | "addition" | "revision";
-            /**
-             * Columns
-             * @description Complete column snapshot for the new version
-             */
-            columns: components["schemas"]["SchemaColumn-Input"][];
-        };
-        /**
          * MetaSchemaGetResponse
          * @description Meta-schema definition for a single requested version.
          */
@@ -2833,12 +2796,12 @@ export interface components {
              */
             current: string;
             /**
-             * Selected
-             * @description Version id requested via query parameter
+             * Version
+             * @description Requested version id keyed to its metadata (single entry)
              */
-            selected: string;
-            /** @description Metadata and paginated columns for ``selected`` */
-            version: components["schemas"]["SchemaVersionGet"];
+            version: {
+                [key: string]: components["schemas"]["SchemaVersionGet"];
+            };
             /**
              * Path
              * @description Registry path (e.g. aws/cloudtrail)
@@ -2849,22 +2812,6 @@ export interface components {
              * @description All version identifiers defined on this schema
              */
             versions: string[];
-        };
-        /**
-         * MetaSchemaUpdateRequest
-         * @description Partial update for meta-schema metadata (current pointer or version summary).
-         */
-        MetaSchemaUpdateRequest: {
-            /**
-             * Current
-             * @description Set the schema's current version pointer
-             */
-            current?: string | null;
-            /**
-             * Summary
-             * @description Update summary on the version selected via query parameter
-             */
-            summary?: string | null;
         };
         /**
          * MetricEntry
@@ -7514,41 +7461,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetaSchemaGetResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    add_meta_schema_version_api_v1_schemas_definitions__schema_path__versions_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                schema_path: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MetaSchemaAddVersionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MetaSchema-Output"];
                 };
             };
             /** @description Validation Error */
