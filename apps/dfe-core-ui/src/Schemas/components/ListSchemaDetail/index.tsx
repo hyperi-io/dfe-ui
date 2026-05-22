@@ -1,18 +1,22 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useFetchSchemaDetail } from '@/Schemas/hooks/useFetchSchemaDetail';
+import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { notification, Spin, Typography } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 
 export const ListSchemaDetail = () => {
   const [_api, contextHolder] = notification.useNotification();
-  const { selectedSchemaPath: schema_path } = useListSchemasContext();
+  const { selectedSchemaPath: schema_path, selectedSchemaVersion: version } =
+    useListSchemasContext();
   const {
     data: schemaDetailData,
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
-  } = useFetchSchemaDetail({ schema_path: schema_path ?? '' });
+  } = useFetchInfiniteFilteredSchemaDetailColumns({
+    schema_path: schema_path ?? '',
+    version: version ?? '',
+  });
 
   if (isFetchingSchemaDetail)
     return (
