@@ -45,8 +45,6 @@ debug-storybook.log
 **/storybook-static/
 **/debug-storybook.log
 
-
-
 # Next.js generated types (often reformatted differently by Next vs Prettier)
 apps/dfe-core-ui/next-env.d.ts
 
@@ -64,4 +62,7 @@ STATE.md
 TODO.md
 docs/
 scripts/
+
+# Renovate
+renovate.json
 
