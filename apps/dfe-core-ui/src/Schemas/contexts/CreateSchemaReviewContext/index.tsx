@@ -17,6 +17,8 @@ interface CreateSchemaReviewContextValue {
   handleGoBack: () => void;
   handleReview: (values: CreateSchemaFormData) => void;
   handleReset: () => void;
+  formErrorMessage: string | null;
+  setFormErrorMessage: (formErrorMessage: string | null) => void;
 }
 
 export const CreateSchemaReviewContext =
@@ -36,13 +38,16 @@ export const CreateSchemaReviewProvider = ({
     null,
   );
 
+  const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
+
   const buttonLabel = isReviewing ? 'Create Schema' : 'Review Schema';
 
   const handleReset = useCallback(() => {
     setDrawerTitle('Add Schema');
     setIsReviewing(false);
     setReviewValues(null);
-  }, [setDrawerTitle, setIsReviewing, setReviewValues]);
+    setFormErrorMessage(null);
+  }, [setDrawerTitle, setIsReviewing, setReviewValues, setFormErrorMessage]);
 
   const handleGoBack = useCallback(() => {
     setDrawerTitle('Add Schema');
@@ -80,6 +85,8 @@ export const CreateSchemaReviewProvider = ({
       handleGoBack,
       handleReview,
       handleReset,
+      formErrorMessage,
+      setFormErrorMessage,
     }),
     [
       isReviewing,
@@ -89,6 +96,8 @@ export const CreateSchemaReviewProvider = ({
       handleGoBack,
       handleReview,
       handleReset,
+      formErrorMessage,
+      setFormErrorMessage,
     ],
   );
 

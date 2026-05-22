@@ -1,3 +1,4 @@
+import { FormNotification } from '@/core/components/FormNotification';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
@@ -42,7 +43,7 @@ export const TableLayout = ({
 }: TableLayoutProps) => {
   const [showVersion, setShowVersion] = useState<string>(requestBody.current);
 
-  const { handleGoBack } = useCreateSchemaReviewContext();
+  const { handleGoBack, formErrorMessage } = useCreateSchemaReviewContext();
 
   const { componentHeight } = useSetComponentHeight({
     offset: 380,
@@ -194,6 +195,10 @@ export const TableLayout = ({
         }}
         scroll={{ y: componentHeight }}
       />
+
+      {formErrorMessage && (
+        <FormNotification type="error" text={formErrorMessage} />
+      )}
       <div className="flex flex-row gap-2 items-center ml-auto">
         <Button type="default" onClick={handleGoBack}>
           Back

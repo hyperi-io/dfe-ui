@@ -1,4 +1,5 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { FormNotification } from '@/core/components/FormNotification';
 import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { Button } from 'antd';
@@ -16,7 +17,7 @@ export const YamlLayout = ({
   buttonLabel,
   onFinish,
 }: YamlLayoutProps) => {
-  const { handleGoBack } = useCreateSchemaReviewContext();
+  const { handleGoBack, formErrorMessage } = useCreateSchemaReviewContext();
 
   const { path, ...restValues } = values;
   const yamlContent = useMemo(
@@ -40,6 +41,10 @@ export const YamlLayout = ({
         {path}.yaml
       </p>
       <AceEditor value={yamlContent} mode="yaml" readOnly />
+
+      {formErrorMessage && (
+        <FormNotification type="error" text={formErrorMessage} />
+      )}
       <div className="flex flex-row gap-2 items-center ml-auto">
         <Button type="default" onClick={handleGoBack}>
           Back

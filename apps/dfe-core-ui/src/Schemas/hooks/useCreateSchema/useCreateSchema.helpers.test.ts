@@ -91,13 +91,11 @@ describe('transformFormDataToRequestBody', () => {
         type: 'String',
         attribute: ['nullable'],
         use_case: 'id',
-        expr: '',
         comment: 'note',
       },
       {
         name: 'col_b',
         type: 'UInt64',
-        attribute: [],
         use_case: 'count',
         expr: 'count()',
         comment: undefined,
@@ -138,7 +136,6 @@ describe('transformFormDataToRequestBody', () => {
           type: 'String',
           attribute: ['nullable'],
           use_case: 'id',
-          expr: '',
           comment: 'note',
         },
       ]);
@@ -168,7 +165,6 @@ describe('transformFormDataToRequestBody', () => {
         {
           name: 'col_b',
           type: 'UInt64',
-          attribute: [],
           use_case: 'count',
           expr: 'count()',
           comment: undefined,

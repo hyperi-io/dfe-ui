@@ -18,9 +18,11 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    ...(column.attribute ? { attribute: column.attribute } : {}),
-    use_case: column.use_case ?? '',
-    expr: column.expr ?? '',
+    ...(column.attribute && column.attribute.length > 0
+      ? { attribute: column.attribute }
+      : {}),
+    ...(column.use_case ? { use_case: column.use_case } : {}),
+    ...(column.expr ? { expr: column.expr } : {}),
     ...(column.comment ? { comment: column.comment } : {}),
   }));
 
@@ -29,9 +31,11 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    ...(column.attribute ? { attribute: column.attribute } : {}),
-    use_case: column.use_case ?? '',
-    expr: column.expr ?? '',
+    ...(column.attribute && column.attribute.length > 0
+      ? { attribute: column.attribute }
+      : {}),
+    ...(column.use_case ? { use_case: column.use_case } : {}),
+    ...(column.expr ? { expr: column.expr } : {}),
     ...(column.comment ? { comment: column.comment } : {}),
   }));
 
