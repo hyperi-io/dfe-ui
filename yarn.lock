@@ -4224,6 +4224,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/papaparse@npm:^5":
+  version: 5.5.2
+  resolution: "@types/papaparse@npm:5.5.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/27b097b6f8f204b20ade1f2cbf4798eb38caa5fbfa3180fd0faa5e3f9aea371c1786ae180d56f3287556463eefe3100c953e316ea6ee99d7ae1d04111cfc9e50
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:19.2.2":
   version: 19.2.2
   resolution: "@types/react-dom@npm:19.2.2"
@@ -6503,6 +6512,7 @@ __metadata:
     "@types/jsdom": "npm:^28"
     "@types/lodash": "npm:^4"
     "@types/node": "npm:^20"
+    "@types/papaparse": "npm:^5"
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
     "@types/react-highlight-words": "npm:^0"
@@ -6518,6 +6528,7 @@ __metadata:
     msw: "npm:^2.12.10"
     next: "npm:16.2.6"
     next-auth: "npm:^4.24.13"
+    papaparse: "npm:^5.5.3"
     react: "npm:19.2.3"
     react-ace: "npm:^14.0.1"
     react-dom: "npm:19.2.3"
@@ -10057,6 +10068,13 @@ __metadata:
   version: 1.0.11
   resolution: "pako@npm:1.0.11"
   checksum: 10c0/86dd99d8b34c3930345b8bbeb5e1cd8a05f608eeb40967b293f72fe469d0e9c88b783a8777e4cc7dc7c91ce54c5e93d88ff4b4f060e6ff18408fd21030d9ffbe
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.5.3":
+  version: 5.5.3
+  resolution: "papaparse@npm:5.5.3"
+  checksum: 10c0/623aae6a35703308fd5a39d616fb3837231ebc70697346355ea508154d3f24df75b6554b736afc1924192205518a5db14e75f5e1cf35d154326050a37cdd9447
   languageName: node
   linkType: hard
 

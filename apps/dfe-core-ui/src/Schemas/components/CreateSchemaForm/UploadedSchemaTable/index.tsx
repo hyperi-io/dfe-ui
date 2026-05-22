@@ -18,7 +18,7 @@ export const UploadedSchemaTable = () => {
 
       <div className="flex flex-col gap-y-2">
         {hasInvalidColumns && (
-          <label htmlFor="uploadedColumns">Valid Columns</label>
+          <label htmlFor="uploadedColumns">Uploaded Columns</label>
         )}
         <AddSchemaTable
           name="uploadedColumns"

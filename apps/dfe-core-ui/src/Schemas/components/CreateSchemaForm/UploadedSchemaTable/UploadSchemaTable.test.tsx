@@ -112,7 +112,7 @@ describe('UploadedSchemaTable', () => {
     expect(
       screen.queryByTestId('invalid-columns-table'),
     ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Valid Columns')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Uploaded Columns')).not.toBeInTheDocument();
     expect(screen.getByTestId('add-schema-table')).toHaveAttribute(
       'data-name',
       'uploadedColumns',
@@ -136,7 +136,7 @@ describe('UploadedSchemaTable', () => {
     );
   });
 
-  test('renders invalid columns section and valid columns label when invalid columns exist', () => {
+  test('renders invalid columns section and uploaded columns label when invalid columns exist', () => {
     const invalidParse = rowSchema.safeParse({
       ...validUploadedColumn,
       name: 'bad id!',
@@ -159,7 +159,7 @@ describe('UploadedSchemaTable', () => {
     renderUploadedSchemaTable();
 
     expect(screen.getByTestId('invalid-columns-table')).toBeInTheDocument();
-    expect(screen.getByText('Valid Columns')).toBeInTheDocument();
+    expect(screen.getByText('Uploaded Columns')).toBeInTheDocument();
     expect(screen.getByTestId('add-schema-table')).toBeInTheDocument();
   });
 

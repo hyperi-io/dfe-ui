@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { Button, FormProps, Input, Select } from 'antd';
-import { useState } from 'react';
 import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
@@ -37,7 +37,9 @@ const CreateSchemaFormBase = ({
     invalidUploadedSchemaColumns,
     handleFormValuesChange,
   } = useCreateSchemaFormContext();
-  const [formError, setFormError] = useState<string | null>(null);
+
+  const { formErrorMessage, setFormErrorMessage } =
+    useCreateSchemaReviewContext();
 
   const onFinish = (values: CreateSchemaFormData) => {
     const isUploadedColumnsValid = uploadedSchemaColumns
@@ -47,7 +49,7 @@ const CreateSchemaFormBase = ({
       .every((result) => result.success);
 
     if (!isUploadedColumnsValid || invalidUploadedSchemaColumns.length > 0) {
-      setFormError(
+      setFormErrorMessage(
         'There are validation errors in the uploaded columns. Please fix them and try again.',
       );
       return;
@@ -64,7 +66,7 @@ const CreateSchemaFormBase = ({
       .every((result) => result.success);
 
     if (!isSchemaColumnsValid) {
-      setFormError(
+      setFormErrorMessage(
         'There are validation errors in the schema columns. Please fix them and try again.',
       );
       return;
@@ -86,9 +88,14 @@ const CreateSchemaFormBase = ({
       className="h-[calc(100vh-120px)] css-custom-scrollbar"
       form={form}
       onFinish={onFinish}
+      onFinishFailed={() => {
+        setFormErrorMessage(
+          'There are validation errors in the form. Please fix them and try again.',
+        );
+      }}
       preserve
       onValuesChange={(changedValues, allValues) => {
-        setFormError(null);
+        setFormErrorMessage(null);
         handleFormValuesChange(changedValues, allValues);
       }}
       initialValues={initialValues}
@@ -150,7 +157,9 @@ const CreateSchemaFormBase = ({
 
       <SchemaUploadCollapse disabledFields={disabledFields} />
 
-      {formError && <FormNotification type="error" text={formError} />}
+      {formErrorMessage && (
+        <FormNotification type="error" text={formErrorMessage} />
+      )}
 
       <Form.Item className="flex justify-end">
         {hasReset && (
