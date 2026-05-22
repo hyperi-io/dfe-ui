@@ -81,8 +81,6 @@ describe('isJsonFile', () => {
   });
 
   test('is case-insensitive on extension and MIME', () => {
-    expect(isJsonFile(file('Export.JSON', [], 'APPLICATION/JSON'))).toBe(
-      true,
-    );
+    expect(isJsonFile(file('Export.JSON', [], 'APPLICATION/JSON'))).toBe(true);
   });
 });

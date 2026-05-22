@@ -20,7 +20,9 @@ describe('parseCsvToObjects', () => {
   test('skips empty lines', async () => {
     const file = new File(['a,b\n\n1,2\n'], 'data.csv', { type: 'text/csv' });
 
-    await expect(parseCsvToObjects(file)).resolves.toEqual([{ a: '1', b: '2' }]);
+    await expect(parseCsvToObjects(file)).resolves.toEqual([
+      { a: '1', b: '2' },
+    ]);
   });
 
   test('rejects when Papa reports row errors in complete', async () => {
