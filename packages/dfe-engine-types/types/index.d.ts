@@ -1476,10 +1476,10 @@ export interface paths {
         get: operations["get_meta_schema_api_v1_schemas_definitions__schema_path__get"];
         put?: never;
         /**
-         * Upsert Meta Schema
-         * @description Create or replace a meta-schema definition at the given registry path.
+         * Create Meta Schema
+         * @description Create a new meta-schema at the given registry path (parent path + schema name).
          */
-        post: operations["upsert_meta_schema_api_v1_schemas_definitions__schema_path__post"];
+        post: operations["create_meta_schema_api_v1_schemas_definitions__schema_path__post"];
         /**
          * Delete Meta Schema
          * @description Delete a meta-schema definition by registry path.
@@ -3380,18 +3380,17 @@ export interface components {
              * Attribute
              * @description Attributes of the column
              */
-            attribute?: string[];
+            attribute?: string[] | null;
             /**
              * Use Case
              * @description Use case of the column
-             * @default
              */
-            use_case: string;
+            use_case?: string | null;
             /**
              * Expr
              * @description Expression for the column
              */
-            expr: string;
+            expr?: string | null;
             /**
              * Comment
              * @description Comment for the column
@@ -4532,18 +4531,17 @@ export interface components {
              * Attribute
              * @description Attributes of the column
              */
-            attribute?: string[];
+            attribute?: string[] | null;
             /**
              * Use Case
              * @description Use case of the column
-             * @default
              */
-            use_case: string;
+            use_case?: string | null;
             /**
              * Expr
              * @description Expression for the column
              */
-            expr: string;
+            expr?: string | null;
             /**
              * Comment
              * @description Comment for the column
@@ -7376,12 +7374,9 @@ export interface operations {
             };
         };
     };
-    upsert_meta_schema_api_v1_schemas_definitions__schema_path__post: {
+    create_meta_schema_api_v1_schemas_definitions__schema_path__post: {
         parameters: {
-            query?: {
-                /** @description Optional git commit / change summary when the store is git-backed */
-                description?: string | null;
-            };
+            query?: never;
             header?: never;
             path: {
                 schema_path: string;
@@ -7395,7 +7390,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
