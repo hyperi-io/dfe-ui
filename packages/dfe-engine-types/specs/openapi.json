@@ -7478,13 +7478,14 @@
             "title": "Current",
             "description": "Current version of the schema"
           },
+          "selected": {
+            "type": "string",
+            "title": "Selected",
+            "description": "Version id requested via query parameter"
+          },
           "version": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/SchemaVersionGet"
-            },
-            "type": "object",
-            "title": "Version",
-            "description": "Requested version id keyed to its metadata (single entry)"
+            "$ref": "#/components/schemas/SchemaVersionGet",
+            "description": "Metadata and paginated columns for ``selected``"
           },
           "path": {
             "type": "string",
@@ -7503,6 +7504,7 @@
         "type": "object",
         "required": [
           "current",
+          "selected",
           "version",
           "path",
           "versions"

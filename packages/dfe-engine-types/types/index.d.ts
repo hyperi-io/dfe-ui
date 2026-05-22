@@ -2796,12 +2796,12 @@ export interface components {
              */
             current: string;
             /**
-             * Version
-             * @description Requested version id keyed to its metadata (single entry)
+             * Selected
+             * @description Version id requested via query parameter
              */
-            version: {
-                [key: string]: components["schemas"]["SchemaVersionGet"];
-            };
+            selected: string;
+            /** @description Metadata and paginated columns for ``selected`` */
+            version: components["schemas"]["SchemaVersionGet"];
             /**
              * Path
              * @description Registry path (e.g. aws/cloudtrail)
