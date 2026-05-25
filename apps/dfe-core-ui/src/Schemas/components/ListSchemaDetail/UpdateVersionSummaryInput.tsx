@@ -5,13 +5,13 @@ interface UpdateVersionSummaryInputProps {
   path: string;
   version: string;
   summary: string;
-  refetchSchemaDetail: () => void;
+  onSuccess?: () => void;
 }
 export const UpdateVersionSummaryInput = ({
   path,
   version,
   summary,
-  refetchSchemaDetail,
+  onSuccess,
 }: UpdateVersionSummaryInputProps) => {
   const {
     mutate: updateSchema,
@@ -20,7 +20,7 @@ export const UpdateVersionSummaryInput = ({
     reset,
   } = useUpdateSchema({
     onSuccess: () => {
-      void refetchSchemaDetail();
+      onSuccess?.();
     },
   });
 

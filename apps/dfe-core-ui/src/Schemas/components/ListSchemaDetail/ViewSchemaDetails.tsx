@@ -3,7 +3,7 @@ import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Select, Table } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
@@ -18,20 +18,19 @@ export const ViewSchemaDetails = ({
   path,
   refetchSchemaDetail,
 }: ViewSchemaDetailsProps) => {
-  const { selectedSchemaVersion, setSelectedSchema } = useListSchemasContext();
-  const [showVersion, setShowVersion] = useState<string>(
-    selectedSchemaVersion as string,
-  );
-
+  const {
+    selectedSchemaVersion,
+    setSelectedSchema,
+    refetch: refetchListSchemas,
+  } = useListSchemasContext();
   const handleSetSelectedSchema = useCallback(
     (version: string) => {
       setSelectedSchema({
         schema_path: path,
         schema_version: version,
       });
-      setShowVersion(version);
     },
-    [path, setSelectedSchema, setShowVersion],
+    [path, setSelectedSchema],
   );
 
   const { componentHeight } = useSetComponentHeight({
@@ -130,8 +129,11 @@ export const ViewSchemaDetails = ({
               versions={versions}
               path={path}
               currentVersion={currentVersion}
-              refetchSchemaDetail={refetchSchemaDetail}
-              handleSetSelectedSchema={handleSetSelectedSchema}
+              onSuccess={(values) => {
+                handleSetSelectedSchema(values.current);
+                void refetchListSchemas();
+                void refetchSchemaDetail();
+              }}
             />
           </dd>
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
@@ -140,9 +142,9 @@ export const ViewSchemaDetails = ({
           <dd>
             <UpdateVersionSummaryInput
               path={path}
-              version={showVersion}
+              version={selectedSchemaVersion ?? ''}
               summary={selectedVersion.summary}
-              refetchSchemaDetail={refetchSchemaDetail}
+              onSuccess={refetchSchemaDetail}
             />
           </dd>
         </dl>
@@ -152,7 +154,7 @@ export const ViewSchemaDetails = ({
           <Select
             className="w-48"
             options={versions}
-            value={showVersion}
+            value={selectedSchemaVersion}
             onChange={(value) => {
               handleSetSelectedSchema(value);
             }}

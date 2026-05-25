@@ -1,19 +1,18 @@
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { useUpdateSchema } from '@/Schemas/hooks/useUpdateSchema';
+import { MetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
 
 interface UpdateCurrentVersionSelectProps {
   versions: { label: string; value: string }[];
   path: string;
   currentVersion: string;
-  refetchSchemaDetail: () => void;
-  handleSetSelectedSchema: (version: string) => void;
+  onSuccess?: (values: MetaSchemaUpdateResponse) => void;
 }
 export const UpdateCurrentVersionSelect = ({
   versions,
   path,
   currentVersion,
-  refetchSchemaDetail,
-  handleSetSelectedSchema,
+  onSuccess,
 }: UpdateCurrentVersionSelectProps) => {
   const {
     mutate: updateSchema,
@@ -21,9 +20,8 @@ export const UpdateCurrentVersionSelect = ({
     isPending: isUpdatingSchema,
     reset,
   } = useUpdateSchema({
-    onSuccess: ({ current }) => {
-      handleSetSelectedSchema(current);
-      void refetchSchemaDetail();
+    onSuccess: (values) => {
+      onSuccess?.(values);
     },
   });
 
