@@ -60,7 +60,6 @@ describe('.useCreateSchema', () => {
 
       const expectedResponse: SchemaCreateResponse = {
         path: 'string',
-
         current: 'string',
         versions: {
           string: {

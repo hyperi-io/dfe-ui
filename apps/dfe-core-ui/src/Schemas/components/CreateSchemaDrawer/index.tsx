@@ -52,7 +52,7 @@ export const CreateSchemaDrawerBase = ({
     {
       onSuccess: ({ path, current }) => {
         setSelectedSchema({
-          schema_path: path ?? null,
+          schema_path: path ?? '',
           schema_version: current,
         });
         refetchSchemas();

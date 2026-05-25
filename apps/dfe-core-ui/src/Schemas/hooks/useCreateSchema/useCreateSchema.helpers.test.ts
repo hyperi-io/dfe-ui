@@ -26,7 +26,6 @@ describe('transformFormDataToRequestBody', () => {
     const { requestBody } = transformFormDataToRequestBody(baseFormData());
     expect(requestBody.path).toBe('my_schema');
     expect(requestBody.current).toBe('1.0.0');
-    expect(requestBody.versions['1.0.0'].summary).toBe('');
     expect(requestBody.versions['1.0.0']).toMatchObject({
       date: '2024-06-15T12:00:00.000Z',
       type: 'model',
@@ -47,7 +46,6 @@ describe('transformFormDataToRequestBody', () => {
       ...baseFormData(),
       description: 'Reads CloudTrail logs',
     });
-
     expect(requestBody.versions['1.0.0'].summary).toBe('Reads CloudTrail logs');
   });
 

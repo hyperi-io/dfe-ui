@@ -24,6 +24,17 @@ function toPascalCase(str) {
     .join('');
 }
 
+/** Resolve `segment` under `root`; reject path traversal (SAST-safe). */
+function pathUnderRoot(root, segment) {
+  const base = path.resolve(root);
+  const target = path.resolve(base, segment);
+  const relative = path.relative(base, target);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Invalid path: ${segment}`);
+  }
+  return target;
+}
+
 // ---------------------------------------------------------------------------
 // Component generation via @svgr/core
 // ---------------------------------------------------------------------------
@@ -50,13 +61,12 @@ async function processDirectory(dir, suffix = '') {
     const basename = path.basename(file);
     const baseName = basename.replace('.svg', '');
     const componentName = 'Icon' + toPascalCase(baseName) + suffix;
-    const svgContent = fs.readFileSync(path.join(dir, basename), 'utf-8');
+    const svgPath = pathUnderRoot(dir, basename);
+    const svgContent = fs.readFileSync(svgPath, 'utf-8');
 
     try {
       const source = await generateComponentSource(componentName, svgContent);
-      const outFile = path.join(ICONS_DIR, `${componentName}.tsx`);
-      if (!outFile.startsWith(ICONS_DIR))
-        throw new Error('Invalid output path');
+      const outFile = pathUnderRoot(ICONS_DIR, `${componentName}.tsx`);
       fs.writeFileSync(outFile, source);
       icons.push(componentName);
     } catch (err) {

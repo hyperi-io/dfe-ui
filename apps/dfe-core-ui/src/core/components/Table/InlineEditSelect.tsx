@@ -3,10 +3,20 @@ import { IconCheck, IconEdit, IconX } from '@repo/dfe-icons';
 import { Button, Select, SelectProps, Tag } from 'antd';
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
-interface InlineEditSelectProps extends SelectProps {
+interface InlineEditSelectProps extends Omit<SelectProps, 'classNames'> {
   initialValue?: string;
   editable?: boolean;
   defaultEditing?: boolean;
+  onEdit?: () => void;
+  classNames?: {
+    select?: string;
+    editContainer?: string;
+    cancelButton?: string;
+    acceptButton?: string;
+    labelContainer?: string;
+    editButton?: string;
+    label?: string;
+  };
 }
 
 const valueSignature = (v: unknown) =>
@@ -39,6 +49,8 @@ const transformLabel = (label: string | string[]) => {
 };
 
 export const InlineEditSelect = ({
+  classNames,
+  onEdit,
   value: propValue,
   initialValue,
   onChange,
@@ -86,6 +98,7 @@ export const InlineEditSelect = ({
     if (!editable) return;
     setDraft(resolved);
     setIsEditing(true);
+    onEdit?.();
   };
 
   const isMultiple = props.mode === 'multiple' && Array.isArray(resolved);
@@ -105,10 +118,12 @@ export const InlineEditSelect = ({
   return (
     <>
       {isEditing ? (
-        <div className="flex items-center gap-x-1">
+        <div
+          className={cn('flex items-center gap-x-1', classNames?.editContainer)}
+        >
           <Select
             {...props}
-            className="w-full"
+            className={cn('w-full', classNames?.select)}
             size="small"
             onChange={(v) => setDraft(v)}
             value={draft}
@@ -118,12 +133,14 @@ export const InlineEditSelect = ({
             }}
           />
           <Button
+            className={classNames?.cancelButton}
             icon={<IconX />}
             size="small"
             type="text"
             onClick={handleCancel}
           />
           <Button
+            className={classNames?.acceptButton}
             icon={<IconCheck />}
             size="small"
             type="text"
@@ -132,17 +149,22 @@ export const InlineEditSelect = ({
         </div>
       ) : (
         <div
-          className={cn('flex items-center gap-1', isMultiple && 'flex-wrap')}
+          className={cn(
+            'flex items-center gap-1',
+            isMultiple && 'flex-wrap',
+            classNames?.labelContainer,
+          )}
         >
           {editable && (
             <Button
+              className={classNames?.editButton}
               icon={<IconEdit />}
               size="small"
               type="text"
               onClick={handleEdit}
             />
           )}
-          {transformLabel(resolved)}
+          <div className={classNames?.label}>{transformLabel(resolved)}</div>
         </div>
       )}
     </>

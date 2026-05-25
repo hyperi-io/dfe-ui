@@ -11,16 +11,18 @@ export const devLogger = ({
     return;
   }
 
+  const line = `[DEV LOGGER]${label ? ` [${label}]: ` : ': '}${message}`;
+
   switch (level) {
     case 'warn':
-      console.warn(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
+      console.warn(line);
       break;
     case 'error':
-      console.error(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
+      console.error(line);
       break;
     case 'info':
     default:
-      console.info(`[DEV LOGGER]${label ? ` [${label}]: ` : ': '}`, message);
+      console.info(line);
       break;
   }
 };

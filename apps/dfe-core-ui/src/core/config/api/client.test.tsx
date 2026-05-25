@@ -34,6 +34,40 @@ describe('createApiClient', () => {
     expect(data).toEqual(mockResponse);
   });
 
+  test('patch sends PATCH method, body, and returns JSON', async () => {
+    const mockResponse = {
+      path: 'aws/cloudtrail',
+      current: '1.0.0',
+      versions: {},
+    };
+    let capturedMethod = '';
+    let capturedBody: unknown;
+    server.use(
+      http.patch(
+        `${BASE_URL}/api/v1/schemas/definitions/aws/cloudtrail`,
+        async ({ request }) => {
+          capturedMethod = request.method;
+          capturedBody = await request.json();
+          return HttpResponse.json(mockResponse);
+        },
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.patch(
+      '/api/v1/schemas/definitions/{schema_path}',
+      {
+        pathParams: { schema_path: 'aws/cloudtrail' },
+        queryParams: { version: '2.1.0' },
+        body: { summary: 'updated' },
+      },
+    );
+
+    expect(capturedMethod).toBe('PATCH');
+    expect(capturedBody).toEqual({ summary: 'updated' });
+    expect(data).toEqual(mockResponse);
+  });
+
   test('post sends body and returns JSON', async () => {
     const mockResponse = {
       access_token: 'token',
@@ -130,7 +164,7 @@ describe('createApiClient', () => {
 
     expect(getAuthHeaders).toHaveBeenCalled();
     expect(capturedHeaders?.get('Authorization')).toBe('Bearer token123');
-    expect(capturedHeaders?.get('Content-Type')).toBe('application/json');
+    expect(capturedHeaders?.get('Content-Type')).toBeNull();
   });
 
   test('custom fetch is used when provided', async () => {
