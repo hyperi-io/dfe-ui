@@ -1,5 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -69,15 +70,16 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data).toBeDefined();
-      expect(result.current.data.items).toHaveLength(10);
-      expect(result.current.data.items[0]).toMatchObject({
+      const responseItem: components['schemas']['SchemaSummaryObject'] = {
         name: 'string',
         current: 'string',
         versions: ['string'],
         updated_at: 'string',
         column_count: 0,
-      });
+      };
+      expect(result.current.data).toBeDefined();
+      expect(result.current.data.items).toHaveLength(10);
+      expect(result.current.data.items[0]).toMatchObject(responseItem);
       expect(result.current.isError).toBe(false);
     });
 

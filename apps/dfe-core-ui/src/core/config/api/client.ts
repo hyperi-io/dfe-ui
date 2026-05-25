@@ -123,18 +123,20 @@ export function createApiClient(config: ApiClientConfig) {
         ? (body as FormData)
         : undefined;
 
+    const hasJsonBody = body !== undefined && method !== 'get';
+
     const headers: HeadersInit = {
-      ...(formDataBody === undefined && { 'Content-Type': 'application/json' }),
+      ...(hasJsonBody &&
+        formDataBody === undefined && { 'Content-Type': 'application/json' }),
       ...(await getAuthHeaders?.()),
     };
 
     const init: RequestInit = {
-      method,
+      method: method.toUpperCase(),
       headers,
-      ...(body !== undefined &&
-        method !== 'get' && {
-          body: formDataBody ?? JSON.stringify(body),
-        }),
+      ...(hasJsonBody && {
+        body: formDataBody ?? JSON.stringify(body),
+      }),
       ...(signal !== undefined && { signal }),
     };
 

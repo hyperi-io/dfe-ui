@@ -1,18 +1,23 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useFetchSchemaDetail } from '@/Schemas/hooks/useFetchSchemaDetail';
+import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { notification, Spin, Typography } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
+import { ViewSchemaDetails } from './ViewSchemaDetails';
 
 export const ListSchemaDetail = () => {
   const [_api, contextHolder] = notification.useNotification();
-  const { selectedSchemaPath: schema_path } = useListSchemasContext();
+  const { selectedSchemaPath: schema_path, selectedSchemaVersion: version } =
+    useListSchemasContext();
   const {
     data: schemaDetailData,
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
-  } = useFetchSchemaDetail({ schema_path: schema_path ?? '' });
+    refetch: refetchSchemaDetail,
+  } = useFetchInfiniteFilteredSchemaDetailColumns({
+    schema_path: schema_path,
+    version: version,
+  });
 
   if (isFetchingSchemaDetail)
     return (
@@ -34,12 +39,11 @@ export const ListSchemaDetail = () => {
   return (
     <>
       {contextHolder}
-      <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
         <Typography.Title level={5}>Schema Configuration</Typography.Title>
-        <AceEditor
-          value={JSON.stringify(schemaDetailData, null, 2)}
-          mode="json"
-          height="70%"
+        <ViewSchemaDetails
+          {...schemaDetailData}
+          refetchSchemaDetail={refetchSchemaDetail}
         />
       </div>
     </>

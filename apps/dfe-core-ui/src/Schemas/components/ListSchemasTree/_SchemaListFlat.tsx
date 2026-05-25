@@ -29,7 +29,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
               e.stopPropagation();
               setSelectedSchema({
                 schema_path: schema.name,
-                schema_version: null,
+                schema_version: schema.current,
               });
             }}
             className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"

@@ -3,7 +3,11 @@ import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { Spin, Tree } from 'antd';
-import { useTransformSchemaToTree } from './hooks/useTransformSchemaToTree';
+import { useMemo, useState } from 'react';
+import {
+  getExpandedKeysForSchemaSelection,
+  useTransformSchemaToTree,
+} from './hooks/useTransformSchemaToTree';
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
@@ -12,6 +16,8 @@ export const SchemaList = ({ className }: { className?: string }) => {
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSchema,
+    selectedSchemaPath,
+    selectedSchemaVersion,
     filters,
     hasFilters,
     setFilters,
@@ -20,7 +26,25 @@ export const SchemaList = ({ className }: { className?: string }) => {
   const treeData = useTransformSchemaToTree({
     schemaObjects,
     setSelectedSchema,
+    selectedSchemaPath,
+    selectedSchemaVersion,
   });
+
+  const expandedKeysForSelection = useMemo(
+    () =>
+      getExpandedKeysForSchemaSelection(
+        selectedSchemaPath,
+        selectedSchemaVersion,
+      ),
+    [selectedSchemaPath, selectedSchemaVersion],
+  );
+
+  const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
+
+  const expandedKeys = useMemo(
+    () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
+    [userExpandedKeys, expandedKeysForSelection],
+  );
 
   if (schemas.length === 0) {
     return (
@@ -47,7 +71,12 @@ export const SchemaList = ({ className }: { className?: string }) => {
         className,
       )}
     >
-      <Tree blockNode treeData={treeData} />
+      <Tree
+        blockNode
+        treeData={treeData}
+        expandedKeys={expandedKeys}
+        onExpand={(keys) => setUserExpandedKeys(keys as string[])}
+      />
       <div ref={loadMoreRef} className="h-4 flex justify-center">
         {isFetchingNextPage && <Spin size="small" />}
       </div>
