@@ -1,8 +1,9 @@
+import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Select, Table } from 'antd';
+import { Select } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';

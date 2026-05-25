@@ -1,10 +1,11 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
-import { Button, Select, Table, Tooltip } from 'antd';
+import { Button, Select, Tooltip } from 'antd';
 import React, { useMemo, useState } from 'react';
 
 interface TableLayoutProps {
