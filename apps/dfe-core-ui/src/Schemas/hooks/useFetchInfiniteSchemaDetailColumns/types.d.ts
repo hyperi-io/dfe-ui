@@ -1,8 +1,8 @@
 import { components } from '@repo/dfe-engine-types';
 
 export type UseFetchInfiniteFilteredSchemaDetailColumnsProps = {
-  schema_path: string;
-  version: string;
+  schema_path: string | null;
+  version: string | null;
   search?: string;
   name?: string;
   type?: string;

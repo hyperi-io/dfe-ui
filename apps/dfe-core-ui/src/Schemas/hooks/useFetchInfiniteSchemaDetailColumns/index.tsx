@@ -47,6 +47,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = (
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
+    enabled: !!schema_path && !!version,
     queryKey: [
       'schema-detail-columns',
       schema_path,
@@ -90,26 +91,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = (
 
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
-      return {
-        path: '',
-        current: '',
-        selected: '',
-        versions: [] as string[],
-        version: {
-          date: '',
-          type: '',
-          summary: '',
-          columns: {
-            items: [],
-            total: 0,
-            page: 1,
-            per_page: per_page ?? 10,
-            total_pages: 0,
-            next_page: null as number | null,
-            prev_page: null as number | null,
-          },
-        },
-      };
+      return null;
     }
 
     const firstPage = data.pages[0];
@@ -126,7 +108,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = (
         },
       },
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

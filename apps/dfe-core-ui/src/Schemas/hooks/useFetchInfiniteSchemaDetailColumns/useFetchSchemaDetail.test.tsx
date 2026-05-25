@@ -12,8 +12,8 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '.';
-import { MOCK_SCHEMA_PATH, server } from './useFetchSchemaDetail.mocks';
 import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
+import { MOCK_SCHEMA_PATH, server } from './useFetchSchemaDetail.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -52,26 +52,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       );
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.data).toEqual({
-        path: '',
-        current: '',
-        selected: '',
-        versions: [],
-        version: {
-          date: '',
-          type: '',
-          summary: '',
-          columns: {
-            items: [],
-            total: 0,
-            page: 1,
-            per_page: 10,
-            total_pages: 0,
-            next_page: null,
-            prev_page: null,
-          },
-        },
-      });
+      expect(result.current.data).toBeNull();
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
     });
@@ -100,8 +81,8 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         };
 
       expect(result.current.data).toBeDefined();
-      expect(result.current.data.version.columns.items).toHaveLength(10);
-      expect(result.current.data.version.columns.items[0]).toMatchObject(
+      expect(result.current.data?.version.columns.items).toHaveLength(10);
+      expect(result.current.data?.version.columns.items[0]).toMatchObject(
         responseItem,
       );
       expect(result.current.isError).toBe(false);
@@ -160,19 +141,21 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toHaveLength(10);
+      expect(result.current.data?.version.columns.items).toHaveLength(10);
 
       void result.current.fetchNextPage();
 
       await waitFor(
         () => {
-          expect(result.current.data.version.columns.items).toHaveLength(20);
+          expect(result.current.data?.version.columns.items).toHaveLength(20);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data.version.columns.items[0].name).toBe('string');
-      expect(result.current.data.version.columns.items[10].name).toBe('string');
+      expect(result.current.data?.version.columns.items[0].name).toBe('string');
+      expect(result.current.data?.version.columns.items[10].name).toBe(
+        'string',
+      );
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -188,20 +171,24 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toHaveLength(10);
+      expect(result.current.data?.version.columns.items).toHaveLength(10);
 
       await result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.version.columns.items.length).toBe(20);
+          expect(result.current.data?.version.columns.items.length).toBe(20);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data.version.columns.items).toHaveLength(20);
-      expect(result.current.data.version.columns.items[0].name).toBe('string');
-      expect(result.current.data.version.columns.items[10].name).toBe('string');
-      expect(result.current.data.version.columns.items[19].name).toBe('string');
+      expect(result.current.data?.version.columns.items).toHaveLength(20);
+      expect(result.current.data?.version.columns.items[0].name).toBe('string');
+      expect(result.current.data?.version.columns.items[10].name).toBe(
+        'string',
+      );
+      expect(result.current.data?.version.columns.items[19].name).toBe(
+        'string',
+      );
     });
 
     it('should not have next page when all data is loaded', async () => {
@@ -224,7 +211,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       await waitFor(
         () => {
           expect(
-            result.current.data.version.columns.items.length,
+            result.current.data?.version.columns.items.length,
           ).toBeGreaterThanOrEqual(20);
         },
         { timeout: 3000 },
@@ -233,12 +220,12 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.version.columns.items).toHaveLength(25);
+          expect(result.current.data?.version.columns.items).toHaveLength(25);
         },
         { timeout: 3000 },
       );
 
-      expect(result.current.data.version.columns.items).toHaveLength(25);
+      expect(result.current.data?.version.columns.items).toHaveLength(25);
     });
   });
 
@@ -259,7 +246,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toHaveLength(5);
+      expect(result.current.data?.version.columns.items).toHaveLength(5);
     });
 
     it('should handle per_page larger than available data', async () => {
@@ -278,7 +265,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toHaveLength(25);
+      expect(result.current.data?.version.columns.items).toHaveLength(25);
     });
   });
 
@@ -303,26 +290,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
 
       expect(result.current.isError).toBe(true);
       expect(result.current.error).toBeDefined();
-      expect(result.current.data).toEqual({
-        path: '',
-        current: '',
-        selected: '',
-        versions: [],
-        version: {
-          date: '',
-          type: '',
-          summary: '',
-          columns: {
-            items: [],
-            total: 0,
-            page: 1,
-            per_page: 10,
-            total_pages: 0,
-            next_page: null,
-            prev_page: null,
-          },
-        },
-      });
+      expect(result.current.data).toBeNull();
     });
   });
 
@@ -343,7 +311,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      expect(result.current.data?.version.columns.items).toBeDefined();
     });
 
     it('should include name filter in query', async () => {
@@ -362,7 +330,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      expect(result.current.data?.version.columns.items).toBeDefined();
     });
 
     it('should include type filter in query', async () => {
@@ -381,7 +349,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      expect(result.current.data?.version.columns.items).toBeDefined();
     });
 
     it('should include use_case filter in query', async () => {
@@ -400,7 +368,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      expect(result.current.data?.version.columns.items).toBeDefined();
     });
 
     it('should handle multiple filters simultaneously', async () => {
@@ -423,7 +391,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      expect(result.current.data?.version.columns.items).toBeDefined();
     });
   });
 
@@ -449,8 +417,8 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       });
 
       expect(result.current.data).toBeDefined();
-      expect(result.current.data.version.columns.items).toHaveLength(
-        initialData.version.columns.items.length,
+      expect(result.current.data?.version.columns.items).toHaveLength(
+        initialData?.version.columns.items?.length ?? 0,
       );
     });
   });
@@ -487,14 +455,15 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       });
 
       expect(result.current.isFetchingNextPage).toBe(false);
-      const initialLength = result.current.data.version.columns.items.length;
+      const initialLength =
+        result.current.data?.version.columns.items?.length ?? 0;
 
       void result.current.fetchNextPage();
 
       await waitFor(
         () => {
           expect(
-            result.current.data.version.columns.items.length,
+            result.current.data?.version.columns.items?.length ?? 0,
           ).toBeGreaterThan(initialLength);
         },
         { timeout: 3000 },
@@ -558,7 +527,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.version.columns.items).toHaveLength(0);
+      expect(result.current.data?.version.columns.items).toHaveLength(0);
       expect(result.current.isError).toBe(false);
     });
   });
@@ -583,7 +552,9 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
 
       rerender({ search: 'new search' });
 
-      expect(result.current.data.version.columns.items).toBeDefined();
+      await waitFor(() => {
+        expect(result.current.data?.version.columns.items).toBeDefined();
+      });
     });
   });
 });

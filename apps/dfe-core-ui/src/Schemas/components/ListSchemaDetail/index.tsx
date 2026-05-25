@@ -15,8 +15,8 @@ export const ListSchemaDetail = () => {
     error: fetchSchemaDetailError,
     refetch: refetchSchemaDetail,
   } = useFetchInfiniteFilteredSchemaDetailColumns({
-    schema_path: schema_path ?? '',
-    version: version ?? '',
+    schema_path: schema_path,
+    version: version,
   });
 
   if (isFetchingSchemaDetail)
