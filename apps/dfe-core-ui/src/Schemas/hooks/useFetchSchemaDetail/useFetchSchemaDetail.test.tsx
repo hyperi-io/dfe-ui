@@ -19,23 +19,22 @@ describe('.useFetchSchemaDetail', () => {
   const response: MetaSchemaDetailResponse = {
     path: 'string',
     current: 'string',
-    versions: {
-      string: {
-        date: 'string',
-        type: 'string',
-        summary: 'string',
-        columns: [
-          {
-            name: 'string',
-            type: 'string',
-            attribute: ['string'],
-            use_case: 'string',
-            expr: 'string',
-          },
-        ],
+    versions: ['string'],
+    selected: 'string',
+    version: {
+      date: 'string',
+      type: 'string',
+      summary: 'string',
+      columns: {
+        items: [],
+        total: 0,
+        page: 0,
+        per_page: 0,
+        total_pages: 0,
+        next_page: 0,
+        prev_page: 0,
       },
     },
-    description: 'string',
   };
 
   describe('only schema_path is provided', () => {

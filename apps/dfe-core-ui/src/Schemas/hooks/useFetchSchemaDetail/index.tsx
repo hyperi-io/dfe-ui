@@ -11,7 +11,7 @@ export const useFetchSchemaDetail = ({
   const { data, isLoading, error } = useQuery({
     queryKey: ['schema', schema_path],
     queryFn: () =>
-      apiClient.get(API_CONFIG.schemas.schema, {
+      apiClient.get(API_CONFIG.schemas.schemaDetail, {
         pathParams: { schema_path: schema_path ?? '' },
       }),
     enabled: !!schema_path,

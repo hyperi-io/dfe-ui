@@ -1,6 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { setupServer } from 'msw/node';
 
-const handlers = [API_CONFIG_MOCKS.schemas.schema.get.success()];
+const handlers = [API_CONFIG_MOCKS.schemas.schemaDetail.get.success()];
 
 export const server = setupServer(...handlers);

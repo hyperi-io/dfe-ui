@@ -9,7 +9,6 @@ type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
 const baseSchema = (
   overrides: Partial<SchemaSummaryObject> & Pick<SchemaSummaryObject, 'name'>,
 ): SchemaSummaryObject => ({
-  description: '',
   current: 'v1',
   versions: ['v1'],
   updated_at: '',

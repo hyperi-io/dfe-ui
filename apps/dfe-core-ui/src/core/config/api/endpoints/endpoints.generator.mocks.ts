@@ -853,7 +853,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
             items: [
               {
                 name: 'string',
-                description: 'string',
                 current: 'string',
                 versions: ['string'],
                 updated_at: 'string',
@@ -896,6 +895,47 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
+    schemaDetail: {
+      mockedUrl: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
+      get: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            selected: 'string',
+            versions: ['string'],
+            version: {
+              date: 'string',
+              type: 'string',
+              summary: 'string',
+              columns: {
+                items: [],
+                total: 0,
+                page: 0,
+                per_page: 0,
+                total_pages: 0,
+                next_page: 0,
+                prev_page: 0,
+              },
+            },
+          },
+          schema_path = 'path',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchemaGetResponse'];
+          schema_path?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.schemaDetail.mockedUrl.replace(
+              '{schema_path}',
+              schema_path,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
     schema: {
       mockedUrl: '/api/v1/schemas/definitions/{schema_path}',
       get: {
@@ -919,7 +959,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 ],
               },
             },
-            description: 'string',
           },
           schema_path = 'path',
         }: {
@@ -977,7 +1016,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 ],
               },
             },
-            description: 'string',
           },
           schema_path = 'path',
         }: {

@@ -52,6 +52,7 @@ export const API_CONFIG = Object.freeze({
   },
   schemas: {
     default: '/api/v1/schemas',
+    schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     schema: '/api/v1/schemas/definitions/{schema_path}',
     sourceColumns: '/api/v1/schemas/{source_name}/columns',
     sourceBuild: '/api/v1/schemas/{source_name}/build',
