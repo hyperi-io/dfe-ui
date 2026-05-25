@@ -113,15 +113,9 @@ describe('useTransformSchemaToTree', () => {
     expect(azureChildren).toHaveLength(2);
     // Sorted alphabetically: activity_log before security_log
     expect(azureChildren[0].key).toBe('azure.activity_log');
-    expectTreeNodeTitle(
-      azureChildren[0].title as ReactElement,
-      'activity_log',
-    );
+    expectTreeNodeTitle(azureChildren[0].title as ReactElement, 'activity_log');
     expect(azureChildren[1].key).toBe('azure.security_log');
-    expectTreeNodeTitle(
-      azureChildren[1].title as ReactElement,
-      'security_log',
-    );
+    expectTreeNodeTitle(azureChildren[1].title as ReactElement, 'security_log');
 
     const activityLog = azureChildren[0].children!;
     expect(activityLog).toHaveLength(1);

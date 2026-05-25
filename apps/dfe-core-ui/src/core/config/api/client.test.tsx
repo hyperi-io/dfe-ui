@@ -35,7 +35,11 @@ describe('createApiClient', () => {
   });
 
   test('patch sends PATCH method, body, and returns JSON', async () => {
-    const mockResponse = { path: 'aws/cloudtrail', current: '1.0.0', versions: {} };
+    const mockResponse = {
+      path: 'aws/cloudtrail',
+      current: '1.0.0',
+      versions: {},
+    };
     let capturedMethod = '';
     let capturedBody: unknown;
     server.use(

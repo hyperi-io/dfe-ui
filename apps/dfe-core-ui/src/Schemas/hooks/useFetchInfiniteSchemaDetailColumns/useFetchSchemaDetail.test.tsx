@@ -12,10 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '.';
-import {
-  MOCK_SCHEMA_PATH,
-  server,
-} from './useFetchSchemaDetail.mocks';
+import { MOCK_SCHEMA_PATH, server } from './useFetchSchemaDetail.mocks';
 import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
 
 class MockIntersectionObserver {
@@ -48,8 +45,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('initial loading state', () => {
     it('should start with loading state and empty data', () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -84,8 +80,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('successful data fetch', () => {
     it('should fetch and return first page of schema detail columns', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -106,14 +101,15 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
 
       expect(result.current.data).toBeDefined();
       expect(result.current.data.version.columns.items).toHaveLength(10);
-      expect(result.current.data.version.columns.items[0]).toMatchObject(responseItem);
+      expect(result.current.data.version.columns.items[0]).toMatchObject(
+        responseItem,
+      );
       expect(result.current.isError).toBe(false);
     });
 
     it('should return all expected properties', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -154,8 +150,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('pagination', () => {
     it('should fetch next page when fetchNextPage is called', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -183,8 +178,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
 
     it('should flatten multiple pages correctly', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -229,7 +223,9 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.version.columns.items.length).toBeGreaterThanOrEqual(20);
+          expect(
+            result.current.data.version.columns.items.length,
+          ).toBeGreaterThanOrEqual(20);
         },
         { timeout: 3000 },
       );
@@ -295,8 +291,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       );
 
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -435,8 +430,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('refetch functionality', () => {
     it('should refetch data when refetch is called', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -464,8 +458,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('loadMoreRef', () => {
     it('should provide a ref object for infinite scroll', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -483,8 +476,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
   describe('isFetchingNextPage state', () => {
     it('should handle fetchNextPage and complete successfully', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -495,16 +487,15 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       });
 
       expect(result.current.isFetchingNextPage).toBe(false);
-      const initialLength =
-        result.current.data.version.columns.items.length;
+      const initialLength = result.current.data.version.columns.items.length;
 
       void result.current.fetchNextPage();
 
       await waitFor(
         () => {
-          expect(result.current.data.version.columns.items.length).toBeGreaterThan(
-            initialLength,
-          );
+          expect(
+            result.current.data.version.columns.items.length,
+          ).toBeGreaterThan(initialLength);
         },
         { timeout: 3000 },
       );
@@ -514,8 +505,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
 
     it('should keep isFetchingNextPage false when not fetching', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
@@ -558,8 +548,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
       );
 
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
+        () => useFetchInfiniteFilteredSchemaDetailColumns(DEFAULT_HOOK_PROPS),
         {
           wrapper,
         },
