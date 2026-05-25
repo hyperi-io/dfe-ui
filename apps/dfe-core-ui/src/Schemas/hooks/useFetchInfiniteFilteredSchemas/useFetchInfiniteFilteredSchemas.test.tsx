@@ -75,7 +75,6 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         name: 'string',
         current: 'string',
         versions: ['string'],
-        description: 'string',
         updated_at: 'string',
         column_count: 0,
       });
