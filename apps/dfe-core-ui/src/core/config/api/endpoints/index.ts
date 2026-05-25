@@ -52,10 +52,9 @@ export const API_CONFIG = Object.freeze({
   },
   schemas: {
     default: '/api/v1/schemas',
-    schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
+    schemaVersions: '/api/v1/schemas/definitions/{schema_path}/versions',
     schema: '/api/v1/schemas/definitions/{schema_path}',
-    schemaDetail:
-      '/api/v1/schemas/definitions/{schema_path}/versions/columns',
+    schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     sourceColumns: '/api/v1/schemas/{source_name}/columns',
     sourceBuild: '/api/v1/schemas/{source_name}/build',
     elasticConvert: '/api/v1/schemas/elastic-converter',
