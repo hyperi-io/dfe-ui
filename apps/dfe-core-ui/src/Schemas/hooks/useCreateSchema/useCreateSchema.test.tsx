@@ -45,7 +45,6 @@ describe('.useCreateSchema', () => {
         ],
       },
     },
-    description: 'string',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -61,7 +60,7 @@ describe('.useCreateSchema', () => {
 
       const expectedResponse: SchemaCreateResponse = {
         path: 'string',
-        description: 'string',
+
         current: 'string',
         versions: {
           string: {
