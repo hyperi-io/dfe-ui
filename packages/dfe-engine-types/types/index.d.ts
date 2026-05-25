@@ -1462,7 +1462,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/schemas/definitions/{schema_path}": {
+    "/api/v1/schemas/definitions/{schema_path}/versions/columns": {
         parameters: {
             query?: never;
             header?: never;
@@ -1473,7 +1473,43 @@ export interface paths {
          * Get Meta Schema
          * @description Get one meta-schema definition by registry path (e.g. ``aws/cloudtrail``).
          */
-        get: operations["get_meta_schema_api_v1_schemas_definitions__schema_path__get"];
+        get: operations["get_meta_schema_api_v1_schemas_definitions__schema_path__versions_columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/{schema_path}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Meta Schema Version
+         * @description Add a new meta-schema version (bumps semver from current and sets it current).
+         */
+        post: operations["add_meta_schema_version_api_v1_schemas_definitions__schema_path__versions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/{schema_path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put?: never;
         /**
          * Create Meta Schema
@@ -1487,7 +1523,11 @@ export interface paths {
         delete: operations["delete_meta_schema_api_v1_schemas_definitions__schema_path__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Meta Schema
+         * @description Update meta-schema metadata: current pointer or a version summary.
+         */
+        patch: operations["update_meta_schema_api_v1_schemas_definitions__schema_path__patch"];
         trace?: never;
     };
     "/api/v1/schemas/elastic-converter": {
@@ -2716,7 +2756,6 @@ export interface components {
          *     Attributes:
          *         current: Current version of the schema.
          *         versions: Dictionary of versions and their metadata.
-         *         description: Human-readable description.
          *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
          */
         "MetaSchema-Input": {
@@ -2733,11 +2772,6 @@ export interface components {
                 [key: string]: components["schemas"]["SchemaVersion-Input"];
             };
             /**
-             * Description
-             * @description Human description
-             */
-            description?: string | null;
-            /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
              */
@@ -2750,7 +2784,6 @@ export interface components {
          *     Attributes:
          *         current: Current version of the schema.
          *         versions: Dictionary of versions and their metadata.
-         *         description: Human-readable description.
          *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
          */
         "MetaSchema-Output": {
@@ -2767,15 +2800,71 @@ export interface components {
                 [key: string]: components["schemas"]["SchemaVersion-Output"];
             };
             /**
-             * Description
-             * @description Human description
-             */
-            description?: string | null;
-            /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
              */
             path?: string | null;
+        };
+        /**
+         * MetaSchemaAddVersionRequest
+         * @description Add a new schema version (semver bump from current).
+         */
+        MetaSchemaAddVersionRequest: {
+            /**
+             * Type
+             * @description Change category (semver bump from current)
+             * @enum {string}
+             */
+            type: "model" | "addition" | "revision";
+            /**
+             * Columns
+             * @description Complete column snapshot for the new version
+             */
+            columns: components["schemas"]["SchemaColumn-Input"][];
+        };
+        /**
+         * MetaSchemaGetResponse
+         * @description Meta-schema definition for a single requested version.
+         */
+        MetaSchemaGetResponse: {
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /**
+             * Selected
+             * @description Version id requested via query parameter
+             */
+            selected: string;
+            /** @description Metadata and paginated columns for ``selected`` */
+            version: components["schemas"]["SchemaVersionGet"];
+            /**
+             * Path
+             * @description Registry path (e.g. aws/cloudtrail)
+             */
+            path: string;
+            /**
+             * Versions
+             * @description All version identifiers defined on this schema
+             */
+            versions: string[];
+        };
+        /**
+         * MetaSchemaUpdateRequest
+         * @description Partial update for meta-schema metadata (current pointer or version summary).
+         */
+        MetaSchemaUpdateRequest: {
+            /**
+             * Current
+             * @description Set the schema's current version pointer
+             */
+            current?: string | null;
+            /**
+             * Summary
+             * @description Update summary on the version selected via query parameter
+             */
+            summary?: string | null;
         };
         /**
          * MetricEntry
@@ -2888,6 +2977,32 @@ export interface components {
         PaginatedResponse_FieldMapSummary_: {
             /** Items */
             items: components["schemas"]["FieldMapSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[SchemaColumn] */
+        PaginatedResponse_SchemaColumn_: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -3437,7 +3552,6 @@ export interface components {
          *
          *     Attributes:
          *         name: Name of the schema.
-         *         description: Human description.
          *         current: Current version of the schema.
          *         versions: List of versions.
          *         updated_at: Last updated timestamp.
@@ -3449,11 +3563,6 @@ export interface components {
              * @description Name of the schema
              */
             name: string;
-            /**
-             * Description
-             * @description Human description
-             */
-            description: string;
             /**
              * Current
              * @description Current version of the schema
@@ -3526,6 +3635,29 @@ export interface components {
              * @description List of columns in the version
              */
             columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+        };
+        /**
+         * SchemaVersionGet
+         * @description Schema version payload for GET definition (columns paginated).
+         */
+        SchemaVersionGet: {
+            /**
+             * Date
+             * @description Date of the version
+             */
+            date: string;
+            /**
+             * Type
+             * @description Type of the version
+             */
+            type: string;
+            /**
+             * Summary
+             * @description Summary of the version
+             */
+            summary: string;
+            /** @description Paginated columns for this version */
+            columns: components["schemas"]["PaginatedResponse_SchemaColumn_"];
         };
         /**
          * ServiceConfigDetail
@@ -7306,9 +7438,9 @@ export interface operations {
     list_schemas_api_v1_schemas_get: {
         parameters: {
             query?: {
-                /** @description Search in path/description */
+                /** @description Search in path */
                 search?: string | null;
-                /** @description Sort field (path, description) */
+                /** @description Sort field (path, current, updated_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
@@ -7343,9 +7475,30 @@ export interface operations {
             };
         };
     };
-    get_meta_schema_api_v1_schemas_definitions__schema_path__get: {
+    get_meta_schema_api_v1_schemas_definitions__schema_path__versions_columns_get: {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Schema version to return (required) */
+                version: string;
+                /** @description Case-insensitive substring search across all column fields */
+                search?: string | null;
+                /** @description Filter by name (substring) */
+                name?: string | null;
+                /** @description Filter by type (substring) */
+                type?: string | null;
+                /** @description Filter by use_case (substring) */
+                use_case?: string | null;
+                /** @description Filter by expr (substring) */
+                expr?: string | null;
+                /** @description Filter by comment (substring) */
+                comment?: string | null;
+                /** @description Filter by attribute (substring) */
+                attribute?: string | null;
+                /** @description Page number (1-based) */
+                page?: number;
+                /** @description Items per page */
+                per_page?: number;
+            };
             header?: never;
             path: {
                 schema_path: string;
@@ -7356,6 +7509,41 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchemaGetResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_meta_schema_version_api_v1_schemas_definitions__schema_path__versions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetaSchemaAddVersionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7426,6 +7614,44 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_meta_schema_api_v1_schemas_definitions__schema_path__patch: {
+        parameters: {
+            query?: {
+                /** @description Version to update summary for (required when summary is set) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetaSchemaUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchema-Output"];
+                };
             };
             /** @description Validation Error */
             422: {
