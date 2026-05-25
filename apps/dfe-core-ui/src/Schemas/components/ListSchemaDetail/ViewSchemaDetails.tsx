@@ -1,12 +1,11 @@
-import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
-import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
-import { useUpdateSchema } from '@/Schemas/hooks/useUpdateSchema';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Select, Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
+import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
+import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
 interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
   refetchSchemaDetail: () => void;
@@ -21,7 +20,7 @@ export const ViewSchemaDetails = ({
 }: ViewSchemaDetailsProps) => {
   const { selectedSchemaVersion, setSelectedSchema } = useListSchemasContext();
   const [showVersion, setShowVersion] = useState<string>(
-    selectedSchemaVersion ?? currentVersion,
+    selectedSchemaVersion as string,
   );
 
   const handleSetSelectedSchema = useCallback(
@@ -34,17 +33,6 @@ export const ViewSchemaDetails = ({
     },
     [path, setSelectedSchema, setShowVersion],
   );
-
-  const {
-    mutate: updateSchema,
-    error,
-    isPending: isUpdatingSchema,
-  } = useUpdateSchema({
-    onSuccess: ({ current }) => {
-      handleSetSelectedSchema(current);
-      void refetchSchemaDetail();
-    },
-  });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 360,
@@ -138,43 +126,25 @@ export const ViewSchemaDetails = ({
             Current Version:
           </dt>
           <dd>
-            <InlineEditSelect
-              options={versions}
-              disabled={isUpdatingSchema}
-              onChange={(e) => {
-                updateSchema({
-                  schema: {
-                    current: e.target.value,
-                  },
-                  parameters: {
-                    schema_path: path,
-                  },
-                });
-              }}
-              value={currentVersion}
+            <UpdateCurrentVersionSelect
+              versions={versions}
+              path={path}
+              currentVersion={currentVersion}
+              refetchSchemaDetail={refetchSchemaDetail}
+              handleSetSelectedSchema={handleSetSelectedSchema}
             />
           </dd>
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
             Summary:
           </dt>
           <dd>
-            <InlineEditInput
-              disabled={isUpdatingSchema}
-              onChange={(e) => {
-                updateSchema({
-                  schema: {
-                    summary: e.target.value,
-                  },
-                  parameters: {
-                    schema_path: path,
-                    version: showVersion,
-                  },
-                });
-              }}
-              value={selectedVersion.summary}
+            <UpdateVersionSummaryInput
+              path={path}
+              version={showVersion}
+              summary={selectedVersion.summary}
+              refetchSchemaDetail={refetchSchemaDetail}
             />
           </dd>
-          {error && <div className="text-red-500">{error.message}</div>}
         </dl>
 
         <div className="flex flex-row gap-2 items-center mb-auto">

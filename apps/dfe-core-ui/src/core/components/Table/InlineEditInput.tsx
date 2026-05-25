@@ -1,3 +1,4 @@
+import { cn } from '@/core/utils/style';
 import { IconCheck, IconEdit, IconX } from '@repo/dfe-icons';
 import { Button, Input, InputProps } from 'antd';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -6,6 +7,16 @@ interface InlineEditInputProps extends InputProps {
   initialValue?: string;
   editable?: boolean;
   defaultEditing?: boolean;
+  onEdit?: () => void;
+  classNames?: {
+    input?: string;
+    editContainer?: string;
+    cancelButton?: string;
+    acceptButton?: string;
+    labelContainer?: string;
+    editButton?: string;
+    label?: string;
+  };
 }
 
 const transformLabel = (label: string) => {
@@ -29,8 +40,10 @@ export const InlineEditInput = ({
   value: propValue,
   initialValue = '',
   onChange,
+  onEdit,
   editable = true,
   defaultEditing = false,
+  classNames,
   ...props
 }: InlineEditInputProps) => {
   const resolved = (propValue ?? initialValue ?? '') as string;
@@ -65,6 +78,7 @@ export const InlineEditInput = ({
     if (!editable) return;
     setDraft(resolved);
     setIsEditing(true);
+    onEdit?.();
   };
 
   // Edge-trigger validation UI: reopen when an error appears; dismiss editor when errors clear after promotion / fix.
@@ -83,20 +97,25 @@ export const InlineEditInput = ({
   return (
     <>
       {isEditing ? (
-        <div className="flex items-center gap-x-1">
+        <div
+          className={cn('flex items-center gap-x-1', classNames?.editContainer)}
+        >
           <Input
             {...props}
+            className={cn('w-full', classNames?.input)}
             size="small"
             onChange={(e) => setDraft(e.target.value)}
             value={draft}
           />
           <Button
+            className={classNames?.cancelButton}
             icon={<IconX />}
             size="small"
             type="text"
             onClick={handleCancel}
           />
           <Button
+            className={classNames?.acceptButton}
             icon={<IconCheck />}
             size="small"
             type="text"
@@ -104,16 +123,22 @@ export const InlineEditInput = ({
           />
         </div>
       ) : (
-        <div className="flex items-center gap-x-1">
+        <div
+          className={cn(
+            'flex items-center gap-x-1',
+            classNames?.labelContainer,
+          )}
+        >
           {editable && (
             <Button
+              className={classNames?.editButton}
               icon={<IconEdit />}
               size="small"
               type="text"
               onClick={handleEdit}
             />
           )}
-          {transformLabel(resolved)}
+          <div className={classNames?.label}>{transformLabel(resolved)}</div>
         </div>
       )}
     </>
