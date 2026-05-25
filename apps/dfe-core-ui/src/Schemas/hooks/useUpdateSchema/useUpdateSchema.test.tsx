@@ -30,9 +30,6 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateSchema', () => {
-  const requestBody: MetaSchemaUpdateRequestBody = {
-    summary: 'string',
-  };
   const parameters: MetaSchemaUpdateParameters = {
     schema_path: 'path',
   };
@@ -47,7 +44,9 @@ describe('.useUpdateSchema', () => {
       );
 
       result.current.mutate({
-        schema: requestBody,
+        schema: {
+          summary: 'string',
+        },
         parameters,
       });
 
@@ -101,7 +100,9 @@ describe('.useUpdateSchema', () => {
       );
 
       result.current.mutate({
-        schema: requestBody,
+        schema: {
+          current: 'string',
+        },
         parameters,
       });
 
@@ -147,6 +148,10 @@ describe('.useUpdateSchema', () => {
   });
 
   describe('onError', () => {
+    const requestBody: MetaSchemaUpdateRequestBody = {
+      summary: 'string',
+    };
+
     beforeEach(() => {
       server.use(API_CONFIG_MOCKS.schemas.schema.patch.error());
     });

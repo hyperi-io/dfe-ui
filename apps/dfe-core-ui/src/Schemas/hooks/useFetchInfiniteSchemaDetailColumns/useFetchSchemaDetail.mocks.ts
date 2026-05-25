@@ -42,8 +42,8 @@ function createMetaSchemaDetailResponse(
         page,
         per_page: perPage,
         total_pages: totalPages,
-        next_page: page < totalPages ? page + 1 : 0,
-        prev_page: page > 1 ? page - 1 : 0,
+        next_page: page < totalPages ? page + 1 : null,
+        prev_page: page > 1 ? page - 1 : null,
       },
     },
   };

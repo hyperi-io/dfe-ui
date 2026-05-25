@@ -19,24 +19,18 @@ import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
  *
  * @returns A list of schema detail columns.
  */
-export const useFetchInfiniteFilteredSchemaDetailColumns = (
-  {
-    schema_path,
-    version,
-    search,
-    name,
-    type,
-    use_case,
-    expr,
-    comment,
-    attribute,
-    per_page,
-  }: UseFetchInfiniteFilteredSchemaDetailColumnsProps = {
-    schema_path: '',
-    version: '',
-    per_page: 10,
-  },
-) => {
+export const useFetchInfiniteFilteredSchemaDetailColumns = ({
+  schema_path,
+  version,
+  search,
+  name,
+  type,
+  use_case,
+  expr,
+  comment,
+  attribute,
+  per_page = 10,
+}: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
   const {
     data,
     isLoading,
@@ -78,13 +72,9 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = (
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.version.columns.per_page;
-      const hasMore =
-        lastPage.version.columns.items &&
-        pageSize > 0 &&
-        lastPage.version.columns.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.version.columns.next_page;
+      return nextPage != null && nextPage > 0 ? nextPage : undefined;
     },
     initialPageParam: 1,
   });
