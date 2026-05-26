@@ -10,23 +10,40 @@ interface YamlLayoutProps {
   values: SchemaCreateRequest;
   buttonLabel: string;
   onFinish?: () => void;
+  hideFields?: {
+    version?: boolean;
+  };
 }
 
 export const YamlLayout = ({
   values,
   buttonLabel,
   onFinish,
+  hideFields,
 }: YamlLayoutProps) => {
   const { handleGoBack, formErrorMessage } = useCreateSchemaReviewContext();
 
   const { path, ...restValues } = values;
+
+  const displayValues = useMemo(() => {
+    if (hideFields?.version) {
+      return {
+        ...restValues,
+        versions: {
+          _unassigned_: restValues.versions[restValues.current],
+        },
+      };
+    }
+    return restValues;
+  }, [restValues, hideFields?.version]);
+
   const yamlContent = useMemo(
     () =>
-      yaml.stringify(restValues, {
+      yaml.stringify(displayValues, {
         indent: 2,
         lineWidth: 0,
       }),
-    [restValues],
+    [displayValues],
   );
 
   const handleFinish = () => {

@@ -9,12 +9,16 @@ export interface ReviewFormProps {
   values: CreateSchemaFormData | null;
   onFinish?: (values: CreateSchemaFormData) => void;
   buttonLabel: string;
+  hideFields?: {
+    version?: boolean;
+  };
 }
 
 export const ReviewForm = ({
   values,
   onFinish,
   buttonLabel,
+  hideFields,
 }: ReviewFormProps) => {
   const [selectedLayout, setSelectedLayout] = useState<'table' | 'yaml'>(
     'table',
@@ -55,6 +59,7 @@ export const ReviewForm = ({
           requestBody={requestBody}
           onFinish={handleFinish}
           buttonLabel={buttonLabel}
+          hideFields={hideFields}
         />
       )}
       {selectedLayout === 'yaml' && (
@@ -62,6 +67,7 @@ export const ReviewForm = ({
           values={requestBody}
           onFinish={handleFinish}
           buttonLabel={buttonLabel}
+          hideFields={hideFields}
         />
       )}
     </div>

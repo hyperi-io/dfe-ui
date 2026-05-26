@@ -19,6 +19,9 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
     [key in keyof CreateSchemaFormData]?: boolean;
   };
   initialValues?: Partial<CreateSchemaFormData>;
+  hideFields?: {
+    version?: boolean;
+  };
 }
 
 const CreateSchemaFormBase = ({
@@ -28,6 +31,7 @@ const CreateSchemaFormBase = ({
   onFinish: onFinishProp,
   initialValues,
   disabledFields,
+  hideFields,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -134,14 +138,16 @@ const CreateSchemaFormBase = ({
           />
         </Form.Item>
 
-        <Form.Item
-          className="w-full"
-          name="version"
-          label="Version"
-          rules={[formValidation]}
-        >
-          <Input disabled={disabledFields?.version} />
-        </Form.Item>
+        {!hideFields?.version && (
+          <Form.Item
+            className="w-full"
+            name="version"
+            label="Version"
+            rules={[formValidation]}
+          >
+            <Input disabled={disabledFields?.version} />
+          </Form.Item>
+        )}
       </div>
 
       <Form.Item
