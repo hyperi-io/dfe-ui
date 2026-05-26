@@ -1,8 +1,12 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
+import {
+  SchemaDetailColumnFilterField,
+  SchemaDetailColumnFilters,
+} from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { notification, Spin } from 'antd';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';
 
@@ -10,6 +14,20 @@ export const ListSchemaDetail = () => {
   const [_api, contextHolder] = notification.useNotification();
   const { selectedSchemaPath: schema_path, selectedSchemaVersion: version } =
     useListSchemasContext();
+  const [columnFilters, setColumnFilters] = useState<SchemaDetailColumnFilters>(
+    {},
+  );
+
+  const handleColumnFilterChange = useCallback(
+    (filterKey: SchemaDetailColumnFilterField, value: string | undefined) => {
+      setColumnFilters((previous) => ({
+        ...previous,
+        [filterKey]: value,
+      }));
+    },
+    [],
+  );
+
   const {
     data: schemaDetailData,
     isLoading: isFetchingSchemaDetail,
@@ -22,6 +40,7 @@ export const ListSchemaDetail = () => {
     schema_path: schema_path,
     version: version,
     per_page: 50,
+    ...columnFilters,
   });
 
   const handleScroll = useCallback(
@@ -68,6 +87,8 @@ export const ListSchemaDetail = () => {
         <h4 className="text-lg font-medium">Schema Configuration</h4>
         <ViewSchemaDetails
           {...schemaDetailData}
+          columnFilters={columnFilters}
+          onColumnFilterChange={handleColumnFilterChange}
           onSuccess={() => {
             void refetchSchemaDetail();
           }}

@@ -2,24 +2,41 @@ import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import {
+  MetaSchemaDetailResponse,
+  SchemaDetailColumnFilterField,
+  SchemaDetailColumnFilters,
+} from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Select } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { UIEventHandler, useCallback, useMemo } from 'react';
+import { createSchemaDetailTextColumnFilter } from './ListSchemaDetail.helper';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
 interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
+  columnFilters: SchemaDetailColumnFilters;
+  onColumnFilterChange: (
+    filterKey: SchemaDetailColumnFilterField,
+    value: string | undefined,
+  ) => void;
   onSuccess?: () => void;
   isLoading?: boolean;
   onScroll?: UIEventHandler<HTMLDivElement>;
 }
+
+type SchemaColumnItem =
+  components['schemas']['MetaSchemaGetResponse']['version']['columns']['items'][number];
 
 export const ViewSchemaDetails = ({
   current: currentVersion,
   versions: allVersions,
   version: selectedVersion,
   path,
+  columnFilters,
+  onColumnFilterChange,
   onSuccess,
   isLoading,
   onScroll,
@@ -43,74 +60,87 @@ export const ViewSchemaDetails = ({
     offset: 360,
   });
 
-  const tableColumns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-    },
-    {
-      title: 'Attribute',
-      dataIndex: 'attribute',
-      key: 'attribute',
-      render: (attribute: string[]) => {
-        return attribute?.length > 0 ? (
-          attribute.join(', ')
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+  const tableColumns = useMemo((): ColumnsType<SchemaColumnItem> => {
+    const columnFilter = (
+      title: string,
+      filterKey: SchemaDetailColumnFilterField,
+    ) =>
+      createSchemaDetailTextColumnFilter<SchemaColumnItem>(
+        title,
+        filterKey,
+        columnFilters[filterKey],
+        onColumnFilterChange,
+      );
+
+    return [
+      {
+        dataIndex: 'name',
+        key: 'name',
+        ...columnFilter('Name', 'name'),
       },
-    },
-    {
-      title: 'Use Case',
-      dataIndex: 'use_case',
-      key: 'use_case',
-      render: (use_case: string) => {
-        return use_case ? (
-          use_case
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'type',
+        key: 'type',
+        ...columnFilter('Type', 'type'),
       },
-    },
-    {
-      title: 'Expr',
-      dataIndex: 'expr',
-      key: 'expr',
-      render: (expr: string) => {
-        return expr ? (
-          expr
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'attribute',
+        key: 'attribute',
+        ...columnFilter('Attribute', 'attribute'),
+        render: (attribute: string[]) => {
+          return attribute?.length > 0 ? (
+            attribute.join(', ')
+          ) : (
+            <span className="text-foreground/40 dark:text-dark-foreground/40">
+              None
+            </span>
+          );
+        },
       },
-    },
-    {
-      title: 'Comment',
-      dataIndex: 'comment',
-      key: 'comment',
-      render: (comment: string) => {
-        return comment ? (
-          comment
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'use_case',
+        key: 'use_case',
+        ...columnFilter('Use Case', 'use_case'),
+        render: (use_case: string) => {
+          return use_case ? (
+            use_case
+          ) : (
+            <span className="text-foreground/40 dark:text-dark-foreground/40">
+              None
+            </span>
+          );
+        },
       },
-    },
-  ];
+      {
+        dataIndex: 'expr',
+        key: 'expr',
+        ...columnFilter('Expr', 'expr'),
+        render: (expr: string) => {
+          return expr ? (
+            expr
+          ) : (
+            <span className="text-foreground/40 dark:text-dark-foreground/40">
+              None
+            </span>
+          );
+        },
+      },
+      {
+        dataIndex: 'comment',
+        key: 'comment',
+        ...columnFilter('Comment', 'comment'),
+        render: (comment: string) => {
+          return comment ? (
+            comment
+          ) : (
+            <span className="text-foreground/40 dark:text-dark-foreground/40">
+              None
+            </span>
+          );
+        },
+      },
+    ];
+  }, [columnFilters, onColumnFilterChange]);
 
   const versions = useMemo(() => {
     return allVersions.map((version) => ({
