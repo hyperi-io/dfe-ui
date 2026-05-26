@@ -61,7 +61,8 @@ describe('useTransformSchemaToTree', () => {
       }),
     );
 
-    expect(result.current).toEqual([]);
+    const { tree } = result.current;
+    expect(tree).toEqual([]);
   });
 
   it('maps nested children and schemas into TreeDataNode keys and hierarchy', () => {
@@ -103,7 +104,7 @@ describe('useTransformSchemaToTree', () => {
       }),
     );
 
-    const tree = result.current;
+    const { tree } = result.current;
 
     expect(tree).toHaveLength(1);
     expect(tree[0].key).toBe('azure');
@@ -143,9 +144,11 @@ describe('useTransformSchemaToTree', () => {
       }),
     );
 
-    expect(result.current).toHaveLength(1);
-    expect(result.current[0].key).toBe('solo.schema');
-    expect(result.current[0].isLeaf).toBe(true);
+    const { tree } = result.current;
+
+    expect(tree).toHaveLength(1);
+    expect(tree[0].key).toBe('solo.schema');
+    expect(tree[0].isLeaf).toBe(true);
   });
 
   it('memoises the tree when schemaObjects and setters are stable', () => {
@@ -176,12 +179,12 @@ describe('useTransformSchemaToTree', () => {
       },
     );
 
-    const first = result.current;
+    const { tree: firstTree } = result.current;
     rerender({
       schema: schema_objects,
       onSelect: setSelectedSchema,
     });
-    expect(result.current).toBe(first);
+    expect(result.current.tree).toBe(firstTree);
 
     const nextObjects: SchemaSummary = {
       schemas: [baseSchema({ name: 'b' })],
@@ -190,7 +193,7 @@ describe('useTransformSchemaToTree', () => {
       schema: nextObjects,
       onSelect: setSelectedSchema,
     });
-    expect(result.current[0].key).toBe('b');
-    expect(result.current).not.toBe(first);
+    expect(result.current.tree[0].key).toBe('b');
+    expect(result.current.tree).not.toEqual(firstTree);
   });
 });

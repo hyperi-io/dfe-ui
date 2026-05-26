@@ -23,12 +23,13 @@ export const SchemaList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListSchemasContext();
 
-  const treeData = useTransformSchemaToTree({
-    schemaObjects,
-    setSelectedSchema,
-    selectedSchemaPath,
-    selectedSchemaVersion,
-  });
+  const { tree: treeData, notificationContextHolder } =
+    useTransformSchemaToTree({
+      schemaObjects,
+      setSelectedSchema,
+      selectedSchemaPath,
+      selectedSchemaVersion,
+    });
 
   const expandedKeysForSelection = useMemo(
     () =>
@@ -65,21 +66,24 @@ export const SchemaList = ({ className }: { className?: string }) => {
   }
 
   return (
-    <div
-      className={cn(
-        'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-        className,
-      )}
-    >
-      <Tree
-        blockNode
-        treeData={treeData}
-        expandedKeys={expandedKeys}
-        onExpand={(keys) => setUserExpandedKeys(keys as string[])}
-      />
-      <div ref={loadMoreRef} className="h-4 flex justify-center">
-        {isFetchingNextPage && <Spin size="small" />}
+    <>
+      {notificationContextHolder}
+      <div
+        className={cn(
+          'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
+          className,
+        )}
+      >
+        <Tree
+          blockNode
+          treeData={treeData}
+          expandedKeys={expandedKeys}
+          onExpand={(keys) => setUserExpandedKeys(keys as string[])}
+        />
+        <div ref={loadMoreRef} className="h-4 flex justify-center">
+          {isFetchingNextPage && <Spin size="small" />}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
