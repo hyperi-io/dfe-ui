@@ -1,5 +1,6 @@
 import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -150,16 +151,19 @@ export const ViewSchemaDetails = ({
           </dd>
         </dl>
 
-        <div className="flex flex-row gap-2 items-center mb-auto">
-          <p>Version:</p>
-          <Select
-            className="w-48"
-            options={versions}
-            value={selectedSchemaVersion}
-            onChange={(value) => {
-              handleSetSelectedSchema(value);
-            }}
-          />
+        <div className="flex flex-col gap-2 items-center justify-end">
+          <div className="flex flex-row gap-2 items-center mb-auto">
+            <p>Version:</p>
+            <Select
+              className="w-48"
+              options={versions}
+              value={selectedSchemaVersion}
+              onChange={(value) => {
+                handleSetSelectedSchema(value);
+              }}
+            />
+          </div>
+          <CreateSchemaVersionDrawer classNames={{ trigger: 'ml-auto' }} />
         </div>
       </div>
 
