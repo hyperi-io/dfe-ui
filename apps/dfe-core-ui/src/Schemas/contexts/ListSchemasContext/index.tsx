@@ -97,8 +97,8 @@ export interface ListSchemasContextValue {
     schema_path,
     schema_version,
   }: {
-    schema_path: string;
-    schema_version: string;
+    schema_path: string | null;
+    schema_version: string | null;
   }) => void;
 }
 
