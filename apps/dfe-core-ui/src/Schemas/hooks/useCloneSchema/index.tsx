@@ -1,0 +1,82 @@
+import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
+import {
+  SchemaCreateRequest,
+  SchemaCreateResponse,
+} from '@/Schemas/hooks/useCreateSchema/types';
+import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
+import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+
+interface UseCloneSchemaProps {
+  onSuccess?: (schema: SchemaCreateResponse) => void;
+  onError?: (error: Error) => void;
+  schema_path: string;
+  version: string | null;
+}
+
+const cloneSchemaError = ({
+  version,
+  isFetchingSchemaDetail,
+  schemaDetailData,
+}: {
+  version: string | null;
+  isFetchingSchemaDetail: boolean;
+  schemaDetailData: MetaSchemaDetailResponse | null;
+}) => {
+  if (!version) return;
+  if (!isFetchingSchemaDetail && schemaDetailData?.version?.columns?.items)
+    return;
+  return { message: 'Unable to clone schema' };
+};
+export const useCloneSchema = ({
+  onSuccess,
+  onError,
+  schema_path,
+  version,
+}: UseCloneSchemaProps) => {
+  const { data: schemaDetailData, isLoading: isFetchingSchemaDetail } =
+    useFetchInfiniteFilteredSchemaDetailColumns({
+      schema_path: schema_path,
+      version,
+      per_page: -1,
+    });
+
+  const {
+    mutate,
+    isPending,
+    error: createSourceError,
+  } = useCreateSchema({
+    onSuccess,
+    onError,
+  });
+
+  const handleMutate = (
+    values: Pick<
+      CreateSchemaFormData,
+      'path' | 'name' | 'version' | 'description'
+    >,
+  ) => {
+    if (!schemaDetailData?.version?.columns?.items) {
+      throw new Error('Unable to clone schema');
+    }
+    const body: SchemaCreateRequest = {
+      path: values.path ? `${values.path}/${values.name}` : values.name,
+      current: values.version,
+      versions: {
+        [values.version]: {
+          date: new Date().toISOString(),
+          type: 'model',
+          summary: values.description ?? '',
+          columns: schemaDetailData.version.columns.items,
+        },
+      },
+    };
+    mutate(body);
+  };
+
+  const error =
+    createSourceError ??
+    cloneSchemaError({ version, isFetchingSchemaDetail, schemaDetailData });
+
+  return { mutate: handleMutate, isPending, error };
+};
