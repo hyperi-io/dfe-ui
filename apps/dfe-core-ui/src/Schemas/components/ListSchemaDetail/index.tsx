@@ -1,7 +1,7 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
-import { notification, Spin, Typography } from 'antd';
+import { notification, Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';
 
@@ -40,7 +40,7 @@ export const ListSchemaDetail = () => {
     <>
       {contextHolder}
       <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <Typography.Title level={5}>Schema Configuration</Typography.Title>
+        <h4 className="text-lg font-medium">Schema Configuration</h4>
         <ViewSchemaDetails
           {...schemaDetailData}
           refetchSchemaDetail={refetchSchemaDetail}
