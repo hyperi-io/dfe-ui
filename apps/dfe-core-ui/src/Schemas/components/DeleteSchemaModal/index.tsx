@@ -41,20 +41,20 @@ export const DeleteSchemaModal = ({
   });
   return (
     <>
-      <Tooltip title={`Delete schema: ${schemaPath}`} destroyOnHidden>
+      <Tooltip title={`Delete ${schemaPath}`} destroyOnHidden>
         <Button
           type="default"
           shape="circle"
           size="small"
           loading={isDeletingSchema}
           disabled={isDeletingSchema}
-          aria-label={`Delete schema: ${schemaPath}`}
+          aria-label={`Delete ${schemaPath}`}
           icon={<IconTrash />}
           onClick={() => setOpen(true)}
         />
       </Tooltip>
       <Modal
-        title={`Delete schema: ${schemaPath}`}
+        title={`Delete ${schemaPath}`}
         open={open}
         onCancel={() => {
           if (isDeletingSchema) return;
