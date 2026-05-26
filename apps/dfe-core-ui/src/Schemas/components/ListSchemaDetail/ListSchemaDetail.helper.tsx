@@ -4,6 +4,34 @@ import { IconSearch, IconX } from '@repo/dfe-icons';
 import { Input } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import { useState } from 'react';
+import Highlighter from 'react-highlight-words';
+
+const nonePlaceholder = (
+  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
+);
+
+export const renderSchemaDetailFilteredCell = (
+  value: string | undefined,
+  filterTerm: string | undefined,
+) => {
+  if (!value) {
+    return nonePlaceholder;
+  }
+
+  const search = filterTerm?.trim();
+  if (!search) {
+    return value;
+  }
+
+  return (
+    <Highlighter
+      highlightClassName="bg-yellow-200"
+      searchWords={[search]}
+      autoEscape
+      textToHighlight={value}
+    />
+  );
+};
 
 interface SchemaDetailColumnFilterTitleProps {
   title: string;

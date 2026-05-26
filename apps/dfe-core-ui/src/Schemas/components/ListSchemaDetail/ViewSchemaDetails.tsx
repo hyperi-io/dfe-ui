@@ -12,7 +12,7 @@ import { IconInfoCircle } from '@repo/dfe-icons';
 import { Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { UIEventHandler, useCallback, useMemo } from 'react';
-import { createSchemaDetailTextColumnFilter } from './ListSchemaDetail.helper';
+import { createSchemaDetailTextColumnFilter, renderSchemaDetailFilteredCell } from './ListSchemaDetail.helper';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
@@ -77,67 +77,46 @@ export const ViewSchemaDetails = ({
         dataIndex: 'name',
         key: 'name',
         ...columnFilter('Name', 'name'),
+        render: (name: string) =>
+          renderSchemaDetailFilteredCell(name, columnFilters.name),
       },
       {
         dataIndex: 'type',
         key: 'type',
         ...columnFilter('Type', 'type'),
+        render: (type: string) =>
+          renderSchemaDetailFilteredCell(type, columnFilters.type),
       },
       {
         dataIndex: 'attribute',
         key: 'attribute',
         ...columnFilter('Attribute', 'attribute'),
-        render: (attribute: string[]) => {
-          return attribute?.length > 0 ? (
-            attribute.join(', ')
-          ) : (
-            <span className="text-foreground/40 dark:text-dark-foreground/40">
-              None
-            </span>
-          );
-        },
+        render: (attribute: string[]) =>
+          renderSchemaDetailFilteredCell(
+            attribute?.length > 0 ? attribute.join(', ') : undefined,
+            columnFilters.attribute,
+          ),
       },
       {
         dataIndex: 'use_case',
         key: 'use_case',
         ...columnFilter('Use Case', 'use_case'),
-        render: (use_case: string) => {
-          return use_case ? (
-            use_case
-          ) : (
-            <span className="text-foreground/40 dark:text-dark-foreground/40">
-              None
-            </span>
-          );
-        },
+        render: (use_case: string) =>
+          renderSchemaDetailFilteredCell(use_case, columnFilters.use_case),
       },
       {
         dataIndex: 'expr',
         key: 'expr',
         ...columnFilter('Expr', 'expr'),
-        render: (expr: string) => {
-          return expr ? (
-            expr
-          ) : (
-            <span className="text-foreground/40 dark:text-dark-foreground/40">
-              None
-            </span>
-          );
-        },
+        render: (expr: string) =>
+          renderSchemaDetailFilteredCell(expr, columnFilters.expr),
       },
       {
         dataIndex: 'comment',
         key: 'comment',
         ...columnFilter('Comment', 'comment'),
-        render: (comment: string) => {
-          return comment ? (
-            comment
-          ) : (
-            <span className="text-foreground/40 dark:text-dark-foreground/40">
-              None
-            </span>
-          );
-        },
+        render: (comment: string) =>
+          renderSchemaDetailFilteredCell(comment, columnFilters.comment),
       },
     ];
   }, [columnFilters, onColumnFilterChange]);
