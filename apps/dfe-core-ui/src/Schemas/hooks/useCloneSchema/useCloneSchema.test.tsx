@@ -62,7 +62,7 @@ describe('.useCloneSchema', () => {
         expect(result.current).toEqual({
           mutate: expect.any(Function),
           isPending: false,
-          error: null,
+          error: undefined,
         });
       });
 
