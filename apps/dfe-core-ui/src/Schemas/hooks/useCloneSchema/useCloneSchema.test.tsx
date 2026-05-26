@@ -48,7 +48,7 @@ describe('.useCloneSchema', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.error).toBeNull();
+        expect(result.current.error).toBeUndefined();
       });
 
       result.current.mutate({
