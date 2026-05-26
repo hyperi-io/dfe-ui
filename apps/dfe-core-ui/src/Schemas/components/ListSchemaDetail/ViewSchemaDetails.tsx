@@ -5,12 +5,14 @@ import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Select } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { UIEventHandler, useCallback, useMemo } from 'react';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
 interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
-  refetchSchemaDetail: () => void;
+  onSuccess?: () => void;
+  isLoading?: boolean;
+  onScroll?: UIEventHandler<HTMLDivElement>;
 }
 
 export const ViewSchemaDetails = ({
@@ -18,7 +20,9 @@ export const ViewSchemaDetails = ({
   versions: allVersions,
   version: selectedVersion,
   path,
-  refetchSchemaDetail,
+  onSuccess,
+  isLoading,
+  onScroll,
 }: ViewSchemaDetailsProps) => {
   const {
     selectedSchemaVersion,
@@ -134,7 +138,7 @@ export const ViewSchemaDetails = ({
               onSuccess={(values) => {
                 handleSetSelectedSchema(values.current);
                 void refetchListSchemas();
-                void refetchSchemaDetail();
+                onSuccess?.();
               }}
             />
           </dd>
@@ -146,7 +150,7 @@ export const ViewSchemaDetails = ({
               path={path}
               version={selectedSchemaVersion ?? ''}
               summary={selectedVersion.summary}
-              onSuccess={refetchSchemaDetail}
+              onSuccess={onSuccess}
             />
           </dd>
         </dl>
@@ -171,11 +175,8 @@ export const ViewSchemaDetails = ({
         columns={tableColumns}
         dataSource={selectedVersion.columns.items}
         rowKey="name"
-        pagination={{
-          defaultPageSize: 50,
-          showSizeChanger: true,
-          pageSizeOptions: [10, 25, 50, 100],
-        }}
+        loading={isLoading}
+        pagination={false}
         locale={{
           emptyText: (
             <div className="flex items-center justify-center gap-2 text-foreground-muted dark:text-dark-foreground-muted">
@@ -185,6 +186,7 @@ export const ViewSchemaDetails = ({
           ),
         }}
         scroll={{ y: componentHeight }}
+        onScroll={onScroll}
       />
     </div>
   );

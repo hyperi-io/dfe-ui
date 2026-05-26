@@ -2,6 +2,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { notification, Spin } from 'antd';
+import { useCallback } from 'react';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';
 
@@ -14,10 +15,33 @@ export const ListSchemaDetail = () => {
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
     refetch: refetchSchemaDetail,
+    fetchNextPage: fetchNextPageSchemaDetail,
+    hasNextPage: hasNextPageSchemaDetail,
+    isFetchingNextPage: isFetchingNextPageSchemaDetail,
   } = useFetchInfiniteFilteredSchemaDetailColumns({
     schema_path: schema_path,
     version: version,
+    per_page: 50,
   });
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const el = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+
+      if (!hasNextPageSchemaDetail || isFetchingNextPageSchemaDetail) return;
+
+      // Fetch data when user is near the bottom
+      if (scrollHeight - scrollTop - clientHeight < 40) {
+        void fetchNextPageSchemaDetail();
+      }
+    },
+    [
+      hasNextPageSchemaDetail,
+      isFetchingNextPageSchemaDetail,
+      fetchNextPageSchemaDetail,
+    ],
+  );
 
   if (isFetchingSchemaDetail)
     return (
@@ -36,6 +60,7 @@ export const ListSchemaDetail = () => {
   if (!schemaDetailData) {
     return <EmptyDetail />;
   }
+
   return (
     <>
       {contextHolder}
@@ -43,7 +68,11 @@ export const ListSchemaDetail = () => {
         <h4 className="text-lg font-medium">Schema Configuration</h4>
         <ViewSchemaDetails
           {...schemaDetailData}
-          refetchSchemaDetail={refetchSchemaDetail}
+          onSuccess={() => {
+            void refetchSchemaDetail();
+          }}
+          isLoading={isFetchingSchemaDetail || isFetchingNextPageSchemaDetail}
+          onScroll={handleScroll}
         />
       </div>
     </>
