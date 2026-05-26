@@ -34,7 +34,6 @@ export const CreateSchemaVersionDrawerBase = ({
 
   const {
     isReviewing,
-    buttonLabel,
     reviewValues,
     handleReview,
     handleReset,
@@ -107,7 +106,7 @@ export const CreateSchemaVersionDrawerBase = ({
       >
         <div className={isReviewing ? 'hidden' : undefined}>
           <CreateSchemaForm
-            buttonLabel={buttonLabel}
+            buttonLabel="Review Schema Version"
             onFinish={handleReview}
             isPending={isCreatingSchemaVersion}
             disabledFields={{
@@ -129,7 +128,7 @@ export const CreateSchemaVersionDrawerBase = ({
         {isReviewing && (
           <ReviewForm
             values={reviewValues}
-            buttonLabel={buttonLabel}
+            buttonLabel="Add Schema Version"
             onFinish={handleSubmit}
             hideFields={{
               version: true,
