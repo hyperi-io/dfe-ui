@@ -1,3 +1,4 @@
+import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
 import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
@@ -122,16 +123,29 @@ const schemaSummaryToTreeData = ({
             selectedSchemaVersion === schema.current
           }
           actions={
-            <DeleteSchemaModal
-              schemaPath={`${schema.name}`}
-              onSuccess={(schemaPath) =>
-                apiNotification.success({
-                  title: 'Schema deleted successfully',
-                  description: `${schemaPath} has been deleted successfully`,
-                  placement: 'bottomLeft',
-                })
-              }
-            />
+            <>
+              <CloneSchemaModal
+                schema={schema.name}
+                versions={schema.versions ?? []}
+                onSuccess={(schema) =>
+                  apiNotification.success({
+                    title: 'Schema cloned successfully',
+                    description: `${schema.path} has been cloned successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+              <DeleteSchemaModal
+                schemaPath={`${schema.name}`}
+                onSuccess={(schemaPath) =>
+                  apiNotification.success({
+                    title: 'Schema deleted successfully',
+                    description: `${schemaPath} has been deleted successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+            </>
           }
         />
       ),

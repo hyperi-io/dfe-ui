@@ -1,0 +1,164 @@
+import { Form } from '@/core/components/Form';
+
+import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
+import { SchemaCreateResponse } from '@/Schemas/hooks/useCreateSchema/types';
+import {
+  schemaGroupValidator,
+  schemaNameValidator,
+  schemaVersionValidator,
+} from '@/Schemas/utils/validation';
+import { FormNotification } from '@/core/components/FormNotification';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { IconCopy } from '@repo/dfe-icons';
+import { Button, Input, Modal, Select, Tooltip } from 'antd';
+import { useState } from 'react';
+import z from 'zod';
+
+const formSchema = z.object({
+  path: schemaGroupValidator.optional(),
+  name: schemaNameValidator,
+  version: schemaVersionValidator,
+  description: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+interface CloneSchemaModalProps {
+  schema: string;
+  versions: string[];
+  onSuccess?: (data: SchemaCreateResponse) => void;
+  onError?: (error: Error) => void;
+}
+export const CloneSchemaModal = ({
+  schema,
+  versions,
+  onSuccess: onSuccessProp,
+  onError,
+}: CloneSchemaModalProps) => {
+  const [form] = Form.useForm<FormData>();
+  const formValidation = useAntdZodResolver<FormData>(formSchema);
+  const [open, setOpen] = useState(false);
+
+  const version = Form.useWatch('version', form);
+
+  const { refetch: refetchSchemas } = useListSchemasContext();
+
+  const onSuccess = (data: SchemaCreateResponse) => {
+    refetchSchemas();
+    onSuccessProp?.(data);
+    setOpen(false);
+  };
+
+  const {
+    mutate: cloneSchemaMutation,
+    isPending,
+    error,
+  } = useCloneSchema({
+    schema_path: schema,
+    version,
+    onSuccess,
+    onError,
+  });
+  const handleCloneSchema = (values: FormData) => {
+    cloneSchemaMutation(values);
+  };
+
+  const path = schema.split('/').slice(0, -1).join('/');
+  const name = schema.split('/').pop();
+
+  return (
+    <>
+      <Tooltip title={`Clone ${schema}`} destroyOnHidden>
+        <Button
+          type="default"
+          shape="circle"
+          size="small"
+          aria-label={`Clone ${schema}`}
+          icon={<IconCopy />}
+          onClick={() => {
+            setOpen(true);
+          }}
+        />
+      </Tooltip>
+
+      <Modal
+        title={`Clone ${schema}`}
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <Form
+          form={form}
+          onFinish={handleCloneSchema}
+          initialValues={{
+            path,
+            name: `${name}_copy`,
+          }}
+        >
+          <div className="flex gap-x-2">
+            <Form.Item
+              name="path"
+              label="Path"
+              rules={[formValidation]}
+              className="mb-2 w-full"
+            >
+              <Input placeholder={`${path ?? ''}`} />
+            </Form.Item>
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[formValidation]}
+              className="mb-2 w-full"
+            >
+              <Input placeholder={`${name}`} />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="version"
+            label="Version"
+            rules={[formValidation]}
+            className="mb-2 w-full"
+          >
+            <Select
+              options={versions.map((version) => ({
+                label: version,
+                value: version,
+              }))}
+              placeholder="Select version"
+            />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[formValidation]}
+            className="mb-2 w-full"
+          >
+            <Input.TextArea placeholder="Enter description" />
+          </Form.Item>
+          {error && <FormNotification text={error.message} type="error" />}
+          <div className="flex justify-end gap-x-2">
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              htmlType="submit"
+              type="primary"
+            >
+              Clone
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+    </>
+  );
+};

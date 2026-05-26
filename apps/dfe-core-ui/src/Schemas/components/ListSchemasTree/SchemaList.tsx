@@ -76,6 +76,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
       >
         <Tree
           blockNode
+          className="[&_.ant-tree-node-content-wrapper]:min-w-0! [&_.ant-tree-node-content-wrapper]:overflow-visible [&_.ant-tree-title]:max-w-full [&_.ant-tree-title]:min-w-0! [&_.ant-tree-title]:overflow-visible"
           treeData={treeData}
           expandedKeys={expandedKeys}
           onExpand={(keys) => setUserExpandedKeys(keys as string[])}
