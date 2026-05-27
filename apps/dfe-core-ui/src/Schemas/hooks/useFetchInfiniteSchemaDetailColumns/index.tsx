@@ -142,8 +142,10 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const hasSelection = !!schema_path && !!version;
+
   return {
-    data: flattenedData,
+    data: hasSelection ? flattenedData : null,
     isLoading,
     isError,
     error,

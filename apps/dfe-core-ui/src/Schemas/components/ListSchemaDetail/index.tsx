@@ -71,6 +71,10 @@ export const ListSchemaDetail = () => {
     ],
   );
 
+  if (!schema_path || !version) {
+    return <EmptyDetail />;
+  }
+
   if (isFetchingSchemaDetail && !schemaDetailData)
     return (
       <div className="flex items-center justify-center h-full">
