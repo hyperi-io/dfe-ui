@@ -44,6 +44,7 @@ const buildVersionChildren = (
   }) => void,
   selectedSchemaPath: string | null,
   selectedSchemaVersion: string | null,
+  expandTreeNode: (key: string) => void,
 ): TreeDataNode[] =>
   (schema.versions ?? []).map((version) => ({
     key: `${schema.name}.${version}`,
@@ -52,15 +53,16 @@ const buildVersionChildren = (
         icon={fileIcon}
         title={
           <>
-            {version}
+            <span className="min-w-0 truncate">{version}</span>
             {version === schema.current && (
               <Tooltip destroyOnHidden title="Current version">
-                <IconStarFilled className="text-yellow-500" />
+                <IconStarFilled className="shrink-0 text-yellow-500" />
               </Tooltip>
             )}
           </>
         }
         onClick={() => {
+          expandTreeNode(schema.name);
           setSelectedSchema({
             schema_path: schema.name,
             schema_version: version,
@@ -82,6 +84,7 @@ const schemaSummaryToTreeData = ({
   selectedSchemaPath,
   selectedSchemaVersion,
   apiNotification,
+  expandTreeNode,
 }: {
   node: SchemaSummary;
   pathSegments: string[];
@@ -95,6 +98,7 @@ const schemaSummaryToTreeData = ({
   selectedSchemaPath: string | null;
   selectedSchemaVersion: string | null;
   apiNotification: NotificationInstance;
+  expandTreeNode: (key: string) => void;
 }): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
@@ -104,6 +108,7 @@ const schemaSummaryToTreeData = ({
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
+      expandTreeNode,
     );
     const schemaIsLeaf = versionChildren.length === 0;
     out.push({
@@ -113,6 +118,7 @@ const schemaSummaryToTreeData = ({
           icon={folderIcon}
           title={schema.name.split('/').pop() ?? ''}
           onClick={() => {
+            expandTreeNode(schema.name);
             setSelectedSchema({
               schema_path: schema.name,
               schema_version: schema.current,
@@ -167,16 +173,21 @@ const schemaSummaryToTreeData = ({
       selectedSchemaPath,
       selectedSchemaVersion,
       apiNotification,
+      expandTreeNode,
     });
 
     if (nested.length === 0) {
       continue;
     }
 
+    const folderKey = nextSegments.join('.');
     out.push({
-      key: nextSegments.join('.'),
+      key: folderKey,
       title: (
-        <Typography.Text className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap">
+        <Typography.Text
+          className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
+          onClick={() => expandTreeNode(folderKey)}
+        >
           {folderIcon}
           {segment}
         </Typography.Text>
@@ -193,6 +204,7 @@ export const useTransformSchemaToTree = ({
   setSelectedSchema,
   selectedSchemaPath,
   selectedSchemaVersion,
+  expandTreeNode,
 }: {
   schemaObjects: SchemaSummary;
   setSelectedSchema: ({
@@ -204,6 +216,7 @@ export const useTransformSchemaToTree = ({
   }) => void;
   selectedSchemaPath: string | null;
   selectedSchemaVersion: string | null;
+  expandTreeNode: (key: string) => void;
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
@@ -217,6 +230,7 @@ export const useTransformSchemaToTree = ({
         selectedSchemaPath,
         selectedSchemaVersion,
         apiNotification,
+        expandTreeNode,
       }),
     [
       schemaObjects,
@@ -224,6 +238,7 @@ export const useTransformSchemaToTree = ({
       selectedSchemaPath,
       selectedSchemaVersion,
       apiNotification,
+      expandTreeNode,
     ],
   );
 

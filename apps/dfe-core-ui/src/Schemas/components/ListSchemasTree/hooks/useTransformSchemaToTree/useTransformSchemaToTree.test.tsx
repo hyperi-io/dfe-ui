@@ -20,6 +20,7 @@ const baseSchema = (
 const defaultSelection = {
   selectedSchemaPath: null as string | null,
   selectedSchemaVersion: null as string | null,
+  expandTreeNode: vi.fn(),
 };
 
 const expectTreeNodeTitle = (
@@ -156,25 +157,30 @@ describe('useTransformSchemaToTree', () => {
       schemas: [baseSchema({ name: 'a' })],
     };
     const setSelectedSchema = vi.fn();
+    const expandTreeNode = vi.fn();
 
     const { result, rerender } = renderHook(
       ({
         schema,
         onSelect,
+        onExpand,
       }: {
         schema: SchemaSummary;
         onSelect: typeof setSelectedSchema;
+        onExpand: typeof expandTreeNode;
       }) =>
         useTransformSchemaToTree({
           schemaObjects: schema,
           setSelectedSchema: onSelect,
           selectedSchemaPath: null,
           selectedSchemaVersion: null,
+          expandTreeNode: onExpand,
         }),
       {
         initialProps: {
           schema: schema_objects,
           onSelect: setSelectedSchema,
+          onExpand: expandTreeNode,
         },
       },
     );
@@ -183,6 +189,7 @@ describe('useTransformSchemaToTree', () => {
     rerender({
       schema: schema_objects,
       onSelect: setSelectedSchema,
+      onExpand: expandTreeNode,
     });
     expect(result.current.tree).toBe(firstTree);
 
@@ -192,6 +199,7 @@ describe('useTransformSchemaToTree', () => {
     rerender({
       schema: nextObjects,
       onSelect: setSelectedSchema,
+      onExpand: expandTreeNode,
     });
     expect(result.current.tree[0].key).toBe('b');
     expect(result.current.tree).not.toEqual(firstTree);

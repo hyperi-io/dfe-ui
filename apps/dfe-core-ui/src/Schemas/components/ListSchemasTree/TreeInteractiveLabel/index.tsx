@@ -25,7 +25,13 @@ export const TreeInteractiveLabel = ({
         )}
       >
         {icon}
-        <span className="min-w-0 truncate">{title}</span>
+        <span className="flex min-w-0 flex-1 items-center gap-x-1 overflow-hidden">
+          {typeof title === 'string' ? (
+            <span className="min-w-0 truncate">{title}</span>
+          ) : (
+            title
+          )}
+        </span>
       </Typography.Text>
 
       {actions ? (
