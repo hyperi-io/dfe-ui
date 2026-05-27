@@ -3,7 +3,7 @@ import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
 import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
-import { notification, Tooltip, TreeDataNode, Typography } from 'antd';
+import { notification, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
@@ -192,13 +192,11 @@ const schemaSummaryToTreeData = ({
     out.push({
       key: folderKey,
       title: (
-        <Typography.Text
-          className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap"
+        <TreeInteractiveLabel
+          icon={folderIcon}
+          title={segment}
           onClick={() => expandTreeNode(folderKey)}
-        >
-          {folderIcon}
-          {segment}
-        </Typography.Text>
+        />
       ),
       children: nested,
     });
