@@ -61,7 +61,10 @@ export const CloneSchemaModal = ({
     onError,
   });
   const handleCloneSchema = (values: FormData) => {
-    cloneSchemaMutation(values);
+    cloneSchemaMutation({
+      ...values,
+      version: '1.0.0',
+    });
   };
 
   const path = schema.split('/').slice(0, -1).join('/');
