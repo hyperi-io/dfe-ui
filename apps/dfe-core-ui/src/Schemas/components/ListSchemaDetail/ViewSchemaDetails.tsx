@@ -21,6 +21,7 @@ import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
 interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
   columnFilters: SchemaDetailColumnFilters;
+  columnFilterResetKey: number;
   onColumnFilterChange: (
     filterKey: SchemaDetailColumnFilterField,
     value: string | undefined,
@@ -40,6 +41,7 @@ export const ViewSchemaDetails = ({
   version: selectedVersion,
   path,
   columnFilters,
+  columnFilterResetKey,
   onColumnFilterChange,
   onSuccess,
   isLoading,
@@ -75,6 +77,7 @@ export const ViewSchemaDetails = ({
         title,
         filterKey,
         columnFilters[filterKey],
+        columnFilterResetKey,
         onColumnFilterChange,
       );
 
@@ -146,7 +149,7 @@ export const ViewSchemaDetails = ({
           ),
       },
     ];
-  }, [columnFilters, onColumnFilterChange]);
+  }, [columnFilters, columnFilterResetKey, onColumnFilterChange]);
 
   const versions = useMemo(() => {
     return allVersions.map((version) => ({

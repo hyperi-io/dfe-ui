@@ -92,6 +92,7 @@ const SchemaDetailColumnFilterTitle = ({
 
   const handleClear = () => {
     setFilterTerm('');
+    setExpanded(false);
     onFilterChange(filterKey, undefined);
   };
 
@@ -125,6 +126,7 @@ export const createSchemaDetailTextColumnFilter = <T extends object>(
   title: string,
   filterKey: SchemaDetailColumnFilterField,
   filterValue: string | undefined,
+  columnFilterResetKey: number,
   onFilterChange: (
     filterKey: SchemaDetailColumnFilterField,
     value: string | undefined,
@@ -133,6 +135,7 @@ export const createSchemaDetailTextColumnFilter = <T extends object>(
   return {
     title: (
       <SchemaDetailColumnFilterTitle
+        key={`${filterKey}-${columnFilterResetKey}`}
         title={title}
         filterKey={filterKey}
         filterValue={filterValue}

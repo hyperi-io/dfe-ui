@@ -17,19 +17,24 @@ export const ListSchemaDetail = () => {
   const [columnFilters, setColumnFilters] = useState<SchemaDetailColumnFilters>(
     {},
   );
+  const [columnFilterResetKey, setColumnFilterResetKey] = useState(0);
 
   const handleColumnFilterChange = useCallback(
     (filterKey: SchemaDetailColumnFilterField, value: string | undefined) => {
-      setColumnFilters((previous) => ({
-        ...previous,
-        [filterKey]: value,
-      }));
+      setColumnFilters((previous) => {
+        if (value === undefined) {
+          const { [filterKey]: _removed, ...rest } = previous;
+          return rest;
+        }
+        return { ...previous, [filterKey]: value };
+      });
     },
     [],
   );
 
   const handleClearAllFilters = useCallback(() => {
     setColumnFilters({});
+    setColumnFilterResetKey((key) => key + 1);
   }, []);
 
   const {
@@ -92,6 +97,7 @@ export const ListSchemaDetail = () => {
         <ViewSchemaDetails
           {...schemaDetailData}
           columnFilters={columnFilters}
+          columnFilterResetKey={columnFilterResetKey}
           onColumnFilterChange={handleColumnFilterChange}
           onClearAllFilters={handleClearAllFilters}
           onSuccess={() => {
