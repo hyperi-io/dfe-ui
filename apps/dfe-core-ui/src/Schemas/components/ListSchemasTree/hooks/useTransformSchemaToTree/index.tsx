@@ -10,6 +10,15 @@ import { useMemo } from 'react';
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
 
+/** Ant Design Tree keys must be globally unique; folder and schema paths can share the same string. */
+export const folderTreeKey = (pathSegments: string[]) =>
+  `dir:${pathSegments.join('.')}`;
+
+export const schemaTreeKey = (schemaPath: string) => `schema:${schemaPath}`;
+
+export const versionTreeKey = (schemaPath: string, version: string) =>
+  `${schemaTreeKey(schemaPath)}@${version}`;
+
 /** Folder keys (dot-separated) plus schema key when a version is selected. */
 export const getExpandedKeysForSchemaSelection = (
   schemaPath: string | null,
@@ -23,11 +32,11 @@ export const getExpandedKeysForSchemaSelection = (
   const keys: string[] = [];
 
   for (let i = 0; i < segments.length - 1; i++) {
-    keys.push(segments.slice(0, i + 1).join('.'));
+    keys.push(folderTreeKey(segments.slice(0, i + 1)));
   }
 
   if (schemaVersion) {
-    keys.push(schemaPath);
+    keys.push(schemaTreeKey(schemaPath));
   }
 
   return keys;
@@ -47,10 +56,9 @@ const buildVersionChildren = (
   expandTreeNode: (key: string) => void,
 ): TreeDataNode[] =>
   (schema.versions ?? []).map((version) => ({
-    key: `${schema.name}.${version}`,
+    key: versionTreeKey(schema.name, version),
     title: (
       <TreeInteractiveLabel
-        icon={fileIcon}
         title={
           <>
             <span className="min-w-0 truncate">{version}</span>
@@ -62,7 +70,7 @@ const buildVersionChildren = (
           </>
         }
         onClick={() => {
-          expandTreeNode(schema.name);
+          expandTreeNode(schemaTreeKey(schema.name));
           setSelectedSchema({
             schema_path: schema.name,
             schema_version: version,
@@ -112,13 +120,13 @@ const schemaSummaryToTreeData = ({
     );
     const schemaIsLeaf = versionChildren.length === 0;
     out.push({
-      key: schema.name,
+      key: schemaTreeKey(schema.name),
       title: (
         <TreeInteractiveLabel
-          icon={folderIcon}
+          icon={fileIcon}
           title={schema.name.split('/').pop() ?? ''}
           onClick={() => {
-            expandTreeNode(schema.name);
+            expandTreeNode(schemaTreeKey(schema.name));
             setSelectedSchema({
               schema_path: schema.name,
               schema_version: schema.current,
@@ -180,7 +188,7 @@ const schemaSummaryToTreeData = ({
       continue;
     }
 
-    const folderKey = nextSegments.join('.');
+    const folderKey = folderTreeKey(nextSegments);
     out.push({
       key: folderKey,
       title: (

@@ -35,18 +35,22 @@ describe('getExpandedKeysForSchemaSelection', () => {
   it('returns folder keys and schema key for a nested path with a version', () => {
     expect(
       getExpandedKeysForSchemaSelection('azure/activity_log/schema1', 'v1'),
-    ).toEqual(['azure', 'azure.activity_log', 'azure/activity_log/schema1']);
+    ).toEqual([
+      'dir:azure',
+      'dir:azure.activity_log',
+      'schema:azure/activity_log/schema1',
+    ]);
   });
 
   it('returns only folder keys when no version is selected', () => {
     expect(
       getExpandedKeysForSchemaSelection('azure/activity_log/schema1', null),
-    ).toEqual(['azure', 'azure.activity_log']);
+    ).toEqual(['dir:azure', 'dir:azure.activity_log']);
   });
 
   it('returns schema key only for a root-level schema with a version', () => {
     expect(getExpandedKeysForSchemaSelection('solo.schema', 'v1')).toEqual([
-      'solo.schema',
+      'schema:solo.schema',
     ]);
   });
 });
@@ -108,28 +112,28 @@ describe('useTransformSchemaToTree', () => {
     const { tree } = result.current;
 
     expect(tree).toHaveLength(1);
-    expect(tree[0].key).toBe('azure');
+    expect(tree[0].key).toBe('dir:azure');
     expectTreeNodeTitle(tree[0].title as ReactElement, 'azure');
 
     const azureChildren = tree[0].children!;
     expect(azureChildren).toHaveLength(2);
     // Sorted alphabetically: activity_log before security_log
-    expect(azureChildren[0].key).toBe('azure.activity_log');
+    expect(azureChildren[0].key).toBe('dir:azure.activity_log');
     expectTreeNodeTitle(azureChildren[0].title as ReactElement, 'activity_log');
-    expect(azureChildren[1].key).toBe('azure.security_log');
+    expect(azureChildren[1].key).toBe('dir:azure.security_log');
     expectTreeNodeTitle(azureChildren[1].title as ReactElement, 'security_log');
 
     const activityLog = azureChildren[0].children!;
     expect(activityLog).toHaveLength(1);
-    expect(activityLog[0].key).toBe('azure/activity_log/schema1');
+    expect(activityLog[0].key).toBe('schema:azure/activity_log/schema1');
     expect(activityLog[0].isLeaf).toBe(false);
     const versionNodes = activityLog[0].children!;
     expect(versionNodes).toHaveLength(2);
-    expect(versionNodes[0].key).toBe('azure/activity_log/schema1.v1');
-    expect(versionNodes[1].key).toBe('azure/activity_log/schema1.v2');
+    expect(versionNodes[0].key).toBe('schema:azure/activity_log/schema1@v1');
+    expect(versionNodes[1].key).toBe('schema:azure/activity_log/schema1@v2');
 
     const securityLeaf = azureChildren[1].children![0];
-    expect(securityLeaf.key).toBe('azure/security_log/alerts');
+    expect(securityLeaf.key).toBe('schema:azure/security_log/alerts');
     expect(securityLeaf.isLeaf).toBe(true);
     expect(securityLeaf.children).toBeUndefined();
   });
@@ -148,8 +152,31 @@ describe('useTransformSchemaToTree', () => {
     const { tree } = result.current;
 
     expect(tree).toHaveLength(1);
-    expect(tree[0].key).toBe('solo.schema');
+    expect(tree[0].key).toBe('schema:solo.schema');
     expect(tree[0].isLeaf).toBe(true);
+  });
+
+  it('uses distinct keys when a root schema and folder share the same name', () => {
+    const { result } = renderHook(() =>
+      useTransformSchemaToTree({
+        schemaObjects: {
+          schemas: [baseSchema({ name: 'test', versions: ['v1'] })],
+          children: {
+            test: {
+              schemas: [
+                baseSchema({ name: 'test/nested', versions: ['v1'] }),
+              ],
+            },
+          },
+        },
+        setSelectedSchema: vi.fn(),
+        ...defaultSelection,
+      }),
+    );
+
+    const keys = result.current.tree.map((node) => node.key);
+    expect(keys).toEqual(['schema:test', 'dir:test']);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
   it('memoises the tree when schemaObjects and setters are stable', () => {
@@ -201,7 +228,7 @@ describe('useTransformSchemaToTree', () => {
       onSelect: setSelectedSchema,
       onExpand: expandTreeNode,
     });
-    expect(result.current.tree[0].key).toBe('b');
+    expect(result.current.tree[0].key).toBe('schema:b');
     expect(result.current.tree).not.toEqual(firstTree);
   });
 });
