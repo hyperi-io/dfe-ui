@@ -14,7 +14,7 @@ export const schemaNameValidator = z
 
 export const schemaGroupValidator = z
   .string()
-  .refine((v) => v && v.length > 0 && GROUP_REGEX.test(v), {
+  .refine((v) => v.length === 0 || GROUP_REGEX.test(v), {
     message:
       'Groups must contain only letters, numbers, underscores, hyphens, and forward slashes',
   });
