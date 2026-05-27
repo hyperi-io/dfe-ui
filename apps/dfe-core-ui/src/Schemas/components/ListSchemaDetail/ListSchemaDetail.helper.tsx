@@ -1,6 +1,6 @@
 import { cn } from '@/core/utils/style';
 import type { SchemaDetailColumnFilterField } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
-import { IconSearch, IconX } from '@repo/dfe-icons';
+import { IconCheck, IconSearch } from '@repo/dfe-icons';
 import { Input } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import { useState } from 'react';
@@ -53,74 +53,64 @@ const SchemaDetailColumnFilterTitle = ({
   onFilterChange,
 }: SchemaDetailColumnFilterTitleProps) => {
   const [expanded, setExpanded] = useState(false);
-  const [draft, setDraft] = useState('');
-
-  const commit = (value: string) => {
-    const nextValue = value.trim() || undefined;
-    onFilterChange(filterKey, nextValue);
-    setExpanded(false);
-  };
+  const [filterTerm, setFilterTerm] = useState('');
 
   const toggleExpanded = () => {
     if (expanded) {
       setExpanded(false);
       return;
     }
-    setDraft(filterValue ?? '');
+    setFilterTerm(filterValue ?? '');
     setExpanded(true);
   };
 
   const hasFilter = Boolean(filterValue);
-  const showCloseIcon = expanded;
+  const showSearchIcon = !expanded;
 
   const triggerButton = (
     <button
       type="button"
       aria-expanded={expanded}
-      aria-label={showCloseIcon ? `Close ${title} filter` : `Filter ${title}`}
+      aria-label={showSearchIcon ? `Filter ${title}` : `Close ${title} filter`}
       onClick={toggleExpanded}
       className={cn(
         'inline-flex size-5 shrink-0 items-center justify-center rounded transition-colors hover:text-foreground dark:hover:text-dark-foreground',
-        (hasFilter || showCloseIcon) && 'text-primary',
-        !hasFilter &&
-          !showCloseIcon &&
-          'text-foreground/45 dark:text-dark-foreground/45',
+        hasFilter && showSearchIcon && 'text-tertiary',
       )}
     >
-      {showCloseIcon ? (
-        <IconX className="size-4 shrink-0" aria-hidden />
-      ) : (
+      {showSearchIcon && (
         <IconSearch className="size-3.5 shrink-0" aria-hidden />
       )}
     </button>
   );
 
+  const handleChange = (value: string) => {
+    const nextValue = value.trim() || undefined;
+    setFilterTerm(nextValue ?? '');
+    onFilterChange(filterKey, nextValue);
+  };
+
+  const handleClear = () => {
+    setFilterTerm('');
+    onFilterChange(filterKey, undefined);
+  };
+
   return (
-    <div
-      className={cn(
-        'flex w-full min-w-0 items-center',
-        expanded ? 'gap-1.5' : 'justify-between gap-2',
-      )}
-    >
+    <div className="flex w-full min-w-0 items-center justify-between">
       {expanded ? (
-        <>
-          {triggerButton}
-          <Input.Search
-            size="small"
-            className="min-w-0 flex-1"
-            placeholder="Filter"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onPressEnter={() => commit(draft)}
-            onClear={() => {
-              setDraft('');
-              onFilterChange(filterKey, undefined);
-              setExpanded(false);
-            }}
-            allowClear
-            autoFocus
-          />
-        </>
+        <Input.Search
+          size="small"
+          className="min-w-0 flex-1"
+          placeholder="Filter"
+          value={filterTerm}
+          onChange={(event) => handleChange(event.target.value)}
+          onClear={handleClear}
+          onSearch={() => setExpanded(false)}
+          enterButton={<IconCheck className="size-4 shrink-0" aria-hidden />}
+          onPressEnter={() => setExpanded(false)}
+          allowClear
+          autoFocus
+        />
       ) : (
         <>
           <span className="min-w-0 truncate">{title}</span>

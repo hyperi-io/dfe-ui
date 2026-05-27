@@ -1,8 +1,14 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
+
+const TEXT_FILTER_DEBOUNCE_MS = 300;
+
+const optionalTextFilterParam = (value: string) =>
+  value === '' ? undefined : value;
 
 /** useFetchInfiniteFilteredSchemas props */
 /**
@@ -31,6 +37,17 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   attribute,
   per_page = 10,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
+  const debouncedSearch = useDebounce(search ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedName = useDebounce(name ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedType = useDebounce(type ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedUseCase = useDebounce(use_case ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedExpr = useDebounce(expr ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedComment = useDebounce(comment ?? '', TEXT_FILTER_DEBOUNCE_MS);
+  const debouncedAttribute = useDebounce(
+    attribute ?? '',
+    TEXT_FILTER_DEBOUNCE_MS,
+  );
+
   const {
     data,
     isLoading,
@@ -46,13 +63,13 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       'schema-detail-columns',
       schema_path,
       version,
-      search,
-      name,
-      type,
-      use_case,
-      expr,
-      comment,
-      attribute,
+      optionalTextFilterParam(debouncedSearch),
+      optionalTextFilterParam(debouncedName),
+      optionalTextFilterParam(debouncedType),
+      optionalTextFilterParam(debouncedUseCase),
+      optionalTextFilterParam(debouncedExpr),
+      optionalTextFilterParam(debouncedComment),
+      optionalTextFilterParam(debouncedAttribute),
       per_page,
     ],
     queryFn: async ({ pageParam = 1, signal }) =>
@@ -60,13 +77,13 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
         pathParams: { schema_path: schema_path ?? '' },
         queryParams: {
           version: version ?? '',
-          search: search,
-          name: name,
-          type: type,
-          use_case: use_case,
-          expr: expr,
-          comment: comment,
-          attribute: attribute,
+          search: optionalTextFilterParam(debouncedSearch),
+          name: optionalTextFilterParam(debouncedName),
+          type: optionalTextFilterParam(debouncedType),
+          use_case: optionalTextFilterParam(debouncedUseCase),
+          expr: optionalTextFilterParam(debouncedExpr),
+          comment: optionalTextFilterParam(debouncedComment),
+          attribute: optionalTextFilterParam(debouncedAttribute),
           page: pageParam,
           per_page,
         },
