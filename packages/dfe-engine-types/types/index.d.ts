@@ -1472,6 +1472,9 @@ export interface paths {
         /**
          * Get Meta Schema
          * @description Get one meta-schema definition by registry path (e.g. ``aws/cloudtrail``).
+         *
+         *     Columns are paginated under ``version.columns``; use ``per_page=-1`` to return all
+         *     matching columns (after search/filters) in one page.
          */
         get: operations["get_meta_schema_api_v1_schemas_definitions__schema_path__versions_columns_get"];
         put?: never;
@@ -2816,6 +2819,11 @@ export interface components {
              * @enum {string}
              */
             type: "model" | "addition" | "revision";
+            /**
+             * Summary
+             * @description Human-readable summary stored on the new version
+             */
+            summary?: string | null;
             /**
              * Columns
              * @description Complete column snapshot for the new version
@@ -5633,9 +5641,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -5874,9 +5880,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -6108,9 +6112,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -6375,9 +6377,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -6627,9 +6627,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -7444,9 +7442,7 @@ export interface operations {
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
@@ -7494,9 +7490,7 @@ export interface operations {
                 comment?: string | null;
                 /** @description Filter by attribute (substring) */
                 attribute?: string | null;
-                /** @description Page number (1-based) */
                 page?: number;
-                /** @description Items per page */
                 per_page?: number;
             };
             header?: never;
