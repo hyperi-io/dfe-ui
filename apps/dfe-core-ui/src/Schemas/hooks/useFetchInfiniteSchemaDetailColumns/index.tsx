@@ -1,6 +1,6 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
 
@@ -77,6 +77,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       return nextPage != null && nextPage > 0 ? nextPage : undefined;
     },
     initialPageParam: 1,
+    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

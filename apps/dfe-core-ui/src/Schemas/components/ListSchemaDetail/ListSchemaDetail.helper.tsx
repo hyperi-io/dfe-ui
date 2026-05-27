@@ -12,21 +12,24 @@ const nonePlaceholder = (
 
 export const renderSchemaDetailFilteredCell = (
   value: string | undefined,
-  filterTerm: string | undefined,
+  ...filterTerms: (string | undefined)[]
 ) => {
   if (!value) {
     return nonePlaceholder;
   }
 
-  const search = filterTerm?.trim();
-  if (!search) {
+  const searchWords = filterTerms
+    .map((term) => term?.trim())
+    .filter((term): term is string => Boolean(term));
+
+  if (searchWords.length === 0) {
     return value;
   }
 
   return (
     <Highlighter
       highlightClassName="bg-yellow-200"
-      searchWords={[search]}
+      searchWords={searchWords}
       autoEscape
       textToHighlight={value}
     />

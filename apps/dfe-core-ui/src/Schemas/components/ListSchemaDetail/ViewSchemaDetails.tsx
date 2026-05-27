@@ -9,10 +9,13 @@ import {
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Select } from 'antd';
+import { Button, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { UIEventHandler, useCallback, useMemo } from 'react';
-import { createSchemaDetailTextColumnFilter, renderSchemaDetailFilteredCell } from './ListSchemaDetail.helper';
+import {
+  createSchemaDetailTextColumnFilter,
+  renderSchemaDetailFilteredCell,
+} from './ListSchemaDetail.helper';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
@@ -22,6 +25,7 @@ interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
     filterKey: SchemaDetailColumnFilterField,
     value: string | undefined,
   ) => void;
+  onClearAllFilters: () => void;
   onSuccess?: () => void;
   isLoading?: boolean;
   onScroll?: UIEventHandler<HTMLDivElement>;
@@ -40,6 +44,7 @@ export const ViewSchemaDetails = ({
   onSuccess,
   isLoading,
   onScroll,
+  onClearAllFilters,
 }: ViewSchemaDetailsProps) => {
   const {
     selectedSchemaVersion,
@@ -52,8 +57,9 @@ export const ViewSchemaDetails = ({
         schema_path: path,
         schema_version: version,
       });
+      onClearAllFilters();
     },
-    [path, setSelectedSchema],
+    [path, setSelectedSchema, onClearAllFilters],
   );
 
   const { componentHeight } = useSetComponentHeight({
@@ -78,14 +84,22 @@ export const ViewSchemaDetails = ({
         key: 'name',
         ...columnFilter('Name', 'name'),
         render: (name: string) =>
-          renderSchemaDetailFilteredCell(name, columnFilters.name),
+          renderSchemaDetailFilteredCell(
+            name,
+            columnFilters.name,
+            columnFilters.search,
+          ),
       },
       {
         dataIndex: 'type',
         key: 'type',
         ...columnFilter('Type', 'type'),
         render: (type: string) =>
-          renderSchemaDetailFilteredCell(type, columnFilters.type),
+          renderSchemaDetailFilteredCell(
+            type,
+            columnFilters.type,
+            columnFilters.search,
+          ),
       },
       {
         dataIndex: 'attribute',
@@ -95,6 +109,7 @@ export const ViewSchemaDetails = ({
           renderSchemaDetailFilteredCell(
             attribute?.length > 0 ? attribute.join(', ') : undefined,
             columnFilters.attribute,
+            columnFilters.search,
           ),
       },
       {
@@ -102,21 +117,33 @@ export const ViewSchemaDetails = ({
         key: 'use_case',
         ...columnFilter('Use Case', 'use_case'),
         render: (use_case: string) =>
-          renderSchemaDetailFilteredCell(use_case, columnFilters.use_case),
+          renderSchemaDetailFilteredCell(
+            use_case,
+            columnFilters.use_case,
+            columnFilters.search,
+          ),
       },
       {
         dataIndex: 'expr',
         key: 'expr',
         ...columnFilter('Expr', 'expr'),
         render: (expr: string) =>
-          renderSchemaDetailFilteredCell(expr, columnFilters.expr),
+          renderSchemaDetailFilteredCell(
+            expr,
+            columnFilters.expr,
+            columnFilters.search,
+          ),
       },
       {
         dataIndex: 'comment',
         key: 'comment',
         ...columnFilter('Comment', 'comment'),
         render: (comment: string) =>
-          renderSchemaDetailFilteredCell(comment, columnFilters.comment),
+          renderSchemaDetailFilteredCell(
+            comment,
+            columnFilters.comment,
+            columnFilters.search,
+          ),
       },
     ];
   }, [columnFilters, onColumnFilterChange]);
@@ -182,6 +209,32 @@ export const ViewSchemaDetails = ({
 
       <Table
         columns={tableColumns}
+        title={() => (
+          <div className="flex items-center justify-between">
+            <p>{selectedVersion.columns.total} columns</p>
+
+            <div className="flex items-center gap-2">
+              <Input.Search
+                allowClear
+                className="w-48"
+                placeholder="Search columns"
+                value={columnFilters.search ?? ''}
+                onChange={(e) => {
+                  onColumnFilterChange('search', e.target.value || undefined);
+                }}
+              />
+              <Button
+                onClick={() => {
+                  onClearAllFilters();
+                }}
+                htmlType="button"
+                disabled={Object.keys(columnFilters).length === 0}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </div>
+        )}
         dataSource={selectedVersion.columns.items}
         rowKey="name"
         loading={isLoading}

@@ -1,6 +1,7 @@
 import { components } from '@repo/dfe-engine-types';
 
 export type SchemaDetailColumnFilterField =
+  | 'search'
   | 'name'
   | 'type'
   | 'attribute'

@@ -28,6 +28,10 @@ export const ListSchemaDetail = () => {
     [],
   );
 
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({});
+  }, []);
+
   const {
     data: schemaDetailData,
     isLoading: isFetchingSchemaDetail,
@@ -62,7 +66,7 @@ export const ListSchemaDetail = () => {
     ],
   );
 
-  if (isFetchingSchemaDetail)
+  if (isFetchingSchemaDetail && !schemaDetailData)
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
@@ -89,6 +93,7 @@ export const ListSchemaDetail = () => {
           {...schemaDetailData}
           columnFilters={columnFilters}
           onColumnFilterChange={handleColumnFilterChange}
+          onClearAllFilters={handleClearAllFilters}
           onSuccess={() => {
             void refetchSchemaDetail();
           }}
