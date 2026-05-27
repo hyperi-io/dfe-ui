@@ -163,9 +163,7 @@ describe('useTransformSchemaToTree', () => {
           schemas: [baseSchema({ name: 'test', versions: ['v1'] })],
           children: {
             test: {
-              schemas: [
-                baseSchema({ name: 'test/nested', versions: ['v1'] }),
-              ],
+              schemas: [baseSchema({ name: 'test/nested', versions: ['v1'] })],
             },
           },
         },
