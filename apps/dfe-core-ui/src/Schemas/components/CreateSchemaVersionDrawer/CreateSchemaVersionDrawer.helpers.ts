@@ -1,4 +1,8 @@
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
+
+/** Internal key for review UI only; not sent to the create-version API. */
+export const REVIEW_PLACEHOLDER_VERSION = '__new_version__';
 
 /**
  * transformFormDataToRequestBody - Transforms the form data to a request body for the create schema version API.
@@ -35,5 +39,31 @@ export const transformFormDataToRequestBody = (
     type: values.type,
     summary: values.description,
     columns: [...uploadedColumns, ...schemaColumns],
+  };
+};
+
+/**
+ * Builds a SchemaCreateRequest-shaped payload for review table/YAML layouts.
+ * The create-version API does not take a version number; this shape is display-only.
+ */
+export const transformFormDataToReviewRequestBody = (
+  values: CreateSchemaFormData,
+): { requestBody: SchemaCreateRequest } => {
+  const versionPayload = transformFormDataToRequestBody(values);
+  const path = values.path ? `${values.path}/${values.name}` : values.name;
+
+  return {
+    requestBody: {
+      path,
+      current: REVIEW_PLACEHOLDER_VERSION,
+      versions: {
+        [REVIEW_PLACEHOLDER_VERSION]: {
+          date: new Date().toISOString(),
+          type: versionPayload.type,
+          summary: versionPayload.summary ?? '',
+          columns: versionPayload.columns,
+        },
+      },
+    },
   };
 };

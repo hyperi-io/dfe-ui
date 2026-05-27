@@ -13,10 +13,12 @@ import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { transformFormDataToRequestBody } from './CreateSchemaVersionDrawer.helpers';
+import {
+  transformFormDataToRequestBody,
+  transformFormDataToReviewRequestBody,
+} from './CreateSchemaVersionDrawer.helpers';
 
 interface CreateSchemaVersionDrawerProps {
-  open?: boolean;
   onClose?: () => void;
   classNames?: {
     trigger?: string;
@@ -24,13 +26,10 @@ interface CreateSchemaVersionDrawerProps {
 }
 
 export const CreateSchemaVersionDrawerBase = ({
-  open,
   onClose,
   classNames,
 }: CreateSchemaVersionDrawerProps) => {
-  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(
-    open ?? false,
-  );
+  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
 
   const {
     isReviewing,
@@ -130,6 +129,7 @@ export const CreateSchemaVersionDrawerBase = ({
             values={reviewValues}
             buttonLabel="Add Schema Version"
             onFinish={handleSubmit}
+            transformToReview={transformFormDataToReviewRequestBody}
             hideFields={{
               version: true,
             }}

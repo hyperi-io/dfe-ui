@@ -24,7 +24,7 @@ interface UseCreateSchemaVersionProps {
  * @param onError - Callback function to be called when the mutation fails
  * @returns {
  *   data: SchemaCreateVersionResponse;
- *   mutate: (schema: SchemaCreateVersionRequest, parameters: { schema_path: string | null }) => void;
+ *   mutate: (variables: { schema: SchemaCreateVersionRequest; parameters: { schema_path: string | null } }) => void;
  *   isPending: boolean;
  *   error: Error | null;
  * }

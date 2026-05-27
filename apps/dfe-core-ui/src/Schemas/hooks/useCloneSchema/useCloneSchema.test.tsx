@@ -31,7 +31,7 @@ beforeAll(() =>
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const { wrapper } = buildTestWrapper().withReactQuery();
+const testWrapper = buildTestWrapper().withReactQuery();
 
 describe('.useCloneSchema', () => {
   describe('schema_path and version are provided', () => {
@@ -44,11 +44,16 @@ describe('.useCloneSchema', () => {
             onSuccess,
             version: '1.0.0',
           }),
-        { wrapper },
+        { wrapper: testWrapper.wrapper },
       );
 
       await waitFor(() => {
-        expect(result.current.error).toBeUndefined();
+        expect(testWrapper.queryClient).not.toBeNull();
+        const schemaDetailQuery = testWrapper
+          .queryClient!.getQueryCache()
+          .findAll({ queryKey: ['schema-detail-columns', 'source', '1.0.0'] })
+          .at(0);
+        expect(schemaDetailQuery?.state.status).toBe('success');
       });
 
       result.current.mutate({
@@ -104,7 +109,7 @@ describe('.useCloneSchema', () => {
     const { result } = renderHook(
       () =>
         useCloneSchema({ schema_path: 'source', onError, version: '1.0.0' }),
-      { wrapper },
+      { wrapper: testWrapper.wrapper },
     );
 
     await waitFor(() => {

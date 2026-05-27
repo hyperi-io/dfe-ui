@@ -11,12 +11,55 @@ type WrapperComponent = ({
   children: React.ReactNode;
 }) => React.ReactElement;
 
+type TestWrapperBuilderWithReactQuery = TestWrapperBuilder & {
+  queryClient: QueryClient;
+};
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+class ReactQueryTestProvider extends React.Component<{
+  children: React.ReactNode;
+  queryClientHolder: { current: QueryClient | null };
+}> {
+  readonly #queryClient = createTestQueryClient();
+
+  componentDidMount() {
+    this.props.queryClientHolder.current = this.#queryClient;
+  }
+
+  componentWillUnmount() {
+    if (this.props.queryClientHolder.current === this.#queryClient) {
+      this.props.queryClientHolder.current = null;
+    }
+  }
+
+  render() {
+    return (
+      <QueryClientProvider client={this.#queryClient}>
+        {this.props.children}
+      </QueryClientProvider>
+    );
+  }
+}
+
 class TestWrapperBuilder {
   get wrapper(): WrapperComponent {
     return this.#build();
   }
 
+  get queryClient(): QueryClient | null {
+    return this.#queryClientRef.current;
+  }
+
   #wrapperList: WrapperComponent[] = [];
+  #queryClientRef: { current: QueryClient | null } = { current: null };
 
   constructor() {
     this.#wrapperList = [];
@@ -26,23 +69,21 @@ class TestWrapperBuilder {
    * Adds MockReactQueryProvider to the test wrapper
    *
    * @example
-   *  const { wrapper } = buildTestWrapper().withReactQuery()
+   *  const testWrapper = buildTestWrapper().withReactQuery()
+   *  renderHook(() => useMyHook(), { wrapper: testWrapper.wrapper })
+   *  // queryClient is set after the wrapper mounts
+   *  testWrapper.queryClient?.getQueryCache()
    */
-  withReactQuery() {
-    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-      return (
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
-      );
-    });
+  withReactQuery(): TestWrapperBuilderWithReactQuery {
+    const queryClientRef = this.#queryClientRef;
 
-    return this;
+    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => (
+      <ReactQueryTestProvider queryClientHolder={queryClientRef}>
+        {children}
+      </ReactQueryTestProvider>
+    ));
+
+    return this as TestWrapperBuilderWithReactQuery;
   }
 
   /**

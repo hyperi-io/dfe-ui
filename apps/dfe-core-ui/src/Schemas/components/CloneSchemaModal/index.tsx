@@ -61,9 +61,14 @@ export const CloneSchemaModal = ({
     onError,
   });
   const handleCloneSchema = (values: FormData) => {
+    /** Set to 1.0.0 as a new version is being created
+     * This is so that the clone only has 1 schema version and the new
+     * version starts at 1.0.0 as an initial model insert
+     */
+    const newClonedVersion = '1.0.0';
     cloneSchemaMutation({
       ...values,
-      version: '1.0.0',
+      version: newClonedVersion,
     });
   };
 
