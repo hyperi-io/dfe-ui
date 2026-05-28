@@ -1,5 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { ListSchemasFilterForm } from './ListSchemasFilterForm';
 
 export const ListSchemasFilters = () => {

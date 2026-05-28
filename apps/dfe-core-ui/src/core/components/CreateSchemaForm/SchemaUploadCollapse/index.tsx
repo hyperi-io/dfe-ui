@@ -1,10 +1,10 @@
+import { AddSchemaTable } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { UploadedSchemaTable } from '@/core/components/CreateSchemaForm/UploadedSchemaTable';
 import { Form } from '@/core/components/Form';
 import { TabLabel } from '@/core/components/TabLabel';
 import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { cn } from '@/core/utils/style';
-import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Radio, Tabs } from 'antd';
 import { useState } from 'react';

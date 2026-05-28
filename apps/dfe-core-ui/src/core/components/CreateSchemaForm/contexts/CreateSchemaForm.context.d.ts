@@ -1,10 +1,10 @@
+import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
+import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type {
   CreateSchemaFormData,
   SchemaFormValidationErrors,
 } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
-import type { RowSchema } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { SchemaColumnRow } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/types';
-import type { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
 import type { FormInstance, FormRule } from 'antd';
 import z from 'zod';
 

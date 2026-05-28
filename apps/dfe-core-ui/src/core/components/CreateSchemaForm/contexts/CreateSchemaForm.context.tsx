@@ -1,3 +1,9 @@
+import {
+  isBlankSchemaListRow,
+  RowSchema,
+} from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   formSchema,
@@ -5,12 +11,6 @@ import {
   type CreateSchemaFormData,
 } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import {
-  isBlankSchemaListRow,
-  RowSchema,
-} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { listItemFromPartial } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
-import { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
 import { Form } from 'antd';
 import {
   createContext,

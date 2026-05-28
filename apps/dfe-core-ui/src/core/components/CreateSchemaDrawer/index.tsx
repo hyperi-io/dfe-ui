@@ -1,12 +1,15 @@
 import { Drawer } from '@/core/components/Drawer';
 
-import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
-import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
+import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
+import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
-} from '@/Schemas/contexts/CreateSchemaReviewContext';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+} from '@/core/contexts/CreateSchemaReviewContext';
+import {
+  ListSchemasProvider,
+  useListSchemasContext,
+} from '@/core/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import { transformFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
 import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
@@ -122,7 +125,9 @@ export const CreateSchemaDrawerBase = ({
 export const CreateSchemaDrawer = ({ ...props }: CreateSchemaDrawerProps) => {
   return (
     <CreateSchemaReviewProvider>
-      <CreateSchemaDrawerBase {...props} />
+      <ListSchemasProvider>
+        <CreateSchemaDrawerBase {...props} />
+      </ListSchemasProvider>
     </CreateSchemaReviewProvider>
   );
 };

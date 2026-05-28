@@ -1,8 +1,7 @@
 import { Form } from '@/core/components/Form';
 
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
 import { FormNotification } from '@/core/components/FormNotification';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import {
   schemaGroupValidator,
@@ -10,6 +9,7 @@ import {
   schemaVersionValidator,
 } from '@/core/schemas/CreateSchemaForm/utils';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, Input, Modal, Select, Tooltip } from 'antd';
 import { useState } from 'react';

@@ -1,9 +1,9 @@
+import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { FileUploadDragger } from '@/core/components/FileUploadDragger';
 import { Form } from '@/core/components/Form';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { FileUploadDragger } from '@/Schemas/components/FileUploadDragger';
-import { useElasticConvert } from '@/Schemas/hooks/useElasticConvert';
-import { convertCsv } from '@/Schemas/server/actions/convertCsv';
-import { isJsonFile } from '@/Schemas/server/actions/convertCsv/csvConvert.helpers';
+import { useElasticConvert } from '@/core/hooks/useElasticConvert';
+import { convertCsv } from '@/core/server/actions/convertCsv';
+import { isJsonFile } from '@/core/server/actions/convertCsv/csvConvert.helpers';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 import { transformDataToUploadedSchemaRow } from './SchemaUploadFileSection.helpers';
 

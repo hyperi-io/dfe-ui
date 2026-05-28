@@ -1,7 +1,7 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
+import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
-import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { Button } from 'antd';
 import { useMemo } from 'react';
 import yaml from 'yaml';

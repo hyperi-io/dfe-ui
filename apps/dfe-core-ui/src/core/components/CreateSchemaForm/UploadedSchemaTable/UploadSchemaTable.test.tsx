@@ -1,12 +1,12 @@
-import { Form } from '@/core/components/Form';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
-import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { type AddSchemaTableProps } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { CreateSchemaFormProvider } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { type AddSchemaTableProps } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type {
   CreateSchemaFormContextValue,
   InvalidColumns,
-} from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
+} from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
+import { Form } from '@/core/components/Form';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import type { FormInstance, FormRule } from 'antd';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -21,11 +21,11 @@ const addSchemaTableSpy = vi.fn((props: AddSchemaTableProps) => (
 ));
 
 vi.mock(
-  '@/Schemas/components/CreateSchemaForm/AddSchemaTable',
+  '@/core/components/CreateSchemaForm/AddSchemaTable',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@/Schemas/components/CreateSchemaForm/AddSchemaTable')
+        typeof import('@/core/components/CreateSchemaForm/AddSchemaTable')
       >();
     return {
       ...actual,
@@ -34,7 +34,7 @@ vi.mock(
   },
 );
 
-vi.mock('@/Schemas/components/CreateSchemaForm/InvalidColumnsTable', () => ({
+vi.mock('@/core/components/CreateSchemaForm/InvalidColumnsTable', () => ({
   InvalidColumnsTable: () => <div data-testid="invalid-columns-table" />,
 }));
 
@@ -45,11 +45,11 @@ const useCreateSchemaFormContextActual = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context',
+  '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context')
+        typeof import('@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context')
       >();
     useCreateSchemaFormContextActual.current =
       actual.useCreateSchemaFormContext;
@@ -175,8 +175,11 @@ describe('UploadedSchemaTable', () => {
 
     const { onRemoveRow } = addSchemaTableSpy.mock.calls[0][0];
 
+    // @ts-expect-error - testValue override
     onRemoveRow?.({ id: 42 });
+    // @ts-expect-error - testValue override
     onRemoveRow?.({ id: undefined });
+    // @ts-expect-error - testValue override
     onRemoveRow?.({});
 
     expect(handleRemoveUploadedSchemaColumn).toHaveBeenCalledWith(undefined);

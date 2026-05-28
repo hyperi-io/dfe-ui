@@ -1,4 +1,4 @@
-import { SchemaCreateRequestColumn } from '@/Schemas/hooks/useCreateSchema/types';
+import { SchemaCreateRequestColumn } from '@/core/hooks/useCreateSchema/types';
 
 export type SchemaColumnRow = Partial<SchemaCreateRequestColumn> & {
   id: string;

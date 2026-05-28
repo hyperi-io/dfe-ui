@@ -1,9 +1,9 @@
+import type { AddSchemaTableProps } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
+import { createEmptyValidationErrors } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import type { AddSchemaTableProps } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { CreateSchemaFormProvider } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import type { CreateSchemaFormContextValue } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
-import { createEmptyValidationErrors } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';
@@ -39,11 +39,11 @@ vi.mock('@/core/components/TabLabel', () => ({
 }));
 
 vi.mock(
-  '@/Schemas/components/CreateSchemaForm/AddSchemaTable',
+  '@/core/components/CreateSchemaForm/AddSchemaTable',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@/Schemas/components/CreateSchemaForm/AddSchemaTable')
+        typeof import('@/core/components/CreateSchemaForm/AddSchemaTable')
       >();
     return {
       ...actual,
@@ -52,7 +52,7 @@ vi.mock(
   },
 );
 
-vi.mock('@/Schemas/components/CreateSchemaForm/UploadedSchemaTable', () => ({
+vi.mock('@/core/components/CreateSchemaForm/UploadedSchemaTable', () => ({
   UploadedSchemaTable: () => <div data-testid="uploaded-schema-table" />,
 }));
 
@@ -69,11 +69,11 @@ const useCreateSchemaFormContextActual = vi.hoisted(() => ({
 }));
 
 vi.mock(
-  '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context',
+  '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context')
+        typeof import('@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context')
       >();
     useCreateSchemaFormContextActual.current =
       actual.useCreateSchemaFormContext;

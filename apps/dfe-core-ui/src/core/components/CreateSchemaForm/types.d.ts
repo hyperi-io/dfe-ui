@@ -1,5 +1,5 @@
-import { ElasticConverterResponse } from '@/Schemas/hooks/useElasticConvert/useElasticConvert';
-import { CsvRow } from '@/Schemas/server/actions/convertCsv';
+import { ElasticConverterResponse } from '@/core/hooks/useElasticConvert/useElasticConvert';
+import { CsvRow } from '@/core/server/actions/convertCsv';
 
 /** Row in the upload tab after CSV / Elastic import; includes stable client keys. */
 export type UploadedSchemaRow = {

@@ -1,6 +1,6 @@
-import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { InvalidColumnsTable } from '@/Schemas/components/CreateSchemaForm/InvalidColumnsTable';
+import { AddSchemaTable } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { InvalidColumnsTable } from '@/core/components/CreateSchemaForm/InvalidColumnsTable';
 
 export const UploadedSchemaTable = () => {
   const {

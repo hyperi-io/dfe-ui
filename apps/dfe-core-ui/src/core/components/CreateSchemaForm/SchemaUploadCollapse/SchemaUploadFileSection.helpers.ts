@@ -1,7 +1,7 @@
 import {
   PreloadedSchema,
   UploadedSchemaRow,
-} from '@/Schemas/components/CreateSchemaForm/types';
+} from '@/core/components/CreateSchemaForm/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export const transformDataToUploadedSchemaRow = (

@@ -1,11 +1,11 @@
-import { Form } from '@/core/components/Form';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   AddSchemaTable,
   RowSchema,
-} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { rowListFieldValidatePaths } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
+} from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import { rowListFieldValidatePaths } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
+import { Form } from '@/core/components/Form';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import uniq from 'lodash/uniq';
 import { useCallback, useEffect } from 'react';

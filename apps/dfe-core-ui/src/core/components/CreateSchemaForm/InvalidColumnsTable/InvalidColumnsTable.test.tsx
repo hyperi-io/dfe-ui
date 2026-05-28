@@ -1,8 +1,8 @@
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,
-} from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import type { CreateSchemaFormContextValue } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
+} from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
+import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import { Form } from 'antd';
