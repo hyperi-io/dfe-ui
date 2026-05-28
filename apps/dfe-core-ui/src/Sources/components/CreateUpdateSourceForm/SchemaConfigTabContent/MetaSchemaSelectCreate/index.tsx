@@ -3,8 +3,32 @@ import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  getSchemaLeafName,
+  getSchemaPathPrefix,
+  isSelectableSchemaOptionValue,
+  schemasToGroupedSelectOptions,
+} from './schemaSelectOptions';
 
 const SCROLL_LOAD_THRESHOLD = 50;
+
+const renderSelectedSchemaLabel = (fullPath: string) => {
+  const pathPrefix = getSchemaPathPrefix(fullPath);
+  const leafName = getSchemaLeafName(fullPath);
+
+  return (
+    <span
+      className={
+        pathPrefix
+          ? 'before:content-[attr(data-path-prefix)] before:text-foreground/45 dark:before:text-dark-foreground/45'
+          : undefined
+      }
+      data-path-prefix={pathPrefix || undefined}
+    >
+      {leafName}
+    </span>
+  );
+};
 
 interface MetaSchemaSelectCreateProps extends Omit<SelectProps, 'onChange'> {
   onChange?: (
@@ -17,10 +41,12 @@ interface MetaSchemaSelectCreateProps extends Omit<SelectProps, 'onChange'> {
 export const MetaSchemaSelectCreate = ({
   value,
   onChange,
+  onOpenChange,
   ...props
 }: MetaSchemaSelectCreateProps) => {
-  const [schemaValue, setSchemaValue] = useState<string | null>(value);
-  const [searchValue, setSearchValue] = useState<string>(value);
+  const [schemaValue, setSchemaValue] = useState<string | null>(value ?? null);
+  const [searchValue, setSearchValue] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const { mutate: _createMetaSchema } = useCreateSchema();
   const {
@@ -33,12 +59,9 @@ export const MetaSchemaSelectCreate = ({
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
   });
-  const schemasOptions = useMemo(() => {
-    const base =
-      schemas?.map((schema) => ({
-        label: schema.name,
-        value: schema.name,
-      })) ?? [];
+
+  const schemaSelectOptions = useMemo(() => {
+    const base = schemasToGroupedSelectOptions(schemas ?? []);
 
     if (!isFetchingNextPage) {
       return base;
@@ -92,13 +115,19 @@ export const MetaSchemaSelectCreate = ({
   );
 
   const handleSelect = useCallback(
-    (value: string) => {
-      setSchemaValue(value);
+    (selectedValue: string) => {
+      if (!isSelectableSchemaOptionValue(selectedValue)) {
+        return;
+      }
+
+      setSchemaValue(selectedValue);
+      setSearchValue('');
       onChange?.(
-        value,
+        selectedValue,
         {
           versions:
-            schemas.find((schema) => schema.name === value)?.versions ?? [],
+            schemas.find((schema) => schema.name === selectedValue)?.versions ??
+            [],
         },
         '_select',
       );
@@ -111,12 +140,35 @@ export const MetaSchemaSelectCreate = ({
     onChange?.(schemaValue, undefined, '_clear_search');
   }, [onChange, schemaValue]);
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setDropdownOpen(open);
+      if (!open) {
+        setSearchValue('');
+      }
+      onOpenChange?.(open);
+    },
+    [onOpenChange],
+  );
+
+  const showSelectedLabel = Boolean(
+    schemaValue && !dropdownOpen && searchValue === '',
+  );
+
+  const selectedLabel = useMemo(() => {
+    if (!showSelectedLabel || !schemaValue) {
+      return null;
+    }
+    return renderSelectedSchemaLabel(schemaValue);
+  }, [schemaValue, showSelectedLabel]);
+
   return (
-    <div className="flex gap-2">
+    <div className="flex min-w-0 flex-1 gap-2">
       <Select
         {...props}
+        className="min-w-0 flex-1"
         loading={isLoading}
-        options={schemasOptions}
+        options={schemaSelectOptions}
         placeholder="Select meta schema"
         showSearch={{
           onSearch: setSearchValue,
@@ -124,7 +176,9 @@ export const MetaSchemaSelectCreate = ({
           autoClearSearchValue: false,
         }}
         virtual={false}
-        value={schemaValue}
+        value={schemaValue ?? undefined}
+        labelRender={() => selectedLabel}
+        onOpenChange={handleOpenChange}
         onSelect={handleSelect}
         onPopupScroll={handlePopupScroll}
         allowClear={searchValue !== ''}
