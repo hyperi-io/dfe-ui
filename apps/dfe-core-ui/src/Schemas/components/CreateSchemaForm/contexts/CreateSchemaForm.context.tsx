@@ -293,6 +293,9 @@ export const CreateSchemaFormProvider = ({
       const invalid = invalidUploadedSchemaColumnsRef.current;
       const uploaded = uploadedSchemaColumnsRef.current;
       if (invalid.length === 0) {
+        const nextUploaded = uploadedFormRows as UploadedSchemaRow[];
+        setUploadedSchemaColumns(nextUploaded);
+        uploadedSchemaColumnsRef.current = nextUploaded;
         return;
       }
 

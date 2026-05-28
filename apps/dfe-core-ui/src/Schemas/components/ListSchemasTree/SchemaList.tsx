@@ -3,7 +3,7 @@ import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { Spin, Tree } from 'antd';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   getExpandedKeysForSchemaSelection,
   useTransformSchemaToTree,
@@ -23,12 +23,20 @@ export const SchemaList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListSchemasContext();
 
-  const treeData = useTransformSchemaToTree({
-    schemaObjects,
-    setSelectedSchema,
-    selectedSchemaPath,
-    selectedSchemaVersion,
-  });
+  const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
+
+  const expandTreeNode = useCallback((key: string) => {
+    setUserExpandedKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
+  }, []);
+
+  const { tree: treeData, notificationContextHolder } =
+    useTransformSchemaToTree({
+      schemaObjects,
+      setSelectedSchema,
+      selectedSchemaPath,
+      selectedSchemaVersion,
+      expandTreeNode,
+    });
 
   const expandedKeysForSelection = useMemo(
     () =>
@@ -38,8 +46,6 @@ export const SchemaList = ({ className }: { className?: string }) => {
       ),
     [selectedSchemaPath, selectedSchemaVersion],
   );
-
-  const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
 
   const expandedKeys = useMemo(
     () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
@@ -65,21 +71,30 @@ export const SchemaList = ({ className }: { className?: string }) => {
   }
 
   return (
-    <div
-      className={cn(
-        'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-        className,
-      )}
-    >
-      <Tree
-        blockNode
-        treeData={treeData}
-        expandedKeys={expandedKeys}
-        onExpand={(keys) => setUserExpandedKeys(keys as string[])}
-      />
-      <div ref={loadMoreRef} className="h-4 flex justify-center">
-        {isFetchingNextPage && <Spin size="small" />}
+    <>
+      {notificationContextHolder}
+      <div
+        className={cn(
+          'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
+          className,
+        )}
+      >
+        <Tree
+          blockNode
+          className={cn(
+            // Chevron expand alignment center
+            '[&_.ant-tree-switcher]:m-auto',
+            // Tree node content wrapper for truncated items in tree
+            '[&_.ant-tree-node-content-wrapper]:min-w-0!',
+          )}
+          treeData={treeData}
+          expandedKeys={expandedKeys}
+          onExpand={(keys) => setUserExpandedKeys(keys as string[])}
+        />
+        <div ref={loadMoreRef} className="h-4 flex justify-center">
+          {isFetchingNextPage && <Spin size="small" />}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

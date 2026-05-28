@@ -1,22 +1,52 @@
+import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
+import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import {
+  MetaSchemaDetailResponse,
+  SchemaDetailColumnFilterField,
+  SchemaDetailColumnFilters,
+} from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Select, Table } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Button, Input, Select } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { UIEventHandler, useCallback, useMemo } from 'react';
+import {
+  createSchemaDetailTextColumnFilter,
+  renderSchemaDetailFilteredCell,
+} from './ListSchemaDetail.helper';
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
 interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
-  refetchSchemaDetail: () => void;
+  columnFilters: SchemaDetailColumnFilters;
+  columnFilterResetKey: number;
+  onColumnFilterChange: (
+    filterKey: SchemaDetailColumnFilterField,
+    value: string | undefined,
+  ) => void;
+  onClearAllFilters: () => void;
+  onSuccess?: () => void;
+  isLoading?: boolean;
+  onScroll?: UIEventHandler<HTMLDivElement>;
 }
+
+type SchemaColumnItem =
+  components['schemas']['MetaSchemaGetResponse']['version']['columns']['items'][number];
 
 export const ViewSchemaDetails = ({
   current: currentVersion,
   versions: allVersions,
   version: selectedVersion,
   path,
-  refetchSchemaDetail,
+  columnFilters,
+  columnFilterResetKey,
+  onColumnFilterChange,
+  onSuccess,
+  isLoading,
+  onScroll,
+  onClearAllFilters,
 }: ViewSchemaDetailsProps) => {
   const {
     selectedSchemaVersion,
@@ -29,82 +59,97 @@ export const ViewSchemaDetails = ({
         schema_path: path,
         schema_version: version,
       });
+      onClearAllFilters();
     },
-    [path, setSelectedSchema],
+    [path, setSelectedSchema, onClearAllFilters],
   );
 
   const { componentHeight } = useSetComponentHeight({
     offset: 360,
   });
 
-  const tableColumns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-    },
-    {
-      title: 'Attribute',
-      dataIndex: 'attribute',
-      key: 'attribute',
-      render: (attribute: string[]) => {
-        return attribute?.length > 0 ? (
-          attribute.join(', ')
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+  const tableColumns = useMemo((): ColumnsType<SchemaColumnItem> => {
+    const columnFilter = (
+      title: string,
+      filterKey: SchemaDetailColumnFilterField,
+    ) =>
+      createSchemaDetailTextColumnFilter<SchemaColumnItem>(
+        title,
+        filterKey,
+        columnFilters[filterKey],
+        columnFilterResetKey,
+        onColumnFilterChange,
+      );
+
+    return [
+      {
+        dataIndex: 'name',
+        key: 'name',
+        ...columnFilter('Name', 'name'),
+        render: (name: string) =>
+          renderSchemaDetailFilteredCell(
+            name,
+            columnFilters.name,
+            columnFilters.search,
+          ),
       },
-    },
-    {
-      title: 'Use Case',
-      dataIndex: 'use_case',
-      key: 'use_case',
-      render: (use_case: string) => {
-        return use_case ? (
-          use_case
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'type',
+        key: 'type',
+        ...columnFilter('Type', 'type'),
+        render: (type: string) =>
+          renderSchemaDetailFilteredCell(
+            type,
+            columnFilters.type,
+            columnFilters.search,
+          ),
       },
-    },
-    {
-      title: 'Expr',
-      dataIndex: 'expr',
-      key: 'expr',
-      render: (expr: string) => {
-        return expr ? (
-          expr
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'attribute',
+        key: 'attribute',
+        ...columnFilter('Attribute', 'attribute'),
+        render: (attribute: string[]) =>
+          renderSchemaDetailFilteredCell(
+            attribute?.length > 0 ? attribute.join(', ') : undefined,
+            columnFilters.attribute,
+            columnFilters.search,
+          ),
       },
-    },
-    {
-      title: 'Comment',
-      dataIndex: 'comment',
-      key: 'comment',
-      render: (comment: string) => {
-        return comment ? (
-          comment
-        ) : (
-          <span className="text-foreground/40 dark:text-dark-foreground/40">
-            None
-          </span>
-        );
+      {
+        dataIndex: 'use_case',
+        key: 'use_case',
+        ...columnFilter('Use Case', 'use_case'),
+        render: (use_case: string) =>
+          renderSchemaDetailFilteredCell(
+            use_case,
+            columnFilters.use_case,
+            columnFilters.search,
+          ),
       },
-    },
-  ];
+      {
+        dataIndex: 'expr',
+        key: 'expr',
+        ...columnFilter('Expr', 'expr'),
+        render: (expr: string) =>
+          renderSchemaDetailFilteredCell(
+            expr,
+            columnFilters.expr,
+            columnFilters.search,
+          ),
+      },
+      {
+        dataIndex: 'comment',
+        key: 'comment',
+        ...columnFilter('Comment', 'comment'),
+        render: (comment: string) =>
+          renderSchemaDetailFilteredCell(
+            comment,
+            columnFilters.comment,
+            columnFilters.search,
+          ),
+      },
+    ];
+  }, [columnFilters, columnFilterResetKey, onColumnFilterChange]);
 
   const versions = useMemo(() => {
     return allVersions.map((version) => ({
@@ -132,7 +177,7 @@ export const ViewSchemaDetails = ({
               onSuccess={(values) => {
                 handleSetSelectedSchema(values.current);
                 void refetchListSchemas();
-                void refetchSchemaDetail();
+                onSuccess?.();
               }}
             />
           </dd>
@@ -144,33 +189,59 @@ export const ViewSchemaDetails = ({
               path={path}
               version={selectedSchemaVersion ?? ''}
               summary={selectedVersion.summary}
-              onSuccess={refetchSchemaDetail}
+              onSuccess={onSuccess}
             />
           </dd>
         </dl>
 
-        <div className="flex flex-row gap-2 items-center mb-auto">
-          <p>Version:</p>
-          <Select
-            className="w-48"
-            options={versions}
-            value={selectedSchemaVersion}
-            onChange={(value) => {
-              handleSetSelectedSchema(value);
-            }}
-          />
+        <div className="flex flex-col gap-2 items-center justify-end">
+          <div className="flex flex-row gap-2 items-center mb-auto">
+            <p>Version:</p>
+            <Select
+              className="w-48"
+              options={versions}
+              value={selectedSchemaVersion}
+              onChange={(value) => {
+                handleSetSelectedSchema(value);
+              }}
+            />
+          </div>
+          <CreateSchemaVersionDrawer classNames={{ trigger: 'ml-auto' }} />
         </div>
       </div>
 
       <Table
         columns={tableColumns}
+        title={() => (
+          <div className="flex items-center justify-between">
+            <p>{selectedVersion.columns.total} columns</p>
+
+            <div className="flex items-center gap-2">
+              <Input.Search
+                allowClear
+                className="w-48"
+                placeholder="Search columns"
+                value={columnFilters.search ?? ''}
+                onChange={(e) => {
+                  onColumnFilterChange('search', e.target.value || undefined);
+                }}
+              />
+              <Button
+                onClick={() => {
+                  onClearAllFilters();
+                }}
+                htmlType="button"
+                disabled={Object.keys(columnFilters).length === 0}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </div>
+        )}
         dataSource={selectedVersion.columns.items}
         rowKey="name"
-        pagination={{
-          defaultPageSize: 50,
-          showSizeChanger: true,
-          pageSizeOptions: [10, 25, 50, 100],
-        }}
+        loading={isLoading}
+        pagination={false}
         locale={{
           emptyText: (
             <div className="flex items-center justify-center gap-2 text-foreground-muted dark:text-dark-foreground-muted">
@@ -180,6 +251,7 @@ export const ViewSchemaDetails = ({
           ),
         }}
         scroll={{ y: componentHeight }}
+        onScroll={onScroll}
       />
     </div>
   );
