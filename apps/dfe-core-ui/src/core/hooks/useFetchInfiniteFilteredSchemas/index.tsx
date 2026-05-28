@@ -1,8 +1,11 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredSchemasProps } from './types';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 /** useFetchInfiniteFilteredSchemas props */
 /**
@@ -20,6 +23,8 @@ export const useFetchInfiniteFilteredSchemas = ({
   sort_order,
   per_page,
 }: UseFetchInfiniteFilteredSchemasProps = {}) => {
+  const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
+
   const {
     data,
     isLoading,
@@ -30,11 +35,11 @@ export const useFetchInfiniteFilteredSchemas = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['schemas', search, sort_by, sort_order, per_page],
+    queryKey: ['schemas', debouncedSearch, sort_by, sort_order, per_page],
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.schemas.default, {
         queryParams: {
-          search: search,
+          search: debouncedSearch || undefined,
           sort_by,
           sort_order,
           page: pageParam,
