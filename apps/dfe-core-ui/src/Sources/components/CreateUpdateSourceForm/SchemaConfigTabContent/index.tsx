@@ -35,7 +35,8 @@ export const SchemaConfigTabContent = ({
         if (action_type === '_select') {
           form.setFieldsValue({
             schema: {
-              meta_schema_version: undefined,
+              meta_schema_version:
+                meta?.versions?.length === 1 ? meta?.versions?.[0] : undefined,
             },
           });
         }
