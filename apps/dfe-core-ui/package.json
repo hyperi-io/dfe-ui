@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "build": "next build",
     "start": "next start",
     "lint": "yarn run check-types && eslint",
-    "check-types": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit",
+    "check-types": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest --ui --coverage.enabled",
     "storybook": "storybook dev -p 6006",
