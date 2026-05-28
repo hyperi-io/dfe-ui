@@ -11,24 +11,31 @@ import {
   useListSchemasContext,
 } from '@/core/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
+import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { transformFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
 import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 interface CreateSchemaDrawerProps {
   open?: boolean;
   onClose?: () => void;
+  onSuccess?: (response: SchemaCreateResponse) => void;
 }
 
 export const CreateSchemaDrawerBase = ({
   open,
   onClose,
+  onSuccess,
 }: CreateSchemaDrawerProps) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(
     open ?? false,
   );
+
+  const pathname = usePathname();
+  const isSchemaDetail = pathname.includes('/schemas/');
 
   const {
     drawerTitle,
@@ -53,17 +60,21 @@ export const CreateSchemaDrawerBase = ({
 
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
-      onSuccess: ({ path, current }) => {
-        setSelectedSchema({
-          schema_path: path ?? '',
-          schema_version: current,
-        });
+      onSuccess: (response) => {
+        // TODO: Move this to the onSuccess prop defined by parent
+        if (isSchemaDetail) {
+          setSelectedSchema({
+            schema_path: response.path ?? '',
+            schema_version: response.current,
+          });
+        }
         refetchSchemas();
         api.success({
           title: 'Schema created successfully',
           placement: 'bottomLeft',
         });
         handleClose();
+        onSuccess?.(response);
       },
       onError: (error) => {
         setFormErrorMessage(error?.message ?? 'An unexpected error occurred');
@@ -81,6 +92,7 @@ export const CreateSchemaDrawerBase = ({
       {notificationContextHolder}
       <Button
         type="default"
+        htmlType="button"
         className="border border-tertiary text-tertiary"
         icon={<IconPlus className="text-tertiary" />}
         onClick={() => setIsDrawerVisible(true)}
