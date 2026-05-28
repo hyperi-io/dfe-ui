@@ -1,5 +1,5 @@
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import z from 'zod';
-import { rowSchema } from '.';
 import { SchemaColumnRow } from './types';
 
 const rowLookup = (column: SchemaColumnRow, ...aliases: string[]): unknown => {

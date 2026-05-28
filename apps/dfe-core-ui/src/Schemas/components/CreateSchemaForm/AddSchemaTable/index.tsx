@@ -2,6 +2,7 @@ import { Form } from '@/core/components/Form';
 import { Table, TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
@@ -15,23 +16,6 @@ import {
 } from './fieldOptions.constants';
 import { SchemaColumnRow } from './types';
 
-const NAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
-export const rowSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name is required' })
-    .refine((v) => NAME_REGEX.test(v), {
-      message: 'Name must be a valid identifier',
-    }),
-  type: z.string().min(1, { message: 'Type is required' }),
-  attribute: z.array(z.string()).optional(),
-  use_case: z.string().optional(),
-  expr: z.string().optional(),
-  comment: z.string().optional(),
-  /** Used for form control of uploaded schema */
-  id: z.string(),
-  imported: z.boolean().optional(),
-});
 export type RowSchema = z.infer<typeof rowSchema>;
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */

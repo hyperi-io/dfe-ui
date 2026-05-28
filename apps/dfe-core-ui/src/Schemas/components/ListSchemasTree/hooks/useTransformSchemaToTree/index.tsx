@@ -1,7 +1,7 @@
 import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
-import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
+import { SchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
 import { notification, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';

@@ -2,13 +2,13 @@ import { Form } from '@/core/components/Form';
 
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
-import { SchemaCreateResponse } from '@/Schemas/hooks/useCreateSchema/types';
+import { FormNotification } from '@/core/components/FormNotification';
+import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import {
   schemaGroupValidator,
   schemaNameValidator,
   schemaVersionValidator,
-} from '@/Schemas/utils/validation';
-import { FormNotification } from '@/core/components/FormNotification';
+} from '@/core/schemas/CreateSchemaForm/utils';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, Input, Modal, Select, Tooltip } from 'antd';

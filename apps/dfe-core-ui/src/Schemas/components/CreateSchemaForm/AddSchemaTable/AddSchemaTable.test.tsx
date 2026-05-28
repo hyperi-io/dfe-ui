@@ -1,4 +1,5 @@
 import { Form } from '@/core/components/Form';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -10,7 +11,6 @@ import {
   AddSchemaTable,
   type AddSchemaTableProps,
   isBlankSchemaListRow,
-  rowSchema,
   type RowSchema,
 } from './index';
 import type { SchemaColumnRow } from './types';

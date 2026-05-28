@@ -1,12 +1,12 @@
+import type { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import type { RowSchema } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import type { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import type { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';
 import type { ReactNode } from 'react';
-import { z } from 'zod';
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import { z } from 'zod';
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,

@@ -1,6 +1,6 @@
+import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { cn } from '@/core/utils/style';
 import { CreateSchemaDrawer } from '@/Schemas/components/CreateSchemaDrawer';
-import { UseFetchInfiniteFilteredSchemasProps } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 

@@ -25,3 +25,11 @@ export const schemaVersionValidator = z
   .refine((v) => VERSION_REGEX.test(v), {
     message: 'Version must be in the format x.x.x',
   });
+
+export const columnNameValidator = z
+  .string()
+  .min(1, { message: 'Name is required' })
+  .refine((v) => NAME_REGEX.test(v), {
+    message:
+      'Name must contain only letters, numbers, underscores, and hyphens',
+  });

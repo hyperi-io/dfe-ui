@@ -1,9 +1,9 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { Table } from '@/core/components/Table';
+import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
-import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
 import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
 import { Button, Select, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';

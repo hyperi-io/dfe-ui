@@ -1,15 +1,15 @@
 import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
 } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
-import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
+import { useCreateSchema } from '@/core/hooks/useCreateSchema';
+import { transformFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
+import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';

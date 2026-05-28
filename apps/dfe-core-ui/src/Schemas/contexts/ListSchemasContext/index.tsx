@@ -3,9 +3,9 @@
 import type {
   SchemaListResponse,
   UseFetchInfiniteFilteredSchemasProps,
-} from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
+} from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 
-import { useFetchInfiniteFilteredSchemas } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas';
+import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {

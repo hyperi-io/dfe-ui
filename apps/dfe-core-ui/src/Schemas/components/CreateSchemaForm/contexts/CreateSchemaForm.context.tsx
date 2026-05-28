@@ -1,15 +1,15 @@
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import {
-  isBlankSchemaListRow,
-  rowSchema,
-  RowSchema,
-} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
-import { listItemFromPartial } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   formSchema,
   SchemaFormValidationErrors,
   type CreateSchemaFormData,
-} from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
+} from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import {
+  isBlankSchemaListRow,
+  RowSchema,
+} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
+import { listItemFromPartial } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { UploadedSchemaRow } from '@/Schemas/components/CreateSchemaForm/types';
 import { Form } from 'antd';
 import {

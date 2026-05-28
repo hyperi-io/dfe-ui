@@ -1,9 +1,7 @@
 import { Form } from '@/core/components/Form';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import {
-  rowSchema,
-  type AddSchemaTableProps,
-} from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
+import { type AddSchemaTableProps } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { CreateSchemaFormProvider } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type {
   CreateSchemaFormContextValue,
@@ -176,11 +174,9 @@ describe('UploadedSchemaTable', () => {
     renderUploadedSchemaTable();
 
     const { onRemoveRow } = addSchemaTableSpy.mock.calls[0][0];
-    // @ts-expect-error - test for invalid type
+
     onRemoveRow?.({ id: 42 });
-    // @ts-expect-error - test for invalid type
     onRemoveRow?.({ id: undefined });
-    // @ts-expect-error - test for invalid type
     onRemoveRow?.({});
 
     expect(handleRemoveUploadedSchemaColumn).toHaveBeenCalledWith(undefined);

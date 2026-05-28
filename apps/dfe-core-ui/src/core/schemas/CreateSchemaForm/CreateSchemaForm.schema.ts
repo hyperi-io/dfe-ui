@@ -1,11 +1,10 @@
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   schemaGroupValidator,
   schemaNameValidator,
   schemaVersionValidator,
-} from '@/Schemas/utils/validation';
+} from '@/core/schemas/CreateSchemaForm/utils';
 import z from 'zod';
-import { rowSchema } from './AddSchemaTable';
-
 /** Used for building the request body */
 const schemaDetails = {
   name: schemaNameValidator,

@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   AddSchemaTable,
-  rowSchema,
   RowSchema,
 } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';

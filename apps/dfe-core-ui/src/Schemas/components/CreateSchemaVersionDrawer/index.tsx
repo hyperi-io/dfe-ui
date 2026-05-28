@@ -1,8 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
 
+import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { cn } from '@/core/utils/style';
 import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
 import {
   CreateSchemaReviewProvider,

@@ -1,9 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { TabLabel } from '@/core/components/TabLabel';
+import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { cn } from '@/core/utils/style';
 import { AddSchemaTable } from '@/Schemas/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/Schemas/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
 import { UploadedSchemaTable } from '@/Schemas/components/CreateSchemaForm/UploadedSchemaTable';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Radio, Tabs } from 'antd';

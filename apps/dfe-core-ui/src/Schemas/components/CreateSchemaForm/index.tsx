@@ -1,14 +1,15 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaReviewContext } from '@/Schemas/contexts/CreateSchemaReviewContext';
 import { Button, FormProps, Input, Select } from 'antd';
-import { isBlankSchemaListRow, rowSchema } from './AddSchemaTable';
+import { isBlankSchemaListRow } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
   CreateSchemaFormProvider,
   useCreateSchemaFormContext,
 } from './contexts/CreateSchemaForm.context';
-import { CreateSchemaFormData } from './CreateSchemaForm.schema';
 import { SchemaUploadCollapse } from './SchemaUploadCollapse';
 
 interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
