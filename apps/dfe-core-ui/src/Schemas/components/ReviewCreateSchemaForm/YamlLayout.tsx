@@ -20,6 +20,7 @@ export const YamlLayout = ({
   const { handleGoBack, formErrorMessage } = useCreateSchemaReviewContext();
 
   const { path, ...restValues } = values;
+
   const yamlContent = useMemo(
     () =>
       yaml.stringify(restValues, {

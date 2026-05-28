@@ -13,7 +13,10 @@ import {
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '.';
 import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
-import { MOCK_SCHEMA_PATH, server } from './useFetchSchemaDetail.mocks';
+import {
+  MOCK_SCHEMA_PATH,
+  server,
+} from './useFetchInfiniteSchemaDetailColumns.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();

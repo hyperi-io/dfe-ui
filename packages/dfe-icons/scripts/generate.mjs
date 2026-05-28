@@ -24,15 +24,13 @@ function toPascalCase(str) {
     .join('');
 }
 
-/** Resolve `segment` under `root`; reject path traversal (SAST-safe). */
-function pathUnderRoot(root, segment) {
-  const base = path.resolve(root);
-  const target = path.resolve(base, segment);
-  const relative = path.relative(base, target);
-  if (relative.startsWith('..') || path.isAbsolute(relative)) {
-    throw new Error(`Invalid path: ${segment}`);
+/** One path segment only — no traversal (build script; satisfies SAST). */
+const SAFE_SEGMENT = /^[A-Za-z0-9_.-]+$/;
+
+function assertSafeSegment(segment, label = 'path') {
+  if (!SAFE_SEGMENT.test(segment)) {
+    throw new Error(`Invalid ${label}: ${segment}`);
   }
-  return target;
 }
 
 // ---------------------------------------------------------------------------
@@ -50,30 +48,32 @@ async function generateComponentSource(name, svgString) {
 async function processDirectory(dir, suffix = '') {
   if (!fs.existsSync(dir)) return [];
 
-  const files = fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.svg'))
-    .sort();
   const icons = [];
+  const dirHandle = await fs.promises.opendir(dir);
+  for await (const entry of dirHandle) {
+    if (!entry.isFile() || !entry.name.endsWith('.svg')) continue;
 
-  for (const file of files) {
-    // Validate filename contains no path separators (satisfies SAST scanners)
-    const basename = path.basename(file);
+    const basename = entry.name;
+    assertSafeSegment(basename, 'svg file');
     const baseName = basename.replace('.svg', '');
     const componentName = 'Icon' + toPascalCase(baseName) + suffix;
-    const svgPath = pathUnderRoot(dir, basename);
+    const outName = `${componentName}.tsx`;
+    assertSafeSegment(outName, 'output file');
+
+    const svgPath = `${dir}${path.sep}${basename}`;
     const svgContent = fs.readFileSync(svgPath, 'utf-8');
 
     try {
       const source = await generateComponentSource(componentName, svgContent);
-      const outFile = pathUnderRoot(ICONS_DIR, `${componentName}.tsx`);
+      const outFile = `${ICONS_DIR}${path.sep}${outName}`;
       fs.writeFileSync(outFile, source);
       icons.push(componentName);
     } catch (err) {
-      console.warn(`  skip ${file}: ${err.message}`);
+      console.warn(`  skip ${basename}: ${err.message}`);
     }
   }
 
+  icons.sort();
   return icons;
 }
 
@@ -185,8 +185,9 @@ const stats = {};
 let allIcons = [];
 
 for (const dir of subdirs) {
+  assertSafeSegment(dir, 'svg subdir');
   const suffix = SUFFIX_MAP[dir] ?? '';
-  const icons = await processDirectory(path.join(SVG_DIR, dir), suffix);
+  const icons = await processDirectory(`${SVG_DIR}${path.sep}${dir}`, suffix);
   stats[dir] = icons.length;
   allIcons.push(...icons);
 }

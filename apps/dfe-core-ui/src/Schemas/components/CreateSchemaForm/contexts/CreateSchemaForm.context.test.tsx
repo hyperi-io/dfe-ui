@@ -461,7 +461,7 @@ describe('CreateSchemaFormProvider', () => {
       });
     });
 
-    test('returns when there are no invalid imported rows tracked', () => {
+    test('syncs form uploadedColumns into context when there are no invalid imported rows', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
@@ -472,7 +472,6 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows(form, [
         { id: 'only', name: 'col_only', type: 'string' },
       ]);
-      const getFieldValue = vi.spyOn(form, 'getFieldValue');
 
       act(() => {
         result.current.handleUpdateUploadedSchemaColumns({
@@ -480,7 +479,7 @@ describe('CreateSchemaFormProvider', () => {
         });
       });
 
-      expect(getFieldValue).toHaveBeenCalledWith('uploadedColumns');
+      expect(result.current.uploadedSchemaColumns[0]?.name).toBe('col_only');
     });
 
     test('merges form row into invalid import and promotes when row becomes valid', async () => {

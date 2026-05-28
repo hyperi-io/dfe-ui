@@ -1,7 +1,12 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
-import { notification, Spin, Typography } from 'antd';
+import {
+  SchemaDetailColumnFilterField,
+  SchemaDetailColumnFilters,
+} from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { notification, Spin } from 'antd';
+import { useCallback, useState } from 'react';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';
 
@@ -9,17 +14,68 @@ export const ListSchemaDetail = () => {
   const [_api, contextHolder] = notification.useNotification();
   const { selectedSchemaPath: schema_path, selectedSchemaVersion: version } =
     useListSchemasContext();
+  const [columnFilters, setColumnFilters] = useState<SchemaDetailColumnFilters>(
+    {},
+  );
+  const [columnFilterResetKey, setColumnFilterResetKey] = useState(0);
+
+  const handleColumnFilterChange = useCallback(
+    (filterKey: SchemaDetailColumnFilterField, value: string | undefined) => {
+      setColumnFilters((previous) => {
+        if (value === undefined) {
+          const { [filterKey]: _removed, ...rest } = previous;
+          return rest;
+        }
+        return { ...previous, [filterKey]: value };
+      });
+    },
+    [],
+  );
+
+  const handleClearAllFilters = useCallback(() => {
+    setColumnFilters({});
+    setColumnFilterResetKey((key) => key + 1);
+  }, []);
+
   const {
     data: schemaDetailData,
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
     refetch: refetchSchemaDetail,
+    fetchNextPage: fetchNextPageSchemaDetail,
+    hasNextPage: hasNextPageSchemaDetail,
+    isFetchingNextPage: isFetchingNextPageSchemaDetail,
   } = useFetchInfiniteFilteredSchemaDetailColumns({
     schema_path: schema_path,
     version: version,
+    per_page: 50,
+    ...columnFilters,
   });
 
-  if (isFetchingSchemaDetail)
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const el = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+
+      if (!hasNextPageSchemaDetail || isFetchingNextPageSchemaDetail) return;
+
+      // Fetch data when user is near the bottom
+      if (scrollHeight - scrollTop - clientHeight < 40) {
+        void fetchNextPageSchemaDetail();
+      }
+    },
+    [
+      hasNextPageSchemaDetail,
+      isFetchingNextPageSchemaDetail,
+      fetchNextPageSchemaDetail,
+    ],
+  );
+
+  if (!schema_path || !version) {
+    return <EmptyDetail />;
+  }
+
+  if (isFetchingSchemaDetail && !schemaDetailData)
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
@@ -36,14 +92,23 @@ export const ListSchemaDetail = () => {
   if (!schemaDetailData) {
     return <EmptyDetail />;
   }
+
   return (
     <>
       {contextHolder}
       <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <Typography.Title level={5}>Schema Configuration</Typography.Title>
+        <h4 className="text-lg font-medium">Schema Configuration</h4>
         <ViewSchemaDetails
           {...schemaDetailData}
-          refetchSchemaDetail={refetchSchemaDetail}
+          columnFilters={columnFilters}
+          columnFilterResetKey={columnFilterResetKey}
+          onColumnFilterChange={handleColumnFilterChange}
+          onClearAllFilters={handleClearAllFilters}
+          onSuccess={() => {
+            void refetchSchemaDetail();
+          }}
+          isLoading={isFetchingSchemaDetail || isFetchingNextPageSchemaDetail}
+          onScroll={handleScroll}
         />
       </div>
     </>

@@ -30,8 +30,43 @@ export const USE_CASE_OPTIONS = [
   { label: 'Bloom', value: 'bloom' },
 ];
 
+export const TYPE_OPTIONS_SEMVER_MAP = {
+  model: 'Major',
+  addition: 'Minor',
+  revision: 'Patch',
+};
 export const TYPE_OPTIONS = [
-  { label: 'Model', value: 'model' },
-  { label: 'Addition', value: 'addition' },
-  { label: 'Revision', value: 'revision' },
+  {
+    label: (
+      <p>
+        Model
+        <span className="ml-2 text-foreground/40 dark:text-dark-foreground/40">
+          (Major)
+        </span>
+      </p>
+    ),
+    value: 'model',
+  },
+  {
+    label: (
+      <p>
+        Addition
+        <span className="ml-2 text-foreground/40 dark:text-dark-foreground/40">
+          (Minor)
+        </span>
+      </p>
+    ),
+    value: 'addition',
+  },
+  {
+    label: (
+      <p>
+        Revision
+        <span className="ml-2 text-foreground/40 dark:text-dark-foreground/40">
+          (Patch)
+        </span>
+      </p>
+    ),
+    value: 'revision',
+  },
 ];

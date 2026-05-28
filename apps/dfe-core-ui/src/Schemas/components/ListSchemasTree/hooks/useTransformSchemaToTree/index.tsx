@@ -1,14 +1,23 @@
-import { cn } from '@/core/utils/style';
+import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
+import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
+import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
 import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
-import { Tooltip, TreeDataNode, Typography } from 'antd';
+import { notification, Tooltip, TreeDataNode } from 'antd';
+import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
-
-const selectedTitleClassName =
-  'text-tertiary! dark:text-dark-foreground! font-semibold';
 
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
+
+/** Ant Design Tree keys must be globally unique; folder and schema paths can share the same string. */
+export const folderTreeKey = (pathSegments: string[]) =>
+  `dir:${pathSegments.join('.')}`;
+
+export const schemaTreeKey = (schemaPath: string) => `schema:${schemaPath}`;
+
+export const versionTreeKey = (schemaPath: string, version: string) =>
+  `${schemaTreeKey(schemaPath)}@${version}`;
 
 /** Folder keys (dot-separated) plus schema key when a version is selected. */
 export const getExpandedKeysForSchemaSelection = (
@@ -23,11 +32,11 @@ export const getExpandedKeysForSchemaSelection = (
   const keys: string[] = [];
 
   for (let i = 0; i < segments.length - 1; i++) {
-    keys.push(segments.slice(0, i + 1).join('.'));
+    keys.push(folderTreeKey(segments.slice(0, i + 1)));
   }
 
   if (schemaVersion) {
-    keys.push(schemaPath);
+    keys.push(schemaTreeKey(schemaPath));
   }
 
   return keys;
@@ -44,49 +53,61 @@ const buildVersionChildren = (
   }) => void,
   selectedSchemaPath: string | null,
   selectedSchemaVersion: string | null,
+  expandTreeNode: (key: string) => void,
 ): TreeDataNode[] =>
   (schema.versions ?? []).map((version) => ({
-    key: `${schema.name}.${version}`,
+    key: versionTreeKey(schema.name, version),
     title: (
-      <Typography.Text
-        onClick={(e) => {
-          e.stopPropagation();
+      <TreeInteractiveLabel
+        title={
+          <>
+            <span className="min-w-0 truncate">{version}</span>
+            {version === schema.current && (
+              <Tooltip destroyOnHidden title="Current version">
+                <IconStarFilled className="shrink-0 text-yellow-500" />
+              </Tooltip>
+            )}
+          </>
+        }
+        onClick={() => {
+          expandTreeNode(schemaTreeKey(schema.name));
           setSelectedSchema({
             schema_path: schema.name,
             schema_version: version,
           });
         }}
-        className={cn(
-          'cursor-pointer flex items-center gap-x-2',
+        selected={
           selectedSchemaPath === schema.name &&
-            selectedSchemaVersion === version &&
-            selectedTitleClassName,
-        )}
-      >
-        {version}
-        {version === schema.current ? (
-          <Tooltip destroyOnHidden title="Current version">
-            <IconStarFilled className="text-yellow-500" />
-          </Tooltip>
-        ) : null}
-      </Typography.Text>
+          selectedSchemaVersion === version
+        }
+      />
     ),
     isLeaf: true,
   }));
 
-const schemaSummaryToTreeData = (
-  node: SchemaSummary,
-  pathSegments: string[],
+const schemaSummaryToTreeData = ({
+  node,
+  pathSegments,
+  setSelectedSchema,
+  selectedSchemaPath,
+  selectedSchemaVersion,
+  apiNotification,
+  expandTreeNode,
+}: {
+  node: SchemaSummary;
+  pathSegments: string[];
   setSelectedSchema: ({
     schema_path,
     schema_version,
   }: {
     schema_path: string;
     schema_version: string;
-  }) => void,
-  selectedSchemaPath: string | null,
-  selectedSchemaVersion: string | null,
-): TreeDataNode[] => {
+  }) => void;
+  selectedSchemaPath: string | null;
+  selectedSchemaVersion: string | null;
+  apiNotification: NotificationInstance;
+  expandTreeNode: (key: string) => void;
+}): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
   for (const schema of node.schemas ?? []) {
@@ -95,29 +116,52 @@ const schemaSummaryToTreeData = (
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
+      expandTreeNode,
     );
     const schemaIsLeaf = versionChildren.length === 0;
     out.push({
-      key: schema.name,
+      key: schemaTreeKey(schema.name),
       title: (
-        <Typography.Text
-          onClick={(e) => {
-            e.stopPropagation();
+        <TreeInteractiveLabel
+          icon={fileIcon}
+          title={schema.name.split('/').pop() ?? ''}
+          onClick={() => {
+            expandTreeNode(schemaTreeKey(schema.name));
             setSelectedSchema({
               schema_path: schema.name,
               schema_version: schema.current,
             });
           }}
-          className={cn(
-            'flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap',
+          selected={
             selectedSchemaPath === schema.name &&
-              selectedSchemaVersion === schema.current &&
-              selectedTitleClassName,
-          )}
-        >
-          {fileIcon}
-          {schema.name.split('/').pop()}
-        </Typography.Text>
+            selectedSchemaVersion === schema.current
+          }
+          actions={
+            <>
+              <CloneSchemaModal
+                schema={schema.name}
+                versions={schema.versions ?? []}
+                onSuccess={(schema) =>
+                  apiNotification.success({
+                    title: 'Schema cloned successfully',
+                    description: `${schema.path} has been cloned successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+              <DeleteSchemaModal
+                schemaPath={`${schema.name}`}
+                onSuccess={(schemaPath) =>
+                  apiNotification.success({
+                    title: 'Schema deleted successfully',
+                    description: `${schemaPath} has been deleted successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+            </>
+          }
+        />
       ),
       children: versionChildren.length > 0 ? versionChildren : undefined,
       isLeaf: schemaIsLeaf,
@@ -130,25 +174,29 @@ const schemaSummaryToTreeData = (
 
   for (const [segment, child] of childEntries) {
     const nextSegments = [...pathSegments, segment];
-    const nested = schemaSummaryToTreeData(
-      child,
-      nextSegments,
+    const nested = schemaSummaryToTreeData({
+      node: child,
+      pathSegments: nextSegments,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
-    );
+      apiNotification,
+      expandTreeNode,
+    });
 
     if (nested.length === 0) {
       continue;
     }
 
+    const folderKey = folderTreeKey(nextSegments);
     out.push({
-      key: nextSegments.join('.'),
+      key: folderKey,
       title: (
-        <Typography.Text className="flex items-center overflow-hidden align-middle cursor-pointer gap-x-1 text-ellipsis whitespace-nowrap">
-          {folderIcon}
-          {segment}
-        </Typography.Text>
+        <TreeInteractiveLabel
+          icon={folderIcon}
+          title={segment}
+          onClick={() => expandTreeNode(folderKey)}
+        />
       ),
       children: nested,
     });
@@ -162,6 +210,7 @@ export const useTransformSchemaToTree = ({
   setSelectedSchema,
   selectedSchemaPath,
   selectedSchemaVersion,
+  expandTreeNode,
 }: {
   schemaObjects: SchemaSummary;
   setSelectedSchema: ({
@@ -173,20 +222,31 @@ export const useTransformSchemaToTree = ({
   }) => void;
   selectedSchemaPath: string | null;
   selectedSchemaVersion: string | null;
-}) =>
-  useMemo(
+  expandTreeNode: (key: string) => void;
+}) => {
+  const [apiNotification, notificationContextHolder] =
+    notification.useNotification();
+
+  const tree = useMemo(
     () =>
-      schemaSummaryToTreeData(
-        schemaObjects,
-        [],
+      schemaSummaryToTreeData({
+        node: schemaObjects,
+        pathSegments: [],
         setSelectedSchema,
         selectedSchemaPath,
         selectedSchemaVersion,
-      ),
+        apiNotification,
+        expandTreeNode,
+      }),
     [
       schemaObjects,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
+      apiNotification,
+      expandTreeNode,
     ],
   );
+
+  return { tree, notificationContextHolder };
+};

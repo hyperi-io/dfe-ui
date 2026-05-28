@@ -1,20 +1,31 @@
 import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import { transformFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
+import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
+import { transformFormDataToRequestBody as transformCreateSchemaFormDataToRequestBody } from '@/Schemas/hooks/useCreateSchema/useCreateSchema.helpers';
 import { Radio } from 'antd';
 import { useState } from 'react';
 import { TableLayout } from './TableLayout';
 import { YamlLayout } from './YamlLayout';
 
+export type ReviewFormTransform = (values: CreateSchemaFormData) => {
+  requestBody: SchemaCreateRequest;
+};
+
 export interface ReviewFormProps {
   values: CreateSchemaFormData | null;
   onFinish?: (values: CreateSchemaFormData) => void;
   buttonLabel: string;
+  hideFields?: {
+    version?: boolean;
+  };
+  transformToReview?: ReviewFormTransform;
 }
 
 export const ReviewForm = ({
   values,
   onFinish,
   buttonLabel,
+  hideFields,
+  transformToReview = transformCreateSchemaFormDataToRequestBody,
 }: ReviewFormProps) => {
   const [selectedLayout, setSelectedLayout] = useState<'table' | 'yaml'>(
     'table',
@@ -28,7 +39,7 @@ export const ReviewForm = ({
     );
   }
 
-  const { requestBody } = transformFormDataToRequestBody(values);
+  const { requestBody } = transformToReview(values);
 
   const handleFinish = () => {
     onFinish?.(values);
@@ -55,6 +66,7 @@ export const ReviewForm = ({
           requestBody={requestBody}
           onFinish={handleFinish}
           buttonLabel={buttonLabel}
+          hideFields={hideFields}
         />
       )}
       {selectedLayout === 'yaml' && (
