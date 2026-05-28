@@ -70,7 +70,9 @@ const builderToGroupedSelectOptions = (
   );
 
   for (const [segment, child] of folderEntries) {
-    options.push(...builderToGroupedSelectOptions(child, [...pathSegments, segment]));
+    options.push(
+      ...builderToGroupedSelectOptions(child, [...pathSegments, segment]),
+    );
   }
 
   const schemaEntries = [...node.schemas].sort((a, b) => {

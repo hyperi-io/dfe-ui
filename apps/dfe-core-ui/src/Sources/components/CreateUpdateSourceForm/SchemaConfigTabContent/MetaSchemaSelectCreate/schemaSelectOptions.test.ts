@@ -30,16 +30,18 @@ describe('schemasToGroupedSelectOptions', () => {
     const testGroup = options.find(
       (option) => 'options' in option && option.label === 'test',
     );
-    expect(testGroup && 'options' in testGroup ? testGroup.options : null).toEqual(
-      [
-        { label: 'test', value: 'test/test' },
-        { label: 'test_copy', value: 'test/test_copy' },
-      ],
-    );
+    expect(
+      testGroup && 'options' in testGroup ? testGroup.options : null,
+    ).toEqual([
+      { label: 'test', value: 'test/test' },
+      { label: 'test_copy', value: 'test/test_copy' },
+    ]);
   });
 
   it('includes root-level schemas as plain selectable options', () => {
-    const options = schemasToGroupedSelectOptions([schemaEntry({ name: 'solo' })]);
+    const options = schemasToGroupedSelectOptions([
+      schemaEntry({ name: 'solo' }),
+    ]);
 
     expect(options).toEqual([{ label: 'solo', value: 'solo' }]);
   });
