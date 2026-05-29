@@ -13,7 +13,7 @@ import {
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { transformFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { usePathname } from 'next/navigation';

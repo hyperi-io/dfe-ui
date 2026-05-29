@@ -1,7 +1,7 @@
 import {
   SCHEMA_TAB_FORM_VALIDATION_KEY_MAP,
   SchemaFormValidationErrors,
-} from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+} from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { FieldError } from '@rc-component/form/es/interface';
 import { type InvalidColumns } from './CreateSchemaForm.context.d';
 

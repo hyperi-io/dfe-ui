@@ -1,9 +1,9 @@
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   schemaGroupValidator,
   schemaNameValidator,
   schemaVersionValidator,
-} from '@/core/schemas/CreateSchemaForm/utils';
+} from '@/core/validationSchemas/CreateSchemaForm/utils';
 import z from 'zod';
 /** Used for building the request body */
 const schemaDetails = {

@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconChevronsLeft } from '@repo/dfe-icons';
 import { Button } from 'antd';
 interface CreateSchemaReviewContextValue {

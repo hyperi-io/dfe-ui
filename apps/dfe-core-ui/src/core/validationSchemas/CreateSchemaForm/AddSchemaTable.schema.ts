@@ -1,5 +1,5 @@
-import { columnNameValidator } from '@/core/schemas/CreateSchemaForm/utils';
 import z from 'zod';
+import { columnNameValidator } from './utils';
 
 export const rowSchema = z.object({
   name: columnNameValidator,

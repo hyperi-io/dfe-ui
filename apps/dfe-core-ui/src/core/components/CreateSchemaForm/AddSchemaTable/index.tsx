@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { Table, TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';

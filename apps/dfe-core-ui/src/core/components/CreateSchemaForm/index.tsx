@@ -1,8 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Button, FormProps, Input, Select } from 'antd';
 import { isBlankSchemaListRow } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';

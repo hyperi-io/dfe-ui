@@ -1,6 +1,6 @@
 import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
-import type { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';

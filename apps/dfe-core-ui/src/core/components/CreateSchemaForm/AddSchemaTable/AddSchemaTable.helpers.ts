@@ -1,4 +1,4 @@
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import z from 'zod';
 import { SchemaColumnRow } from './types';
 

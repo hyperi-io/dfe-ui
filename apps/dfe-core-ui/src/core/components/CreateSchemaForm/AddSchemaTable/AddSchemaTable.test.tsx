@@ -1,6 +1,6 @@
 import { Form } from '@/core/components/Form';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';

@@ -4,13 +4,13 @@ import {
 } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   formSchema,
   SchemaFormValidationErrors,
   type CreateSchemaFormData,
-} from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+} from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Form } from 'antd';
 import {
   createContext,

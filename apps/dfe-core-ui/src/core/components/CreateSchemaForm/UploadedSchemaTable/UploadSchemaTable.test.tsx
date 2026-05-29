@@ -5,8 +5,8 @@ import type {
   InvalidColumns,
 } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { Form } from '@/core/components/Form';
-import { rowSchema } from '@/core/schemas/CreateSchemaForm/AddSchemaTable.schema';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen } from '@testing-library/react';
 import type { FormInstance, FormRule } from 'antd';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

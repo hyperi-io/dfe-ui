@@ -7,8 +7,8 @@ import {
   useCreateSchemaReviewContext,
 } from '@/core/contexts/CreateSchemaReviewContext';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { cn } from '@/core/utils/style';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';

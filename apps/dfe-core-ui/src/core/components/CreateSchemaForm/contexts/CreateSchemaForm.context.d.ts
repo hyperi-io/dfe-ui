@@ -4,7 +4,7 @@ import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types
 import type {
   CreateSchemaFormData,
   SchemaFormValidationErrors,
-} from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+} from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import type { FormInstance, FormRule } from 'antd';
 import z from 'zod';
 

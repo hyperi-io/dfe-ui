@@ -3,7 +3,7 @@ import { Table } from '@/core/components/Table';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
 import { Button, Select, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';

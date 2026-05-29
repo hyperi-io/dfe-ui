@@ -1,4 +1,4 @@
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { transformFormDataToRequestBody } from './useCreateSchema.helpers';
 

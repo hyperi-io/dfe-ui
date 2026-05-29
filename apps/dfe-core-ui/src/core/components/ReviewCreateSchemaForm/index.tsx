@@ -1,6 +1,6 @@
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { transformFormDataToRequestBody as transformCreateSchemaFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Radio } from 'antd';
 import { useState } from 'react';
 import { TableLayout } from './TableLayout';

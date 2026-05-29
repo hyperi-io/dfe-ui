@@ -3,8 +3,8 @@ import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/c
 import { UploadedSchemaTable } from '@/core/components/CreateSchemaForm/UploadedSchemaTable';
 import { Form } from '@/core/components/Form';
 import { TabLabel } from '@/core/components/TabLabel';
-import { CreateSchemaFormData } from '@/core/schemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { cn } from '@/core/utils/style';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Radio, Tabs } from 'antd';
 import { useState } from 'react';
