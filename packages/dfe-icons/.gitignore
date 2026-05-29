@@ -1,8 +1,2 @@
-# Generated files
-src/icons/
-src/index.ts
-src/manifest.ts
-stories/AllIcons.stories.tsx
-
 # Storybook build
 storybook-static/
