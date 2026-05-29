@@ -103,13 +103,13 @@ outside the Additional Use Grant and requires a commercial license.
 
 ### What You Need
 
-| Scenario | License Required |
-|----------|-----------------|
-| Single entity, internal use | BUSL-1.1 (no commercial license) |
-| Multiple entities, each runs own instance | BUSL-1.1 for each (no commercial license) |
-| One entity hosts for multiple group entities | Commercial license (ESLA) -- affiliate / group hosting rights |
-| Shared services / centralised IT for group | Commercial license (ESLA) -- affiliate / group hosting rights |
-| Hosted or managed service for external parties | Commercial license (ESLA) with hosted-service rights |
+| Scenario                                       | License Required                                              |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| Single entity, internal use                    | BUSL-1.1 (no commercial license)                              |
+| Multiple entities, each runs own instance      | BUSL-1.1 for each (no commercial license)                     |
+| One entity hosts for multiple group entities   | Commercial license (ESLA) -- affiliate / group hosting rights |
+| Shared services / centralised IT for group     | Commercial license (ESLA) -- affiliate / group hosting rights |
+| Hosted or managed service for external parties | Commercial license (ESLA) with hosted-service rights          |
 
 ## How to Obtain a Commercial License
 

@@ -19,19 +19,19 @@ versioning and changelog generation. All commits must follow this format:
 
 ### Types
 
-| Type | Description | Version Bump |
-|------|-------------|--------------|
-| `feat` | A new feature | Minor (0.X.0) |
-| `fix` | A bug fix | Patch (0.0.X) |
-| `docs` | Documentation only | None |
-| `style` | Code style (formatting, semicolons, etc.) | None |
-| `refactor` | Code change that neither fixes a bug nor adds a feature | None |
-| `perf` | Performance improvement | Patch (0.0.X) |
-| `test` | Adding or correcting tests | None |
-| `build` | Changes to build system or dependencies | None |
-| `ci` | Changes to CI configuration | None |
-| `chore` | Other changes that don't modify src or test files | None |
-| `revert` | Reverts a previous commit | Varies |
+| Type       | Description                                             | Version Bump  |
+| ---------- | ------------------------------------------------------- | ------------- |
+| `feat`     | A new feature                                           | Minor (0.X.0) |
+| `fix`      | A bug fix                                               | Patch (0.0.X) |
+| `docs`     | Documentation only                                      | None          |
+| `style`    | Code style (formatting, semicolons, etc.)               | None          |
+| `refactor` | Code change that neither fixes a bug nor adds a feature | None          |
+| `perf`     | Performance improvement                                 | Patch (0.0.X) |
+| `test`     | Adding or correcting tests                              | None          |
+| `build`    | Changes to build system or dependencies                 | None          |
+| `ci`       | Changes to CI configuration                             | None          |
+| `chore`    | Other changes that don't modify src or test files       | None          |
+| `revert`   | Reverts a previous commit                               | Varies        |
 
 ### Breaking Changes
 
