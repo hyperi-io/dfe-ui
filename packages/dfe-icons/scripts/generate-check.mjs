@@ -11,17 +11,20 @@ execSync('node scripts/generate.mjs', {
   stdio: 'inherit',
 });
 
-const status = execSync('git status --porcelain -- src/ stories/AllIcons.stories.tsx', {
-  cwd: packageRoot,
-  encoding: 'utf-8',
-}).trim();
+const status = execSync(
+  'git status --porcelain -- src/ types/ stories/AllIcons.stories.tsx',
+  {
+    cwd: packageRoot,
+    encoding: 'utf-8',
+  },
+).trim();
 
 if (status) {
   console.error(
     [
       '@repo/dfe-icons generated output is out of date.',
       'Run: yarn workspace @repo/dfe-icons generate',
-      'Then commit changes under packages/dfe-icons/src/ and stories/AllIcons.stories.tsx',
+      'Then commit packages/dfe-icons/src/, types/, and stories/AllIcons.stories.tsx',
       '',
       status,
     ].join('\n'),

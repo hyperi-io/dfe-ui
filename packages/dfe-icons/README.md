@@ -4,7 +4,7 @@ React icon components built from [Tabler Icons](https://tabler.io/icons) SVG sou
 
 ## How it works
 
-SVG files under `svg/` are the source of truth. The `scripts/generate.mjs` script transforms them into typed, tree-shakeable React components under `src/`. **Generated `src/` is committed** so CI and fresh clones do not run SVGR on every build.
+SVG files under `svg/` are the source of truth. The `scripts/generate.mjs` script transforms them into typed, tree-shakeable React components under `src/`, plus a lightweight `types/index.d.ts` for TypeScript consumers. **Generated output is committed** so CI and fresh clones do not run SVGR on every build.
 
 Only the icons you actually import end up in your app bundle.
 

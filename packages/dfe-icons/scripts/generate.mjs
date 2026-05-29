@@ -12,6 +12,7 @@ const SVG_DIR = path.join(ROOT, 'svg');
 const SRC_DIR = path.join(ROOT, 'src');
 const ICONS_DIR = path.join(SRC_DIR, 'icons');
 const STORIES_DIR = path.join(ROOT, 'stories');
+const TYPES_DIR = path.join(ROOT, 'types');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -215,6 +216,24 @@ const manifestContent = [
 ].join('\n');
 fs.writeFileSync(path.join(SRC_DIR, 'manifest.ts'), manifestContent);
 
+// Lightweight declarations for dependents (avoids loading thousands of .tsx in app tsc)
+fs.mkdirSync(TYPES_DIR, { recursive: true });
+const consumerTypesLines = [
+  'import type { ComponentType, SVGProps } from "react";',
+  '',
+  'export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;',
+  '',
+  'export declare const iconManifest: readonly string[];',
+  'export type IconName = string;',
+  '',
+  ...allIcons.map((name) => `export declare const ${name}: IconComponent;`),
+  '',
+];
+fs.writeFileSync(
+  path.join(TYPES_DIR, 'index.d.ts'),
+  consumerTypesLines.join('\n'),
+);
+
 // Storybook story
 fs.writeFileSync(
   path.join(STORIES_DIR, 'AllIcons.stories.tsx'),
@@ -227,4 +246,5 @@ const breakdown = Object.entries(stats)
 console.log(`Done – ${allIcons.length} icons (${breakdown})`);
 console.log('  → src/index.ts');
 console.log('  → src/manifest.ts');
+console.log('  → types/index.d.ts');
 console.log('  → stories/AllIcons.stories.tsx');
