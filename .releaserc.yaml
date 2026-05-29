@@ -38,10 +38,4 @@ plugins:
         python3 -c "from pathlib import Path; import json; Path('VERSION').write_text('${nextRelease.version}\n');
         p=Path('package.json'); d=json.loads(p.read_text()); d['version']='${nextRelease.version}';
         p.write_text(json.dumps(d, indent=2)+'\n')"
-  - - '@semantic-release/git'
-    - assets:
-        - CHANGELOG.md
-        - VERSION
-        - package.json
-      message: 'chore: version ${nextRelease.version} [skip ci]'
   - '@semantic-release/github'
