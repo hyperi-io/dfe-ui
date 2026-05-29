@@ -1,4 +1,4 @@
-import { Table } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
@@ -210,10 +210,11 @@ export const ViewSchemaDetails = ({
         </div>
       </div>
 
-      <Table
+      <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
+        visibleColumns={['name', 'type']}
         title={() => (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <p>{selectedVersion.columns.total} columns</p>
 
             <div className="flex items-center gap-2">
