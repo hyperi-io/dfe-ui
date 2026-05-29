@@ -1,5 +1,6 @@
 import { Form } from '@/core/components/Form';
-import { Table, TableProps } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
+import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -161,7 +162,6 @@ export const AddSchemaTable = ({
           {
             title: '',
             key: '__rowId',
-
             width: 0,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
@@ -176,7 +176,6 @@ export const AddSchemaTable = ({
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            width: '20%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -186,6 +185,9 @@ export const AddSchemaTable = ({
                   rules={[formValidation]}
                 >
                   <InlineEditInput
+                    classNames={{
+                      editContainer: 'w-full',
+                    }}
                     defaultEditing={
                       config.defaultEditFields === true ||
                       (Array.isArray(config.defaultEditFields) &&
@@ -200,7 +202,6 @@ export const AddSchemaTable = ({
             title: 'Type',
             dataIndex: 'type',
             key: 'type',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -211,6 +212,9 @@ export const AddSchemaTable = ({
                 >
                   <InlineEditSelect
                     options={PRIMITIVE_OPTIONS}
+                    classNames={{
+                      editContainer: 'w-full',
+                    }}
                     defaultEditing={
                       config.defaultEditFields === true ||
                       (Array.isArray(config.defaultEditFields) &&
@@ -225,7 +229,6 @@ export const AddSchemaTable = ({
             title: 'Use Case',
             dataIndex: 'use_case',
             key: 'use_case',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -249,7 +252,6 @@ export const AddSchemaTable = ({
             title: 'Attributes',
             dataIndex: 'attribute',
             key: 'attribute',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -274,7 +276,6 @@ export const AddSchemaTable = ({
             title: 'Expression',
             dataIndex: 'expr',
             key: 'expr',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -297,7 +298,6 @@ export const AddSchemaTable = ({
             title: 'Comment',
             dataIndex: 'comment',
             key: 'comment',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -319,7 +319,9 @@ export const AddSchemaTable = ({
         ];
 
         return (
-          <Table<SchemaColumnListRow>
+          <SchemaTable<SchemaColumnListRow>
+            visibleColumns={['name', 'type', '__rowId', 'delete']}
+            lockedColumns={['__rowId', 'delete']}
             dataSource={fields}
             rowKey="key"
             columns={columns}

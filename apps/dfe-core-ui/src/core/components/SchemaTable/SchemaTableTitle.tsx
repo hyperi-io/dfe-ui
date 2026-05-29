@@ -2,16 +2,21 @@ import { IconMenu2, IconX } from '@repo/dfe-icons';
 import { Button, Checkbox, TableProps } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+const isIncludedColumn = (column: string, lockedColumns: string[]) => {
+  return !lockedColumns?.includes(column);
+};
 export const SchemaTableTitle = <T extends object>({
   title,
   selectedVisibleColumns,
   columns,
   setSelectedVisibleColumns,
+  lockedColumns = [],
 }: {
   title: TableProps<T>['title'];
   selectedVisibleColumns: string[];
   columns: string[];
   setSelectedVisibleColumns: (value: string[]) => void;
+  lockedColumns?: string[];
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,7 +49,7 @@ export const SchemaTableTitle = <T extends object>({
     <div className="flex items-center gap-2 w-full">
       {title?.([])}
 
-      <div className="relative" ref={menuRef}>
+      <div className="ml-auto relative" ref={menuRef}>
         <Button
           type="default"
           icon={isMenuOpen ? <IconX /> : <IconMenu2 />}
@@ -56,26 +61,29 @@ export const SchemaTableTitle = <T extends object>({
               Configure Visible Columns
             </p>
 
-            {columnsOptions.map((column) => (
-              <div
-                className="flex items-center justify-between"
-                key={column.value}
-              >
-                <p>{column.label}</p>
-                <Checkbox
-                  checked={selectedVisibleColumns.includes(column.value)}
-                  onChange={() =>
-                    setSelectedVisibleColumns(
-                      selectedVisibleColumns.includes(column.value)
-                        ? selectedVisibleColumns.filter(
-                            (c) => c !== column.value,
-                          )
-                        : [...selectedVisibleColumns, column.value],
-                    )
-                  }
-                />
-              </div>
-            ))}
+            {columnsOptions.map(
+              (column) =>
+                isIncludedColumn(column.value, lockedColumns) && (
+                  <div
+                    className="flex items-center justify-between"
+                    key={column.value}
+                  >
+                    <p>{column.label}</p>
+                    <Checkbox
+                      checked={selectedVisibleColumns.includes(column.value)}
+                      onChange={() =>
+                        setSelectedVisibleColumns(
+                          selectedVisibleColumns.includes(column.value)
+                            ? selectedVisibleColumns.filter(
+                                (c) => c !== column.value,
+                              )
+                            : [...selectedVisibleColumns, column.value],
+                        )
+                      }
+                    />
+                  </div>
+                ),
+            )}
           </div>
         )}
       </div>

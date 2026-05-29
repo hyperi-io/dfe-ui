@@ -7,10 +7,12 @@ import { SchemaTableTitle } from './SchemaTableTitle';
 interface SchemaTableProps<T extends object> extends TableProps<T> {
   searchableColumns?: string[];
   visibleColumns?: string[];
+  lockedColumns?: string[];
 }
 
 export const SchemaTable = <T extends object>({
   visibleColumns: visibleColumnsProp,
+  lockedColumns,
   columns: originalColumns,
   title,
   ...props
@@ -105,6 +107,7 @@ export const SchemaTable = <T extends object>({
           selectedVisibleColumns={selectedVisibleColumns}
           columns={columnKeys}
           setSelectedVisibleColumns={setSelectedVisibleColumns}
+          lockedColumns={lockedColumns}
         />
       )}
       columns={displayedColumns}

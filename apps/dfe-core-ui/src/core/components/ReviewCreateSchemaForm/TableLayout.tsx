@@ -1,5 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
-import { Table } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -172,7 +172,9 @@ export const TableLayout = ({
         )}
       </div>
 
-      <Table
+      <SchemaTable
+        visibleColumns={['imported', 'name', 'type']}
+        lockedColumns={['imported', 'delete']}
         columns={tableColumns}
         dataSource={allColumns}
         rowKey="name"
