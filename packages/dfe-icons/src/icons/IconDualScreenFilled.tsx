@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconDualScreenFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-dual-screen" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M19 3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1h-5v2a1 1 0 0 1-1.351.936l-8-3A1 1 0 0 1 4 19V4a1 1 0 0 1 .212-.616l.068-.079.078-.072.066-.05.092-.058.065-.033.1-.04.099-.028.046-.01.108-.013L5 3zm-5.649 3.064A1 1 0 0 1 14 7v11h4V5h-7.486z" /></svg>;
+const Memo = memo(IconDualScreenFilled);
+export default Memo;

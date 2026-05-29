@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconDeviceTabletFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-device-tablet" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M18 2a2 2 0 0 1 1.995 1.85L20 4v16a2 2 0 0 1-1.85 1.995L18 22H6a2 2 0 0 1-1.995-1.85L4 20V4a2 2 0 0 1 1.85-1.995L6 2zm-6 13a2 2 0 0 0-1.977 1.697l-.018.154L10 17l.005.15A2 2 0 1 0 12 15" /></svg>;
+const Memo = memo(IconDeviceTabletFilled);
+export default Memo;

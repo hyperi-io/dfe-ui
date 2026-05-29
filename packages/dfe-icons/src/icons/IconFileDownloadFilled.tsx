@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconFileDownloadFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-file-download" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="m12 2 .117.007a1 1 0 0 1 .876.876L13 3v4l.005.15a2 2 0 0 0 1.838 1.844L15 9h4l.117.007a1 1 0 0 1 .876.876L20 10v9a3 3 0 0 1-2.824 2.995L17 22H7a3 3 0 0 1-2.995-2.824L4 19V5a3 3 0 0 1 2.824-2.995L7 2zm0 8a1 1 0 0 0-1 1v3.585l-.793-.792a1 1 0 0 0-1.32-.083l-.094.083a1 1 0 0 0 0 1.414l2.5 2.5.044.042.068.055.11.071.114.054.105.035.15.03L12 18l.117-.007.117-.02.108-.033.081-.034.098-.052.092-.064.094-.083 2.5-2.5a1 1 0 0 0 0-1.414l-.094-.083a1 1 0 0 0-1.32.083l-.793.791V11a1 1 0 0 0-.883-.993zm2.999-7.001L19 7h-4z" /></svg>;
+const Memo = memo(IconFileDownloadFilled);
+export default Memo;

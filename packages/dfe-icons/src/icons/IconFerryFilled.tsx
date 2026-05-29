@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconFerryFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-ferry" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M22 12a1 1 0 0 1 .86 1.51l-2.202 3.709A4.06 4.06 0 0 1 17.293 19H2a1 1 0 0 1-.957-1.291l1.521-5A1 1 0 0 1 3.521 12zm-3 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-5.106-7.447L14.617 7h.874a1 1 0 0 1 .864.497L18.392 11H5.56l.973-3.284A1 1 0 0 1 7.491 7h4.89l-.275-.553a1 1 0 0 1 1.788-.894" /></svg>;
+const Memo = memo(IconFerryFilled);
+export default Memo;

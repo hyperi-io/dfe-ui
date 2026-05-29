@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconBrandAngularFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-brand-angular" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="m12.665 2.174 7.4 2.612a2 2 0 0 1 1.316 2.156l-1.323 9.703a2 2 0 0 1-.99 1.468l-6.076 3.471a2 2 0 0 1-1.984 0l-6.076-3.47a2 2 0 0 1-.96-1.3l-.03-.167L2.62 6.943a2 2 0 0 1 1.316-2.156l7.4-2.613a2 2 0 0 1 1.33 0m.271 4.475c-.324-.865-1.548-.865-1.872 0l-3 8a1 1 0 0 0 .585 1.287l.111.035a1 1 0 0 0 1.176-.62L10.443 14h3.113l.508 1.352a1 1 0 0 0 1.176.62l.111-.035a1 1 0 0 0 .585-1.287zM12 9.848l.807 2.151h-1.614z" /></svg>;
+const Memo = memo(IconBrandAngularFilled);
+export default Memo;

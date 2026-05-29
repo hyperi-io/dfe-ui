@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconBladeFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-blade" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M11.586 3a2 2 0 0 1 2.828 0l.586.585.586-.585a2 2 0 0 1 2.7-.117l.128.117L21 5.586a2 2 0 0 1 0 2.828L20.414 9l.586.586a2 2 0 0 1 0 2.828L12.414 21a2 2 0 0 1-2.828 0L9 20.414 8.414 21a2 2 0 0 1-2.828 0L3 18.414a2 2 0 0 1 0-2.828l.585-.587L3 14.414a2 2 0 0 1-.117-2.7L3 11.585zm3.027 4.21a1 1 0 0 0-1.32 1.497l.292.293-1.068 1.067a2.003 2.003 0 0 0-2.512 1.784L10 12l.005.15q.014.188.062.367L9 13.585l-.293-.292-.094-.083a1 1 0 0 0-1.32 1.497l.292.293-.292.293-.083.094a1 1 0 0 0 1.497 1.32L9 16.415l.293.292.094.083a1 1 0 0 0 1.32-1.497L10.415 15l1.069-1.067a2.003 2.003 0 0 0 2.449-2.45L15 10.415l.293.292.094.083a1 1 0 0 0 1.32-1.497L16.415 9l.292-.293.083-.094a1 1 0 0 0-1.497-1.32L15 7.585l-.293-.292z" /></svg>;
+const Memo = memo(IconBladeFilled);
+export default Memo;

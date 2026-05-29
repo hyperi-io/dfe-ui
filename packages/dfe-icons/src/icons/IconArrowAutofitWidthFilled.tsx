@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconArrowAutofitWidthFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-arrow-autofit-width" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M20.121 12.879a3 3 0 0 0-4.242 0l-.085.09-.083.094-.08.096-.115.158a3 3 0 0 0-.515 1.59l.001.093H8.999v-.092a3 3 0 0 0-5.12-2.03.514.514 0 0 1-.878-.363L3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6.514a.515.515 0 0 1-.879.365" /><path d="M11 18a1 1 0 0 1-1 1H5.416l1.291 1.293a1 1 0 0 1 .083 1.32l-.083.094a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1-.097-.112l-.071-.11-.054-.114-.035-.105-.03-.149L2 18l.003-.075.017-.126.03-.111.044-.111.052-.098.067-.096.08-.09 3-3a1 1 0 0 1 1.414 1.414L5.414 17H10a1 1 0 0 1 1 1m10.989-.148.007.058L22 18l-.003.075-.017.126-.03.111-.044.111-.052.098-.074.104-.073.082-3 3a1 1 0 1 1-1.414-1.414L18.585 19H14a1 1 0 0 1 0-2h4.585l-1.292-1.293a1 1 0 0 1-.083-1.32l.083-.094a1 1 0 0 1 1.414 0l3 3q.054.053.097.112l.071.11.054.114.035.105z" /></svg>;
+const Memo = memo(IconArrowAutofitWidthFilled);
+export default Memo;

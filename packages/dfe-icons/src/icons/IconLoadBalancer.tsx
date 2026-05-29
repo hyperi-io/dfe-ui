@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconLoadBalancer = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="prefix__icon prefix__icon-tabler prefix__icons-tabler-outline prefix__icon-tabler-load-balancer" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path stroke="none" d="M0 0h24v24H0z" /><path d="M9 13a3 3 0 1 0 6 0 3 3 0 1 0-6 0M11 20a1 1 0 1 0 2 0 1 1 0 1 0-2 0M12 16v3M12 10V3M9 6l3-3 3 3M12 10V3" /><path d="m9 6 3-3 3 3M14.894 12.227l6.11-2.224M17.159 8.21l3.845 1.793-1.793 3.845M9.101 12.214l-6.075-2.211M6.871 8.21l-3.845 1.793 1.793 3.845" /></svg>;
+const Memo = memo(IconLoadBalancer);
+export default Memo;

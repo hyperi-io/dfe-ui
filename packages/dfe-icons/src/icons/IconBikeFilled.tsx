@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconBikeFilled = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="prefix__icon prefix__icon-tabler prefix__icons-tabler-filled prefix__icon-tabler-bike" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path fill="none" d="M0 0h24v24H0z" /><path d="M5 14a4 4 0 1 1-4 4l.005-.2A4 4 0 0 1 5 14M19 14a4 4 0 1 1-4 4l.005-.2A4 4 0 0 1 19 14" /><path d="M14.832 7.445 16.535 10H19a1 1 0 0 1 .993.883L20 11a1 1 0 0 1-1 1h-3a1 1 0 0 1-.832-.445l-1.396-2.093-3.275 2.62 2.21 2.21a1 1 0 0 1 .284.577L13 15v4a1 1 0 0 1-2 0v-3.585l-2.707-2.708a1 1 0 0 1-.01-1.403l.092-.085 5-4a1 1 0 0 1 1.457.226M17 3a2 2 0 1 1-2 2l.005-.15A2 2 0 0 1 17 3" /></svg>;
+const Memo = memo(IconBikeFilled);
+export default Memo;
