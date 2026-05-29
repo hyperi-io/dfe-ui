@@ -5,7 +5,7 @@ export const FieldMapsTree = () => {
   return (
     <div className="flex flex-col gap-2 relative">
       <ListFieldMapsFilters />
-      <FieldMapsList className="mt-14" />
+      <FieldMapsList className="mt-10" />
     </div>
   );
 };
