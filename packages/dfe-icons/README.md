@@ -4,7 +4,9 @@ React icon components built from [Tabler Icons](https://tabler.io/icons) SVG sou
 
 ## How it works
 
-The `scripts/generate.mjs` script reads every `.svg` file from subdirectories under `svg/` and transforms them into typed, tree-shakeable React components. Only the icons you actually import end up in your bundle.
+SVG files under `svg/` are the source of truth. The `scripts/generate.mjs` script transforms them into typed, tree-shakeable React components under `src/`, plus a lightweight `types/index.d.ts` for TypeScript consumers. **Generated output is committed** so CI and fresh clones do not run SVGR on every build.
+
+Only the icons you actually import end up in your app bundle.
 
 Source directories are auto-discovered. The upstream Tabler icons live in `svg/outline/` and `svg/filled/`, while any additional directories (e.g. `svg/custom/`) are picked up automatically.
 
@@ -36,10 +38,10 @@ Every component is a `React.forwardRef` wrapping an `<svg>` element, so it accep
 ## Adding a custom icon
 
 1. Create a new `.svg` file in `svg/custom/` (or any subdirectory under `svg/`).
-2. Run the generator:
+2. Regenerate and commit the output:
 
    ```sh
-   yarn generate
+   yarn workspace @repo/dfe-icons generate
    ```
 
 3. Import the new component by its PascalCase name:
@@ -68,13 +70,14 @@ The SVG should follow the same 24×24 viewBox convention used by Tabler:
 
 ## Scripts
 
-| Command                | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `yarn generate`        | Transform SVGs into React components                    |
-| `yarn build`           | Same as `generate` (runs as part of the turbo pipeline) |
-| `yarn storybook`       | Start Storybook dev server on port 6006                 |
-| `yarn build-storybook` | Build a static Storybook site                           |
-| `yarn check-types`     | Run TypeScript type checking                            |
+| Command                | Description                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| `yarn generate`        | Transform SVGs into React components (run after SVG changes)     |
+| `yarn generate:check`  | Regenerate and fail if `src/` is out of date (CI / pre-push)     |
+| `yarn build`           | Typecheck only (`tsc --noEmit`)                                    |
+| `yarn storybook`       | Start Storybook dev server on port 6006                            |
+| `yarn build-storybook` | Build a static Storybook site                                      |
+| `yarn check-types`     | Run TypeScript type checking                                       |
 
 ## Storybook
 

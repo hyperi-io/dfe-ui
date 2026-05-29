@@ -9,6 +9,7 @@
     "format": "prettier --write \"**/*.{css,json,md,mjs,ts,tsx,yaml,yml}\"",
     "format:check": "prettier --check .",
     "check-types": "turbo run check-types",
+    "check:icons": "yarn workspace @repo/dfe-icons generate:check",
     "test": "turbo run test"
   },
   "devDependencies": {
