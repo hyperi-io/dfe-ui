@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { memo } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const IconBiohazardOff = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps) => <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} className="prefix__icon prefix__icon-tabler prefix__icons-tabler-outline prefix__icon-tabler-biohazard-off" viewBox="0 0 24 24" role="img" width="1em" height="1em" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path stroke="none" d="M0 0h24v24H0z" /><path d="M10.586 10.586a2 2 0 1 0 2.836 2.82" /><path d="M11.939 14c0 .173.048.351.056.533v.217a4.75 4.75 0 0 1-4.533 4.745h-.217M2.495 14.745a4.75 4.75 0 0 1 7.737-3.693" /><path d="M16.745 19.495a4.75 4.75 0 0 1-4.69-5.503h-.06M14.533 10.538a4.75 4.75 0 0 1 6.957 3.987v.217M10.295 10.929a4.75 4.75 0 0 1-2.988-3.64m.66-3.324a5 5 0 0 1 .5-.66l.164-.172M15.349 3.133a4.75 4.75 0 0 1-.836 7.385M3 3l18 18" /></svg>;
+const Memo = memo(IconBiohazardOff);
+export default Memo;
