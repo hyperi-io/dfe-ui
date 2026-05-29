@@ -1,7 +1,7 @@
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import {

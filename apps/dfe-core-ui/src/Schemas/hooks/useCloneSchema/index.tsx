@@ -1,9 +1,9 @@
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import { useCreateSchema } from '@/Schemas/hooks/useCreateSchema';
+import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import {
   SchemaCreateRequest,
   SchemaCreateResponse,
-} from '@/Schemas/hooks/useCreateSchema/types';
+} from '@/core/hooks/useCreateSchema/types';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { useState } from 'react';

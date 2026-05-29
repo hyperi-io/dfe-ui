@@ -5,7 +5,7 @@ export const ListSourcesTree = () => {
   return (
     <div className="flex flex-col gap-2 relative">
       <ListSourcesFilters />
-      <SourceList className="mt-14" />
+      <SourceList className="mt-10" />
     </div>
   );
 };

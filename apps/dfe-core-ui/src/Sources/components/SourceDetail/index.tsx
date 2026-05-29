@@ -12,7 +12,7 @@ import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';
-import { notification, Spin, Typography } from 'antd';
+import { notification, Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 
 export const SourceDetail = () => {
@@ -70,7 +70,7 @@ export const SourceDetail = () => {
     <>
       {contextHolder}
       <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <Typography.Title level={5}>Source Configuration</Typography.Title>
+        <h4 className="text-lg font-medium">Source Configuration</h4>
         <CreateUpdateSourceForm
           key={source_name ?? 'empty'}
           disabledFields={{

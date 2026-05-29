@@ -2,9 +2,9 @@
 
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
+import { ListSchemasProvider } from '@/core/contexts/ListSchemasContext';
 import { ListSchemaDetail } from '@/Schemas/components/ListSchemaDetail';
 import { ListSchemasTree } from '@/Schemas/components/ListSchemasTree';
-import { ListSchemasProvider } from '@/Schemas/contexts/ListSchemasContext';
 
 export const SchemaListScene = () => {
   return (

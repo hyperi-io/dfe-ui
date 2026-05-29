@@ -1,14 +1,14 @@
 import { Drawer } from '@/core/components/Drawer';
 
-import { cn } from '@/core/utils/style';
-import { CreateSchemaForm } from '@/Schemas/components/CreateSchemaForm';
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import { ReviewForm } from '@/Schemas/components/ReviewCreateSchemaForm';
+import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
+import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
-} from '@/Schemas/contexts/CreateSchemaReviewContext';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+} from '@/core/contexts/CreateSchemaReviewContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
+import { cn } from '@/core/utils/style';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
