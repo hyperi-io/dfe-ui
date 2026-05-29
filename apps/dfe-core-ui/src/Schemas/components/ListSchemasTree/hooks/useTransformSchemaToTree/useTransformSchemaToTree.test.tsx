@@ -1,4 +1,4 @@
-import { SchemaSummary } from '@/Schemas/hooks/useFetchInfiniteFilteredSchemas/types';
+import { SchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { components } from '@repo/dfe-engine-types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';

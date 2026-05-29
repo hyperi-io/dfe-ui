@@ -1,9 +1,9 @@
 'use client';
 
+import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
+import { ListSchemasProvider } from '@/core/contexts/ListSchemasContext';
 import { cn } from '@/core/utils/style';
-import { CreateSchemaDrawer } from '@/Schemas/components/CreateSchemaDrawer';
-import { ListSchemasProvider } from '@/Schemas/contexts/ListSchemasContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

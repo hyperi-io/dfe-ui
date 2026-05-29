@@ -161,7 +161,10 @@ export const CreateUpdateSourceFormBase = ({
             ),
             forceRender: true,
             children: (
-              <SchemaConfigTabContent formValidation={formValidation} />
+              <SchemaConfigTabContent
+                formValidation={formValidation}
+                form={form}
+              />
             ),
           },
           {

@@ -1,6 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { SchemaCreateResponse } from '@/Schemas/hooks/useCreateSchema/types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,

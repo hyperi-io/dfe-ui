@@ -1,5 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useDeleteSchema } from '@/Schemas/hooks/useDeleteSchema';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, Modal, Tooltip } from 'antd';

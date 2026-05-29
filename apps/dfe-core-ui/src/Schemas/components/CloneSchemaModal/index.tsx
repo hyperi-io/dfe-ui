@@ -1,15 +1,15 @@
 import { Form } from '@/core/components/Form';
 
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
-import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
-import { SchemaCreateResponse } from '@/Schemas/hooks/useCreateSchema/types';
+import { FormNotification } from '@/core/components/FormNotification';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
+import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   schemaGroupValidator,
   schemaNameValidator,
   schemaVersionValidator,
-} from '@/Schemas/utils/validation';
-import { FormNotification } from '@/core/components/FormNotification';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+} from '@/core/validationSchemas/CreateSchemaForm/utils';
+import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, Input, Modal, Select, Tooltip } from 'antd';
 import { useState } from 'react';

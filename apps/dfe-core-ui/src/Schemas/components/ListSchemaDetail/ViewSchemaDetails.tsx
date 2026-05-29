@@ -1,7 +1,7 @@
 import { Table } from '@/core/components/Table';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
 import {
   MetaSchemaDetailResponse,
   SchemaDetailColumnFilterField,

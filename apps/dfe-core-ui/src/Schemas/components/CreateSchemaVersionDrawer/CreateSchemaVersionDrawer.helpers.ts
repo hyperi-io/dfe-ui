@@ -1,5 +1,5 @@
-import { CreateSchemaFormData } from '@/Schemas/components/CreateSchemaForm/CreateSchemaForm.schema';
-import { SchemaCreateRequest } from '@/Schemas/hooks/useCreateSchema/types';
+import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 
 /** Internal key for review UI only; not sent to the create-version API. */
 export const REVIEW_PLACEHOLDER_VERSION = '__new_version__';

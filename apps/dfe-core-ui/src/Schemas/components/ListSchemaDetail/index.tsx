@@ -1,5 +1,5 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { useListSchemasContext } from '@/Schemas/contexts/ListSchemasContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import {
   SchemaDetailColumnFilterField,

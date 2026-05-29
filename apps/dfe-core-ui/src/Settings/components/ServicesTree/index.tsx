@@ -5,7 +5,7 @@ export const ServicesTree = () => {
   return (
     <div className="flex flex-col gap-2 relative">
       <ListServicesFilters />
-      <ServicesList className="mt-14" />
+      <ServicesList className="mt-10" />
     </div>
   );
 };
