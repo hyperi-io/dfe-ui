@@ -1,5 +1,7 @@
 # Turborepo starter
 
+[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue)](LICENSE)
+
 This Turborepo starter is maintained by the Turborepo core team.
 
 ## Using this example
@@ -146,6 +148,10 @@ npx turbo link
 yarn exec turbo link
 pnpm exec turbo link
 ```
+
+## License
+
+This repository is licensed under the [Business Source License 1.1 (BUSL-1.1)](LICENSE). See [COMMERCIAL.md](COMMERCIAL.md) for commercial use, hosted-service restrictions, and enterprise licensing.
 
 ## Useful Links
 
