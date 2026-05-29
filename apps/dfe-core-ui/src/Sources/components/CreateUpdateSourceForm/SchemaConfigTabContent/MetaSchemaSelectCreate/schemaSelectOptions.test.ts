@@ -4,6 +4,7 @@ import {
   getSchemaLeafName,
   getSchemaPathPrefix,
   schemasToGroupedSelectOptions,
+  versionsFromMetaSchemaOutput,
 } from './schemaSelectOptions';
 
 type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
@@ -73,5 +74,32 @@ describe('getSchemaPathPrefix', () => {
 describe('getSchemaLeafName', () => {
   it('returns the last path segment', () => {
     expect(getSchemaLeafName('test/test_copy')).toBe('test_copy');
+  });
+});
+
+describe('versionsFromMetaSchemaOutput', () => {
+  it('returns version keys from the response', () => {
+    expect(
+      versionsFromMetaSchemaOutput({
+        current: '1.0.0',
+        versions: {
+          '1.0.0': {
+            date: '2026-01-01',
+            type: 'model',
+            summary: 'Initial version',
+            columns: [],
+          },
+        },
+      }),
+    ).toEqual(['1.0.0']);
+  });
+
+  it('falls back to current when versions is empty', () => {
+    expect(
+      versionsFromMetaSchemaOutput({
+        current: '2.0.0',
+        versions: {},
+      }),
+    ).toEqual(['2.0.0']);
   });
 });

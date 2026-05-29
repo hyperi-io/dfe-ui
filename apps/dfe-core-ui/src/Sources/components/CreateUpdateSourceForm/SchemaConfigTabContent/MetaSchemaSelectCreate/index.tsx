@@ -8,6 +8,7 @@ import {
   getSchemaPathPrefix,
   isSelectableSchemaOptionValue,
   schemasToGroupedSelectOptions,
+  versionsFromMetaSchemaOutput,
 } from './schemaSelectOptions';
 
 const SCROLL_LOAD_THRESHOLD = 50;
@@ -114,8 +115,8 @@ export const MetaSchemaSelectCreate = ({
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
-  const handleSelect = useCallback(
-    (selectedValue: string) => {
+  const applySchemaSelection = useCallback(
+    (selectedValue: string, versionsOverride?: string[]) => {
       if (!isSelectableSchemaOptionValue(selectedValue)) {
         return;
       }
@@ -126,6 +127,7 @@ export const MetaSchemaSelectCreate = ({
         selectedValue,
         {
           versions:
+            versionsOverride ??
             schemas.find((schema) => schema.name === selectedValue)?.versions ??
             [],
         },
@@ -133,6 +135,13 @@ export const MetaSchemaSelectCreate = ({
       );
     },
     [onChange, schemas],
+  );
+
+  const handleSelectFromDropdown = useCallback(
+    (selectedValue: string) => {
+      applySchemaSelection(selectedValue);
+    },
+    [applySchemaSelection],
   );
 
   const handleSearchClear = useCallback(() => {
@@ -179,15 +188,18 @@ export const MetaSchemaSelectCreate = ({
         value={schemaValue ?? undefined}
         labelRender={() => selectedLabel}
         onOpenChange={handleOpenChange}
-        onSelect={handleSelect}
+        onSelect={handleSelectFromDropdown}
         onPopupScroll={handlePopupScroll}
         allowClear={searchValue !== ''}
         onClear={handleSearchClear}
       />
       <CreateSchemaDrawer
         onSuccess={(response) => {
-          refetchSchemas();
-          handleSelect(response.path ?? '');
+          void refetchSchemas();
+          applySchemaSelection(
+            response.path ?? '',
+            versionsFromMetaSchemaOutput(response),
+          );
         }}
       />
     </div>
