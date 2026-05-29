@@ -2,6 +2,7 @@
   "name": "@repo/dfe-engine-types",
   "version": "0.1.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "description": "TypeScript types for DFE Engine API",
   "type": "module",
   "exports": {

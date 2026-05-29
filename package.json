@@ -1,6 +1,7 @@
 {
   "name": "dfe-ui",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "audit": "node scripts/audit.mjs",
     "build": "turbo run build",
