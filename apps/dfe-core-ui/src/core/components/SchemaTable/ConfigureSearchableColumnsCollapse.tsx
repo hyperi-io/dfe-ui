@@ -1,6 +1,9 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Checkbox } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+
+const MIN_SEARCHABLE_COLUMNS_ERROR =
+  'Select at least one searchable column.';
 
 const isIncludedColumn = (
   column: string,
@@ -19,12 +22,31 @@ export const ConfigureSearchableColumnsCollapse = ({
   searchableColumnsOptions,
   setSelectedSearchableColumns,
 }: ConfigureSearchableColumnsCollapseProps) => {
+  const [error, setError] = useState<string | null>(null);
+
   const columnsOptions = useMemo(() => {
     return searchableColumnsOptions.map((column) => ({
       label: column,
       value: column,
     }));
   }, [searchableColumnsOptions]);
+
+  const handleToggle = (columnValue: string) => {
+    const isSelected = selectedSearchableColumns.includes(columnValue);
+    if (isSelected) {
+      if (selectedSearchableColumns.length <= 1) {
+        setError(MIN_SEARCHABLE_COLUMNS_ERROR);
+        return;
+      }
+      setSelectedSearchableColumns(
+        selectedSearchableColumns.filter((c) => c !== columnValue),
+      );
+      setError(null);
+      return;
+    }
+    setSelectedSearchableColumns([...selectedSearchableColumns, columnValue]);
+    setError(null);
+  };
 
   return (
     <SimpleCollapse
@@ -33,6 +55,11 @@ export const ConfigureSearchableColumnsCollapse = ({
         title: 'font-semibold',
       }}
     >
+      {error ? (
+        <p className="mb-2 text-sm text-red-500" role="alert">
+          {error}
+        </p>
+      ) : null}
       {columnsOptions.map(
         (column) =>
           isIncludedColumn(column.value, searchableColumnsOptions) && (
@@ -43,15 +70,7 @@ export const ConfigureSearchableColumnsCollapse = ({
               <p>{column.label}</p>
               <Checkbox
                 checked={selectedSearchableColumns.includes(column.value)}
-                onChange={() =>
-                  setSelectedSearchableColumns(
-                    selectedSearchableColumns.includes(column.value)
-                      ? selectedSearchableColumns.filter(
-                          (c) => c !== column.value,
-                        )
-                      : [...selectedSearchableColumns, column.value],
-                  )
-                }
+                onChange={() => handleToggle(column.value)}
               />
             </div>
           ),
