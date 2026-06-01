@@ -75,9 +75,16 @@ function buildUrl(
   const url = new URL(path, base);
   if (query) {
     for (const [k, v] of Object.entries(query)) {
-      if (v !== undefined && v !== null) {
-        url.searchParams.set(k, String(v));
+      if (v === undefined || v === null) continue;
+      if (Array.isArray(v)) {
+        for (const item of v) {
+          if (item !== undefined && item !== null) {
+            url.searchParams.append(k, String(item));
+          }
+        }
+        continue;
       }
+      url.searchParams.set(k, String(v));
     }
   }
   return url.toString();
