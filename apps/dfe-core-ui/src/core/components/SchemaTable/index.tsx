@@ -1,6 +1,7 @@
 import { Table, TableProps } from '@/core/components/Table';
 import { IconEye, IconEyeOff, IconSearch } from '@repo/dfe-icons';
 import { Button, Tooltip } from 'antd';
+import uniq from 'lodash/uniq';
 import { useMemo, useState } from 'react';
 import { SchemaTableTitle } from './SchemaTableTitle';
 
@@ -11,19 +12,19 @@ interface SchemaTableProps<T extends object> extends TableProps<T> {
 }
 
 export const SchemaTable = <T extends object>({
-  visibleColumns: visibleColumnsProp,
-  lockedColumns,
-  columns: originalColumns,
+  visibleColumns: visibleColumnsProp = [],
+  lockedColumns = [],
+  columns: originalColumns = [],
   title,
   ...props
 }: SchemaTableProps<T>) => {
   const visibleColumns = useMemo(() => {
     return (
-      visibleColumnsProp ??
+      uniq(visibleColumnsProp.concat(lockedColumns ?? [])) ??
       originalColumns?.map((column) => column.key as string) ??
       []
     );
-  }, [visibleColumnsProp, originalColumns]);
+  }, [visibleColumnsProp, originalColumns, lockedColumns]);
   const [selectedVisibleColumns, setSelectedVisibleColumns] =
     useState<string[]>(visibleColumns);
   const columnKeys = useMemo(() => {

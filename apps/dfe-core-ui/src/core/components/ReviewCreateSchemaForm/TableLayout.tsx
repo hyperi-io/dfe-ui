@@ -83,7 +83,7 @@ export const TableLayout = ({
       },
     },
     {
-      title: 'Use Case',
+      title: 'Index Type',
       dataIndex: 'use_case',
       key: 'use_case',
       render: (use_case: string) => {
@@ -97,7 +97,7 @@ export const TableLayout = ({
       },
     },
     {
-      title: 'Expr',
+      title: 'Expression (CTE)',
       dataIndex: 'expr',
       key: 'expr',
       render: (expr: string) => {
@@ -173,8 +173,16 @@ export const TableLayout = ({
       </div>
 
       <SchemaTable
-        visibleColumns={['imported', 'name', 'type']}
-        lockedColumns={['imported', 'delete']}
+        visibleColumns={[
+          '__rowId',
+          'imported',
+          'name',
+          'type',
+          'delete',
+          'expr',
+          'comment',
+        ]}
+        lockedColumns={['__rowId', 'imported', 'delete', 'name']}
         columns={tableColumns}
         dataSource={allColumns}
         rowKey="name"

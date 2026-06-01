@@ -59,6 +59,16 @@ const CaptureFormInstance = ({
   return null;
 };
 
+const headerAddColumnButton = (table: HTMLElement) =>
+  within(table.querySelector('.ant-table-thead') as HTMLElement).getByRole(
+    'button',
+  );
+
+const rowRemoveColumnButton = (table: HTMLElement) =>
+  within(table.querySelector('.ant-table-body') as HTMLElement).getAllByRole(
+    'button',
+  )[0];
+
 const renderAddSchemaTable = (
   props: Partial<AddSchemaTableProps> = {},
   options?: {
@@ -87,6 +97,15 @@ const renderAddSchemaTable = (
       <FormColumnsProbe listName={listName} onColumns={onColumns} />
       <AddSchemaTable
         formValidation={bypassFormValidation}
+        lockedColumns={['__rowId', 'delete', 'name']}
+        visibleColumns={[
+          'name',
+          'type',
+          '__rowId',
+          'delete',
+          'expr',
+          'comment',
+        ]}
         onMount={onMount}
         {...('onRemoveRow' in props ? { onRemoveRow } : {})}
         {...tableProps}
@@ -211,7 +230,22 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       Comment: 'note',
     } as unknown as SchemaColumnRow;
     const onColumns = vi.fn();
-    renderAddSchemaTable({ initialValues: [column] }, { onColumns });
+    renderAddSchemaTable(
+      {
+        initialValues: [column],
+        visibleColumns: [
+          'name',
+          'type',
+          '__rowId',
+          'delete',
+          'use_case',
+          'attribute',
+          'expr',
+          'comment',
+        ],
+      },
+      { onColumns },
+    );
 
     await waitFor(() => {
       const last = onColumns.mock.calls.at(-1)?.[0] as RowSchema[] | undefined;
@@ -281,8 +315,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
 
     const table = container.querySelector('.ant-table');
     expect(table).toBeTruthy();
-    const headerAdd = within(table as HTMLElement).getAllByRole('button')[0];
-    await user.click(headerAdd);
+    await user.click(headerAddColumnButton(table as HTMLElement));
 
     await waitFor(() => {
       const last = onColumns.mock.calls.at(-1)?.[0] as RowSchema[] | undefined;
@@ -323,8 +356,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
 
     vi.spyOn(capturedForm!, 'getFieldValue').mockReturnValue(undefined);
 
-    const removeButton = within(table as HTMLElement).getAllByRole('button')[1];
-    await user.click(removeButton);
+    await user.click(rowRemoveColumnButton(table as HTMLElement));
 
     await waitFor(() => {
       const last = onColumns.mock.calls.at(-1)?.[0] as RowSchema[] | undefined;
@@ -349,8 +381,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
     });
 
     const table = container.querySelector('.ant-table');
-    const removeButton = within(table as HTMLElement).getAllByRole('button')[1];
-    await user.click(removeButton);
+    await user.click(rowRemoveColumnButton(table as HTMLElement));
 
     await waitFor(() => {
       const last = onColumns.mock.calls.at(-1)?.[0] as RowSchema[] | undefined;
@@ -376,8 +407,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
     });
 
     const table = container.querySelector('.ant-table');
-    const removeButton = within(table as HTMLElement).getAllByRole('button')[1];
-    await user.click(removeButton);
+    await user.click(rowRemoveColumnButton(table as HTMLElement));
 
     await waitFor(() => {
       expect(onRemoveRow).toHaveBeenCalledWith(

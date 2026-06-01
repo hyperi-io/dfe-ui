@@ -41,6 +41,8 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   };
   onMount?: () => void;
   onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
+  visibleColumns?: string[];
+  lockedColumns?: string[];
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -87,10 +89,21 @@ export const AddSchemaTable = ({
     defaultAddColumns: true,
     defaultRemoveColumns: true,
   },
+  visibleColumns: visibleColumnsProp,
+  lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
   ...tableProps
 }: AddSchemaTableProps) => {
+  const visibleColumns = visibleColumnsProp ?? [
+    'name',
+    'type',
+    '__rowId',
+    'delete',
+    'expr',
+    'comment',
+  ];
+  const lockedColumns = lockedColumnsProp ?? ['__rowId', 'delete', 'name'];
   const form = Form.useFormInstance();
 
   /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */
@@ -226,7 +239,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Use Case',
+            title: 'Index Type',
             dataIndex: 'use_case',
             key: 'use_case',
             render: (_: unknown, record: SchemaColumnListRow) => {
@@ -273,7 +286,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Expression',
+            title: 'Expression (CTE)',
             dataIndex: 'expr',
             key: 'expr',
             render: (_: unknown, record: SchemaColumnListRow) => {
@@ -320,8 +333,8 @@ export const AddSchemaTable = ({
 
         return (
           <SchemaTable<SchemaColumnListRow>
-            visibleColumns={['name', 'type', '__rowId', 'delete']}
-            lockedColumns={['__rowId', 'delete']}
+            visibleColumns={visibleColumns}
+            lockedColumns={lockedColumns}
             dataSource={fields}
             rowKey="key"
             columns={columns}
