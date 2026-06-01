@@ -9,6 +9,11 @@ interface SchemaTableProps<T extends object> extends TableProps<T> {
   searchableColumns?: string[];
   visibleColumns?: string[];
   lockedColumns?: string[];
+  showSearchableColumns?: {
+    searchableColumnsOptions: string[];
+    selectedSearchableColumns: string[];
+    setSelectedSearchableColumns: (value: string[]) => void;
+  };
 }
 
 export const SchemaTable = <T extends object>({
@@ -16,6 +21,7 @@ export const SchemaTable = <T extends object>({
   lockedColumns = [],
   columns: originalColumns = [],
   title,
+  showSearchableColumns,
   ...props
 }: SchemaTableProps<T>) => {
   const visibleColumns = useMemo(() => {
@@ -109,6 +115,7 @@ export const SchemaTable = <T extends object>({
           columns={columnKeys}
           setSelectedVisibleColumns={setSelectedVisibleColumns}
           lockedColumns={lockedColumns}
+          showSearchableColumns={showSearchableColumns}
         />
       )}
       columns={displayedColumns}
