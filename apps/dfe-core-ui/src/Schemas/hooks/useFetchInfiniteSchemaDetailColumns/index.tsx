@@ -2,8 +2,11 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef } from 'react';
-import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  SchemaDetailColumnFilterField,
+  UseFetchInfiniteFilteredSchemaDetailColumnsProps,
+} from './types';
 
 const TEXT_FILTER_DEBOUNCE_MS = 300;
 
@@ -37,6 +40,22 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   attribute,
   per_page = 10,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
+  const searchableColumnsOptions: {
+    label: string;
+    value: SchemaDetailColumnFilterField;
+  }[] = [
+    { label: 'Name', value: 'name' },
+    { label: 'Type', value: 'type' },
+    { label: 'Use Case', value: 'use_case' },
+    { label: 'Expression (CTE)', value: 'expr' },
+    { label: 'Comment', value: 'comment' },
+    { label: 'Attribute', value: 'attribute' },
+  ];
+
+  const [selectedSearchableColumns, setSelectedSearchableColumns] = useState<
+    string[]
+  >(searchableColumnsOptions.map((column) => column.value));
+
   const debouncedSearch = useDebounce(search ?? '', TEXT_FILTER_DEBOUNCE_MS);
   const debouncedName = useDebounce(name ?? '', TEXT_FILTER_DEBOUNCE_MS);
   const debouncedType = useDebounce(type ?? '', TEXT_FILTER_DEBOUNCE_MS);
@@ -70,6 +89,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       optionalTextFilterParam(debouncedExpr),
       optionalTextFilterParam(debouncedComment),
       optionalTextFilterParam(debouncedAttribute),
+      selectedSearchableColumns,
       per_page,
     ],
     queryFn: async ({ pageParam = 1, signal }) =>
@@ -84,6 +104,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
           expr: optionalTextFilterParam(debouncedExpr),
           comment: optionalTextFilterParam(debouncedComment),
           attribute: optionalTextFilterParam(debouncedAttribute),
+          searchable_columns: selectedSearchableColumns,
           page: pageParam,
           per_page,
         },
@@ -146,6 +167,9 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
 
   return {
     data: hasSelection ? flattenedData : null,
+    searchableColumnsOptions,
+    selectedSearchableColumns,
+    setSelectedSearchableColumns,
     isLoading,
     isError,
     error,

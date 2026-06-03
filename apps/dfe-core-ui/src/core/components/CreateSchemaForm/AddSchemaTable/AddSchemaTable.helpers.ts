@@ -41,11 +41,11 @@ export const listItemFromPartial = (
   const attributeRaw =
     rowLookup(column, 'attribute', 'Attribute') ?? column.attribute;
   const use_case = String(
-    rowLookup(column, 'use_case', 'Use Case', 'UseCase') ??
-      column.use_case ??
-      '',
+    rowLookup(column, 'use_case', 'Index Type') ?? column.use_case ?? '',
   );
-  const expr = String(rowLookup(column, 'expr', 'Expr') ?? column.expr ?? '');
+  const expr = String(
+    rowLookup(column, 'expr', 'Expression (CTE)') ?? column.expr ?? '',
+  );
   const comment = String(
     rowLookup(column, 'comment', 'Comment') ?? column.comment ?? '',
   );

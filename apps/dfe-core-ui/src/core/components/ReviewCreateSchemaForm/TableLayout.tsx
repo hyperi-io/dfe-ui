@@ -1,5 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
-import { Table } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -83,7 +83,7 @@ export const TableLayout = ({
       },
     },
     {
-      title: 'Use Case',
+      title: 'Index Type',
       dataIndex: 'use_case',
       key: 'use_case',
       render: (use_case: string) => {
@@ -97,7 +97,7 @@ export const TableLayout = ({
       },
     },
     {
-      title: 'Expr',
+      title: 'Expression (CTE)',
       dataIndex: 'expr',
       key: 'expr',
       render: (expr: string) => {
@@ -172,7 +172,17 @@ export const TableLayout = ({
         )}
       </div>
 
-      <Table
+      <SchemaTable
+        visibleColumns={[
+          '__rowId',
+          'imported',
+          'name',
+          'type',
+          'delete',
+          'expr',
+          'comment',
+        ]}
+        lockedColumns={['__rowId', 'imported', 'delete', 'name']}
         columns={tableColumns}
         dataSource={allColumns}
         rowKey="name"

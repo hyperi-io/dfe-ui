@@ -128,6 +128,31 @@ describe('createApiClient', () => {
     expect(capturedUrl).toContain('sort_order=asc');
   });
 
+  test('array query params are repeated for the same key', async () => {
+    const mockList = { items: [], total: 0 };
+    let capturedUrl = '';
+    server.use(
+      http.get(`${BASE_URL}/api/v1/sources`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json(mockList);
+      }),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    await client.request('/api/v1/sources', 'get', {
+      queryParams: {
+        searchable_columns: ['name', 'type', 'comment'],
+      } as Record<string, unknown>,
+    });
+
+    const url = new URL(capturedUrl);
+    expect(url.searchParams.getAll('searchable_columns')).toEqual([
+      'name',
+      'type',
+      'comment',
+    ]);
+  });
+
   test('delete returns undefined for 204 No Content (empty body)', async () => {
     server.use(
       http.delete(

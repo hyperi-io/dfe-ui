@@ -1,5 +1,6 @@
 import { Form } from '@/core/components/Form';
-import { Table, TableProps } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
+import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -40,6 +41,8 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   };
   onMount?: () => void;
   onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
+  visibleColumns?: string[];
+  lockedColumns?: string[];
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -86,10 +89,21 @@ export const AddSchemaTable = ({
     defaultAddColumns: true,
     defaultRemoveColumns: true,
   },
+  visibleColumns: visibleColumnsProp,
+  lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
   ...tableProps
 }: AddSchemaTableProps) => {
+  const visibleColumns = visibleColumnsProp ?? [
+    'name',
+    'type',
+    '__rowId',
+    'delete',
+    'expr',
+    'comment',
+  ];
+  const lockedColumns = lockedColumnsProp ?? ['__rowId', 'delete', 'name'];
   const form = Form.useFormInstance();
 
   /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */
@@ -161,7 +175,6 @@ export const AddSchemaTable = ({
           {
             title: '',
             key: '__rowId',
-
             width: 0,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
@@ -176,7 +189,6 @@ export const AddSchemaTable = ({
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            width: '20%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -186,6 +198,9 @@ export const AddSchemaTable = ({
                   rules={[formValidation]}
                 >
                   <InlineEditInput
+                    classNames={{
+                      editContainer: 'w-full',
+                    }}
                     defaultEditing={
                       config.defaultEditFields === true ||
                       (Array.isArray(config.defaultEditFields) &&
@@ -200,7 +215,6 @@ export const AddSchemaTable = ({
             title: 'Type',
             dataIndex: 'type',
             key: 'type',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -211,6 +225,9 @@ export const AddSchemaTable = ({
                 >
                   <InlineEditSelect
                     options={PRIMITIVE_OPTIONS}
+                    classNames={{
+                      editContainer: 'w-full',
+                    }}
                     defaultEditing={
                       config.defaultEditFields === true ||
                       (Array.isArray(config.defaultEditFields) &&
@@ -222,10 +239,9 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Use Case',
+            title: 'Index Type',
             dataIndex: 'use_case',
             key: 'use_case',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -249,7 +265,6 @@ export const AddSchemaTable = ({
             title: 'Attributes',
             dataIndex: 'attribute',
             key: 'attribute',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -271,10 +286,9 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Expression',
+            title: 'Expression (CTE)',
             dataIndex: 'expr',
             key: 'expr',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -297,7 +311,6 @@ export const AddSchemaTable = ({
             title: 'Comment',
             dataIndex: 'comment',
             key: 'comment',
-            width: '16%',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -319,7 +332,9 @@ export const AddSchemaTable = ({
         ];
 
         return (
-          <Table<SchemaColumnListRow>
+          <SchemaTable<SchemaColumnListRow>
+            visibleColumns={visibleColumns}
+            lockedColumns={lockedColumns}
             dataSource={fields}
             rowKey="key"
             columns={columns}

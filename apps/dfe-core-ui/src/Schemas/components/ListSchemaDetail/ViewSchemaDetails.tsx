@@ -1,4 +1,4 @@
-import { Table } from '@/core/components/Table';
+import { SchemaTable } from '@/core/components/SchemaTable';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
@@ -30,6 +30,14 @@ interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
   onSuccess?: () => void;
   isLoading?: boolean;
   onScroll?: UIEventHandler<HTMLDivElement>;
+  showSearchableColumns?: {
+    searchableColumnsOptions: {
+      label: string;
+      value: SchemaDetailColumnFilterField;
+    }[];
+    selectedSearchableColumns: string[];
+    setSelectedSearchableColumns: (value: string[]) => void;
+  };
 }
 
 type SchemaColumnItem =
@@ -47,6 +55,7 @@ export const ViewSchemaDetails = ({
   isLoading,
   onScroll,
   onClearAllFilters,
+  showSearchableColumns,
 }: ViewSchemaDetailsProps) => {
   const {
     selectedSchemaVersion,
@@ -87,69 +96,92 @@ export const ViewSchemaDetails = ({
         key: 'name',
         ...columnFilter('Name', 'name'),
         render: (name: string) =>
-          renderSchemaDetailFilteredCell(
-            name,
-            columnFilters.name,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: name,
+            filterTerms: [columnFilters.name, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'name',
+              ) ?? false,
+          }),
       },
       {
         dataIndex: 'type',
         key: 'type',
         ...columnFilter('Type', 'type'),
         render: (type: string) =>
-          renderSchemaDetailFilteredCell(
-            type,
-            columnFilters.type,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: type,
+            filterTerms: [columnFilters.type, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'type',
+              ) ?? false,
+          }),
       },
       {
         dataIndex: 'attribute',
         key: 'attribute',
         ...columnFilter('Attribute', 'attribute'),
         render: (attribute: string[]) =>
-          renderSchemaDetailFilteredCell(
-            attribute?.length > 0 ? attribute.join(', ') : undefined,
-            columnFilters.attribute,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: attribute?.length > 0 ? attribute.join(', ') : undefined,
+            filterTerms: [columnFilters.attribute, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'attribute',
+              ) ?? false,
+          }),
       },
       {
         dataIndex: 'use_case',
         key: 'use_case',
-        ...columnFilter('Use Case', 'use_case'),
+        ...columnFilter('Index Type', 'use_case'),
         render: (use_case: string) =>
-          renderSchemaDetailFilteredCell(
-            use_case,
-            columnFilters.use_case,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: use_case,
+            filterTerms: [columnFilters.use_case, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'use_case',
+              ) ?? false,
+          }),
       },
       {
         dataIndex: 'expr',
         key: 'expr',
-        ...columnFilter('Expr', 'expr'),
+        ...columnFilter('Expression (CTE)', 'expr'),
         render: (expr: string) =>
-          renderSchemaDetailFilteredCell(
-            expr,
-            columnFilters.expr,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: expr,
+            filterTerms: [columnFilters.expr, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'expr',
+              ) ?? false,
+          }),
       },
       {
         dataIndex: 'comment',
         key: 'comment',
         ...columnFilter('Comment', 'comment'),
         render: (comment: string) =>
-          renderSchemaDetailFilteredCell(
-            comment,
-            columnFilters.comment,
-            columnFilters.search,
-          ),
+          renderSchemaDetailFilteredCell({
+            value: comment,
+            filterTerms: [columnFilters.comment, columnFilters.search],
+            isSearchable:
+              showSearchableColumns?.selectedSearchableColumns.includes(
+                'comment',
+              ) ?? false,
+          }),
       },
     ];
-  }, [columnFilters, columnFilterResetKey, onColumnFilterChange]);
+  }, [
+    columnFilters,
+    columnFilterResetKey,
+    onColumnFilterChange,
+    showSearchableColumns,
+  ]);
 
   const versions = useMemo(() => {
     return allVersions.map((version) => ({
@@ -210,10 +242,12 @@ export const ViewSchemaDetails = ({
         </div>
       </div>
 
-      <Table
+      <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
+        visibleColumns={['name', 'type', 'expr', 'comment']}
+        showSearchableColumns={showSearchableColumns}
         title={() => (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <p>{selectedVersion.columns.total} columns</p>
 
             <div className="flex items-center gap-2">
