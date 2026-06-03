@@ -5,13 +5,14 @@ import { setupServer } from 'msw/node';
 
 export const MOCK_SCHEMA_PATH = 'path';
 
-const SCHEMA_DETAIL_COLUMN_ITEM: components['schemas']['dfe_engine__schema__models__SchemaColumn'] =
+const SCHEMA_DETAIL_COLUMN_ITEM: components['schemas']['MetaSchemaGetResponse']['version']['columns']['items'][number] =
   {
     name: 'string',
     type: 'string',
     attribute: ['string'],
     use_case: 'string',
     expr: 'string',
+    _matched_searchable: [],
   };
 
 const TOTAL_ITEMS = 25;
