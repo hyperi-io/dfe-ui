@@ -244,7 +244,7 @@ export const ViewSchemaDetails = ({
 
       <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
-        visibleColumns={['name', 'type']}
+        visibleColumns={['name', 'type', 'expr', 'comment']}
         showSearchableColumns={showSearchableColumns}
         title={() => (
           <div className="flex items-center justify-between w-full">
