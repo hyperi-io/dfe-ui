@@ -1205,7 +1205,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
+          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'][];
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,

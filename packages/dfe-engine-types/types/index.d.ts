@@ -1734,7 +1734,10 @@ export interface paths {
         };
         /**
          * Liveness
-         * @description Liveness probe — is the process alive?
+         * @description Liveness probe -- is the process alive?
+         *
+         *     Checks run concurrently via ``run_blocking`` with per-check
+         *     timeout so a single slow check can't stall the kubelet probe.
          */
         get: operations["liveness_health_live_get"];
         put?: never;
@@ -1752,10 +1755,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Readiness
-         * @description Readiness probe — can the service handle traffic?
-         */
+        /** Readiness */
         get: operations["readiness_health_ready_get"];
         put?: never;
         post?: never;
@@ -1772,10 +1772,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Startup
-         * @description Startup probe — has initialisation completed?
-         */
+        /** Startup */
         get: operations["startup_health_startup_get"];
         put?: never;
         post?: never;
@@ -3010,7 +3007,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         PaginatedResponse_SchemaColumn_: {
             /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -3519,6 +3516,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Matched Searchable
+             * @description Column fields that matched the search query (API only)
+             */
+            matched_searchable?: string[];
         };
         /**
          * SchemaSummary
@@ -3642,7 +3644,7 @@ export interface components {
              * Columns
              * @description List of columns in the version
              */
-            columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+            columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
         };
         /**
          * SchemaVersionGet
@@ -4656,7 +4658,7 @@ export interface components {
          * SchemaColumn
          * @description A column in the schema.
          */
-        dfe_engine__schema__models__SchemaColumn: {
+        "dfe_engine__schema__models__SchemaColumn-Output": {
             /**
              * Name
              * @description Name of the column
@@ -4687,6 +4689,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Matched Searchable
+             * @description Column fields that matched the search query (API only)
+             */
+            _matched_searchable?: string[];
         };
     };
     responses: never;
@@ -7490,6 +7497,8 @@ export interface operations {
                 comment?: string | null;
                 /** @description Filter by attribute (substring) */
                 attribute?: string | null;
+                /** @description Fields to apply ``search`` against (name, type, type_filter, use_case, expr, comment, attribute). Defaults to all column fields. */
+                searchable_columns?: string[] | null;
                 page?: number;
                 per_page?: number;
             };
@@ -7677,7 +7686,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
                 };
             };
             /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
