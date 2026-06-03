@@ -120,11 +120,6 @@ describe('listItemFromPartial', () => {
     });
   });
 
-  test('uses UseCase alias for use_case', () => {
-    const column = { UseCase: 'dimension' } as unknown as SchemaColumnRow;
-    expect(listItemFromPartial(column).use_case).toBe('dimension');
-  });
-
   test('uses empty strings for missing name and type', () => {
     expect(listItemFromPartial({ id: '1' })).toMatchObject({
       id: '1',

@@ -3,6 +3,7 @@ import { IconEye, IconEyeOff, IconSearch } from '@repo/dfe-icons';
 import { Button, Tooltip } from 'antd';
 import uniq from 'lodash/uniq';
 import { useMemo, useState } from 'react';
+import { getColumnTitleText } from './SchemaTable.helpers';
 import { SchemaTableTitle } from './SchemaTableTitle';
 
 interface SchemaTableProps<T extends object> extends TableProps<T> {
@@ -36,7 +37,7 @@ export const SchemaTable = <T extends object>({
   const columnOptions = useMemo(() => {
     return (
       originalColumns?.map((column) => ({
-        label: column.title as string,
+        label: getColumnTitleText(column.title),
         value: column.key as string,
       })) ?? []
     );
