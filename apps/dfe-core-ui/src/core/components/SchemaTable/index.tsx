@@ -10,7 +10,7 @@ interface SchemaTableProps<T extends object> extends TableProps<T> {
   visibleColumns?: string[];
   lockedColumns?: string[];
   showSearchableColumns?: {
-    searchableColumnsOptions: string[];
+    searchableColumnsOptions: { label: string; value: string }[];
     selectedSearchableColumns: string[];
     setSelectedSearchableColumns: (value: string[]) => void;
   };
@@ -33,15 +33,23 @@ export const SchemaTable = <T extends object>({
   }, [visibleColumnsProp, originalColumns, lockedColumns]);
   const [selectedVisibleColumns, setSelectedVisibleColumns] =
     useState<string[]>(visibleColumns);
+  const columnOptions = useMemo(() => {
+    return (
+      originalColumns?.map((column) => ({
+        label: column.title as string,
+        value: column.key as string,
+      })) ?? []
+    );
+  }, [originalColumns]);
   const columnKeys = useMemo(() => {
     return originalColumns?.map((column) => column.key as string) ?? [];
   }, [originalColumns]);
 
   const isAllColumnsVisible = useMemo(() => {
-    return columnKeys.every((column) =>
-      selectedVisibleColumns.includes(column),
+    return columnOptions.every((column) =>
+      selectedVisibleColumns.includes(column.value),
     );
-  }, [selectedVisibleColumns, columnKeys]);
+  }, [selectedVisibleColumns, columnOptions]);
 
   const filteredColumnsToDisplay = useMemo(() => {
     return originalColumns?.filter((column) => {
@@ -112,7 +120,7 @@ export const SchemaTable = <T extends object>({
         <SchemaTableTitle
           title={title}
           selectedVisibleColumns={selectedVisibleColumns}
-          columns={columnKeys}
+          columns={columnOptions}
           setSelectedVisibleColumns={setSelectedVisibleColumns}
           lockedColumns={lockedColumns}
           showSearchableColumns={showSearchableColumns}

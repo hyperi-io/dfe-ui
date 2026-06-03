@@ -40,18 +40,21 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   attribute,
   per_page = 10,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
-  const searchableColumnsOptions: SchemaDetailColumnFilterField[] = [
-    'name',
-    'type',
-    'use_case',
-    'expr',
-    'comment',
-    'attribute',
+  const searchableColumnsOptions: {
+    label: string;
+    value: SchemaDetailColumnFilterField;
+  }[] = [
+    { label: 'Name', value: 'name' },
+    { label: 'Type', value: 'type' },
+    { label: 'Use Case', value: 'use_case' },
+    { label: 'Expression (CTE)', value: 'expr' },
+    { label: 'Comment', value: 'comment' },
+    { label: 'Attribute', value: 'attribute' },
   ];
 
   const [selectedSearchableColumns, setSelectedSearchableColumns] = useState<
     string[]
-  >(searchableColumnsOptions);
+  >(searchableColumnsOptions.map((column) => column.value));
 
   const debouncedSearch = useDebounce(search ?? '', TEXT_FILTER_DEBOUNCE_MS);
   const debouncedName = useDebounce(name ?? '', TEXT_FILTER_DEBOUNCE_MS);

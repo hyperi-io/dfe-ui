@@ -1,6 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Checkbox } from 'antd';
-import { useMemo } from 'react';
 
 const isIncludedColumn = (column: string, lockedColumns: string[]) => {
   return !lockedColumns?.includes(column);
@@ -8,7 +7,7 @@ const isIncludedColumn = (column: string, lockedColumns: string[]) => {
 
 interface ConfigureVisibleColumnsCollapseProps {
   selectedVisibleColumns: string[];
-  columns: string[];
+  columns: { label: string; value: string }[];
   setSelectedVisibleColumns: (value: string[]) => void;
   lockedColumns?: string[];
 }
@@ -18,13 +17,6 @@ export const ConfigureVisibleColumnsCollapse = ({
   setSelectedVisibleColumns,
   lockedColumns = [],
 }: ConfigureVisibleColumnsCollapseProps) => {
-  const columnsOptions = useMemo(() => {
-    return columns.map((column) => ({
-      label: column,
-      value: column,
-    }));
-  }, [columns]);
-
   return (
     <SimpleCollapse
       title="Configure Visible Columns"
@@ -33,7 +25,7 @@ export const ConfigureVisibleColumnsCollapse = ({
       }}
       defaultOpen={true}
     >
-      {columnsOptions.map(
+      {columns.map(
         (column) =>
           isIncludedColumn(column.value, lockedColumns) && (
             <div

@@ -31,7 +31,10 @@ interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
   isLoading?: boolean;
   onScroll?: UIEventHandler<HTMLDivElement>;
   showSearchableColumns?: {
-    searchableColumnsOptions: SchemaDetailColumnFilterField[];
+    searchableColumnsOptions: {
+      label: string;
+      value: SchemaDetailColumnFilterField;
+    }[];
     selectedSearchableColumns: string[];
     setSelectedSearchableColumns: (value: string[]) => void;
   };

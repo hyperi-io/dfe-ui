@@ -7,11 +7,11 @@ import { ConfigureVisibleColumnsCollapse } from './ConfigureVisibleColumnsCollap
 interface SchemaTableTitleProps<T extends object> {
   title: TableProps<T>['title'];
   selectedVisibleColumns: string[];
-  columns: string[];
+  columns: { label: string; value: string }[];
   setSelectedVisibleColumns: (value: string[]) => void;
   lockedColumns?: string[];
   showSearchableColumns?: {
-    searchableColumnsOptions: string[];
+    searchableColumnsOptions: { label: string; value: string }[];
     selectedSearchableColumns: string[];
     setSelectedSearchableColumns: (value: string[]) => void;
   };

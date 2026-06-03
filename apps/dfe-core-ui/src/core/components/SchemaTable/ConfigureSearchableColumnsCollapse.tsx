@@ -1,20 +1,12 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Checkbox } from 'antd';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-const MIN_SEARCHABLE_COLUMNS_ERROR =
-  'Select at least one searchable column.';
-
-const isIncludedColumn = (
-  column: string,
-  searchableColumnsOptions: string[],
-) => {
-  return searchableColumnsOptions?.includes(column);
-};
+const MIN_SEARCHABLE_COLUMNS_ERROR = 'Select at least one searchable column.';
 
 interface ConfigureSearchableColumnsCollapseProps {
   selectedSearchableColumns: string[];
-  searchableColumnsOptions: string[];
+  searchableColumnsOptions: { label: string; value: string }[];
   setSelectedSearchableColumns: (value: string[]) => void;
 }
 export const ConfigureSearchableColumnsCollapse = ({
@@ -23,13 +15,6 @@ export const ConfigureSearchableColumnsCollapse = ({
   setSelectedSearchableColumns,
 }: ConfigureSearchableColumnsCollapseProps) => {
   const [error, setError] = useState<string | null>(null);
-
-  const columnsOptions = useMemo(() => {
-    return searchableColumnsOptions.map((column) => ({
-      label: column,
-      value: column,
-    }));
-  }, [searchableColumnsOptions]);
 
   const handleToggle = (columnValue: string) => {
     const isSelected = selectedSearchableColumns.includes(columnValue);
@@ -60,21 +45,15 @@ export const ConfigureSearchableColumnsCollapse = ({
           {error}
         </p>
       ) : null}
-      {columnsOptions.map(
-        (column) =>
-          isIncludedColumn(column.value, searchableColumnsOptions) && (
-            <div
-              className="flex items-center justify-between"
-              key={column.value}
-            >
-              <p>{column.label}</p>
-              <Checkbox
-                checked={selectedSearchableColumns.includes(column.value)}
-                onChange={() => handleToggle(column.value)}
-              />
-            </div>
-          ),
-      )}
+      {searchableColumnsOptions.map((column) => (
+        <div className="flex items-center justify-between" key={column.value}>
+          <p>{column.label}</p>
+          <Checkbox
+            checked={selectedSearchableColumns.includes(column.value)}
+            onChange={() => handleToggle(column.value)}
+          />
+        </div>
+      ))}
     </SimpleCollapse>
   );
 };
