@@ -74,7 +74,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: components['schemas']['dfe_engine__schema__models__SchemaColumn'] =
+      const responseItem: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'] =
         {
           name: 'string',
           type: 'string',
