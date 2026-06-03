@@ -21,20 +21,20 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
     >
       {collapsed ? (
         <Image
-          className="block w-[30px]"
+          className="block h-[40px]"
           src={darkMode ? inverseLogoMark : primaryLogoMark}
           alt="logo"
           loading="eager"
           width={30}
-          height={44}
+          height={40}
         />
       ) : (
         <Image
-          className="my-[2px] block h-[40px]"
+          className="my-[2px] block w-[120px] h-[40px]"
           src={darkMode ? inverseLogoFull : primaryLogoFull}
           alt="logo"
           loading="eager"
-          width={249}
+          width={120}
           height={40}
         />
       )}
