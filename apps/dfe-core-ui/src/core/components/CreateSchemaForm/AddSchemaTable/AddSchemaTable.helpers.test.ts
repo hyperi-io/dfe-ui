@@ -30,8 +30,8 @@ describe('listItemFromPartial', () => {
       Name: 'count',
       Type: 'UInt64',
       Attribute: 'metric',
-      'Use Case': 'count',
-      Expr: 'count()',
+      'Index Type': 'count',
+      'Expression (CTE)': 'count()',
       Comment: '',
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column)).toEqual({
@@ -118,11 +118,6 @@ describe('listItemFromPartial', () => {
       expr: 'e',
       comment: 'co',
     });
-  });
-
-  test('uses UseCase alias for use_case', () => {
-    const column = { UseCase: 'dimension' } as unknown as SchemaColumnRow;
-    expect(listItemFromPartial(column).use_case).toBe('dimension');
   });
 
   test('uses empty strings for missing name and type', () => {

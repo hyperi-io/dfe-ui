@@ -10,12 +10,21 @@ const nonePlaceholder = (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
 
-export const renderSchemaDetailFilteredCell = (
-  value: string | undefined,
-  ...filterTerms: (string | undefined)[]
-) => {
+export const renderSchemaDetailFilteredCell = ({
+  value,
+  filterTerms,
+  isSearchable,
+}: {
+  value: string | undefined;
+  filterTerms: (string | undefined)[];
+  isSearchable?: boolean;
+}) => {
   if (!value) {
     return nonePlaceholder;
+  }
+
+  if (!isSearchable) {
+    return value;
   }
 
   const searchWords = filterTerms

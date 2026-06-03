@@ -39,6 +39,9 @@ export const ListSchemaDetail = () => {
 
   const {
     data: schemaDetailData,
+    searchableColumnsOptions,
+    selectedSearchableColumns,
+    setSelectedSearchableColumns,
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
     refetch: refetchSchemaDetail,
@@ -102,6 +105,11 @@ export const ListSchemaDetail = () => {
           {...schemaDetailData}
           columnFilters={columnFilters}
           columnFilterResetKey={columnFilterResetKey}
+          showSearchableColumns={{
+            searchableColumnsOptions,
+            selectedSearchableColumns: selectedSearchableColumns,
+            setSelectedSearchableColumns: setSelectedSearchableColumns,
+          }}
           onColumnFilterChange={handleColumnFilterChange}
           onClearAllFilters={handleClearAllFilters}
           onSuccess={() => {
