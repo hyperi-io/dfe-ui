@@ -30,8 +30,8 @@ describe('listItemFromPartial', () => {
       Name: 'count',
       Type: 'UInt64',
       Attribute: 'metric',
-      'Use Case': 'count',
-      Expr: 'count()',
+      'Index Type': 'count',
+      'Expression (CTE)': 'count()',
       Comment: '',
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column)).toEqual({

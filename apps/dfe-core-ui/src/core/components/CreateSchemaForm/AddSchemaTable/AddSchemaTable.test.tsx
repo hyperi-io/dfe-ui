@@ -225,8 +225,8 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       Name: 'count',
       Type: 'UInt64',
       Attribute: 'metric',
-      'Use Case': 'count',
-      Expr: 'count()',
+      'Index Type': 'count',
+      'Expression (CTE)': 'count()',
       Comment: 'note',
     } as unknown as SchemaColumnRow;
     const onColumns = vi.fn();

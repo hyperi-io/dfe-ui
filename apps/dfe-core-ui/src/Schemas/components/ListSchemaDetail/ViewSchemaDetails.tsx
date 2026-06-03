@@ -133,7 +133,7 @@ export const ViewSchemaDetails = ({
       {
         dataIndex: 'use_case',
         key: 'use_case',
-        ...columnFilter('Use Case', 'use_case'),
+        ...columnFilter('Index Type', 'use_case'),
         render: (use_case: string) =>
           renderSchemaDetailFilteredCell({
             value: use_case,
@@ -147,7 +147,7 @@ export const ViewSchemaDetails = ({
       {
         dataIndex: 'expr',
         key: 'expr',
-        ...columnFilter('Expr', 'expr'),
+        ...columnFilter('Expression (CTE)', 'expr'),
         render: (expr: string) =>
           renderSchemaDetailFilteredCell({
             value: expr,
