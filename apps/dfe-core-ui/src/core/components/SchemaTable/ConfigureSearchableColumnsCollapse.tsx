@@ -37,6 +37,7 @@ export const ConfigureSearchableColumnsCollapse = ({
     <SimpleCollapse
       title="Configure Searchable Columns"
       classNames={{
+        container: 'px-0',
         title: 'font-semibold',
       }}
     >

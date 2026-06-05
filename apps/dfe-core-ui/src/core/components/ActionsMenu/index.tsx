@@ -1,8 +1,18 @@
+import { cn } from '@/core/utils/style';
 import { IconMenu2, IconX } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
-export const ActionsMenu = ({ children }: { children: React.ReactNode }) => {
+interface ActionsMenuProps {
+  children: React.ReactNode;
+  classNames?: {
+    container?: string;
+    trigger?: string;
+    menu?: string;
+  };
+}
+
+export const ActionsMenu = ({ children, classNames }: ActionsMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -24,14 +34,28 @@ export const ActionsMenu = ({ children }: { children: React.ReactNode }) => {
   }, [isMenuOpen]);
 
   return (
-    <div className="ml-auto relative" ref={menuRef}>
+    <div
+      className={cn('ml-auto relative', classNames?.container)}
+      ref={menuRef}
+    >
       <Button
         type="default"
         icon={isMenuOpen ? <IconX /> : <IconMenu2 />}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
+        classNames={classNames?.trigger}
       />
       {isMenuOpen && (
-        <div className="absolute top-10 right-0 bg-background dark:bg-dark-background border border-foreground/10 dark:border-dark-foreground/10 p-4 rounded-md shadow-md z-2 w-96">
+        <div
+          className={cn(
+            // Alignment
+            'absolute top-10 right-0 z-2',
+            // Card styling
+            'w-96 bg-background dark:bg-dark-background border border-foreground/10 dark:border-dark-foreground/10 p-4 rounded-md shadow-md',
+            // Layout
+            'flex flex-col',
+            classNames?.menu,
+          )}
+        >
           {children}
         </div>
       )}
