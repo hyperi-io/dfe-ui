@@ -10,9 +10,23 @@ interface ActionsMenuProps {
     trigger?: string;
     menu?: string;
   };
+  placement?: 'bottom-right' | 'left';
 }
 
-export const ActionsMenu = ({ children, classNames }: ActionsMenuProps) => {
+const getPlacementStyles = (placement: ActionsMenuProps['placement']) => {
+  switch (placement) {
+    case 'left':
+      return 'top-0 translate-x-[-102%]';
+    case 'bottom-right':
+      return 'top-10 right-0';
+  }
+};
+
+export const ActionsMenu = ({
+  children,
+  classNames,
+  placement = 'bottom-right',
+}: ActionsMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +62,8 @@ export const ActionsMenu = ({ children, classNames }: ActionsMenuProps) => {
         <div
           className={cn(
             // Alignment
-            'absolute top-10 right-0 z-2',
+            'absolute z-100',
+            getPlacementStyles(placement),
             // Card styling
             'w-96 bg-background dark:bg-dark-background border border-foreground/10 dark:border-dark-foreground/10 p-4 rounded-md shadow-md',
             // Layout
