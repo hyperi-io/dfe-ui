@@ -43,7 +43,7 @@ export const CloneSourceModal = ({
     source_name: source?.name,
     source_version: version,
     onSuccess: (data) => {
-      setOpen(false);
+      handleClose();
       onSuccess?.(data);
     },
     queryEnabled: enabled,
@@ -68,7 +68,12 @@ export const CloneSourceModal = ({
       <Modal
         title={`Clone ${source.name}`}
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={handleClose}
+        afterOpenChange={(visible) => {
+          if (visible) {
+            form.setFieldsValue(getDefaultFormValues());
+          }
+        }}
         footer={null}
         destroyOnHidden
       >
@@ -134,7 +139,7 @@ export const CloneSourceModal = ({
               loading={isPending}
               disabled={isPending}
               type="default"
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
             >
               Cancel
             </Button>

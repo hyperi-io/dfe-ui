@@ -4,14 +4,19 @@ import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
+interface SourceDetailActionMenuProps {
+  source: SourceDetail;
+  onEditSuccess?: (source: SourceUpdateResponse) => void;
+}
+
 export const SourceDetailActionMenu = ({
   source,
-}: {
-  source: SourceDetail;
-}) => {
+  onEditSuccess,
+}: SourceDetailActionMenuProps) => {
   const { refetch: refetchSources, setSelectedSourceName } =
     useListSourcesContext();
   return (
@@ -33,6 +38,7 @@ export const SourceDetailActionMenu = ({
             Edit Source
           </Button>
         }
+        onSuccess={onEditSuccess}
       />
       <CloneSourceModal
         key="clone-source"

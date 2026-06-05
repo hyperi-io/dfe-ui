@@ -9,12 +9,14 @@ interface EditSourceDrawerProps {
   open?: boolean;
   onClose?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
+  onSuccess?: (source: SourceUpdateResponse) => void;
 }
 
 export const EditSourceDrawer = ({
   open,
   onClose,
   trigger,
+  onSuccess,
 }: EditSourceDrawerProps) => {
   const title = 'Edit Source';
   const [api, contextHolder] = notification.useNotification();
@@ -28,10 +30,10 @@ export const EditSourceDrawer = ({
   const handleOnSuccess = (response: SourceUpdateResponse) => {
     setIsDrawerVisible(false);
     onClose?.();
+    onSuccess?.(response);
     api.success({
-      title: 'Source updated successfully',
+      title: `${response.source} updated successfully`,
       placement: 'bottomLeft',
-      message: `${response.source} updated successfully`,
     });
   };
 
