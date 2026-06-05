@@ -4,11 +4,27 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { transform } from '@svgr/core';
+import { optimize } from 'svgo';
 import svgrConfig from '../.svgrrc.json' with { type: 'json' };
+
+const LOGO_SVGO_PLUGINS = [
+  'convertStyleToAttrs',
+  {
+    name: 'convertColors',
+    params: {
+      currentColor: true,
+      names2hex: false,
+      rgb2hex: false,
+      shorthex: false,
+      shortname: false,
+    },
+  },
+];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SVG_DIR = path.join(ROOT, 'svg');
+const TABLER_DIR = path.join(SVG_DIR, 'third-party', 'tabler');
 const SRC_DIR = path.join(ROOT, 'src');
 const ICONS_DIR = path.join(SRC_DIR, 'icons');
 const STORIES_DIR = path.join(ROOT, 'stories');
@@ -38,15 +54,27 @@ function assertSafeSegment(segment, label = 'path') {
 // Component generation via @svgr/core
 // ---------------------------------------------------------------------------
 
-async function generateComponentSource(name, svgString) {
-  return transform(svgString, svgrConfig, { componentName: name });
+/** Logo SVGs: map every paint color (hex, rgb(), keywords, inline styles) to currentColor. */
+function prepareLogoSvg(svgContent) {
+  return optimize(svgContent, { plugins: LOGO_SVGO_PLUGINS }).data;
+}
+
+async function generateComponentSource(name, svgString, { isLogo = false } = {}) {
+  const input = isLogo ? prepareLogoSvg(svgString) : svgString;
+  const config = isLogo
+    ? {
+        ...svgrConfig,
+        svgProps: { ...svgrConfig.svgProps, fill: 'currentColor' },
+      }
+    : svgrConfig;
+  return transform(input, config, { componentName: name });
 }
 
 // ---------------------------------------------------------------------------
 // Directory processing
 // ---------------------------------------------------------------------------
 
-async function processDirectory(dir, suffix = '') {
+async function processDirectory(dir, suffix = '', { isLogo = false } = {}) {
   if (!fs.existsSync(dir)) return [];
 
   const icons = [];
@@ -65,7 +93,9 @@ async function processDirectory(dir, suffix = '') {
     const svgContent = fs.readFileSync(svgPath, 'utf-8');
 
     try {
-      const source = await generateComponentSource(componentName, svgContent);
+      const source = await generateComponentSource(componentName, svgContent, {
+        isLogo,
+      });
       const outFile = `${ICONS_DIR}${path.sep}${outName}`;
       fs.writeFileSync(outFile, source);
       icons.push(componentName);
@@ -172,13 +202,15 @@ fs.rmSync(SRC_DIR, { recursive: true, force: true });
 fs.mkdirSync(ICONS_DIR, { recursive: true });
 fs.mkdirSync(STORIES_DIR, { recursive: true });
 
-// Auto-discover all subdirectories under svg/.
+// Top-level svg/ dirs (custom, logo, …). Tabler lives under third-party/tabler/.
 // Only "filled" gets a "Filled" suffix; everything else has no suffix.
 const SUFFIX_MAP = { filled: 'Filled' };
+const SKIP_TOP_LEVEL_DIRS = new Set(['third-party']);
+const TABLER_STYLE_DIRS = ['outline', 'filled'];
 
 const subdirs = fs
   .readdirSync(SVG_DIR, { withFileTypes: true })
-  .filter((d) => d.isDirectory())
+  .filter((d) => d.isDirectory() && !SKIP_TOP_LEVEL_DIRS.has(d.name))
   .map((d) => d.name)
   .sort();
 
@@ -188,8 +220,21 @@ let allIcons = [];
 for (const dir of subdirs) {
   assertSafeSegment(dir, 'svg subdir');
   const suffix = SUFFIX_MAP[dir] ?? '';
-  const icons = await processDirectory(`${SVG_DIR}${path.sep}${dir}`, suffix);
+  const icons = await processDirectory(`${SVG_DIR}${path.sep}${dir}`, suffix, {
+    isLogo: dir === 'logo',
+  });
   stats[dir] = icons.length;
+  allIcons.push(...icons);
+}
+
+for (const style of TABLER_STYLE_DIRS) {
+  assertSafeSegment(style, 'tabler style dir');
+  const suffix = SUFFIX_MAP[style] ?? '';
+  const icons = await processDirectory(
+    `${TABLER_DIR}${path.sep}${style}`,
+    suffix,
+  );
+  stats[style] = icons.length;
   allIcons.push(...icons);
 }
 
