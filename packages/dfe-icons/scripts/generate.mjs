@@ -4,7 +4,22 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { transform } from '@svgr/core';
+import { optimize } from 'svgo';
 import svgrConfig from '../.svgrrc.json' with { type: 'json' };
+
+const LOGO_SVGO_PLUGINS = [
+  'convertStyleToAttrs',
+  {
+    name: 'convertColors',
+    params: {
+      currentColor: true,
+      names2hex: false,
+      rgb2hex: false,
+      shorthex: false,
+      shortname: false,
+    },
+  },
+];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -38,15 +53,27 @@ function assertSafeSegment(segment, label = 'path') {
 // Component generation via @svgr/core
 // ---------------------------------------------------------------------------
 
-async function generateComponentSource(name, svgString) {
-  return transform(svgString, svgrConfig, { componentName: name });
+/** Logo SVGs: map every paint color (hex, rgb(), keywords, inline styles) to currentColor. */
+function prepareLogoSvg(svgContent) {
+  return optimize(svgContent, { plugins: LOGO_SVGO_PLUGINS }).data;
+}
+
+async function generateComponentSource(name, svgString, { isLogo = false } = {}) {
+  const input = isLogo ? prepareLogoSvg(svgString) : svgString;
+  const config = isLogo
+    ? {
+        ...svgrConfig,
+        svgProps: { ...svgrConfig.svgProps, fill: 'currentColor' },
+      }
+    : svgrConfig;
+  return transform(input, config, { componentName: name });
 }
 
 // ---------------------------------------------------------------------------
 // Directory processing
 // ---------------------------------------------------------------------------
 
-async function processDirectory(dir, suffix = '') {
+async function processDirectory(dir, suffix = '', { isLogo = false } = {}) {
   if (!fs.existsSync(dir)) return [];
 
   const icons = [];
@@ -65,7 +92,9 @@ async function processDirectory(dir, suffix = '') {
     const svgContent = fs.readFileSync(svgPath, 'utf-8');
 
     try {
-      const source = await generateComponentSource(componentName, svgContent);
+      const source = await generateComponentSource(componentName, svgContent, {
+        isLogo,
+      });
       const outFile = `${ICONS_DIR}${path.sep}${outName}`;
       fs.writeFileSync(outFile, source);
       icons.push(componentName);
@@ -188,7 +217,9 @@ let allIcons = [];
 for (const dir of subdirs) {
   assertSafeSegment(dir, 'svg subdir');
   const suffix = SUFFIX_MAP[dir] ?? '';
-  const icons = await processDirectory(`${SVG_DIR}${path.sep}${dir}`, suffix);
+  const icons = await processDirectory(`${SVG_DIR}${path.sep}${dir}`, suffix, {
+    isLogo: dir === 'logo',
+  });
   stats[dir] = icons.length;
   allIcons.push(...icons);
 }
