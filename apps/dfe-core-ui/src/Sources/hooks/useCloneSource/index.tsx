@@ -81,5 +81,10 @@ export const useCloneSource = ({
       sourceDetailData,
     });
 
-  return { mutate: handleMutate, isPending, error };
+  return {
+    mutate: handleMutate,
+    isPending,
+    isFetchingSourceDetail,
+    error,
+  };
 };

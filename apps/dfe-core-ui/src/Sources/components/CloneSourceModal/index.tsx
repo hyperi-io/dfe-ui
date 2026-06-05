@@ -37,6 +37,7 @@ export const CloneSourceModal = ({
   const {
     mutate: cloneSourceMutation,
     isPending,
+    isFetchingSourceDetail,
     error,
   } = useCloneSource({
     source_name: source?.name,
@@ -122,8 +123,8 @@ export const CloneSourceModal = ({
           {error && <FormNotification text={error.message} type="error" />}
           <div className="flex justify-end gap-x-2">
             <Button
-              loading={isPending}
-              disabled={isPending}
+              loading={isPending || isFetchingSourceDetail}
+              disabled={isPending || isFetchingSourceDetail}
               htmlType="submit"
               type="primary"
             >
