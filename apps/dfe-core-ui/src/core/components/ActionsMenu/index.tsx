@@ -11,6 +11,7 @@ interface ActionsMenuProps {
     menu?: string;
   };
   placement?: 'bottom-right' | 'left';
+  destroyOnHidden?: boolean;
 }
 
 const getPlacementStyles = (placement: ActionsMenuProps['placement']) => {
@@ -22,10 +23,20 @@ const getPlacementStyles = (placement: ActionsMenuProps['placement']) => {
   }
 };
 
+/**
+ *
+ * @param children - The children to render in the menu.
+ * @param classNames - The class names to apply to the menu.
+ * @param placement - The placement of the menu.
+ * @param destroyOnHidden - Whether to destroy the menu when it is hidden. Caveat: If you are using a modal or drawer to open the menu, you should set this to true.
+ * @returns A button that opens the menu when clicked.
+ */
+
 export const ActionsMenu = ({
   children,
   classNames,
   placement = 'bottom-right',
+  destroyOnHidden = false,
 }: ActionsMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,7 +69,7 @@ export const ActionsMenu = ({
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         classNames={classNames?.trigger}
       />
-      {isMenuOpen && (
+      {(isMenuOpen || !destroyOnHidden) && (
         <div
           className={cn(
             // Alignment
@@ -68,6 +79,7 @@ export const ActionsMenu = ({
             'w-96 bg-background dark:bg-dark-background border border-foreground/10 dark:border-dark-foreground/10 p-4 rounded-md shadow-md',
             // Layout
             'flex flex-col',
+            !isMenuOpen && !destroyOnHidden && 'hidden',
             classNames?.menu,
           )}
         >
