@@ -4,6 +4,7 @@ import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
+import { SourceDetailActionMenu } from './SourceDetailActionMenu';
 
 export const ViewSourceDetail = () => {
   const { selectedSourceName: source_name } = useListSourcesContext();
@@ -41,6 +42,7 @@ export const ViewSourceDetail = () => {
             </span>
             {sourceDetailData.display_name || sourceDetailData.source}
           </h4>
+          <SourceDetailActionMenu source={sourceDetailData} />
         </div>
         <AceEditor
           value={JSON.stringify(sourceDetailData, null, 2)}

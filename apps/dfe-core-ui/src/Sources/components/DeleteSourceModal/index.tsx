@@ -2,16 +2,20 @@ import { useDeleteSource } from '@/Sources/hooks/useDeleteSource';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
-import { useState } from 'react';
+import { Button, ButtonProps, Modal } from 'antd';
+import { cloneElement, useState } from 'react';
+
+interface DeleteSourceModalProps {
+  source: string;
+  onSuccess?: () => void;
+  trigger?: React.ReactElement<ButtonProps>;
+}
 
 export const DeleteSourceModal = ({
   source,
   onSuccess,
-}: {
-  source: string;
-  onSuccess?: () => void;
-}) => {
+  trigger,
+}: DeleteSourceModalProps) => {
   const [open, setOpen] = useState(false);
   const { mutate, isPending, error } = useDeleteSource({
     onSuccess: () => {
@@ -25,15 +29,25 @@ export const DeleteSourceModal = ({
 
   return (
     <>
-      <Button
-        type="default"
-        shape="circle"
-        size="small"
-        className="hover:border-error hover:text-error"
-        aria-label={`Delete ${source}`}
-        icon={<IconTrash />}
-        onClick={() => setOpen(true)}
-      />
+      {trigger ? (
+        cloneElement(trigger, {
+          ...trigger.props,
+          onClick: (event: React.MouseEvent<HTMLElement>) => {
+            setOpen(true);
+            trigger.props.onClick?.(event);
+          },
+        })
+      ) : (
+        <Button
+          type="default"
+          shape="circle"
+          size="small"
+          className="hover:border-error hover:text-error"
+          aria-label={`Delete ${source}`}
+          icon={<IconTrash />}
+          onClick={() => setOpen(true)}
+        />
+      )}
       <Modal
         title={`Delete ${source}`}
         open={open}
