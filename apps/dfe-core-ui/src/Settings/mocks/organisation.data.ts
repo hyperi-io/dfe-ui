@@ -1,6 +1,6 @@
-import hyperILogo from '@/core/assets/images/logo/primary-logo-mark.svg';
 import type { StaticImageData } from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
+import defaultLogo from './default-logo.png';
 
 interface OrganisationRequest {
   name: string;
@@ -22,7 +22,7 @@ const createOrganisation = ({
   return {
     name,
     owner,
-    logo: logo ?? hyperILogo,
+    logo: logo ?? defaultLogo,
     brandColor: brandColor ?? '#f1f1f1',
     id: uuidv4(),
   };
