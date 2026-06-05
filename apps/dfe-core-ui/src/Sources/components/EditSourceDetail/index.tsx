@@ -15,7 +15,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { notification, Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 
-export const SourceDetail = () => {
+export const EditSourceDetail = () => {
   const [api, contextHolder] = notification.useNotification();
   const queryClient = useQueryClient();
   const {

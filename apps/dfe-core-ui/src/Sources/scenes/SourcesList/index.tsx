@@ -2,8 +2,8 @@
 
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
+import { EditSourceDetail } from '@/Sources/components/EditSourceDetail';
 import { ListSourcesTree } from '@/Sources/components/ListSourcesTree';
-import { SourceDetail } from '@/Sources/components/SourceDetail';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 
 export const SourcesListScene = () => {
@@ -12,7 +12,7 @@ export const SourcesListScene = () => {
       <ListSourcesProvider>
         <Splitter
           leftPanelContent={<ListSourcesTree />}
-          rightPanelContent={<SourceDetail />}
+          rightPanelContent={<EditSourceDetail />}
         />
       </ListSourcesProvider>
     </MainContentCard>
