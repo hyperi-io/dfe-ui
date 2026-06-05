@@ -2,6 +2,7 @@ import { ActionsMenu } from '@/core/components/ActionsMenu';
 import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
@@ -11,6 +12,8 @@ export const SourceDetailActionMenu = ({
 }: {
   source: SourceDetail;
 }) => {
+  const { refetch: refetchSources, setSelectedSourceName } =
+    useListSourcesContext();
   return (
     <ActionsMenu
       placement="left"
@@ -44,6 +47,10 @@ export const SourceDetailActionMenu = ({
             Clone Source
           </Button>
         }
+        onSuccess={({ source: newSource }) => {
+          setSelectedSourceName(newSource);
+          refetchSources();
+        }}
       />
       <DeleteSourceModal
         key="delete-source"
@@ -58,6 +65,10 @@ export const SourceDetailActionMenu = ({
             Delete Source
           </Button>
         }
+        onSuccess={() => {
+          setSelectedSourceName(null);
+          refetchSources();
+        }}
       />
     </ActionsMenu>
   );
