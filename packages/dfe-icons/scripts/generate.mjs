@@ -24,6 +24,7 @@ const LOGO_SVGO_PLUGINS = [
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SVG_DIR = path.join(ROOT, 'svg');
+const TABLER_DIR = path.join(SVG_DIR, 'third-party', 'tabler');
 const SRC_DIR = path.join(ROOT, 'src');
 const ICONS_DIR = path.join(SRC_DIR, 'icons');
 const STORIES_DIR = path.join(ROOT, 'stories');
@@ -201,13 +202,15 @@ fs.rmSync(SRC_DIR, { recursive: true, force: true });
 fs.mkdirSync(ICONS_DIR, { recursive: true });
 fs.mkdirSync(STORIES_DIR, { recursive: true });
 
-// Auto-discover all subdirectories under svg/.
+// Top-level svg/ dirs (custom, logo, …). Tabler lives under third-party/tabler/.
 // Only "filled" gets a "Filled" suffix; everything else has no suffix.
 const SUFFIX_MAP = { filled: 'Filled' };
+const SKIP_TOP_LEVEL_DIRS = new Set(['third-party']);
+const TABLER_STYLE_DIRS = ['outline', 'filled'];
 
 const subdirs = fs
   .readdirSync(SVG_DIR, { withFileTypes: true })
-  .filter((d) => d.isDirectory())
+  .filter((d) => d.isDirectory() && !SKIP_TOP_LEVEL_DIRS.has(d.name))
   .map((d) => d.name)
   .sort();
 
@@ -221,6 +224,17 @@ for (const dir of subdirs) {
     isLogo: dir === 'logo',
   });
   stats[dir] = icons.length;
+  allIcons.push(...icons);
+}
+
+for (const style of TABLER_STYLE_DIRS) {
+  assertSafeSegment(style, 'tabler style dir');
+  const suffix = SUFFIX_MAP[style] ?? '';
+  const icons = await processDirectory(
+    `${TABLER_DIR}${path.sep}${style}`,
+    suffix,
+  );
+  stats[style] = icons.length;
   allIcons.push(...icons);
 }
 
