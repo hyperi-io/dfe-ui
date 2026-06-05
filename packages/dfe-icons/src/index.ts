@@ -4635,6 +4635,8 @@ export { default as IconPresentationAnalytics } from "./icons/IconPresentationAn
 export { default as IconPresentationAnalyticsFilled } from "./icons/IconPresentationAnalyticsFilled";
 export { default as IconPresentationFilled } from "./icons/IconPresentationFilled";
 export { default as IconPresentationOff } from "./icons/IconPresentationOff";
+export { default as IconPrimaryLogoFull } from "./icons/IconPrimaryLogoFull";
+export { default as IconPrimaryLogoMark } from "./icons/IconPrimaryLogoMark";
 export { default as IconPrinter } from "./icons/IconPrinter";
 export { default as IconPrinterOff } from "./icons/IconPrinterOff";
 export { default as IconPrism } from "./icons/IconPrism";

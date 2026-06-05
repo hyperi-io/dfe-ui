@@ -4642,6 +4642,8 @@ export declare const IconPresentationAnalytics: IconComponent;
 export declare const IconPresentationAnalyticsFilled: IconComponent;
 export declare const IconPresentationFilled: IconComponent;
 export declare const IconPresentationOff: IconComponent;
+export declare const IconPrimaryLogoFull: IconComponent;
+export declare const IconPrimaryLogoMark: IconComponent;
 export declare const IconPrinter: IconComponent;
 export declare const IconPrinterOff: IconComponent;
 export declare const IconPrism: IconComponent;
