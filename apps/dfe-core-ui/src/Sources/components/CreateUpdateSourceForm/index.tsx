@@ -96,8 +96,8 @@ export const CreateUpdateSourceFormBase = ({
       form={form}
       onFinish={onFinish}
       initialValues={{
-        ...initialValues,
         enabled: true,
+        ...initialValues,
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}
