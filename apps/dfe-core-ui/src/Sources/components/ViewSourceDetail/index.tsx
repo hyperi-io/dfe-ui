@@ -4,6 +4,7 @@ import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { Spin, Tabs } from 'antd';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
 import { EmptyDetail } from './EmptyDetail';
+import { HuntsTabContent } from './HuntsTabContent';
 import { SampleEventsTabContent } from './SampleEventsTabContent';
 import { SigmaTabContent } from './SigmaTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
@@ -90,6 +91,11 @@ export const ViewSourceDetail = () => {
               key: 'sigma',
               label: 'Sigma',
               children: <SigmaTabContent />,
+            },
+            {
+              key: 'hunts',
+              label: 'Hunts',
+              children: <HuntsTabContent />,
             },
             {
               key: 'rules',
