@@ -1,6 +1,6 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { Table } from '@/core/components/Table';
-import { useGetSampleEvents } from '@/Sources/hooks/useGetSampleEvents';
+import { useFetchSampleEvents } from '@/Sources/hooks/useFetchSampleEvents';
 import { Spin } from 'antd';
 import { useMemo } from 'react';
 import { getSampleEventsTableColumns } from './SampleEventsTabContent.helpers';
@@ -10,7 +10,7 @@ export const SampleEventsTabContent = ({ source }: { source: string }) => {
     data: sampleEvents,
     isLoading,
     error,
-  } = useGetSampleEvents({
+  } = useFetchSampleEvents({
     source_name: source,
   });
 

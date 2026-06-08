@@ -18,7 +18,7 @@ export const SAMPLE_EVENTS_QUERY_KEY = (source_name: string | null) =>
  * @param enabled - Whether to enable the query.
  * @returns
  */
-export const useGetSampleEvents = ({
+export const useFetchSampleEvents = ({
   source_name,
   enabled = true,
 }: {
