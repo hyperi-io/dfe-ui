@@ -9,6 +9,7 @@ import { SigmaTabContent } from './SigmaTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
 import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
 import { SourceDetailActionMenu } from './SourceDetailActionMenu';
+import { SourceEnabledTag } from './SourceEnabledTag';
 import { SourceRulesTabContent } from './SourceRulesTabContent';
 import { TableStatsTabContent } from './TableStatsTabContent';
 
@@ -42,11 +43,15 @@ export const ViewSourceDetail = () => {
     <>
       <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-lg font-medium">
-            <span className="text-foreground/50 dark:text-dark-foreground/50 mr-2">
+          <h4 className="text-lg font-medium flex items-center gap-2 w-full">
+            <span className="text-foreground/50 dark:text-dark-foreground/50">
               Source:
             </span>
             {sourceDetailData.display_name || sourceDetailData.source}
+            <SourceEnabledTag
+              className="text-sm font-normal max-h-6 ml-auto mr-2"
+              enabled={sourceDetailData.enabled}
+            />
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />
         </div>

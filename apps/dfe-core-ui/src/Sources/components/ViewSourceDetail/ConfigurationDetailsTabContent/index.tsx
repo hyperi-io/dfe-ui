@@ -1,7 +1,7 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
 import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { IconCapture, IconCaptureOff, IconInfoCircle } from '@repo/dfe-icons';
+import { IconInfoCircle } from '@repo/dfe-icons';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -10,7 +10,6 @@ const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
 export const ConfigurationDetailsTabContent = ({
-  enabled,
   source,
   display_name,
   description,
@@ -24,24 +23,6 @@ export const ConfigurationDetailsTabContent = ({
 }: SourceDetail) => {
   return (
     <div className="h-full min-h-0 relative">
-      <div className="absolute top-0 right-0">
-        <span
-          className={cn(
-            'border rounded-full px-4 py-1 flex items-center justify-center gap-2',
-            enabled ? 'border-success text-success' : 'border-error text-error',
-          )}
-        >
-          {enabled ? (
-            <IconCapture width={16} height={16} />
-          ) : (
-            <IconCaptureOff width={16} height={16} />
-          )}{' '}
-          Source is{' '}
-          <span className="font-semibold">
-            {enabled ? 'enabled' : 'disabled'}
-          </span>
-        </span>
-      </div>
       <dl className="grid grid-cols-[140px_1fr] gap-x-6 gap-y-1">
         <dt className={dataListTermStyle}>File pathname:</dt>
         <dd>{source}.yaml</dd>
