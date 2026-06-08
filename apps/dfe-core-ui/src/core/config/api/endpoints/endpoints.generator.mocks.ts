@@ -12,6 +12,7 @@ const DEFAULT_VALIDATION_ERROR = {
       ctx: {},
     },
   ],
+  message: 'An unexpected error occurred',
 };
 
 export const API_CONFIG_MOCKS = Object.freeze({
@@ -1232,8 +1233,49 @@ export const API_CONFIG_MOCKS = Object.freeze({
     sourceColumns: {
       mockedUrl: '/api/v1/schemas/{source_name}/columns',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              type: 'string',
+              use_case: '',
+              attribute: '',
+              description: '',
+            },
+          ],
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['dfe_engine__api__v1__schemas__SchemaColumn'][];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.sourceColumns.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.sourceColumns.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
