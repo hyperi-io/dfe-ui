@@ -70,7 +70,7 @@ export const ViewSourceDetail = () => {
             {
               key: 'sample-events',
               label: 'Sample Events',
-              children: <SampleEventsTabContent />,
+              children: <SampleEventsTabContent source={source_name ?? ''} />,
             },
             {
               key: 'table-stats',
