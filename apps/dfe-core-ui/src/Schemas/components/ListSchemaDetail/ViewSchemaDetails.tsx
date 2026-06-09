@@ -72,6 +72,7 @@ export const ViewSchemaDetails = ({
     },
     [path, setSelectedSchema, onClearAllFilters],
   );
+  const totalColumns = selectedVersion.columns.total;
 
   const { componentHeight } = useSetComponentHeight({
     offset: 360,
@@ -248,7 +249,13 @@ export const ViewSchemaDetails = ({
         showSearchableColumns={showSearchableColumns}
         title={() => (
           <div className="flex items-center justify-between w-full">
-            <p>{selectedVersion.columns.total} columns</p>
+            <p>
+              {totalColumns > 0 ? (
+                <>{totalColumns} columns</>
+              ) : (
+                <>No columns loaded</>
+              )}
+            </p>
 
             <div className="flex items-center gap-2">
               <Input.Search

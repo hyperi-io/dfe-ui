@@ -13,7 +13,7 @@ export const SourceColumnsTabContent = ({
 }) => {
   const { componentHeight } = useSetComponentHeight({ offset: 300 });
   const {
-    data: { items: sourceColumns = [] } = {},
+    data: { items: sourceColumns = [], total = 0 } = {},
     error,
     isLoading,
     fetchNextPage: fetchNextPageSourceColumns,
@@ -88,6 +88,11 @@ export const SourceColumnsTabContent = ({
   return (
     <SchemaTable
       rowKey="name"
+      title={() => (
+        <div className="flex items-center justify-between w-full">
+          <p> {total > 0 ? <>{total} columns</> : <>No columns loaded</>} </p>
+        </div>
+      )}
       visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}
       lockedColumns={['name']}
       dataSource={sourceColumns ?? []}
