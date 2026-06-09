@@ -1,18 +1,11 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { ViewSourceDetailTabs } from '@/Sources/components/ViewSourceTabs';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
-import { Spin, Tabs } from 'antd';
-import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
+import { Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
-import { HuntsTabContent } from './HuntsTabContent';
-import { SampleEventsTabContent } from './SampleEventsTabContent';
-import { SigmaTabContent } from './SigmaTabContent';
-import { SourceColumnsTabContent } from './SourceColumnsTabContent';
-import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
 import { SourceDetailActionMenu } from './SourceDetailActionMenu';
 import { SourceEnabledTag } from './SourceEnabledTag';
-import { SourceRulesTabContent } from './SourceRulesTabContent';
-import { TableStatsTabContent } from './TableStatsTabContent';
 
 export const ViewSourceDetail = () => {
   const { selectedSourceName: source_name } = useListSourcesContext();
@@ -56,55 +49,9 @@ export const ViewSourceDetail = () => {
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />
         </div>
-        <Tabs
-          className="min-h-0 flex-1 -mt-3"
-          items={[
-            {
-              key: 'configuration',
-              label: 'Configuration Details',
-              children: (
-                <ConfigurationDetailsTabContent {...sourceDetailData} />
-              ),
-            },
-
-            {
-              key: 'sample-events',
-              label: 'Sample Events',
-              children: <SampleEventsTabContent source={source_name ?? ''} />,
-            },
-            {
-              key: 'table-stats',
-              label: 'Table Statistics',
-              children: <TableStatsTabContent />,
-            },
-            {
-              key: 'columns',
-              label: 'Columns',
-              children: (
-                <SourceColumnsTabContent source_name={source_name ?? ''} />
-              ),
-            },
-            {
-              key: 'ddl-preview',
-              label: 'DDL Preview',
-              children: <SourceDdlPreviewTabContent />,
-            },
-            {
-              key: 'sigma',
-              label: 'Sigma',
-              children: <SigmaTabContent />,
-            },
-            {
-              key: 'hunts',
-              label: 'Hunts',
-              children: <HuntsTabContent />,
-            },
-            {
-              key: 'rules',
-              label: 'Rules',
-              children: <SourceRulesTabContent />,
-            },
-          ]}
+        <ViewSourceDetailTabs
+          selectedSourceName={source_name ?? ''}
+          {...sourceDetailData}
         />
       </div>
     </>
