@@ -80,7 +80,9 @@ export const ViewSourceDetail = () => {
             {
               key: 'columns',
               label: 'Columns',
-              children: <SourceColumnsTabContent />,
+              children: (
+                <SourceColumnsTabContent source_name={source_name ?? ''} />
+              ),
             },
             {
               key: 'ddl-preview',
