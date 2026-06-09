@@ -1,7 +1,8 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { Table } from '@/core/components/Table';
+import { useDevAlert } from '@/core/hooks/useDevAlert';
 import { useFetchSampleEvents } from '@/Sources/hooks/useFetchSampleEvents';
-import { Spin } from 'antd';
+import { Alert, Spin } from 'antd';
 import { useMemo } from 'react';
 import { getSampleEventsTableColumns } from './SampleEventsTabContent.helpers';
 
@@ -13,6 +14,8 @@ export const SampleEventsTabContent = ({ source }: { source: string }) => {
   } = useFetchSampleEvents({
     source_name: source,
   });
+
+  const { isDevAlertsEnabled } = useDevAlert();
 
   const columns = useMemo(
     () => getSampleEventsTableColumns(sampleEvents ?? []),
@@ -35,11 +38,16 @@ export const SampleEventsTabContent = ({ source }: { source: string }) => {
     );
 
   return (
-    <Table
-      dataSource={sampleEvents}
-      columns={columns}
-      pagination={false}
-      rowKey="_uuid"
-    />
+    <>
+      {isDevAlertsEnabled && (
+        <Alert className="mb-4" type="error" title="Dev Alert - Mocked Data" />
+      )}
+      <Table
+        dataSource={sampleEvents}
+        columns={columns}
+        pagination={false}
+        rowKey="_uuid"
+      />
+    </>
   );
 };
