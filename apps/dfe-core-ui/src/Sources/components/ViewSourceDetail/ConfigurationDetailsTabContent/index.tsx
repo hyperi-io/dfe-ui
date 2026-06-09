@@ -5,7 +5,8 @@ import { IconInfoCircle } from '@repo/dfe-icons';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-
+const formCollapseTitleStyle =
+  'font-medium text-foreground/60 dark:text-dark-foreground/60';
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
@@ -34,6 +35,7 @@ export const ConfigurationDetailsTabContent = ({
       <SimpleCollapse
         classNames={{
           container: 'px-0',
+          title: formCollapseTitleStyle,
         }}
         title="Schema"
         defaultOpen={true}
@@ -121,6 +123,7 @@ export const ConfigurationDetailsTabContent = ({
         <SimpleCollapse
           classNames={{
             container: 'px-0',
+            title: '',
           }}
           title="Receiver"
           defaultOpen={true}
@@ -138,6 +141,7 @@ export const ConfigurationDetailsTabContent = ({
           classNames={{
             container: 'px-0',
             content: 'flex flex-col gap-2',
+            title: formCollapseTitleStyle,
           }}
           title="Fetcher"
           defaultOpen={true}
@@ -158,7 +162,7 @@ export const ConfigurationDetailsTabContent = ({
               )}
             </dd>
           </dl>
-          <p className="mt-2">Auth Details</p>
+          <p className={cn(dataListTermStyle, 'mt-2')}>Auth Details</p>
           <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Auth Type:</dt>
             <dd>{fetcher?.auth?.type ? fetcher?.auth?.type : <EmptyData />}</dd>
@@ -209,6 +213,7 @@ export const ConfigurationDetailsTabContent = ({
         <SimpleCollapse
           classNames={{
             container: 'px-0',
+            title: formCollapseTitleStyle,
           }}
           title="Transform"
           defaultOpen={true}
@@ -247,6 +252,7 @@ export const ConfigurationDetailsTabContent = ({
         <SimpleCollapse
           classNames={{
             container: 'px-0',
+            title: formCollapseTitleStyle,
           }}
           title="Mapping"
           defaultOpen={true}
@@ -267,6 +273,7 @@ export const ConfigurationDetailsTabContent = ({
         <SimpleCollapse
           classNames={{
             container: 'px-0',
+            title: formCollapseTitleStyle,
           }}
           title="Sigma"
           defaultOpen={true}
@@ -291,6 +298,7 @@ export const ConfigurationDetailsTabContent = ({
       <SimpleCollapse
         classNames={{
           container: 'px-0',
+          title: formCollapseTitleStyle,
         }}
         title="Sigma"
         defaultOpen={true}
