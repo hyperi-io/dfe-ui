@@ -1,3 +1,54 @@
-export const SourceDdlPreviewTabContent = () => {
-  return <div>SourceDdlPreview</div>;
+import { useBuildSource } from '@/Sources/hooks/useBuildSource';
+import { Tabs } from 'antd';
+import { BuildSourceBanner } from './BuildSourceBanner';
+import { GeneratedDdlTabContent } from './GeneratedDdlTabContent';
+import { GeneratedViewsTabContent } from './GeneratedViewsTabContent';
+
+export const SourceDdlPreviewTabContent = ({
+  source_name,
+}: {
+  source_name: string;
+}) => {
+  const { data, mutate, isPending, error } = useBuildSource();
+
+  return (
+    <div className="h-[calc(100vh-225px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <BuildSourceBanner
+        onClick={() => mutate(source_name)}
+        isPending={isPending}
+        error={error}
+      />
+
+      {data && (
+        <Tabs
+          classNames={{
+            item: 'm-0 p-0 pb-2 mr-4',
+            indicator: 'bg-tertiary/40',
+          }}
+          items={[
+            {
+              key: 'generated-ddl',
+              label: 'Generated DDL',
+              children: (
+                <GeneratedDdlTabContent
+                  source_name={source_name}
+                  create_table={data?.ddl?.create_table}
+                />
+              ),
+            },
+            {
+              key: 'generated-views',
+              label: 'Generated Views',
+              children: (
+                <GeneratedViewsTabContent
+                  source_name={source_name}
+                  views={data?.ddl?.views}
+                />
+              ),
+            },
+          ]}
+        />
+      )}
+    </div>
+  );
 };

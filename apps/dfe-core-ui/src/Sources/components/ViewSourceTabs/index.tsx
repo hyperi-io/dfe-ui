@@ -98,7 +98,9 @@ export const ViewSourceDetailTabs = ({
         {
           key: 'ddl-preview',
           label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
-          children: <SourceDdlPreviewTabContent />,
+          children: (
+            <SourceDdlPreviewTabContent source_name={selectedSourceName} />
+          ),
         },
         {
           key: 'sigma',
