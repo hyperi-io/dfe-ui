@@ -46,9 +46,12 @@ afterAll(() => server.close());
 describe('useFetchInfiniteSourceColumns', () => {
   describe('initial loading state', () => {
     it('should start with loading state and empty data', () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
@@ -67,9 +70,12 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('successful data fetch', () => {
     it('should fetch and return first page of source columns', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -89,9 +95,12 @@ describe('useFetchInfiniteSourceColumns', () => {
     });
 
     it('should return all expected properties', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -124,9 +133,12 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('pagination', () => {
     it('should fetch next page when fetchNextPage is called', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       // Wait for first page to load
       await waitFor(() => {
@@ -153,9 +165,12 @@ describe('useFetchInfiniteSourceColumns', () => {
     });
 
     it('should flatten multiple pages correctly', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -264,9 +279,12 @@ describe('useFetchInfiniteSourceColumns', () => {
     it('should handle error state correctly', async () => {
       server.use(API_CONFIG_MOCKS.schemas.sourceColumns.get.error());
 
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -344,9 +362,12 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('refetch functionality', () => {
     it('should refetch data when refetch is called', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -369,9 +390,12 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('loadMoreRef', () => {
     it('should provide a ref object for infinite scroll', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -384,9 +408,12 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('isFetchingNextPage state', () => {
     it('should handle fetchNextPage and complete successfully', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -413,9 +440,12 @@ describe('useFetchInfiniteSourceColumns', () => {
     });
 
     it('should keep isFetchingNextPage false when not fetching', async () => {
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -442,9 +472,12 @@ describe('useFetchInfiniteSourceColumns', () => {
         }),
       );
 
-      const { result } = renderHook(() => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
