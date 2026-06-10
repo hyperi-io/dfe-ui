@@ -64,6 +64,10 @@ export const ViewSourceDetailTabs = ({
     [pathname, router, searchParams],
   );
 
+  const isMetaSchemaDefined =
+    !!sourceDetailData.schema?.meta_schema ||
+    !!sourceDetailData.schema?.derived_schema;
+
   return (
     <Tabs
       className="min-h-0 flex-1 -mt-3"
@@ -79,37 +83,50 @@ export const ViewSourceDetailTabs = ({
         {
           key: 'sample-events',
           label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
-          children: <SampleEventsTabContent source={selectedSourceName} />,
-        },
-        {
-          key: 'table-stats',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
-          children: <TableStatsTabContent />,
-        },
-        {
-          key: 'columns',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
           children: (
-            <SourceColumnsTabContent source_name={selectedSourceName} />
+            <SampleEventsTabContent
+              source_name={selectedSourceName}
+              schema={sourceDetailData.schema}
+            />
           ),
         },
-        {
-          key: 'ddl-preview',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
-          children: (
-            <SourceDdlPreviewTabContent source_name={selectedSourceName} />
-          ),
-        },
-        {
-          key: 'hunts',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
-          children: <HuntsTabContent />,
-        },
-        {
-          key: 'rules',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
-          children: <SourceRulesTabContent />,
-        },
+
+        /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
+        ...(isMetaSchemaDefined
+          ? [
+              {
+                key: 'table-stats',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
+                children: <TableStatsTabContent />,
+              },
+              {
+                key: 'columns',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
+                children: (
+                  <SourceColumnsTabContent source_name={selectedSourceName} />
+                ),
+              },
+              {
+                key: 'ddl-preview',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
+                children: (
+                  <SourceDdlPreviewTabContent
+                    source_name={selectedSourceName}
+                  />
+                ),
+              },
+              {
+                key: 'hunts',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
+                children: <HuntsTabContent />,
+              },
+              {
+                key: 'rules',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
+                children: <SourceRulesTabContent />,
+              },
+            ]
+          : []),
       ]}
     />
   );

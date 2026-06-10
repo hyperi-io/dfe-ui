@@ -1,18 +1,27 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useDevAlert } from '@/core/hooks/useDevAlert';
 import { useFetchSampleEvents } from '@/Sources/hooks/useFetchSampleEvents';
+import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { IconInfoCircle } from '@repo/dfe-icons';
 import { Alert, Spin } from 'antd';
 import { useMemo } from 'react';
 import { getSampleEventsTableColumns } from './SampleEventsTabContent.helpers';
 
-export const SampleEventsTabContent = ({ source }: { source: string }) => {
+export const SampleEventsTabContent = ({
+  source_name,
+  schema,
+}: {
+  source_name: string;
+  schema: SourceDetail['schema'];
+}) => {
   const {
     data: sampleEvents,
     isLoading,
     error,
   } = useFetchSampleEvents({
-    source_name: source,
+    source_name,
   });
 
   const { isDevAlertsEnabled } = useDevAlert();
@@ -37,10 +46,23 @@ export const SampleEventsTabContent = ({ source }: { source: string }) => {
       />
     );
 
+  const isMetaSchemaDefined = !!schema?.meta_schema || !!schema?.derived_schema;
+
   return (
-    <>
+    <div className="flex flex-col gap-y-4">
+      {!isMetaSchemaDefined && (
+        <NotificationCard
+          icon={<IconInfoCircle className="w-4 h-4" />}
+          description={
+            <>
+              This source has no schema defined. Results will subsequently be
+              sent to <span className="font-semibold">_default_land.</span>
+            </>
+          }
+        />
+      )}
       {isDevAlertsEnabled && (
-        <Alert className="mb-4" type="error" title="Dev Alert - Mocked Data" />
+        <Alert type="error" title="Dev Alert - Mocked Data" />
       )}
       <Table
         dataSource={sampleEvents}
@@ -48,6 +70,6 @@ export const SampleEventsTabContent = ({ source }: { source: string }) => {
         pagination={false}
         rowKey="_uuid"
       />
-    </>
+    </div>
   );
 };

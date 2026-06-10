@@ -91,6 +91,10 @@ export const CreateUpdateSourceFormBase = ({
     onFinishFailed?.(errorInfo);
   };
 
+  const metaSchema = Form.useWatch(['schema'], form);
+  const isMetaSchemaDefined =
+    !!metaSchema?.meta_schema || !!metaSchema?.derived_schema;
+
   return (
     <Form
       form={form}
@@ -140,18 +144,6 @@ export const CreateUpdateSourceFormBase = ({
             ),
           },
           {
-            key: 'transform',
-            label: (
-              <TabLabel
-                label="Transform"
-                validationErrors={validationErrors?.transform}
-              />
-            ),
-            forceRender: true,
-            children: <TransformTabContent formValidation={formValidation} />,
-          },
-
-          {
             key: 'schemaConfig',
             label: (
               <TabLabel
@@ -167,23 +159,42 @@ export const CreateUpdateSourceFormBase = ({
               />
             ),
           },
-          {
-            key: 'mappingStandards',
-            label: (
-              <TabLabel
-                label="Mapping"
-                validationErrors={validationErrors?.mappingStandards}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <MappingStandardsTabContent
-                formValidation={formValidation}
-                initialValues={initialValues}
-                form={form}
-              />
-            ),
-          },
+
+          ...(isMetaSchemaDefined
+            ? /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
+              [
+                {
+                  key: 'transform',
+                  label: (
+                    <TabLabel
+                      label="Transform"
+                      validationErrors={validationErrors?.transform}
+                    />
+                  ),
+                  forceRender: true,
+                  children: (
+                    <TransformTabContent formValidation={formValidation} />
+                  ),
+                },
+                {
+                  key: 'mappingStandards',
+                  label: (
+                    <TabLabel
+                      label="Mapping"
+                      validationErrors={validationErrors?.mappingStandards}
+                    />
+                  ),
+                  forceRender: true,
+                  children: (
+                    <MappingStandardsTabContent
+                      formValidation={formValidation}
+                      initialValues={initialValues}
+                      form={form}
+                    />
+                  ),
+                },
+              ]
+            : []),
         ]}
       />
 
