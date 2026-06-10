@@ -7,7 +7,6 @@ import { useCallback, useMemo } from 'react';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
 import { HuntsTabContent } from './HuntsTabContent';
 import { SampleEventsTabContent } from './SampleEventsTabContent';
-import { SigmaTabContent } from './SigmaTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
 import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
 import { SourceRulesTabContent } from './SourceRulesTabContent';
@@ -19,7 +18,6 @@ const SOURCE_DETAIL_TAB_KEY_MAP = {
   'table-stats': 'Table Statistics',
   columns: 'Columns',
   'ddl-preview': 'DDL Preview',
-  sigma: 'Sigma',
   hunts: 'Hunts',
   rules: 'Rules',
 } as const;
@@ -101,11 +99,6 @@ export const ViewSourceDetailTabs = ({
           children: (
             <SourceDdlPreviewTabContent source_name={selectedSourceName} />
           ),
-        },
-        {
-          key: 'sigma',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['sigma'],
-          children: <SigmaTabContent />,
         },
         {
           key: 'hunts',

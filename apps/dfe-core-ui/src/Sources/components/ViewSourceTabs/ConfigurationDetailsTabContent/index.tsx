@@ -1,7 +1,6 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
 import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { IconInfoCircle } from '@repo/dfe-icons';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -19,7 +18,6 @@ export const ConfigurationDetailsTabContent = ({
   transform,
   match,
   fetcher,
-  sigma,
   mapping_standards,
 }: SourceDetail) => {
   return (
@@ -269,45 +267,6 @@ export const ConfigurationDetailsTabContent = ({
           </dl>
         </SimpleCollapse>
       )}
-      {sigma && (
-        <SimpleCollapse
-          classNames={{
-            container: 'px-0',
-            title: formCollapseTitleStyle,
-          }}
-          title="Sigma"
-          defaultOpen={true}
-        >
-          <dl className="grid grid-cols-[140px_1fr] gap-x-6 gap-y-1">
-            <dt className={dataListTermStyle}>Sigma Taxonomy:</dt>
-            <dd>{sigma?.taxonomy ? sigma?.taxonomy : <EmptyData />}</dd>
-            <dt className={dataListTermStyle}>Sigma Custom Mappings:</dt>
-            <dd className="flex gap-1">
-              {Object.keys(sigma?.custom_mappings ?? {}).map((key) => (
-                <span
-                  className="bg-background-muted dark:bg-dark-background-muted px-2 py-1 rounded-md"
-                  key={key}
-                >
-                  {key}: {sigma?.custom_mappings?.[key]}
-                </span>
-              ))}
-            </dd>
-          </dl>
-        </SimpleCollapse>
-      )}
-      <SimpleCollapse
-        classNames={{
-          container: 'px-0',
-          title: formCollapseTitleStyle,
-        }}
-        title="Sigma"
-        defaultOpen={true}
-      >
-        <span className={cn(dataListTermStyle, 'flex items-center gap-2')}>
-          <IconInfoCircle />
-          Coming soon
-        </span>
-      </SimpleCollapse>
     </div>
   );
 };
