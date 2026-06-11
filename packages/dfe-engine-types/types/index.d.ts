@@ -3084,7 +3084,7 @@ export interface components {
         };
         /**
          * PaginatedSchemaSummaryResponse
-         * @description Schema list: full ``schema_objects`` tree plus paginated ``items``.
+         * @description Schema list: path tree in ``objects`` plus paginated ``items``.
          */
         PaginatedSchemaSummaryResponse: {
             /** Items */
@@ -3104,14 +3104,29 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** @description All matching schemas as a path tree (not limited to current page) */
-            schema_objects: components["schemas"]["SchemaSummary"];
+            /** @description Full matching collection view (not limited to current page) */
+            objects: components["schemas"]["PathTree_SchemaSummaryObject_"];
             /** Total Pages */
             readonly total_pages: number;
             /** Next Page */
             readonly next_page: number | null;
             /** Prev Page */
             readonly prev_page: number | null;
+        };
+        /** PathTree[SchemaSummaryObject] */
+        PathTree_SchemaSummaryObject_: {
+            /**
+             * Items
+             * @description Entries attached at this path level
+             */
+            items?: components["schemas"]["SchemaSummaryObject"][];
+            /**
+             * Children
+             * @description Further nesting keyed by path segment
+             */
+            children?: {
+                [key: string]: components["schemas"]["PathTree_SchemaSummaryObject_"];
+            };
         };
         /** PermissionsResponse */
         PermissionsResponse: {
@@ -3521,40 +3536,6 @@ export interface components {
              * @description Column fields that matched the search query (API only)
              */
             matched_searchable?: string[];
-        };
-        /**
-         * SchemaSummary
-         * @description Tree node grouping schemas by path prefix (directory layout).
-         *
-         *     Wire input may use path segments as sibling keys alongside ``schemas``; those
-         *     map into ``children`` during validation. Serialized JSON uses explicit
-         *     ``schemas`` and ``children`` at every node.
-         *
-         *     Example (wire input shape)::
-         *
-         *         {
-         *             "children": {
-         *                 "azure": {
-         *                     "activity_log": {"schemas": [SchemaSummaryObject, ...]},
-         *                     "schemas": [],
-         *                 }
-         *             },
-         *             "schemas": [...],
-         *         }
-         */
-        SchemaSummary: {
-            /**
-             * Schemas
-             * @description Schema entries defined at this path level
-             */
-            schemas?: components["schemas"]["SchemaSummaryObject"][];
-            /**
-             * Children
-             * @description Further nesting keyed by path segment
-             */
-            children?: {
-                [key: string]: components["schemas"]["SchemaSummary"];
-            };
         };
         /**
          * SchemaSummaryObject
@@ -7445,6 +7426,8 @@ export interface operations {
             query?: {
                 /** @description Search in path */
                 search?: string | null;
+                /** @description Filter by top-level schema path segment (repeat param for multiple), e.g. meta, common-header, additional, hunt-results */
+                schema_type?: string[] | null;
                 /** @description Sort field (path, current, updated_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
