@@ -1,5 +1,4 @@
 import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
-import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -49,7 +48,6 @@ export const MetaSchemaSelectCreate = ({
   const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { mutate: _createMetaSchema } = useCreateSchema();
   const {
     data: { items: schemas },
     isLoading,
@@ -59,6 +57,7 @@ export const MetaSchemaSelectCreate = ({
     refetch: refetchSchemas,
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
+    schema_type: ['meta'],
   });
 
   const schemaSelectOptions = useMemo(() => {

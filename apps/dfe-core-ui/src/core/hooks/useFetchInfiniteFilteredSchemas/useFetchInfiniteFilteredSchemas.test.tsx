@@ -46,7 +46,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.isLoading).toBe(true);
       const expectedResponse: SchemaListResponse = {
         items: [],
-        schema_objects: {},
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
@@ -262,7 +262,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
       const expectedResponse: SchemaListResponse = {
         items: [],
-        schema_objects: {},
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
@@ -278,6 +278,21 @@ describe('useFetchInfiniteFilteredSchemas', () => {
     it('should include search in query', async () => {
       const { result } = renderHook(
         () => useFetchInfiniteFilteredSchemas({ search: 'test' }),
+        {
+          wrapper,
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.data.items).toBeDefined();
+    });
+
+    it('should include schema_type filter in query', async () => {
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredSchemas({ schema_type: ['meta'] }),
         {
           wrapper,
         },
@@ -435,8 +450,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         API_CONFIG_MOCKS.schemas.default.get.success({
           mockedResponse: {
             items: [],
-            schema_objects: {
-              schemas: [],
+            objects: {
+              items: [],
               children: {},
             },
             total: 0,
