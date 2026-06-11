@@ -1,7 +1,7 @@
 import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
-import { SchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
 import { notification, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
@@ -43,7 +43,7 @@ export const getExpandedKeysForSchemaSelection = (
 };
 
 const buildVersionChildren = (
-  schema: NonNullable<SchemaSummary['schemas']>[number],
+  schema: NonNullable<SchemaListResponse['objects']['items']>[number],
   setSelectedSchema: ({
     schema_path,
     schema_version,
@@ -94,7 +94,7 @@ const schemaSummaryToTreeData = ({
   apiNotification,
   expandTreeNode,
 }: {
-  node: SchemaSummary;
+  node: SchemaListResponse['objects'];
   pathSegments: string[];
   setSelectedSchema: ({
     schema_path,
@@ -110,7 +110,7 @@ const schemaSummaryToTreeData = ({
 }): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
-  for (const schema of node.schemas ?? []) {
+  for (const schema of node.items ?? []) {
     const versionChildren = buildVersionChildren(
       schema,
       setSelectedSchema,
@@ -212,7 +212,7 @@ export const useTransformSchemaToTree = ({
   selectedSchemaVersion,
   expandTreeNode,
 }: {
-  schemaObjects: SchemaSummary;
+  schemaObjects: SchemaListResponse['objects'];
   setSelectedSchema: ({
     schema_path,
     schema_version,

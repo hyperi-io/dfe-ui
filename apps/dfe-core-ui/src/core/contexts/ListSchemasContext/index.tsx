@@ -104,7 +104,7 @@ export interface ListSchemasContextValue {
 
 const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
   items: [] as SchemaListResponse['items'],
-  schema_objects: {} as SchemaListResponse['schema_objects'],
+  objects: {} as SchemaListResponse['objects'],
   total: 0,
   page: 1,
   per_page: 10,
@@ -167,7 +167,7 @@ export const ListSchemasProvider = ({
     hasNextPage,
     loadMoreRef,
     isFetchingNextPage,
-  } = useFetchInfiniteFilteredSchemas(filters);
+  } = useFetchInfiniteFilteredSchemas({ ...filters, schema_type: ['meta'] });
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSchemasProps) => {

@@ -1,4 +1,4 @@
-import { SchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { components } from '@repo/dfe-engine-types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
@@ -56,7 +56,7 @@ describe('getExpandedKeysForSchemaSelection', () => {
 });
 
 describe('useTransformSchemaToTree', () => {
-  it('returns an empty tree for empty schema_objects', () => {
+  it('returns an empty tree for empty objects', () => {
     const setSelectedSchema = vi.fn();
     const { result } = renderHook(() =>
       useTransformSchemaToTree({
@@ -73,13 +73,14 @@ describe('useTransformSchemaToTree', () => {
   it('maps nested children and schemas into TreeDataNode keys and hierarchy', () => {
     const setSelectedSchema = vi.fn();
 
-    const schema_objects: SchemaSummary = {
+    const schema_objects: SchemaListResponse['objects'] = {
+      items: [],
       children: {
         azure: {
-          schemas: [],
+          items: [],
           children: {
             activity_log: {
-              schemas: [
+              items: [
                 baseSchema({
                   name: 'azure/activity_log/schema1',
                   versions: ['v1', 'v2'],
@@ -88,7 +89,7 @@ describe('useTransformSchemaToTree', () => {
               ],
             },
             security_log: {
-              schemas: [
+              items: [
                 baseSchema({
                   name: 'azure/security_log/alerts',
                   current: 'v1',
@@ -142,7 +143,7 @@ describe('useTransformSchemaToTree', () => {
     const { result } = renderHook(() =>
       useTransformSchemaToTree({
         schemaObjects: {
-          schemas: [baseSchema({ name: 'solo.schema', versions: [] })],
+          items: [baseSchema({ name: 'solo.schema', versions: [] })],
         },
         setSelectedSchema: vi.fn(),
         ...defaultSelection,
@@ -160,10 +161,10 @@ describe('useTransformSchemaToTree', () => {
     const { result } = renderHook(() =>
       useTransformSchemaToTree({
         schemaObjects: {
-          schemas: [baseSchema({ name: 'test', versions: ['v1'] })],
+          items: [baseSchema({ name: 'test', versions: ['v1'] })],
           children: {
             test: {
-              schemas: [baseSchema({ name: 'test/nested', versions: ['v1'] })],
+              items: [baseSchema({ name: 'test/nested', versions: ['v1'] })],
             },
           },
         },
@@ -178,8 +179,8 @@ describe('useTransformSchemaToTree', () => {
   });
 
   it('memoises the tree when schemaObjects and setters are stable', () => {
-    const schema_objects: SchemaSummary = {
-      schemas: [baseSchema({ name: 'a' })],
+    const schema_objects: SchemaListResponse['objects'] = {
+      items: [baseSchema({ name: 'a' })],
     };
     const setSelectedSchema = vi.fn();
     const expandTreeNode = vi.fn();
@@ -190,7 +191,7 @@ describe('useTransformSchemaToTree', () => {
         onSelect,
         onExpand,
       }: {
-        schema: SchemaSummary;
+        schema: SchemaListResponse['objects'];
         onSelect: typeof setSelectedSchema;
         onExpand: typeof expandTreeNode;
       }) =>
@@ -218,8 +219,8 @@ describe('useTransformSchemaToTree', () => {
     });
     expect(result.current.tree).toBe(firstTree);
 
-    const nextObjects: SchemaSummary = {
-      schemas: [baseSchema({ name: 'b' })],
+    const nextObjects: SchemaListResponse['objects'] = {
+      items: [baseSchema({ name: 'b' })],
     };
     rerender({
       schema: nextObjects,
