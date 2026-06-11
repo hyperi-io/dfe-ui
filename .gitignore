@@ -43,3 +43,72 @@ yarn-error.log*
 # Storybook
 storybook-static/
 debug-storybook.log
+
+# Local working files (not committed)
+docs/superpowers/
+.claude/
+hyperi-ai/
+.mcp.json
+STATE.md
+CLAUDE.md
+TODO.md
+.ai-version
+
+# OS junk (never useful in repo)
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor / IDE local state
+.idea/
+.vscode/
+
+# Local environment files (never commit -- contain secrets)
+.env
+.env.*
+!.env.example
+!.env.example.*
+
+# them alone if already present.
+docs/superpowers/
+.mcp.json
+.ai-version
+
+# committed -- mirrored in .git/info/exclude.
+CLAUDE.md
+TODO.md
+AGENTS.md
+GEMINI.md
+.claude/
+.codex/
+.cursor/
+.gemini/
+.cursorrules
+
+# Git worktrees (local dev convenience)
+.worktrees/
+
+# Node / TypeScript build artefacts
+node_modules/
+dist/
+build/
+out/
+.next/
+.turbo/
+.vite/
+.nuxt/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Yarn / pnpm / npm
+.pnpm-store/
+.yarn/cache
+.yarn/install-state.gz
+.pnp.*
