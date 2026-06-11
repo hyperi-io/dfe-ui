@@ -167,7 +167,7 @@ export const ListSchemasProvider = ({
     hasNextPage,
     loadMoreRef,
     isFetchingNextPage,
-  } = useFetchInfiniteFilteredSchemas(filters);
+  } = useFetchInfiniteFilteredSchemas({ ...filters, schema_type: ['meta'] });
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSchemasProps) => {

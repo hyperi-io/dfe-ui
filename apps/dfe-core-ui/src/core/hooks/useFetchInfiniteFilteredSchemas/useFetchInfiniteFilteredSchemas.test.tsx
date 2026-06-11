@@ -290,6 +290,21 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.data.items).toBeDefined();
     });
 
+    it('should include schema_type filter in query', async () => {
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredSchemas({ schema_type: ['meta'] }),
+        {
+          wrapper,
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.data.items).toBeDefined();
+    });
+
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
         () => useFetchInfiniteFilteredSchemas({ sort_by: 'path' }),

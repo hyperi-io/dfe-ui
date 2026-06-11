@@ -11,7 +11,7 @@ import {
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
-    data: { items: schemas, schema_objects: schemaObjects },
+    data: { items: metaSchemas, schema_objects: schemaObjects },
     error,
     loadMoreRef,
     isFetchingNextPage,
@@ -23,6 +23,8 @@ export const SchemaList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListSchemasContext();
 
+  const metaSchemaObjects = schemaObjects.children?.meta ?? {};
+
   const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
 
   const expandTreeNode = useCallback((key: string) => {
@@ -31,7 +33,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
 
   const { tree: treeData, notificationContextHolder } =
     useTransformSchemaToTree({
-      schemaObjects,
+      schemaObjects: metaSchemaObjects,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
@@ -52,7 +54,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
     [userExpandedKeys, expandedKeysForSelection],
   );
 
-  if (schemas.length === 0) {
+  if (metaSchemas.length === 0) {
     return (
       <EmptyList
         className={className}

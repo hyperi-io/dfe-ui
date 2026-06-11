@@ -10,6 +10,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 /** useFetchInfiniteFilteredSchemas props */
 /**
  * @param search - The search query to filter the schemas by path, version and version ids.
+ * @param schema_type - The type of the schema to filter by (meta, common-header, etc) string[].
  * @param sort_by - The field to sort the schemas by (path, current_version, column_count).
  * @param sort_order - The order to sort the schemas by.
  * @param per_page - The number of schemas to fetch per page.
@@ -19,6 +20,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  */
 export const useFetchInfiniteFilteredSchemas = ({
   search,
+  schema_type,
   sort_by,
   sort_order,
   per_page,
@@ -40,6 +42,7 @@ export const useFetchInfiniteFilteredSchemas = ({
       apiClient.get(API_CONFIG.schemas.default, {
         queryParams: {
           search: debouncedSearch || undefined,
+          schema_type,
           sort_by,
           sort_order,
           page: pageParam,

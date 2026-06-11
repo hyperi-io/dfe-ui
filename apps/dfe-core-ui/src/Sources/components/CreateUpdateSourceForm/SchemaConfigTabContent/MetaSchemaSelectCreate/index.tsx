@@ -57,6 +57,7 @@ export const MetaSchemaSelectCreate = ({
     refetch: refetchSchemas,
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
+    schema_type: ['meta'],
   });
 
   const schemaSelectOptions = useMemo(() => {
