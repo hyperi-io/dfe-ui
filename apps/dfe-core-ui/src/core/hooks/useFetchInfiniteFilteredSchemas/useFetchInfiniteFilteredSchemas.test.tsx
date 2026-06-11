@@ -46,7 +46,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.isLoading).toBe(true);
       const expectedResponse: SchemaListResponse = {
         items: [],
-        schema_objects: {},
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
@@ -262,7 +262,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
       const expectedResponse: SchemaListResponse = {
         items: [],
-        schema_objects: {},
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
@@ -450,8 +450,8 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         API_CONFIG_MOCKS.schemas.default.get.success({
           mockedResponse: {
             items: [],
-            schema_objects: {
-              schemas: [],
+            objects: {
+              items: [],
               children: {},
             },
             total: 0,

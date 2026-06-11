@@ -11,7 +11,7 @@ import {
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
-    data: { items: metaSchemas, schema_objects: schemaObjects },
+    data: { items: metaSchemas, objects: schemaObjects },
     error,
     loadMoreRef,
     isFetchingNextPage,

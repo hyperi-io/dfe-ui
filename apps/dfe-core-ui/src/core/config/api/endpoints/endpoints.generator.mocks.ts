@@ -865,11 +865,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
             total_pages: 0,
             next_page: 0,
             prev_page: 0,
-            schema_objects: {
-              schemas: [],
+            objects: {
+              items: [],
               children: {
                 string: {
-                  schemas: [],
+                  items: [],
                   children: {},
                 },
               },

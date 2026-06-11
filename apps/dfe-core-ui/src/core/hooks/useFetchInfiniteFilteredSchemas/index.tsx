@@ -63,7 +63,7 @@ export const useFetchInfiniteFilteredSchemas = ({
     if (!data?.pages?.length) {
       return {
         items: [],
-        schema_objects: {},
+        objects: {},
         total: 0,
         page: 1,
         per_page: per_page ?? 10,
@@ -77,13 +77,13 @@ export const useFetchInfiniteFilteredSchemas = ({
     const allSchemaObjects = data.pages.reduce((acc, page) => {
       return {
         ...acc,
-        ...page.schema_objects,
+        ...page.objects,
       };
     }, {});
     return {
       ...data.pages[0],
       items: allItems,
-      schema_objects: allSchemaObjects,
+      objects: allSchemaObjects,
     };
   }, [data, per_page]);
 
