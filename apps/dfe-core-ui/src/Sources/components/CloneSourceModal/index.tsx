@@ -76,7 +76,8 @@ export const CloneSourceModal = ({
           onFinish={handleCloneSource}
           initialValues={{
             ...source,
-            source: undefined,
+            version: versions?.length > 0 ? versions[0] : undefined,
+            source: `${source.name}_copy`,
           }}
         >
           <div className="flex gap-x-2">

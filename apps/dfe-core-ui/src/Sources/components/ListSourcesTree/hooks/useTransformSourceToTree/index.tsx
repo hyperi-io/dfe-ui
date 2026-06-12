@@ -93,6 +93,7 @@ const sourceSummaryToTreeData = ({
   selectedSourceVersion,
   apiNotification,
   expandTreeNode,
+  refetchSources,
 }: {
   node: SourceListResponse['objects'];
   pathSegments: string[];
@@ -107,6 +108,7 @@ const sourceSummaryToTreeData = ({
   selectedSourceVersion: string | null;
   apiNotification: NotificationInstance;
   expandTreeNode: (key: string) => void;
+  refetchSources: () => void;
 }): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
@@ -141,13 +143,14 @@ const sourceSummaryToTreeData = ({
               <CloneSourceModal
                 source={source}
                 versions={source.versions ?? []}
-                onSuccess={(source) =>
+                onSuccess={(source) => {
+                  void refetchSources();
                   apiNotification.success({
                     title: 'Source cloned successfully',
                     description: `${source.source} has been cloned successfully`,
                     placement: 'bottomLeft',
-                  })
-                }
+                  });
+                }}
               />
               <DeleteSourceModal
                 source={`${source.name}`}
@@ -182,6 +185,7 @@ const sourceSummaryToTreeData = ({
       selectedSourceVersion,
       apiNotification,
       expandTreeNode,
+      refetchSources,
     });
 
     if (nested.length === 0) {
@@ -211,6 +215,7 @@ export const useTransformSourceToTree = ({
   selectedSourceName,
   selectedSourceVersion,
   expandTreeNode,
+  refetchSources,
 }: {
   sourceObjects: SourceListResponse['objects'];
   setSelectedSource: ({
@@ -223,6 +228,7 @@ export const useTransformSourceToTree = ({
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   expandTreeNode: (key: string) => void;
+  refetchSources: () => void;
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
@@ -237,6 +243,7 @@ export const useTransformSourceToTree = ({
         selectedSourceVersion,
         apiNotification,
         expandTreeNode,
+        refetchSources,
       }),
     [
       sourceObjects,
@@ -245,6 +252,7 @@ export const useTransformSourceToTree = ({
       selectedSourceVersion,
       apiNotification,
       expandTreeNode,
+      refetchSources,
     ],
   );
 

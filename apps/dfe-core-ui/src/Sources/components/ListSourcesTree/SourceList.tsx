@@ -16,6 +16,7 @@ export const SourceList = ({ className }: { className?: string }) => {
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSource,
+    refetch: refetchSources,
     selectedSourceName,
     selectedSourceVersion,
     filters,
@@ -36,6 +37,7 @@ export const SourceList = ({ className }: { className?: string }) => {
       selectedSourceName,
       selectedSourceVersion,
       expandTreeNode,
+      refetchSources,
     });
 
   const expandedKeysForSelection = useMemo(

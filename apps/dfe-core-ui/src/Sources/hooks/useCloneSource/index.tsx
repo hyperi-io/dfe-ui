@@ -61,11 +61,13 @@ export const useCloneSource = ({
       onError?.(new Error(errMessage));
       return;
     }
+
     const body: SourceCreateRequestBody = {
       source: values.source,
       display_name: values.display_name,
       enabled: values.enabled,
       ...sourceDetailData.version,
+      date_time: undefined,
     };
     mutate(body);
   };

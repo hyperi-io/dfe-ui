@@ -6,6 +6,8 @@ import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
 
 type SourceSummaryObject = SourceListResponse['items'][number];
 
+const refetchSources = vi.fn();
+
 const baseSource = (
   overrides: Partial<SourceSummaryObject> & Pick<SourceSummaryObject, 'name'>,
 ): SourceSummaryObject => ({
@@ -24,6 +26,7 @@ const baseSource = (
 });
 
 const defaultSelection = {
+  refetchSources,
   selectedSourcePath: null as string | null,
   selectedSourceVersion: null as string | null,
   expandTreeNode: vi.fn(),
@@ -206,6 +209,7 @@ describe('useTransformSourceToTree', () => {
         onExpand: typeof expandTreeNode;
       }) =>
         useTransformSourceToTree({
+          refetchSources,
           sourceObjects: source,
           setSelectedSource: onSelect,
           selectedSourceName: null,
