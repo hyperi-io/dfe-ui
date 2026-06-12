@@ -451,15 +451,35 @@ export interface paths {
         };
         /**
          * List Sources
-         * @description List sources with pagination, search, and filtering.
+         * @description List sources with pagination, search, filtering, and a full object tree.
          */
         get: operations["list_sources_api_v1_sources_get"];
         put?: never;
         /**
          * Create Source
-         * @description Create a new source from a source definition.
+         * @description Create a new source from a flat source definition (initial version ``1.0.0``).
          */
         post: operations["create_source_api_v1_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{name}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Source Version
+         * @description Get one immutable source version snapshot by id.
+         */
+        get: operations["get_source_version_api_v1_sources__name__versions_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -480,7 +500,7 @@ export interface paths {
         get: operations["get_source_api_v1_sources__name__get"];
         /**
          * Update Source
-         * @description Update an existing source definition.
+         * @description Update a source from a flat revision body (appends next major version).
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
@@ -1569,7 +1589,7 @@ export interface paths {
         };
         /**
          * Get Schema Columns
-         * @description Get columns for a source's schema.
+         * @description Get composed schema columns for a source version (profile + meta/derived/additional).
          */
         get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
         put?: never;
@@ -1591,7 +1611,7 @@ export interface paths {
         put?: never;
         /**
          * Build Schema
-         * @description Build complete schema (DDL) from a source definition.
+         * @description Build complete schema (DDL) from a source version snapshot.
          *
          *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
          *     without executing it against ClickHouse.
@@ -2872,6 +2892,27 @@ export interface components {
             summary?: string | null;
         };
         /**
+         * MetaSchemaVersionWriteResponse
+         * @description Meta-schema state after adding a version or updating metadata.
+         */
+        MetaSchemaVersionWriteResponse: {
+            /**
+             * Path
+             * @description Registry path (e.g. ``aws/cloudtrail``)
+             */
+            path: string;
+            /**
+             * Current
+             * @description Current version id after the write
+             */
+            current: string;
+            /**
+             * Versions
+             * @description All version ids on this schema
+             */
+            versions: string[];
+        };
+        /**
          * MetricEntry
          * @description A single metric from the service's manifest.
          */
@@ -3056,32 +3097,6 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
-        /** PaginatedResponse[SourceSummary] */
-        PaginatedResponse_SourceSummary_: {
-            /** Items */
-            items: components["schemas"]["SourceSummary"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** Total Pages */
-            readonly total_pages: number;
-            /** Next Page */
-            readonly next_page: number | null;
-            /** Prev Page */
-            readonly prev_page: number | null;
-        };
         /**
          * PaginatedSchemaSummaryResponse
          * @description Schema list: path tree in ``objects`` plus paginated ``items``.
@@ -3113,6 +3128,37 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /**
+         * PaginatedSourceSummaryResponse
+         * @description Source list: path tree in ``objects`` plus paginated ``items``.
+         */
+        PaginatedSourceSummaryResponse: {
+            /** Items */
+            items: components["schemas"]["SourceSummaryObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** @description Full matching collection view (not limited to current page) */
+            objects: components["schemas"]["PathTree_SourceSummaryObject_"];
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PathTree[SchemaSummaryObject] */
         PathTree_SchemaSummaryObject_: {
             /**
@@ -3126,6 +3172,21 @@ export interface components {
              */
             children?: {
                 [key: string]: components["schemas"]["PathTree_SchemaSummaryObject_"];
+            };
+        };
+        /** PathTree[SourceSummaryObject] */
+        PathTree_SourceSummaryObject_: {
+            /**
+             * Items
+             * @description Entries attached at this path level
+             */
+            items?: components["schemas"]["SourceSummaryObject"][];
+            /**
+             * Children
+             * @description Further nesting keyed by path segment
+             */
+            children?: {
+                [key: string]: components["schemas"]["PathTree_SourceSummaryObject_"];
             };
         };
         /** PermissionsResponse */
@@ -3778,7 +3839,7 @@ export interface components {
          *
          *     See docs/SOURCE.md for the full specification.
          */
-        "Source-Input": {
+        Source: {
             /**
              * Source
              * @description The _source label — immutable identifier
@@ -3800,72 +3861,28 @@ export interface components {
              * @default true
              */
             enabled: boolean;
-            /** @description Common schema header configuration */
-            header?: components["schemas"]["SourceHeader"];
-            /** @description Receiver match rule */
-            match?: components["schemas"]["SourceMatch"] | null;
-            /** @description Schema configuration */
-            schema?: components["schemas"]["SourceSchema"];
-            /** @description Transform stage (optional) */
-            transform?: components["schemas"]["SourceTransform"] | null;
-            /** @description SaaS API fetcher (optional) */
-            fetcher?: components["schemas"]["SourceFetcher"] | null;
-            /** @description Sigma field mappings (optional) */
-            sigma?: components["schemas"]["SourceSigma"] | null;
             /**
-             * Mapping Standards
-             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
+             * Deployed Version
+             * @description Version deployed to ClickHouse / runtime (null until first deploy)
              */
-            mapping_standards?: string[];
-        };
-        /**
-         * Source
-         * @description The top-level data entity in the DFE platform.
-         *
-         *     A Source represents a distinct data stream entering the platform.
-         *     Everything flows from the _source label.
-         *
-         *     See docs/SOURCE.md for the full specification.
-         */
-        "Source-Output": {
+            deployed_version?: string | null;
             /**
-             * Source
-             * @description The _source label — immutable identifier
+             * Current
+             * @description Working version (latest definition)
+             * @default 1.0.0
              */
-            source: string;
+            current: string;
             /**
-             * Display Name
-             * @description Human-readable display name
+             * Versions
+             * @description Version id → configuration snapshot
              */
-            display_name?: string | null;
-            /**
-             * Description
-             * @description Source description
-             */
-            description?: string | null;
-            /**
-             * Enabled
-             * @description Whether the source is active
-             * @default true
-             */
-            enabled: boolean;
-            /** @description Common schema header configuration */
-            header?: components["schemas"]["SourceHeader"];
-            /** @description Receiver match rule */
-            match?: components["schemas"]["SourceMatch"] | null;
-            /** @description Schema configuration */
-            schema?: components["schemas"]["SourceSchema"];
-            /** @description Transform stage (optional) */
-            transform?: components["schemas"]["SourceTransform"] | null;
-            /** @description SaaS API fetcher (optional) */
-            fetcher?: components["schemas"]["SourceFetcher"] | null;
-            /** @description Sigma field mappings (optional) */
-            sigma?: components["schemas"]["SourceSigma"] | null;
-            /**
-             * Mapping Standards
-             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
-             */
-            mapping_standards?: string[];
+            versions?: {
+                [key: string]: components["schemas"]["SourceVersion"];
+            };
+            /** @description Receiver match rule on the deployed version (serialized for API compat). */
+            readonly match: components["schemas"]["SourceMatch"] | null;
+            /** @description Transform config on the deployed version (serialized for API compat). */
+            readonly transform: components["schemas"]["SourceTransform"] | null;
         };
         /**
          * SourceFetcher
@@ -3957,7 +3974,7 @@ export interface components {
         };
         /**
          * SourceResponse
-         * @description Full source after create/update.
+         * @description Legacy compact metadata after create/update (prefer full ``Source`` on write).
          */
         SourceResponse: {
             /** Source */
@@ -3967,6 +3984,21 @@ export interface components {
              * @default ok
              */
             message: string;
+            /**
+             * Current
+             * @description Working version id after the operation
+             */
+            current: string;
+            /**
+             * Deployed Version
+             * @description Version deployed to runtime (null until first deploy)
+             */
+            deployed_version?: string | null;
+            /**
+             * Versions
+             * @description All version ids on the source
+             */
+            versions: string[];
         };
         /**
          * SourceSchema
@@ -4024,37 +4056,73 @@ export interface components {
             };
         };
         /**
-         * SourceSummary
-         * @description Lightweight source listing (for paginated list).
+         * SourceSummaryObject
+         * @description Summary row for paginated source list (mirrors ``SchemaSummaryObject``).
          */
-        SourceSummary: {
+        SourceSummaryObject: {
             /**
-             * Source
-             * @description Source name / identifier
+             * Name
+             * @description Source name (_source label)
              */
-            source: string;
-            /** Display Name */
+            name: string;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
             display_name?: string | null;
-            /** Description */
+            /**
+             * Description
+             * @description Source description
+             */
             description?: string | null;
             /**
              * Enabled
+             * @description Whether the source is active
              * @default true
              */
             enabled: boolean;
-            /** Header Type */
+            /**
+             * Current
+             * @description Working version id
+             */
+            current: string;
+            /**
+             * Deployed Version
+             * @description Version deployed to ClickHouse / runtime (null until first deploy)
+             */
+            deployed_version?: string | null;
+            /**
+             * Versions
+             * @description All defined version ids
+             */
+            versions: string[];
+            /**
+             * Updated At
+             * @description Last updated timestamp (ISO 8601)
+             * @default
+             */
+            updated_at: string;
+            /**
+             * Header Type
+             * @description Common header profile type (deployed version)
+             */
             header_type?: string | null;
             /**
              * Has Transform
+             * @description Whether a transform stage is configured
              * @default false
              */
             has_transform: boolean;
             /**
              * Has Fetcher
+             * @description Whether a fetcher is configured
              * @default false
              */
             has_fetcher: boolean;
-            /** Mapping Standards */
+            /**
+             * Mapping Standards
+             * @description Mapping standards on the deployed version
+             */
             mapping_standards?: string[];
         };
         /**
@@ -4084,6 +4152,137 @@ export interface components {
              * @description Enrichment files (CSV, MMDB)
              */
             files?: string[];
+        };
+        /**
+         * SourceVersion
+         * @description Versioned source configuration snapshot (schema, mappings, fetcher, etc.).
+         */
+        SourceVersion: {
+            /**
+             * Date Time
+             * @description Version creation date (YYYY-MM-DD)
+             */
+            date_time: string;
+            /** @description Common schema header configuration */
+            header?: components["schemas"]["SourceHeader"];
+            /** @description Schema configuration */
+            schema?: components["schemas"]["SourceSchema"];
+            /**
+             * Mapping Standards
+             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
+             */
+            mapping_standards?: string[];
+            /** @description Sigma field mappings (optional) */
+            sigma?: components["schemas"]["SourceSigma"] | null;
+            /**
+             * Field Mappings
+             * @description Field map registry paths for this version (optional)
+             */
+            field_mappings?: string[] | null;
+            /** @description SaaS API fetcher (optional) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Receiver match rule (optional) */
+            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Transform stage (optional) */
+            transform?: components["schemas"]["SourceTransform"] | null;
+        };
+        /**
+         * SourceVersionGetResponse
+         * @description Source payload for a single requested version (mirrors ``MetaSchemaGetResponse``).
+         */
+        SourceVersionGetResponse: {
+            /**
+             * Source
+             * @description Source name (_source label)
+             */
+            source: string;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * Enabled
+             * @description Whether the source is active
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Current
+             * @description Working version id
+             */
+            current: string;
+            /**
+             * Deployed Version
+             * @description Version deployed to ClickHouse / runtime (null until first deploy)
+             */
+            deployed_version?: string | null;
+            /**
+             * Selected
+             * @description Version id requested via query parameter
+             */
+            selected: string;
+            /**
+             * Versions
+             * @description All version ids defined on this source
+             */
+            versions: string[];
+            /** @description Immutable configuration snapshot for ``selected`` */
+            version: components["schemas"]["SourceVersion"];
+        };
+        /**
+         * SourceWriteRequest
+         * @description Flat source definition for create/update API (no version tree).
+         */
+        SourceWriteRequest: {
+            /**
+             * Source
+             * @description Source name (_source label); required on create
+             */
+            source?: string | null;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * Enabled
+             * @description Whether the source is active
+             * @default true
+             */
+            enabled: boolean;
+            /** @description Receiver match rule */
+            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Common schema header configuration for this revision */
+            header?: components["schemas"]["SourceHeader"] | null;
+            /** @description Schema configuration for this revision */
+            schema?: components["schemas"]["SourceSchema"] | null;
+            /** @description Transform stage (optional, top-level) */
+            transform?: components["schemas"]["SourceTransform"] | null;
+            /** @description SaaS API fetcher (optional) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Sigma field mappings (optional) */
+            sigma?: components["schemas"]["SourceSigma"] | null;
+            /**
+             * Mapping Standards
+             * @description Standards to generate mapping views for
+             */
+            mapping_standards?: string[] | null;
+            /**
+             * Field Mappings
+             * @description Field map registry paths for this revision
+             */
+            field_mappings?: string[] | null;
         };
         /** SqlValidationError */
         SqlValidationError: {
@@ -5625,7 +5824,7 @@ export interface operations {
                 search?: string | null;
                 /** @description Filter by enabled status */
                 enabled?: boolean | null;
-                /** @description Sort field (source, display_name, enabled) */
+                /** @description Sort field (source, display_name, enabled, current, deployed_version, updated_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
@@ -5644,7 +5843,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SourceSummary_"];
+                    "application/json": components["schemas"]["PaginatedSourceSummaryResponse"];
                 };
             };
             /** @description Validation Error */
@@ -5667,7 +5866,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Source-Input"];
+                "application/json": components["schemas"]["SourceWriteRequest"];
             };
         };
         responses: {
@@ -5700,6 +5899,40 @@ export interface operations {
             };
         };
     };
+    get_source_version_api_v1_sources__name__versions_get: {
+        parameters: {
+            query: {
+                /** @description Source version id to return (required) */
+                version: string;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceVersionGetResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_source_api_v1_sources__name__get: {
         parameters: {
             query?: never;
@@ -5717,7 +5950,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Source-Output"];
+                    "application/json": components["schemas"]["Source"];
                 };
             };
             /** @description Validation Error */
@@ -5742,7 +5975,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Source-Input"];
+                "application/json": components["schemas"]["SourceWriteRequest"];
             };
         };
         responses: {
@@ -7534,7 +7767,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MetaSchema-Output"];
+                    "application/json": components["schemas"]["MetaSchemaVersionWriteResponse"];
                 };
             };
             /** @description Validation Error */
@@ -7636,7 +7869,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MetaSchema-Output"];
+                    "application/json": components["schemas"]["MetaSchemaVersionWriteResponse"];
                 };
             };
             /** @description Validation Error */
@@ -7695,7 +7928,7 @@ export interface operations {
     get_schema_columns_api_v1_schemas__source_name__columns_get: {
         parameters: {
             query?: {
-                /** @description Schema version (latest if not specified) */
+                /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
             };
             header?: never;
@@ -7728,7 +7961,10 @@ export interface operations {
     };
     build_schema_api_v1_schemas__source_name__build_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Source version id (defaults to deployed_version) */
+                version?: string | null;
+            };
             header?: never;
             path: {
                 source_name: string;
