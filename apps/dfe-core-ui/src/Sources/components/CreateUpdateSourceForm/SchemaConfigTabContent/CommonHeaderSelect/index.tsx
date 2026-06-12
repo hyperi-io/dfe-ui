@@ -1,18 +1,16 @@
-import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import {
   getSchemaLeafName,
   getSchemaPathPrefix,
   isSelectableSchemaOptionValue,
   schemasToGroupedSelectOptions,
-  versionsFromMetaSchemaOutput,
 } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/helpers/schemaSelectOptions';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const SCROLL_LOAD_THRESHOLD = 50;
+const SCROLL_LOAD_THRESHOLD = 0;
 
-const renderSelectedSchemaLabel = (fullPath: string) => {
+const renderSelectedCommonHeaderLabel = (fullPath: string) => {
   const pathPrefix = getSchemaPathPrefix(fullPath);
   const leafName = getSchemaLeafName(fullPath);
 
@@ -30,7 +28,7 @@ const renderSelectedSchemaLabel = (fullPath: string) => {
   );
 };
 
-interface MetaSchemaSelectCreateProps extends Omit<SelectProps, 'onChange'> {
+interface CommonHeaderSelectProps extends Omit<SelectProps, 'onChange'> {
   onChange?: (
     value: string | null,
     meta?: { versions: string[] },
@@ -38,30 +36,32 @@ interface MetaSchemaSelectCreateProps extends Omit<SelectProps, 'onChange'> {
   ) => void;
 }
 
-export const MetaSchemaSelectCreate = ({
+export const CommonHeaderSelect = ({
   value,
   onChange,
   onOpenChange,
   ...props
-}: MetaSchemaSelectCreateProps) => {
-  const [schemaValue, setSchemaValue] = useState<string | null>(value ?? null);
+}: CommonHeaderSelectProps) => {
+  const [commonHeaderValue, setCommonHeaderValue] = useState<string | null>(
+    value ?? null,
+  );
   const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {
-    data: { items: schemas },
+    data: { items: commonHeaders },
     isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch: refetchSchemas,
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
-    schema_type: ['meta'],
+    per_page: -1,
+    schema_type: ['common-header'],
   });
 
-  const schemaSelectOptions = useMemo(() => {
-    const base = schemasToGroupedSelectOptions(schemas ?? []);
+  const commonHeaderSelectOptions = useMemo(() => {
+    const base = schemasToGroupedSelectOptions(commonHeaders ?? []);
 
     if (!isFetchingNextPage) {
       return base;
@@ -73,28 +73,30 @@ export const MetaSchemaSelectCreate = ({
         label: (
           <span className="flex items-center gap-2 text-sm text-foreground/50 dark:text-dark-foreground/50">
             <Spin size="small" />{' '}
-            <span className="sr-only">Loading more schemas...</span>
+            <span className="sr-only">Loading more common headers...</span>
           </span>
         ),
         value: '__loading__',
         disabled: true,
       },
     ];
-  }, [schemas, isFetchingNextPage]);
+  }, [commonHeaders, isFetchingNextPage]);
 
-  // Loads current schema versions if value is provided
-  const initialSchema = schemas.find((schema) => schema.name === value);
+  // Loads current common header versions if value is provided
+  const initialCommonHeader = commonHeaders.find(
+    (commonHeader) => commonHeader.name === value,
+  );
   const onLoad = useCallback(() => {
-    if (initialSchema) {
+    if (initialCommonHeader) {
       onChange?.(
-        initialSchema.name,
+        initialCommonHeader.name,
         {
-          versions: initialSchema.versions ?? [],
+          versions: initialCommonHeader.versions ?? [],
         },
         '_load',
       );
     }
-  }, [initialSchema, onChange]);
+  }, [initialCommonHeader, onChange]);
 
   useEffect(() => {
     onLoad();
@@ -114,39 +116,41 @@ export const MetaSchemaSelectCreate = ({
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
-  const applySchemaSelection = useCallback(
+  const applyCommonHeaderSelection = useCallback(
     (selectedValue: string, versionsOverride?: string[]) => {
       if (!isSelectableSchemaOptionValue(selectedValue)) {
         return;
       }
 
-      setSchemaValue(selectedValue);
+      setCommonHeaderValue(selectedValue);
       setSearchValue('');
       onChange?.(
         selectedValue,
         {
           versions:
             versionsOverride ??
-            schemas.find((schema) => schema.name === selectedValue)?.versions ??
+            commonHeaders.find(
+              (commonHeader) => commonHeader.name === selectedValue,
+            )?.versions ??
             [],
         },
         '_select',
       );
     },
-    [onChange, schemas],
+    [onChange, commonHeaders],
   );
 
   const handleSelectFromDropdown = useCallback(
     (selectedValue: string) => {
-      applySchemaSelection(selectedValue);
+      applyCommonHeaderSelection(selectedValue);
     },
-    [applySchemaSelection],
+    [applyCommonHeaderSelection],
   );
 
   const handleSearchClear = useCallback(() => {
     setSearchValue('');
-    onChange?.(schemaValue, undefined, '_clear_search');
-  }, [onChange, schemaValue]);
+    onChange?.(commonHeaderValue, undefined, '_clear_search');
+  }, [onChange, commonHeaderValue]);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -160,15 +164,15 @@ export const MetaSchemaSelectCreate = ({
   );
 
   const showSelectedLabel = Boolean(
-    schemaValue && !dropdownOpen && searchValue === '',
+    commonHeaderValue && !dropdownOpen && searchValue === '',
   );
 
   const selectedLabel = useMemo(() => {
-    if (!showSelectedLabel || !schemaValue) {
+    if (!showSelectedLabel || !commonHeaderValue) {
       return null;
     }
-    return renderSelectedSchemaLabel(schemaValue);
-  }, [schemaValue, showSelectedLabel]);
+    return renderSelectedCommonHeaderLabel(commonHeaderValue);
+  }, [commonHeaderValue, showSelectedLabel]);
 
   return (
     <div className="flex min-w-0 flex-1 gap-2">
@@ -176,30 +180,21 @@ export const MetaSchemaSelectCreate = ({
         {...props}
         className="min-w-0 flex-1"
         loading={isLoading}
-        options={schemaSelectOptions}
-        placeholder="Select meta schema"
+        options={commonHeaderSelectOptions}
+        placeholder="Select common header"
         showSearch={{
           onSearch: setSearchValue,
           searchValue,
           autoClearSearchValue: false,
         }}
         virtual={false}
-        value={schemaValue ?? undefined}
+        value={commonHeaderValue ?? undefined}
         labelRender={() => selectedLabel}
         onOpenChange={handleOpenChange}
         onSelect={handleSelectFromDropdown}
         onPopupScroll={handlePopupScroll}
         allowClear={searchValue !== ''}
         onClear={handleSearchClear}
-      />
-      <CreateSchemaDrawer
-        onSuccess={(response) => {
-          void refetchSchemas();
-          applySchemaSelection(
-            response.path ?? '',
-            versionsFromMetaSchemaOutput(response),
-          );
-        }}
       />
     </div>
   );

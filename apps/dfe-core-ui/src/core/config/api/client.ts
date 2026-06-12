@@ -264,4 +264,20 @@ export class ApiError extends Error {
   }
 }
 
+/** Parsed error JSON body from a failed request (`ApiError.detail`). */
+export function getApiErrorResponseBody(
+  error: unknown,
+): { message: string; errors?: { message: string }[] } | null {
+  if (!(error instanceof ApiError)) return null;
+  const { detail } = error;
+  if (detail == null || typeof detail !== 'object') return null;
+  if (
+    !('message' in detail) ||
+    typeof (detail as { message: unknown }).message !== 'string'
+  ) {
+    return null;
+  }
+  return detail as { message: string; errors?: { message: string }[] };
+}
+
 export type ApiClient = ReturnType<typeof createApiClient>;
