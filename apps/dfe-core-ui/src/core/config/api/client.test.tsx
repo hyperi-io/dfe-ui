@@ -9,7 +9,12 @@ import {
   test,
   vi,
 } from 'vitest';
-import { ApiError, createApiClient, getErrorMessage } from './client';
+import {
+  ApiError,
+  createApiClient,
+  getApiErrorResponseBody,
+  getErrorMessage,
+} from './client';
 
 const BASE_URL = 'https://api.example.com';
 
@@ -296,6 +301,40 @@ describe('createApiClient', () => {
       expect(err).toBeInstanceOf(ApiError);
       expect((err as ApiError).message).toBe('Custom error message');
     }
+  });
+});
+
+describe('getApiErrorResponseBody', () => {
+  test('returns ErrorResponse from ApiError.detail', () => {
+    const error = new ApiError(422, 'Unprocessable Entity', {
+      code: 'validation_error',
+      message: '1 validation error(s)',
+      errors: [
+        {
+          field: '',
+          message:
+            "Value error, current version '1.0.0' must define at least one column",
+          code: 'value_error',
+        },
+      ],
+    });
+
+    expect(getApiErrorResponseBody(error)).toEqual({
+      code: 'validation_error',
+      message: '1 validation error(s)',
+      errors: [
+        {
+          field: '',
+          message:
+            "Value error, current version '1.0.0' must define at least one column",
+          code: 'value_error',
+        },
+      ],
+    });
+  });
+
+  test('returns null for non-ApiError', () => {
+    expect(getApiErrorResponseBody(new Error('nope'))).toBeNull();
   });
 });
 

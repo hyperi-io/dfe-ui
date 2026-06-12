@@ -12,6 +12,7 @@ import {
 } from 'antd';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
+import { CommonHeaderSelect } from './CommonHeaderSelect';
 import { MetaSchemaSelectCreate } from './MetaSchemaSelectCreate';
 
 export const MetaSchemaForm = ({
@@ -21,8 +22,7 @@ export const MetaSchemaForm = ({
   formValidation: FormRule;
   form: FormInstance<CreateUpdateSourceFormData>;
 }) => {
-  const [versions, setVersions] = useState<string[]>([]);
-
+  const [metaSchemaVersions, setMetaSchemaVersions] = useState<string[]>([]);
   const handleChangeMetaSchema = useCallback(
     (
       value: string | null,
@@ -30,7 +30,7 @@ export const MetaSchemaForm = ({
       action_type?: string,
     ) => {
       if (value) {
-        setVersions(meta?.versions ?? []);
+        setMetaSchemaVersions(meta?.versions ?? []);
 
         if (action_type === '_select') {
           form.setFieldsValue({
@@ -44,37 +44,80 @@ export const MetaSchemaForm = ({
     },
     [form],
   );
-
-  const versionsOptions = useMemo(() => {
+  const metaSchemaVersionsOptions = useMemo(() => {
     return (
-      versions?.map((version) => ({ label: version, value: version })) ?? []
+      metaSchemaVersions?.map((version) => ({
+        label: version,
+        value: version,
+      })) ?? []
     );
-  }, [versions]);
+  }, [metaSchemaVersions]);
+
+  const [commonHeaderVersions, setCommonHeaderVersions] = useState<string[]>(
+    [],
+  );
+  const handleChangeCommonHeader = useCallback(
+    (
+      value: string | null,
+      commonHeader?: { versions: string[] },
+      action_type?: string,
+    ) => {
+      if (value) {
+        setCommonHeaderVersions(commonHeader?.versions ?? []);
+
+        if (action_type === '_select') {
+          form.setFieldsValue({
+            header: {
+              version:
+                commonHeader?.versions?.length === 1
+                  ? commonHeader?.versions?.[0]
+                  : undefined,
+            },
+          });
+        }
+      }
+    },
+    [form],
+  );
+  const commonHeaderVersionsOptions = useMemo(() => {
+    return (
+      commonHeaderVersions?.map((version) => ({
+        label: version,
+        value: version,
+      })) ?? []
+    );
+  }, [commonHeaderVersions]);
+
   return (
     <div className="grid grid-cols-2 gap-2">
       <Form.Item
         className="w-full"
         name={['header', 'type']}
+        /**
+         * Validate on blur to prevent form submission when clearing the meta schema
+         */
+        validateTrigger={['onBlur']}
         label="Header Type"
         rules={[formValidation]}
       >
-        <Select
-          options={[
-            { label: 'Timeseries', value: 'time_series' },
-            { label: 'Minimal', value: 'minimal' },
-            { label: 'Passthrough', value: 'passthrough' },
-          ]}
-          placeholder="Select header type"
-          allowClear
-        />
+        <CommonHeaderSelect onChange={handleChangeCommonHeader} />
       </Form.Item>
+
       <Form.Item
         className="w-full"
         name={['header', 'version']}
         label="Header Version"
         rules={[formValidation]}
       >
-        <Input placeholder="Enter header version" />
+        <Select
+          options={commonHeaderVersionsOptions}
+          disabled={!commonHeaderVersions?.length}
+          placeholder={
+            commonHeaderVersions?.length
+              ? 'Select header version'
+              : 'Select header first to access versions'
+          }
+        />
       </Form.Item>
 
       <Form.Item
@@ -121,10 +164,10 @@ export const MetaSchemaForm = ({
         rules={[formValidation]}
       >
         <Select
-          options={versionsOptions}
-          disabled={!versions?.length}
+          options={metaSchemaVersionsOptions}
+          disabled={!metaSchemaVersions?.length}
           placeholder={
-            versions?.length
+            metaSchemaVersions?.length
               ? 'Select meta schema version'
               : 'Select meta schema first to access versions'
           }

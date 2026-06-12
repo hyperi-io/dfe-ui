@@ -1,14 +1,14 @@
 import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
-import { Select, SelectProps, Spin } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getSchemaLeafName,
   getSchemaPathPrefix,
   isSelectableSchemaOptionValue,
   schemasToGroupedSelectOptions,
   versionsFromMetaSchemaOutput,
-} from './schemaSelectOptions';
+} from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/helpers/schemaSelectOptions';
+import { Select, SelectProps, Spin } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const SCROLL_LOAD_THRESHOLD = 50;
 
