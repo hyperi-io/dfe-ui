@@ -11,6 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSources } from '.';
+import { SourceListResponse, SourceListSummary } from './types';
 import { server } from './useFetchInfiniteFilteredSources.mocks';
 
 class MockIntersectionObserver {
@@ -42,15 +43,17 @@ describe('useFetchInfiniteFilteredSources', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.data).toEqual({
+      const expectedResponse: SourceListResponse = {
         items: [],
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
         total_pages: 0,
         next_page: null,
         prev_page: null,
-      });
+      };
+      expect(result.current.data).toEqual(expectedResponse);
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
     });
@@ -66,18 +69,21 @@ describe('useFetchInfiniteFilteredSources', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data).toBeDefined();
-      expect(result.current.data.items).toHaveLength(10);
-      expect(result.current.data.items[0]).toMatchObject({
-        source: 'string',
+      const responseItem: SourceListSummary = {
+        name: 'string',
         display_name: 'string',
-        description: 'string',
         enabled: true,
-        header_type: 'string',
+        current: 'string',
+        versions: ['string'],
+        updated_at: 'string',
         has_transform: false,
         has_fetcher: false,
         mapping_standards: ['string'],
-      });
+        deployed_version: 'string',
+      };
+      expect(result.current.data).toBeDefined();
+      expect(result.current.data.items).toHaveLength(10);
+      expect(result.current.data.items[0]).toMatchObject(responseItem);
       expect(result.current.isError).toBe(false);
     });
 
@@ -140,8 +146,9 @@ describe('useFetchInfiniteFilteredSources', () => {
       );
 
       // Data should be flattened - 20 items total
-      expect(result.current.data.items[0].source).toBe('string');
-      expect(result.current.data.items[10].source).toBe('string');
+      expect(result.current.data.items[0].name).toBe('string');
+      expect(result.current.data.items[10].name).toBe('string');
+      expect(result.current.data.items[19].name).toBe('string');
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -168,9 +175,9 @@ describe('useFetchInfiniteFilteredSources', () => {
 
       // Verify we have 20 items (pages 1 and 2)
       expect(result.current.data.items).toHaveLength(20);
-      expect(result.current.data.items[0].source).toBe('string');
-      expect(result.current.data.items[10].source).toBe('string');
-      expect(result.current.data.items[19].source).toBe('string');
+      expect(result.current.data.items[0].name).toBe('string');
+      expect(result.current.data.items[10].name).toBe('string');
+      expect(result.current.data.items[19].name).toBe('string');
     });
 
     it('should not have next page when all data is loaded', async () => {
@@ -256,15 +263,18 @@ describe('useFetchInfiniteFilteredSources', () => {
       expect(result.current.isError).toBe(true);
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
-      expect(result.current.data).toEqual({
+
+      const expectedResponse: SourceListResponse = {
         items: [],
+        objects: {},
         total: 0,
         page: 1,
         per_page: 10,
         total_pages: 0,
         next_page: null,
         prev_page: null,
-      });
+      };
+      expect(result.current.data).toEqual(expectedResponse);
     });
   });
 
@@ -286,7 +296,7 @@ describe('useFetchInfiniteFilteredSources', () => {
 
     it('should include enabled filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSources({ enabled: 'true' }),
+        () => useFetchInfiniteFilteredSources({ enabled: true }),
         {
           wrapper,
         },
@@ -301,7 +311,7 @@ describe('useFetchInfiniteFilteredSources', () => {
 
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSources({ sort_by: 'source' }),
+        () => useFetchInfiniteFilteredSources({ sort_by: 'path' }),
         {
           wrapper,
         },
@@ -337,8 +347,8 @@ describe('useFetchInfiniteFilteredSources', () => {
         () =>
           useFetchInfiniteFilteredSources({
             search: 'test',
-            enabled: 'true',
-            sort_by: 'source',
+            enabled: true,
+            sort_by: 'path',
             sort_order: 'asc',
 
             per_page: 20,
@@ -445,6 +455,10 @@ describe('useFetchInfiniteFilteredSources', () => {
         API_CONFIG_MOCKS.sources.default.get.success({
           mockedResponse: {
             items: [],
+            objects: {
+              items: [],
+              children: {},
+            },
             total: 0,
             page: 0,
             per_page: 0,

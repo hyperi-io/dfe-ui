@@ -1,14 +1,17 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 /** useFetchInfiniteFilteredSources props */
 /**
- * @param search - The search query to filter the sources by name and description.
- * @param enabled - Whether the sources are enabled.
- * @param sort_by - The field to sort the sources by (source, display_name, enabled).
+ * @param search - The search query to filter the sources by display name.
+ * @param enabled - The status of the sources to filter by (true, false).
+ * @param sort_by - The field to sort the sources by (display_name, enabled).
  * @param sort_order - The order to sort the sources by.
  * @param per_page - The number of sources to fetch per page.
  */
@@ -22,6 +25,8 @@ export const useFetchInfiniteFilteredSources = ({
   sort_order,
   per_page,
 }: UseFetchInfiniteFilteredSourcesProps = {}) => {
+  const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
+
   const {
     data,
     isLoading,
@@ -32,13 +37,19 @@ export const useFetchInfiniteFilteredSources = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['sources', search, enabled, sort_by, sort_order, per_page],
+    queryKey: [
+      'sources',
+      debouncedSearch,
+      enabled,
+      sort_by,
+      sort_order,
+      per_page,
+    ],
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.sources.default, {
         queryParams: {
-          search: search,
-          enabled:
-            enabled === 'true' ? true : enabled === 'false' ? false : undefined,
+          search: debouncedSearch || undefined,
+          enabled,
           sort_by,
           sort_order,
           page: pageParam,
@@ -59,6 +70,7 @@ export const useFetchInfiniteFilteredSources = ({
     if (!data?.pages?.length) {
       return {
         items: [],
+        objects: {},
         total: 0,
         page: 1,
         per_page: per_page ?? 10,
@@ -69,9 +81,16 @@ export const useFetchInfiniteFilteredSources = ({
     }
 
     const allItems = data.pages.flatMap((page) => page.items || []);
+    const allObjects = data.pages.reduce((acc, page) => {
+      return {
+        ...acc,
+        ...page.objects,
+      };
+    }, {});
     return {
       ...data.pages[0],
       items: allItems,
+      objects: allObjects,
     };
   }, [data, per_page]);
 

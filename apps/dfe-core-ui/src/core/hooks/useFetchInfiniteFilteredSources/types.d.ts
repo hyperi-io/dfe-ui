@@ -1,11 +1,12 @@
 import { components } from '@repo/dfe-engine-types';
 
 export type SourceListResponse =
-  components['schemas']['PaginatedResponse_SourceSummary_'];
-export type SourceSummary = components['schemas']['SourceSummary'];
+  components['schemas']['PaginatedSourceSummaryResponse'];
+export type SourceSummary = components['schemas']['SourceSummaryObject'];
+export type SourceListSummary = SourceListResponse['items'][number];
 export interface SourceListRequestParams {
   search?: string;
-  enabled?: 'true' | 'false';
+  enabled?: boolean;
   sort_by?: string;
   sort_order?: string;
   page?: number;

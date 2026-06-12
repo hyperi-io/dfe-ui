@@ -117,7 +117,7 @@ describe('ListSourcesContext', () => {
 
       expect(result.current.filters).toEqual({
         search: 'foo',
-        enabled: 'true',
+        enabled: true,
         sort_by: 'source',
         sort_order: 'asc',
       });
@@ -129,7 +129,7 @@ describe('ListSourcesContext', () => {
         .withListSourcesProvider({
           defaultFilters: {
             search: 'default-search',
-            enabled: 'true' as const,
+            enabled: true,
           },
         });
 
@@ -221,7 +221,7 @@ describe('ListSourcesContext', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      result.current.setFilters({ search: 'new-search', enabled: 'false' });
+      result.current.setFilters({ search: 'new-search', enabled: false });
 
       expect(mockReplace).toHaveBeenCalledWith(
         '/sources?search=new-search&enabled=false',
@@ -239,7 +239,7 @@ describe('ListSourcesContext', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      result.current.setFilters({ enabled: 'true' });
+      result.current.setFilters({ enabled: true });
 
       expect(mockReplace).toHaveBeenCalledWith(
         '/sources?search=existing&enabled=true',

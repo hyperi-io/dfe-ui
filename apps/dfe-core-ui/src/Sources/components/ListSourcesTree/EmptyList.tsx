@@ -1,9 +1,8 @@
+import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
-import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export const EmptyList = ({
   hasFilters,
@@ -16,16 +15,6 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredSourcesProps;
   className?: string;
 }) => {
-  const searchParams = useSearchParams();
-  const isCreateSourceVisible = searchParams.get('create_source') === 'true';
-  const router = useRouter();
-  const pathname = usePathname();
-  const handleClose = () => {
-    // Remove the create_source parameter from the url
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('create_source');
-    router.replace(`${pathname}?${newSearchParams.toString()}`);
-  };
   return (
     <div
       className={cn(
@@ -49,10 +38,7 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <CreateSourceDrawer
-          open={isCreateSourceVisible}
-          onClose={handleClose}
-        />
+        <CreateSourceDrawer />
       )}
     </div>
   );
