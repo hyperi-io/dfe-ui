@@ -13,7 +13,7 @@ export const SourceSelect = (props: SelectProps) => {
     isFetchingNextPage,
   } = useFetchInfiniteFilteredSources({
     search,
-    enabled: 'true',
+    enabled: true,
   });
 
   const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -29,8 +29,8 @@ export const SourceSelect = (props: SelectProps) => {
 
   const sourcesOptions = useMemo(() => {
     return sources.map((source) => ({
-      label: source.source,
-      value: source.source,
+      label: source.name,
+      value: source.name,
     }));
   }, [sources]);
 

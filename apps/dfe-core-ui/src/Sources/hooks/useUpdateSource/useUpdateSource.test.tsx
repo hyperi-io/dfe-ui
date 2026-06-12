@@ -73,6 +73,8 @@ describe('.useUpdateSource', () => {
       const expectedResponse: SourceUpdateResponse = {
         source: 'string',
         message: 'ok',
+        current: 'string',
+        versions: ['string'],
       };
 
       await waitFor(() => {

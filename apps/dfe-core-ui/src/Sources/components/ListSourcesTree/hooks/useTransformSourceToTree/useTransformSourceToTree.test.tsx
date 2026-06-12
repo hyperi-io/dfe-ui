@@ -68,6 +68,7 @@ describe('useTransformSourceToTree', () => {
       useTransformSourceToTree({
         sourceObjects: {},
         setSelectedSource,
+        selectedSourceName: null,
         ...defaultSelection,
       }),
     );
@@ -112,6 +113,7 @@ describe('useTransformSourceToTree', () => {
       useTransformSourceToTree({
         sourceObjects: source_objects,
         setSelectedSource,
+        selectedSourceName: null,
         ...defaultSelection,
       }),
     );
@@ -152,6 +154,7 @@ describe('useTransformSourceToTree', () => {
           items: [baseSource({ name: 'solo.source', versions: [] })],
         },
         setSelectedSource: vi.fn(),
+        selectedSourceName: null,
         ...defaultSelection,
       }),
     );
@@ -174,6 +177,7 @@ describe('useTransformSourceToTree', () => {
             },
           },
         },
+        selectedSourceName: null,
         setSelectedSource: vi.fn(),
         ...defaultSelection,
       }),
@@ -204,7 +208,7 @@ describe('useTransformSourceToTree', () => {
         useTransformSourceToTree({
           sourceObjects: source,
           setSelectedSource: onSelect,
-          selectedSourcePath: null,
+          selectedSourceName: null,
           selectedSourceVersion: null,
           expandTreeNode: onExpand,
         }),
