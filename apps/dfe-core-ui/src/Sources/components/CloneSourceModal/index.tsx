@@ -22,9 +22,11 @@ type FormData = z.infer<typeof formSchema>;
 export const CloneSourceModal = ({
   source,
   onSuccess,
+  versions,
 }: {
   source: SourceSummary;
   onSuccess?: (source: SourceCreateResponse) => void;
+  versions: string[];
 }) => {
   const [enabled, setEnabled] = useState(false);
   const [form] = Form.useForm<FormData>();

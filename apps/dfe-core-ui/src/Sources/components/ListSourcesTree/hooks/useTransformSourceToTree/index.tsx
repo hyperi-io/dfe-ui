@@ -1,121 +1,250 @@
 import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
-import type { SourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
-import { IconFile } from '@repo/dfe-icons';
-import { notification, TreeDataNode } from 'antd';
+import { SourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
+import { notification, Tooltip, TreeDataNode } from 'antd';
+import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
+const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
 
-export const sourceTreeKey = (sourceName: string) => `source:${sourceName}`;
+/** Ant Design Tree keys must be globally unique; folder and source paths can share the same string. */
+export const folderTreeKey = (pathSegments: string[]) =>
+  `dir:${pathSegments.join('.')}`;
 
-const sourceListLabel = (sourceDetail: SourceSummary) => {
-  const { display_name, source } = sourceDetail;
-  const displayName = display_name?.trim();
-  if (displayName) {
-    return (
-      <>
-        {displayName}
-        <span className="ml-2 bg-background-muted dark:bg-dark-background-muted font-normal rounded-full px-2 py-0.5 text-xs text-foreground/50 dark:text-dark-foreground/50">
-          {source}
-        </span>
-      </>
-    );
+export const sourceTreeKey = (sourcePath: string) => `source:${sourcePath}`;
+
+export const versionTreeKey = (sourcePath: string, version: string) =>
+  `${sourceTreeKey(sourcePath)}@${version}`;
+
+/** Folder keys (dot-separated) plus source key when a version is selected. */
+export const getExpandedKeysForSourceSelection = (
+  sourcePath: string | null,
+  sourceVersion: string | null,
+): string[] => {
+  if (!sourcePath) {
+    return [];
   }
-  return source;
+
+  const segments = sourcePath.split('/');
+  const keys: string[] = [];
+
+  for (let i = 0; i < segments.length - 1; i++) {
+    keys.push(folderTreeKey(segments.slice(0, i + 1)));
+  }
+
+  if (sourceVersion) {
+    keys.push(sourceTreeKey(sourcePath));
+  }
+
+  return keys;
 };
 
-const sourcesToTreeData = ({
-  sources,
-  setSelectedSourceName,
-  selectedSourceName,
-  refetchSources,
-  onCloneSuccess,
-  onDeleteSuccess,
-}: {
-  sources: SourceSummary[];
-  setSelectedSourceName: (source: string | null) => void;
-  selectedSourceName: string | null;
-  refetchSources: () => void;
-  onCloneSuccess: (sourceName: string) => void;
-  onDeleteSuccess: (sourceName: string) => void;
-}): TreeDataNode[] =>
-  sources.map((source) => ({
-    key: sourceTreeKey(source.source),
+const buildVersionChildren = (
+  source: NonNullable<SourceListResponse['objects']['items']>[number],
+  setSelectedSource: ({
+    source_name,
+    source_version,
+  }: {
+    source_name: string;
+    source_version: string;
+  }) => void,
+  selectedSourcePath: string | null,
+  selectedSourceVersion: string | null,
+  expandTreeNode: (key: string) => void,
+): TreeDataNode[] =>
+  (source.versions ?? []).map((version) => ({
+    key: versionTreeKey(source.name, version),
     title: (
       <TreeInteractiveLabel
-        icon={fileIcon}
-        title={sourceListLabel(source)}
-        onClick={() => {
-          setSelectedSourceName(source.source);
-        }}
-        selected={selectedSourceName === source.source}
-        actions={
+        title={
           <>
-            <CloneSourceModal
-              source={source}
-              onSuccess={({ source: newSource }) => {
-                setSelectedSourceName(newSource);
-                refetchSources();
-                onCloneSuccess(newSource);
-              }}
-            />
-            <DeleteSourceModal
-              source={source.source}
-              onSuccess={() => {
-                setSelectedSourceName(null);
-                refetchSources();
-                onDeleteSuccess(source.source);
-              }}
-            />
+            <span className="min-w-0 truncate">{version}</span>
+            {version === source.current && (
+              <Tooltip destroyOnHidden title="Current version">
+                <IconStarFilled className="shrink-0 text-yellow-500" />
+              </Tooltip>
+            )}
           </>
+        }
+        onClick={() => {
+          expandTreeNode(sourceTreeKey(source.name));
+          setSelectedSource({
+            source_name: source.name,
+            source_version: version,
+          });
+        }}
+        selected={
+          selectedSourcePath === source.name &&
+          selectedSourceVersion === version
         }
       />
     ),
     isLeaf: true,
   }));
 
-export const useTransformSourceToTree = ({
-  sources,
-  setSelectedSourceName,
+const sourceSummaryToTreeData = ({
+  node,
+  pathSegments,
+  setSelectedSource,
   selectedSourceName,
-  refetchSources,
+  selectedSourceVersion,
+  apiNotification,
+  expandTreeNode,
 }: {
-  sources: SourceSummary[];
-  setSelectedSourceName: (source: string | null) => void;
+  node: SourceListResponse['objects'];
+  pathSegments: string[];
+  setSelectedSource: ({
+    source_name,
+    source_version,
+  }: {
+    source_name: string;
+    source_version: string;
+  }) => void;
   selectedSourceName: string | null;
-  refetchSources: () => void;
+  selectedSourceVersion: string | null;
+  apiNotification: NotificationInstance;
+  expandTreeNode: (key: string) => void;
+}): TreeDataNode[] => {
+  const out: TreeDataNode[] = [];
+
+  for (const source of node.items ?? []) {
+    const versionChildren = buildVersionChildren(
+      source,
+      setSelectedSource,
+      selectedSourceName,
+      selectedSourceVersion,
+      expandTreeNode,
+    );
+    const sourceIsLeaf = versionChildren.length === 0;
+    out.push({
+      key: sourceTreeKey(source.name),
+      title: (
+        <TreeInteractiveLabel
+          icon={fileIcon}
+          title={source.name.split('/').pop() ?? ''}
+          onClick={() => {
+            expandTreeNode(sourceTreeKey(source.name));
+            setSelectedSource({
+              source_name: source.name,
+              source_version: source.current,
+            });
+          }}
+          selected={
+            selectedSourceName === source.name &&
+            selectedSourceVersion === source.current
+          }
+          actions={
+            <>
+              <CloneSourceModal
+                source={source}
+                versions={source.versions ?? []}
+                onSuccess={(source) =>
+                  apiNotification.success({
+                    title: 'Source cloned successfully',
+                    description: `${source.source} has been cloned successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+              <DeleteSourceModal
+                source={`${source.name}`}
+                onSuccess={() =>
+                  apiNotification.success({
+                    title: 'Source deleted successfully',
+                    description: `${source.name} has been deleted successfully`,
+                    placement: 'bottomLeft',
+                  })
+                }
+              />
+            </>
+          }
+        />
+      ),
+      children: versionChildren.length > 0 ? versionChildren : undefined,
+      isLeaf: sourceIsLeaf,
+    });
+  }
+
+  const childEntries = Object.entries(node.children ?? {}).sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+
+  for (const [segment, child] of childEntries) {
+    const nextSegments = [...pathSegments, segment];
+    const nested = sourceSummaryToTreeData({
+      node: child,
+      pathSegments: nextSegments,
+      setSelectedSource,
+      selectedSourceName,
+      selectedSourceVersion,
+      apiNotification,
+      expandTreeNode,
+    });
+
+    if (nested.length === 0) {
+      continue;
+    }
+
+    const folderKey = folderTreeKey(nextSegments);
+    out.push({
+      key: folderKey,
+      title: (
+        <TreeInteractiveLabel
+          icon={folderIcon}
+          title={segment}
+          onClick={() => expandTreeNode(folderKey)}
+        />
+      ),
+      children: nested,
+    });
+  }
+
+  return out;
+};
+
+export const useTransformSourceToTree = ({
+  sourceObjects,
+  setSelectedSource,
+  selectedSourceName,
+  selectedSourceVersion,
+  expandTreeNode,
+}: {
+  sourceObjects: SourceListResponse['objects'];
+  setSelectedSource: ({
+    source_name,
+    source_version,
+  }: {
+    source_name: string;
+    source_version: string;
+  }) => void;
+  selectedSourceName: string | null;
+  selectedSourceVersion: string | null;
+  expandTreeNode: (key: string) => void;
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
 
   const tree = useMemo(
     () =>
-      sourcesToTreeData({
-        sources,
-        setSelectedSourceName,
+      sourceSummaryToTreeData({
+        node: sourceObjects,
+        pathSegments: [],
+        setSelectedSource,
         selectedSourceName,
-        refetchSources,
-        onCloneSuccess: (sourceName) =>
-          apiNotification.success({
-            title: 'Source cloned successfully',
-            description: `${sourceName} has been cloned successfully`,
-            placement: 'bottomLeft',
-          }),
-        onDeleteSuccess: (sourceName) =>
-          apiNotification.success({
-            title: 'Source deleted successfully',
-            description: `${sourceName} has been deleted successfully`,
-            placement: 'bottomLeft',
-          }),
+        selectedSourceVersion,
+        apiNotification,
+        expandTreeNode,
       }),
     [
-      sources,
-      setSelectedSourceName,
+      sourceObjects,
+      setSelectedSource,
       selectedSourceName,
-      refetchSources,
+      selectedSourceVersion,
       apiNotification,
+      expandTreeNode,
     ],
   );
 
