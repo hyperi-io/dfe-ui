@@ -9,6 +9,11 @@ import {
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconChevronsLeft } from '@repo/dfe-icons';
 import { Button } from 'antd';
+
+interface FormErrorMessage {
+  message: string;
+  errors: { message: string }[];
+}
 interface CreateSchemaReviewContextValue {
   isReviewing: boolean;
   drawerTitle: React.ReactNode | string;
@@ -17,8 +22,8 @@ interface CreateSchemaReviewContextValue {
   handleGoBack: () => void;
   handleReview: (values: CreateSchemaFormData) => void;
   handleReset: () => void;
-  formErrorMessage: string | null;
-  setFormErrorMessage: (formErrorMessage: string | null) => void;
+  formErrorMessage: FormErrorMessage | null;
+  setFormErrorMessage: (formErrorMessage: FormErrorMessage | null) => void;
 }
 
 export const CreateSchemaReviewContext =
@@ -38,7 +43,8 @@ export const CreateSchemaReviewProvider = ({
     null,
   );
 
-  const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
+  const [formErrorMessage, setFormErrorMessage] =
+    useState<FormErrorMessage | null>(null);
 
   const buttonLabel = isReviewing ? 'Create Schema' : 'Review Schema';
 

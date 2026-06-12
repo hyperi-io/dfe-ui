@@ -44,7 +44,13 @@ export const YamlLayout = ({
       <AceEditor value={yamlContent} mode="yaml" readOnly />
 
       {formErrorMessage && (
-        <FormNotification type="error" text={formErrorMessage} />
+        <FormNotification
+          type="error"
+          title={formErrorMessage.message}
+          text={formErrorMessage.errors
+            ?.map((error) => error?.message)
+            .join(', ')}
+        />
       )}
       <div className="flex flex-row gap-2 items-center ml-auto">
         <Button type="default" onClick={handleGoBack}>

@@ -54,9 +54,12 @@ const CreateSchemaFormBase = ({
       .every((result) => result.success);
 
     if (!isUploadedColumnsValid || invalidUploadedSchemaColumns.length > 0) {
-      setFormErrorMessage(
-        'There are validation errors in the uploaded columns. Please fix them and try again.',
-      );
+      setFormErrorMessage({
+        message:
+          'There are validation errors in the uploaded columns. Please fix them and try again.',
+        errors: [],
+      });
+
       return;
     }
 
@@ -71,9 +74,11 @@ const CreateSchemaFormBase = ({
       .every((result) => result.success);
 
     if (!isSchemaColumnsValid) {
-      setFormErrorMessage(
-        'There are validation errors in the schema columns. Please fix them and try again.',
-      );
+      setFormErrorMessage({
+        message:
+          'There are validation errors in the schema columns. Please fix them and try again.',
+        errors: [],
+      });
       return;
     }
 
@@ -94,9 +99,11 @@ const CreateSchemaFormBase = ({
       form={form}
       onFinish={onFinish}
       onFinishFailed={() => {
-        setFormErrorMessage(
-          'There are validation errors in the form. Please fix them and try again.',
-        );
+        setFormErrorMessage({
+          message:
+            'There are validation errors in the form. Please fix them and try again.',
+          errors: [],
+        });
       }}
       preserve
       onValuesChange={(changedValues, allValues) => {
@@ -165,7 +172,13 @@ const CreateSchemaFormBase = ({
       <SchemaUploadCollapse disabledFields={disabledFields} />
 
       {formErrorMessage && (
-        <FormNotification type="error" text={formErrorMessage} />
+        <FormNotification
+          type="error"
+          title={formErrorMessage.message}
+          text={formErrorMessage.errors
+            ?.map((error) => error?.message)
+            ?.join(', ')}
+        />
       )}
 
       <Form.Item className="flex justify-end">
