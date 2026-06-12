@@ -986,26 +986,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             path: 'string',
             current: 'string',
-            versions: {
-              string: {
-                date: 'string',
-                type: 'string',
-                summary: 'string',
-                columns: [
-                  {
-                    name: 'string',
-                    type: 'string',
-                    attribute: ['string'],
-                    use_case: 'string',
-                    expr: 'string',
-                  },
-                ],
-              },
-            },
+            versions: ['string'],
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
           schema_path?: string;
         } = {}) => {
           return http.post(
@@ -1103,26 +1088,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             path: 'string',
             current: 'string',
-            versions: {
-              string: {
-                date: 'string',
-                type: 'string',
-                summary: 'string',
-                columns: [
-                  {
-                    name: 'string',
-                    type: 'string',
-                    attribute: ['string'],
-                    use_case: 'string',
-                    expr: 'string',
-                  },
-                ],
-              },
-            },
+            versions: ['string'],
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
           schema_path?: string;
         } = {}) => {
           return http.patch(

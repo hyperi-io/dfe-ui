@@ -9,4 +9,4 @@ export interface MetaSchemaUpdateParameters {
 }
 
 export type MetaSchemaUpdateResponse =
-  components['schemas']['MetaSchema-Output'];
+  components['schemas']['MetaSchemaVersionWriteResponse'];
