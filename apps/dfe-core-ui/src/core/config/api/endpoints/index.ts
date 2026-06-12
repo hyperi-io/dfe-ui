@@ -10,6 +10,7 @@ export const API_CONFIG = Object.freeze({
   sources: {
     default: '/api/v1/sources',
     source: '/api/v1/sources/{name}',
+    sourceVersion: '/api/v1/sources/{name}/versions',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
   },

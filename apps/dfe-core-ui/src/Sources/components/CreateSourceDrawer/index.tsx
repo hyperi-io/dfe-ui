@@ -26,7 +26,7 @@ export const CreateSourceDrawer = ({
     onClose?.();
   };
 
-  const { refetch: refetchSources, setSelectedSourceName } =
+  const { refetch: refetchSources, setSelectedSource } =
     useListSourcesContext();
   const {
     mutate: createSourceMutation,
@@ -34,8 +34,11 @@ export const CreateSourceDrawer = ({
     error,
     reset: resetCreateSource,
   } = useCreateSource({
-    onSuccess: ({ source }) => {
-      setSelectedSourceName(source);
+    onSuccess: (response) => {
+      setSelectedSource({
+        source_name: response.source,
+        source_version: response.current,
+      });
       refetchSources();
       setIsDrawerVisible(false);
       api.success({

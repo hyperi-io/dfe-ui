@@ -1,17 +1,20 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { SourceListResponse, SourceListSummary } from './types';
 
-const SOURCE_ITEM = {
-  source: 'string',
+const SOURCE_ITEM: SourceListSummary = {
+  name: 'string',
   display_name: 'string',
-  description: 'string',
   enabled: true,
-  header_type: 'string',
+  current: 'string',
+  deployed_version: 'string',
+  versions: ['string'],
+  updated_at: 'string',
   has_transform: false,
   has_fetcher: false,
   mapping_standards: ['string'],
-} as const;
+};
 
 const TOTAL_ITEMS = 25;
 const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
@@ -29,15 +32,24 @@ function createPaginatedSourcesHandler() {
     const items = ALL_ITEMS.slice(start, start + perPage);
     const totalPages = Math.ceil(TOTAL_ITEMS / perPage);
 
-    return HttpResponse.json({
+    const response: SourceListResponse = {
       items,
       total: TOTAL_ITEMS,
+      objects: ALL_ITEMS.reduce(
+        (acc, item) => {
+          acc[item.name] = item;
+          return acc;
+        },
+        {} as Record<string, SourceListSummary>,
+      ),
       page,
       per_page: perPage,
       total_pages: totalPages,
       next_page: page < totalPages ? page + 1 : 0,
       prev_page: page > 1 ? page - 1 : 0,
-    });
+    };
+
+    return HttpResponse.json(response);
   });
 }
 

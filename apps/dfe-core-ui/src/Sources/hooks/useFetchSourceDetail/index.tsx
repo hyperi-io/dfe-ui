@@ -9,18 +9,21 @@ export const SOURCE_DETAIL_QUERY_KEY = (source_name: string | null) => [
 
 export const useFetchSourceDetail = ({
   source_name,
-  enabled = true,
+  source_version,
+  queryEnabled = true,
 }: {
   source_name: string | null;
-  enabled?: boolean;
+  source_version: string | null;
+  queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: SOURCE_DETAIL_QUERY_KEY(source_name),
     queryFn: () =>
-      apiClient.get(API_CONFIG.sources.source, {
+      apiClient.get(API_CONFIG.sources.sourceVersion, {
         pathParams: { name: source_name ?? '' },
+        queryParams: { version: source_version ?? '' },
       }),
-    enabled: !!source_name && enabled,
+    enabled: !!source_name && queryEnabled,
   });
   return { data, isLoading, error };
 };

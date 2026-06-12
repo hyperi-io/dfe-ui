@@ -1,31 +1,58 @@
+import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Sources/components/ListSourcesTree/EmptyList';
 import { ErrorList } from '@/Sources/components/ListSourcesTree/ErrorList';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { cn } from '@/core/utils/style';
 import { Spin, Tree } from 'antd';
-import { useTransformSourceToTree } from './hooks/useTransformSourceToTree';
+import { useCallback, useMemo, useState } from 'react';
+import {
+  getExpandedKeysForSourceSelection,
+  useTransformSourceToTree,
+} from './hooks/useTransformSourceToTree';
 
 export const SourceList = ({ className }: { className?: string }) => {
   const {
-    data: { items: sources },
+    data: { items: sources, objects: sourceObjects },
     error,
     loadMoreRef,
     isFetchingNextPage,
-    selectedSourceName,
+    setSelectedSource,
     refetch: refetchSources,
-    setSelectedSourceName,
+    selectedSourceName,
+    selectedSourceVersion,
     filters,
     hasFilters,
     setFilters,
   } = useListSourcesContext();
 
+  const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
+
+  const expandTreeNode = useCallback((key: string) => {
+    setUserExpandedKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
+  }, []);
+
   const { tree: treeData, notificationContextHolder } =
     useTransformSourceToTree({
-      sources,
-      setSelectedSourceName,
+      sourceObjects,
+      setSelectedSource,
       selectedSourceName,
+      selectedSourceVersion,
+      expandTreeNode,
       refetchSources,
     });
+
+  const expandedKeysForSelection = useMemo(
+    () =>
+      getExpandedKeysForSourceSelection(
+        selectedSourceName,
+        selectedSourceVersion,
+      ),
+    [selectedSourceName, selectedSourceVersion],
+  );
+
+  const expandedKeys = useMemo(
+    () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
+    [userExpandedKeys, expandedKeysForSelection],
+  );
 
   if (sources.length === 0) {
     return (
@@ -36,7 +63,6 @@ export const SourceList = ({ className }: { className?: string }) => {
         defaultFilters={{
           ...filters,
           search: undefined,
-          enabled: undefined,
         }}
       />
     );
@@ -57,13 +83,15 @@ export const SourceList = ({ className }: { className?: string }) => {
       >
         <Tree
           blockNode
-          showIcon={false}
           className={cn(
-            '[&_.ant-tree-switcher]:m-0! [&_.ant-tree-switcher]:flex [&_.ant-tree-switcher]:shrink-0 [&_.ant-tree-switcher]:items-center [&_.ant-tree-switcher]:justify-center',
-            '[&_.ant-tree-switcher-noop]:hidden',
+            // Chevron expand alignment center
+            '[&_.ant-tree-switcher]:m-auto',
+            // Tree node content wrapper for truncated items in tree
             '[&_.ant-tree-node-content-wrapper]:min-w-0!',
           )}
           treeData={treeData}
+          expandedKeys={expandedKeys}
+          onExpand={(keys) => setUserExpandedKeys(keys as string[])}
         />
         <div ref={loadMoreRef} className="h-4 flex justify-center">
           {isFetchingNextPage && <Spin size="small" />}

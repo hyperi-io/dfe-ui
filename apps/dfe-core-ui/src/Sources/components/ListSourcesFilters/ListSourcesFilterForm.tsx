@@ -8,7 +8,7 @@ import z from 'zod';
 
 const formSchema = z.object({
   search: z.string().optional(),
-  enabled: z.enum(['true', 'false']).optional(),
+  enabled: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;

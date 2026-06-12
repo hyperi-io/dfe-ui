@@ -37,7 +37,9 @@ export const TreeInteractiveLabel = ({
       {actions ? (
         <div
           className={cn(
+            //Layout
             'absolute top-1/2 right-0 z-10 flex -translate-y-1/2 items-center gap-x-1',
+            //Visibility - Only show actions when hovering or focusing on the label
             'pointer-events-none opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100',
           )}
         >

@@ -24,6 +24,7 @@ interface ListSourcesQueryParams extends Omit<
   'page'
 > {
   source_name?: string;
+  source_version?: string;
 }
 
 const parseFiltersFromParams = (
@@ -34,9 +35,11 @@ const parseFiltersFromParams = (
     searchParam === null || searchParam === '' ? undefined : searchParam;
   const enabledParam = params.get('enabled');
   const enabled =
-    enabledParam === 'true' || enabledParam === 'false'
-      ? enabledParam
-      : undefined;
+    enabledParam === 'true'
+      ? true
+      : enabledParam === 'false'
+        ? false
+        : undefined;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
   return { search, enabled, sort_by, sort_order };
@@ -49,6 +52,7 @@ const filtersToSearchString = (f: ListSourcesQueryParams): string => {
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.source_name) params.set('source_name', f.source_name);
+  if (f.source_version) params.set('source_version', f.source_version);
   return params.toString();
 };
 
@@ -73,11 +77,19 @@ export interface ListSourcesContextValue {
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
   selectedSourceName: string | null;
-  setSelectedSourceName: (source: string | null) => void;
+  selectedSourceVersion: string | null;
+  setSelectedSource: ({
+    source_name,
+    source_version,
+  }: {
+    source_name: string | null;
+    source_version: string | null;
+  }) => void;
 }
 
 const DEFAULT_SOURCE_LIST_RESPONSE: SourceListResponse = {
   items: [] as SourceListResponse['items'],
+  objects: {},
   total: 0,
   page: 1,
   per_page: 10,
@@ -101,6 +113,9 @@ export const ListSourcesProvider = ({
   const [selectedSourceName, setSelectedSourceName] = useState<string | null>(
     null,
   );
+  const [selectedSourceVersion, setSelectedSourceVersion] = useState<
+    string | null
+  >(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -114,11 +129,15 @@ export const ListSourcesProvider = ({
 
   useEffect(() => {
     const source_name = searchParams.get('source_name');
-    startTransition(() =>
+    const source_version = searchParams.get('source_version');
+    startTransition(() => {
       setSelectedSourceName(
         source_name && source_name !== '' ? source_name : null,
-      ),
-    );
+      );
+      setSelectedSourceVersion(
+        source_version && source_version !== '' ? source_version : null,
+      );
+    });
   }, [searchParams]);
 
   const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
@@ -149,16 +168,30 @@ export const ListSourcesProvider = ({
     [queryClient, router, pathname, filters],
   );
 
-  const handleSetSelectedSourceName = useCallback(
-    (source: string | null) => {
-      setSelectedSourceName(source);
+  const handleSetSelectedSource = useCallback(
+    ({
+      source_name,
+      source_version,
+    }: {
+      source_name: string | null;
+      source_version: string | null;
+    }) => {
+      setSelectedSourceName(source_name);
+      setSelectedSourceVersion(source_version);
       const query = filtersToSearchString({
         ...filters,
-        source_name: source ?? '',
+        source_name: source_name ?? '',
+        source_version: source_version ?? '',
       });
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [router, pathname, filters, setSelectedSourceName],
+    [
+      router,
+      pathname,
+      filters,
+      setSelectedSourceName,
+      setSelectedSourceVersion,
+    ],
   );
 
   const value = useMemo<ListSourcesContextValue>(
@@ -176,7 +209,8 @@ export const ListSourcesProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSourceName,
-      setSelectedSourceName: handleSetSelectedSourceName,
+      setSelectedSource: handleSetSelectedSource,
+      selectedSourceVersion,
     }),
     [
       data,
@@ -192,7 +226,8 @@ export const ListSourcesProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSourceName,
-      handleSetSelectedSourceName,
+      handleSetSelectedSource,
+      selectedSourceVersion,
     ],
   );
 

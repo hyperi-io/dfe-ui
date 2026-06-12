@@ -1,8 +1,8 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchSourceDetail } from '.';
+import { SourceVersionDetail } from './types';
 import { server } from './useFetchSourceDetail.mocks';
 
 beforeAll(() =>
@@ -19,55 +19,68 @@ describe('.useFetchSourceDetail', () => {
   describe('source_name is provided', () => {
     test('should return data', async () => {
       const { result } = renderHook(
-        () => useFetchSourceDetail({ source_name: 'source' }),
+        () =>
+          useFetchSourceDetail({
+            source_name: 'source',
+            source_version: 'string',
+          }),
         { wrapper },
       );
 
-      const response: components['schemas']['Source-Output'] = {
+      const response: SourceVersionDetail = {
         source: 'source',
         enabled: true,
         display_name: 'string',
         description: 'string',
-        header: {
-          type: 'string',
-          version: 'string',
-        },
-        match: {
-          field: 'string',
-          value: 'string',
-        },
-        schema: {
-          meta_schema: 'string',
-          meta_schema_version: 'string',
-          derived_schema: 'string',
-          additional_fields: 'string',
-          ttl_days: 0,
-          engine: 'string',
-        },
-        transform: {
-          engine: 'string',
-          config_file: 'string',
-          env: {
-            string: 'string',
-          },
-          files: ['string'],
-        },
-        fetcher: {
-          source_type: 'string',
-          base_url: 'string',
-          auth: {
+        versions: ['string'],
+        current: 'string',
+        deployed_version: 'string',
+        selected: 'string',
+        version: {
+          date_time: 'string',
+          header: {
             type: 'string',
-            token_url: 'string',
-            client_id: 'string',
-            client_secret: 'string',
-            api_key: 'string',
+            version: 'string',
           },
-          poll_interval_secs: 0,
-        },
-        sigma: {
-          taxonomy: 'string',
-          custom_mappings: {
-            string: 'string',
+          schema: {
+            meta_schema: 'string',
+            meta_schema_version: 'string',
+            derived_schema: 'string',
+            additional_fields: 'string',
+            ttl_days: 0,
+            engine: 'string',
+          },
+          transform: {
+            engine: 'string',
+            config_file: 'string',
+            env: {
+              string: 'string',
+            },
+            files: ['string'],
+          },
+          fetcher: {
+            source_type: 'string',
+            base_url: 'string',
+            auth: {
+              type: 'string',
+              token_url: 'string',
+              client_id: 'string',
+              client_secret: 'string',
+              api_key: 'string',
+            },
+            poll_interval_secs: 0,
+          },
+          sigma: {
+            taxonomy: 'string',
+            custom_mappings: {
+              string: 'string',
+            },
+          },
+          field_mappings: ['string'],
+          mapping_standards: ['string'],
+          match: {
+            field: 'string',
+            value: 'string',
           },
         },
       };

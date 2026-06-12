@@ -18,13 +18,17 @@ import { EmptyDetail } from './EmptyDetail';
 export const SourceDetail = () => {
   const [api, contextHolder] = notification.useNotification();
   const queryClient = useQueryClient();
-  const { selectedSourceName: source_name, refetch: refetchSources } =
-    useListSourcesContext();
+  const {
+    setSelectedSource,
+    selectedSourceName: source_name,
+    selectedSourceVersion: source_version,
+    refetch: refetchSources,
+  } = useListSourcesContext();
   const {
     data: sourceDetailData,
     isLoading: isFetchingSourceDetail,
     error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name });
+  } = useFetchSourceDetail({ source_name, source_version });
 
   const {
     mutate: updateSource,
@@ -32,9 +36,13 @@ export const SourceDetail = () => {
     error: updateSourceError,
     reset: resetUpdateSource,
   } = useUpdateSource({
-    onSuccess: () => {
+    onSuccess: (response) => {
       void queryClient.invalidateQueries({
         queryKey: SOURCE_DETAIL_QUERY_KEY(source_name),
+      });
+      setSelectedSource({
+        source_name: response.source,
+        source_version: response.current,
       });
       refetchSources();
       api.success({

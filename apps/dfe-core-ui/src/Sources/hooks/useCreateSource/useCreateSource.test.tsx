@@ -73,6 +73,8 @@ describe('.useCreateSource', () => {
       const expectedResponse: SourceCreateResponse = {
         source: 'string',
         message: 'ok',
+        current: 'string',
+        versions: ['string'],
       };
 
       await waitFor(() => {

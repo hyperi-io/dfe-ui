@@ -53,22 +53,7 @@ describe('.useUpdateSchema', () => {
       const expectedResponse: MetaSchemaUpdateResponse = {
         path: 'string',
         current: 'string',
-        versions: {
-          string: {
-            date: 'string',
-            type: 'string',
-            summary: 'string',
-            columns: [
-              {
-                name: 'string',
-                type: 'string',
-                attribute: ['string'],
-                use_case: 'string',
-                expr: 'string',
-              },
-            ],
-          },
-        },
+        versions: ['string'],
       };
 
       await waitFor(() => {
@@ -109,22 +94,7 @@ describe('.useUpdateSchema', () => {
       const expectedResponse: MetaSchemaUpdateResponse = {
         path: 'string',
         current: 'string',
-        versions: {
-          string: {
-            date: 'string',
-            type: 'string',
-            summary: 'string',
-            columns: [
-              {
-                name: 'string',
-                type: 'string',
-                attribute: ['string'],
-                use_case: 'string',
-                expr: 'string',
-              },
-            ],
-          },
-        },
+        versions: ['string'],
       };
 
       await waitFor(() => {

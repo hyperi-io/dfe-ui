@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
 /*
  * Transforms the source request body to a form data object.
@@ -9,38 +9,41 @@ import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
  * @returns The transformed form data object
  */
 export const transformSourceRequestBodyToFormData = (
-  source?: SourceDetail,
+  source?: SourceVersionDetail,
 ): CreateUpdateSourceFormData => {
   const transformedSource: CreateUpdateSourceFormData = {
     ...source,
     source: source?.source ?? '',
     enabled: source?.enabled ?? false,
+    ...source?.version,
     // Manual cast because schema form rules are stricter than the source request body
-    schema: source?.schema
+    schema: source?.version?.schema
       ? {
-          ...source?.schema,
-          meta_schema: source?.schema?.meta_schema ?? '',
-          meta_schema_version: source?.schema?.meta_schema_version ?? '',
+          ...source?.version?.schema,
+          meta_schema: source?.version?.schema?.meta_schema ?? '',
+          meta_schema_version:
+            source?.version?.schema?.meta_schema_version ?? '',
         }
       : undefined,
     // Manual cast because transform form rules are stricter than the source request body
-    transform: source?.transform
+    transform: source?.version?.transform
       ? {
-          ...source?.transform,
-          config_file: source?.transform?.config_file ?? null,
+          ...source?.version?.transform,
+          config_file: source?.version?.transform?.config_file ?? null,
         }
       : undefined,
     // If the fetcher is present it transforms the auth type to none if it is null
     fetcher:
-      Object.keys(source?.fetcher ?? {}).length > 0
+      Object.keys(source?.version?.fetcher ?? {}).length > 0
         ? {
-            ...source?.fetcher,
-            base_url: source?.fetcher?.base_url ?? '',
-            poll_interval_secs: source?.fetcher?.poll_interval_secs ?? 0,
+            ...source?.version?.fetcher,
+            base_url: source?.version?.fetcher?.base_url ?? '',
+            poll_interval_secs:
+              source?.version?.fetcher?.poll_interval_secs ?? 0,
             auth: {
-              ...source?.fetcher?.auth,
-              type: source?.fetcher?.auth
-                ? source?.fetcher?.auth?.type
+              ...source?.version?.fetcher?.auth,
+              type: source?.version?.fetcher?.auth
+                ? source?.version?.fetcher?.auth?.type
                 : 'none',
             },
           }
