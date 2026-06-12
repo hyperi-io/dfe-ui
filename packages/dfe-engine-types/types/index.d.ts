@@ -2823,7 +2823,7 @@ export interface components {
             summary?: string | null;
             /**
              * Columns
-             * @description Complete column snapshot for the new version
+             * @description Complete column snapshot for the new version (at least one column)
              */
             columns: components["schemas"]["SchemaColumn-Input"][];
         };
