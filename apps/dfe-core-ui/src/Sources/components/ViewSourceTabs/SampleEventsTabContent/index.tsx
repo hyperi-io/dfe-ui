@@ -3,7 +3,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useDevAlert } from '@/core/hooks/useDevAlert';
 import { useFetchSampleEvents } from '@/Sources/hooks/useFetchSampleEvents';
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Alert, Spin } from 'antd';
 import { useMemo } from 'react';
@@ -14,7 +14,7 @@ export const SampleEventsTabContent = ({
   schema,
 }: {
   source_name: string;
-  schema: SourceDetail['schema'];
+  schema: SourceVersionDetail['version']['schema'];
 }) => {
   const {
     data: sampleEvents,

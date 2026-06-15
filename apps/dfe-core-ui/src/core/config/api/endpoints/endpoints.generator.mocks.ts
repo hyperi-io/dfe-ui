@@ -1245,7 +1245,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['PaginatedSourceColumnsResponse'];
+          mockedResponse?: components['schemas']['dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2'];
           source_name?: string;
         } = {}) => {
           return http.get(
@@ -1346,7 +1346,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['SchemaColumn-Output'][];
+          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'][];
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,

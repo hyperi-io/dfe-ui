@@ -1,6 +1,6 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -13,13 +13,8 @@ export const ConfigurationDetailsTabContent = ({
   source,
   display_name,
   description,
-  header,
-  schema,
-  transform,
-  match,
-  fetcher,
-  mapping_standards,
-}: SourceDetail) => {
+  version: { header, schema, transform, match, fetcher, mapping_standards },
+}: SourceVersionDetail) => {
   return (
     <div className="h-full min-h-0 relative">
       <dl className="grid grid-cols-[140px_1fr] gap-x-6 gap-y-1">

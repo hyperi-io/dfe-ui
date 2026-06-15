@@ -21,13 +21,17 @@ interface EditSourceFormProps {
 
 export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
   const queryClient = useQueryClient();
-  const { selectedSourceName: source_name, refetch: refetchSources } =
-    useListSourcesContext();
+  const {
+    selectedSourceName: source_name,
+    selectedSourceVersion: source_version,
+    refetch: refetchSources,
+  } = useListSourcesContext();
+
   const {
     data: sourceDetailData,
     isLoading: isFetchingSourceDetail,
     error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name });
+  } = useFetchSourceDetail({ source_name, source_version });
 
   const {
     mutate: updateSource,
@@ -64,22 +68,20 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
 
   const initialValues = transformSourceRequestBodyToFormData(sourceDetailData);
   return (
-    <>
-      <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <CreateUpdateSourceForm
-          key={source_name ?? 'empty'}
-          disabledFields={{
-            source: true,
-          }}
-          initialValues={initialValues}
-          onFinish={handleUpdateSource}
-          onValuesChange={resetUpdateSource}
-          isPending={isUpdatingSource}
-          error={updateSourceError}
-          buttonLabel="Update Source"
-          hasReset={true}
-        />
-      </div>
-    </>
+    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <CreateUpdateSourceForm
+        key={source_name ?? 'empty'}
+        disabledFields={{
+          source: true,
+        }}
+        initialValues={initialValues}
+        onFinish={handleUpdateSource}
+        onValuesChange={resetUpdateSource}
+        isPending={isUpdatingSource}
+        error={updateSourceError}
+        buttonLabel="Update Source"
+        hasReset={true}
+      />
+    </div>
   );
 };

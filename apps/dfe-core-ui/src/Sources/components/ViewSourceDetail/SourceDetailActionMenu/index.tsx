@@ -3,13 +3,14 @@ import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 interface SourceDetailActionMenuProps {
-  source: SourceDetail;
+  source: SourceVersionDetail;
   onEditSuccess?: (source: SourceUpdateResponse) => void;
 }
 
@@ -17,7 +18,7 @@ export const SourceDetailActionMenu = ({
   source,
   onEditSuccess,
 }: SourceDetailActionMenuProps) => {
-  const { refetch: refetchSources, setSelectedSourceName } =
+  const { refetch: refetchSources, setSelectedSource } =
     useListSourcesContext();
   return (
     <ActionsMenu
@@ -42,7 +43,10 @@ export const SourceDetailActionMenu = ({
       />
       <CloneSourceModal
         key="clone-source"
-        source={source}
+        name={source.source}
+        display_name={source.display_name}
+        enabled={source.enabled}
+        versions={source.versions ?? []}
         trigger={
           <Button
             className="flex items-center justify-start"
@@ -53,8 +57,11 @@ export const SourceDetailActionMenu = ({
             Clone Source
           </Button>
         }
-        onSuccess={({ source: newSource }) => {
-          setSelectedSourceName(newSource);
+        onSuccess={(newSource: SourceCreateResponse) => {
+          setSelectedSource({
+            source_name: newSource.source,
+            source_version: newSource.current,
+          });
           refetchSources();
         }}
       />
@@ -72,7 +79,10 @@ export const SourceDetailActionMenu = ({
           </Button>
         }
         onSuccess={() => {
-          setSelectedSourceName(null);
+          setSelectedSource({
+            source_name: null,
+            source_version: null,
+          });
           refetchSources();
         }}
       />

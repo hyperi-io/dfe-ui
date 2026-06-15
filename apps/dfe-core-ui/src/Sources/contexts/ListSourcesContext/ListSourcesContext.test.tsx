@@ -246,26 +246,6 @@ describe('ListSourcesContext', () => {
       );
     });
 
-    it('setFilters preserves source_name and other non-filter params', async () => {
-      searchParamsRef.current = new URLSearchParams(
-        'source_name=my-source&tab=columns&search=existing',
-      );
-
-      const { result } = renderHook(() => useListSourcesContext(), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      result.current.setFilters({ enabled: 'true' });
-
-      expect(mockReplace).toHaveBeenCalledWith(
-        '/sources?source_name=my-source&tab=columns&search=existing&enabled=true',
-      );
-    });
-
     it('setFilters with explicit undefined clears params and navigates to pathname only', async () => {
       searchParamsRef.current = new URLSearchParams('search=foo');
 

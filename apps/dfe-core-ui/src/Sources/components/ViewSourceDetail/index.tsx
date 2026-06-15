@@ -8,12 +8,15 @@ import { SourceDetailActionMenu } from './SourceDetailActionMenu';
 import { SourceEnabledTag } from './SourceEnabledTag';
 
 export const ViewSourceDetail = () => {
-  const { selectedSourceName: source_name } = useListSourcesContext();
+  const {
+    selectedSourceName: source_name,
+    selectedSourceVersion: source_version,
+  } = useListSourcesContext();
   const {
     data: sourceDetailData,
     isLoading: isFetchingSourceDetail,
     error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name });
+  } = useFetchSourceDetail({ source_name, source_version });
 
   if (isFetchingSourceDetail)
     return (

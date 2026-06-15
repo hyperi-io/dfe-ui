@@ -45,16 +45,11 @@ const parseFiltersFromParams = (
   return { search, enabled, sort_by, sort_order };
 };
 
-const applyListFiltersToSearchParams = (
-  params: URLSearchParams,
-  f: UseFetchInfiniteFilteredSourcesProps,
-) => {
+const filtersToSearchString = (f: ListSourcesQueryParams): string => {
+  const params = new URLSearchParams();
   if (f.search) params.set('search', f.search);
-  else params.delete('search');
   if (f.enabled !== undefined) params.set('enabled', String(f.enabled));
-  else params.delete('enabled');
   if (f.sort_by) params.set('sort_by', f.sort_by);
-  else params.delete('sort_by');
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.source_name) params.set('source_name', f.source_name);
   if (f.source_version) params.set('source_version', f.source_version);
@@ -162,15 +157,15 @@ export const ListSourcesProvider = ({
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
       void queryClient.cancelQueries({ queryKey: ['sources'] });
-      const updated: UseFetchInfiniteFilteredSourcesProps = {
+      const updated: ListSourcesQueryParams = {
         ...filters,
         ...newFilters,
       };
 
-      const query = filtersToSearchString(updated, searchParams);
+      const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [queryClient, router, pathname, filters, searchParams],
+    [queryClient, router, pathname, filters],
   );
 
   const handleSetSelectedSource = useCallback(

@@ -1,6 +1,6 @@
 'use client';
 
-import { SourceDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
@@ -33,7 +33,7 @@ const isSourceDetailTabKey = (
   value !== null &&
   (SOURCE_DETAIL_TAB_KEYS as readonly string[]).includes(value);
 
-type ViewSourceDetailTabsProps = SourceDetail & {
+type ViewSourceDetailTabsProps = SourceVersionDetail & {
   selectedSourceName: string;
 };
 
@@ -65,8 +65,8 @@ export const ViewSourceDetailTabs = ({
   );
 
   const isMetaSchemaDefined =
-    !!sourceDetailData.schema?.meta_schema ||
-    !!sourceDetailData.schema?.derived_schema;
+    !!sourceDetailData.version.schema?.meta_schema ||
+    !!sourceDetailData.version.schema?.derived_schema;
 
   return (
     <Tabs
@@ -86,7 +86,7 @@ export const ViewSourceDetailTabs = ({
           children: (
             <SampleEventsTabContent
               source_name={selectedSourceName}
-              schema={sourceDetailData.schema}
+              schema={sourceDetailData.version.schema}
             />
           ),
         },
