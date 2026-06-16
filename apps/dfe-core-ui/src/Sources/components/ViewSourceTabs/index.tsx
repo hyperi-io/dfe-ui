@@ -5,12 +5,9 @@ import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
-import { HuntsTabContent } from './HuntsTabContent';
 import { SampleEventsTabContent } from './SampleEventsTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
 import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
-import { SourceRulesTabContent } from './SourceRulesTabContent';
-import { TableStatsTabContent } from './TableStatsTabContent';
 
 const SOURCE_DETAIL_TAB_KEY_MAP = {
   configuration: 'Configuration Details',
@@ -94,11 +91,11 @@ export const ViewSourceDetailTabs = ({
         /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
         ...(isMetaSchemaDefined
           ? [
-              {
-                key: 'table-stats',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
-                children: <TableStatsTabContent />,
-              },
+              // {
+              //   key: 'table-stats',
+              //   label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
+              //   children: <TableStatsTabContent />,
+              // },
               {
                 key: 'columns',
                 label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
@@ -115,16 +112,16 @@ export const ViewSourceDetailTabs = ({
                   />
                 ),
               },
-              {
-                key: 'hunts',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
-                children: <HuntsTabContent />,
-              },
-              {
-                key: 'rules',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
-                children: <SourceRulesTabContent />,
-              },
+              // {
+              //   key: 'rules',
+              //   label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
+              //   children: <SourceRulesTabContent />,
+              // },
+              // {
+              //   key: 'hunts',
+              //   label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
+              //   children: <HuntsTabContent />,
+              // },
             ]
           : []),
       ]}

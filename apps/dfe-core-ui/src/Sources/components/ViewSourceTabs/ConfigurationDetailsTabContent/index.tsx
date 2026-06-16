@@ -35,14 +35,7 @@ export const ConfigurationDetailsTabContent = ({
       >
         <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
           <dt className={dataListTermStyle}>Header Type:</dt>
-          <dd>
-            <span className="text-foreground/40 dark:text-dark-foreground/40">
-              {/* Common header path */}
-              {header?.type.split('/').slice(0, -1).join('/')}/
-            </span>
-            {/* Common header name */}
-            {header?.type.split('/').pop()}.yaml
-          </dd>
+          <dd>{header?.type}</dd>
           <dt className={dataListTermStyle}>Header Version:</dt>
           <dd>{header?.version}</dd>
           {schema?.engine ? (
