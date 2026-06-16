@@ -10,6 +10,8 @@ export const API_CONFIG = Object.freeze({
   sources: {
     default: '/api/v1/sources',
     source: '/api/v1/sources/{name}',
+    sourceColumns: '/api/v1/sources/{name}/columns',
+    sourceBuild: '/api/v1/sources/{name}/build',
     sourceVersion: '/api/v1/sources/{name}/versions',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
@@ -56,8 +58,6 @@ export const API_CONFIG = Object.freeze({
     schemaVersions: '/api/v1/schemas/definitions/{schema_path}/versions',
     schema: '/api/v1/schemas/definitions/{schema_path}',
     schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
-    sourceColumns: '/api/v1/schemas/{source_name}/columns',
-    sourceBuild: '/api/v1/schemas/{source_name}/build',
     elasticConvert: '/api/v1/schemas/elastic-converter',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

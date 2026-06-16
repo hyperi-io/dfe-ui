@@ -260,6 +260,108 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
+    sourceColumns: {
+      mockedUrl: '/api/v1/sources/{name}/columns',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.sources.sourceColumns.mockedUrl.replace(
+              '{name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.sources.sourceColumns.mockedUrl.replace(
+              '{name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    sourceBuild: {
+      mockedUrl: '/api/v1/sources/{name}/build',
+      post: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            version: 'string',
+            columns: [],
+            ddl: {
+              source_name: 'source',
+              create_table: 'string',
+              views: {
+                view1: 'string',
+                view2: 'string',
+              },
+            },
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SchemaBuildResult'];
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.sourceBuild.mockedUrl.replace(
+              '{name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.sourceBuild.mockedUrl.replace(
+              '{name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
     sourceVersion: {
       mockedUrl: '/api/v1/sources/{name}/versions',
       get: {
@@ -1222,108 +1324,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
             API_CONFIG_MOCKS.schemas.schemaDetail.mockedUrl.replace(
               '{schema_path}',
               schema_path,
-            ),
-            () => {
-              return HttpResponse.json(mockedResponse, { status });
-            },
-          );
-        },
-      },
-    },
-    sourceColumns: {
-      mockedUrl: '/api/v1/schemas/{source_name}/columns',
-      get: {
-        success: ({
-          mockedResponse = {
-            items: [],
-            total: 0,
-            page: 0,
-            per_page: 0,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
-          },
-          source_name = 'source',
-        }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2'];
-          source_name?: string;
-        } = {}) => {
-          return http.get(
-            API_CONFIG_MOCKS.schemas.sourceColumns.mockedUrl.replace(
-              '{source_name}',
-              source_name,
-            ),
-            () => {
-              return HttpResponse.json(mockedResponse);
-            },
-          );
-        },
-        error: ({
-          mockedResponse = DEFAULT_VALIDATION_ERROR,
-          status = 422,
-          source_name = 'source',
-        }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
-          status?: number;
-          source_name?: string;
-        } = {}) => {
-          return http.get(
-            API_CONFIG_MOCKS.schemas.sourceColumns.mockedUrl.replace(
-              '{source_name}',
-              source_name,
-            ),
-            () => {
-              return HttpResponse.json(mockedResponse, { status });
-            },
-          );
-        },
-      },
-    },
-    sourceBuild: {
-      mockedUrl: '/api/v1/schemas/{source_name}/build',
-      post: {
-        success: ({
-          mockedResponse = {
-            source_name: 'source',
-            version: 'string',
-            columns: [],
-            ddl: {
-              source_name: 'source',
-              create_table: 'string',
-              views: {
-                view1: 'string',
-                view2: 'string',
-              },
-            },
-          },
-          source_name = 'source',
-        }: {
-          mockedResponse?: components['schemas']['SchemaBuildResult'];
-          source_name?: string;
-        } = {}) => {
-          return http.post(
-            API_CONFIG_MOCKS.schemas.sourceBuild.mockedUrl.replace(
-              '{source_name}',
-              source_name,
-            ),
-            () => {
-              return HttpResponse.json(mockedResponse);
-            },
-          );
-        },
-        error: ({
-          mockedResponse = DEFAULT_VALIDATION_ERROR,
-          status = 422,
-          source_name = 'source',
-        }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
-          status?: number;
-          source_name?: string;
-        } = {}) => {
-          return http.post(
-            API_CONFIG_MOCKS.schemas.sourceBuild.mockedUrl.replace(
-              '{source_name}',
-              source_name,
             ),
             () => {
               return HttpResponse.json(mockedResponse, { status });
