@@ -30,8 +30,8 @@ export const useFetchInfiniteSourceColumns = ({
   } = useInfiniteQuery({
     queryKey: ['source-columns', source_name, version],
     queryFn: async ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.schemas.sourceColumns, {
-        pathParams: { source_name: source_name ?? '' },
+      apiClient.get(API_CONFIG.sources.sourceColumns, {
+        pathParams: { name: source_name ?? '' },
         queryParams: {
           version: version ?? '',
           page: pageParam,

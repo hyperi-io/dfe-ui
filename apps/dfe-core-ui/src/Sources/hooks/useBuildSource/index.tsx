@@ -5,9 +5,9 @@ import { useMutation } from '@tanstack/react-query';
 export const useBuildSource = () => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (source_name: string) => {
-      return apiClient.post(API_CONFIG.schemas.sourceBuild, {
+      return apiClient.post(API_CONFIG.sources.sourceBuild, {
         pathParams: {
-          source_name,
+          name: source_name,
         },
       });
     },

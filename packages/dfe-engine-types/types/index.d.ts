@@ -486,6 +486,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{name}/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Source Schema Columns
+         * @description Get composed schema columns for a source version (profile + meta/derived/additional).
+         *
+         *     Use ``per_page=-1`` to return all columns in one page.
+         */
+        get: operations["get_source_schema_columns_api_v1_sources__name__columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{name}/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build Source Schema
+         * @description Build complete schema (DDL) from a source version snapshot.
+         *
+         *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
+         *     without executing it against ClickHouse.
+         */
+        post: operations["build_source_schema_api_v1_sources__name__build_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{name}": {
         parameters: {
             query?: never;
@@ -1574,51 +1619,6 @@ export interface paths {
          *     ``upload_too_large`` when exceeded). Override with ``DFE_API_ELASTIC_CONVERTER_*``.
          */
         post: operations["elastic_converter_api_v1_schemas_elastic_converter_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/schemas/{source_name}/columns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Schema Columns
-         * @description Get composed schema columns for a source version (profile + meta/derived/additional).
-         *
-         *     Use ``per_page=-1`` to return all columns in one page.
-         */
-        get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/schemas/{source_name}/build": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Build Schema
-         * @description Build complete schema (DDL) from a source version snapshot.
-         *
-         *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
-         *     without executing it against ClickHouse.
-         */
-        post: operations["build_schema_api_v1_schemas__source_name__build_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3530,7 +3530,7 @@ export interface components {
              */
             version: string;
             /** Columns */
-            columns: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            columns: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
             ddl?: components["schemas"]["DDLResult"] | null;
         };
         /**
@@ -3685,7 +3685,7 @@ export interface components {
              */
             summary: string;
             /** @description Paginated columns for this version */
-            columns: components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1"];
+            columns: components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2"];
         };
         /**
          * ServiceConfigDetail
@@ -4730,7 +4730,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1: {
             /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            items: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -4756,7 +4756,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
             /** Items */
-            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -4805,11 +4805,23 @@ export interface components {
             /** Message */
             message: string;
         };
+        /** SeedResponse */
+        dfe_engine__api__v1__services__SeedResponse: {
+            /** Seeded */
+            seeded: number;
+        };
+        /** ValidationResult */
+        dfe_engine__api__v1__services__ValidationResult: {
+            /** Valid */
+            valid: boolean;
+            /** Errors */
+            errors?: string[];
+        };
         /**
          * SchemaColumn
-         * @description A column in a schema definition.
+         * @description A column in a composed source schema (API response).
          */
-        dfe_engine__api__v1__schemas__SchemaColumn: {
+        dfe_engine__api__v1__sources__SchemaColumn: {
             /** Name */
             name: string;
             /** Type */
@@ -4829,18 +4841,6 @@ export interface components {
              * @default
              */
             description: string;
-        };
-        /** SeedResponse */
-        dfe_engine__api__v1__services__SeedResponse: {
-            /** Seeded */
-            seeded: number;
-        };
-        /** ValidationResult */
-        dfe_engine__api__v1__services__ValidationResult: {
-            /** Valid */
-            valid: boolean;
-            /** Errors */
-            errors?: string[];
         };
         /**
          * SeedResponse
@@ -5948,6 +5948,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SourceVersionGetResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_source_schema_columns_api_v1_sources__name__columns_get: {
+        parameters: {
+            query?: {
+                /** @description Source version id (defaults to deployed_version) */
+                version?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    build_source_schema_api_v1_sources__name__build_post: {
+        parameters: {
+            query?: {
+                /** @description Source version id (defaults to deployed_version) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaBuildResult"];
                 };
             };
             /** @description Validation Error */
@@ -7940,76 +8010,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_schema_columns_api_v1_schemas__source_name__columns_get: {
-        parameters: {
-            query?: {
-                /** @description Source version id (defaults to deployed_version) */
-                version?: string | null;
-                page?: number;
-                per_page?: number;
-            };
-            header?: never;
-            path: {
-                source_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    build_schema_api_v1_schemas__source_name__build_post: {
-        parameters: {
-            query?: {
-                /** @description Source version id (defaults to deployed_version) */
-                version?: string | null;
-            };
-            header?: never;
-            path: {
-                source_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SchemaBuildResult"];
                 };
             };
             /** @description Validation Error */
