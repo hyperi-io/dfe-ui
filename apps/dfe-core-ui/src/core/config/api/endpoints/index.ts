@@ -60,4 +60,19 @@ export const API_CONFIG = Object.freeze({
     schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     elasticConvert: '/api/v1/schemas/elastic-converter',
   },
+  orgs: {
+    default: '/api/v1/orgs',
+    org: '/api/v1/orgs/{name}',
+  },
+  groups: {
+    default: '/api/v1/auth/groups',
+    group: '/api/v1/auth/groups/{name}',
+    groupMembers: '/api/v1/auth/groups/{name}/members',
+    groupMember: '/api/v1/auth/groups/{name}/members/{username}',
+  },
+  accounts: {
+    default: '/api/v1/auth/accounts',
+    account: '/api/v1/auth/accounts/{username}',
+    resetPassword: '/api/v1/auth/accounts/{username}/reset-password',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);

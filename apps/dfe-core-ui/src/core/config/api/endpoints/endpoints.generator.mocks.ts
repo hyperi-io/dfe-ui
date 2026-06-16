@@ -1372,5 +1372,83 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  orgs: {
+    default: {
+      mockedUrl: '/api/v1/orgs',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    org: {
+      mockedUrl: '/api/v1/orgs/{name}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
+  groups: {
+    default: {
+      mockedUrl: '/api/v1/auth/groups',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    group: {
+      mockedUrl: '/api/v1/auth/groups/{name}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    groupMembers: {
+      mockedUrl: '/api/v1/auth/groups/{name}/members',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    groupMember: {
+      mockedUrl: '/api/v1/auth/groups/{name}/members/{username}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
+  accounts: {
+    default: {
+      mockedUrl: '/api/v1/auth/accounts',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    account: {
+      mockedUrl: '/api/v1/auth/accounts/{username}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    resetPassword: {
+      mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
 });
 /* eslint-enable no-console */
