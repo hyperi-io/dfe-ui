@@ -27,10 +27,6 @@ const createOrganisation = ({
     id: uuidv4(),
   };
 };
-export const ORGANISATION_LIST_RESPONSE = [
-  createOrganisation({ name: 'HyperI', owner: true }),
-  createOrganisation({ name: 'HyperSec' }),
-];
 
 export const ORGANISATION_DETAILS_RESPONSE = createOrganisation({
   name: 'HyperI',

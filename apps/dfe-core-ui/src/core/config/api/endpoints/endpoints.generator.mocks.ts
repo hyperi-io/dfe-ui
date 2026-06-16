@@ -1376,8 +1376,35 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/orgs',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              display_name: 'string',
+              org_ids: ['string'],
+              enabled: true,
+              dedicated_database: true,
+              created_at: 'string',
+              updated_at: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'][];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },

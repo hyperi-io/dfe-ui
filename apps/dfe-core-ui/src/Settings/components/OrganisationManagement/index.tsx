@@ -1,19 +1,18 @@
 'use client';
 
+import { GenericErrorCard } from '@/core/components/GenericError';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { CreateOrganisationDrawer } from '@/Settings/components/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import { ORGANISATION_LIST_RESPONSE } from '@/Settings/mocks/organisation.data';
-import { Input } from 'antd';
-import { useState } from 'react';
+import { useFetchOrganisations } from '@/Settings/hooks/useFetchOrganisations';
+import { IconInfoCircle } from '@repo/dfe-icons';
+import { Spin } from 'antd';
 import { OrganisationCard } from './OrganisationCard';
 
 export const OrganisationManagement = () => {
-  const [search, setSearch] = useState('');
-  // const [companyLimit, setCompanyLimit] = useState(3);
-  const filteredOrganisations = ORGANISATION_LIST_RESPONSE.filter(
-    (organisation) =>
-      organisation.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // const [search, setSearch] = useState('');
+  const { data: organisations, isLoading, error } = useFetchOrganisations();
+
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       <SectionCard
@@ -24,20 +23,40 @@ export const OrganisationManagement = () => {
       <SectionCard
         title="Manage existing organisations"
         description="Manage existing organisations and their configurations."
-        rightTitleSlot={
-          <Input.Search
-            className="ml-auto w-60"
-            placeholder="Search organisations"
-            onChange={(e) => setSearch(e.target.value)}
-            value={search}
-          />
-        }
+        // rightTitleSlot={
+        //   <Input.Search
+        //     className="ml-auto w-60"
+        //     placeholder="Search organisations"
+        //     onChange={(e) => setSearch(e.target.value)}
+        //     value={search}
+        //   />
+        // }
       >
+        {isLoading && (
+          <>
+            <Spin /> <p className="sr-only">Loading organisations</p>
+          </>
+        )}
+        {error && (
+          <>
+            <GenericErrorCard
+              title="Error fetching organisations"
+              description={error.message}
+            />
+          </>
+        )}
+        {!isLoading && !error && organisations?.length === 0 && (
+          <NotificationCard
+            className="w-full"
+            description="No organisations found"
+            icon={<IconInfoCircle />}
+          />
+        )}
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredOrganisations.map((organisation) => (
-            <li key={organisation.id}>
+          {organisations?.map((organisation) => (
+            <li key={organisation.name}>
               <OrganisationCard
-                key={organisation.id}
+                key={organisation.name}
                 organisation={organisation}
               />
             </li>
