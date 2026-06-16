@@ -1590,6 +1590,8 @@ export interface paths {
         /**
          * Get Schema Columns
          * @description Get composed schema columns for a source version (profile + meta/derived/additional).
+         *
+         *     Use ``per_page=-1`` to return all columns in one page.
          */
         get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
         put?: never;
@@ -3045,32 +3047,6 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
-        /** PaginatedResponse[SchemaColumn] */
-        PaginatedResponse_SchemaColumn_: {
-            /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** Total Pages */
-            readonly total_pages: number;
-            /** Next Page */
-            readonly next_page: number | null;
-            /** Prev Page */
-            readonly prev_page: number | null;
-        };
         /** PaginatedResponse[ServiceConfigSummary] */
         PaginatedResponse_ServiceConfigSummary_: {
             /** Items */
@@ -3709,7 +3685,7 @@ export interface components {
              */
             summary: string;
             /** @description Paginated columns for this version */
-            columns: components["schemas"]["PaginatedResponse_SchemaColumn_"];
+            columns: components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1"];
         };
         /**
          * ServiceConfigDetail
@@ -4750,6 +4726,58 @@ export interface components {
              * @description Allowed values (renders as dropdown in UI)
              */
             enum?: unknown[] | null;
+        };
+        /** PaginatedResponse[SchemaColumn] */
+        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[SchemaColumn] */
+        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
         };
         /** SeedResponse */
         dfe_engine__api__v1__deployments__SeedResponse: {
@@ -7930,6 +7958,8 @@ export interface operations {
             query?: {
                 /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
+                page?: number;
+                per_page?: number;
             };
             header?: never;
             path: {
@@ -7945,7 +7975,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2"];
                 };
             };
             /** @description Validation Error */
