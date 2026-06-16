@@ -16,9 +16,10 @@ export const TransformTabContent = ({
   form: FormInstance<CreateUpdateSourceFormData>;
 }) => {
   const initialTransform = form.getFieldValue('transform');
-  const [assignTransform, setAssignTransform] = useState<AssignTransformOptions>(
-    () => getInitialAssignTransform(initialTransform),
-  );
+  const [assignTransform, setAssignTransform] =
+    useState<AssignTransformOptions>(() =>
+      getInitialAssignTransform(initialTransform),
+    );
   return (
     <div className="flex flex-col gap-2">
       <Radio.Group
