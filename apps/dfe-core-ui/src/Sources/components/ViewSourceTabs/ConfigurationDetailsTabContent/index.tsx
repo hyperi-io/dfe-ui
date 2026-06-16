@@ -35,7 +35,14 @@ export const ConfigurationDetailsTabContent = ({
       >
         <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
           <dt className={dataListTermStyle}>Header Type:</dt>
-          <dd>{header?.type}</dd>
+          <dd>
+            <span className="text-foreground/40 dark:text-dark-foreground/40">
+              {/* Common header path */}
+              {header?.type.split('/').slice(0, -1).join('/')}/
+            </span>
+            {/* Common header name */}
+            {header?.type.split('/').pop()}.yaml
+          </dd>
           <dt className={dataListTermStyle}>Header Version:</dt>
           <dd>{header?.version}</dd>
           {schema?.engine ? (
@@ -69,7 +76,14 @@ export const ConfigurationDetailsTabContent = ({
               {schema?.meta_schema ? (
                 <>
                   <dt className={dataListTermStyle}>Meta Schema:</dt>
-                  <dd>{schema?.meta_schema}</dd>
+                  <dd>
+                    <span className="text-foreground/40 dark:text-dark-foreground/40">
+                      {/* Meta schema path */}
+                      {schema?.meta_schema?.split('/').slice(0, -1).join('/')}/
+                    </span>
+                    {/* Meta schema name */}
+                    {schema?.meta_schema?.split('/').pop()}.yaml
+                  </dd>
                   <dt className={dataListTermStyle}>Meta Schema Version:</dt>
                   <dd>{schema?.meta_schema_version}</dd>
                 </>

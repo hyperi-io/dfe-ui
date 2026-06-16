@@ -91,6 +91,11 @@ export const CreateUpdateSourceFormBase = ({
     onFinishFailed?.(errorInfo);
   };
 
+  const handleFinish = (values: CreateUpdateSourceFormData) => {
+    // Handle data transformation for header type if needed
+    onFinish?.(values);
+  };
+
   const metaSchema = Form.useWatch(['schema'], form);
   const isMetaSchemaDefined =
     !!metaSchema?.meta_schema || !!metaSchema?.derived_schema;
@@ -98,7 +103,7 @@ export const CreateUpdateSourceFormBase = ({
   return (
     <Form
       form={form}
-      onFinish={onFinish}
+      onFinish={handleFinish}
       initialValues={{
         enabled: true,
         ...initialValues,
