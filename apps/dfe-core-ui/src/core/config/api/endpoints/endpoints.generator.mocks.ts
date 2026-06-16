@@ -1407,12 +1407,82 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'org_name',
+            display_name: 'string',
+            org_ids: ['string'],
+            enabled: true,
+            dedicated_database: true,
+            created_at: 'string',
+            updated_at: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     org: {
       mockedUrl: '/api/v1/orgs/{name}',
       get: {
         success: () => {
           console.error('Not implemented');
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'org_name',
+            display_name: 'string',
+            org_ids: ['string'],
+            enabled: true,
+            dedicated_database: true,
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'];
+          org_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          org_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
