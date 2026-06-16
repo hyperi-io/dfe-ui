@@ -21,6 +21,7 @@ export const ConfigureVisibleColumnsCollapse = ({
     <SimpleCollapse
       title="Configure Visible Columns"
       classNames={{
+        container: 'px-0 pt-0',
         title: 'font-semibold',
       }}
       defaultOpen={true}

@@ -16,15 +16,15 @@ export const TreeInteractiveLabel = ({
   actions,
 }: TreeInteractiveLabelProps) => {
   return (
-    <div className="group relative flex h-8 w-full min-w-0 max-w-full items-center">
+    <div className="group relative flex w-full min-w-0 max-w-full items-center">
       <Typography.Text
         onClick={onClick}
         className={cn(
-          'mb-0! h-8 flex w-full min-w-0 max-w-full items-center gap-x-1 overflow-hidden cursor-pointer leading-8',
+          'mb-0! flex w-full min-w-0 max-w-full flex-start p-1 gap-x-1 overflow-hidden cursor-pointer',
           selected && 'text-tertiary! dark:text-dark-foreground! font-semibold',
         )}
       >
-        {icon}
+        <span className="mt-1">{icon}</span>
         <span className="flex min-w-0 flex-1 items-center gap-x-1 overflow-hidden">
           {typeof title === 'string' ? (
             <span className="min-w-0 truncate">{title}</span>

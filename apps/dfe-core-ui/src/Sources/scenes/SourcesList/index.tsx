@@ -3,7 +3,7 @@
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
 import { ListSourcesTree } from '@/Sources/components/ListSourcesTree';
-import { SourceDetail } from '@/Sources/components/SourceDetail';
+import { ViewSourceDetail } from '@/Sources/components/ViewSourceDetail';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 
 export const SourcesListScene = () => {
@@ -12,7 +12,7 @@ export const SourcesListScene = () => {
       <ListSourcesProvider>
         <Splitter
           leftPanelContent={<ListSourcesTree />}
-          rightPanelContent={<SourceDetail />}
+          rightPanelContent={<ViewSourceDetail />}
         />
       </ListSourcesProvider>
     </MainContentCard>
