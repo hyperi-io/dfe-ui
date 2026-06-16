@@ -178,7 +178,10 @@ export const CreateUpdateSourceFormBase = ({
                   ),
                   forceRender: true,
                   children: (
-                    <TransformTabContent formValidation={formValidation} />
+                    <TransformTabContent
+                      formValidation={formValidation}
+                      form={form}
+                    />
                   ),
                 },
                 {

@@ -1,17 +1,24 @@
 import { Form } from '@/core/components/Form';
-import { FormRule, Input, Radio, Select } from 'antd';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { FormRule, Input, Radio, Select, type FormInstance } from 'antd';
 import { useState } from 'react';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
-
-type AssignTransformOptions = 'none' | 'define_transform';
+import {
+  AssignTransformOptions,
+  getInitialAssignTransform,
+} from './TransformTabContent.helpers';
 
 export const TransformTabContent = ({
   formValidation,
+  form,
 }: {
   formValidation: FormRule;
+  form: FormInstance<CreateUpdateSourceFormData>;
 }) => {
-  const [assignTransform, setAssignTransform] =
-    useState<AssignTransformOptions>('none');
+  const initialTransform = form.getFieldValue('transform');
+  const [assignTransform, setAssignTransform] = useState<AssignTransformOptions>(
+    () => getInitialAssignTransform(initialTransform),
+  );
   return (
     <div className="flex flex-col gap-2">
       <Radio.Group
