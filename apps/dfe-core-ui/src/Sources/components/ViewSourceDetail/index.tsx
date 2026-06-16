@@ -54,6 +54,7 @@ export const ViewSourceDetail = () => {
         </div>
         <ViewSourceDetailTabs
           selectedSourceName={source_name ?? ''}
+          selectedSourceVersion={source_version ?? ''}
           {...sourceDetailData}
         />
       </div>

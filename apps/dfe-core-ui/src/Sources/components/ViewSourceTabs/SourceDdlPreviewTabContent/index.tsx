@@ -6,8 +6,10 @@ import { GeneratedViewsTabContent } from './GeneratedViewsTabContent';
 
 export const SourceDdlPreviewTabContent = ({
   source_name,
+  source_version,
 }: {
   source_name: string;
+  source_version: string;
 }) => {
   const { data, mutate, isPending, error } = useBuildSource();
 
@@ -32,6 +34,7 @@ export const SourceDdlPreviewTabContent = ({
               children: (
                 <GeneratedDdlTabContent
                   source_name={source_name}
+                  source_version={source_version}
                   create_table={data?.ddl?.create_table}
                 />
               ),
@@ -42,6 +45,7 @@ export const SourceDdlPreviewTabContent = ({
               children: (
                 <GeneratedViewsTabContent
                   source_name={source_name}
+                  source_version={source_version}
                   views={data?.ddl?.views}
                 />
               ),

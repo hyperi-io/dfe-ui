@@ -4,9 +4,11 @@ import { Alert } from 'antd';
 
 export const GeneratedViewsTabContent = ({
   source_name,
+  source_version,
   views,
 }: {
   source_name: string;
+  source_version: string;
   views?: Record<string, string>;
 }) => {
   const hasViews = Object.keys(views ?? {}).length > 0;
@@ -28,7 +30,13 @@ export const GeneratedViewsTabContent = ({
       {Object.entries(views ?? {}).map(([key, value]) => (
         <div className="flex flex-col gap-y-2" key={key}>
           <h3>{key}</h3>
-          <AceEditor value={value} mode="sql" height="200px" readOnly={true} />
+          <AceEditor
+            name={`${source_name}-${source_version}-${key}`}
+            value={value}
+            mode="sql"
+            height="200px"
+            readOnly={true}
+          />
         </div>
       ))}
     </div>

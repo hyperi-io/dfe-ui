@@ -5,9 +5,11 @@ import { Alert } from 'antd';
 
 export const GeneratedDdlTabContent = ({
   source_name,
+  source_version,
   create_table,
 }: {
   source_name: string;
+  source_version: string;
   create_table?: string;
 }) => {
   const { componentHeight } = useSetComponentHeight({
@@ -29,6 +31,7 @@ export const GeneratedDdlTabContent = ({
 
   return (
     <AceEditor
+      name={`${source_name}-${source_version}`}
       value={create_table}
       mode="sql"
       height={`${componentHeight}px`}

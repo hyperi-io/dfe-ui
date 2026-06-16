@@ -32,10 +32,12 @@ const isSourceDetailTabKey = (
 
 type ViewSourceDetailTabsProps = SourceVersionDetail & {
   selectedSourceName: string;
+  selectedSourceVersion: string;
 };
 
 export const ViewSourceDetailTabs = ({
   selectedSourceName,
+  selectedSourceVersion,
   ...sourceDetailData
 }: ViewSourceDetailTabsProps) => {
   const searchParams = useSearchParams();
@@ -109,6 +111,7 @@ export const ViewSourceDetailTabs = ({
                 children: (
                   <SourceDdlPreviewTabContent
                     source_name={selectedSourceName}
+                    source_version={selectedSourceVersion}
                   />
                 ),
               },
