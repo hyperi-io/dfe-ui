@@ -4,26 +4,27 @@ import {
   CreateUpdateSourceFormData,
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import {
-  SOURCE_DETAIL_QUERY_KEY,
-  useFetchSourceDetail,
-} from '@/Sources/hooks/useFetchSourceDetail';
+import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
+import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';
-import { notification, Spin } from 'antd';
-import { EmptyDetail } from './EmptyDetail';
+import { Spin } from 'antd';
 
-export const SourceDetail = () => {
-  const [api, contextHolder] = notification.useNotification();
+interface EditSourceFormProps {
+  onSuccess?: (response: SourceUpdateResponse) => void;
+}
+
+export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
   const queryClient = useQueryClient();
   const {
-    setSelectedSource,
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
     refetch: refetchSources,
+    setSelectedSource,
   } = useListSourcesContext();
+
   const {
     data: sourceDetailData,
     isLoading: isFetchingSourceDetail,
@@ -37,18 +38,15 @@ export const SourceDetail = () => {
     reset: resetUpdateSource,
   } = useUpdateSource({
     onSuccess: (response) => {
-      void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(source_name),
-      });
       setSelectedSource({
         source_name: response.source,
         source_version: response.current,
       });
-      refetchSources();
-      api.success({
-        title: 'Source updated successfully',
-        placement: 'bottomLeft',
+      void queryClient.invalidateQueries({
+        queryKey: ['source', response.source],
       });
+      refetchSources();
+      onSuccess?.(response);
     },
   });
 
@@ -70,29 +68,22 @@ export const SourceDetail = () => {
       />
     );
 
-  if (!sourceDetailData) {
-    return <EmptyDetail />;
-  }
   const initialValues = transformSourceRequestBodyToFormData(sourceDetailData);
   return (
-    <>
-      {contextHolder}
-      <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <h4 className="text-lg font-medium">Source Configuration</h4>
-        <CreateUpdateSourceForm
-          key={source_name ?? 'empty'}
-          disabledFields={{
-            source: true,
-          }}
-          initialValues={initialValues}
-          onFinish={handleUpdateSource}
-          onValuesChange={resetUpdateSource}
-          isPending={isUpdatingSource}
-          error={updateSourceError}
-          buttonLabel="Update Source"
-          hasReset={true}
-        />
-      </div>
-    </>
+    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <CreateUpdateSourceForm
+        key={source_name ?? 'empty'}
+        disabledFields={{
+          source: true,
+        }}
+        initialValues={initialValues}
+        onFinish={handleUpdateSource}
+        onValuesChange={resetUpdateSource}
+        isPending={isUpdatingSource}
+        error={updateSourceError}
+        buttonLabel="Update Source"
+        hasReset={true}
+      />
+    </div>
   );
 };

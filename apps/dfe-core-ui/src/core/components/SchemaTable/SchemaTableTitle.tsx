@@ -1,5 +1,5 @@
-import { IconMenu2, IconX } from '@repo/dfe-icons';
-import { Button, TableProps } from 'antd';
+import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { TableProps } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { ConfigureSearchableColumnsCollapse } from './ConfigureSearchableColumnsCollapse';
 import { ConfigureVisibleColumnsCollapse } from './ConfigureVisibleColumnsCollapse';
@@ -48,26 +48,17 @@ export const SchemaTableTitle = <T extends object>({
     <div className="flex items-center gap-2 w-full">
       {title?.([])}
 
-      <div className="ml-auto relative" ref={menuRef}>
-        <Button
-          type="default"
-          icon={isMenuOpen ? <IconX /> : <IconMenu2 />}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+      <ActionsMenu>
+        <ConfigureVisibleColumnsCollapse
+          selectedVisibleColumns={selectedVisibleColumns}
+          columns={columns}
+          setSelectedVisibleColumns={setSelectedVisibleColumns}
+          lockedColumns={lockedColumns}
         />
-        {isMenuOpen && (
-          <div className="absolute top-10 right-0 bg-background dark:bg-dark-background border border-foreground/10 dark:border-dark-foreground/10 p-4 rounded-md shadow-md z-2 w-96">
-            <ConfigureVisibleColumnsCollapse
-              selectedVisibleColumns={selectedVisibleColumns}
-              columns={columns}
-              setSelectedVisibleColumns={setSelectedVisibleColumns}
-              lockedColumns={lockedColumns}
-            />
-            {showSearchableColumns && (
-              <ConfigureSearchableColumnsCollapse {...showSearchableColumns} />
-            )}
-          </div>
+        {showSearchableColumns && (
+          <ConfigureSearchableColumnsCollapse {...showSearchableColumns} />
         )}
-      </div>
+      </ActionsMenu>
     </div>
   );
 };

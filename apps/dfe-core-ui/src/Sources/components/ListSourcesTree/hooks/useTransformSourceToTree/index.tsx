@@ -141,7 +141,9 @@ const sourceSummaryToTreeData = ({
           actions={
             <>
               <CloneSourceModal
-                source={source}
+                name={source.name}
+                display_name={source.display_name}
+                enabled={source.enabled}
                 versions={source.versions ?? []}
                 onSuccess={(source) => {
                   void refetchSources();

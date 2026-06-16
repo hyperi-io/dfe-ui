@@ -15,7 +15,12 @@ export const GenericErrorCard = ({
   description = 'Please try again later or contact support if the problem persists.',
 }: GenericErrorProps) => {
   return (
-    <div className={cn('bg-background-muted rounded-md p-4', className)}>
+    <div
+      className={cn(
+        'bg-background-muted dark:bg-dark-background-muted rounded-md p-4',
+        className,
+      )}
+    >
       <div className="flex flex-col items-center justify-center">
         <ErrorHoundSvg className="w-1/4 h-auto m-auto dark:fill-white fill-primary" />
         {title && (

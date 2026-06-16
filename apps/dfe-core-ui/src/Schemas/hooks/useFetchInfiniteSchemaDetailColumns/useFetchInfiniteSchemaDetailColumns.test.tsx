@@ -1,6 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -12,7 +11,10 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '.';
-import { UseFetchInfiniteFilteredSchemaDetailColumnsProps } from './types';
+import {
+  MetaSchemaDetailColumnItem,
+  UseFetchInfiniteFilteredSchemaDetailColumnsProps,
+} from './types';
 import {
   MOCK_SCHEMA_PATH,
   server,
@@ -74,14 +76,13 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'] =
-        {
-          name: 'string',
-          type: 'string',
-          attribute: ['string'],
-          use_case: 'string',
-          expr: 'string',
-        };
+      const responseItem: MetaSchemaDetailColumnItem = {
+        name: 'string',
+        type: 'string',
+        attribute: ['string'],
+        use_case: 'string',
+        expr: 'string',
+      };
 
       expect(result.current.data).toBeDefined();
       expect(result.current.data?.version.columns.items).toHaveLength(10);

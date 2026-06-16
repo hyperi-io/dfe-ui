@@ -6,4 +6,4 @@ export type ElasticConverterRequest = {
 };
 
 export type ElasticConverterResponse =
-  components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
+  components['schemas']['SchemaColumn-Output'][];

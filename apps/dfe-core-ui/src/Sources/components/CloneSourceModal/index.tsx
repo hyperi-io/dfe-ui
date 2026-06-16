@@ -2,13 +2,12 @@ import { useCloneSource } from '@/Sources/hooks/useCloneSource';
 import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Form } from '@/core/components/Form';
-import type { SourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconCopy } from '@repo/dfe-icons';
-import { Button, Input, Modal, Select, Switch } from 'antd';
-import { useState } from 'react';
+import { Button, ButtonProps, Input, Modal, Select, Switch } from 'antd';
+import { cloneElement, useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -19,33 +18,56 @@ const formSchema = z.object({
 
 export type CloneSourceFormData = z.infer<typeof formSchema>;
 
-export const CloneSourceModal = ({
-  source,
-  onSuccess,
-  versions,
-}: {
-  source: SourceSummary;
-  onSuccess?: (source: SourceCreateResponse) => void;
+interface CloneSourceModalProps {
+  name: string;
+  display_name?: string | null;
+  enabled: boolean;
   versions: string[];
-}) => {
-  const [enabled, setEnabled] = useState(false);
+  onSuccess?: (source: SourceCreateResponse) => void;
+  trigger?: React.ReactElement<ButtonProps>;
+}
+
+export const CloneSourceModal = ({
+  name,
+  display_name,
+  enabled,
+  versions,
+  onSuccess,
+  trigger,
+}: CloneSourceModalProps) => {
   const [form] = Form.useForm<CloneSourceFormData>();
   const formValidation = useAntdZodResolver<CloneSourceFormData>(formSchema);
   const [open, setOpen] = useState(false);
 
+  const getDefaultFormValues = (): CloneSourceFormData => ({
+    source: `${name}_copy`,
+    display_name: `Copy: ${display_name ?? name}`,
+    enabled: enabled,
+  });
+
+  const handleClose = () => {
+    setOpen(false);
+    form.resetFields();
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
   const version = Form.useWatch('version', form);
+
   const {
     mutate: cloneSourceMutation,
     isPending,
     error,
   } = useCloneSource({
-    source_name: source?.name,
+    source_name: name,
     source_version: version,
     onSuccess: (data) => {
-      setOpen(false);
+      handleClose();
       onSuccess?.(data);
     },
-    queryEnabled: enabled,
+    queryEnabled: open,
   });
   const handleCloneSource = (values: CloneSourceFormData) => {
     cloneSourceMutation(values);
@@ -53,32 +75,40 @@ export const CloneSourceModal = ({
 
   return (
     <>
-      <Button
-        type="default"
-        shape="circle"
-        size="small"
-        aria-label={`Clone ${source.name}`}
-        icon={<IconCopy />}
-        onClick={() => {
-          setOpen(true);
-          setEnabled(true);
-        }}
-      />
+      {trigger ? (
+        cloneElement(trigger, {
+          ...trigger.props,
+          onClick: (event: React.MouseEvent<HTMLElement>) => {
+            handleOpen();
+            trigger.props.onClick?.(event);
+          },
+        })
+      ) : (
+        <Button
+          type="default"
+          shape="circle"
+          size="small"
+          aria-label={`Clone ${name}`}
+          icon={<IconCopy />}
+          onClick={handleOpen}
+        />
+      )}
       <Modal
-        title={`Clone ${source.name}`}
+        title={`Clone ${name}`}
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={handleClose}
+        afterOpenChange={(visible) => {
+          if (visible) {
+            form.setFieldsValue(getDefaultFormValues());
+          }
+        }}
         footer={null}
         destroyOnHidden
       >
         <Form
           form={form}
           onFinish={handleCloneSource}
-          initialValues={{
-            ...source,
-            version: versions?.length > 0 ? versions[0] : undefined,
-            source: `${source.name}_copy`,
-          }}
+          initialValues={getDefaultFormValues()}
         >
           <div className="flex gap-x-2">
             <Form.Item
@@ -87,7 +117,7 @@ export const CloneSourceModal = ({
               rules={[formValidation]}
               className="mb-2 w-full"
             >
-              <Input placeholder={`${source.name}_copy`} />
+              <Input placeholder={`${name}_copy`} />
             </Form.Item>
             <Form.Item name="enabled" label="Enabled" rules={[formValidation]}>
               <Switch />
@@ -115,9 +145,7 @@ export const CloneSourceModal = ({
             rules={[formValidation]}
             className="mb-2"
           >
-            <Input
-              placeholder={`${source.display_name ?? source.name} - copy`}
-            />
+            <Input placeholder={`${display_name ?? name} - copy`} />
           </Form.Item>
           {error && <FormNotification text={error.message} type="error" />}
           <div className="flex justify-end gap-x-2">
@@ -133,7 +161,7 @@ export const CloneSourceModal = ({
               loading={isPending}
               disabled={isPending}
               type="default"
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
             >
               Cancel
             </Button>
