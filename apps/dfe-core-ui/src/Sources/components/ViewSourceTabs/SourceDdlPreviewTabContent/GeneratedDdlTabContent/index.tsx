@@ -32,6 +32,7 @@ export const GeneratedDdlTabContent = ({
       value={create_table}
       mode="sql"
       height={`${componentHeight}px`}
+      readOnly={true}
     />
   );
 };

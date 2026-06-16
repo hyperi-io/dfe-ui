@@ -28,7 +28,7 @@ export const GeneratedViewsTabContent = ({
       {Object.entries(views ?? {}).map(([key, value]) => (
         <div className="flex flex-col gap-y-2" key={key}>
           <h3>{key}</h3>
-          <AceEditor value={value} mode="sql" height="200px" />
+          <AceEditor value={value} mode="sql" height="200px" readOnly={true} />
         </div>
       ))}
     </div>
