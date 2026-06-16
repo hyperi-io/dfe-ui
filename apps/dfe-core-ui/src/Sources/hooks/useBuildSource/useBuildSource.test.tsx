@@ -67,7 +67,7 @@ describe('.useBuildSource', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.schemas.sourceBuild.post.error());
+      server.use(API_CONFIG_MOCKS.sources.sourceBuild.post.error());
     });
     test('should return error', async () => {
       const { result } = renderHook(() => useBuildSource(), { wrapper });

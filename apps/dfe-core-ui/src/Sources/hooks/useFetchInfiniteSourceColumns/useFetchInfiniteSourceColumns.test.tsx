@@ -12,11 +12,11 @@ import {
 } from 'vitest';
 import { useFetchInfiniteSourceColumns } from '.';
 import { UseFetchInfiniteSourceColumnsItem } from './types';
+import { UseFetchInfiniteSourceColumnsProps } from './types.d';
 import {
   MOCK_SOURCE_NAME,
   server,
 } from './useFetchInfiniteSourceColumns.mocks';
-import { UseFetchInfiniteSourceColumnsProps } from './types.d';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -277,7 +277,7 @@ describe('useFetchInfiniteSourceColumns', () => {
 
   describe('error handling', () => {
     it('should handle error state correctly', async () => {
-      server.use(API_CONFIG_MOCKS.schemas.sourceColumns.get.error());
+      server.use(API_CONFIG_MOCKS.sources.sourceColumns.get.error());
 
       const { result } = renderHook(
         () => useFetchInfiniteSourceColumns(DEFAULT_HOOK_PROPS),
@@ -458,7 +458,7 @@ describe('useFetchInfiniteSourceColumns', () => {
   describe('empty results', () => {
     it('should handle empty searches array', async () => {
       server.use(
-        API_CONFIG_MOCKS.schemas.sourceColumns.get.success({
+        API_CONFIG_MOCKS.sources.sourceColumns.get.success({
           source_name: MOCK_SOURCE_NAME,
           mockedResponse: {
             items: [],
