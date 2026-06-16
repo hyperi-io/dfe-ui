@@ -4,10 +4,7 @@ import {
   CreateUpdateSourceFormData,
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import {
-  SOURCE_DETAIL_QUERY_KEY,
-  useFetchSourceDetail,
-} from '@/Sources/hooks/useFetchSourceDetail';
+import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
@@ -25,6 +22,7 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
     refetch: refetchSources,
+    setSelectedSource,
   } = useListSourcesContext();
 
   const {
@@ -40,8 +38,12 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
     reset: resetUpdateSource,
   } = useUpdateSource({
     onSuccess: (response) => {
+      setSelectedSource({
+        source_name: response.source,
+        source_version: response.current,
+      });
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(source_name),
+        queryKey: ['source', response.source],
       });
       refetchSources();
       onSuccess?.(response);

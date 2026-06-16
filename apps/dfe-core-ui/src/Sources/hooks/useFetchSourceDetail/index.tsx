@@ -2,10 +2,10 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
 
-export const SOURCE_DETAIL_QUERY_KEY = (source_name: string | null) => [
-  'source',
-  source_name,
-];
+export const SOURCE_DETAIL_QUERY_KEY = (
+  source_name: string | null,
+  source_version: string | null = null,
+) => ['source', source_name, source_version ?? ''];
 
 export const useFetchSourceDetail = ({
   source_name,
@@ -17,7 +17,7 @@ export const useFetchSourceDetail = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SOURCE_DETAIL_QUERY_KEY(source_name),
+    queryKey: SOURCE_DETAIL_QUERY_KEY(source_name, source_version),
     queryFn: () =>
       apiClient.get(API_CONFIG.sources.sourceVersion, {
         pathParams: { name: source_name ?? '' },
