@@ -6,7 +6,7 @@ import { Button, Input } from 'antd';
 import { useState } from 'react';
 import { RoleCard } from './RoleCard';
 
-const ROLE_LIMIT = 6;
+const ROLE_LIMIT = 3;
 export const RoleManagement = () => {
   const [customRoleSearch, setCustomRoleSearch] = useState('');
   const {

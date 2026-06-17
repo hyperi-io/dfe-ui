@@ -1873,6 +1873,34 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            username: 'string',
+            enabled: true,
+            groups: ['string'],
+            created_at: 'string',
+            updated_at: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     account: {
       mockedUrl: '/api/v1/auth/accounts/{username}',
