@@ -1844,8 +1844,33 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/auth/accounts',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = [
+            {
+              username: 'string',
+              enabled: true,
+              groups: ['string'],
+              created_at: 'string',
+              updated_at: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'][];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
