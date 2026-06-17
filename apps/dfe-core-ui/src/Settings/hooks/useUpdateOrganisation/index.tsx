@@ -9,17 +9,19 @@ import {
 interface UseUpdateOrganisationProps {
   onSuccess?: (data: OrganisationUpdateResponse) => void;
   onError?: (error: Error) => void;
+  org_name: string;
 }
 
 export const useUpdateOrganisation = ({
+  org_name,
   onSuccess,
   onError,
-}: UseUpdateOrganisationProps = {}) => {
+}: UseUpdateOrganisationProps) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (organisation: OrganisationUpdateRequestBody) => {
       return apiClient.put(API_CONFIG.orgs.org, {
         body: organisation,
-        pathParams: { name: organisation.org_name },
+        pathParams: { name: org_name },
       });
     },
     onSuccess: (data) => {

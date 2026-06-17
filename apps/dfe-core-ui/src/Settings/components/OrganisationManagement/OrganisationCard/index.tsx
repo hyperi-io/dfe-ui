@@ -7,10 +7,12 @@ import { IconLockFilled } from '@repo/dfe-icons';
 
 export const OrganisationCard = ({
   organisation,
+  refetch,
 }: {
   organisation: Organisation;
+  refetch: () => void;
 }) => {
-  const isParentOrganisation = organisation.org_ids.length > 1;
+  const isParentOrganisation = (organisation.org_ids?.length ?? 0) > 0;
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative">
       <PopoverMenu
@@ -18,7 +20,11 @@ export const OrganisationCard = ({
         ariaLabel="Organisation actions"
         options={[
           <ViewOrganisationDrawer key="view-organisation" />,
-          <EditOrganisationDrawer key="edit-organisation" />,
+          <EditOrganisationDrawer
+            key="edit-organisation"
+            organisation={organisation}
+            refetch={refetch}
+          />,
           <ArchiveOrganisationDrawer
             key="archive-organisation"
             disabled={isParentOrganisation}
@@ -32,7 +38,7 @@ export const OrganisationCard = ({
             {organisation.name.charAt(0).toUpperCase()}
           </p>
         </span>
-        <h3 className="font-medium">{organisation.name}</h3>
+        <h3 className="font-medium">{organisation.display_name}</h3>
       </div>
       {isParentOrganisation && (
         <span className="absolute bottom-1 right-1 bg-brand-primary dark:bg-secondary rounded-full p-1 text-white text-xs">

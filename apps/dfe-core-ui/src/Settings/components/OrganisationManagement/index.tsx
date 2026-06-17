@@ -64,6 +64,7 @@ export const OrganisationManagement = () => {
                 <OrganisationCard
                   key={organisation.name}
                   organisation={organisation}
+                  refetch={refetch}
                 />
               </li>
             ))}

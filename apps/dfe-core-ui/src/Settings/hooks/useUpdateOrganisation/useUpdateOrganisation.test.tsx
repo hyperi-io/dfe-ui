@@ -30,7 +30,6 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateOrganisation', () => {
   const requestBody: OrganisationUpdateRequestBody = {
-    org_name: 'org_name',
     display_name: 'string',
     org_ids: ['string'],
     enabled: true,
@@ -43,14 +42,19 @@ describe('.useUpdateOrganisation', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateOrganisation({ onSuccess, onError }),
+        () =>
+          useUpdateOrganisation({
+            org_name: 'org_name',
+            onSuccess,
+            onError,
+          }),
         { wrapper },
       );
 
       result.current.mutate(requestBody);
 
       const expectedResponse: OrganisationUpdateResponse = {
-        name: requestBody.org_name,
+        name: 'org_name',
         display_name: 'string',
         org_ids: ['string'],
         enabled: true,
@@ -87,7 +91,12 @@ describe('.useUpdateOrganisation', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateOrganisation({ onSuccess, onError }),
+        () =>
+          useUpdateOrganisation({
+            org_name: 'org_name',
+            onSuccess,
+            onError,
+          }),
         { wrapper },
       );
 
