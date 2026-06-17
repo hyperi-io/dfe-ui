@@ -11,14 +11,19 @@ import { OrganisationCard } from './OrganisationCard';
 
 export const OrganisationManagement = () => {
   // const [search, setSearch] = useState('');
-  const { data: organisations, isLoading, error } = useFetchOrganisations();
+  const {
+    data: organisations,
+    isLoading,
+    error,
+    refetch,
+  } = useFetchOrganisations();
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       <SectionCard
         title="Configure a new organisation"
         description="Create and configure a new organisation and manage user, role defaults and more."
-        rightTitleSlot={<CreateOrganisationDrawer />}
+        rightTitleSlot={<CreateOrganisationDrawer refetch={refetch} />}
       />
       <SectionCard
         title="Manage existing organisations"
@@ -52,16 +57,18 @@ export const OrganisationManagement = () => {
             icon={<IconInfoCircle />}
           />
         )}
-        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {organisations?.map((organisation) => (
-            <li key={organisation.name}>
-              <OrganisationCard
-                key={organisation.name}
-                organisation={organisation}
-              />
-            </li>
-          ))}
-        </ul>
+        {organisations && organisations?.length > 0 && (
+          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {organisations?.map((organisation) => (
+              <li key={organisation.name}>
+                <OrganisationCard
+                  key={organisation.name}
+                  organisation={organisation}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         {/* {companyLimit < filteredOrganisations.length && (
           <Button
             type="link"

@@ -5,17 +5,31 @@ import {
 } from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
 import { useCreateOrganisation } from '@/Settings/hooks/useCreateOrganisation';
 import { IconPlus } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const CreateOrganisationDrawer = () => {
+export const CreateOrganisationDrawer = ({
+  refetch,
+}: {
+  refetch: () => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
 
   const {
     mutate: createOrganisation,
     isPending,
     error,
-  } = useCreateOrganisation();
+  } = useCreateOrganisation({
+    onSuccess: () => {
+      api.success({
+        title: 'Organisation created successfully',
+        placement: 'bottomLeft',
+      });
+      refetch();
+      setIsOpen(false);
+    },
+  });
 
   const handleCreateOrganisation = (
     values: CreateUpdateOrganisationFormData,
@@ -24,6 +38,7 @@ export const CreateOrganisationDrawer = () => {
   };
   return (
     <>
+      {contextHolder}
       <Button
         type="primary"
         icon={<IconPlus />}
@@ -37,7 +52,12 @@ export const CreateOrganisationDrawer = () => {
         onClose={() => setIsOpen(false)}
       >
         <CreateUpdateOrganisationForm
-          initialValues={{ dedicated_database: false }}
+          initialValues={{
+            dedicated_database: false,
+            display_name: '',
+            org_ids: [],
+            name: '',
+          }}
           onFinish={handleCreateOrganisation}
           error={error}
           isPending={isPending}

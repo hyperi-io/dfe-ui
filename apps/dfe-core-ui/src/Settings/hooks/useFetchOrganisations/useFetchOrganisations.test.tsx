@@ -33,6 +33,7 @@ describe('.useFetchOrganisations', () => {
         data: undefined,
         isLoading: true,
         error: null,
+        refetch: expect.any(Function),
       });
 
       const expectedResponse: Organisation[] = [
@@ -52,6 +53,7 @@ describe('.useFetchOrganisations', () => {
           data: expectedResponse,
           isLoading: false,
           error: null,
+          refetch: expect.any(Function),
         });
       });
     });

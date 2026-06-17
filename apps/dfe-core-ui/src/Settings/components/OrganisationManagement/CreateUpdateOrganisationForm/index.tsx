@@ -51,6 +51,9 @@ export const CreateUpdateOrganisationForm = ({
           name="name"
           label="Name"
           rules={[formValidation]}
+          normalize={(value) =>
+            typeof value === 'string' ? value.toLowerCase() : value
+          }
         >
           <Input placeholder="Enter name" />
         </Form.Item>
