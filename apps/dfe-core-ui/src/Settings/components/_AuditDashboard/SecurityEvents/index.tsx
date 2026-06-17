@@ -1,15 +1,14 @@
 import { SECURITY_LOGS_DATA } from '@/Settings/mocks/securityLogs.data';
 import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
-import { Button, DatePicker, Input, Select } from 'antd';
-import dayjs, { type Dayjs } from 'dayjs';
+import { Button, DatePicker, Input, Select, type GetProps } from 'antd';
+import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 
-/** RangePicker with `allowEmpty` — each bound may be null while selecting. */
-type DateRange = [Dayjs | null, Dayjs | null];
+type RangePickerValue = GetProps<typeof DatePicker.RangePicker>['value'];
 
 export const SecurityEvents = () => {
   const [severity, setSeverity] = useState<string | undefined>(undefined);
-  const [dates, setDates] = useState<DateRange | null>(null);
+  const [dates, setDates] = useState<RangePickerValue>(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'asc' | 'desc'>('desc');
 

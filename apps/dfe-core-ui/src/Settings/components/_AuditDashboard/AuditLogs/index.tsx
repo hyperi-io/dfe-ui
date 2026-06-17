@@ -1,13 +1,12 @@
 import { AUDIT_LOGS_DATA } from '@/Settings/mocks/auditLogs.data';
-import { Button, DatePicker, Input } from 'antd';
-import dayjs, { type Dayjs } from 'dayjs';
+import { Button, DatePicker, Input, type GetProps } from 'antd';
+import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 
-/** RangePicker with `allowEmpty` — each bound may be null while selecting. */
-type DateRange = [Dayjs | null, Dayjs | null];
+type RangePickerValue = GetProps<typeof DatePicker.RangePicker>['value'];
 
 export const AuditLogs = () => {
-  const [dates, setDates] = useState<DateRange | null>(null);
+  const [dates, setDates] = useState<RangePickerValue>(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'asc' | 'desc'>('desc');
 
