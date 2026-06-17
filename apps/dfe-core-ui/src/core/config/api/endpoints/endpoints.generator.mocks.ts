@@ -1992,6 +1992,41 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          username = 'string',
+        }: { status?: number; username?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     resetPassword: {
       mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
