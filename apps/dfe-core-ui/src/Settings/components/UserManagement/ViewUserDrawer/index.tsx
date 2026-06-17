@@ -1,10 +1,13 @@
 import { Drawer } from '@/core/components/Drawer';
+import { ViewUserDetails } from '@/Settings/components/UserManagement/ViewUserDrawer/ViewUserDetails';
 import { IconEye } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
-export const ViewUserDrawer = ({ title = 'View User' }: { title?: string }) => {
+export const ViewUserDrawer = ({ username }: { username: string }) => {
   const [open, setOpen] = useState(false);
+  const title = `View ${username}`;
+
   return (
     <>
       <Button
@@ -13,12 +16,10 @@ export const ViewUserDrawer = ({ title = 'View User' }: { title?: string }) => {
         icon={<IconEye />}
         onClick={() => setOpen(true)}
       >
-        {title}
+        View User
       </Button>
       <Drawer title={title} open={open} onClose={() => setOpen(false)}>
-        <div className="border border-error text-error bg-error/10 rounded-md p-4">
-          Implement ViewUserDrawer
-        </div>
+        <ViewUserDetails username={username} />
       </Drawer>
     </>
   );
