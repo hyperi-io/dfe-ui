@@ -30,7 +30,7 @@ afterEach(() => {
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.useAuthMe', () => {
+describe('.useLogin', () => {
   test('should return user', async () => {
     const { result } = renderHook(() => useLogin(), { wrapper });
 
