@@ -11,6 +11,10 @@ const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
 
+const ROLE_LIMIT = 3;
+const PERMISSION_LIMIT = 3;
+const GROUP_LIMIT = 3;
+
 export const UserActionsPopoverContent = () => {
   const { handleLogout } = useLogout();
   const { data: me, isLoading, error } = useAuthMe();
@@ -36,7 +40,14 @@ export const UserActionsPopoverContent = () => {
           <dt className={dataListTermStyle}>Roles:</dt>
           <dd>
             {me?.roles?.length && me?.roles?.length > 0 ? (
-              me.roles.join(', ')
+              <div className="flex items-center gap-1">
+                {me.roles.slice(0, ROLE_LIMIT).join(', ')}
+                {me.roles.length > ROLE_LIMIT && (
+                  <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
+                    +{me.roles.length - ROLE_LIMIT} more
+                  </span>
+                )}
+              </div>
             ) : (
               <EmptyData />
             )}
@@ -44,7 +55,14 @@ export const UserActionsPopoverContent = () => {
           <dt className={dataListTermStyle}>Permissions:</dt>
           <dd>
             {me?.permissions?.length && me?.permissions?.length > 0 ? (
-              me.permissions.join(', ')
+              <div className="flex items-center gap-1">
+                {me.permissions.slice(0, PERMISSION_LIMIT).join(', ')}
+                {me.permissions.length > PERMISSION_LIMIT && (
+                  <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
+                    +{me.permissions.length - PERMISSION_LIMIT} more
+                  </span>
+                )}
+              </div>
             ) : (
               <EmptyData />
             )}
@@ -52,7 +70,14 @@ export const UserActionsPopoverContent = () => {
           <dt className={dataListTermStyle}>Groups:</dt>
           <dd>
             {me?.groups?.length && me?.groups?.length > 0 ? (
-              me.groups.join(', ')
+              <div className="flex items-center gap-1">
+                {me.groups.slice(0, GROUP_LIMIT).join(', ')}
+                {me.groups.length > GROUP_LIMIT && (
+                  <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
+                    +{me.groups.length - GROUP_LIMIT} more
+                  </span>
+                )}
+              </div>
             ) : (
               <EmptyData />
             )}
