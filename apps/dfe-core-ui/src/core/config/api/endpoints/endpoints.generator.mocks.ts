@@ -1779,6 +1779,10 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             scopes: ['string'],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
             wildcard: false,
             argo_namespace_prefix: 'string',
             notes: 'string',

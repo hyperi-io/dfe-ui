@@ -3,7 +3,7 @@ import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { UseFetchInfiniteFilteredRoleScopesProps } from './types.d';
+import { UseFetchInfiniteFilteredRoleScopesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
