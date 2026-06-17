@@ -20,6 +20,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => searchParamsRef.current,
 }));
 vi.mock('next-auth/react', () => ({
+  getSession: vi.fn().mockResolvedValue(null),
   signIn: (...args: unknown[]) => mockSignIn(...args),
 }));
 

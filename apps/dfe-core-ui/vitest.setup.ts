@@ -34,6 +34,11 @@ vi.mock('next/link', () => ({
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
+vi.mock('next-auth/react', () => ({
+  getSession: vi.fn().mockResolvedValue(null),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}));
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
   usePathname: vi.fn(),
