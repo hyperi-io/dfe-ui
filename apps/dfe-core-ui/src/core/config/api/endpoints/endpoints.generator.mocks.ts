@@ -1520,6 +1520,35 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          org_name = 'org_name',
+        }: { status?: number; org_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          org_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
   },
   groups: {
