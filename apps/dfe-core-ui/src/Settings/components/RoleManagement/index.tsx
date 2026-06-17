@@ -23,6 +23,7 @@ export const RoleManagement = () => {
   const {
     data: { items: coreRoles, total: coreRolesTotal },
     fetchNextPage: fetchCoreRolesNextPage,
+    refetch: refetchCoreRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'core',
     per_page: ROLE_LIMIT,
@@ -51,7 +52,7 @@ export const RoleManagement = () => {
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {customRoles?.map((role) => (
             <li key={role.name.replaceAll(' ', '-')}>
-              <RoleCard role={role} />
+              <RoleCard refetch={refetchCustomRoles} role={role} />
             </li>
           ))}
         </ul>
@@ -85,7 +86,7 @@ export const RoleManagement = () => {
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {coreRoles?.map((role) => (
             <li key={role.name.replaceAll(' ', '-')}>
-              <RoleCard role={role} />
+              <RoleCard refetch={refetchCoreRoles} role={role} />
             </li>
           ))}
         </ul>

@@ -24,6 +24,7 @@ const formSchema = z.object({
 export type CreateUpdateRoleFormData = z.infer<typeof formSchema>;
 
 export const CreateUpdateRoleForm = ({
+  name,
   onFinish,
   error,
   isPending,
@@ -35,13 +36,18 @@ export const CreateUpdateRoleForm = ({
     description: '',
     scoped: false,
   },
+  disabledFields,
 }: {
+  name: string;
   onFinish: (values: CreateUpdateRoleFormData) => void;
   error: Error | null;
   isPending: boolean;
   buttonLabel?: string;
   hasReset?: boolean;
   initialValues?: CreateUpdateRoleFormData;
+  disabledFields?: {
+    name?: boolean;
+  };
 }) => {
   const [form] = Form.useForm<CreateUpdateRoleFormData>();
   const formValidation =
@@ -52,9 +58,14 @@ export const CreateUpdateRoleForm = ({
   };
 
   return (
-    <Form form={form} onFinish={handleFinish} initialValues={initialValues}>
+    <Form
+      name={name}
+      form={form}
+      onFinish={handleFinish}
+      initialValues={initialValues}
+    >
       <Form.Item name="name" label="Name" rules={[formValidation]}>
-        <Input placeholder="Enter name" />
+        <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
 
       <Form.Item

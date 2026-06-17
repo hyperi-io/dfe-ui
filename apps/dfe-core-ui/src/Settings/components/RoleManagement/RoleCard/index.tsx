@@ -10,7 +10,13 @@ import { Tooltip } from 'antd';
 
 const PERMISSION_LIMIT = 4;
 
-export const RoleCard = ({ role }: { role: RoleListItem }) => {
+export const RoleCard = ({
+  role,
+  refetch,
+}: {
+  role: RoleListItem;
+  refetch: () => void;
+}) => {
   const isCoreRole = role.resource_type === 'core';
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
@@ -23,9 +29,20 @@ export const RoleCard = ({ role }: { role: RoleListItem }) => {
               role_name={role.name}
               key="view-role-details"
             />,
-            <EditRoleDrawer key="edit-role" disabled={isCoreRole} />,
+            ...(!isCoreRole
+              ? [
+                  <EditRoleDrawer
+                    key="edit-role"
+                    disabled={isCoreRole}
+                    role_name={role.name}
+                    refetch={refetch}
+                  />,
+                ]
+              : []),
             <CloneRoleDrawer key="clone-role" />,
-            <DeleteRoleDrawer key="delete-role" disabled={isCoreRole} />,
+            ...(!isCoreRole
+              ? [<DeleteRoleDrawer key="delete-role" disabled={isCoreRole} />]
+              : []),
           ]}
         />
 

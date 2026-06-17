@@ -46,9 +46,11 @@ export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
         onClose={() => setIsOpen(false)}
       >
         <CreateUpdateRoleForm
+          name="create-role-form"
           onFinish={handleCreateRole}
           error={error}
           isPending={isPending}
+          buttonLabel="Create Role"
         />
       </Drawer>
     </>
