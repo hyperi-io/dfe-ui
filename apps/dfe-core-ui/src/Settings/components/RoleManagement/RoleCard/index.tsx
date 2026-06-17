@@ -49,7 +49,7 @@ export const RoleCard = ({ role }: { role: RoleListItem }) => {
         <p className="text-sm text-foreground/50 dark:text-dark-foreground/50">
           {role.description}
         </p>
-        <ul className="flex flex-wrap gap-2 w-full overflow-hidden max-h-12 relative">
+        <ul className="flex flex-wrap gap-2 w-full overflow-hidden max-h-12 relative mt-1">
           {role.permissions && role.permissions.length > 0 ? (
             role.permissions.slice(0, PERMISSION_LIMIT).map((permission) => (
               <li

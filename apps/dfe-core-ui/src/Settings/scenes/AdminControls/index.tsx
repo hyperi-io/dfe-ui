@@ -7,13 +7,40 @@ import { OrganisationManagement } from '@/Settings/components/OrganisationManage
 import { RoleManagement } from '@/Settings/components/RoleManagement';
 import { UserManagement } from '@/Settings/components/UserManagement';
 import { Tabs } from 'antd';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
+import {
+  adminTabFromPathname,
+  adminTabPath,
+  isAdminTabKey,
+} from './adminTabs';
 
 export const AdminControlsScene = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const activeTab = useMemo(
+    () => adminTabFromPathname(pathname),
+    [pathname],
+  );
+
+  const handleTabChange = useCallback(
+    (key: string) => {
+      if (!isAdminTabKey(key)) {
+        return;
+      }
+      router.replace(adminTabPath(key));
+    },
+    [router],
+  );
+
   return (
     <MainContentCard className="pl-0">
       <Tabs
         className="h-full"
         tabPlacement="start"
+        activeKey={activeTab}
+        onChange={handleTabChange}
         items={[
           {
             key: 'organization-management',
