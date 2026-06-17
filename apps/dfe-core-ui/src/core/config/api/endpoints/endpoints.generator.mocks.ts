@@ -1664,8 +1664,30 @@ export const API_CONFIG_MOCKS = Object.freeze({
     scopes: {
       mockedUrl: '/api/v1/auth/roles/scopes',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            scopes: ['string'],
+            wildcard: false,
+            argo_namespace_prefix: 'string',
+            notes: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['CasbinScopesResponse'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
