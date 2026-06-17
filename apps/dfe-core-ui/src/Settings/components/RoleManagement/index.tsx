@@ -1,8 +1,10 @@
+import { GenericErrorCard } from '@/core/components/GenericError';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
-import { IconLock } from '@repo/dfe-icons';
-import { Button, Input } from 'antd';
+import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
+import { Button, Input, Spin } from 'antd';
 import { useState } from 'react';
 import { RoleCard } from './RoleCard';
 
@@ -12,7 +14,9 @@ export const RoleManagement = () => {
   const {
     data: { items: customRoles, total: customRolesTotal },
     fetchNextPage: fetchCustomRolesNextPage,
+    isLoading: isLoadingCustomRoles,
     refetch: refetchCustomRoles,
+    error: errorCustomRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'custom',
     per_page: ROLE_LIMIT,
@@ -23,7 +27,9 @@ export const RoleManagement = () => {
   const {
     data: { items: coreRoles, total: coreRolesTotal },
     fetchNextPage: fetchCoreRolesNextPage,
+    isLoading: isLoadingCoreRoles,
     refetch: refetchCoreRoles,
+    error: errorCoreRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'core',
     per_page: ROLE_LIMIT,
@@ -49,13 +55,32 @@ export const RoleManagement = () => {
           />
         }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {customRoles?.map((role) => (
-            <li key={role.name.replaceAll(' ', '-')}>
-              <RoleCard refetch={refetchCustomRoles} role={role} />
-            </li>
-          ))}
-        </ul>
+        {isLoadingCustomRoles && (
+          <>
+            <Spin /> <p className="sr-only">Loading custom roles</p>
+          </>
+        )}
+
+        {errorCustomRoles && (
+          <GenericErrorCard
+            title="Error fetching custom roles"
+            description={
+              errorCustomRoles.message ??
+              'Unexpected error fetching custom roles'
+            }
+          />
+        )}
+
+        {customRoles.length > 0 && (
+          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {customRoles?.map((role) => (
+              <li key={role.name.replaceAll(' ', '-')}>
+                <RoleCard refetch={refetchCustomRoles} role={role} />
+              </li>
+            ))}
+          </ul>
+        )}
+
         {customRoles.length < customRolesTotal && (
           <Button
             type="link"
@@ -65,6 +90,16 @@ export const RoleManagement = () => {
             Show more
           </Button>
         )}
+
+        {!isLoadingCustomRoles &&
+          !errorCustomRoles &&
+          customRoles.length === 0 && (
+            <NotificationCard
+              className="w-full"
+              description="No custom roles found"
+              icon={<IconInfoCircle />}
+            />
+          )}
       </SectionCard>
       <SectionCard
         title={
@@ -83,19 +118,37 @@ export const RoleManagement = () => {
           />
         }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {coreRoles?.map((role) => (
-            <li key={role.name.replaceAll(' ', '-')}>
-              <RoleCard
-                refetch={() => {
-                  refetchCoreRoles();
-                  refetchCustomRoles();
-                }}
-                role={role}
-              />
-            </li>
-          ))}
-        </ul>
+        {isLoadingCoreRoles && (
+          <>
+            <Spin /> <p className="sr-only">Loading core roles</p>
+          </>
+        )}
+
+        {errorCoreRoles && (
+          <GenericErrorCard
+            title="Error fetching core roles"
+            description={
+              errorCoreRoles.message ?? 'Unexpected error fetching core roles'
+            }
+          />
+        )}
+
+        {coreRoles.length > 0 && (
+          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {coreRoles?.map((role) => (
+              <li key={role.name.replaceAll(' ', '-')}>
+                <RoleCard
+                  refetch={() => {
+                    refetchCoreRoles();
+                    refetchCustomRoles();
+                  }}
+                  role={role}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
         {coreRoles.length < coreRolesTotal && (
           <Button
             type="link"
@@ -104,6 +157,14 @@ export const RoleManagement = () => {
           >
             Show more
           </Button>
+        )}
+
+        {!isLoadingCoreRoles && !errorCoreRoles && coreRoles.length === 0 && (
+          <NotificationCard
+            className="w-full"
+            description="No core roles found"
+            icon={<IconInfoCircle />}
+          />
         )}
       </SectionCard>
     </div>
