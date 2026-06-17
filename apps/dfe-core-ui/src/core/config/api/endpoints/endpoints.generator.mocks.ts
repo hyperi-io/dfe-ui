@@ -1652,6 +1652,34 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     role: {
       mockedUrl: '/api/v1/auth/roles/{name}',
