@@ -2031,8 +2031,41 @@ export const API_CONFIG_MOCKS = Object.freeze({
     resetPassword: {
       mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {},
+          username = 'string',
+        }: {
+          mockedResponse?: Record<string, never>;
+          username?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.accounts.resetPassword.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.accounts.resetPassword.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
