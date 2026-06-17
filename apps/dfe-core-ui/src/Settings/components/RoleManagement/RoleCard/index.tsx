@@ -1,7 +1,7 @@
 import { cn } from '@/core/utils/style';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { CloneRoleDrawer } from '@/Settings/components/RoleManagement/CloneRoleDrawer';
-import { DeleteRoleDrawer } from '@/Settings/components/RoleManagement/DeleteRoleDrawer';
+import { DeleteRoleModal } from '@/Settings/components/RoleManagement/DeleteRoleModal';
 import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDrawer';
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
 import { RoleListItem } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
@@ -41,7 +41,14 @@ export const RoleCard = ({
               : []),
             <CloneRoleDrawer key="clone-role" />,
             ...(!isCoreRole
-              ? [<DeleteRoleDrawer key="delete-role" disabled={isCoreRole} />]
+              ? [
+                  <DeleteRoleModal
+                    key="delete-role"
+                    disabled={isCoreRole}
+                    role_name={role.name}
+                    refetch={refetch}
+                  />,
+                ]
               : []),
           ]}
         />
