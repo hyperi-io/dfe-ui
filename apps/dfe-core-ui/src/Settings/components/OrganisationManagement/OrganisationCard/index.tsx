@@ -19,7 +19,11 @@ export const OrganisationCard = ({
         className="absolute top-1 right-1"
         ariaLabel="Organisation actions"
         options={[
-          <ViewOrganisationDrawer key="view-organisation" />,
+          <ViewOrganisationDrawer
+            key="view-organisation"
+            org_name={organisation.name}
+            display_name={organisation.display_name}
+          />,
           <EditOrganisationDrawer
             key="edit-organisation"
             organisation={organisation}
