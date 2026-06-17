@@ -1699,6 +1699,41 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          group_name = 'group_name',
+        }: { status?: number; group_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     groupMembers: {
       mockedUrl: '/api/v1/auth/groups/{name}/members',
