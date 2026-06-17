@@ -1,0 +1,56 @@
+import { Drawer } from '@/core/components/Drawer';
+import {
+  CreateUpdateRoleForm,
+  CreateUpdateRoleFormData,
+} from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
+import { useCreateRole } from '@/Settings/hooks/useCreateRole';
+import { IconPlus } from '@repo/dfe-icons';
+import { Button, notification } from 'antd';
+import { useState } from 'react';
+
+export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
+
+  const {
+    mutate: createRole,
+    isPending,
+    error,
+  } = useCreateRole({
+    onSuccess: () => {
+      setIsOpen(false);
+      refetch();
+      api.success({
+        title: 'Role created successfully',
+        placement: 'bottomLeft',
+      });
+    },
+  });
+
+  const handleCreateRole = (values: CreateUpdateRoleFormData) => {
+    createRole(values);
+  };
+  return (
+    <>
+      {contextHolder}
+      <Button
+        type="primary"
+        onClick={() => setIsOpen(true)}
+        icon={<IconPlus />}
+      >
+        Configure New Custom Role
+      </Button>
+      <Drawer
+        title="Create Custom Role"
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
+        <CreateUpdateRoleForm
+          onFinish={handleCreateRole}
+          error={error}
+          isPending={isPending}
+        />
+      </Drawer>
+    </>
+  );
+};

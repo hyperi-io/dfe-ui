@@ -1,7 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { UseFetchInfiniteFilteredRoleScopesProps } from './types';
 
@@ -48,6 +48,7 @@ export const useFetchInfiniteFilteredRoleScopes = ({
       return hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
+    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

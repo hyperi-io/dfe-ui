@@ -12,8 +12,7 @@ export type AdminTabKey = (typeof ADMIN_TAB_KEYS)[number];
 export const DEFAULT_ADMIN_TAB: AdminTabKey = 'organization-management';
 
 export const isAdminTabKey = (value: string | null): value is AdminTabKey =>
-  value !== null &&
-  (ADMIN_TAB_KEYS as readonly string[]).includes(value);
+  value !== null && (ADMIN_TAB_KEYS as readonly string[]).includes(value);
 
 export const adminTabPath = (tab: AdminTabKey) =>
   tab === DEFAULT_ADMIN_TAB ? ADMIN_BASE_PATH : `${ADMIN_BASE_PATH}/${tab}`;

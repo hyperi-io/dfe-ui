@@ -1,4 +1,4 @@
-import { CreateCustomRoleDrawer } from '@/Settings/components/CreateCustomRoleDrawer';
+import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
 import { IconLock } from '@repo/dfe-icons';
@@ -12,6 +12,7 @@ export const RoleManagement = () => {
   const {
     data: { items: customRoles, total: customRolesTotal },
     fetchNextPage: fetchCustomRolesNextPage,
+    refetch: refetchCustomRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'custom',
     per_page: ROLE_LIMIT,
@@ -32,7 +33,7 @@ export const RoleManagement = () => {
       <SectionCard
         title="Configure a custom role"
         description="Configure a custom role and its permissions."
-        rightTitleSlot={<CreateCustomRoleDrawer />}
+        rightTitleSlot={<CreateRoleDrawer refetch={refetchCustomRoles} />}
       />
       <SectionCard
         title="Manage roles"

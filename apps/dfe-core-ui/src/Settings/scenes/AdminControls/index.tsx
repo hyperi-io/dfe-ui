@@ -9,20 +9,13 @@ import { UserManagement } from '@/Settings/components/UserManagement';
 import { Tabs } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
-import {
-  adminTabFromPathname,
-  adminTabPath,
-  isAdminTabKey,
-} from './adminTabs';
+import { adminTabFromPathname, adminTabPath, isAdminTabKey } from './adminTabs';
 
 export const AdminControlsScene = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const activeTab = useMemo(
-    () => adminTabFromPathname(pathname),
-    [pathname],
-  );
+  const activeTab = useMemo(() => adminTabFromPathname(pathname), [pathname]);
 
   const handleTabChange = useCallback(
     (key: string) => {
