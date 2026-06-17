@@ -4,12 +4,14 @@ import { CloneRoleDrawer } from '@/Settings/components/RoleManagement/CloneRoleD
 import { DeleteRoleDrawer } from '@/Settings/components/RoleManagement/DeleteRoleDrawer';
 import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDrawer';
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
-import { Role } from '@/Settings/mocks/role.data';
+import { RoleListItem } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { IconLockFilled } from '@repo/dfe-icons';
+import { Tooltip } from 'antd';
 
 const PERMISSION_LIMIT = 4;
 
-export const RoleCard = ({ role }: { role: Role }) => {
+export const RoleCard = ({ role }: { role: RoleListItem }) => {
+  const isCoreRole = role.resource_type === 'core';
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
       <div className="flex flex-col gap-1">
@@ -18,19 +20,32 @@ export const RoleCard = ({ role }: { role: Role }) => {
           ariaLabel="Role actions"
           options={[
             <ViewRoleDetailsDrawer key="view-role-details" />,
-            <EditRoleDrawer
-              key="edit-role"
-              disabled={role.predefined ?? false}
-            />,
+            <EditRoleDrawer key="edit-role" disabled={isCoreRole} />,
             <CloneRoleDrawer key="clone-role" />,
-            <DeleteRoleDrawer
-              key="delete-role"
-              disabled={role.predefined ?? false}
-            />,
+            <DeleteRoleDrawer key="delete-role" disabled={isCoreRole} />,
           ]}
         />
 
-        <h3 className="font-medium">{role.name}</h3>
+        <h3 className="font-medium flex items-center gap-2">
+          {isCoreRole && (
+            <Tooltip
+              destroyOnHidden
+              title={
+                <>
+                  <p className="font-semibold mb-1">
+                    You can&apos;t mutate core roles.
+                  </p>
+                  <p>Clone a core role to create a custom editable role.</p>
+                </>
+              }
+            >
+              <span className="bg-brand-primary dark:bg-secondary rounded-full p-1 text-white text-xs">
+                <IconLockFilled />
+              </span>
+            </Tooltip>
+          )}
+          {role.name}
+        </h3>
         <p className="text-sm text-foreground/50 dark:text-dark-foreground/50">
           {role.description}
         </p>
@@ -62,11 +77,6 @@ export const RoleCard = ({ role }: { role: Role }) => {
           </span>
         )}
       </div>
-      {role.predefined && (
-        <span className="absolute bottom-1 right-1 bg-brand-primary dark:bg-secondary rounded-full p-1 text-white text-xs">
-          <IconLockFilled />
-        </span>
-      )}
     </div>
   );
 };

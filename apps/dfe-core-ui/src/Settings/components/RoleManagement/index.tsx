@@ -1,41 +1,32 @@
 import { CreateCustomRoleDrawer } from '@/Settings/components/CreateCustomRoleDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import {
-  CUSTOM_ROLE_LIST_RESPONSE,
-  PREDEFINED_ROLE_LIST_RESPONSE,
-} from '@/Settings/mocks/role.data';
+import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
 import { IconLock } from '@repo/dfe-icons';
 import { Button, Input } from 'antd';
 import { useState } from 'react';
 import { RoleCard } from './RoleCard';
 
+const ROLE_LIMIT = 6;
 export const RoleManagement = () => {
   const [customRoleSearch, setCustomRoleSearch] = useState('');
-  const [preDefinedRoleSearch, setPreDefinedRoleSearch] = useState('');
+  const {
+    data: { items: customRoles, total: customRolesTotal },
+    fetchNextPage: fetchCustomRolesNextPage,
+  } = useFetchInfiniteFilteredRoles({
+    resource_type: 'custom',
+    per_page: ROLE_LIMIT,
+    search: customRoleSearch,
+  });
 
-  const [customRoleLimit, setCustomRoleLimit] = useState(3);
-  const [preDefinedRoleLimit, setPreDefinedRoleLimit] = useState(3);
-
-  const filteredCustomRoles = CUSTOM_ROLE_LIST_RESPONSE.filter(
-    (role) =>
-      role.name.toLowerCase().includes(customRoleSearch.toLowerCase()) ||
-      role.description
-        ?.toLowerCase()
-        .includes(customRoleSearch.toLowerCase()) ||
-      role.permissions?.some((permission) =>
-        permission.toLowerCase().includes(customRoleSearch.toLowerCase()),
-      ),
-  );
-  const filteredPreDefinedRoles = PREDEFINED_ROLE_LIST_RESPONSE.filter(
-    (role) =>
-      role.name.toLowerCase().includes(preDefinedRoleSearch.toLowerCase()) ||
-      role.description
-        ?.toLowerCase()
-        .includes(preDefinedRoleSearch.toLowerCase()) ||
-      role.permissions?.some((permission) =>
-        permission.toLowerCase().includes(preDefinedRoleSearch.toLowerCase()),
-      ),
-  );
+  const [coreRoleSearch, setCoreRoleSearch] = useState('');
+  const {
+    data: { items: coreRoles, total: coreRolesTotal },
+    fetchNextPage: fetchCoreRolesNextPage,
+  } = useFetchInfiniteFilteredRoles({
+    resource_type: 'core',
+    per_page: ROLE_LIMIT,
+    search: coreRoleSearch,
+  });
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       <SectionCard
@@ -52,21 +43,22 @@ export const RoleManagement = () => {
             placeholder="Search custom roles"
             onChange={(e) => setCustomRoleSearch(e.target.value)}
             value={customRoleSearch}
+            allowClear
           />
         }
       >
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredCustomRoles.slice(0, customRoleLimit).map((role) => (
-            <li key={role.id}>
+          {customRoles?.map((role) => (
+            <li key={role.name.replaceAll(' ', '-')}>
               <RoleCard role={role} />
             </li>
           ))}
         </ul>
-        {customRoleLimit < filteredCustomRoles.length && (
+        {customRoles.length < customRolesTotal && (
           <Button
             type="link"
             className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-            onClick={() => setCustomRoleLimit(customRoleLimit + 4)}
+            onClick={() => fetchCustomRolesNextPage()}
           >
             Show more
           </Button>
@@ -75,7 +67,7 @@ export const RoleManagement = () => {
       <SectionCard
         title={
           <span className="flex items-center gap-2">
-            <IconLock /> Predefined roles
+            <IconLock /> Core roles
           </span>
         }
         description="View configured roles and their permissions."
@@ -83,23 +75,24 @@ export const RoleManagement = () => {
           <Input.Search
             className="ml-auto w-60"
             placeholder="Search predefined roles"
-            onChange={(e) => setPreDefinedRoleSearch(e.target.value)}
-            value={preDefinedRoleSearch}
+            onChange={(e) => setCoreRoleSearch(e.target.value)}
+            value={coreRoleSearch}
+            allowClear
           />
         }
       >
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredPreDefinedRoles.slice(0, preDefinedRoleLimit).map((role) => (
-            <li key={role.id}>
+          {coreRoles?.map((role) => (
+            <li key={role.name.replaceAll(' ', '-')}>
               <RoleCard role={role} />
             </li>
           ))}
         </ul>
-        {preDefinedRoleLimit < filteredPreDefinedRoles.length && (
+        {coreRoles.length < coreRolesTotal && (
           <Button
             type="link"
             className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-            onClick={() => setPreDefinedRoleLimit(preDefinedRoleLimit + 4)}
+            onClick={() => fetchCoreRolesNextPage()}
           >
             Show more
           </Button>

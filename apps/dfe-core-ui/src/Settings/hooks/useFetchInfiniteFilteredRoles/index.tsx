@@ -1,8 +1,11 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { ResourceType, UseFetchInfiniteFilteredRolesProps } from './types.d';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 /** useFetchInfiniteFilteredRoles props */
 /**
@@ -18,6 +21,8 @@ export const useFetchInfiniteFilteredRoles = ({
   resource_type,
   per_page,
 }: UseFetchInfiniteFilteredRolesProps = {}) => {
+  const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
+
   const {
     data,
     isLoading,
@@ -28,11 +33,11 @@ export const useFetchInfiniteFilteredRoles = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['roles', search, resource_type, per_page],
+    queryKey: ['roles', debouncedSearch, resource_type, per_page],
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.roles.default, {
         queryParams: {
-          search: search,
+          search: debouncedSearch || undefined,
           resource_type: resource_type as ResourceType,
           page: pageParam,
           per_page,
