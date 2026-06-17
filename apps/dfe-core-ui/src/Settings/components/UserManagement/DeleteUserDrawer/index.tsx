@@ -1,51 +1,80 @@
-import { Drawer } from '@/core/components/Drawer';
+import { useDeleteAccount } from '@/Settings/hooks/useDeleteAccount';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, notification } from 'antd';
+import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
+import { DeleteUserForm, DeleteUserFormData } from './DeleteUserForm';
 
 export const DeleteUserDrawer = ({
-  title = 'Delete user',
-  isActive = true,
+  username,
+  isActive,
+  refetch,
 }: {
-  title?: string;
+  username: string;
   isActive: boolean;
+  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
-  const [api, contextHolder] = notification.useNotification();
+  const { notification } = App.useApp();
+  const title = `Delete ${username}`;
 
-  const handleDelete = () => {
-    // Only de-activate the user if they are inactive
+  const { mutate, isPending, error } = useDeleteAccount({
+    onSuccess: () => {
+      setOpen(false);
+      notification.success({
+        title: (
+          <>
+            <span className="font-semibold">{username}</span> deleted
+            successfully
+          </>
+        ),
+        placement: 'bottomLeft',
+      });
+      refetch();
+    },
+  });
+
+  const handleOpen = () => {
     if (isActive) {
-      api.error({
+      notification.error({
         title: 'User is active',
-        description: 'Please de-activate them first.',
+        description: 'Please deactivate them first.',
         placement: 'bottomLeft',
       });
       return;
     }
-    // eslint-disable-next-line no-alert
-    window.alert('User deleted successfully.');
+    setOpen(true);
   };
+
+  const handleDelete = (_values: DeleteUserFormData) => {
+    mutate(username);
+  };
+
   return (
     <>
-      {contextHolder}
       <Button
         aria-label={title}
         type="text"
         icon={<IconTrash />}
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         danger
       >
-        {title}
+        Delete User
       </Button>
-      <Drawer title={title} open={open} onClose={() => setOpen(false)}>
-        <div className="border border-error text-error bg-error/10 rounded-md p-4">
-          Implement DeleteUserDrawer
-        </div>
-        <Button className="mt-4" type="primary" danger onClick={handleDelete}>
-          Test Delete
-        </Button>
-      </Drawer>
+      <Modal
+        title="Delete User"
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <DeleteUserForm
+          username={username}
+          onFinish={handleDelete}
+          error={error}
+          isPending={isPending}
+          onCancel={() => setOpen(false)}
+        />
+      </Modal>
     </>
   );
 };
