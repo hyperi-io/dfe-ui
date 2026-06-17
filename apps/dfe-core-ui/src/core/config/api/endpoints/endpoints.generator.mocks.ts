@@ -1793,6 +1793,51 @@ export const API_CONFIG_MOCKS = Object.freeze({
           console.error('Not implemented');
         },
       },
+      delete: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.groupMember.mockedUrl
+              .replace('{name}', group_name)
+              .replace('{username}', username),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.groupMember.mockedUrl
+              .replace('{name}', group_name)
+              .replace('{username}', username),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
   },
   accounts: {
