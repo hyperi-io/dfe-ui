@@ -1,12 +1,16 @@
+import { cn } from '@/core/utils/style';
 import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { Tabs } from 'antd';
-import { OrganisationGroups } from './OrganisationGroups';
 import { UserGroups } from './UserGroups';
 
 export const GroupManagement = () => {
   return (
     <Tabs
-      className="[&_.ant-tabs-nav-list]:w-full [&_.ant-tabs-tab]:w-full"
+      className={cn(
+        // Disable cursor for tabs
+        // Remove this if more tabs are added
+        '[&_.ant-tabs-nav-list]:w-full [&_.ant-tabs-tab]:w-full [&_.ant-tabs-tab]:cursor-default [&_.ant-tabs-tab-btn]:cursor-default',
+      )}
       items={[
         {
           key: 'user-groups',
@@ -18,17 +22,6 @@ export const GroupManagement = () => {
             />
           ),
           children: <UserGroups />,
-        },
-        {
-          key: 'organisation-groups',
-          label: (
-            <AdminTabLabel
-              className="max-w-full"
-              label="Organisation Groups"
-              description="Configure custom groups and organisations."
-            />
-          ),
-          children: <OrganisationGroups />,
         },
       ]}
     />
