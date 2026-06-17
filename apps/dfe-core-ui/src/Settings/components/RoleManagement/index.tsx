@@ -86,7 +86,13 @@ export const RoleManagement = () => {
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {coreRoles?.map((role) => (
             <li key={role.name.replaceAll(' ', '-')}>
-              <RoleCard refetch={refetchCoreRoles} role={role} />
+              <RoleCard
+                refetch={() => {
+                  refetchCoreRoles();
+                  refetchCustomRoles();
+                }}
+                role={role}
+              />
             </li>
           ))}
         </ul>
