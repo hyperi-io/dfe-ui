@@ -1743,6 +1743,35 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          role_name = 'role_name',
+        }: { status?: number; role_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          role_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     scopes: {
       mockedUrl: '/api/v1/auth/roles/scopes',
