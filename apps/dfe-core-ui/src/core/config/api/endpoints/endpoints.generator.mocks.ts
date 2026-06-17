@@ -1948,6 +1948,50 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      put: {
+        success: ({
+          mockedResponse = {
+            username: 'string',
+            enabled: true,
+            groups: ['string'],
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'];
+          username?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     resetPassword: {
       mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
