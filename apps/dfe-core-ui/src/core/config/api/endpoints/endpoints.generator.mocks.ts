@@ -1583,6 +1583,33 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     group: {
       mockedUrl: '/api/v1/auth/groups/{name}',
