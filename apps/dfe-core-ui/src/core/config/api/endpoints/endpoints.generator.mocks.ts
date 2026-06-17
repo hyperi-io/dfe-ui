@@ -1742,6 +1742,49 @@ export const API_CONFIG_MOCKS = Object.freeze({
           console.error('Not implemented');
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.groups.groupMembers.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.groups.groupMembers.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     groupMember: {
       mockedUrl: '/api/v1/auth/groups/{name}/members/{username}',
