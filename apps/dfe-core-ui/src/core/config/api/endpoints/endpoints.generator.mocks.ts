@@ -1684,8 +1684,25 @@ export const API_CONFIG_MOCKS = Object.freeze({
     role: {
       mockedUrl: '/api/v1/auth/roles/{name}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+          role_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
       put: {
