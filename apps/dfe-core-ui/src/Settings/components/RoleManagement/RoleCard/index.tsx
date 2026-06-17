@@ -19,7 +19,10 @@ export const RoleCard = ({ role }: { role: RoleListItem }) => {
           className="absolute top-1 right-1"
           ariaLabel="Role actions"
           options={[
-            <ViewRoleDetailsDrawer key="view-role-details" />,
+            <ViewRoleDetailsDrawer
+              role_name={role.name}
+              key="view-role-details"
+            />,
             <EditRoleDrawer key="edit-role" disabled={isCoreRole} />,
             <CloneRoleDrawer key="clone-role" />,
             <DeleteRoleDrawer key="delete-role" disabled={isCoreRole} />,
