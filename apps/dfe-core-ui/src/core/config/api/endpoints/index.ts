@@ -75,4 +75,9 @@ export const API_CONFIG = Object.freeze({
     account: '/api/v1/auth/accounts/{username}',
     resetPassword: '/api/v1/auth/accounts/{username}/reset-password',
   },
+  roles: {
+    default: '/api/v1/auth/roles',
+    role: '/api/v1/auth/roles/{name}',
+    scopes: '/api/v1/auth/roles/scopes',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);

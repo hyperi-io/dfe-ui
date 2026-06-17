@@ -1611,5 +1611,64 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  roles: {
+    default: {
+      mockedUrl: '/api/v1/auth/roles',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                permissions: ['string'],
+                scoped: false,
+                resource_type: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_RoleResponse_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    role: {
+      mockedUrl: '/api/v1/auth/roles/{name}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    scopes: {
+      mockedUrl: '/api/v1/auth/roles/scopes',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
 });
 /* eslint-enable no-console */
