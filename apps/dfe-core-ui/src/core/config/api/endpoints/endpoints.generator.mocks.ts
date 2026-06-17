@@ -1688,6 +1688,44 @@ export const API_CONFIG_MOCKS = Object.freeze({
           console.error('Not implemented');
         },
       },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+          role_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          role_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     scopes: {
       mockedUrl: '/api/v1/auth/roles/scopes',
