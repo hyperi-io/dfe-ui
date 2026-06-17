@@ -49,7 +49,12 @@ export const EditOrganisationDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
+      <Button
+        type="text"
+        aria-label={`Edit ${organisation.display_name}`}
+        icon={<IconEdit />}
+        onClick={() => setOpen(true)}
+      >
         Edit Organisation
       </Button>
       <Drawer

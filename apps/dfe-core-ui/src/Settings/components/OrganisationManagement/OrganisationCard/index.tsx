@@ -1,4 +1,4 @@
-import { ArchiveOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ArchiveOrganisationDrawer';
+import { DeleteOrganisationModal } from '@/Settings/components/OrganisationManagement/DeleteOrganisationModal';
 import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
@@ -29,9 +29,12 @@ export const OrganisationCard = ({
             organisation={organisation}
             refetch={refetch}
           />,
-          <ArchiveOrganisationDrawer
-            key="archive-organisation"
+          <DeleteOrganisationModal
+            key="delete-organisation"
             disabled={isParentOrganisation}
+            org_name={organisation.name}
+            display_name={organisation.display_name}
+            refetch={refetch}
           />,
         ]}
       />

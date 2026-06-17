@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ConfigProvider } from 'antd';
+import { App as AntdApp, ConfigProvider } from 'antd';
 
 // import '@/core/config/AceEditor/init';
 
@@ -50,7 +50,7 @@ const CompatibleStyleProviders = ({
           },
         }}
       >
-        {children}
+        <AntdApp>{children}</AntdApp>
       </ConfigProvider>
     </StyleProvider>
   );

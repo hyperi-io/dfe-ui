@@ -15,7 +15,12 @@ export const ViewOrganisationDrawer = ({
 
   return (
     <>
-      <Button type="text" icon={<IconEye />} onClick={() => setOpen(true)}>
+      <Button
+        type="text"
+        aria-label={`View ${display_name} details`}
+        icon={<IconEye />}
+        onClick={() => setOpen(true)}
+      >
         View Organisation Details
       </Button>
       <Drawer
