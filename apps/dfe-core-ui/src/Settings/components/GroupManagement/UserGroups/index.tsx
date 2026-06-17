@@ -36,7 +36,7 @@ export const UserGroups = () => {
   const hasMore = visibleGroups.length < filteredGroups.length;
 
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
+    <div className="h-full css-custom-scrollbar">
       <SectionCard
         title="Configure a new group"
         description="Create a group and assign roles to its members."
