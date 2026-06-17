@@ -4,6 +4,7 @@ import { Button } from 'antd';
 
 export const UserActionsPopoverContent = () => {
   const { handleLogout } = useLogout();
+
   return (
     <div className="flex flex-col gap-y-2">
       <Button

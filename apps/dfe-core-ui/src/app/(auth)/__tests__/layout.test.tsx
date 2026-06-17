@@ -1,6 +1,9 @@
 import Layout from '@/app/(auth)/layout';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+const { wrapper: ThemeWrapper } = buildTestWrapper().withTheme();
 
 const getServerSession = vi.mocked(
   (await import('next-auth')).getServerSession,
@@ -34,7 +37,7 @@ describe('Layout (auth)', () => {
     const element = await Layout({
       children: <div>Dashboard content</div>,
     });
-    render(element);
+    render(<ThemeWrapper>{element}</ThemeWrapper>);
 
     expect(screen.getByText('Dashboard content')).toBeTruthy();
     expect(redirect).not.toHaveBeenCalled();

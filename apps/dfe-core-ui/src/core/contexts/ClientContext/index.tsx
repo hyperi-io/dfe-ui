@@ -1,3 +1,5 @@
+'use client';
+
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CompatibleStyleWrapper } from './CompatibleStyleWrapper';

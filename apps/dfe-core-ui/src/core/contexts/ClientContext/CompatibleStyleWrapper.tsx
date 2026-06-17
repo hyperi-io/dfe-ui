@@ -1,13 +1,10 @@
+'use client';
+
 import React from 'react';
 
 import { App as AntdApp, ConfigProvider } from 'antd';
 
-// import '@/core/config/AceEditor/init';
-
-import {
-  ThemeProvider,
-  useTheme,
-} from '@/core/contexts/ClientContext/ThemeContext';
+import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { colors } from '@/core/utils/theme';
 import {
   darkAlgorithm,
@@ -61,9 +58,5 @@ export const CompatibleStyleWrapper = ({
 }: {
   children: React.ReactNode;
 }) => {
-  return (
-    <ThemeProvider>
-      <CompatibleStyleProviders>{children}</CompatibleStyleProviders>
-    </ThemeProvider>
-  );
+  return <CompatibleStyleProviders>{children}</CompatibleStyleProviders>;
 };
