@@ -28,7 +28,8 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
   });
 
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
-    createGroup(values);
+    const { name, description, roles, members = [] } = values;
+    createGroup({ name, description, roles, members });
   };
 
   return (
@@ -52,6 +53,7 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
           error={error}
           isPending={isPending}
           buttonLabel="Create Group"
+          showMembersField
         />
       </Drawer>
     </>

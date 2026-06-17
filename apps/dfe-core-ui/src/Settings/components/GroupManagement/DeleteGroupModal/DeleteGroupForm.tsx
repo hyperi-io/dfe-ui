@@ -37,7 +37,11 @@ export const DeleteGroupForm = ({
   };
 
   return (
-    <Form form={form} onFinish={handleFinish}>
+    <Form
+      form={form}
+      onFinish={handleFinish}
+      initialValues={{ group_name: '' }}
+    >
       <p>
         Are you sure you want to delete{' '}
         <span className="font-semibold">{group_name}</span>?

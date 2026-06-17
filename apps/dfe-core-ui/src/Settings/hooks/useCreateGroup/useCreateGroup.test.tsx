@@ -30,6 +30,7 @@ describe('.useCreateGroup', () => {
     name: 'group_name',
     description: 'string',
     roles: ['string'],
+    members: [],
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {

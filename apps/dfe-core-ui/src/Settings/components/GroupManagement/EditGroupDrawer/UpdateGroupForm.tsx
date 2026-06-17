@@ -30,6 +30,7 @@ export const UpdateGroupForm = ({
     onFinish({
       description: values.description,
       roles: values.roles,
+      members: values.members ?? [],
     });
   };
 
@@ -64,11 +65,13 @@ export const UpdateGroupForm = ({
         name: groupDetailData.name,
         description: groupDetailData.description,
         roles: groupDetailData.roles,
+        members: groupDetailData.members,
       }}
       disabledFields={{
         name: true,
       }}
       buttonLabel="Update Group"
+      showMembersField
     />
   );
 };
