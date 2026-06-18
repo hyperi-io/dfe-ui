@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
@@ -54,14 +55,35 @@ export const CreateSourceDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        type="default"
-        className="border border-tertiary text-tertiary"
-        icon={<IconPlus className="text-tertiary" />}
-        onClick={() => setIsDrawerVisible(true)}
-      >
-        {title}
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.SOURCE_WRITE}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="default"
+            className="border border-tertiary text-tertiary"
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            {title}
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{
+            show: true,
+            placement: 'bottom',
+          }}
+        >
+          <Button
+            type="default"
+            disabled
+            className="border border-tertiary text-tertiary"
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            {title}
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title={title}
         open={isDrawerVisible}

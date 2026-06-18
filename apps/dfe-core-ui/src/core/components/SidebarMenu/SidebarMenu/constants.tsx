@@ -41,7 +41,7 @@ export const featureFlagSidebarMenuItems = [
                 />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right' }}
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
               >
                 <SidebarLink
                   collapsed={collapsed}
@@ -73,7 +73,7 @@ export const featureFlagSidebarMenuItems = [
                 />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right' }}
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
               >
                 <SidebarLink
                   collapsed={collapsed}
@@ -105,7 +105,7 @@ export const featureFlagSidebarMenuItems = [
                 />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right' }}
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
               >
                 <SidebarLink
                   collapsed={collapsed}
@@ -138,7 +138,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
@@ -168,7 +170,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
@@ -199,7 +203,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
@@ -229,7 +235,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
@@ -273,7 +281,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
@@ -303,7 +313,9 @@ export const featureFlagSidebarMenuItems = [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
           <SidebarLink
             collapsed={collapsed}
             disabled
