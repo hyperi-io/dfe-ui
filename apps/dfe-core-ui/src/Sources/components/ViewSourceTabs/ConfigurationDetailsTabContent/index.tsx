@@ -9,6 +9,7 @@ const formCollapseTitleStyle =
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
+
 export const ConfigurationDetailsTabContent = ({
   source,
   display_name,

@@ -7,16 +7,20 @@ import { LoginRequest } from './types';
 // Custom mocks needed for useLogin
 // These are mocked globally in vitest.setup.ts
 // but we need to define specific mock behavior for this test file
-const { mockPush, mockSignIn, searchParamsRef } = vi.hoisted(() => ({
-  mockPush: vi.fn(),
-  mockSignIn: vi.fn(),
-  searchParamsRef: { current: new URLSearchParams() },
-}));
+const { mockPush, mockRefresh, mockSignIn, searchParamsRef } = vi.hoisted(
+  () => ({
+    mockPush: vi.fn(),
+    mockRefresh: vi.fn(),
+    mockSignIn: vi.fn(),
+    searchParamsRef: { current: new URLSearchParams() },
+  }),
+);
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
   useSearchParams: () => searchParamsRef.current,
 }));
 vi.mock('next-auth/react', () => ({
+  getSession: vi.fn().mockResolvedValue(null),
   signIn: (...args: unknown[]) => mockSignIn(...args),
 }));
 
@@ -27,7 +31,7 @@ afterEach(() => {
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.useAuthMe', () => {
+describe('.useLogin', () => {
   test('should return user', async () => {
     const { result } = renderHook(() => useLogin(), { wrapper });
 

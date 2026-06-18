@@ -5,22 +5,34 @@ import { EditUserDrawer } from '@/Settings/components/UserManagement/EditUserDra
 import { ViewUserDrawer } from '@/Settings/components/UserManagement/ViewUserDrawer';
 
 export const RowActions = ({
-  name,
+  username,
   isActive,
+  refetch,
 }: {
-  name: string | undefined;
+  username: string;
   isActive: boolean;
+  refetch: () => void;
 }) => {
   return (
     <PopoverMenu
       options={[
-        <ViewUserDrawer key="view-user" title={`View ${name}`} />,
-        <EditUserDrawer key="edit-user" title={`Edit ${name}`} />,
-        <DeReactivateUser key="dereactivate-user" isActive={isActive} />,
+        <ViewUserDrawer key="view-user" username={username} />,
+        <EditUserDrawer
+          key="edit-user"
+          username={username}
+          refetch={refetch}
+        />,
+        <DeReactivateUser
+          key="dereactivate-user"
+          username={username}
+          isActive={isActive}
+          refetch={refetch}
+        />,
         <DeleteUserDrawer
           key="delete-user"
-          title={`Delete ${name}`}
+          username={username}
           isActive={isActive}
+          refetch={refetch}
         />,
       ]}
       ariaLabel="User actions"

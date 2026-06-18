@@ -50,21 +50,59 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
+        const expiresIn = (user as { expiresIn?: number }).expiresIn ?? 86400;
         token.accessToken = (user as { accessToken?: string }).accessToken;
-        token.expiresIn = (user as { expiresIn?: number }).expiresIn;
+        token.accessTokenExpiresAt = Date.now() + expiresIn * 1000;
         token.roles = (user as { roles?: string[] }).roles ?? [];
+        delete token.error;
+        return token;
       }
+
+      if (trigger === 'update' && session) {
+        const refresh = session as {
+          accessToken?: string;
+          expiresIn?: number;
+          roles?: string[];
+        };
+        if (refresh.accessToken) {
+          token.accessToken = refresh.accessToken;
+          token.accessTokenExpiresAt =
+            Date.now() + (refresh.expiresIn ?? 86400) * 1000;
+          if (refresh.roles) {
+            token.roles = refresh.roles;
+          }
+          delete token.error;
+        }
+        return token;
+      }
+
+      if (
+        typeof token.accessTokenExpiresAt === 'number' &&
+        Date.now() >= token.accessTokenExpiresAt
+      ) {
+        return {
+          ...token,
+          error: 'AccessTokenExpired',
+        };
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as { accessToken?: string }).accessToken =
-          token.accessToken as string;
+          token.accessToken as string | undefined;
         (session.user as { roles?: string[] }).roles =
           (token.roles as string[]) ?? [];
       }
+      if (token.error === 'AccessTokenExpired') {
+        session.error = 'AccessTokenExpired';
+      } else {
+        delete session.error;
+      }
+      session.accessTokenExpiresAt = token.accessTokenExpiresAt;
       return session;
     },
   },

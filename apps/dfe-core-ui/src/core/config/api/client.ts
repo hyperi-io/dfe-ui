@@ -93,6 +93,7 @@ function buildUrl(
 export type ApiClientConfig = {
   baseUrl: string;
   getAuthHeaders?: () => HeadersInit | Promise<HeadersInit>;
+  onUnauthorized?: () => void | Promise<void>;
   fetch?: typeof fetch;
 };
 
@@ -101,7 +102,12 @@ export type ApiClientConfig = {
  * Request bodies, query/path params, and response data are inferred from @repo/dfe-engine-types.
  */
 export function createApiClient(config: ApiClientConfig) {
-  const { baseUrl, getAuthHeaders, fetch: customFetch } = config;
+  const {
+    baseUrl,
+    getAuthHeaders,
+    onUnauthorized,
+    fetch: customFetch,
+  } = config;
 
   async function request<Path extends keyof paths, Method extends HttpMethod>(
     path: Path,
@@ -166,6 +172,10 @@ export function createApiClient(config: ApiClientConfig) {
         throw new Error(`Response body is not valid JSON: ${text}`, {
           cause: error,
         });
+      }
+
+      if (res.status === 401) {
+        await onUnauthorized?.();
       }
 
       throw new ApiError(res.status, res.statusText, detail);

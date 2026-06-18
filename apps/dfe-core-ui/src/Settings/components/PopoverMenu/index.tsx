@@ -1,6 +1,7 @@
 import { cn } from '@/core/utils/style';
 import { IconMenu2 } from '@repo/dfe-icons';
 import { Button, Popover } from 'antd';
+import { useState } from 'react';
 
 interface PopoverMenuProps {
   options: React.ReactNode[];
@@ -13,15 +14,26 @@ export const PopoverMenu = ({
   className,
   ariaLabel = 'Actions',
 }: PopoverMenuProps) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <Popover
+      open={open}
+      onOpenChange={setOpen}
       trigger="click"
       classNames={{
         container: 'p-0.5',
       }}
-      destroyOnHidden
       content={
-        <ul className="[&_button]:w-full [&_button]:text-left [&_button]:justify-start">
+        <ul
+          className="[&_button]:w-full [&_button]:text-left [&_button]:justify-start"
+          onClick={() => setOpen(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              setOpen(false);
+            }
+          }}
+        >
           {options.map((option, index) => (
             <li key={`popover-menu-${index}`}>{option}</li>
           ))}

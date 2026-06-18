@@ -39,16 +39,60 @@ export const API_CONFIG_MOCKS = Object.freeze({
     refresh: {
       mockedUrl: '/api/v1/auth/refresh',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            access_token: 'refreshed-token',
+            token_type: 'bearer',
+            expires_in: 3600,
+            user_id: 'string',
+            roles: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['TokenResponse'];
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          }),
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 401,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
     me: {
       mockedUrl: '/api/v1/auth/me',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            org_id: 'string',
+            user_id: 'string',
+            roles: ['string'],
+            permissions: ['string'],
+            groups: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['UserResponse'];
+        } = {}) =>
+          http.get(API_CONFIG_MOCKS.auth.me.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          }),
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.auth.me.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
@@ -1368,6 +1412,901 @@ export const API_CONFIG_MOCKS = Object.freeze({
               return HttpResponse.json(mockedResponse, { status });
             },
           );
+        },
+      },
+    },
+  },
+  orgs: {
+    default: {
+      mockedUrl: '/api/v1/orgs',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              display_name: 'string',
+              org_ids: ['string'],
+              enabled: true,
+              dedicated_database: true,
+              created_at: 'string',
+              updated_at: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'][];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'org_name',
+            display_name: 'string',
+            org_ids: ['string'],
+            enabled: true,
+            dedicated_database: true,
+            created_at: 'string',
+            updated_at: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    org: {
+      mockedUrl: '/api/v1/orgs/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'org_name',
+            display_name: 'string',
+            org_ids: ['string'],
+            enabled: true,
+            dedicated_database: true,
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'];
+          org_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          org_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'org_name',
+            display_name: 'string',
+            org_ids: ['string'],
+            enabled: true,
+            dedicated_database: true,
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['OrgResponse'];
+          org_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          org_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          org_name = 'org_name',
+        }: { status?: number; org_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          org_name = 'org_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          org_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.orgs.org.mockedUrl.replace('{name}', org_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  groups: {
+    default: {
+      mockedUrl: '/api/v1/auth/groups',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              description: 'string',
+              roles: ['string'],
+              members: ['string'],
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'][];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    group: {
+      mockedUrl: '/api/v1/auth/groups/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          group_name = 'group_name',
+        }: { status?: number; group_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.group.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    groupMembers: {
+      mockedUrl: '/api/v1/auth/groups/{name}/members',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.groups.groupMembers.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.groups.groupMembers.mockedUrl.replace(
+              '{name}',
+              group_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    groupMember: {
+      mockedUrl: '/api/v1/auth/groups/{name}/members/{username}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+      delete: {
+        success: ({
+          mockedResponse = {
+            name: 'group_name',
+            description: 'string',
+            roles: ['string'],
+            members: ['string'],
+          },
+          group_name = 'group_name',
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['GroupResponse'];
+          group_name?: string;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.groupMember.mockedUrl
+              .replace('{name}', group_name)
+              .replace('{username}', username),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          group_name = 'group_name',
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          group_name?: string;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.groups.groupMember.mockedUrl
+              .replace('{name}', group_name)
+              .replace('{username}', username),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  accounts: {
+    default: {
+      mockedUrl: '/api/v1/auth/accounts',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              username: 'string',
+              enabled: true,
+              groups: ['string'],
+              created_at: 'string',
+              updated_at: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'][];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            username: 'string',
+            enabled: true,
+            groups: ['string'],
+            created_at: 'string',
+            updated_at: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    account: {
+      mockedUrl: '/api/v1/auth/accounts/{username}',
+      get: {
+        success: ({
+          mockedResponse = {
+            username: 'string',
+            enabled: true,
+            groups: ['string'],
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'];
+          username?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            username: 'string',
+            enabled: true,
+            groups: ['string'],
+            created_at: 'string',
+            updated_at: 'string',
+          },
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['AccountResponse'];
+          username?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          username = 'string',
+        }: { status?: number; username?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.accounts.account.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    resetPassword: {
+      mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
+      post: {
+        success: ({
+          mockedResponse = {},
+          username = 'string',
+        }: {
+          mockedResponse?: Record<string, never>;
+          username?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.accounts.resetPassword.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          username = 'string',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          username?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.accounts.resetPassword.mockedUrl.replace(
+              '{username}',
+              username,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  roles: {
+    default: {
+      mockedUrl: '/api/v1/auth/roles',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                permissions: ['string'],
+                scoped: false,
+                resource_type: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_RoleResponse_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    role: {
+      mockedUrl: '/api/v1/auth/roles/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+          role_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            description: 'string',
+            permissions: ['string'],
+            scoped: false,
+            resource_type: 'string',
+          },
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['RoleResponse'];
+          role_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          role_name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          role_name = 'role_name',
+        }: { status?: number; role_name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          role_name = 'role_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          role_name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.roles.role.mockedUrl.replace('{name}', role_name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    scopes: {
+      mockedUrl: '/api/v1/auth/roles/scopes',
+      get: {
+        success: ({
+          mockedResponse = {
+            scopes: ['string'],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            wildcard: false,
+            argo_namespace_prefix: 'string',
+            notes: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['CasbinScopesResponse'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },

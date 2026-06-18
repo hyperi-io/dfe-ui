@@ -34,6 +34,13 @@ vi.mock('next/link', () => ({
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
+vi.mock('next-auth/react', () => ({
+  getSession: vi.fn().mockResolvedValue(null),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+  useSession: vi.fn(() => ({ data: null, status: 'unauthenticated' })),
+}));
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
   usePathname: vi.fn(),

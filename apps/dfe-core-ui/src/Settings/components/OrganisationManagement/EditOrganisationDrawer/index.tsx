@@ -1,13 +1,60 @@
 import { Drawer } from '@/core/components/Drawer';
+import {
+  CreateUpdateOrganisationForm,
+  CreateUpdateOrganisationFormData,
+} from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
+import { Organisation } from '@/Settings/hooks/useFetchOrganisations/types';
+import { useUpdateOrganisation } from '@/Settings/hooks/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const EditOrganisationDrawer = () => {
+export const EditOrganisationDrawer = ({
+  organisation,
+  refetch,
+}: {
+  organisation: Organisation;
+  refetch: () => void;
+}) => {
   const [open, setOpen] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
+
+  const {
+    mutate: updateOrganisation,
+    isPending,
+    error,
+  } = useUpdateOrganisation({
+    org_name: organisation.name,
+    onSuccess: () => {
+      refetch();
+      api.success({
+        title: 'Organisation updated successfully',
+        placement: 'bottomLeft',
+      });
+      setOpen(false);
+    },
+  });
+
+  const handleUpdateOrganisation = (
+    values: CreateUpdateOrganisationFormData,
+  ) => {
+    updateOrganisation({
+      display_name: values.display_name,
+      org_ids: values.org_ids,
+      enabled: organisation.enabled,
+      dedicated_database: values.dedicated_database,
+      confirm_merge: values.confirm_merge ?? false,
+    });
+  };
   return (
     <>
-      <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
+      {contextHolder}
+      <Button
+        type="text"
+        aria-label={`Edit ${organisation.display_name}`}
+        icon={<IconEdit />}
+        onClick={() => setOpen(true)}
+      >
         Edit Organisation
       </Button>
       <Drawer
@@ -15,9 +62,19 @@ export const EditOrganisationDrawer = () => {
         open={open}
         onClose={() => setOpen(false)}
       >
-        <div className="text-error border border-error rounded-md p-4 bg-error/10">
-          Implement EditOrganisationDrawer
-        </div>
+        <CreateUpdateOrganisationForm
+          showConfirmMergeField
+          initialValues={{
+            ...organisation,
+            confirm_merge: false,
+          }}
+          onFinish={handleUpdateOrganisation}
+          error={error}
+          isPending={isPending}
+          disabledFields={{
+            name: true,
+          }}
+        />
       </Drawer>
     </>
   );
