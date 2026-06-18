@@ -1,48 +1,75 @@
 'use client';
 
-import { CreateOrganisationDrawer } from '@/Settings/components/CreateOrganisationDrawer';
+import { GenericErrorCard } from '@/core/components/GenericError';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import { ORGANISATION_LIST_RESPONSE } from '@/Settings/mocks/organisation.data';
-import { Input } from 'antd';
-import { useState } from 'react';
+import { useFetchOrganisations } from '@/Settings/hooks/useFetchOrganisations';
+import { IconInfoCircle } from '@repo/dfe-icons';
+import { Spin } from 'antd';
 import { OrganisationCard } from './OrganisationCard';
 
 export const OrganisationManagement = () => {
-  const [search, setSearch] = useState('');
-  // const [companyLimit, setCompanyLimit] = useState(3);
-  const filteredOrganisations = ORGANISATION_LIST_RESPONSE.filter(
-    (organisation) =>
-      organisation.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // const [search, setSearch] = useState('');
+  const {
+    data: organisations,
+    isLoading,
+    error,
+    refetch,
+  } = useFetchOrganisations();
+
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       <SectionCard
         title="Configure a new organisation"
         description="Create and configure a new organisation and manage user, role defaults and more."
-        rightTitleSlot={<CreateOrganisationDrawer />}
+        rightTitleSlot={<CreateOrganisationDrawer refetch={refetch} />}
       />
       <SectionCard
         title="Manage existing organisations"
         description="Manage existing organisations and their configurations."
-        rightTitleSlot={
-          <Input.Search
-            className="ml-auto w-60"
-            placeholder="Search organisations"
-            onChange={(e) => setSearch(e.target.value)}
-            value={search}
-          />
-        }
+        // rightTitleSlot={
+        //   <Input.Search
+        //     className="ml-auto w-60"
+        //     placeholder="Search organisations"
+        //     onChange={(e) => setSearch(e.target.value)}
+        //     value={search}
+        //   />
+        // }
       >
-        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredOrganisations.map((organisation) => (
-            <li key={organisation.id}>
-              <OrganisationCard
-                key={organisation.id}
-                organisation={organisation}
-              />
-            </li>
-          ))}
-        </ul>
+        {isLoading && (
+          <>
+            <Spin /> <p className="sr-only">Loading organisations</p>
+          </>
+        )}
+        {error && (
+          <>
+            <GenericErrorCard
+              title="Error fetching organisations"
+              description={error.message}
+            />
+          </>
+        )}
+        {!isLoading && !error && organisations?.length === 0 && (
+          <NotificationCard
+            className="w-full"
+            description="No organisations found"
+            icon={<IconInfoCircle />}
+          />
+        )}
+        {organisations && organisations?.length > 0 && (
+          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {organisations?.map((organisation) => (
+              <li key={organisation.name}>
+                <OrganisationCard
+                  key={organisation.name}
+                  organisation={organisation}
+                  refetch={refetch}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         {/* {companyLimit < filteredOrganisations.length && (
           <Button
             type="link"

@@ -32,6 +32,7 @@ export const useLogin = ({
         typeof url === 'string' && url.startsWith('http')
           ? new URL(url).pathname
           : url;
+      router.refresh();
       router.push(path);
     },
   });

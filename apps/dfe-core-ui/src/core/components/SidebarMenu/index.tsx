@@ -65,7 +65,7 @@ export const Sidebar = () => {
             </p>
           )}
           <ThemeToggle className="mr-2" collapsed={collapsed} />
-          <UserActionsButton collapsed={collapsed} />
+          <UserActionsButton />
         </div>
       </div>
     </Sider>

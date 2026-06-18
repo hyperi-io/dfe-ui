@@ -16,7 +16,8 @@ export const SettingsToolbarBase = () => {
     },
   ];
 
-  const isSelected = (path: string) => pathname === path;
+  const isSelected = (path: string) =>
+    pathname === path || pathname.startsWith(`${path}/`);
 
   return (
     <ListFieldMapsProvider>

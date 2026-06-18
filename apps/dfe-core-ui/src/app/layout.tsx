@@ -1,4 +1,5 @@
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import { ClientContext } from '@/core/contexts/ClientContext';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Inter } from 'next/font/google';
 import './globals.css';
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${ibmPlexMono.variable} antialiased min-h-screen overflow-hidden`}
       >
-        <AntdRegistry>{children}</AntdRegistry>
+        <AntdRegistry>
+          <ClientContext>{children}</ClientContext>
+        </AntdRegistry>
       </body>
     </html>
   );

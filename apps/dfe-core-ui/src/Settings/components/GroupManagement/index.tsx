@@ -1,36 +1,10 @@
-import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
-import { Tabs } from 'antd';
-import { OrganisationGroups } from './OrganisationGroups';
 import { UserGroups } from './UserGroups';
 
+/** Tab shell for future organisation-scoped groups; mirrors RoleManagement layout. */
 export const GroupManagement = () => {
   return (
-    <Tabs
-      className="[&_.ant-tabs-nav-list]:w-full [&_.ant-tabs-tab]:w-full"
-      items={[
-        {
-          key: 'user-groups',
-          label: (
-            <AdminTabLabel
-              className="max-w-full"
-              label="User Groups"
-              description="Configure custom groups and members."
-            />
-          ),
-          children: <UserGroups />,
-        },
-        {
-          key: 'organisation-groups',
-          label: (
-            <AdminTabLabel
-              className="max-w-full"
-              label="Organisation Groups"
-              description="Configure custom groups and organisations."
-            />
-          ),
-          children: <OrganisationGroups />,
-        },
-      ]}
-    />
+    <div className="min-w-0 h-[calc(100vh-100px)] css-custom-scrollbar">
+      <UserGroups />
+    </div>
   );
 };

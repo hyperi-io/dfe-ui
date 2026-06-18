@@ -1,20 +1,39 @@
+import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconLock } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { App, Button } from 'antd';
 
 export const DeReactivateUser = ({
-  isActive = true,
+  username,
+  isActive,
+  refetch,
 }: {
+  username: string;
   isActive: boolean;
+  refetch: () => void;
 }) => {
+  const { notification } = App.useApp();
   const actionTitle = isActive ? 'Deactivate user' : 'Activate user';
+
+  const { mutate, isPending } = useUpdateAccount({
+    username,
+    onSuccess: () => {
+      refetch();
+      notification.success({
+        title: isActive ? 'User deactivated' : 'User activated',
+        placement: 'bottomLeft',
+      });
+    },
+  });
+
   return (
     <Button
       aria-label={actionTitle}
       type="text"
       icon={<IconLock />}
+      loading={isPending}
+      disabled={isPending}
       onClick={() => {
-        // eslint-disable-next-line no-alert
-        window.alert(actionTitle);
+        mutate({ enabled: !isActive });
       }}
     >
       {actionTitle}
