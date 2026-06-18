@@ -11,9 +11,14 @@ interface SidebarLinkProps {
     label: string;
     external: boolean;
   };
+  disabled?: boolean;
 }
 
-export const SidebarLink = ({ collapsed, item }: SidebarLinkProps) => {
+export const SidebarLink = ({
+  collapsed,
+  item,
+  disabled = false,
+}: SidebarLinkProps) => {
   const isExternalLink = item.external;
 
   return (
@@ -21,12 +26,16 @@ export const SidebarLink = ({ collapsed, item }: SidebarLinkProps) => {
       {isExternalLink ? (
         <a
           href={item.key}
+          {...(disabled
+            ? { 'aria-disabled': true, onClick: (e) => e.preventDefault() }
+            : {})}
           target="_blank"
           rel="noreferrer noopener nofollow"
           className={cn(
             'flex w-full gap-3 px-7 py-2 ',
             'dark:text-dark-foreground! text-foreground!',
             'focus:bg-tertiary/20',
+            disabled && 'pointer-events-none',
           )}
         >
           <span className="ml-1">{item.icon}</span>
@@ -36,10 +45,14 @@ export const SidebarLink = ({ collapsed, item }: SidebarLinkProps) => {
       ) : (
         <Link
           href={item.key}
+          {...(disabled
+            ? { 'aria-disabled': true, onClick: (e) => e.preventDefault() }
+            : {})}
           className={cn(
             'flex w-full gap-3 px-7 py-2 ',
             'dark:text-dark-foreground! text-foreground!',
             'focus:bg-tertiary/20',
+            disabled && 'pointer-events-none',
           )}
         >
           <span className="ml-1">{item.icon}</span>

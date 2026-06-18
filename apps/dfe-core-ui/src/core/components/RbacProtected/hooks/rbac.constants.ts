@@ -1,4 +1,4 @@
-export const SCOPES = [
+const SCOPES_FROM_CASBIN = [
   '*',
   'alert:*',
   'alert:read',
@@ -45,7 +45,11 @@ export const SCOPES = [
   'transforms:test',
 ];
 
-export const UI_DISPLAY_ACTIONS = {
+const SCOPES_NOT_ADDED_YET = ['rule:read', 'rule:write'];
+
+export const SCOPES = SCOPES_FROM_CASBIN.concat(SCOPES_NOT_ADDED_YET);
+
+const UI_DISPLAY_ACTIONS_CASBIN = {
   ALERT_READ: 'alert:read',
   ALERT_WRITE: 'alert:write',
   ARGO_APPLICATIONS: 'argo:applications',
@@ -82,5 +86,16 @@ export const UI_DISPLAY_ACTIONS = {
   TRANSFORMS_COMPILE: 'transforms:compile',
   TRANSFORMS_TEST: 'transforms:test',
 };
+
+const UI_DISPLAY_ACTIONS_NOT_ADDED_YET = {
+  RULE_READ: 'rule:read',
+  RULE_WRITE: 'rule:write',
+};
+
+export const UI_DISPLAY_ACTIONS = {
+  ...UI_DISPLAY_ACTIONS_CASBIN,
+  ...UI_DISPLAY_ACTIONS_NOT_ADDED_YET,
+};
+
 export type UI_DISPLAY_ACTIONS_TYPE =
   (typeof UI_DISPLAY_ACTIONS)[keyof typeof UI_DISPLAY_ACTIONS];

@@ -1,4 +1,5 @@
 import { IconWrapper } from '@/core/components/IconWrapper';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
@@ -11,6 +12,8 @@ import {
   IconShieldCheck,
   IconTable,
 } from '@repo/dfe-icons';
+
+const { rbacActions } = RbacProtected;
 
 interface SidebarMenuProps {
   collapsed: boolean;
@@ -25,43 +28,91 @@ export const featureFlagSidebarMenuItems = [
         {
           key: `${hyperdxUrl}/search`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <SidebarLink
-              collapsed={collapsed}
-              item={{
-                key: `${hyperdxUrl}/search`,
-                icon: <IconWrapper icon={<IconTable />} />,
-                label: 'Search',
-                external: true,
-              }}
-            />
+            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: `${hyperdxUrl}/search`,
+                    icon: <IconWrapper icon={<IconTable />} />,
+                    label: 'Search',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: `${hyperdxUrl}/search`,
+                    icon: <IconWrapper icon={<IconTable />} />,
+                    label: 'Search',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           ),
         },
         {
           key: `${hyperdxUrl}/chart`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <SidebarLink
-              collapsed={collapsed}
-              item={{
-                key: `${hyperdxUrl}/chart`,
-                icon: <IconWrapper icon={<IconChartDots />} />,
-                label: 'Chart Explorer',
-                external: true,
-              }}
-            />
+            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: `${hyperdxUrl}/chart`,
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: `${hyperdxUrl}/chart`,
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           ),
         },
         {
           key: `${hyperdxUrl}/dashboards`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <SidebarLink
-              collapsed={collapsed}
-              item={{
-                key: `${hyperdxUrl}/dashboards`,
-                icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                label: 'Dashboards',
-                external: true,
-              }}
-            />
+            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: `${hyperdxUrl}/dashboards`,
+                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
+                    label: 'Dashboards',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: `${hyperdxUrl}/dashboards`,
+                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
+                    label: 'Dashboards',
+                    external: true,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           ),
         },
       ]
@@ -69,58 +120,122 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/sources',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/sources',
-          icon: <IconWrapper icon={<IconArrowBounce />} />,
-          label: 'Sources',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.SOURCE_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/sources',
+              icon: <IconWrapper icon={<IconArrowBounce />} />,
+              label: 'Sources',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/sources',
+              icon: <IconWrapper icon={<IconArrowBounce />} />,
+              label: 'Sources',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
   {
     key: '/schemas',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/schemas',
-          icon: <IconWrapper icon={<IconDatabase />} />,
-          label: 'Schemas',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.SCHEMA_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/schemas',
+              icon: <IconWrapper icon={<IconDatabase />} />,
+              label: 'Schemas',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/schemas',
+              icon: <IconWrapper icon={<IconDatabase />} />,
+              label: 'Schemas',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
 
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/rules',
-          icon: <IconWrapper icon={<IconShieldCheck />} />,
-          label: 'Rules',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.RULE_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/rules',
+              icon: <IconWrapper icon={<IconShieldCheck />} />,
+              label: 'Rules',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/rules',
+              icon: <IconWrapper icon={<IconShieldCheck />} />,
+              label: 'Rules',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
   {
     key: '/field-maps',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/field-maps',
-          icon: <IconWrapper icon={<IconRotate2 />} />,
-          label: 'Field Maps',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.FIELDMAP_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/field-maps',
+              icon: <IconWrapper icon={<IconRotate2 />} />,
+              label: 'Field Maps',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/field-maps',
+              icon: <IconWrapper icon={<IconRotate2 />} />,
+              label: 'Field Maps',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
   // {
@@ -140,29 +255,61 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/services',
-          icon: <IconWrapper icon={<IconCode />} />,
-          label: 'Services',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.SERVICE_METRICS_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/services',
+              icon: <IconWrapper icon={<IconCode />} />,
+              label: 'Services',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/services',
+              icon: <IconWrapper icon={<IconCode />} />,
+              label: 'Services',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
   {
     key: '/settings',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/settings',
-          icon: <IconWrapper icon={<IconSettings2 />} />,
-          label: 'Settings',
-          external: false,
-        }}
-      />
+      <RbacProtected action={rbacActions.CONFIG_READ}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/settings',
+              icon: <IconWrapper icon={<IconSettings2 />} />,
+              label: 'Settings',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/settings',
+              icon: <IconWrapper icon={<IconSettings2 />} />,
+              label: 'Settings',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     ),
   },
 ];
