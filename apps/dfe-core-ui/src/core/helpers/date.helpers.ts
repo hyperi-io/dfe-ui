@@ -22,7 +22,7 @@ export const parseValidDate = (
   return parsed.isValid() ? parsed : null;
 };
 
-export const formatDateTooltip = (date: string) => {
+export const formatDateToString = (date: string) => {
   const parsed = parseValidDate(date);
   if (!parsed) {
     return date?.trim() ? INVALID_DATE_LABEL : EMPTY_DATE_LABEL;

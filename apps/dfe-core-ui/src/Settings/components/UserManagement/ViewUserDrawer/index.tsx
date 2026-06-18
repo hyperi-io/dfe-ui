@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 export const ViewUserDrawer = ({ username }: { username: string }) => {
   const [open, setOpen] = useState(false);
-  const title = `View ${username}`;
+  const title = `View User`;
 
   return (
     <>
@@ -16,7 +16,7 @@ export const ViewUserDrawer = ({ username }: { username: string }) => {
         icon={<IconEye />}
         onClick={() => setOpen(true)}
       >
-        View User
+        {title}
       </Button>
       <Drawer title={title} open={open} onClose={() => setOpen(false)}>
         <ViewUserDetails username={username} />

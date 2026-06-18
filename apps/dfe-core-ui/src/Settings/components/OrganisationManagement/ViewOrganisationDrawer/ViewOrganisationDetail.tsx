@@ -1,13 +1,13 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import {
+  formatDateToString,
+  formatDateXAgo,
+} from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
 import { useFetchOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Spin, Tooltip } from 'antd';
-import {
-  formatDateTooltip,
-  formatDateXAgo,
-} from './ViewOrganisationDrawer.helpers';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -61,7 +61,7 @@ export const ViewOrganisationDetail = ({
         </h1>
         <Tooltip
           destroyOnHidden
-          title={formatDateTooltip(organisationDetail.updated_at)}
+          title={formatDateToString(organisationDetail.updated_at)}
         >
           <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
             Updated {formatDateXAgo(organisationDetail.updated_at)}
@@ -109,7 +109,7 @@ export const ViewOrganisationDetail = ({
         )}
       >
         <dt className={cn(dataListTermStyle)}>Created At:</dt>
-        <dd>{formatDateTooltip(organisationDetail.created_at)}</dd>
+        <dd>{formatDateToString(organisationDetail.created_at)}</dd>
       </dl>
     </div>
   );

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
-  formatDateTooltip,
+  formatDateToString,
   formatDateXAgo,
   parseValidDate,
-} from './ViewOrganisationDrawer.helpers';
+} from './date.helpers';
 
 describe('ViewOrganisationDrawer.helpers', () => {
   describe('.parseValidDate', () => {
@@ -23,19 +23,19 @@ describe('ViewOrganisationDrawer.helpers', () => {
     });
   });
 
-  describe('.formatDateTooltip', () => {
+  describe('.formatDateToString', () => {
     test('should format valid UTC date to DD MMM YYYY, HH:mm', () => {
-      expect(formatDateTooltip('2021-01-01T00:00:00Z')).toBe(
+      expect(formatDateToString('2021-01-01T00:00:00Z')).toBe(
         '01 Jan 2021, 00:00',
       );
     });
 
     test('should return N/A for empty date', () => {
-      expect(formatDateTooltip('')).toBe('N/A');
+      expect(formatDateToString('')).toBe('N/A');
     });
 
     test('should return Invalid date for unparseable input', () => {
-      expect(formatDateTooltip('not-a-date')).toBe('Invalid date');
+      expect(formatDateToString('not-a-date')).toBe('Invalid date');
     });
   });
 
