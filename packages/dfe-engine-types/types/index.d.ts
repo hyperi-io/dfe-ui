@@ -194,7 +194,7 @@ export interface paths {
         get: operations["get_group_api_v1_auth_groups__name__get"];
         /**
          * Update Group
-         * @description Update group roles or description (admin only).
+         * @description Update group roles, description, or members (admin only).
          */
         put: operations["update_group_api_v1_auth_groups__name__put"];
         post?: never;
@@ -287,6 +287,78 @@ export interface paths {
          * @description Revoke (delete) an API key by short token (admin only).
          */
         delete: operations["revoke_api_key_api_v1_auth_api_keys__short_token__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/roles/scopes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Casbin Scopes
+         * @description Return assignable Casbin permission scopes for role configuration.
+         */
+        get: operations["list_casbin_scopes_api_v1_auth_roles_scopes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Roles
+         * @description List roles with pagination (admin only).
+         */
+        get: operations["list_roles_api_v1_auth_roles_get"];
+        put?: never;
+        /**
+         * Create Role
+         * @description Create a new RBAC role (admin only).
+         */
+        post: operations["create_role_api_v1_auth_roles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/roles/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Role
+         * @description Get one role by name (admin only).
+         */
+        get: operations["get_role_api_v1_auth_roles__name__get"];
+        /**
+         * Update Role
+         * @description Update a role (admin only).
+         */
+        put: operations["update_role_api_v1_auth_roles__name__put"];
+        post?: never;
+        /**
+         * Delete Role
+         * @description Delete a role (admin only).
+         */
+        delete: operations["delete_role_api_v1_auth_roles__name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1954,6 +2026,44 @@ export interface components {
             }[];
         };
         /**
+         * CasbinScopesResponse
+         * @description Assignable Casbin scopes (paginated) plus picker metadata.
+         */
+        CasbinScopesResponse: {
+            /**
+             * Scopes
+             * @description Permission patterns for the current page
+             */
+            scopes: string[];
+            /**
+             * Total
+             * @description Total scopes matching filters
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Page size; -1 means all scopes in one page
+             */
+            per_page: number;
+            /** Total Pages */
+            total_pages: number;
+            /** Next Page */
+            next_page?: number | null;
+            /** Prev Page */
+            prev_page?: number | null;
+            /** Wildcard */
+            wildcard: boolean;
+            /** Argo Namespace Prefix */
+            argo_namespace_prefix: string;
+            /** Notes */
+            notes: string;
+        };
+        /**
          * CelCheckBatchRequest
          * @description Request to validate multiple CEL expressions in one call.
          */
@@ -2199,6 +2309,11 @@ export interface components {
              * @default
              */
             description: string;
+            /**
+             * Members
+             * @description Account usernames in this group (local login resolves roles from this list)
+             */
+            members?: string[];
         };
         /** CreateOrgRequest */
         CreateOrgRequest: {
@@ -2256,6 +2371,31 @@ export interface components {
              */
             client_id_env: string;
             groups?: components["schemas"]["GroupResolutionRequest"];
+        };
+        /** CreateRoleRequest */
+        CreateRoleRequest: {
+            /**
+             * Name
+             * @description Unique role name
+             */
+            name: string;
+            /**
+             * Description
+             * @description Human-readable description
+             * @default
+             */
+            description: string;
+            /**
+             * Permissions
+             * @description Casbin-style permission patterns
+             */
+            permissions: string[];
+            /**
+             * Scoped
+             * @description When true, role is org-scoped at query time
+             * @default false
+             */
+            scoped: boolean;
         };
         /**
          * DDLResult
@@ -3047,6 +3187,32 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[RoleResponse] */
+        PaginatedResponse_RoleResponse_: {
+            /** Items */
+            items: components["schemas"]["RoleResponse"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PaginatedResponse[ServiceConfigSummary] */
         PaginatedResponse_ServiceConfigSummary_: {
             /** Items */
@@ -3404,6 +3570,22 @@ export interface components {
              * @description New plaintext password
              */
             new_password: string;
+        };
+        /** RoleResponse */
+        RoleResponse: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+            /** Permissions */
+            permissions: string[];
+            /** Scoped */
+            scoped: boolean;
+            /**
+             * Resource Type
+             * @description core for system roles, custom for user-created roles
+             */
+            resource_type: string;
         };
         /**
          * RuleCreateRequest
@@ -4506,6 +4688,11 @@ export interface components {
              * @description Replace description
              */
             description?: string | null;
+            /**
+             * Members
+             * @description Replace member username list
+             */
+            members?: string[] | null;
         };
         /** UpdateOrgRequest */
         UpdateOrgRequest: {
@@ -4550,6 +4737,24 @@ export interface components {
             display_name?: string | null;
             /** @description Group resolution config */
             groups?: components["schemas"]["GroupResolutionRequest"] | null;
+        };
+        /** UpdateRoleRequest */
+        UpdateRoleRequest: {
+            /**
+             * Description
+             * @description Replace description
+             */
+            description?: string | null;
+            /**
+             * Permissions
+             * @description Replace permission patterns
+             */
+            permissions?: string[] | null;
+            /**
+             * Scoped
+             * @description Replace org-scoped flag
+             */
+            scoped?: boolean | null;
         };
         /** UserResponse */
         UserResponse: {
@@ -5462,6 +5667,206 @@ export interface operations {
             header?: never;
             path: {
                 short_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_casbin_scopes_api_v1_auth_roles_scopes_get: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive substring match on permission scope strings */
+                search?: string | null;
+                /** @description Return only scopes that start with this prefix (e.g. config:, argo:) */
+                prefix?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasbinScopesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_roles_api_v1_auth_roles_get: {
+        parameters: {
+            query?: {
+                /** @description Return only roles with this resource_type (core or custom) */
+                resource_type?: ("core" | "custom") | null;
+                /** @description Case-insensitive match on role name or description */
+                search?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_RoleResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_role_api_v1_auth_roles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_role_api_v1_auth_roles__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_role_api_v1_auth_roles__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_role_api_v1_auth_roles__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
             };
             cookie?: never;
         };
