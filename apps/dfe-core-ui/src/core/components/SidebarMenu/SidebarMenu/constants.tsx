@@ -3,11 +3,14 @@ import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
   IconChartDots,
+  IconCode,
   IconDatabase,
   IconLayoutGrid,
+  IconRotate2,
   IconSettings2,
   IconShieldCheck,
   IconTable,
+  IconTransform,
 } from '@repo/dfe-icons';
 
 interface SidebarMenuProps {
@@ -102,6 +105,48 @@ export const featureFlagSidebarMenuItems = [
           key: '/rules',
           icon: <IconWrapper icon={<IconShieldCheck />} />,
           label: 'Rules',
+          external: false,
+        }}
+      />
+    ),
+  },
+  {
+    key: '/field-maps',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/field-maps',
+          icon: <IconWrapper icon={<IconRotate2 />} />,
+          label: 'Field Maps',
+          external: false,
+        }}
+      />
+    ),
+  },
+  {
+    key: '/transforms',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/transforms',
+          icon: <IconWrapper icon={<IconTransform />} />,
+          label: 'Transforms',
+          external: false,
+        }}
+      />
+    ),
+  },
+  {
+    key: '/services',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <SidebarLink
+        collapsed={collapsed}
+        item={{
+          key: '/services',
+          icon: <IconWrapper icon={<IconCode />} />,
+          label: 'Services',
           external: false,
         }}
       />
