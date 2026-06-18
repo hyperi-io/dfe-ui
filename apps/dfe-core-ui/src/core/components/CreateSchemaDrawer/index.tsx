@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import {
@@ -95,15 +96,32 @@ export const CreateSchemaDrawerBase = ({
   return (
     <>
       {notificationContextHolder}
-      <Button
-        type="default"
-        htmlType="button"
-        className="border border-tertiary text-tertiary"
-        icon={<IconPlus className="text-tertiary" />}
-        onClick={() => setIsDrawerVisible(true)}
-      >
-        Add Schema
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="default"
+            htmlType="button"
+            className="border border-tertiary text-tertiary"
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            Add Schema
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true, placement: 'bottom' }}>
+          <Button
+            type="default"
+            htmlType="button"
+            disabled
+            className="border border-tertiary text-tertiary"
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            Add Schema
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title={drawerTitle}
         open={isDrawerVisible}

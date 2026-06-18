@@ -90,6 +90,7 @@ const UI_DISPLAY_ACTIONS_CASBIN = {
 const UI_DISPLAY_ACTIONS_NOT_ADDED_YET = {
   RULE_READ: 'rule:read',
   RULE_WRITE: 'rule:write',
+  SOURCE_DELETE: 'source:delete',
 };
 
 export const UI_DISPLAY_ACTIONS = {

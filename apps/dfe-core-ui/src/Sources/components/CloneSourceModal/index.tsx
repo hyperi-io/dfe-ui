@@ -4,6 +4,7 @@ import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Form } from '@/core/components/Form';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, Input, Modal, Select, Switch } from 'antd';
@@ -75,24 +76,53 @@ export const CloneSourceModal = ({
 
   return (
     <>
-      {trigger ? (
-        cloneElement(trigger, {
-          ...trigger.props,
-          onClick: (event: React.MouseEvent<HTMLElement>) => {
-            handleOpen();
-            trigger.props.onClick?.(event);
-          },
-        })
-      ) : (
-        <Button
-          type="default"
-          shape="circle"
-          size="small"
-          aria-label={`Clone ${name}`}
-          icon={<IconCopy />}
-          onClick={handleOpen}
-        />
-      )}
+      <RbacProtected action={RbacProtected.rbacActions.SOURCE_WRITE}>
+        <RbacProtected.Unrestricted>
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                handleOpen();
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              shape="circle"
+              size="small"
+              aria-label={`Clone ${name}`}
+              icon={<IconCopy />}
+              onClick={handleOpen}
+            />
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="justify-start"
+          tooltip={{ show: true, placement: 'left' }}
+        >
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              disabled: true,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                handleOpen();
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              shape="circle"
+              disabled
+              size="small"
+              aria-label={`Clone ${name}`}
+              icon={<IconCopy />}
+              onClick={handleOpen}
+            />
+          )}
+        </RbacProtected.Restricted>
+      </RbacProtected>
       <Modal
         title={`Clone ${name}`}
         open={open}
@@ -147,6 +177,7 @@ export const CloneSourceModal = ({
           >
             <Input placeholder={`${display_name ?? name} - copy`} />
           </Form.Item>
+
           {error && <FormNotification text={error.message} type="error" />}
           <div className="flex justify-end gap-x-2">
             <Button

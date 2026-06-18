@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 
+import { cn } from '@/core/utils/style';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 import { AbstractTooltipProps } from 'antd/es/tooltip';
@@ -13,10 +14,12 @@ interface TooltipProps extends AbstractTooltipProps {
 interface RestrictedProps {
   children: React.ReactNode;
   tooltip?: TooltipProps;
+  className?: string;
 }
 export const Restricted = ({
   children,
   tooltip = { show: false },
+  className,
 }: RestrictedProps) => {
   const { isAuthorized, isLoading, isError } = useContext(RbacProtectedContext);
 
@@ -25,7 +28,12 @@ export const Restricted = ({
   if (!isAuthorized && !tooltip) return children;
 
   return !isAuthorized ? (
-    <div className="relative opacity-50 h-full">
+    <div
+      className={cn(
+        'relative opacity-50 h-full flex items-center justify-center',
+        className,
+      )}
+    >
       {tooltip.show && (
         <Tooltip
           destroyOnHidden
@@ -39,7 +47,7 @@ export const Restricted = ({
           }
           {...tooltip}
         >
-          <button className="absolute z-10 h-full w-full">
+          <button type="button" className="absolute z-10 h-full w-full">
             {tooltip.showIcon && (
               <span className="absolute left-7 top-1.5 bg-white rounded-full p-1">
                 <IconLock className="text-black w-4 h-4" />

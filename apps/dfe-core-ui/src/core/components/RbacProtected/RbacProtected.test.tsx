@@ -10,13 +10,7 @@ import {
   expect,
   it,
 } from 'vitest';
-import {
-  RbacError,
-  RbacLoader,
-  RbacProtected,
-  Restricted,
-  Unrestricted,
-} from '.';
+import { RbacProtected } from '.';
 import { ADMIN_MOCKED_RESPONSE, server } from './hooks/hooks.mocks';
 import { UI_DISPLAY_ACTIONS } from './hooks/rbac.constants';
 
@@ -32,18 +26,18 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 const TestRbacProtected = () => (
   <RbacProtected action={UI_DISPLAY_ACTIONS.SCHEMA_WRITE}>
-    <RbacLoader>
+    <RbacProtected.Loader>
       <p>Loading...</p>
-    </RbacLoader>
-    <RbacError>
+    </RbacProtected.Loader>
+    <RbacProtected.Error>
       <p>Unexpected error</p>
-    </RbacError>
-    <Unrestricted>
+    </RbacProtected.Error>
+    <RbacProtected.Unrestricted>
       <p>Can view schemas upload</p>
-    </Unrestricted>
-    <Restricted>
+    </RbacProtected.Unrestricted>
+    <RbacProtected.Restricted>
       <p>Cannot view schemas upload</p>
-    </Restricted>
+    </RbacProtected.Restricted>
   </RbacProtected>
 );
 

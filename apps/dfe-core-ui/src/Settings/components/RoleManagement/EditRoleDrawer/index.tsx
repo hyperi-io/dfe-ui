@@ -1,6 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
+import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchRoleDetail';
 import { useUpdateRole } from '@/Settings/hooks/useUpdateRole';
 import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { UpdateRoleForm, UpdateRoleFormData } from './UpdateRoleForm';
@@ -17,6 +19,8 @@ export const EditRoleDrawer = ({
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
+  const queryClient = useQueryClient();
+
   const {
     mutate: updateRole,
     isPending,
@@ -29,6 +33,9 @@ export const EditRoleDrawer = ({
       api.success({
         title: 'Role updated successfully',
         placement: 'bottomLeft',
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ROLE_DETAIL_QUERY_KEY(role_name),
       });
     },
   });

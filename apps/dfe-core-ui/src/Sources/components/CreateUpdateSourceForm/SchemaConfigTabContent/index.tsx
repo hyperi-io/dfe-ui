@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { FormInstance, FormRule, Radio } from 'antd';
 import { useState } from 'react';
@@ -32,7 +33,14 @@ export const SchemaConfigTabContent = ({
       </Radio.Group>
 
       {assignSchema === 'define_schema' && (
-        <MetaSchemaForm formValidation={formValidation} form={form} />
+        <RbacProtected action={RbacProtected.rbacActions.SCHEMA_READ}>
+          <RbacProtected.Unrestricted>
+            <MetaSchemaForm formValidation={formValidation} form={form} />
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <RbacProtected.RestrictedRoute />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       )}
     </div>
   );
