@@ -1,6 +1,9 @@
 'use client';
 
-import { shouldRefreshAccessToken, SESSION_CHECK_INTERVAL_MS } from '@/core/config/authSession';
+import {
+  shouldRefreshAccessToken,
+  SESSION_CHECK_INTERVAL_MS,
+} from '@/core/config/authSession';
 import { useRefreshToken } from '@/core/hooks/useRefreshToken';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -75,8 +78,7 @@ export const AuthSessionMonitor = () => {
 
     void refreshToken()
       .then((tokenResponse) => {
-        knownExpiresAt.current =
-          Date.now() + tokenResponse.expires_in * 1000;
+        knownExpiresAt.current = Date.now() + tokenResponse.expires_in * 1000;
       })
       .catch(() => {
         if (signingOut.current) {

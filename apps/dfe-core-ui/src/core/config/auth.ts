@@ -52,8 +52,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        const expiresIn =
-          (user as { expiresIn?: number }).expiresIn ?? 86400;
+        const expiresIn = (user as { expiresIn?: number }).expiresIn ?? 86400;
         token.accessToken = (user as { accessToken?: string }).accessToken;
         token.accessTokenExpiresAt = Date.now() + expiresIn * 1000;
         token.roles = (user as { roles?: string[] }).roles ?? [];

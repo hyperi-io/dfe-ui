@@ -32,7 +32,8 @@ describe('shouldRefreshAccessToken', () => {
   test('returns false when expiry is far in the future', () => {
     expect(
       shouldRefreshAccessToken({
-        accessTokenExpiresAt: Date.now() + ACCESS_TOKEN_REFRESH_BUFFER_MS + 60_000,
+        accessTokenExpiresAt:
+          Date.now() + ACCESS_TOKEN_REFRESH_BUFFER_MS + 60_000,
       }),
     ).toBe(false);
   });

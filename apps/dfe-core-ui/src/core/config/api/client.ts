@@ -102,7 +102,12 @@ export type ApiClientConfig = {
  * Request bodies, query/path params, and response data are inferred from @repo/dfe-engine-types.
  */
 export function createApiClient(config: ApiClientConfig) {
-  const { baseUrl, getAuthHeaders, onUnauthorized, fetch: customFetch } = config;
+  const {
+    baseUrl,
+    getAuthHeaders,
+    onUnauthorized,
+    fetch: customFetch,
+  } = config;
 
   async function request<Path extends keyof paths, Method extends HttpMethod>(
     path: Path,

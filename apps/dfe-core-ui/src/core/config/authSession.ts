@@ -3,7 +3,10 @@ const DEFAULT_MIN_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 const DEFAULT_SESSION_CHECK_INTERVAL_MS = 60 * 1000;
 const DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS = 5 * 60;
 
-const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+const parsePositiveInt = (
+  value: string | undefined,
+  fallback: number,
+): number => {
   if (value === undefined || value.trim() === '') {
     return fallback;
   }
