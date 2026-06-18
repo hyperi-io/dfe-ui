@@ -12,7 +12,7 @@ describe('isUserAuthorized', () => {
   it('returns true for an exact permission match', () => {
     expect(
       isUserAuthorized(
-        new Set(['schemas:write']),
+        new Set(['schema:write']),
         UI_DISPLAY_ACTIONS.schema_write,
       ),
     ).toBe(true);
@@ -20,7 +20,7 @@ describe('isUserAuthorized', () => {
 
   it('returns true when a parent scope wildcard matches', () => {
     expect(
-      isUserAuthorized(new Set(['schemas:*']), UI_DISPLAY_ACTIONS.schema_write),
+      isUserAuthorized(new Set(['schema:*']), UI_DISPLAY_ACTIONS.schema_write),
     ).toBe(true);
   });
 
