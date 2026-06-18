@@ -204,7 +204,7 @@ export const ViewSchemaDetails = ({
             Current Version:
           </dt>
           <dd>
-            <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+            <RbacProtected action={RbacProtected.rbacActions.schemas_write}>
               <RbacProtected.Unrestricted>
                 <UpdateCurrentVersionSelect
                   versions={versions}
@@ -236,7 +236,7 @@ export const ViewSchemaDetails = ({
             Summary:
           </dt>
           <dd>
-            <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+            <RbacProtected action={RbacProtected.rbacActions.schemas_write}>
               <RbacProtected.Unrestricted>
                 <UpdateVersionSummaryInput
                   path={path}

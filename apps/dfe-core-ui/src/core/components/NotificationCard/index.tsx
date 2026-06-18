@@ -7,11 +7,13 @@ export const NotificationCard = ({
   description,
   className,
   type = 'default',
+  title,
 }: {
   icon?: React.ReactNode;
   description: React.ReactNode;
   className?: string;
   type?: DisplayType;
+  title?: string;
 }) => {
   const displayType = {
     default: cn(
@@ -37,6 +39,14 @@ export const NotificationCard = ({
       )}
     >
       {icon && icon}
+
+      {typeof title === 'string' ? (
+        <h3 className="text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted">
+          {title}
+        </h3>
+      ) : (
+        title
+      )}
 
       {typeof description === 'string' ? (
         <p className="text-sm text-foreground-muted dark:text-dark-foreground-muted">

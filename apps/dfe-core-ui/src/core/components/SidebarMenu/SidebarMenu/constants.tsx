@@ -28,7 +28,7 @@ export const featureFlagSidebarMenuItems = [
         {
           key: `${hyperdxUrl}/search`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+            <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
@@ -60,7 +60,7 @@ export const featureFlagSidebarMenuItems = [
         {
           key: `${hyperdxUrl}/chart`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+            <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
@@ -92,7 +92,7 @@ export const featureFlagSidebarMenuItems = [
         {
           key: `${hyperdxUrl}/dashboards`,
           Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.DASHBOARD_READ}>
+            <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
@@ -126,7 +126,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/sources',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.SOURCE_READ}>
+      <RbacProtected action={rbacActions.source_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -158,7 +158,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/schemas',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.SCHEMA_READ}>
+      <RbacProtected action={rbacActions.schemas_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -191,7 +191,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.RULE_READ}>
+      <RbacProtected action={rbacActions.role_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -223,7 +223,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/field-maps',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.FIELDMAP_READ}>
+      <RbacProtected action={rbacActions.fieldmap_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -269,7 +269,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.SERVICE_METRICS_READ}>
+      <RbacProtected action={rbacActions.services_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -301,7 +301,14 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/settings',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.CONFIG_READ}>
+      <RbacProtected
+        action={[
+          rbacActions.org_read,
+          rbacActions.account_read,
+          rbacActions.role_read,
+          rbacActions.group_read,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}

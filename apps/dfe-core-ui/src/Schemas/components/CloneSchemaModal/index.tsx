@@ -78,7 +78,7 @@ export const CloneSchemaModal = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+      <RbacProtected action={RbacProtected.rbacActions.schemas_write}>
         <RbacProtected.Unrestricted>
           <Tooltip title={`Clone ${schema}`} destroyOnHidden>
             <Button

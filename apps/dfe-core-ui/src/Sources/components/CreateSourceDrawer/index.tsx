@@ -55,7 +55,7 @@ export const CreateSourceDrawer = ({
   return (
     <>
       {contextHolder}
-      <RbacProtected action={RbacProtected.rbacActions.SOURCE_WRITE}>
+      <RbacProtected action={RbacProtected.rbacActions.source_write}>
         <RbacProtected.Unrestricted>
           <Button
             type="default"

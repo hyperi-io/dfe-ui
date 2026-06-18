@@ -12,7 +12,7 @@ export const MappingStandardsTabContent = ({
   initialValues?: CreateUpdateSourceFormData;
   form: FormInstance<CreateUpdateSourceFormData>;
 }) => (
-  <RbacProtected action={RbacProtected.rbacActions.CONFIG_READ}>
+  <RbacProtected action={RbacProtected.rbacActions.fieldmap_read}>
     <RbacProtected.Unrestricted>
       <MappingStandardsForm
         formValidation={formValidation}

@@ -41,7 +41,7 @@ export const EditSourceDrawer = ({
   return (
     <>
       {contextHolder}
-      <RbacProtected action={RbacProtected.rbacActions.SOURCE_WRITE}>
+      <RbacProtected action={RbacProtected.rbacActions.source_write}>
         <RbacProtected.Unrestricted>
           {trigger ? (
             cloneElement(trigger, {

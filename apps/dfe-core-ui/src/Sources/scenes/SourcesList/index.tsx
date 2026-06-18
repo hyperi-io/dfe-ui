@@ -10,7 +10,7 @@ import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 export const SourcesListScene = () => {
   return (
     <MainContentCard>
-      <RbacProtected action={RbacProtected.rbacActions.SOURCE_READ}>
+      <RbacProtected action={RbacProtected.rbacActions.source_read}>
         <RbacProtected.Unrestricted>
           <ListSourcesProvider>
             <Splitter

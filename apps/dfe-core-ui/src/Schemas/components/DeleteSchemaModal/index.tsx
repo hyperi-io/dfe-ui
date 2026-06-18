@@ -42,7 +42,7 @@ export const DeleteSchemaModal = ({
   });
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_DELETE}>
+      <RbacProtected action={RbacProtected.rbacActions.schemas_delete}>
         <RbacProtected.Unrestricted>
           <Tooltip title={`Delete ${schemaPath}`} destroyOnHidden>
             <Button

@@ -4,7 +4,7 @@ import { useRbac } from './hooks/useRbac';
 
 interface RbacProtectedProps {
   children: React.ReactNode;
-  action: UI_DISPLAY_ACTIONS_TYPE;
+  action: UI_DISPLAY_ACTIONS_TYPE | UI_DISPLAY_ACTIONS_TYPE[];
 }
 
 export const RbacProtectedContext = createContext<{

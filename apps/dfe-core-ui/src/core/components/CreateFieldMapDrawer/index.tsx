@@ -68,7 +68,7 @@ export const CreateFieldMapDrawer = ({
   return (
     <>
       {contextHolder}
-      <RbacProtected action={RbacProtected.rbacActions.CONFIG_WRITE}>
+      <RbacProtected action={RbacProtected.rbacActions.fieldmap_write}>
         <RbacProtected.Unrestricted>
           <Button
             type="default"

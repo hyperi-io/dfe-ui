@@ -30,7 +30,7 @@ export const DeleteSourceModal = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.SOURCE_DELETE}>
+      <RbacProtected action={RbacProtected.rbacActions.source_delete}>
         <RbacProtected.Unrestricted>
           {trigger ? (
             cloneElement(trigger, {
@@ -53,7 +53,7 @@ export const DeleteSourceModal = ({
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          className="opacity-100"
+          className="opacity-100 justify-start"
           tooltip={{ show: true, placement: 'top' }}
         >
           {trigger ? (
