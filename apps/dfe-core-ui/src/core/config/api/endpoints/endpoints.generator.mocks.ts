@@ -39,8 +39,30 @@ export const API_CONFIG_MOCKS = Object.freeze({
     refresh: {
       mockedUrl: '/api/v1/auth/refresh',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            access_token: 'refreshed-token',
+            token_type: 'bearer',
+            expires_in: 3600,
+            user_id: 'string',
+            roles: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['TokenResponse'];
+        } = {}) =>
+          http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          }),
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 401,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },

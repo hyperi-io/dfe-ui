@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const expiresIn =
           (user as { expiresIn?: number }).expiresIn ?? 86400;
@@ -61,13 +61,30 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
 
+      if (trigger === 'update' && session) {
+        const refresh = session as {
+          accessToken?: string;
+          expiresIn?: number;
+          roles?: string[];
+        };
+        if (refresh.accessToken) {
+          token.accessToken = refresh.accessToken;
+          token.accessTokenExpiresAt =
+            Date.now() + (refresh.expiresIn ?? 86400) * 1000;
+          if (refresh.roles) {
+            token.roles = refresh.roles;
+          }
+          delete token.error;
+        }
+        return token;
+      }
+
       if (
         typeof token.accessTokenExpiresAt === 'number' &&
         Date.now() >= token.accessTokenExpiresAt
       ) {
         return {
           ...token,
-          accessToken: undefined,
           error: 'AccessTokenExpired',
         };
       }
@@ -86,6 +103,7 @@ export const authOptions: NextAuthOptions = {
       } else {
         delete session.error;
       }
+      session.accessTokenExpiresAt = token.accessTokenExpiresAt;
       return session;
     },
   },

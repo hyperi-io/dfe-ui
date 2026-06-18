@@ -43,7 +43,7 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/login');
   });
 
-  test('redirects to /login when access token expired in session', async () => {
+  test('renders children when access token expired but refresh may run on client', async () => {
     getServerSession.mockResolvedValue({
       user: {
         name: 'test',
@@ -52,15 +52,16 @@ describe('Layout (auth)', () => {
       },
       expires: '2025-12-31',
       error: 'AccessTokenExpired',
+      accessTokenExpiresAt: Date.now() - 1000,
     });
 
-    try {
-      await Layout({ children: <div>Child</div> });
-    } catch {
-      // redirect() throws in Next.js - ignore
-    }
+    const element = await Layout({
+      children: <div>Dashboard content</div>,
+    });
+    render(<ThemeWrapper>{element}</ThemeWrapper>);
 
-    expect(redirect).toHaveBeenCalledWith('/login');
+    expect(screen.getByText('Dashboard content')).toBeTruthy();
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   test('renders children when user is authenticated', async () => {

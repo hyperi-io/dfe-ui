@@ -14,7 +14,7 @@ export default async function RootLayout({
   }
 
   const accessToken = session.user?.accessToken;
-  if (!accessToken || session.error === 'AccessTokenExpired') {
+  if (!accessToken) {
     redirect('/login');
   }
 

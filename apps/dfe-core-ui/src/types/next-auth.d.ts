@@ -9,6 +9,7 @@ declare module 'next-auth' {
 
   interface Session {
     error?: 'AccessTokenExpired';
+    accessTokenExpiresAt?: number;
     user: User & {
       accessToken?: string;
       roles?: string[];
