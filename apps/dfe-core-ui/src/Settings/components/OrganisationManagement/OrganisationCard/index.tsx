@@ -13,6 +13,9 @@ export const OrganisationCard = ({
   refetch: () => void;
 }) => {
   const isParentOrganisation = (organisation.org_ids?.length ?? 0) > 0;
+  const orgIcon =
+    organisation.display_name?.charAt(0).toUpperCase() ??
+    organisation.name.charAt(0).toUpperCase();
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative">
       <PopoverMenu
@@ -41,9 +44,7 @@ export const OrganisationCard = ({
 
       <div className="flex flex-col items-center gap-2">
         <span className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-brand-primary dark:bg-secondary">
-          <p className="text-white text-sm">
-            {organisation.name.charAt(0).toUpperCase()}
-          </p>
+          <p className="text-white text-sm">{orgIcon}</p>
         </span>
         <h3 className="font-medium">{organisation.display_name}</h3>
       </div>
