@@ -286,6 +286,20 @@ describe('createApiClient', () => {
     });
   });
 
+  test('calls onUnauthorized when response is 401', async () => {
+    const onUnauthorized = vi.fn();
+    server.use(
+      http.get(`${BASE_URL}/api/v1/auth/me`, () =>
+        HttpResponse.json({ message: 'Unauthorized' }, { status: 401 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL, onUnauthorized });
+
+    await expect(client.get('/api/v1/auth/me')).rejects.toThrow(ApiError);
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
+
   test('ApiError message prefers message from JSON detail', async () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/auth/me`, () =>

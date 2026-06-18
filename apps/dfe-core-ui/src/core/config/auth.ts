@@ -52,18 +52,39 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        const expiresIn =
+          (user as { expiresIn?: number }).expiresIn ?? 86400;
         token.accessToken = (user as { accessToken?: string }).accessToken;
-        token.expiresIn = (user as { expiresIn?: number }).expiresIn;
+        token.accessTokenExpiresAt = Date.now() + expiresIn * 1000;
         token.roles = (user as { roles?: string[] }).roles ?? [];
+        delete token.error;
+        return token;
       }
+
+      if (
+        typeof token.accessTokenExpiresAt === 'number' &&
+        Date.now() >= token.accessTokenExpiresAt
+      ) {
+        return {
+          ...token,
+          accessToken: undefined,
+          error: 'AccessTokenExpired',
+        };
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as { accessToken?: string }).accessToken =
-          token.accessToken as string;
+          token.accessToken as string | undefined;
         (session.user as { roles?: string[] }).roles =
           (token.roles as string[]) ?? [];
+      }
+      if (token.error === 'AccessTokenExpired') {
+        session.error = 'AccessTokenExpired';
+      } else {
+        delete session.error;
       }
       return session;
     },

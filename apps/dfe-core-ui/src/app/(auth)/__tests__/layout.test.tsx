@@ -28,9 +28,48 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/login');
   });
 
-  test('renders children when user is authenticated', async () => {
+  test('redirects to /login when access token is missing', async () => {
     getServerSession.mockResolvedValue({
       user: { name: 'test', email: 'test@example.com' },
+      expires: '2025-12-31',
+    });
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/login');
+  });
+
+  test('redirects to /login when access token expired in session', async () => {
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'test',
+        email: 'test@example.com',
+        accessToken: 'expired',
+      },
+      expires: '2025-12-31',
+      error: 'AccessTokenExpired',
+    });
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/login');
+  });
+
+  test('renders children when user is authenticated', async () => {
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'test',
+        email: 'test@example.com',
+        accessToken: 'valid-token',
+      },
       expires: '2025-12-31',
     });
 
