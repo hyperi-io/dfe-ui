@@ -3,8 +3,8 @@
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
-import { FieldMapsDetail } from '@/Settings/components/FieldMapsDetail';
-import { FieldMapsTree } from '@/Settings/components/FieldMapsTree';
+import { FieldMapsDetail } from '@/FieldMaps/components/FieldMapsDetail';
+import { FieldMapsTree } from '@/FieldMaps/components/FieldMapsTree';
 
 export const FieldMapsListScene = () => {
   return (
