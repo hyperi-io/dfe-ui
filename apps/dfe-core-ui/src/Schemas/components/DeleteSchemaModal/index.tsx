@@ -42,7 +42,7 @@ export const DeleteSchemaModal = ({
   });
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_DELETE}>
         <RbacProtected.Unrestricted>
           <Tooltip title={`Delete ${schemaPath}`} destroyOnHidden>
             <Button
@@ -52,6 +52,8 @@ export const DeleteSchemaModal = ({
               loading={isDeletingSchema}
               disabled={isDeletingSchema}
               onClick={() => setOpen(true)}
+              aria-label={`Delete ${schemaPath}`}
+              icon={<IconTrash />}
             />
           </Tooltip>
         </RbacProtected.Unrestricted>
@@ -59,14 +61,16 @@ export const DeleteSchemaModal = ({
           tooltip={{ show: true, placement: 'top' }}
           className="opacity-100"
         >
-          <Button
-            type="default"
-            aria-label={`Delete ${schemaPath}`}
-            icon={<IconTrash />}
-            disabled
-            shape="circle"
-            size="small"
-          />
+          <span className="bg-white rounded-full">
+            <Button
+              type="default"
+              aria-label={`Delete ${schemaPath}`}
+              icon={<IconTrash />}
+              disabled
+              shape="circle"
+              size="small"
+            />
+          </span>
         </RbacProtected.Restricted>
       </RbacProtected>
 

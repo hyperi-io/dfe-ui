@@ -98,7 +98,7 @@ export const CloneSourceModal = ({
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          className="justify-start"
+          className="justify-start opacity-100"
           tooltip={{ show: true, placement: 'left' }}
         >
           {trigger ? (
@@ -111,15 +111,17 @@ export const CloneSourceModal = ({
               },
             })
           ) : (
-            <Button
-              type="default"
-              shape="circle"
-              disabled
-              size="small"
-              aria-label={`Clone ${name}`}
-              icon={<IconCopy />}
-              onClick={handleOpen}
-            />
+            <span className="bg-white rounded-full">
+              <Button
+                type="default"
+                shape="circle"
+                disabled
+                size="small"
+                aria-label={`Clone ${name}`}
+                icon={<IconCopy />}
+                onClick={handleOpen}
+              />
+            </span>
           )}
         </RbacProtected.Restricted>
       </RbacProtected>

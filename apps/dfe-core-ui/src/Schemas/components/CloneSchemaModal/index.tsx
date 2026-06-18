@@ -94,17 +94,19 @@ export const CloneSchemaModal = ({
           </Tooltip>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'top' }}
           className="opacity-100"
+          tooltip={{ show: true, placement: 'top' }}
         >
-          <Button
-            type="default"
-            disabled
-            shape="circle"
-            size="small"
-            aria-label={`Clone ${schema}`}
-            icon={<IconCopy />}
-          />
+          <span className="bg-white rounded-full">
+            <Button
+              type="default"
+              disabled
+              shape="circle"
+              size="small"
+              aria-label={`Clone ${schema}`}
+              icon={<IconCopy />}
+            />
+          </span>
         </RbacProtected.Restricted>
       </RbacProtected>
 
