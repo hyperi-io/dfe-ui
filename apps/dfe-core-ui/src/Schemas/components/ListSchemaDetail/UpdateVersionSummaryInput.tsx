@@ -6,12 +6,14 @@ interface UpdateVersionSummaryInputProps {
   version: string;
   summary: string;
   onSuccess?: () => void;
+  editable?: boolean;
 }
 export const UpdateVersionSummaryInput = ({
   path,
   version,
   summary,
   onSuccess,
+  editable = true,
 }: UpdateVersionSummaryInputProps) => {
   const {
     mutate: updateSchema,
@@ -30,6 +32,7 @@ export const UpdateVersionSummaryInput = ({
         classNames={{
           input: 'min-w-96',
         }}
+        editable={editable}
         disabled={isUpdatingSchema}
         onChange={(e) => {
           updateSchema({

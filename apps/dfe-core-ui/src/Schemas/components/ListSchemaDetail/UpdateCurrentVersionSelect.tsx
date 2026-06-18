@@ -7,12 +7,14 @@ interface UpdateCurrentVersionSelectProps {
   path: string;
   currentVersion: string;
   onSuccess?: (values: MetaSchemaUpdateResponse) => void;
+  editable?: boolean;
 }
 export const UpdateCurrentVersionSelect = ({
   versions,
   path,
   currentVersion,
   onSuccess,
+  editable = true,
 }: UpdateCurrentVersionSelectProps) => {
   const {
     mutate: updateSchema,
@@ -32,6 +34,7 @@ export const UpdateCurrentVersionSelect = ({
           select: 'min-w-48',
         }}
         options={versions}
+        editable={editable}
         disabled={isUpdatingSchema}
         onChange={(e) => {
           updateSchema({

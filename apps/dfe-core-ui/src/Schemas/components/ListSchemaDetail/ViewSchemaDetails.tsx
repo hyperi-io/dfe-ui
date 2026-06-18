@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -203,27 +204,57 @@ export const ViewSchemaDetails = ({
             Current Version:
           </dt>
           <dd>
-            <UpdateCurrentVersionSelect
-              versions={versions}
-              path={path}
-              currentVersion={currentVersion}
-              onSuccess={(values) => {
-                handleSetSelectedSchema(values.current);
-                void refetchListSchemas();
-                onSuccess?.();
-              }}
-            />
+            <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+              <RbacProtected.Unrestricted>
+                <UpdateCurrentVersionSelect
+                  versions={versions}
+                  path={path}
+                  currentVersion={currentVersion}
+                  onSuccess={(values) => {
+                    handleSetSelectedSchema(values.current);
+                    void refetchListSchemas();
+                    onSuccess?.();
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="justify-start opacity-100">
+                <UpdateCurrentVersionSelect
+                  versions={versions}
+                  editable={false}
+                  path={path}
+                  currentVersion={currentVersion}
+                  onSuccess={(values) => {
+                    handleSetSelectedSchema(values.current);
+                    void refetchListSchemas();
+                    onSuccess?.();
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           </dd>
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
             Summary:
           </dt>
           <dd>
-            <UpdateVersionSummaryInput
-              path={path}
-              version={selectedSchemaVersion ?? ''}
-              summary={selectedVersion.summary}
-              onSuccess={onSuccess}
-            />
+            <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+              <RbacProtected.Unrestricted>
+                <UpdateVersionSummaryInput
+                  path={path}
+                  version={selectedSchemaVersion ?? ''}
+                  summary={selectedVersion.summary}
+                  onSuccess={onSuccess}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="opacity-100">
+                <UpdateVersionSummaryInput
+                  editable={false}
+                  path={path}
+                  version={selectedSchemaVersion ?? ''}
+                  summary={selectedVersion.summary}
+                  onSuccess={onSuccess}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           </dd>
         </dl>
 

@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -77,18 +78,35 @@ export const CloneSchemaModal = ({
 
   return (
     <>
-      <Tooltip title={`Clone ${schema}`} destroyOnHidden>
-        <Button
-          type="default"
-          shape="circle"
-          size="small"
-          aria-label={`Clone ${schema}`}
-          icon={<IconCopy />}
-          onClick={() => {
-            setOpen(true);
-          }}
-        />
-      </Tooltip>
+      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+        <RbacProtected.Unrestricted>
+          <Tooltip title={`Clone ${schema}`} destroyOnHidden>
+            <Button
+              type="default"
+              shape="circle"
+              size="small"
+              aria-label={`Clone ${schema}`}
+              icon={<IconCopy />}
+              onClick={() => {
+                setOpen(true);
+              }}
+            />
+          </Tooltip>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'top' }}
+          className="opacity-100"
+        >
+          <Button
+            type="default"
+            disabled
+            shape="circle"
+            size="small"
+            aria-label={`Clone ${schema}`}
+            icon={<IconCopy />}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
 
       <Modal
         title={`Clone ${schema}`}

@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import {
@@ -91,17 +92,37 @@ export const CreateSchemaVersionDrawerBase = ({
   return (
     <>
       {notificationContextHolder}
-      <Button
-        type="default"
-        className={cn(
-          'border border-tertiary text-tertiary',
-          classNames?.trigger,
-        )}
-        icon={<IconPlus className="text-tertiary" />}
-        onClick={() => setIsDrawerVisible(true)}
-      >
-        Add Schema Version
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.SCHEMA_WRITE}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="default"
+            className={cn(
+              'border border-tertiary text-tertiary',
+              classNames?.trigger,
+            )}
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            Add Schema Version
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="ml-auto"
+          tooltip={{ show: true, placement: 'left' }}
+        >
+          <Button
+            type="default"
+            disabled
+            className={cn(
+              'border border-tertiary text-tertiary',
+              classNames?.trigger,
+            )}
+          >
+            Add Schema Version
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title={isReviewing ? 'Review Schema Version' : 'Add Schema Version'}
         open={isDrawerVisible}
