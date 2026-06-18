@@ -1,5 +1,5 @@
+import { CompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
 import { Modal } from '@/core/components/Modal';
-import { CompileTransformResponse } from '@/Transforms/hooks/useCompileTransform/types';
 import { useState } from 'react';
 
 interface ResponseModalProps {

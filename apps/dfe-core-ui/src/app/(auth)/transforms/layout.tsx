@@ -1,4 +1,4 @@
-import { TransformsToolbar } from '@/Transforms/components/TransformsToolbar';
+import { TransformsToolbar } from '@/_Transforms/components/TransformsToolbar';
 
 export default async function Layout({
   children,

@@ -1,7 +1,7 @@
 'use client';
 
+import { CreateTransform } from '@/_Transforms/components/CreateTransform';
 import { MainContentCard } from '@/core/components/ContentCard';
-import { CreateTransform } from '@/Transforms/components/CreateTransform';
 
 export const TransformsScene = () => {
   return (

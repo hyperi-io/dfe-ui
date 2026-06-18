@@ -10,7 +10,6 @@ import {
   IconSettings2,
   IconShieldCheck,
   IconTable,
-  IconTransform,
 } from '@repo/dfe-icons';
 
 interface SidebarMenuProps {
@@ -124,20 +123,20 @@ export const featureFlagSidebarMenuItems = [
       />
     ),
   },
-  {
-    key: '/transforms',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <SidebarLink
-        collapsed={collapsed}
-        item={{
-          key: '/transforms',
-          icon: <IconWrapper icon={<IconTransform />} />,
-          label: 'Transforms',
-          external: false,
-        }}
-      />
-    ),
-  },
+  // {
+  //   key: '/transforms',
+  //   Component: ({ collapsed }: SidebarMenuProps) => (
+  //     <SidebarLink
+  //       collapsed={collapsed}
+  //       item={{
+  //         key: '/transforms',
+  //         icon: <IconWrapper icon={<IconTransform />} />,
+  //         label: 'Transforms',
+  //         external: false,
+  //       }}
+  //     />
+  //   ),
+  // },
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (
