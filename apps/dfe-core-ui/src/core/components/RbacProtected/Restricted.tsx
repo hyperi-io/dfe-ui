@@ -15,7 +15,7 @@ interface RestrictedProps {
 }
 export const Restricted = ({
   children,
-  tooltip = { show: true, placement: 'right' },
+  tooltip = { show: false },
 }: RestrictedProps) => {
   const { isAuthorized, isLoading, isError } = useContext(RbacProtectedContext);
 
@@ -24,7 +24,7 @@ export const Restricted = ({
   if (!isAuthorized && !tooltip) return children;
 
   return !isAuthorized ? (
-    <div className="relative opacity-50">
+    <div className="relative opacity-50 h-full">
       {tooltip.show && (
         <Tooltip
           destroyOnHidden
