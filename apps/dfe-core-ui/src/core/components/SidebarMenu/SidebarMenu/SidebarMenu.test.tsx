@@ -1,17 +1,27 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { SidebarMenu } from './index';
+import { server } from './SidebarMenu.mocks';
 
-const { wrapper } = buildTestWrapper().withTheme();
+const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+
+beforeAll(() =>
+  server.listen({
+    onUnhandledRequest: 'error',
+  }),
+);
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe('SidebarMenu', () => {
   describe('collapsed is false', () => {
-    it('should render menu list', () => {
+    it('should render menu list', async () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
-      const menuItemList = screen
-        .getAllByRole('link')
+      const menuItems = await screen.findAllByRole('link');
+
+      const menuItemList = menuItems
         .map((item) => item.textContent)
         .filter((item) => !!item);
 
@@ -22,36 +32,39 @@ describe('SidebarMenu', () => {
         'Sources',
         'Schemas',
         'Rules',
+        'Field Maps',
+        'Services',
         'Settings',
       ]);
     });
 
-    it('should navigate to the correct page when a menu item is clicked', () => {
+    it('should navigate to the correct page when a menu item is clicked', async () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
-      const menuItemList = screen.getAllByRole('link');
-      expect(menuItemList[0]).toHaveAttribute(
+      const menuItems = await screen.findAllByRole('link');
+      expect(menuItems[0]).toHaveAttribute(
         'href',
         'https://localhost:8080/search',
       );
     });
 
-    it('should not show tooltip on hover', () => {
+    it('should not show tooltip on hover', async () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
-      const menuItemList = screen.getAllByRole('link');
+      const menuItems = await screen.findAllByRole('link');
 
-      expect(menuItemList[0]).toHaveAttribute(
+      expect(menuItems[0]).toHaveAttribute(
         'href',
         'https://localhost:8080/search',
       );
     });
   });
 
-  describe('collapsed is true', () => {
+  describe('collapsed is true', async () => {
     it('should show tooltip on hover', async () => {
       const user = userEvent.setup();
       render(<SidebarMenu collapsed={true} />, { wrapper });
-      const menuItemList = screen.getAllByRole('link');
-      await user.hover(menuItemList[0]);
+      const menuItems = await screen.findAllByRole('link');
+
+      await user.hover(menuItems[0]);
 
       await waitFor(() => {
         const searchElements = screen.getAllByText('Search');
@@ -59,23 +72,26 @@ describe('SidebarMenu', () => {
       });
     });
 
-    it('should render icon list', () => {
+    it('should render icon list', async () => {
       const { container } = render(<SidebarMenu collapsed={true} />, {
         wrapper,
       });
       const sidebar = container.querySelector('ul');
       expect(sidebar).toBeTruthy();
-      const collapsedMenuItemList = within(sidebar as HTMLElement)
-        .getAllByRole('link')
-        .map((item) => item.textContent?.trim())
-        .filter((item) => !!item);
 
-      expect(collapsedMenuItemList).toEqual([]);
+      await waitFor(() => {
+        const collapsedMenuItemList = within(sidebar as HTMLElement)
+          .getAllByRole('link')
+          .map((item) => item.textContent?.trim())
+          .filter((item) => !!item);
+
+        expect(collapsedMenuItemList).toEqual([]);
+      });
     });
 
-    it('should navigate to the correct page when a menu item is clicked', () => {
+    it('should navigate to the correct page when a menu item is clicked', async () => {
       render(<SidebarMenu collapsed={true} />, { wrapper });
-      const menuItemList = screen.getAllByRole('link');
+      const menuItemList = await screen.findAllByRole('link');
 
       expect(menuItemList[0]).toHaveAttribute(
         'href',

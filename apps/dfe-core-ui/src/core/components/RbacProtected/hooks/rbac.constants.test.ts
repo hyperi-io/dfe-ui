@@ -2,7 +2,7 @@ import { uniq } from 'lodash';
 import { describe, expect, it } from 'vitest';
 import { UI_DISPLAY_ACTIONS } from './rbac.constants';
 
-const UI_DISPLAY_ACTIONS_CLONED = {
+const UI_DISPLAY_ACTIONS_CASBIN = {
   ALERT_READ: 'alert:read',
   ALERT_WRITE: 'alert:write',
   ARGO_APPLICATIONS: 'argo:applications',
@@ -38,6 +38,17 @@ const UI_DISPLAY_ACTIONS_CLONED = {
   SOURCE_WRITE: 'source:write',
   TRANSFORMS_COMPILE: 'transforms:compile',
   TRANSFORMS_TEST: 'transforms:test',
+};
+
+const UI_DISPLAY_ACTIONS_NOT_ADDED_YET = {
+  RULE_READ: 'rule:read',
+  RULE_WRITE: 'rule:write',
+  SOURCE_DELETE: 'source:delete',
+};
+
+export const UI_DISPLAY_ACTIONS_CLONED = {
+  ...UI_DISPLAY_ACTIONS_CASBIN,
+  ...UI_DISPLAY_ACTIONS_NOT_ADDED_YET,
 };
 
 describe('UI_DISPLAY_ACTIONS', () => {
