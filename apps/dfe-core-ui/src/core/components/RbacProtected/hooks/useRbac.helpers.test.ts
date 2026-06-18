@@ -33,12 +33,6 @@ describe('isUserAuthorized', () => {
     ).toBe(true);
   });
 
-  it('returns true when permissions are provided as a Set', () => {
-    expect(
-      isUserAuthorized(new Set(['schema:*']), UI_DISPLAY_ACTIONS.SCHEMA_WRITE),
-    ).toBe(true);
-  });
-
   it('returns false when no permission matches', () => {
     expect(
       isUserAuthorized(
@@ -51,6 +45,15 @@ describe('isUserAuthorized', () => {
   it('returns false for unrelated scope wildcards', () => {
     expect(
       isUserAuthorized(new Set(['alert:*']), UI_DISPLAY_ACTIONS.SCHEMA_WRITE),
+    ).toBe(false);
+  });
+
+  it('returns false for unrelated nested scope wildcards', () => {
+    expect(
+      isUserAuthorized(
+        new Set(['service:*:config:read']),
+        UI_DISPLAY_ACTIONS.SERVICE_CONFIG_WRITE,
+      ),
     ).toBe(false);
   });
 });
