@@ -10,7 +10,7 @@ import { ListSchemasTree } from '@/Schemas/components/ListSchemasTree';
 export const SchemaListScene = () => {
   return (
     <MainContentCard>
-      <RbacProtected action={RbacProtected.rbacActions.schemas_read}>
+      <RbacProtected action={RbacProtected.rbacActions.schema_read}>
         <RbacProtected.Unrestricted>
           <ListSchemasProvider>
             <Splitter

@@ -29,9 +29,7 @@ const cel_scopes = {
   cel_check: 'cel:check',
 };
 
-const dashboard_scopes = {
-  dashboard_read: 'dashboard:read',
-};
+const dashboard_scopes = { dashboard_read: 'dashboard:read' };
 
 const deployment_scopes = {
   deployment_read: 'deployment:read',
@@ -84,26 +82,26 @@ const role_scopes = {
 };
 
 const rules_scopes = {
-  rules_write: 'rules:write',
-  rules_validate: 'rules:validate',
+  rule_write: 'rule:write',
+  rule_validate: 'rule:validate',
 };
 
 const schemas_scopes = {
-  schemas_read: 'schemas:read',
-  schemas_write: 'schemas:write',
-  schemas_delete: 'schemas:delete',
+  schema_read: 'schema:read',
+  schema_write: 'schema:write',
+  schema_delete: 'schema:delete',
 };
 
 const service_surfaces_scopes = {
-  service_surfaces_read: 'service_surfaces:read',
-  service_surfaces_write: 'service_surfaces:write',
+  service_surface_read: 'service_surface:read',
+  service_surface_write: 'service_surface:write',
 };
 
 const services_scopes = {
-  services_read: 'services:read',
-  services_write: 'services:write',
-  services_delete: 'services:delete',
-  services_validate: 'services:validate',
+  service_read: 'service:read',
+  service_write: 'service:write',
+  service_delete: 'service:delete',
+  service_validate: 'service:validate',
 };
 
 const sigma_scopes = {
@@ -122,8 +120,8 @@ const system_scopes = {
 };
 
 const tasks_scopes = {
-  tasks_read: 'tasks:read',
-  tasks_write: 'tasks:write',
+  task_read: 'task:read',
+  task_write: 'task:write',
 };
 
 const transform_scopes = {

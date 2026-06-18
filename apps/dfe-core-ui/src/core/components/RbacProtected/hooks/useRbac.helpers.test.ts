@@ -5,7 +5,7 @@ import { isUserAuthorized } from './useRbac.helpers';
 describe('isUserAuthorized', () => {
   it('returns true when the user has global * permission', () => {
     expect(
-      isUserAuthorized(new Set(['*']), UI_DISPLAY_ACTIONS.schemas_write),
+      isUserAuthorized(new Set(['*']), UI_DISPLAY_ACTIONS.schema_write),
     ).toBe(true);
   });
 
@@ -13,17 +13,14 @@ describe('isUserAuthorized', () => {
     expect(
       isUserAuthorized(
         new Set(['schemas:write']),
-        UI_DISPLAY_ACTIONS.schemas_write,
+        UI_DISPLAY_ACTIONS.schema_write,
       ),
     ).toBe(true);
   });
 
   it('returns true when a parent scope wildcard matches', () => {
     expect(
-      isUserAuthorized(
-        new Set(['schemas:*']),
-        UI_DISPLAY_ACTIONS.schemas_write,
-      ),
+      isUserAuthorized(new Set(['schemas:*']), UI_DISPLAY_ACTIONS.schema_write),
     ).toBe(true);
   });
 
@@ -40,14 +37,14 @@ describe('isUserAuthorized', () => {
     expect(
       isUserAuthorized(
         new Set(['schema:read']),
-        UI_DISPLAY_ACTIONS.schemas_write,
+        UI_DISPLAY_ACTIONS.schema_write,
       ),
     ).toBe(false);
   });
 
   it('returns false for unrelated scope wildcards', () => {
     expect(
-      isUserAuthorized(new Set(['alert:*']), UI_DISPLAY_ACTIONS.schemas_write),
+      isUserAuthorized(new Set(['alert:*']), UI_DISPLAY_ACTIONS.schema_write),
     ).toBe(false);
   });
 

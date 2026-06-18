@@ -158,7 +158,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/schemas',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.schemas_read}>
+      <RbacProtected action={rbacActions.schema_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -269,7 +269,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.services_read}>
+      <RbacProtected action={rbacActions.service_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}

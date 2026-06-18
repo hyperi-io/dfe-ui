@@ -34,7 +34,7 @@ describe('useRbac', () => {
       const { result } = renderHook(
         () =>
           useRbac({
-            action: UI_DISPLAY_ACTIONS.schemas_write,
+            action: UI_DISPLAY_ACTIONS.schema_write,
           }),
         { wrapper },
       );
@@ -59,7 +59,7 @@ describe('useRbac', () => {
       const { result } = renderHook(
         () =>
           useRbac({
-            action: UI_DISPLAY_ACTIONS.schemas_write,
+            action: UI_DISPLAY_ACTIONS.schema_write,
           }),
         { wrapper },
       );

@@ -33,7 +33,7 @@ export const SchemaConfigTabContent = ({
       </Radio.Group>
 
       {assignSchema === 'define_schema' && (
-        <RbacProtected action={RbacProtected.rbacActions.schemas_read}>
+        <RbacProtected action={RbacProtected.rbacActions.schema_read}>
           <RbacProtected.Unrestricted>
             <MetaSchemaForm formValidation={formValidation} form={form} />
           </RbacProtected.Unrestricted>

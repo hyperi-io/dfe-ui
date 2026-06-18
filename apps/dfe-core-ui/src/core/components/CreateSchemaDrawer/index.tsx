@@ -96,7 +96,7 @@ export const CreateSchemaDrawerBase = ({
   return (
     <>
       {notificationContextHolder}
-      <RbacProtected action={RbacProtected.rbacActions.schemas_write}>
+      <RbacProtected action={RbacProtected.rbacActions.schema_write}>
         <RbacProtected.Unrestricted>
           <Button
             type="default"

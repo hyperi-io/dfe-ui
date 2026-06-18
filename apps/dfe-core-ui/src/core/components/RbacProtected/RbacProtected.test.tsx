@@ -25,7 +25,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 const TestRbacProtected = () => (
-  <RbacProtected action={UI_DISPLAY_ACTIONS.schemas_write}>
+  <RbacProtected action={UI_DISPLAY_ACTIONS.schema_write}>
     <RbacProtected.Loader>
       <p>Loading...</p>
     </RbacProtected.Loader>
