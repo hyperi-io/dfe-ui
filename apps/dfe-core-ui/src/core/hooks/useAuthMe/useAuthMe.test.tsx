@@ -34,6 +34,7 @@ describe('.useAuthMe', () => {
         isLoading: true,
         error: null,
         refetch: expect.any(Function),
+        isError: false,
       });
 
       const expectedResponse: AuthMe = {
@@ -50,6 +51,7 @@ describe('.useAuthMe', () => {
           isLoading: false,
           error: null,
           refetch: expect.any(Function),
+          isError: false,
         });
       });
     });
