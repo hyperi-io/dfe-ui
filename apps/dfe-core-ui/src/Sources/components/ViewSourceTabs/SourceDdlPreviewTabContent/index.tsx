@@ -18,8 +18,7 @@ export const SourceDdlPreviewTabContent = ({
     reset();
   }, [source_name, source_version, reset]);
 
-  const buildResult =
-    data?.version === source_version ? data : undefined;
+  const buildResult = data?.version === source_version ? data : undefined;
 
   return (
     <div className="h-[calc(100vh-225px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
