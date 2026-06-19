@@ -45,7 +45,7 @@ export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'bottomLeft' }}
+          tooltip={{ show: true, placement: 'bottomRight' }}
         >
           <Button htmlType="button" type="primary" icon={<IconPlus />} disabled>
             Configure New Custom Role

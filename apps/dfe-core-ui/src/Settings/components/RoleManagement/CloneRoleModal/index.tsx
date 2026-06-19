@@ -44,7 +44,7 @@ export const CloneRoleModal = ({
             Clone Role
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             htmlType="button"
             type="text"

@@ -64,7 +64,7 @@ export const DeleteAccountDrawer = ({
             Delete Account
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             aria-label={title}
             type="text"

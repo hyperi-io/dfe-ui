@@ -22,7 +22,7 @@ export const ViewAccountDrawer = ({ username }: { username: string }) => {
             {title}
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             aria-label={title}
             type="text"

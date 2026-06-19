@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ResetAccountPasswordForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPasswordForm';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/UpdateAccountForm';
@@ -48,7 +49,7 @@ export const EditAccountDrawer = ({
             Edit Account
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             aria-label={title}
             type="text"
@@ -75,7 +76,19 @@ export const EditAccountDrawer = ({
             Set a new password for this account. This does not change group
             memberships.
           </p>
-          <ResetAccountPasswordForm username={username} />
+          <RbacProtected
+            action={RbacProtected.rbacActions.accounts_reset_password}
+          >
+            <RbacProtected.Unrestricted>
+              <ResetAccountPasswordForm username={username} />
+            </RbacProtected.Unrestricted>
+            <RbacProtected.Restricted>
+              <NotificationCard
+                className="w-full"
+                title="You do not have permission to reset the password for this account."
+              />
+            </RbacProtected.Restricted>
+          </RbacProtected>
         </div>
       </Drawer>
     </>

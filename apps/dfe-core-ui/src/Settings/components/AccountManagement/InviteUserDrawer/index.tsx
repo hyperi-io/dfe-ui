@@ -38,7 +38,9 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
             Invite New User
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomRight' }}
+        >
           <Button
             type="primary"
             icon={<IconSend />}

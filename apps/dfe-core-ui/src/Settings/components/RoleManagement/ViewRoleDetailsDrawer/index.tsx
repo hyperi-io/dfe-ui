@@ -16,7 +16,7 @@ export const ViewRoleDetailsDrawer = ({ role_name }: { role_name: string }) => {
             View Role Details
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button type="text" htmlType="button" icon={<IconEye />} disabled>
             View Role Details
           </Button>

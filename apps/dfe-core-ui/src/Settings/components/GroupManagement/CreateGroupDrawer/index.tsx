@@ -46,7 +46,9 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
             Configure New Group
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomRight' }}
+        >
           <Button
             type="primary"
             disabled

@@ -10,6 +10,7 @@ const accounts_scopes = {
   account_write: 'account:write',
   account_read: 'account:read',
   account_delete: 'account:delete',
+  accounts_reset_password: 'accounts:reset_password',
 };
 
 const alerts_scopes = {

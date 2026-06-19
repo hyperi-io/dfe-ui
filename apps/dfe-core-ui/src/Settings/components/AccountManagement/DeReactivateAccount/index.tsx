@@ -42,7 +42,7 @@ export const DeReactivateAccount = ({
           {actionTitle}
         </Button>
       </RbacProtected.Unrestricted>
-      <RbacProtected.Restricted>
+      <RbacProtected.Restricted tooltip={{ show: true }}>
         <Button
           aria-label={actionTitle}
           type="text"

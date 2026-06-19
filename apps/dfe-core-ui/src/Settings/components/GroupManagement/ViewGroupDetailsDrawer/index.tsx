@@ -20,7 +20,7 @@ export const ViewGroupDetailsDrawer = ({
             View Group Details
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             disabled
             type="text"

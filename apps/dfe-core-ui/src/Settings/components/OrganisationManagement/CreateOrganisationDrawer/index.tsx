@@ -50,7 +50,9 @@ export const CreateOrganisationDrawer = ({
             Configure New Organisation
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomRight' }}
+        >
           <Button disabled type="primary" icon={<IconPlus />}>
             Configure New Organisation
           </Button>

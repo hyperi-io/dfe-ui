@@ -59,7 +59,7 @@ export const EditRoleDrawer = ({
             Edit Role
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button type="text" htmlType="button" icon={<IconEdit />} disabled>
             Edit Role
           </Button>

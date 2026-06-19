@@ -49,7 +49,7 @@ export const DeleteGroupModal = ({
             Delete Group
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             disabled
             type="text"
