@@ -1,4 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useDeleteSchema } from '@/Schemas/hooks/useDeleteSchema';
 import { IconTrash } from '@repo/dfe-icons';
@@ -41,18 +42,38 @@ export const DeleteSchemaModal = ({
   });
   return (
     <>
-      <Tooltip title={`Delete ${schemaPath}`} destroyOnHidden>
-        <Button
-          type="default"
-          shape="circle"
-          size="small"
-          loading={isDeletingSchema}
-          disabled={isDeletingSchema}
-          aria-label={`Delete ${schemaPath}`}
-          icon={<IconTrash />}
-          onClick={() => setOpen(true)}
-        />
-      </Tooltip>
+      <RbacProtected action={RbacProtected.rbacActions.schema_delete}>
+        <RbacProtected.Unrestricted>
+          <Tooltip title={`Delete ${schemaPath}`} destroyOnHidden>
+            <Button
+              type="default"
+              shape="circle"
+              size="small"
+              loading={isDeletingSchema}
+              disabled={isDeletingSchema}
+              onClick={() => setOpen(true)}
+              aria-label={`Delete ${schemaPath}`}
+              icon={<IconTrash />}
+            />
+          </Tooltip>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'top' }}
+          className="opacity-100"
+        >
+          <span className="bg-white rounded-full">
+            <Button
+              type="default"
+              aria-label={`Delete ${schemaPath}`}
+              icon={<IconTrash />}
+              disabled
+              shape="circle"
+              size="small"
+            />
+          </span>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Modal
         title={`Delete ${schemaPath}`}
         open={open}

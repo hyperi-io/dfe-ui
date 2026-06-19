@@ -20,7 +20,12 @@ const Login = ({ callbackUrl }: { callbackUrl: string }) => {
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
-  const { mutate: login, isPending, error } = useLogin({ callbackUrl });
+  const {
+    mutate: login,
+    isPending,
+    error,
+    reset: resetLoginMutation,
+  } = useLogin({ callbackUrl });
 
   const onSubmit = (data: FormData) => {
     login(data);
@@ -46,6 +51,9 @@ const Login = ({ callbackUrl }: { callbackUrl: string }) => {
           initialValues={{ username: '', password: '' }}
           form={form}
           onFinish={onSubmit}
+          onValuesChange={() => {
+            resetLoginMutation();
+          }}
         >
           <Form.Item name="username" label="Username" rules={[formValidation]}>
             <Input placeholder="Username" />
@@ -54,7 +62,12 @@ const Login = ({ callbackUrl }: { callbackUrl: string }) => {
             <Input.Password placeholder="Password" />
           </Form.Item>
 
-          {error && <FormNotification text={error.message} type="error" />}
+          {error && (
+            <FormNotification
+              text="Unable to login. Please try again."
+              type="error"
+            />
+          )}
           <Button
             loading={isPending}
             type="primary"

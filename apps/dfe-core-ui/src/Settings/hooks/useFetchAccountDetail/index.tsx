@@ -2,6 +2,10 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
 
+export const ACCOUNT_DETAIL_QUERY_KEY = (username?: string | null) => [
+  'account',
+  username,
+];
 export const useFetchAccountDetail = ({
   username,
 }: {
@@ -9,7 +13,7 @@ export const useFetchAccountDetail = ({
 }) => {
   const isQueryEnabled = !!username;
   const { data, isLoading, error } = useQuery({
-    queryKey: ['account', username],
+    queryKey: ACCOUNT_DETAIL_QUERY_KEY(username),
     queryFn: () =>
       apiClient.get(API_CONFIG.accounts.account, {
         pathParams: { username: username ?? '' },

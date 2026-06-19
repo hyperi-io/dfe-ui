@@ -3,7 +3,9 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-const { wrapper: ThemeWrapper } = buildTestWrapper().withTheme();
+const { wrapper: ThemeWrapper } = buildTestWrapper()
+  .withTheme()
+  .withReactQuery();
 
 const getServerSession = vi.mocked(
   (await import('next-auth')).getServerSession,

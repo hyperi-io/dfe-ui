@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
@@ -39,13 +40,25 @@ export const CreateOrganisationDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        type="primary"
-        icon={<IconPlus />}
-        onClick={() => setIsOpen(true)}
-      >
-        Configure New Organisation
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.org_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => setIsOpen(true)}
+          >
+            Configure New Organisation
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomRight' }}
+        >
+          <Button disabled type="primary" icon={<IconPlus />}>
+            Configure New Organisation
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Create Organisation"
         open={isOpen}

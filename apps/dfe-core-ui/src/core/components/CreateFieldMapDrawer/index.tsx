@@ -3,6 +3,7 @@ import {
   CreateFieldMapFormData,
 } from '@/core/components/CreateFieldMapForm';
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useCreateFieldMap } from '@/core/hooks/useCreateFieldMap';
 import { FieldMap } from '@/core/hooks/useCreateFieldMap/types';
@@ -67,14 +68,32 @@ export const CreateFieldMapDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        type="default"
-        className={cn('border border-tertiary text-tertiary', trigger)}
-        icon={<IconPlus className="text-tertiary" />}
-        onClick={() => setIsDrawerVisible(true)}
-      >
-        {title}
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.fieldmap_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="default"
+            className={cn('border border-tertiary text-tertiary', trigger)}
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            {title}
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="mt-auto"
+          tooltip={{ show: true, placement: 'top' }}
+        >
+          <Button
+            type="default"
+            disabled
+            className={cn('border border-tertiary text-tertiary', trigger)}
+            icon={<IconPlus className="text-tertiary" />}
+            onClick={() => setIsDrawerVisible(true)}
+          >
+            {title}
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
       <Drawer
         key={title}
         title={title}

@@ -99,8 +99,28 @@ export const API_CONFIG_MOCKS = Object.freeze({
     permissions: {
       mockedUrl: '/api/v1/auth/permissions',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            roles: ['string'],
+            permissions: ['string'],
+          },
+        }: {
+          mockedResponse?: components['schemas']['PermissionsResponse'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.auth.permissions.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.auth.permissions.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
         },
       },
     },
