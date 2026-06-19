@@ -42,6 +42,7 @@ describe('.useLogin', () => {
         mutate: expect.any(Function) as (data: LoginRequest) => Promise<void>,
         isPending: false,
         error: null,
+        reset: expect.any(Function),
       });
     });
 

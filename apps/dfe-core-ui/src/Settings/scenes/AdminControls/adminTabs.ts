@@ -4,7 +4,7 @@ export const ADMIN_TAB_KEYS = [
   'organization-management',
   'role-management',
   'group-management',
-  'user-management',
+  'account-management',
 ] as const;
 
 export type AdminTabKey = (typeof ADMIN_TAB_KEYS)[number];

@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateRoleFormData } from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
 import { useCreateRole } from '@/Settings/hooks/useCreateRole';
 import { IconCopy } from '@repo/dfe-icons';
@@ -32,14 +33,30 @@ export const CloneRoleModal = ({
   };
   return (
     <>
-      <Button
-        type="text"
-        aria-label={`Clone ${role_name}`}
-        icon={<IconCopy />}
-        onClick={() => setOpen(true)}
-      >
-        Clone Role
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.role_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            aria-label={`Clone ${role_name}`}
+            icon={<IconCopy />}
+            onClick={() => setOpen(true)}
+          >
+            Clone Role
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button
+            htmlType="button"
+            type="text"
+            aria-label={`Clone ${role_name}`}
+            icon={<IconCopy />}
+            disabled
+          >
+            Clone Role
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Modal
         title="Clone Role"
         open={open}

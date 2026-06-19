@@ -33,7 +33,7 @@ export const AUDIT_LOGS_DATA = [
   }),
   createAuditLog({
     user: 'Claire Bell',
-    action: 'Create User: Amazon Lily',
+    action: 'Create Account: Amazon Lily',
   }),
   createAuditLog({
     user: 'Claire Bell',
@@ -77,7 +77,7 @@ export const AUDIT_LOGS_DATA = [
   }),
   createAuditLog({
     user: 'Ava Lovelace',
-    action: 'Create User: Grace Hopper',
+    action: 'Create Account: Grace Hopper',
   }),
   createAuditLog({
     user: 'Ava Lovelace',

@@ -1,11 +1,14 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
 } from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
+import { ORGANISATION_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchOrganisationDetail';
 import { Organisation } from '@/Settings/hooks/useFetchOrganisations/types';
 import { useUpdateOrganisation } from '@/Settings/hooks/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
@@ -18,6 +21,8 @@ export const EditOrganisationDrawer = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
+
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateOrganisation,
@@ -32,6 +37,9 @@ export const EditOrganisationDrawer = ({
         placement: 'bottomLeft',
       });
       setOpen(false);
+      void queryClient.invalidateQueries({
+        queryKey: ORGANISATION_DETAIL_QUERY_KEY(organisation.name),
+      });
     },
   });
 
@@ -49,14 +57,24 @@ export const EditOrganisationDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        type="text"
-        aria-label={`Edit ${organisation.display_name}`}
-        icon={<IconEdit />}
-        onClick={() => setOpen(true)}
-      >
-        Edit Organisation
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.org_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            aria-label={`Edit ${organisation.display_name}`}
+            icon={<IconEdit />}
+            onClick={() => setOpen(true)}
+          >
+            Edit Organisation
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button type="text" htmlType="button" icon={<IconEdit />} disabled>
+            Edit Organisation
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Edit Organisation"
         open={open}

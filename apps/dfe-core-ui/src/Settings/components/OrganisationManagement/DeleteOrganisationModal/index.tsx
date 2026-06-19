@@ -1,5 +1,6 @@
 import { useDeleteOrganisation } from '@/Settings/hooks/useDeleteOrganisation';
 
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
@@ -48,16 +49,32 @@ export const DeleteOrganisationModal = ({
 
   return (
     <>
-      <Button
-        type="text"
-        className="hover:text-error hover:bg-error/5"
-        aria-label={`Delete ${display_name}`}
-        icon={<IconTrash />}
-        onClick={() => setOpen(true)}
-        disabled={disabled}
-      >
-        Delete Organisation
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.org_delete}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            className="hover:text-error hover:bg-error/5"
+            aria-label={`Delete ${display_name}`}
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+            disabled={disabled}
+          >
+            Delete Organisation
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button
+            type="text"
+            className="hover:text-error hover:bg-error/5"
+            aria-label={`Delete ${display_name}`}
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+            disabled
+          >
+            Delete Organisation
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
 
       <Modal
         title="Delete Organisation"

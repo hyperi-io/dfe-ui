@@ -54,10 +54,11 @@ export const SampleEventsTabContent = ({
         <NotificationCard
           icon={<IconInfoCircle className="w-4 h-4" />}
           description={
-            <>
-              This source has no schema defined. Results will subsequently be
-              sent to <span className="font-semibold">_default_land.</span>
-            </>
+            <p className="flex gap-2">
+              This source has no meta or derived schema defined. Results will
+              subsequently be sent to{' '}
+              <span className="font-semibold">_default_land.</span>
+            </p>
           }
         />
       )}

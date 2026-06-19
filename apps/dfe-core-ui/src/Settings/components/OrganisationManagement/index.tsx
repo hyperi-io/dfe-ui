@@ -2,6 +2,7 @@
 
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchOrganisations } from '@/Settings/hooks/useFetchOrganisations';
@@ -37,48 +38,51 @@ export const OrganisationManagement = () => {
         //   />
         // }
       >
-        {isLoading && (
-          <>
-            <Spin /> <p className="sr-only">Loading organisations</p>
-          </>
-        )}
-        {error && (
-          <>
-            <GenericErrorCard
-              title="Error fetching organisations"
-              description={error.message}
-            />
-          </>
-        )}
-        {!isLoading && !error && organisations?.length === 0 && (
-          <NotificationCard
-            className="w-full"
-            description="No organisations found"
-            icon={<IconInfoCircle />}
-          />
-        )}
-        {organisations && organisations?.length > 0 && (
-          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {organisations?.map((organisation) => (
-              <li key={organisation.name}>
-                <OrganisationCard
-                  key={organisation.name}
-                  organisation={organisation}
-                  refetch={refetch}
+        <RbacProtected action={RbacProtected.rbacActions.org_read}>
+          <RbacProtected.Unrestricted>
+            {isLoading && (
+              <>
+                <Spin /> <p className="sr-only">Loading organisations</p>
+              </>
+            )}
+            {error && (
+              <>
+                <GenericErrorCard
+                  title="Error fetching organisations"
+                  description={error.message}
                 />
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* {companyLimit < filteredOrganisations.length && (
-          <Button
-            type="link"
-            className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-            onClick={() => setCompanyLimit(companyLimit + 4)}
-          >
-            Show more
-          </Button>
-        )} */}
+              </>
+            )}
+            {!isLoading && !error && organisations?.length === 0 && (
+              <NotificationCard
+                className="w-full"
+                description="No organisations found"
+                icon={<IconInfoCircle />}
+              />
+            )}
+            {organisations && organisations?.length > 0 && (
+              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {organisations?.map((organisation) => (
+                  <li key={organisation.name}>
+                    <OrganisationCard
+                      key={organisation.name}
+                      organisation={organisation}
+                      refetch={refetch}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <NotificationCard
+              className="w-full"
+              title="You do not have sufficient permissions"
+              description="Please contact your administrator to request access."
+              icon={<IconInfoCircle />}
+            />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
       {/* <SectionCard
         className="mb-0"

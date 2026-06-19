@@ -2,6 +2,10 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
 
+export const ROLE_DETAIL_QUERY_KEY = (role_name?: string | null) => [
+  'role',
+  role_name,
+];
 export const useFetchRoleDetail = ({
   role_name,
 }: {
@@ -9,7 +13,7 @@ export const useFetchRoleDetail = ({
 }) => {
   const isQueryEnabled = !!role_name;
   const { data, isLoading, error } = useQuery({
-    queryKey: ['role', role_name],
+    queryKey: ROLE_DETAIL_QUERY_KEY(role_name),
     queryFn: () =>
       apiClient.get(API_CONFIG.roles.role, {
         pathParams: { name: role_name ?? '' },

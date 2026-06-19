@@ -1,11 +1,11 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
+import { AccountManagement } from '@/Settings/components/AccountManagement';
 import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
 import { OrganisationManagement } from '@/Settings/components/OrganisationManagement';
 import { RoleManagement } from '@/Settings/components/RoleManagement';
-import { UserManagement } from '@/Settings/components/UserManagement';
 import { Tabs } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
@@ -71,14 +71,14 @@ export const AdminControlsScene = () => {
             children: <GroupManagement />,
           },
           {
-            key: 'user-management',
+            key: 'account-management',
             label: (
               <AdminTabLabel
-                label="User Management"
-                description="Manage users, link LDAP users and configure user account default settings."
+                label="Account Management"
+                description="Manage accounts, link LDAP accounts and configure account default settings."
               />
             ),
-            children: <UserManagement />,
+            children: <AccountManagement />,
           },
           // {
           //   key: 'audit',

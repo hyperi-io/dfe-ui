@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteGroup } from '@/Settings/hooks/useDeleteGroup';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
@@ -36,15 +37,29 @@ export const DeleteGroupModal = ({
 
   return (
     <>
-      <Button
-        type="text"
-        className="hover:text-error hover:bg-error/5"
-        aria-label={`Delete ${group_name}`}
-        icon={<IconTrash />}
-        onClick={() => setOpen(true)}
-      >
-        Delete Group
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.group_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            className="hover:text-error hover:bg-error/5"
+            aria-label={`Delete ${group_name}`}
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+          >
+            Delete Group
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button
+            disabled
+            type="text"
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+          >
+            Delete Group
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
 
       <Modal
         title="Delete Group"

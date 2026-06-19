@@ -12,7 +12,7 @@ export const useLogin = ({
   const searchParams = useSearchParams();
   const callbackUrl = callbackUrl_ ?? searchParams.get('callbackUrl') ?? '/';
 
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error, reset } = useMutation({
     mutationFn: async (data: components['schemas']['LoginRequest']) => {
       const result = await signIn('credentials', {
         username: data.username,
@@ -37,5 +37,5 @@ export const useLogin = ({
     },
   });
 
-  return { mutate, isPending, error };
+  return { mutate, isPending, error, reset };
 };

@@ -8,7 +8,10 @@ export const UserActionsButton = () => {
       destroyOnHidden
       trigger="click"
       content={<UserActionsPopoverContent />}
-      placement="topRight"
+      placement="topLeft"
+      classNames={{
+        content: 'min-w-84',
+      }}
     >
       <Button
         className="-ml-1 bg-background-muted dark:bg-dark-background-muted hover:bg-foreground/10 dark:hover:bg-dark-foreground/10 text-[14px]"

@@ -1,3 +1,5 @@
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
@@ -42,23 +44,34 @@ export const GroupRoleSelect = (props: SelectProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <Select
-        loading={isInitialLoading}
-        disabled={!!error}
-        options={options}
-        placeholder="Select roles"
-        showSearch={{
-          onSearch: setSearch,
-        }}
-        onPopupScroll={handlePopupScroll}
-        mode="multiple"
-        onSelect={() => {
-          setSearch('');
-        }}
-        {...props}
-      />
-      {error && <div className="text-error text-sm">{error.message}</div>}
-    </div>
+    <RbacProtected action={RbacProtected.rbacActions.role_read}>
+      <RbacProtected.Unrestricted>
+        <div className="flex flex-col gap-2">
+          <Select
+            loading={isInitialLoading}
+            disabled={!!error}
+            options={options}
+            placeholder="Select roles"
+            showSearch={{
+              onSearch: setSearch,
+            }}
+            onPopupScroll={handlePopupScroll}
+            mode="multiple"
+            onSelect={() => {
+              setSearch('');
+            }}
+            {...props}
+          />
+          {error && <div className="text-error text-sm">{error.message}</div>}
+        </div>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted>
+        <NotificationCard
+          className="w-full"
+          title="You do not have sufficient permissions"
+          description="Please contact your administrator to request access."
+        />
+      </RbacProtected.Restricted>
+    </RbacProtected>
   );
 };

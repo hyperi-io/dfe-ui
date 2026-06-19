@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateGroupForm,
   CreateUpdateGroupFormData,
@@ -35,13 +36,30 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
   return (
     <>
       {contextHolder}
-      <Button
-        type="primary"
-        onClick={() => setIsOpen(true)}
-        icon={<IconPlus />}
-      >
-        Configure New Group
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.group_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="primary"
+            onClick={() => setIsOpen(true)}
+            icon={<IconPlus />}
+          >
+            Configure New Group
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomRight' }}
+        >
+          <Button
+            type="primary"
+            disabled
+            onClick={() => setIsOpen(true)}
+            icon={<IconPlus />}
+          >
+            Configure New Group
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Create Group"
         open={isOpen}

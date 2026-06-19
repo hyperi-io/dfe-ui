@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
@@ -40,24 +41,54 @@ export const EditSourceDrawer = ({
   return (
     <>
       {contextHolder}
-      {trigger ? (
-        cloneElement(trigger, {
-          ...trigger.props,
-          onClick: (event: React.MouseEvent<HTMLElement>) => {
-            setIsDrawerVisible(true);
-            trigger.props.onClick?.(event);
-          },
-        })
-      ) : (
-        <Button
-          type="default"
-          className="border border-tertiary text-tertiary"
-          icon={<IconEdit className="text-tertiary" />}
-          onClick={() => setIsDrawerVisible(true)}
+      <RbacProtected action={RbacProtected.rbacActions.source_write}>
+        <RbacProtected.Unrestricted>
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                setIsDrawerVisible(true);
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              className="border border-tertiary text-tertiary"
+              icon={<IconEdit className="text-tertiary" />}
+              onClick={() => setIsDrawerVisible(true)}
+            >
+              {title}
+            </Button>
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          className="opacity-100 justify-start"
+          tooltip={{ show: true, placement: 'left' }}
         >
-          {title}
-        </Button>
-      )}
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              disabled: true,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                setIsDrawerVisible(true);
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              disabled
+              className="border border-tertiary text-tertiary"
+              icon={<IconEdit className="text-tertiary" />}
+              onClick={() => setIsDrawerVisible(true)}
+            >
+              {title}
+            </Button>
+          )}
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title={title}
         open={isDrawerVisible}

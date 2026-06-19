@@ -22,7 +22,7 @@ export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   return (
     <Sider
-      className="h-screen border-r border-solid border-gray-200 dark:border-[#303030]"
+      className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
       theme={colorMode === 'light' ? 'light' : 'dark'}
       trigger={null}
       collapsible
