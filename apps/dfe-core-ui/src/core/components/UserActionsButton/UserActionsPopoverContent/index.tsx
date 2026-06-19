@@ -63,21 +63,6 @@ export const UserActionsPopoverContent = () => {
               <EmptyData />
             )}
           </dd>
-          <dt className={dataListTermStyle}>Permissions:</dt>
-          <dd>
-            {me?.permissions?.length && me?.permissions?.length > 0 ? (
-              <div className="flex items-center gap-1">
-                {me.permissions.slice(0, PERMISSION_LIMIT).join(', ')}
-                {me.permissions.length > PERMISSION_LIMIT && (
-                  <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
-                    +{me.permissions.length - PERMISSION_LIMIT} more
-                  </span>
-                )}
-              </div>
-            ) : (
-              <EmptyData />
-            )}
-          </dd>
           <dt className={dataListTermStyle}>Groups:</dt>
           <dd>
             {me?.groups?.length && me?.groups?.length > 0 ? (
