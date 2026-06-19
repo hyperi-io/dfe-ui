@@ -53,7 +53,7 @@ export interface paths {
         };
         /**
          * Get Me
-         * @description Get the current authenticated user's info.
+         * @description Get the current authenticated user's info (roles/groups from stores, not JWT).
          */
         get: operations["get_me_api_v1_auth_me_get"];
         put?: never;
