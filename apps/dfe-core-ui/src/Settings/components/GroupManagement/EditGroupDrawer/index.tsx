@@ -1,7 +1,9 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchGroupDetail';
 import { useUpdateGroup } from '@/Settings/hooks/useUpdateGroup';
 import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { UpdateGroupForm, UpdateGroupFormData } from './UpdateGroupForm';
@@ -16,6 +18,8 @@ export const EditGroupDrawer = ({
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
+  const queryClient = useQueryClient();
+
   const {
     mutate: updateGroup,
     isPending,
@@ -28,6 +32,10 @@ export const EditGroupDrawer = ({
       api.success({
         title: 'Group updated successfully',
         placement: 'bottomLeft',
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: GROUP_DETAIL_QUERY_KEY(group_name),
       });
     },
   });

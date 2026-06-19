@@ -4,9 +4,11 @@ import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
 } from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
+import { ORGANISATION_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchOrganisationDetail';
 import { Organisation } from '@/Settings/hooks/useFetchOrganisations/types';
 import { useUpdateOrganisation } from '@/Settings/hooks/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
@@ -19,6 +21,8 @@ export const EditOrganisationDrawer = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
+
+  const queryClient = useQueryClient();
 
   const {
     mutate: updateOrganisation,
@@ -33,6 +37,9 @@ export const EditOrganisationDrawer = ({
         placement: 'bottomLeft',
       });
       setOpen(false);
+      void queryClient.invalidateQueries({
+        queryKey: ORGANISATION_DETAIL_QUERY_KEY(organisation.name),
+      });
     },
   });
 

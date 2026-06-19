@@ -1,5 +1,6 @@
 'use client';
 
+import { useFetchPermissions } from '@/core/hooks/_useFetchPermissions';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useLogout } from '@/core/hooks/useLogout';
 import { IconLogout } from '@repo/dfe-icons';
@@ -17,16 +18,26 @@ const GROUP_LIMIT = 3;
 
 export const UserActionsPopoverContent = () => {
   const { handleLogout } = useLogout();
-  const { data: me, isLoading, error } = useAuthMe();
+  const { data: me, isLoading: isLoadingUser, error: errorUser } = useAuthMe();
+
+  const {
+    data: permissions,
+    isLoading: isLoadingPermissions,
+    error: errorPermissions,
+  } = useFetchPermissions();
 
   return (
     <div className="flex min-w-48 flex-col gap-y-3">
-      {isLoading && (
+      {(isLoadingUser || isLoadingPermissions) && (
         <div className="flex justify-center py-1">
           <Spin size="small" />
         </div>
       )}
-      {error && (
+
+      <span className="font-medium text-foreground/50 dark:text-dark-foreground/50 text-xs">
+        Current User:
+      </span>
+      {errorUser && (
         <p className="text-foreground/50 dark:text-dark-foreground/50 text-sm">
           Could not load profile
         </p>
@@ -75,6 +86,35 @@ export const UserActionsPopoverContent = () => {
                 {me.groups.length > GROUP_LIMIT && (
                   <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
                     +{me.groups.length - GROUP_LIMIT} more
+                  </span>
+                )}
+              </div>
+            ) : (
+              <EmptyData />
+            )}
+          </dd>
+        </dl>
+      )}
+      <span className="border-t border-foreground/10 dark:border-dark-foreground/10 my-1/2" />
+      <span className="font-medium text-foreground/50 dark:text-dark-foreground/50 text-xs">
+        User Permissions:
+      </span>
+      {errorPermissions && (
+        <p className="text-foreground/50 dark:text-dark-foreground/50 text-sm">
+          Could not load permissions
+        </p>
+      )}
+
+      {permissions && (
+        <dl className="grid grid-cols-[80px_1fr] gap-x-6 gap-y-1 text-xs">
+          <dt className={dataListTermStyle}>Permissions:</dt>
+          <dd>
+            {permissions.permissions.length > 0 ? (
+              <div className="flex items-center gap-1">
+                {permissions.permissions.slice(0, PERMISSION_LIMIT).join(', ')}
+                {permissions.permissions.length > PERMISSION_LIMIT && (
+                  <span className="text-foreground/40 dark:text-dark-foreground/40 text-xs">
+                    +{permissions.permissions.length - PERMISSION_LIMIT} more
                   </span>
                 )}
               </div>

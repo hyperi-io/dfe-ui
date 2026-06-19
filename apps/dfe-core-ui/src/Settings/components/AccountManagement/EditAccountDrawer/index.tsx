@@ -3,8 +3,10 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ResetAccountPasswordForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPasswordForm';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/UpdateAccountForm';
+import { ACCOUNT_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchAccountDetail';
 import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, Divider, notification } from 'antd';
 import { useState } from 'react';
 
@@ -19,6 +21,8 @@ export const EditAccountDrawer = ({
   const [api, contextHolder] = notification.useNotification();
   const title = `Edit ${username}`;
 
+  const queryClient = useQueryClient();
+
   const {
     mutate: updateAccount,
     isPending,
@@ -31,6 +35,9 @@ export const EditAccountDrawer = ({
       api.success({
         title: 'Account updated successfully',
         placement: 'bottomLeft',
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ACCOUNT_DETAIL_QUERY_KEY(username),
       });
     },
   });
