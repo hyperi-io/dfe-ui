@@ -3,7 +3,7 @@ import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconLock } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 
-export const DeReactivateUser = ({
+export const DeReactivateAccount = ({
   username,
   isActive,
   refetch,
@@ -13,14 +13,14 @@ export const DeReactivateUser = ({
   refetch: () => void;
 }) => {
   const { notification } = App.useApp();
-  const actionTitle = isActive ? 'Deactivate user' : 'Activate user';
+  const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
 
   const { mutate, isPending } = useUpdateAccount({
     username,
     onSuccess: () => {
       refetch();
       notification.success({
-        title: isActive ? 'User deactivated' : 'User activated',
+        title: isActive ? 'Account deactivated' : 'Account activated',
         placement: 'bottomLeft',
       });
     },

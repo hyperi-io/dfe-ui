@@ -1,8 +1,8 @@
+import { DeleteAccountDrawer } from '@/Settings/components/AccountManagement/DeleteAccountDrawer';
+import { DeReactivateAccount } from '@/Settings/components/AccountManagement/DeReactivateAccount';
+import { EditAccountDrawer } from '@/Settings/components/AccountManagement/EditAccountDrawer';
+import { ViewAccountDrawer } from '@/Settings/components/AccountManagement/ViewAccountDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
-import { DeleteUserDrawer } from '@/Settings/components/UserManagement/DeleteUserDrawer';
-import { DeReactivateUser } from '@/Settings/components/UserManagement/DeReactivateUser';
-import { EditUserDrawer } from '@/Settings/components/UserManagement/EditUserDrawer';
-import { ViewUserDrawer } from '@/Settings/components/UserManagement/ViewUserDrawer';
 
 export const RowActions = ({
   username,
@@ -16,19 +16,19 @@ export const RowActions = ({
   return (
     <PopoverMenu
       options={[
-        <ViewUserDrawer key="view-user" username={username} />,
-        <EditUserDrawer
+        <ViewAccountDrawer key="view-user" username={username} />,
+        <EditAccountDrawer
           key="edit-user"
           username={username}
           refetch={refetch}
         />,
-        <DeReactivateUser
+        <DeReactivateAccount
           key="dereactivate-user"
           username={username}
           isActive={isActive}
           refetch={refetch}
         />,
-        <DeleteUserDrawer
+        <DeleteAccountDrawer
           key="delete-user"
           username={username}
           isActive={isActive}

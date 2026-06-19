@@ -9,12 +9,16 @@ const formSchema = z.object({
   new_password: z.string().min(1, { message: 'New password is required' }),
 });
 
-type ResetUserPasswordFormValues = z.infer<typeof formSchema>;
+type ResetAccountPasswordFormValues = z.infer<typeof formSchema>;
 
-export const ResetUserPasswordForm = ({ username }: { username: string }) => {
-  const [form] = Form.useForm<ResetUserPasswordFormValues>();
+export const ResetAccountPasswordForm = ({
+  username,
+}: {
+  username: string;
+}) => {
+  const [form] = Form.useForm<ResetAccountPasswordFormValues>();
   const formValidation =
-    useAntdZodResolver<ResetUserPasswordFormValues>(formSchema);
+    useAntdZodResolver<ResetAccountPasswordFormValues>(formSchema);
   const { notification } = App.useApp();
 
   const {
@@ -32,13 +36,13 @@ export const ResetUserPasswordForm = ({ username }: { username: string }) => {
     },
   });
 
-  const handleFinish = (values: ResetUserPasswordFormValues) => {
+  const handleFinish = (values: ResetAccountPasswordFormValues) => {
     resetPassword(values);
   };
 
   return (
     <Form
-      name={`reset-user-password-form-${username}`}
+      name={`reset-account-password-form-${username}`}
       form={form}
       onFinish={handleFinish}
       layout="vertical"

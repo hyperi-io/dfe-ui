@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { AccountGroupSelect } from '@/Settings/components/UserManagement/AccountGroupSelect';
+import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
 import { AccountCreateRequestBody } from '@/Settings/hooks/useCreateAccount/types';
 import { Button, Input } from 'antd';
 import z from 'zod';
@@ -18,7 +18,7 @@ export const CreateAccountForm = ({
   onFinish,
   error,
   isPending,
-  buttonLabel = 'Create User',
+  buttonLabel = 'Create Account',
 }: {
   onFinish: (values: AccountCreateRequestBody) => void;
   error: Error | null;

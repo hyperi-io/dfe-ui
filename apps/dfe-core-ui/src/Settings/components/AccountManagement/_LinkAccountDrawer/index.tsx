@@ -3,7 +3,7 @@ import { IconLinkPlus } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
-export const LinkUserDrawer = () => {
+export const LinkAccountDrawer = () => {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -12,11 +12,11 @@ export const LinkUserDrawer = () => {
         icon={<IconLinkPlus />}
         onClick={() => setOpen(true)}
       >
-        Link New User
+        Link New Account
       </Button>
-      <Drawer title="Link User" open={open} onClose={() => setOpen(false)}>
+      <Drawer title="Link Account" open={open} onClose={() => setOpen(false)}>
         <div className="border border-error rounded-md p-4 text-error bg-error/10">
-          Implement LinkUserDrawer
+          Implement LinkAccountDrawer
         </div>
       </Drawer>
     </>

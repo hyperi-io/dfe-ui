@@ -14,7 +14,7 @@ const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
 
-export const ViewUserDetails = ({ username }: { username: string }) => {
+export const ViewAccountDetails = ({ username }: { username: string }) => {
   const { data, isLoading, error } = useFetchAccountDetail({ username });
 
   if (isLoading) {
@@ -37,7 +37,7 @@ export const ViewUserDetails = ({ username }: { username: string }) => {
   if (!data) {
     return (
       <EmptyDetail
-        title="No user details found"
+        title="No account details found"
         description="Please try again later."
       />
     );

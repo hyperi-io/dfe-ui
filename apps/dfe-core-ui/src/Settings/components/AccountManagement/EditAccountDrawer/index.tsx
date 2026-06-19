@@ -1,13 +1,13 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ResetUserPasswordForm } from '@/Settings/components/UserManagement/EditUserDrawer/ResetUserPasswordForm';
-import { UpdateUserForm } from '@/Settings/components/UserManagement/EditUserDrawer/UpdateUserForm';
+import { ResetAccountPasswordForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPasswordForm';
+import { UpdateAccountForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/UpdateAccountForm';
 import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, Divider, notification } from 'antd';
 import { useState } from 'react';
 
-export const EditUserDrawer = ({
+export const EditAccountDrawer = ({
   username,
   refetch,
 }: {
@@ -28,7 +28,7 @@ export const EditUserDrawer = ({
       setOpen(false);
       refetch();
       api.success({
-        title: 'User updated successfully',
+        title: 'Account updated successfully',
         placement: 'bottomLeft',
       });
     },
@@ -45,7 +45,7 @@ export const EditUserDrawer = ({
             icon={<IconEdit />}
             onClick={() => setOpen(true)}
           >
-            Edit User
+            Edit Account
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted>
@@ -56,14 +56,14 @@ export const EditUserDrawer = ({
             icon={<IconEdit />}
             onClick={() => setOpen(true)}
           >
-            Edit User
+            Edit Account
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
       <Drawer title={title} open={open} onClose={() => setOpen(false)}>
         <div className="flex flex-col gap-2">
-          <UpdateUserForm
+          <UpdateAccountForm
             username={username}
             onFinish={updateAccount}
             error={error}
@@ -75,7 +75,7 @@ export const EditUserDrawer = ({
             Set a new password for this account. This does not change group
             memberships.
           </p>
-          <ResetUserPasswordForm username={username} />
+          <ResetAccountPasswordForm username={username} />
         </div>
       </Drawer>
     </>

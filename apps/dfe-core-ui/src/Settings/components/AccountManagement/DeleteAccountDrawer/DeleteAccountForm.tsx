@@ -9,9 +9,9 @@ const formSchema = z.object({
   username: z.string().min(1, { message: 'Username is required' }),
 });
 
-export type DeleteUserFormData = z.infer<typeof formSchema>;
+export type DeleteAccountFormData = z.infer<typeof formSchema>;
 
-export const DeleteUserForm = ({
+export const DeleteAccountForm = ({
   username,
   onFinish,
   error,
@@ -19,16 +19,16 @@ export const DeleteUserForm = ({
   onCancel,
 }: {
   username: string;
-  onFinish: (values: DeleteUserFormData) => void;
+  onFinish: (values: DeleteAccountFormData) => void;
   error?: Error | null;
   isPending?: boolean;
   onCancel?: () => void;
 }) => {
-  const [form] = Form.useForm<DeleteUserFormData>();
-  const formValidation = useAntdZodResolver<DeleteUserFormData>(formSchema);
+  const [form] = Form.useForm<DeleteAccountFormData>();
+  const formValidation = useAntdZodResolver<DeleteAccountFormData>(formSchema);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleFinish = (values: DeleteUserFormData) => {
+  const handleFinish = (values: DeleteAccountFormData) => {
     if (values.username !== username) {
       setFormError('Username does not match');
       return;

@@ -3,9 +3,9 @@ import { useDeleteAccount } from '@/Settings/hooks/useDeleteAccount';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
-import { DeleteUserForm, DeleteUserFormData } from './DeleteUserForm';
+import { DeleteAccountForm, DeleteAccountFormData } from './DeleteAccountForm';
 
-export const DeleteUserDrawer = ({
+export const DeleteAccountDrawer = ({
   username,
   isActive,
   refetch,
@@ -46,8 +46,8 @@ export const DeleteUserDrawer = ({
     setOpen(true);
   };
 
-  const handleDelete = (_values: DeleteUserFormData) => {
-    mutate(username);
+  const handleDelete = (values: DeleteAccountFormData) => {
+    mutate(values.username);
   };
 
   return (
@@ -61,7 +61,7 @@ export const DeleteUserDrawer = ({
             onClick={handleOpen}
             danger
           >
-            Delete User
+            Delete Account
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted>
@@ -73,19 +73,19 @@ export const DeleteUserDrawer = ({
             disabled
             danger
           >
-            Delete User
+            Delete Account
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
 
       <Modal
-        title="Delete User"
+        title="Delete Account"
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
         destroyOnHidden
       >
-        <DeleteUserForm
+        <DeleteAccountForm
           username={username}
           onFinish={handleDelete}
           error={error}

@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { CreateAccountForm } from '@/Settings/components/UserManagement/CreateAccountForm';
+import { CreateAccountForm } from '@/Settings/components/AccountManagement/CreateAccountForm';
 import { useCreateAccount } from '@/Settings/hooks/useCreateAccount';
 import { IconSend } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -19,7 +19,7 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
       setOpen(false);
       refetch();
       api.success({
-        title: 'User created successfully',
+        title: 'Account created successfully',
         placement: 'bottomLeft',
       });
     },
@@ -50,7 +50,7 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title="Create User" open={open} onClose={() => setOpen(false)}>
+      <Drawer title="Create Account" open={open} onClose={() => setOpen(false)}>
         <CreateAccountForm
           onFinish={createAccount}
           error={error}

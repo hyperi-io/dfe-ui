@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { AccountGroupSelect } from '@/Settings/components/UserManagement/AccountGroupSelect';
+import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
 import { useFetchAccountDetail } from '@/Settings/hooks/useFetchAccountDetail';
 import { AccountUpdateRequestBody } from '@/Settings/hooks/useUpdateAccount/types';
 import { Button, Spin } from 'antd';
@@ -12,9 +12,9 @@ const formSchema = z.object({
   groups: z.array(z.string()).optional(),
 });
 
-type UpdateUserFormValues = z.infer<typeof formSchema>;
+type UpdateAccountFormValues = z.infer<typeof formSchema>;
 
-export const UpdateUserForm = ({
+export const UpdateAccountForm = ({
   username,
   onFinish,
   error,
@@ -25,8 +25,9 @@ export const UpdateUserForm = ({
   error: Error | null;
   isPending: boolean;
 }) => {
-  const [form] = Form.useForm<UpdateUserFormValues>();
-  const formValidation = useAntdZodResolver<UpdateUserFormValues>(formSchema);
+  const [form] = Form.useForm<UpdateAccountFormValues>();
+  const formValidation =
+    useAntdZodResolver<UpdateAccountFormValues>(formSchema);
 
   const {
     data: accountDetail,
@@ -34,7 +35,7 @@ export const UpdateUserForm = ({
     error: fetchError,
   } = useFetchAccountDetail({ username });
 
-  const handleFinish = (values: UpdateUserFormValues) => {
+  const handleFinish = (values: UpdateAccountFormValues) => {
     onFinish({
       groups: values.groups ?? [],
     });
@@ -51,7 +52,7 @@ export const UpdateUserForm = ({
   if (fetchError) {
     return (
       <GenericErrorCard
-        title="Error fetching user detail"
+        title="Error fetching account detail"
         description={fetchError.message}
       />
     );
@@ -63,7 +64,7 @@ export const UpdateUserForm = ({
 
   return (
     <Form
-      name={`update-user-form-${username}`}
+      name={`update-account-form-${username}`}
       form={form}
       onFinish={handleFinish}
       initialValues={{ groups: accountDetail.groups }}
@@ -85,7 +86,7 @@ export const UpdateUserForm = ({
           type="primary"
           htmlType="submit"
         >
-          Update User
+          Update Account
         </Button>
       </Form.Item>
     </Form>

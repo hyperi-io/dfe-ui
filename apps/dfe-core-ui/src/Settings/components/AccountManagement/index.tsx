@@ -13,11 +13,11 @@ import { useMemo, useState } from 'react';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { RowActions } from './RowActions';
 
-export const UserManagement = () => {
+export const AccountManagement = () => {
   const [search, setSearch] = useState('');
   const { data: accounts, isLoading, error, refetch } = useFetchAccounts();
 
-  const filteredUsers = useMemo(() => {
+  const filteredAccounts = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!accounts) {
       return [];
@@ -82,9 +82,9 @@ export const UserManagement = () => {
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       {/* <SectionCard
-        title="Link a new user"
+        title="Link a new account"
         description="Link an external identity to the platform (coming soon)."
-        rightTitleSlot={<LinkUserDrawer />}
+        rightTitleSlot={<LinkAccountDrawer />}
       /> */}
       <SectionCard
         title="Invite a new user"
@@ -92,12 +92,12 @@ export const UserManagement = () => {
         rightTitleSlot={<InviteUserDrawer refetch={refetch} />}
       />
       <SectionCard
-        title="Manage existing users"
+        title="Manage existing accounts"
         description="Manage local accounts, group memberships, and account status."
         rightTitleSlot={
           <Input.Search
             className="ml-auto w-60"
-            placeholder="Search users"
+            placeholder="Search accounts"
             onChange={(e) => setSearch(e.target.value)}
             value={search}
             allowClear
@@ -108,27 +108,27 @@ export const UserManagement = () => {
           <RbacProtected.Unrestricted>
             {isLoading && (
               <>
-                <Spin /> <p className="sr-only">Loading users</p>
+                <Spin /> <p className="sr-only">Loading accounts</p>
               </>
             )}
             {error && (
               <GenericErrorCard
-                title="Error fetching users"
+                title="Error fetching accounts"
                 description={error.message}
               />
             )}
-            {!isLoading && !error && filteredUsers.length === 0 && (
+            {!isLoading && !error && filteredAccounts.length === 0 && (
               <NotificationCard
                 className="w-full"
-                description="No users found"
+                description="No accounts found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {!isLoading && !error && filteredUsers.length > 0 && (
+            {!isLoading && !error && filteredAccounts.length > 0 && (
               <Table
                 rowKey="username"
                 scroll={{ y: componentHeight }}
-                dataSource={filteredUsers}
+                dataSource={filteredAccounts}
                 columns={columns}
                 pagination={false}
               />
