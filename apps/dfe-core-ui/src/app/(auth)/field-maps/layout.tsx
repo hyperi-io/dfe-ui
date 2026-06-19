@@ -1,4 +1,4 @@
-import { FieldMapsToolbar } from '@/FieldMaps/components/FieldMapsToolbar';
+import { FieldMapsToolbar } from '@/_FieldMaps/components/FieldMapsToolbar';
 
 export default async function Layout({
   children,

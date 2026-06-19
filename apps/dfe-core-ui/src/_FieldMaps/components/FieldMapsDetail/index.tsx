@@ -1,8 +1,8 @@
+import { useFetchFieldMapDetail } from '@/_FieldMaps/hooks/useFetchFieldMapDetail';
 import { AceEditor } from '@/core/components/AceEditor';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
-import { useFetchFieldMapDetail } from '@/FieldMaps/hooks/useFetchFieldMapDetail';
 import { Spin } from 'antd';
 
 export const FieldMapsDetail = () => {

@@ -32,8 +32,9 @@ describe('SidebarMenu', () => {
         'Sources',
         'Schemas',
         'Rules',
-        'Field Maps',
-        'Services',
+        // 'Field Maps',
+        // 'Transforms',
+        // 'Services',
         'Settings',
       ]);
     });

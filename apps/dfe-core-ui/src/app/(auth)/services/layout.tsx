@@ -1,4 +1,4 @@
-import { ServicesToolbar } from '@/Services/components/ServicesToolbar';
+import { ServicesToolbar } from '@/_Services/components/ServicesToolbar';
 
 export default async function Layout({
   children,

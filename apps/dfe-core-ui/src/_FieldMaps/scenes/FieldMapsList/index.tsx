@@ -1,10 +1,10 @@
 'use client';
 
+import { FieldMapsDetail } from '@/_FieldMaps/components/FieldMapsDetail';
+import { FieldMapsTree } from '@/_FieldMaps/components/FieldMapsTree';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
-import { FieldMapsDetail } from '@/FieldMaps/components/FieldMapsDetail';
-import { FieldMapsTree } from '@/FieldMaps/components/FieldMapsTree';
 
 export const FieldMapsListScene = () => {
   return (
