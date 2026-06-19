@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useUpdateGroup } from '@/Settings/hooks/useUpdateGroup';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -38,9 +39,24 @@ export const EditGroupDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
-        Edit Group
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.group_write}>
+        <RbacProtected.Unrestricted>
+          <Button type="text" icon={<IconEdit />} onClick={() => setOpen(true)}>
+            Edit Group
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <Button
+            disabled
+            type="text"
+            icon={<IconEdit />}
+            onClick={() => setOpen(true)}
+          >
+            Edit Group
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer title="Edit Group" open={open} onClose={() => setOpen(false)}>
         <UpdateGroupForm
           onFinish={handleUpdateGroup}

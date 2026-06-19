@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchRoleDetail';
 import { useUpdateRole } from '@/Settings/hooks/useUpdateRole';
 import { IconEdit } from '@repo/dfe-icons';
@@ -47,14 +48,24 @@ export const EditRoleDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        type="text"
-        icon={<IconEdit />}
-        disabled={disabled}
-        onClick={() => setOpen(true)}
-      >
-        Edit Role
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.role_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            icon={<IconEdit />}
+            disabled={disabled}
+            onClick={() => setOpen(true)}
+          >
+            Edit Role
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+          <Button type="text" htmlType="button" icon={<IconEdit />} disabled>
+            Edit Role
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer title="Edit Role" open={open} onClose={() => setOpen(false)}>
         <UpdateRoleForm
           onFinish={handleUpdateRole}

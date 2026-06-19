@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateRoleForm,
   CreateUpdateRoleFormData,
@@ -33,13 +34,25 @@ export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
   return (
     <>
       {contextHolder}
-      <Button
-        type="primary"
-        onClick={() => setIsOpen(true)}
-        icon={<IconPlus />}
-      >
-        Configure New Custom Role
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.role_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="primary"
+            onClick={() => setIsOpen(true)}
+            icon={<IconPlus />}
+          >
+            Configure New Custom Role
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'bottomLeft' }}
+        >
+          <Button htmlType="button" type="primary" icon={<IconPlus />} disabled>
+            Configure New Custom Role
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Create Custom Role"
         open={isOpen}

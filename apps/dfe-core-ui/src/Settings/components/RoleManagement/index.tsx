@@ -1,5 +1,6 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
@@ -55,51 +56,63 @@ export const RoleManagement = () => {
           />
         }
       >
-        {isLoadingCustomRoles && (
-          <>
-            <Spin /> <p className="sr-only">Loading custom roles</p>
-          </>
-        )}
+        <RbacProtected action={RbacProtected.rbacActions.role_read}>
+          <RbacProtected.Unrestricted>
+            {isLoadingCustomRoles && (
+              <>
+                <Spin /> <p className="sr-only">Loading custom roles</p>
+              </>
+            )}
 
-        {errorCustomRoles && (
-          <GenericErrorCard
-            title="Error fetching custom roles"
-            description={
-              errorCustomRoles.message ??
-              'Unexpected error fetching custom roles'
-            }
-          />
-        )}
+            {errorCustomRoles && (
+              <GenericErrorCard
+                title="Error fetching custom roles"
+                description={
+                  errorCustomRoles.message ??
+                  'Unexpected error fetching custom roles'
+                }
+              />
+            )}
 
-        {customRoles.length > 0 && (
-          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {customRoles?.map((role) => (
-              <li key={role.name.replaceAll(' ', '-')}>
-                <RoleCard refetch={refetchCustomRoles} role={role} />
-              </li>
-            ))}
-          </ul>
-        )}
+            {customRoles.length > 0 && (
+              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {customRoles?.map((role) => (
+                  <li key={role.name.replaceAll(' ', '-')}>
+                    <RoleCard refetch={refetchCustomRoles} role={role} />
+                  </li>
+                ))}
+              </ul>
+            )}
 
-        {customRoles.length < customRolesTotal && (
-          <Button
-            type="link"
-            className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-            onClick={() => fetchCustomRolesNextPage()}
-          >
-            Show more
-          </Button>
-        )}
+            {customRoles.length < customRolesTotal && (
+              <Button
+                type="link"
+                className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
+                onClick={() => fetchCustomRolesNextPage()}
+              >
+                Show more
+              </Button>
+            )}
 
-        {!isLoadingCustomRoles &&
-          !errorCustomRoles &&
-          customRoles.length === 0 && (
+            {!isLoadingCustomRoles &&
+              !errorCustomRoles &&
+              customRoles.length === 0 && (
+                <NotificationCard
+                  className="w-full"
+                  description="No custom roles found"
+                  icon={<IconInfoCircle />}
+                />
+              )}
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
             <NotificationCard
               className="w-full"
-              description="No custom roles found"
+              title="You do not have sufficient permissions"
+              description="Please contact your administrator to request access."
               icon={<IconInfoCircle />}
             />
-          )}
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
       <SectionCard
         title={
@@ -118,54 +131,69 @@ export const RoleManagement = () => {
           />
         }
       >
-        {isLoadingCoreRoles && (
-          <>
-            <Spin /> <p className="sr-only">Loading core roles</p>
-          </>
-        )}
+        <RbacProtected action={RbacProtected.rbacActions.role_read}>
+          <RbacProtected.Unrestricted>
+            {isLoadingCoreRoles && (
+              <>
+                <Spin /> <p className="sr-only">Loading core roles</p>
+              </>
+            )}
 
-        {errorCoreRoles && (
-          <GenericErrorCard
-            title="Error fetching core roles"
-            description={
-              errorCoreRoles.message ?? 'Unexpected error fetching core roles'
-            }
-          />
-        )}
+            {errorCoreRoles && (
+              <GenericErrorCard
+                title="Error fetching core roles"
+                description={
+                  errorCoreRoles.message ??
+                  'Unexpected error fetching core roles'
+                }
+              />
+            )}
 
-        {coreRoles.length > 0 && (
-          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {coreRoles?.map((role) => (
-              <li key={role.name.replaceAll(' ', '-')}>
-                <RoleCard
-                  refetch={() => {
-                    refetchCoreRoles();
-                    refetchCustomRoles();
-                  }}
-                  role={role}
+            {coreRoles.length > 0 && (
+              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {coreRoles?.map((role) => (
+                  <li key={role.name.replaceAll(' ', '-')}>
+                    <RoleCard
+                      refetch={() => {
+                        refetchCoreRoles();
+                        refetchCustomRoles();
+                      }}
+                      role={role}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {coreRoles.length < coreRolesTotal && (
+              <Button
+                type="link"
+                className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
+                onClick={() => fetchCoreRolesNextPage()}
+              >
+                Show more
+              </Button>
+            )}
+
+            {!isLoadingCoreRoles &&
+              !errorCoreRoles &&
+              coreRoles.length === 0 && (
+                <NotificationCard
+                  className="w-full"
+                  description="No core roles found"
+                  icon={<IconInfoCircle />}
                 />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {coreRoles.length < coreRolesTotal && (
-          <Button
-            type="link"
-            className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-            onClick={() => fetchCoreRolesNextPage()}
-          >
-            Show more
-          </Button>
-        )}
-
-        {!isLoadingCoreRoles && !errorCoreRoles && coreRoles.length === 0 && (
-          <NotificationCard
-            className="w-full"
-            description="No core roles found"
-            icon={<IconInfoCircle />}
-          />
-        )}
+              )}
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <NotificationCard
+              className="w-full"
+              title="You do not have sufficient permissions"
+              description="Please contact your administrator to request access."
+              icon={<IconInfoCircle />}
+            />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
     </div>
   );

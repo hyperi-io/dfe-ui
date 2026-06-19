@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteRole } from '@/Settings/hooks/useDeleteRole';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
@@ -42,16 +43,32 @@ export const DeleteRoleModal = ({
 
   return (
     <>
-      <Button
-        type="text"
-        className="hover:text-error hover:bg-error/5"
-        aria-label={`Delete ${role_name}`}
-        icon={<IconTrash />}
-        onClick={() => setOpen(true)}
-        disabled={disabled}
-      >
-        Delete Role
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.role_delete}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            className="hover:text-error hover:bg-error/5"
+            aria-label={`Delete ${role_name}`}
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+            disabled={disabled}
+          >
+            Delete Role
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true, placement: 'right' }}>
+          <Button
+            type="text"
+            htmlType="button"
+            className="hover:text-error hover:bg-error/5"
+            aria-label={`Delete ${role_name}`}
+            icon={<IconTrash />}
+            disabled
+          >
+            Delete Role
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
 
       <Modal
         title="Delete Role"

@@ -1,10 +1,9 @@
 const account_groups_scopes = {
   group_write: 'group:write',
   group_read: 'group:read',
-  group_update: 'group:update',
+  group_delete: 'group:delete',
   group_add_member: 'group:add_member',
   group_remove_member: 'group:remove_member',
-  group_delete: 'group:delete',
 };
 
 const accounts_scopes = {
