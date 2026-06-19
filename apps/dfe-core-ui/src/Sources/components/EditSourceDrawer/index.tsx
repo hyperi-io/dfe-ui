@@ -62,7 +62,10 @@ export const EditSourceDrawer = ({
             </Button>
           )}
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted className="justify-start">
+        <RbacProtected.Restricted
+          className="opacity-100 justify-start"
+          tooltip={{ show: true, placement: 'left' }}
+        >
           {trigger ? (
             cloneElement(trigger, {
               ...trigger.props,

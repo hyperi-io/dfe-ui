@@ -54,11 +54,12 @@ export const DeleteSourceModal = ({
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
           className="opacity-100 justify-start"
-          tooltip={{ show: true, placement: 'top' }}
+          tooltip={{ show: true, placement: 'left' }}
         >
           {trigger ? (
             cloneElement(trigger, {
               ...trigger.props,
+              disabled: true,
               onClick: (event: React.MouseEvent<HTMLElement>) => {
                 setOpen(true);
                 trigger.props.onClick?.(event);
