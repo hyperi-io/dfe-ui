@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { ResetUserPasswordForm } from '@/Settings/components/UserManagement/EditUserDrawer/ResetUserPasswordForm';
 import { UpdateUserForm } from '@/Settings/components/UserManagement/EditUserDrawer/UpdateUserForm';
 import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
@@ -36,14 +37,30 @@ export const EditUserDrawer = ({
   return (
     <>
       {contextHolder}
-      <Button
-        aria-label={title}
-        type="text"
-        icon={<IconEdit />}
-        onClick={() => setOpen(true)}
-      >
-        Edit User
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.account_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            aria-label={title}
+            type="text"
+            icon={<IconEdit />}
+            onClick={() => setOpen(true)}
+          >
+            Edit User
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <Button
+            aria-label={title}
+            type="text"
+            disabled
+            icon={<IconEdit />}
+            onClick={() => setOpen(true)}
+          >
+            Edit User
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer title={title} open={open} onClose={() => setOpen(false)}>
         <div className="flex flex-col gap-2">
           <UpdateUserForm

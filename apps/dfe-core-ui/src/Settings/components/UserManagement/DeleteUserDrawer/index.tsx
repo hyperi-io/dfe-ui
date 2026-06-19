@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteAccount } from '@/Settings/hooks/useDeleteAccount';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
@@ -51,15 +52,32 @@ export const DeleteUserDrawer = ({
 
   return (
     <>
-      <Button
-        aria-label={title}
-        type="text"
-        icon={<IconTrash />}
-        onClick={handleOpen}
-        danger
-      >
-        Delete User
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.account_delete}>
+        <RbacProtected.Unrestricted>
+          <Button
+            aria-label={title}
+            type="text"
+            icon={<IconTrash />}
+            onClick={handleOpen}
+            danger
+          >
+            Delete User
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <Button
+            aria-label={title}
+            type="text"
+            icon={<IconTrash />}
+            onClick={handleOpen}
+            disabled
+            danger
+          >
+            Delete User
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Modal
         title="Delete User"
         open={open}

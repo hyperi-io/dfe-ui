@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconLock } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
@@ -26,17 +27,35 @@ export const DeReactivateUser = ({
   });
 
   return (
-    <Button
-      aria-label={actionTitle}
-      type="text"
-      icon={<IconLock />}
-      loading={isPending}
-      disabled={isPending}
-      onClick={() => {
-        mutate({ enabled: !isActive });
-      }}
-    >
-      {actionTitle}
-    </Button>
+    <RbacProtected action={RbacProtected.rbacActions.account_write}>
+      <RbacProtected.Unrestricted>
+        <Button
+          aria-label={actionTitle}
+          type="text"
+          icon={<IconLock />}
+          loading={isPending}
+          disabled={isPending}
+          onClick={() => {
+            mutate({ enabled: !isActive });
+          }}
+        >
+          {actionTitle}
+        </Button>
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted>
+        <Button
+          aria-label={actionTitle}
+          type="text"
+          icon={<IconLock />}
+          loading={isPending}
+          disabled
+          onClick={() => {
+            mutate({ enabled: !isActive });
+          }}
+        >
+          {actionTitle}
+        </Button>
+      </RbacProtected.Restricted>
+    </RbacProtected>
   );
 };

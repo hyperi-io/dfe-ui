@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateAccountForm } from '@/Settings/components/UserManagement/CreateAccountForm';
 import { useCreateAccount } from '@/Settings/hooks/useCreateAccount';
 import { IconSend } from '@repo/dfe-icons';
@@ -27,9 +28,28 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
   return (
     <>
       {contextHolder}
-      <Button type="primary" icon={<IconSend />} onClick={() => setOpen(true)}>
-        Invite New User
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.account_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="primary"
+            icon={<IconSend />}
+            onClick={() => setOpen(true)}
+          >
+            Invite New User
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <Button
+            type="primary"
+            icon={<IconSend />}
+            disabled
+            onClick={() => setOpen(true)}
+          >
+            Invite New User
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer title="Create User" open={open} onClose={() => setOpen(false)}>
         <CreateAccountForm
           onFinish={createAccount}

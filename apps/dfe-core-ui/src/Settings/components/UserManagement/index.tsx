@@ -2,6 +2,7 @@
 
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
@@ -103,33 +104,45 @@ export const UserManagement = () => {
           />
         }
       >
-        {isLoading && (
-          <>
-            <Spin /> <p className="sr-only">Loading users</p>
-          </>
-        )}
-        {error && (
-          <GenericErrorCard
-            title="Error fetching users"
-            description={error.message}
-          />
-        )}
-        {!isLoading && !error && filteredUsers.length === 0 && (
-          <NotificationCard
-            className="w-full"
-            description="No users found"
-            icon={<IconInfoCircle />}
-          />
-        )}
-        {!isLoading && !error && filteredUsers.length > 0 && (
-          <Table
-            rowKey="username"
-            scroll={{ y: componentHeight }}
-            dataSource={filteredUsers}
-            columns={columns}
-            pagination={false}
-          />
-        )}
+        <RbacProtected action={RbacProtected.rbacActions.account_read}>
+          <RbacProtected.Unrestricted>
+            {isLoading && (
+              <>
+                <Spin /> <p className="sr-only">Loading users</p>
+              </>
+            )}
+            {error && (
+              <GenericErrorCard
+                title="Error fetching users"
+                description={error.message}
+              />
+            )}
+            {!isLoading && !error && filteredUsers.length === 0 && (
+              <NotificationCard
+                className="w-full"
+                description="No users found"
+                icon={<IconInfoCircle />}
+              />
+            )}
+            {!isLoading && !error && filteredUsers.length > 0 && (
+              <Table
+                rowKey="username"
+                scroll={{ y: componentHeight }}
+                dataSource={filteredUsers}
+                columns={columns}
+                pagination={false}
+              />
+            )}
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <NotificationCard
+              className="w-full"
+              icon={<IconInfoCircle />}
+              title="You do not have sufficient permissions"
+              description="Please contact your administrator to request access."
+            />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
     </div>
   );
