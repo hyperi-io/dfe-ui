@@ -4,10 +4,8 @@ import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
   IconChartDots,
-  IconCode,
   IconDatabase,
   IconLayoutGrid,
-  IconRotate2,
   IconSettings2,
   IconShieldCheck,
   IconTable,
@@ -220,38 +218,38 @@ export const featureFlagSidebarMenuItems = [
       </RbacProtected>
     ),
   },
-  {
-    key: '/field-maps',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.fieldmap_read}>
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/field-maps',
-              icon: <IconWrapper icon={<IconRotate2 />} />,
-              label: 'Field Maps',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/field-maps',
-              icon: <IconWrapper icon={<IconRotate2 />} />,
-              label: 'Field Maps',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
-      </RbacProtected>
-    ),
-  },
+  // {
+  //   key: '/field-maps',
+  //   Component: ({ collapsed }: SidebarMenuProps) => (
+  //     <RbacProtected action={rbacActions.fieldmap_read}>
+  //       <RbacProtected.Unrestricted>
+  //         <SidebarLink
+  //           collapsed={collapsed}
+  //           item={{
+  //             key: '/field-maps',
+  //             icon: <IconWrapper icon={<IconRotate2 />} />,
+  //             label: 'Field Maps',
+  //             external: false,
+  //           }}
+  //         />
+  //       </RbacProtected.Unrestricted>
+  //       <RbacProtected.Restricted
+  //         tooltip={{ show: true, placement: 'right', showIcon: true }}
+  //       >
+  //         <SidebarLink
+  //           collapsed={collapsed}
+  //           disabled
+  //           item={{
+  //             key: '/field-maps',
+  //             icon: <IconWrapper icon={<IconRotate2 />} />,
+  //             label: 'Field Maps',
+  //             external: false,
+  //           }}
+  //         />
+  //       </RbacProtected.Restricted>
+  //     </RbacProtected>
+  //   ),
+  // },
   // {
   //   key: '/transforms',
   //   Component: ({ collapsed }: SidebarMenuProps) => (
@@ -266,38 +264,38 @@ export const featureFlagSidebarMenuItems = [
   //     />
   //   ),
   // },
-  {
-    key: '/services',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.service_read}>
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/services',
-              icon: <IconWrapper icon={<IconCode />} />,
-              label: 'Services',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/services',
-              icon: <IconWrapper icon={<IconCode />} />,
-              label: 'Services',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
-      </RbacProtected>
-    ),
-  },
+  // {
+  //   key: '/services',
+  //   Component: ({ collapsed }: SidebarMenuProps) => (
+  //     <RbacProtected action={rbacActions.service_read}>
+  //       <RbacProtected.Unrestricted>
+  //         <SidebarLink
+  //           collapsed={collapsed}
+  //           item={{
+  //             key: '/services',
+  //             icon: <IconWrapper icon={<IconCode />} />,
+  //             label: 'Services',
+  //             external: false,
+  //           }}
+  //         />
+  //       </RbacProtected.Unrestricted>
+  //       <RbacProtected.Restricted
+  //         tooltip={{ show: true, placement: 'right', showIcon: true }}
+  //       >
+  //         <SidebarLink
+  //           collapsed={collapsed}
+  //           disabled
+  //           item={{
+  //             key: '/services',
+  //             icon: <IconWrapper icon={<IconCode />} />,
+  //             label: 'Services',
+  //             external: false,
+  //           }}
+  //         />
+  //       </RbacProtected.Restricted>
+  //     </RbacProtected>
+  //   ),
+  // },
   {
     key: '/settings',
     Component: ({ collapsed }: SidebarMenuProps) => (
