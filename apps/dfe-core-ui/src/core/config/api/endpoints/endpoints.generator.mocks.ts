@@ -881,8 +881,187 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
   },
   rules: {
+    rule: {
+      mockedUrl: '/api/v1/rules/{rule_id}',
+      get: {
+        success: ({
+          mockedResponse = {
+            rule_id: 'string',
+            name: 'string',
+            severity: 'string',
+            source: 'string',
+            source_db: 'string',
+            source_table: 'string',
+            where_clause: 'string',
+            cel_filter: 'string',
+            original_sql: 'string',
+            hunt_name: 'string',
+            created_at: 'string',
+          },
+          rule_id = 'rule_id',
+        }: {
+          mockedResponse?: components['schemas']['RuleResponse'];
+          rule_id?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          rule_id = 'rule_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          rule_id?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            rule: {
+              rule_id: 'string',
+              name: 'string',
+              severity: 'string',
+              source_db: 'string',
+              source_table: 'string',
+              where_clause: 'string',
+              cel_filter: 'string',
+              original_sql: 'string',
+              hunt_name: 'string',
+              source: 'string',
+              warnings: ['string'],
+              created_at: 'string',
+            },
+            sanitize_summary: {
+              additionalProp1: {},
+            },
+
+            sql_errors: [
+              {
+                message: 'string',
+                position: 0,
+                suggestion: 'string',
+              },
+            ],
+            cost_estimate: {
+              estimated_rows: 0,
+              explain_plan: 'string',
+              explain_duration_ms: 0,
+              window_minutes: 60,
+              warnings: ['string'],
+            },
+          },
+          rule_id = 'rule_id',
+        }: {
+          mockedResponse?: components['schemas']['RuleCreateResponse'];
+          rule_id?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          rule_id = 'rule_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          rule_id?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({ rule_id = 'rule_id' }: { rule_id?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json({});
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          rule_id = 'rule_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          rule_id?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
     default: {
       mockedUrl: '/api/v1/rules',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                rule_id: 'string',
+                name: 'string',
+                severity: 'string',
+                source: 'string',
+                source_db: 'string',
+                source_table: 'string',
+                hunt_name: 'string',
+                created_at: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_RuleSummary_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
       post: {
         success: ({
           mockedResponse = {
