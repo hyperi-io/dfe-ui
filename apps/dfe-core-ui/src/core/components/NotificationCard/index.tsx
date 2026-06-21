@@ -10,10 +10,10 @@ export const NotificationCard = ({
   title,
 }: {
   icon?: React.ReactNode;
-  description?: React.ReactNode;
+  description?: string | React.ReactNode;
   className?: string;
   type?: DisplayType;
-  title?: string;
+  title?: string | React.ReactNode;
 }) => {
   const displayType = {
     default: cn(
