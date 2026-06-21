@@ -28,24 +28,25 @@ const formSchema = z.object({
   estimate_cost: z.boolean().optional(),
   cost_window_minutes: z.string().optional(),
 });
-type CreateRuleFormData = z.infer<typeof formSchema>;
+type CreateUpdateRuleFormData = z.infer<typeof formSchema>;
 
-interface RuleFormProps {
-  initialValues?: CreateRuleFormData;
+interface CreateUpdateRuleFormProps {
+  initialValues?: CreateUpdateRuleFormData;
   className?: string;
   onRuleCreateSuccess?: (response: RuleCreateResponse) => void;
   onRuleValidateSuccess?: (response: SqlValidationResponse) => void;
   disableInputs?: boolean;
 }
 
-export const RuleForm = ({
+export const CreateUpdateRuleForm = ({
   initialValues,
   className,
   onRuleCreateSuccess,
   onRuleValidateSuccess,
-}: RuleFormProps) => {
-  const [form] = Form.useForm<CreateRuleFormData>();
-  const formValidation = useAntdZodResolver<CreateRuleFormData>(formSchema);
+}: CreateUpdateRuleFormProps) => {
+  const [form] = Form.useForm<CreateUpdateRuleFormData>();
+  const formValidation =
+    useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
 
   const { componentHeight } = useSetComponentHeight({
     offset: 300,
@@ -75,7 +76,7 @@ export const RuleForm = ({
     },
   });
 
-  const handleCreateCustomRule = (values: CreateRuleFormData) => {
+  const handleCreateCustomRule = (values: CreateUpdateRuleFormData) => {
     createRule({
       ...values,
       estimate_cost: values.estimate_cost ?? false,
