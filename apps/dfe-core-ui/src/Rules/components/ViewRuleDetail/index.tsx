@@ -93,6 +93,25 @@ export const ViewRuleDetail = () => {
         />
       )}
 
+      {ruleDetail.sql_errors && ruleDetail.sql_errors.length > 0 && (
+        <NotificationCard
+          title={
+            <span className="flex items-center gap-x-2">
+              <IconAlertCircle /> SQL Errors
+            </span>
+          }
+          description={
+            <>
+              <ul className="text-xs list-disc list-inside ">
+                {ruleDetail.sql_errors.map((error) => (
+                  <li key={error.message}>{error.message}</li>
+                ))}
+              </ul>
+            </>
+          }
+          type="error"
+        />
+      )}
       <AceEditor
         value={ruleDetail.original_sql}
         mode="sql"
