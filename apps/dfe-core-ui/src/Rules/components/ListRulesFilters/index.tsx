@@ -13,8 +13,7 @@ export const ListRulesFilters = () => {
         <span className="flex justify-between items-center w-full">
           <p className="font-semibold">Filters</p>
           <p className="text-xs text-gray-400 mr-4">
-            {rules.length} of {total}{' '}
-            {total === 1 ? 'result' : 'results'}
+            {rules.length} of {total} {total === 1 ? 'result' : 'results'}
           </p>
         </span>
       }
