@@ -2678,6 +2678,35 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          hunt_id = 'hunt_id',
+        }: { status?: number; hunt_id?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          hunt_id = 'hunt_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          hunt_id?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     huntRun: {
       mockedUrl: '/api/v1/hunts/{hunt_id}/run',
