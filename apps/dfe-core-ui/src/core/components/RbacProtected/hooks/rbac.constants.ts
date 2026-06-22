@@ -83,6 +83,7 @@ const role_scopes = {
 
 const rules_scopes = {
   rule_write: 'rule:write',
+  rule_delete: 'rule:delete',
   rule_validate: 'rule:validate',
 };
 

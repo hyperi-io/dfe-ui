@@ -1,8 +1,12 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { CloneRuleModal } from '@/Rules/components/CloneRuleModal';
+import { DeleteRuleModal } from '@/Rules/components/DeleteRuleModal';
 import { UpdateRuleDrawer } from '@/Rules/components/UpdateRuleDrawer';
+import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
+import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
-import { IconEdit } from '@repo/dfe-icons';
+import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 interface RuleDetailActionMenuProps {
@@ -14,6 +18,18 @@ export const RuleDetailActionMenu = ({
   rule,
   onEditSuccess,
 }: RuleDetailActionMenuProps) => {
+  const { refetch: refetchRules, setSelectedRuleId } = useListRulesContext();
+
+  const onCloneSuccess = (rule: RuleCreateResponse) => {
+    setSelectedRuleId(rule.rule.rule_id);
+    refetchRules();
+  };
+
+  const onDeleteSuccess = () => {
+    setSelectedRuleId(null);
+    refetchRules();
+  };
+
   return (
     <ActionsMenu
       placement="left"
@@ -35,6 +51,37 @@ export const RuleDetailActionMenu = ({
           </Button>
         }
         onSuccess={onEditSuccess}
+      />
+      <CloneRuleModal
+        key="clone-rule"
+        rule={rule}
+        trigger={
+          <Button
+            className="flex items-center justify-start"
+            type="text"
+            icon={<IconCopy />}
+            aria-label="Clone Rule"
+          >
+            Clone Rule
+          </Button>
+        }
+        onSuccess={onCloneSuccess}
+      />
+
+      <DeleteRuleModal
+        key="delete-rule"
+        rule={rule}
+        trigger={
+          <Button
+            className="flex items-center justify-start"
+            type="text"
+            icon={<IconTrash />}
+            aria-label="Delete Rule"
+          >
+            Delete Rule
+          </Button>
+        }
+        onSuccess={onDeleteSuccess}
       />
     </ActionsMenu>
   );
