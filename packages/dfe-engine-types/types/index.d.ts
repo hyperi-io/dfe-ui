@@ -53,7 +53,7 @@ export interface paths {
         };
         /**
          * Get Me
-         * @description Get the current authenticated user's info (roles/groups from stores, not JWT).
+         * @description Get the current authenticated user's info.
          */
         get: operations["get_me_api_v1_auth_me_get"];
         put?: never;
@@ -1007,7 +1007,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List Rules
+         * @description List detection rules with pagination and search.
+         */
+        get: operations["list_rules_api_v1_rules_get"];
         put?: never;
         /**
          * Create Rule
@@ -1040,6 +1044,34 @@ export interface paths {
          */
         post: operations["validate_rule_sql_api_v1_rules_validate_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Rule
+         * @description Get a detection rule by ID.
+         */
+        get: operations["get_rule_api_v1_rules__rule_id__get"];
+        /**
+         * Update Rule
+         * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
+         */
+        put: operations["update_rule_api_v1_rules__rule_id__put"];
+        post?: never;
+        /**
+         * Delete Rule
+         * @description Delete a detection rule.
+         */
+        delete: operations["delete_rule_api_v1_rules__rule_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3213,6 +3245,32 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[RuleSummary] */
+        PaginatedResponse_RuleSummary_: {
+            /** Items */
+            items: components["schemas"]["RuleSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PaginatedResponse[ServiceConfigSummary] */
         PaginatedResponse_ServiceConfigSummary_: {
             /** Items */
@@ -3677,8 +3735,84 @@ export interface components {
             source?: string | null;
             /** Warnings */
             warnings?: string[];
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
             /** Created At */
             created_at: string;
+        };
+        /** RuleSummary */
+        RuleSummary: {
+            /** Rule Id */
+            rule_id: string;
+            /** Name */
+            name: string;
+            /** Severity */
+            severity: string;
+            /** Source */
+            source?: string | null;
+            /** Source Db */
+            source_db?: string | null;
+            /** Source Table */
+            source_table?: string | null;
+            /** Hunt Name */
+            hunt_name?: string | null;
+            /** Created At */
+            created_at: string;
+        };
+        /**
+         * RuleUpdateRequest
+         * @description Update an existing hunt rule (same shape as create).
+         */
+        RuleUpdateRequest: {
+            /**
+             * Name
+             * @description Human-readable rule name
+             */
+            name: string;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Source Type
+             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @default raw
+             */
+            source_type: string;
+            /**
+             * User Sql
+             * @description User-authored SQL WHERE fragment
+             */
+            user_sql: string;
+            /**
+             * Cel Filter
+             * @description CEL expression filter
+             */
+            cel_filter?: string | null;
+            /**
+             * Hunt Name
+             * @description Parent hunt name
+             */
+            hunt_name?: string | null;
+            /**
+             * Source
+             * @description Source label (e.g. windows_audit)
+             */
+            source?: string | null;
+            /**
+             * Estimate Cost
+             * @description Run EXPLAIN and estimate query cost
+             * @default false
+             */
+            estimate_cost: boolean;
+            /**
+             * Cost Window Minutes
+             * @description Window in minutes for cost estimate
+             * @default 60
+             */
+            cost_window_minutes: number;
         };
         /** SampleRecord */
         SampleRecord: {
@@ -7276,6 +7410,48 @@ export interface operations {
             };
         };
     };
+    list_rules_api_v1_rules_get: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive search in rule_id, name, source, hunt_name, severity */
+                search?: string | null;
+                /** @description Filter by severity */
+                severity?: string | null;
+                /** @description Filter by source label */
+                source?: string | null;
+                /** @description Sort field (rule_id, name, severity, source, hunt_name, created_at) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_RuleSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_rule_api_v1_rules_post: {
         parameters: {
             query?: never;
@@ -7330,6 +7506,101 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SqlValidationResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_rule_api_v1_rules__rule_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_rule_api_v1_rules__rule_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleCreateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_rule_api_v1_rules__rule_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
