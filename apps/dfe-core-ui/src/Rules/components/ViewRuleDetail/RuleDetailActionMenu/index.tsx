@@ -7,7 +7,7 @@ import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { App, Button } from 'antd';
 
 interface RuleDetailActionMenuProps {
   onEditSuccess?: (rule: RuleUpdateResponse) => void;
@@ -18,16 +18,25 @@ export const RuleDetailActionMenu = ({
   rule,
   onEditSuccess,
 }: RuleDetailActionMenuProps) => {
+  const { notification } = App.useApp();
   const { refetch: refetchRules, setSelectedRuleId } = useListRulesContext();
 
   const onCloneSuccess = (rule: RuleCreateResponse) => {
     setSelectedRuleId(rule.rule.rule_id);
     refetchRules();
+    notification.success({
+      title: `Rule ${rule.rule.name} cloned successfully`,
+      placement: 'bottomLeft',
+    });
   };
 
   const onDeleteSuccess = () => {
     setSelectedRuleId(null);
     refetchRules();
+    notification.success({
+      title: `Rule ${rule.name} deleted successfully`,
+      placement: 'bottomLeft',
+    });
   };
 
   return (
