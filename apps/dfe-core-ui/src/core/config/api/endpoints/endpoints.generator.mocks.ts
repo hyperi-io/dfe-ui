@@ -2636,6 +2636,48 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      put: {
+        success: ({
+          mockedResponse = {
+            hunt_id: 'string',
+            config: {
+              name: 'string',
+              cron: 'string',
+              log_buffer: 0,
+              global_target_table_name: 'string',
+              global_source_table_name: 'string',
+              customers: ['string'],
+            },
+          },
+          hunt_id = 'hunt_id',
+        }: {
+          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          hunt_id?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          hunt_id = 'hunt_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          hunt_id?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     huntRun: {
       mockedUrl: '/api/v1/hunts/{hunt_id}/run',
