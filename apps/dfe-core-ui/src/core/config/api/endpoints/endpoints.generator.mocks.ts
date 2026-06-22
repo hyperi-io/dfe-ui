@@ -2514,5 +2514,39 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  hunts: {
+    default: {
+      mockedUrl: '/api/v1/hunts',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    status: {
+      mockedUrl: '/api/v1/hunts/status',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    hunt: {
+      mockedUrl: '/api/v1/hunts/{hunt_id}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    huntRun: {
+      mockedUrl: '/api/v1/hunts/{hunt_id}/run',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
 });
 /* eslint-enable no-console */
