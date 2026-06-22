@@ -65,6 +65,9 @@ export const CreateRuleScene = () => {
               />
             )}
           </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted tooltip={{ show: true, placement: 'top' }}>
+            <RbacProtected.RestrictedRoute />
+          </RbacProtected.Restricted>
         </RbacProtected>
       </MainContentCard>
     </>
