@@ -91,7 +91,7 @@ export const CreateRuleDrawer = ({
       <Drawer
         title={title}
         open={isDrawerVisible}
-        size="60%"
+        size="80%"
         onClose={handleClose}
       >
         <CreateUpdateRuleForm

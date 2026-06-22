@@ -2,6 +2,7 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { ContentCard } from '@/core/components/ContentCard';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -129,15 +130,26 @@ const CreateUpdateRuleFormBase = ({
         )}
 
         <div className="flex gap-x-2 ml-auto! mt-2">
-          <ValidateButton
-            validate={handleValidateRule}
-            loading={isValidateRulePending}
-            validationErrors={validateRuleResponse?.errors?.map(
-              (error) => error.message,
-            )}
-            success={validateRuleResponse?.valid}
-            error={validateRuleError?.message}
-          />
+          <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
+            <RbacProtected.Unrestricted>
+              <ValidateButton
+                validate={handleValidateRule}
+                loading={isValidateRulePending}
+                validationErrors={validateRuleResponse?.errors?.map(
+                  (error) => error.message,
+                )}
+                success={validateRuleResponse?.valid}
+                error={validateRuleError?.message}
+              />
+            </RbacProtected.Unrestricted>
+            <RbacProtected.Restricted
+              tooltip={{ show: true, placement: 'top' }}
+            >
+              <Button disabled type="default">
+                Validate
+              </Button>
+            </RbacProtected.Restricted>
+          </RbacProtected>
 
           <Button
             loading={isPending}

@@ -78,7 +78,7 @@ export const CloneRuleModal = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.source_write}>
+      <RbacProtected action={RbacProtected.rbacActions.rule_write}>
         <RbacProtected.Unrestricted>
           {trigger ? (
             cloneElement(trigger, {
