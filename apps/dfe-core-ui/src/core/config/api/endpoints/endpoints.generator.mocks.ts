@@ -2711,8 +2711,44 @@ export const API_CONFIG_MOCKS = Object.freeze({
     huntRun: {
       mockedUrl: '/api/v1/hunts/{hunt_id}/run',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            task_id: 'string',
+            hunt_name: 'string',
+          },
+          hunt_id = 'hunt_id',
+        }: {
+          mockedResponse?: components['schemas']['TriggerResponse'];
+          hunt_id?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace(
+              '{hunt_id}',
+              hunt_id,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          hunt_id = 'hunt_id',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          hunt_id?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace(
+              '{hunt_id}',
+              hunt_id,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
