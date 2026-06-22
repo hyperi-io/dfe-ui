@@ -1,5 +1,5 @@
 import { CreateRuleDrawer } from '@/Rules/components/CreateRuleDrawer';
-import { UseFetchInfiniteFilteredRulesProps } from '@/Rules/hooks/useFetchInfiniteFilteredRules/types';
+import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';

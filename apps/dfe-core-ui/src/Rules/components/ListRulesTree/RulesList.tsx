@@ -1,5 +1,5 @@
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { RuleListItem } from '@/Rules/hooks/useFetchInfiniteFilteredRules/types';
+import { RuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -66,9 +66,9 @@ export const RulesList = ({ className }: { className?: string }) => {
               )}
               onClick={() => setSelectedRuleId(rule.rule_id)}
             >
-              <dl className="min-w-0 w-full">
-                <dt className="truncate font-medium">{rule.name}</dt>
-                <dd className="text-sm text-gray-500 dark:text-gray-400 truncate capitalize">
+              <dl className="w-full min-w-0">
+                <dt className="font-medium truncate">{rule.name}</dt>
+                <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
                   {rule.severity}
                   {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}
                 </dd>
@@ -77,7 +77,7 @@ export const RulesList = ({ className }: { className?: string }) => {
           </li>
         );
       })}
-      <div ref={loadMoreRef} className="h-4 flex justify-center">
+      <div ref={loadMoreRef} className="flex justify-center h-4">
         {isFetchingNextPage && <Spin size="small" />}
       </div>
     </ul>

@@ -49,10 +49,6 @@ export const CreateHuntDrawer = ({
       cron: '* * * * *',
       log_buffer: 60,
       global_target_table_name: '',
-      global_source_table_name: '',
-      customers: [],
-      rules: [],
-      hunt_id: '',
     });
   };
   return (
@@ -100,11 +96,11 @@ export const CreateHuntDrawer = ({
           buttonLabel={title}
           initialValues={{
             name: '',
-            user_sql: '',
-            severity: 'medium',
-            source_type: 'raw',
-            cel_filter: '',
-            hunt_name: '',
+            customers: [],
+            rules: [],
+            cron: '* * * * *',
+            log_buffer: 60,
+            hunt_id: '',
           }}
         />
       </Drawer>
