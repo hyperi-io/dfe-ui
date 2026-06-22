@@ -4041,26 +4041,20 @@ export interface components {
         };
         /**
          * RuleUpdateRequest
-         * @description Update an existing hunt rule (same shape as create).
+         * @description Update an existing hunt rule (re-runs creation pipeline; ``source_type`` is not accepted).
          */
         RuleUpdateRequest: {
             /**
              * Name
-             * @description Human-readable rule name
+             * @description Rule name; omitted to keep existing
              */
-            name: string;
+            name?: string | null;
             /**
              * Severity
              * @description low|medium|high|critical
              * @default medium
              */
             severity: string;
-            /**
-             * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
-             * @default raw
-             */
-            source_type: string;
             /**
              * User Sql
              * @description User-authored SQL WHERE fragment
