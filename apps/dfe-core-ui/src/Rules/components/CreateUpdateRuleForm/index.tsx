@@ -1,19 +1,17 @@
-import { IconDeviceFloppy } from '@repo/dfe-icons';
-import { Button, Form } from 'antd';
-import { useEffect } from 'react';
-
-import { useCreateRule } from '@/Rules/hooks/useCreateRule';
-import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { useValidateRule } from '@/Rules/hooks/useValidateRule';
-import { SqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { AceEditor } from '@/core/components/AceEditor';
 import { ContentCard } from '@/core/components/ContentCard';
+import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useValidateRule } from '@/Rules/hooks/useValidateRule';
+import { SqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
+import { IconDeviceFloppy } from '@repo/dfe-icons';
+import { Button, FormProps } from 'antd';
+import { useEffect } from 'react';
 import z from 'zod';
+import { AdvancedSettings } from './AdvancedSettings';
 import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
 
@@ -28,21 +26,36 @@ const formSchema = z.object({
   estimate_cost: z.boolean().optional(),
   cost_window_minutes: z.string().optional(),
 });
-type CreateUpdateRuleFormData = z.infer<typeof formSchema>;
+export type CreateUpdateRuleFormData = z.infer<typeof formSchema>;
 
-interface CreateUpdateRuleFormProps {
-  initialValues?: CreateUpdateRuleFormData;
-  className?: string;
-  onRuleCreateSuccess?: (response: RuleCreateResponse) => void;
-  onRuleValidateSuccess?: (response: SqlValidationResponse) => void;
-  disableInputs?: boolean;
+export interface DisabledFields {
+  name?: boolean;
+  id?: boolean;
 }
 
-export const CreateUpdateRuleForm = ({
+type CreateUpdateRuleFormProps = FormProps<CreateUpdateRuleFormData> & {
+  onFinish: (values: CreateUpdateRuleFormData) => void;
+  initialValues?: CreateUpdateRuleFormData;
+  isPending: boolean;
+  error: Error | null;
+  resetFormFields?: boolean;
+  buttonLabel?: string;
+  disabledFields?: DisabledFields;
+  hideAdvancedSettings?: boolean;
+  onValidateSuccess?: (data: SqlValidationResponse) => void;
+};
+
+const CreateUpdateRuleFormBase = ({
+  onFinish,
   initialValues,
-  className,
-  onRuleCreateSuccess,
-  onRuleValidateSuccess,
+  isPending,
+  error,
+  resetFormFields,
+  buttonLabel = 'Save Rule',
+  disabledFields,
+  onValidateSuccess,
+  hideAdvancedSettings = false,
+  ...props
 }: CreateUpdateRuleFormProps) => {
   const [form] = Form.useForm<CreateUpdateRuleFormData>();
   const formValidation =
@@ -52,17 +65,11 @@ export const CreateUpdateRuleForm = ({
     offset: 300,
   });
 
-  const {
-    data: createRuleResponse,
-    mutate: createRule,
-    reset: resetCreateRule,
-    isPending,
-    error: createRuleError,
-  } = useCreateRule({
-    onSuccess: (data) => {
-      onRuleCreateSuccess?.(data);
-    },
-  });
+  useEffect(() => {
+    if (resetFormFields) {
+      form.resetFields();
+    }
+  }, [resetFormFields, form]);
 
   const {
     data: validateRuleResponse,
@@ -72,19 +79,9 @@ export const CreateUpdateRuleForm = ({
     reset: resetValidateRule,
   } = useValidateRule({
     onSuccess: (data) => {
-      onRuleValidateSuccess?.(data);
+      onValidateSuccess?.(data);
     },
   });
-
-  const handleCreateCustomRule = (values: CreateUpdateRuleFormData) => {
-    createRule({
-      ...values,
-      estimate_cost: values.estimate_cost ?? false,
-      cost_window_minutes: values.cost_window_minutes
-        ? Number(values.cost_window_minutes)
-        : 0,
-    });
-  };
 
   const userSql = Form.useWatch('user_sql', form);
   const handleValidateRule = () => {
@@ -95,85 +92,68 @@ export const CreateUpdateRuleForm = ({
     resetValidateRule();
   }, [userSql, resetValidateRule]);
 
-  useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        name: initialValues.name ?? '',
-        user_sql: initialValues.user_sql ?? '',
-        severity: initialValues.severity ?? 'medium',
-        source_type: initialValues.source_type ?? 'raw',
-        cel_filter: initialValues.cel_filter ?? '',
-        hunt_name: initialValues.hunt_name ?? '',
-        source: initialValues.source ?? '',
-        estimate_cost: initialValues.estimate_cost ?? false,
-        cost_window_minutes: initialValues.cost_window_minutes ?? '',
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues]);
-
   return (
-    <>
-      <Form
-        className={cn('w-full flex flex-col gap-y-2', className)}
-        form={form}
-        onFinish={handleCreateCustomRule}
-        onValuesChange={resetCreateRule}
+    <Form
+      form={form}
+      onFinish={onFinish}
+      initialValues={initialValues}
+      {...props}
+    >
+      <RuleSettings
+        formValidation={formValidation}
+        disabledFields={disabledFields}
       >
-        <RuleSettings formValidation={formValidation}>
-          {/* <AdvancedSettings formValidation={formValidation} /> */}
-        </RuleSettings>
+        {!hideAdvancedSettings && (
+          <AdvancedSettings formValidation={formValidation} />
+        )}
+      </RuleSettings>
 
-        <ContentCard className="flex flex-col gap-y-2">
-          <Form.Item
-            name="user_sql"
-            className="m-0! grow"
-            rules={[formValidation]}
+      <ContentCard className="flex flex-col gap-y-2">
+        <Form.Item
+          name="user_sql"
+          className="m-0! grow"
+          rules={[formValidation]}
+        >
+          <AceEditor
+            value={initialValues?.user_sql}
+            height={`${componentHeight}px`}
+            mode="sql"
+          />
+        </Form.Item>
+
+        {error && (
+          <FormNotification
+            type="error"
+            text={error?.message ?? 'An unexpected error occurred'}
+          />
+        )}
+
+        <div className="flex gap-x-2 ml-auto! mt-2">
+          <ValidateButton
+            validate={handleValidateRule}
+            loading={isValidateRulePending}
+            validationErrors={validateRuleResponse?.errors?.map(
+              (error) => error.message,
+            )}
+            success={validateRuleResponse?.valid}
+            error={validateRuleError?.message}
+          />
+
+          <Button
+            loading={isPending}
+            htmlType="submit"
+            type="primary"
+            icon={<IconDeviceFloppy className="size-4" />}
+            disabled={isPending}
           >
-            <AceEditor
-              value={initialValues?.user_sql}
-              height={`${componentHeight}px`}
-              mode="sql"
-              // readOnly={!!initialValues?.user_sql}
-            />
-          </Form.Item>
-
-          {createRuleError && (
-            <FormNotification
-              type="error"
-              text={createRuleError?.message ?? 'An unexpected error occurred'}
-            />
-          )}
-
-          <div className="flex gap-x-2 ml-auto! mt-2">
-            <ValidateButton
-              validate={handleValidateRule}
-              loading={isValidateRulePending}
-              validationErrors={validateRuleResponse?.errors?.map(
-                (error) => error.message,
-              )}
-              success={validateRuleResponse?.valid}
-              error={validateRuleError?.message}
-            />
-
-            <Button
-              loading={isPending}
-              htmlType="submit"
-              type="primary"
-              icon={<IconDeviceFloppy className="size-4" />}
-              disabled={isPending}
-            >
-              Save Rule
-            </Button>
-          </div>
-        </ContentCard>
-      </Form>
-      {createRuleResponse != null && (
-        <ResponseModal
-          response={createRuleResponse}
-          onClose={resetCreateRule}
-        />
-      )}
-    </>
+            {buttonLabel}
+          </Button>
+        </div>
+      </ContentCard>
+    </Form>
   );
 };
+
+export const CreateUpdateRuleForm = Object.assign(CreateUpdateRuleFormBase, {
+  ResponseModal: ResponseModal,
+});

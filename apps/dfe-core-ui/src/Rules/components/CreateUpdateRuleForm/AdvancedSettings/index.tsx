@@ -14,7 +14,6 @@ export const AdvancedSettings = ({
     <>
       <Button
         type="text"
-        className="mr-6"
         aria-label="Toggle advanced settings"
         onClick={() => setShowAdvanced(!showAdvanced)}
         icon={
@@ -29,7 +28,7 @@ export const AdvancedSettings = ({
         Advanced Settings
       </Button>
       {showAdvanced && (
-        <ContentCard className="absolute w-full bg-background rounded-md shadow-md z-10 flex gap-x-2 -bottom-25 left">
+        <ContentCard className="absolute z-10 flex w-full rounded-md shadow-md bg-background gap-x-2 -bottom-25 left">
           <Form.Item
             label="CEL Filter"
             name="cel_filter"
