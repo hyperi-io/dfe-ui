@@ -1,6 +1,7 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
@@ -41,26 +42,30 @@ export const CreateRuleScene = () => {
     <>
       {notificationContextHolder}
       <MainContentCard className="p-0">
-        <CreateUpdateRuleForm
-          onFinish={handleCreateCustomRule}
-          isPending={isPending}
-          error={createRuleError}
-          hideAdvancedSettings
-          initialValues={{
-            name: storedSearch?.savedSearchName ?? '',
-            user_sql: storedSearch?.sql ?? '',
-            severity: 'medium',
-            source_type: sourceType,
-            cel_filter: '',
-            hunt_name: '',
-          }}
-        />
-        {createRuleResponse != null && (
-          <CreateUpdateRuleForm.ResponseModal
-            response={createRuleResponse}
-            onClose={resetCreateRule}
-          />
-        )}
+        <RbacProtected action={RbacProtected.rbacActions.rule_write}>
+          <RbacProtected.Unrestricted>
+            <CreateUpdateRuleForm
+              onFinish={handleCreateCustomRule}
+              isPending={isPending}
+              error={createRuleError}
+              hideAdvancedSettings
+              initialValues={{
+                name: storedSearch?.savedSearchName ?? '',
+                user_sql: storedSearch?.sql ?? '',
+                severity: 'medium',
+                source_type: sourceType,
+                cel_filter: '',
+                hunt_name: '',
+              }}
+            />
+            {createRuleResponse != null && (
+              <CreateUpdateRuleForm.ResponseModal
+                response={createRuleResponse}
+                onClose={resetCreateRule}
+              />
+            )}
+          </RbacProtected.Unrestricted>
+        </RbacProtected>
       </MainContentCard>
     </>
   );
