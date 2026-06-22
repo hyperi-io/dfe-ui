@@ -1,8 +1,8 @@
+import { CreateRuleDrawer } from '@/Rules/components/CreateRuleDrawer';
 import { UseFetchInfiniteFilteredRulesProps } from '@/Rules/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import Link from 'next/link';
 
 export const EmptyList = ({
   hasFilters,
@@ -24,7 +24,7 @@ export const EmptyList = ({
     >
       <IconInfoCircle className="w-6 h-6 text-foreground" />
       <div className="flex flex-col">
-        <h2 className="text-md font-medium">
+        <h2 className="font-medium text-md">
           {hasFilters ? 'No rules match your filters' : 'No rules found'}
         </h2>
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
@@ -38,9 +38,7 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <Link href="/rules/create">
-          <Button type="primary">Create Rule</Button>
-        </Link>
+        <CreateRuleDrawer />
       )}
     </div>
   );
