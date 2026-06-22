@@ -6,6 +6,7 @@ import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useFetchRuleDetail } from '@/Rules/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
+import { RuleDetailActionMenu } from './RuleDetailActionMenu';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -50,8 +51,12 @@ export const ViewRuleDetail = () => {
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-      <h4 className="text-lg font-medium">Rule Configuration</h4>
-
+      <div className="flex items-center justify-between">
+        <h4 className="flex items-center w-full gap-2 text-lg font-medium">
+          Rule Configuration:
+        </h4>
+        <RuleDetailActionMenu rule={ruleDetail} />
+      </div>
       <div className="flex flex-col gap-4">
         <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
           <dt className={dataListTermStyle}>Name:</dt>

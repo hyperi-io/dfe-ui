@@ -7,6 +7,7 @@ import {
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 
+import { useSourceType } from '@/Rules/components/CreateUpdateRuleForm/hooks/useHyperdxSource';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
@@ -22,6 +23,7 @@ export const CreateRuleDrawer = ({
   const [api, contextHolder] = notification.useNotification();
   const [isDrawerVisible, setIsDrawerVisible] = useState(open);
 
+  const { sourceType } = useSourceType();
   const handleClose = () => {
     setIsDrawerVisible(false);
     onClose?.();
@@ -47,6 +49,7 @@ export const CreateRuleDrawer = ({
   const handleCreateRule = (values: CreateUpdateRuleFormData) => {
     createRuleMutation({
       ...values,
+      source_type: sourceType,
       estimate_cost: values.estimate_cost ?? false,
       cost_window_minutes: values.cost_window_minutes
         ? Number(values.cost_window_minutes)

@@ -19,7 +19,7 @@ const formSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   user_sql: z.string().min(1, { message: 'User SQL is required' }),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
-  source_type: z.enum(['raw', 'hyperdx']),
+  source_type: z.enum(['raw', 'hyperdx']).optional().nullable(),
   cel_filter: z.string().optional(),
   hunt_name: z.string().optional(),
   source: z.string().optional(),

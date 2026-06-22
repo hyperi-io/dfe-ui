@@ -29,6 +29,7 @@ export const CreateRuleScene = () => {
   const handleCreateCustomRule = (values: CreateUpdateRuleFormData) => {
     createRule({
       ...values,
+      source_type: sourceType,
       estimate_cost: values.estimate_cost ?? false,
       cost_window_minutes: values.cost_window_minutes
         ? Number(values.cost_window_minutes)
