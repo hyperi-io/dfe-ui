@@ -53,7 +53,7 @@ export interface paths {
         };
         /**
          * Get Me
-         * @description Get the current authenticated user's info (roles/groups from stores, not JWT).
+         * @description Get the current authenticated user's info.
          */
         get: operations["get_me_api_v1_auth_me_get"];
         put?: never;
@@ -1007,7 +1007,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List Rules
+         * @description List detection rules with pagination and search.
+         */
+        get: operations["list_rules_api_v1_rules_get"];
         put?: never;
         /**
          * Create Rule
@@ -1040,6 +1044,34 @@ export interface paths {
          */
         post: operations["validate_rule_sql_api_v1_rules_validate_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Rule
+         * @description Get a detection rule by ID.
+         */
+        get: operations["get_rule_api_v1_rules__rule_id__get"];
+        /**
+         * Update Rule
+         * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
+         */
+        put: operations["update_rule_api_v1_rules__rule_id__put"];
+        post?: never;
+        /**
+         * Delete Rule
+         * @description Delete a detection rule.
+         */
+        delete: operations["delete_rule_api_v1_rules__rule_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1691,6 +1723,103 @@ export interface paths {
          *     ``upload_too_large`` when exceeded). Override with ``DFE_API_ELASTIC_CONVERTER_*``.
          */
         post: operations["elastic_converter_api_v1_schemas_elastic_converter_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Schema Columns
+         * @description Get composed schema columns for a source version (profile + meta/derived/additional).
+         */
+        get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build Schema
+         * @description Build complete schema (DDL) from a source version snapshot.
+         *
+         *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
+         *     without executing it against ClickHouse.
+         */
+        post: operations["build_schema_api_v1_schemas__source_name__build_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/json-paths": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Discover Json Paths
+         * @description Discover JSON paths inside a source's ``_json`` column.
+         *
+         *     Resolves the requested ``version`` (or the source's current version). If that
+         *     version defines a ``meta_schema`` the source owns its own table and discovery
+         *     runs against ``db.<source>``. Otherwise the source's data still lives in the
+         *     shared catch-all landing table, so discovery runs against ``db.<landing>``
+         *     filtered by the version's match rule.
+         *
+         *     Returns one record per path with observed types, a suggested column name,
+         *     and whether the path is already promoted. ``?samples=N`` adds random
+         *     distinct example values; ``?stats=true`` adds coverage + distinct counts.
+         */
+        get: operations["discover_json_paths_api_v1_schemas__source_name__json_paths_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/promote-field": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Promote Field
+         * @description Promote JSON path(s) into dedicated typed columns.
+         *
+         *     Creates a new schema version on the source's meta-schema, adding one column
+         *     per path with a ``@copy`` directive so dfe-loader copies the value forward.
+         *     ``?dry_run=true`` returns the proposed diff + DDL without committing.
+         */
+        post: operations["promote_field_api_v1_schemas__source_name__promote_field_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2486,6 +2615,48 @@ export interface components {
             /** Orphaned Groups */
             orphaned_groups: components["schemas"]["OrphanedGroupInfo"][];
         };
+        /**
+         * DraftColumn
+         * @description A ready-to-send meta-schema column derived from a discovered JSON path.
+         *
+         *     Shaped to drop straight into ``MetaSchemaAddVersionRequest.columns`` (the
+         *     create-version endpoint) or a new meta-schema's version -- the UI sends these
+         *     verbatim, no field mapping. ``type`` is derived from the first observed
+         *     ClickHouse type; for a multi-type path (``is_consistent=false``) confirm it
+         *     before saving.
+         */
+        DraftColumn: {
+            /**
+             * Name
+             * @description Server-derived snake_case column name for the path. camelCase is split, dots and non-identifier characters become underscores, a leading digit is prefixed with 'f_', and a numeric suffix ('_2', '_3', ...) is added to avoid colliding with an existing column name.
+             */
+            name: string;
+            /**
+             * Type
+             * @description DFE primitive type mapped from the first observed ClickHouse type (e.g. string, integer, float, boolean, datetime, date, uuid, ip; compound or unknown types fall back to 'json'). For a multi-type path this is a best-effort guess from the first type -- check the enclosing 'is_consistent' before saving.
+             */
+            type: string;
+            /**
+             * Attribute
+             * @description ClickHouse storage attributes for the column (e.g. 'nullable', 'lowcardinality'). Empty for a plain column.
+             */
+            attribute?: string[];
+            /**
+             * Use Case
+             * @description Index use case to generate for the column (dimension, range, bloom, fulltext, text_search), or null for no index. Always null on a discovered draft -- set it in the editor if you want an index.
+             */
+            use_case?: string | null;
+            /**
+             * Expr
+             * @description DFE directive used as the column's expression. A '@copy: _json.<path>' directive tells dfe-loader to copy the value forward from the _json column on ingest (e.g. '@copy: _json.user.email').
+             */
+            expr: string;
+            /**
+             * Comment
+             * @description Human-readable column description (defaults to the source path).
+             */
+            comment?: string | null;
+        };
         /** EmittedRecord */
         EmittedRecord: {
             /** Key */
@@ -2819,6 +2990,75 @@ export interface components {
              * @default
              */
             target_table: string;
+        };
+        /**
+         * JsonPathInfo
+         * @description One JSON path discovered inside a source's ``_json`` column.
+         */
+        JsonPathInfo: {
+            /**
+             * Path
+             * @description Dotted path to the field inside the _json column (e.g. 'user.email').
+             */
+            path: string;
+            /**
+             * Types
+             * @description Distinct ClickHouse types observed for this path across the scanned rows, in first-seen order. More than one entry means the field is stored as different types in different rows (e.g. ['Int64', 'String']).
+             */
+            types: string[];
+            /**
+             * Is Consistent
+             * @description True when the path has exactly one observed ClickHouse type (len(types) == 1). False means the type varies row to row, so the derived 'column.type' is only a best-effort guess from the first type and should be confirmed before promoting.
+             */
+            is_consistent: boolean;
+            /**
+             * Promoted To
+             * @description Name of the existing meta-schema column this path is already copied into (via a '@copy' directive), or null if not yet promoted. Only ever populated when discovering against a source that already has a meta_schema; always null while discovering against the catch-all landing table.
+             */
+            promoted_to?: string | null;
+            /** @description Ready-to-send meta-schema column derived from this path. Post it verbatim to the create-meta-schema-version endpoint (no client-side type mapping needed). */
+            column: components["schemas"]["DraftColumn"];
+            /**
+             * Coverage Pct
+             * @description Percentage of scanned rows (0-100) in which this path is present and non-null. Only populated with '?stats=true'. Low coverage (e.g. 0.5%) flags a rare or optional field you may not want to promote.
+             */
+            coverage_pct?: number | null;
+            /**
+             * Distinct Count
+             * @description Approximate number of distinct values for this path -- a HyperLogLog estimate (uniqHLL12), not an exact count. Only populated with '?stats=true'. Useful for gauging cardinality, e.g. when choosing an index type.
+             */
+            distinct_count?: number | null;
+            /**
+             * Samples
+             * @description Up to N random, distinct example values for this path, rendered as strings. Only populated with '?samples=N'.
+             */
+            samples?: string[] | null;
+        };
+        /**
+         * JsonPathsResponse
+         * @description Discovered JSON paths for a source.
+         */
+        JsonPathsResponse: {
+            /**
+             * Source Name
+             * @description The source these paths were discovered for.
+             */
+            source_name: string;
+            /**
+             * Table
+             * @description Fully-qualified ClickHouse table actually queried ('db.table'). The source's own table when the selected version has a meta_schema, otherwise the shared catch-all landing table.
+             */
+            table: string;
+            /**
+             * Json Column
+             * @description Name of the JSON column inspected (always '_json').
+             */
+            json_column: string;
+            /**
+             * Paths
+             * @description One entry per distinct JSON path found in the column.
+             */
+            paths: components["schemas"]["JsonPathInfo"][];
         };
         /** LoginRequest */
         LoginRequest: {
@@ -3213,6 +3453,32 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[RuleSummary] */
+        PaginatedResponse_RuleSummary_: {
+            /** Items */
+            items: components["schemas"]["RuleSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PaginatedResponse[ServiceConfigSummary] */
         PaginatedResponse_ServiceConfigSummary_: {
             /** Items */
@@ -3392,6 +3658,78 @@ export interface components {
              * @description Template filename
              */
             name: string;
+        };
+        /**
+         * PromoteFieldRequest
+         * @description Promote one or more JSON paths into dedicated typed columns.
+         */
+        PromoteFieldRequest: {
+            /**
+             * Json Path
+             * @description JSON path (e.g. user.email) or a list of paths for batch promotion
+             */
+            json_path: string | string[];
+            /**
+             * Column Name
+             * @description Target column name (single promotion only; batch uses suggested names)
+             */
+            column_name?: string | null;
+            /**
+             * Data Type
+             * @description DFE primitive override; auto-derived from the JSON type when omitted
+             */
+            data_type?: string | null;
+            /**
+             * Index Type
+             * @description Optional ClickHouse secondary index family
+             */
+            index_type?: ("minmax" | "set" | "bloom_filter" | "tokenbf_v1" | "ngrambf_v1") | null;
+            /**
+             * Atomic
+             * @description When true, all paths succeed or none commit; else best-effort
+             * @default true
+             */
+            atomic: boolean;
+        };
+        /**
+         * PromoteFieldResponse
+         * @description Result of a promote-field call.
+         */
+        PromoteFieldResponse: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Schema Version
+             * @description New schema version, or null on dry_run / no commit
+             */
+            schema_version?: string | null;
+            /** Results */
+            results: components["schemas"]["PromoteResult"][];
+            /** @description Populated only when dry_run=true */
+            diff?: components["schemas"]["SchemaDiff"] | null;
+        };
+        /**
+         * PromoteResult
+         * @description Per-path outcome of a promotion.
+         */
+        PromoteResult: {
+            /** Json Path */
+            json_path: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "error";
+            /** Column Name */
+            column_name?: string | null;
+            /** Data Type */
+            data_type?: string | null;
+            /** Index Type */
+            index_type?: string | null;
+            /** Copy Cel */
+            copy_cel?: string | null;
+            /** Error */
+            error?: string | null;
         };
         /**
          * ProviderResponse
@@ -3677,8 +4015,84 @@ export interface components {
             source?: string | null;
             /** Warnings */
             warnings?: string[];
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
             /** Created At */
             created_at: string;
+        };
+        /** RuleSummary */
+        RuleSummary: {
+            /** Rule Id */
+            rule_id: string;
+            /** Name */
+            name: string;
+            /** Severity */
+            severity: string;
+            /** Source */
+            source?: string | null;
+            /** Source Db */
+            source_db?: string | null;
+            /** Source Table */
+            source_table?: string | null;
+            /** Hunt Name */
+            hunt_name?: string | null;
+            /** Created At */
+            created_at: string;
+        };
+        /**
+         * RuleUpdateRequest
+         * @description Update an existing hunt rule (same shape as create).
+         */
+        RuleUpdateRequest: {
+            /**
+             * Name
+             * @description Human-readable rule name
+             */
+            name: string;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Source Type
+             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @default raw
+             */
+            source_type: string;
+            /**
+             * User Sql
+             * @description User-authored SQL WHERE fragment
+             */
+            user_sql: string;
+            /**
+             * Cel Filter
+             * @description CEL expression filter
+             */
+            cel_filter?: string | null;
+            /**
+             * Hunt Name
+             * @description Parent hunt name
+             */
+            hunt_name?: string | null;
+            /**
+             * Source
+             * @description Source label (e.g. windows_audit)
+             */
+            source?: string | null;
+            /**
+             * Estimate Cost
+             * @description Run EXPLAIN and estimate query cost
+             * @default false
+             */
+            estimate_cost: boolean;
+            /**
+             * Cost Window Minutes
+             * @description Window in minutes for cost estimate
+             * @default 60
+             */
+            cost_window_minutes: number;
         };
         /** SampleRecord */
         SampleRecord: {
@@ -3698,22 +4112,6 @@ export interface components {
             headers?: {
                 [key: string]: string;
             };
-        };
-        /**
-         * SchemaBuildResult
-         * @description Result of building a schema from a source.
-         */
-        SchemaBuildResult: {
-            /** Source Name */
-            source_name: string;
-            /**
-             * Version
-             * @default
-             */
-            version: string;
-            /** Columns */
-            columns: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
-            ddl?: components["schemas"]["DDLResult"] | null;
         };
         /**
          * SchemaColumn
@@ -3755,6 +4153,21 @@ export interface components {
              * @description Column fields that matched the search query (API only)
              */
             matched_searchable?: string[];
+        };
+        /**
+         * SchemaDiff
+         * @description Proposed schema change returned by ``?dry_run=true``.
+         */
+        SchemaDiff: {
+            /** New Columns */
+            new_columns: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            /**
+             * Ddl
+             * @description ALTER statements that would run
+             */
+            ddl?: string[];
+            /** Copy Directives */
+            copy_directives?: string[];
         };
         /**
          * SchemaSummaryObject
@@ -4339,8 +4752,8 @@ export interface components {
             field_mappings?: string[] | null;
             /** @description SaaS API fetcher (optional) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
-            /** @description Receiver match rule (optional) */
-            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Receiver match rule (required) */
+            match: components["schemas"]["SourceMatch"];
             /** @description Transform stage (optional) */
             transform?: components["schemas"]["SourceTransform"] | null;
         };
@@ -4419,8 +4832,8 @@ export interface components {
              * @default true
              */
             enabled: boolean;
-            /** @description Receiver match rule */
-            match?: components["schemas"]["SourceMatch"] | null;
+            /** @description Receiver match rule (required) */
+            match: components["schemas"]["SourceMatch"];
             /** @description Common schema header configuration for this revision */
             header?: components["schemas"]["SourceHeader"] | null;
             /** @description Schema configuration for this revision */
@@ -5010,6 +5423,47 @@ export interface components {
             /** Message */
             message: string;
         };
+        /**
+         * SchemaBuildResult
+         * @description Result of building a schema from a source.
+         */
+        dfe_engine__api__v1__schemas__SchemaBuildResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Version
+             * @default
+             */
+            version: string;
+            /** Columns */
+            columns: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            ddl?: components["schemas"]["DDLResult"] | null;
+        };
+        /**
+         * SchemaColumn
+         * @description A column in a schema definition.
+         */
+        dfe_engine__api__v1__schemas__SchemaColumn: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /**
+             * Use Case
+             * @default
+             */
+            use_case: string;
+            /**
+             * Attribute
+             * @default
+             */
+            attribute: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+        };
         /** SeedResponse */
         dfe_engine__api__v1__services__SeedResponse: {
             /** Seeded */
@@ -5021,6 +5475,22 @@ export interface components {
             valid: boolean;
             /** Errors */
             errors?: string[];
+        };
+        /**
+         * SchemaBuildResult
+         * @description Result of building a schema from a source.
+         */
+        dfe_engine__api__v1__sources__SchemaBuildResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Version
+             * @default
+             */
+            version: string;
+            /** Columns */
+            columns: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
+            ddl?: components["schemas"]["DDLResult"] | null;
         };
         /**
          * SchemaColumn
@@ -6422,7 +6892,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SchemaBuildResult"];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"];
                 };
             };
             /** @description Validation Error */
@@ -7276,6 +7746,48 @@ export interface operations {
             };
         };
     };
+    list_rules_api_v1_rules_get: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive search in rule_id, name, source, hunt_name, severity */
+                search?: string | null;
+                /** @description Filter by severity */
+                severity?: string | null;
+                /** @description Filter by source label */
+                source?: string | null;
+                /** @description Sort field (rule_id, name, severity, source, hunt_name, created_at) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_RuleSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_rule_api_v1_rules_post: {
         parameters: {
             query?: never;
@@ -7330,6 +7842,101 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SqlValidationResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_rule_api_v1_rules__rule_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_rule_api_v1_rules__rule_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleCreateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_rule_api_v1_rules__rule_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -8415,6 +9022,152 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_schema_columns_api_v1_schemas__source_name__columns_get: {
+        parameters: {
+            query?: {
+                /** @description Source version id (defaults to deployed_version) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    build_schema_api_v1_schemas__source_name__build_post: {
+        parameters: {
+            query?: {
+                /** @description Source version id (defaults to deployed_version) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaBuildResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    discover_json_paths_api_v1_schemas__source_name__json_paths_get: {
+        parameters: {
+            query?: {
+                /** @description Random distinct example values per path */
+                samples?: number | null;
+                /** @description Include coverage_pct + distinct_count (expensive, opt-in) */
+                stats?: boolean;
+                /** @description Comma-separated paths to restrict discovery + sampling */
+                paths?: string | null;
+                /** @description Source version to discover against (defaults to current) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JsonPathsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    promote_field_api_v1_schemas__source_name__promote_field_post: {
+        parameters: {
+            query?: {
+                /** @description Return the proposed diff without committing */
+                dry_run?: boolean;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromoteFieldRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoteFieldResponse"];
                 };
             };
             /** @description Validation Error */
