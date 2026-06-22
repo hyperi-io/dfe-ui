@@ -1,3 +1,4 @@
+import { CreateHuntDrawer } from '@/Hunts/components/CreateHuntDrawer';
 import { UseFetchInfiniteFilteredHuntsProps } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -37,9 +38,7 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <>{console.log('Update to use create hunt drawer')}</>
-
-        // <CreateHuntDrawer />
+        <CreateHuntDrawer />
       )}
     </div>
   );
