@@ -83,7 +83,7 @@ export const API_CONFIG = Object.freeze({
   },
   hunts: {
     default: '/api/v1/hunts',
-    status: '/api/v1/hunts/status',
+    engineStatus: '/api/v1/hunts/status',
     hunt: '/api/v1/hunts/{hunt_id}',
     huntRun: '/api/v1/hunts/{hunt_id}/run',
   },

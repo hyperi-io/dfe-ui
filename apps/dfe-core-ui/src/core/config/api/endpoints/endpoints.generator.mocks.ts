@@ -2523,11 +2523,21 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
-    status: {
+    engineStatus: {
       mockedUrl: '/api/v1/hunts/status',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            running: true,
+            hunt_count: 1,
+            scheduling_mode: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['HuntEngineStatus'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.hunts.engineStatus.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
         },
       },
     },
