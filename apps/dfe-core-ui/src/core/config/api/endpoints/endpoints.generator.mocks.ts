@@ -2557,6 +2557,38 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      post: {
+        success: ({
+          mockedResponse = {
+            hunt_id: 'string',
+            config: {
+              name: 'string',
+              cron: 'string',
+              log_buffer: 0,
+              global_target_table_name: 'string',
+              global_source_table_name: 'string',
+              customers: ['string'],
+            },
+          },
+        }: {
+          mockedResponse?: components['schemas']['HuntDetailResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     engineStatus: {
       mockedUrl: '/api/v1/hunts/status',
