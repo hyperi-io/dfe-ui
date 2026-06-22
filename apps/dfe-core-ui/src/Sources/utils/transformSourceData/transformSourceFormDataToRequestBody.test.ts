@@ -32,6 +32,7 @@ describe('transformSourceFormDataToRequestBody', () => {
           type: 'none',
         },
       },
+      match: { field: 'field', value: 'value' },
     };
 
     const result = transformSourceFormDataToRequestBody(source);
@@ -45,6 +46,7 @@ describe('transformSourceFormDataToRequestBody', () => {
         poll_interval_secs: 300,
         auth: null,
       },
+      match: { field: 'field', value: 'value' },
     });
   });
 });

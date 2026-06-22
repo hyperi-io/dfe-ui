@@ -1,4 +1,5 @@
 import { ContentCard } from '@/core/components/ContentCard';
+import { SourceSelect } from '@/core/components/SourceSelect';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, Form, FormRule, Input, Switch } from 'antd';
 import { useState } from 'react';
@@ -14,7 +15,6 @@ export const AdvancedSettings = ({
     <>
       <Button
         type="text"
-        className="mr-6"
         aria-label="Toggle advanced settings"
         onClick={() => setShowAdvanced(!showAdvanced)}
         icon={
@@ -29,7 +29,7 @@ export const AdvancedSettings = ({
         Advanced Settings
       </Button>
       {showAdvanced && (
-        <ContentCard className="absolute w-full bg-background rounded-md shadow-md z-10 flex gap-x-2 -bottom-25 left">
+        <ContentCard className="absolute z-10 flex w-full rounded-md shadow-md bg-background gap-x-2 -bottom-25 left">
           <Form.Item
             label="CEL Filter"
             name="cel_filter"
@@ -55,7 +55,7 @@ export const AdvancedSettings = ({
             layout="vertical"
             rules={[formValidation]}
           >
-            <Input className="w-full" />
+            <SourceSelect />
           </Form.Item>
           <Form.Item
             label="Cost Window Minutes"

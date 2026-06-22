@@ -189,7 +189,7 @@ export const featureFlagSidebarMenuItems = [
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.role_read}>
+      <RbacProtected action={rbacActions.rule_read}>
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}

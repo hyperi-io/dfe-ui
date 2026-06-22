@@ -15,13 +15,10 @@ const mappingStandardsTabSchema = {
 };
 
 const sourceTypeTabSchema = {
-  match: z
-    .object({
-      field: z.string({ message: 'Field is required' }),
-      value: z.string({ message: 'Value is required' }),
-    })
-    .optional()
-    .nullable(),
+  match: z.object({
+    field: z.string({ message: 'Field is required' }),
+    value: z.string({ message: 'Value is required' }),
+  }),
   fetcher: z
     .object({
       source_type: z

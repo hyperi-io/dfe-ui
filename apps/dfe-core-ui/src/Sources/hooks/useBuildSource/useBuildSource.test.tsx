@@ -49,10 +49,14 @@ describe('.useBuildSource', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
         });
       });
 
-      result.current.mutate('source');
+      result.current.mutate({
+        source_name: 'source',
+        source_version: 'string',
+      });
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -60,6 +64,7 @@ describe('.useBuildSource', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
         });
       });
     });
@@ -78,16 +83,21 @@ describe('.useBuildSource', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
         });
       });
 
-      result.current.mutate('source');
+      result.current.mutate({
+        source_name: 'source',
+        source_version: 'string',
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBeUndefined();
         expect(result.current.isPending).toBe(false);
         expect(result.current.error).toBeTruthy();
         expect(result.current.mutate).toEqual(expect.any(Function));
+        expect(result.current.reset).toEqual(expect.any(Function));
       });
     });
   });

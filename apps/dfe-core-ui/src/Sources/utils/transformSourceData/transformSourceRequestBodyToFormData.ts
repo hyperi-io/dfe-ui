@@ -48,6 +48,7 @@ export const transformSourceRequestBodyToFormData = (
             },
           }
         : null,
+    match: source?.version?.match ?? { field: '', value: '' },
   };
   return transformedSource;
 };

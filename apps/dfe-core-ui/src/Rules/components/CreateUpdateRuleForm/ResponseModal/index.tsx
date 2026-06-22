@@ -1,7 +1,8 @@
 import { Modal } from '@/core/components/Modal';
-import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface ResponseModalProps {
@@ -10,10 +11,12 @@ interface ResponseModalProps {
 }
 
 export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
+  const router = useRouter();
   const [open, setOpen] = useState(!!response);
   const handleClose = () => {
     setOpen(false);
     onClose?.();
+    router.push(`/rules?rule_id=${response?.rule?.rule_id}`);
   };
 
   const {
@@ -41,60 +44,66 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
         <dd>{rule?.severity}</dd>
 
         <dt>Rule Source</dt>
-        <dd>{rule?.source ?? 'No source identified'}</dd>
+        <dd>{rule?.source || 'No source identified'}</dd>
 
         <dt>Rule Source Table</dt>
-        <dd>{rule?.source_table ?? 'No source table identified'}</dd>
+        <dd>{rule?.source_table || 'No source table identified'}</dd>
 
         <dt>Rule Source DB</dt>
-        <dd>{rule?.source_db ?? 'No source DB identified'}</dd>
+        <dd>{rule?.source_db || 'No source DB identified'}</dd>
 
         <dt>Rule Where Clause</dt>
-        <dd>{rule?.where_clause ?? 'No where clause identified'}</dd>
+        <dd>{rule?.where_clause || 'No where clause identified'}</dd>
 
         <dt>Rule Cel Filter</dt>
-        <dd>{rule?.cel_filter ?? 'No CEL filter provided'}</dd>
+        <dd>{rule?.cel_filter || 'No CEL filter provided'}</dd>
 
         <dt>Rule Original SQL</dt>
         <dd>{rule?.original_sql}</dd>
 
         <dt>Rule Hunt Name</dt>
-        <dd>{rule?.hunt_name ?? 'No hunt name provided'}</dd>
+        <dd>{rule?.hunt_name || 'No hunt name provided'}</dd>
 
         <dt>Rule Created At</dt>
         <dd>{rule?.created_at}</dd>
       </dl>
 
       {rule?.warnings && rule.warnings.length > 0 && (
-        <SimpleCollapse
+        <NotificationCard
+          className="w-full"
           title={
             <span className="flex items-center gap-x-2 text-warning">
               <IconAlertCircle /> Warnings
             </span>
           }
-        >
-          <ul className="text-xs list-disc list-inside ">
-            {rule.warnings.map((warning) => (
-              <li key={warning}>{warning}</li>
-            ))}
-          </ul>
-        </SimpleCollapse>
+          description={
+            <ul className="text-xs list-disc list-inside ">
+              {rule.warnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          }
+          type="warning"
+        />
       )}
 
       {sql_errors && sql_errors.length > 0 && (
-        <SimpleCollapse
+        <NotificationCard
+          className="w-full"
           title={
             <span className="flex items-center gap-x-2 text-error">
               <IconAlertCircle /> SQL Errors
             </span>
           }
-        >
-          <ul className="text-xs list-disc list-inside">
-            {sql_errors.map((error) => (
-              <li key={error.message}>{error.message}</li>
-            ))}
-          </ul>
-        </SimpleCollapse>
+          description={
+            <ul className="text-xs list-disc list-inside">
+              {sql_errors.map((error) => (
+                <li key={error.message}>{error.message}</li>
+              ))}
+            </ul>
+          }
+          type="error"
+        />
       )}
       {/* {cost_estimate && (
         <SimpleCollapse

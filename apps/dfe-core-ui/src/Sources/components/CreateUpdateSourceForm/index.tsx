@@ -117,22 +117,6 @@ export const CreateUpdateSourceFormBase = ({
         destroyOnHidden={false}
         items={[
           {
-            key: 'sourceDetails',
-            label: (
-              <TabLabel
-                label="Details"
-                validationErrors={validationErrors?.sourceDetails}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <SourceDetailsTabContent
-                formValidation={formValidation}
-                disabledFields={disabledFields}
-              />
-            ),
-          },
-          {
             key: 'sourceType',
             label: (
               <TabLabel
@@ -148,6 +132,23 @@ export const CreateUpdateSourceFormBase = ({
               />
             ),
           },
+          {
+            key: 'sourceDetails',
+            label: (
+              <TabLabel
+                label="Details"
+                validationErrors={validationErrors?.sourceDetails}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SourceDetailsTabContent
+                formValidation={formValidation}
+                disabledFields={disabledFields}
+              />
+            ),
+          },
+
           {
             key: 'schemaConfig',
             label: (

@@ -64,7 +64,7 @@ const buildVersionChildren = (
             <span className="min-w-0 truncate">{version}</span>
             {version === schema.current && (
               <Tooltip destroyOnHidden title="Current version">
-                <IconStarFilled className="shrink-0 text-yellow-500" />
+                <IconStarFilled className="text-yellow-500 shrink-0" />
               </Tooltip>
             )}
           </>
