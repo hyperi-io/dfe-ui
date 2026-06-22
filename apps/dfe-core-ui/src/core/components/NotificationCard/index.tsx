@@ -1,6 +1,6 @@
 import { cn } from '@/core/utils/style';
 
-type DisplayType = 'default' | 'warning';
+type DisplayType = 'default' | 'warning' | 'error' | 'info';
 
 export const NotificationCard = ({
   icon,
@@ -10,10 +10,10 @@ export const NotificationCard = ({
   title,
 }: {
   icon?: React.ReactNode;
-  description?: React.ReactNode;
+  description?: string | React.ReactNode;
   className?: string;
   type?: DisplayType;
-  title?: string;
+  title?: string | React.ReactNode;
 }) => {
   const displayType = {
     default: cn(
@@ -23,6 +23,14 @@ export const NotificationCard = ({
     warning: cn(
       // Card Border & Background
       'border-warning/30 bg-warning/10 dark:border-dark-warning/50 dark:bg-dark-warning/10',
+    ),
+    error: cn(
+      // Card Border & Background
+      'border-error/30 bg-error/10 dark:border-dark-error/50 dark:bg-dark-error/10',
+    ),
+    info: cn(
+      // Card Border & Background
+      'border-info/30 bg-info/10 dark:border-dark-info/50 dark:bg-dark-info/10',
     ),
   };
   return (

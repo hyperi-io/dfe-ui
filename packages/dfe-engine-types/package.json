@@ -6,7 +6,8 @@
   "description": "TypeScript types for DFE Engine API",
   "type": "module",
   "exports": {
-    ".": "./types/index.d.ts"
+    ".": "./types/index.d.ts",
+    "./scopes": "./scopes/index.ts"
   },
   "scripts": {
     "clean": "rm -rf types",

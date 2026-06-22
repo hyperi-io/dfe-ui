@@ -1,8 +1,8 @@
-import { FormInstance, FormRule, Radio } from 'antd';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { IconInfoCircle } from '@repo/dfe-icons';
+import { Form, FormInstance, FormRule, Input } from 'antd';
 import { useState } from 'react';
 import { CreateUpdateSourceFormData } from '..';
-import { FetcherForm } from './FetcherForm';
-import { ReceiverForm } from './ReceiverForm';
 import { getInitialSourceType } from './helpers';
 
 type SourceType = 'receiver' | 'fetcher';
@@ -20,27 +20,48 @@ export const SourceTypeTabContent = ({
     match: initialMatch,
     fetcher: initialFetcher,
   });
-  const [sourceType, setSourceType] = useState<SourceType | null>(
+  const [_sourceType, _setSourceType] = useState<SourceType | null>(
     initialSourceType,
   );
 
   return (
     <div className="flex flex-col gap-2">
-      <Radio.Group
+      <NotificationCard
+        icon={<IconInfoCircle />}
+        description="CEL expression to match the incoming data."
+      />
+      <div className="flex gap-x-2">
+        {/* TODO: Add CEL expression editor */}
+        <Form.Item
+          className="w-full"
+          name={['match', 'field']}
+          label="Field"
+          rules={[formValidation]}
+        >
+          <Input placeholder="Enter field" />
+        </Form.Item>
+        <Form.Item
+          className="w-full"
+          name={['match', 'value']}
+          label="Value"
+          rules={[formValidation]}
+        >
+          <Input placeholder="Enter value" />
+        </Form.Item>
+      </div>
+
+      {/* <Radio.Group
         value={sourceType}
         onChange={(e) => {
           setSourceType(e.target.value as SourceType);
         }}
       >
-        <Radio value="receiver">Receiver</Radio>
         <Radio value="fetcher">Fetcher</Radio>
       </Radio.Group>
-      {sourceType === 'receiver' && (
-        <ReceiverForm formValidation={formValidation} />
-      )}
+
       {sourceType === 'fetcher' && (
         <FetcherForm formValidation={formValidation} form={form} />
-      )}
+      )} */}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
@@ -35,12 +36,19 @@ export const SourceSelect = (props: SelectProps) => {
   }, [sources]);
 
   return (
-    <Select
-      placeholder="Select source"
-      {...props}
-      showSearch={{ onSearch: setSearch }}
-      options={sourcesOptions}
-      onPopupScroll={handlePopupScroll}
-    />
+    <RbacProtected action={RbacProtected.rbacActions.source_read}>
+      <RbacProtected.Unrestricted>
+        <Select
+          placeholder="Select source"
+          {...props}
+          showSearch={{ onSearch: setSearch }}
+          options={sourcesOptions}
+          onPopupScroll={handlePopupScroll}
+        />
+      </RbacProtected.Unrestricted>
+      <RbacProtected.Restricted tooltip={{ show: true, placement: 'top' }}>
+        <Select disabled placeholder="Select source" {...props} />
+      </RbacProtected.Restricted>
+    </RbacProtected>
   );
 };
