@@ -35,7 +35,6 @@ describe('.useUpdateRule', () => {
     hunt_name: 'string',
     estimate_cost: false,
     cost_window_minutes: 60,
-    source_type: 'string',
   };
 
   const rule_id = 'rule_id';

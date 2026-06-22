@@ -228,6 +228,10 @@ export const API_CONFIG_MOCKS = Object.freeze({
                   type: 'string',
                   version: 'string',
                 },
+                match: {
+                  field: 'string',
+                  value: 'string',
+                },
               },
             },
           },
@@ -392,7 +396,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SchemaBuildResult'];
+          mockedResponse?: components['schemas']['dfe_engine__api__v1__sources__SchemaBuildResult'];
           source_name?: string;
         } = {}) => {
           return http.post(

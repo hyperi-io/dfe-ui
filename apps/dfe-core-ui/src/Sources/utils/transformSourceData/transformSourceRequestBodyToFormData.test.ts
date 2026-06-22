@@ -19,6 +19,10 @@ describe('transformSourceRequestBodyToFormData', () => {
           auth: null,
           poll_interval_secs: 300,
         },
+        match: {
+          field: 'field',
+          value: 'value',
+        },
       },
     };
     const result = transformSourceRequestBodyToFormData(source);

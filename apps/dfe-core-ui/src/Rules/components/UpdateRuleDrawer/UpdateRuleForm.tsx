@@ -35,7 +35,6 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   const handleUpdateRule = (values: CreateUpdateRuleFormData) => {
     updateRule({
       ...values,
-      source_type: '',
       estimate_cost: values.estimate_cost ?? false,
       cost_window_minutes: values.cost_window_minutes
         ? Number(values.cost_window_minutes)
