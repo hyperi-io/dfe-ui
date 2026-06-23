@@ -52,7 +52,13 @@ export const OriginTabContent = ({
           <Select
             placeholder="Select operator"
             onChange={() => {
-              form.setFields([{ name: ['match', 'value'], errors: [] }]);
+              form.setFields([
+                {
+                  name: ['match', 'value'],
+                  errors: [],
+                  value: '',
+                },
+              ]);
             }}
             options={OPERATORS.map((operator) => ({
               label: operator,
