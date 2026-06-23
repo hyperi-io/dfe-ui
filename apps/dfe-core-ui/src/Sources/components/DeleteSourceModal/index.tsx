@@ -3,7 +3,7 @@ import { useDeleteSource } from '@/Sources/hooks/useDeleteSource';
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, ButtonProps, Modal } from 'antd';
+import { Button, ButtonProps, Modal, Tooltip } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteSourceModalProps {
@@ -41,19 +41,21 @@ export const DeleteSourceModal = ({
               },
             })
           ) : (
-            <Button
-              type="default"
-              shape="circle"
-              size="small"
-              className="hover:border-error hover:text-error"
-              aria-label={`Delete ${source}`}
-              icon={<IconTrash />}
-              onClick={() => setOpen(true)}
-            />
+            <Tooltip destroyOnHidden title={`Delete ${source}`}>
+              <Button
+                type="default"
+                shape="circle"
+                size="small"
+                className="hover:border-error hover:text-error"
+                aria-label={`Delete ${source}`}
+                icon={<IconTrash />}
+                onClick={() => setOpen(true)}
+              />
+            </Tooltip>
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          className="opacity-100 justify-start"
+          className="justify-start opacity-100"
           tooltip={{ show: true, placement: 'left' }}
         >
           {trigger ? (

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getValidationErrors } from './helpers';
+import { FormValidationErrors, getValidationErrors } from './helpers';
 
 const ERROR_FIELDS = [
   {
@@ -34,10 +34,10 @@ const ERROR_FIELDS = [
   },
 ];
 
-const expectedResponse = {
+const expectedResponse: FormValidationErrors = {
   sourceDetails: ['Source is required'],
   mappingStandards: [],
-  sourceType: [],
+  origin: [],
   schemaConfig: [
     'Header type is required',
     'Header version is required',
