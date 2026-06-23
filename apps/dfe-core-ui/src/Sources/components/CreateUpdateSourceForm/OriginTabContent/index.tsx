@@ -1,13 +1,14 @@
+import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Form, FormInstance, FormRule, Input } from 'antd';
+import { FormInstance, FormRule, Input, Select } from 'antd';
 import { useState } from 'react';
 import { CreateUpdateSourceFormData } from '..';
-import { getInitialSourceType } from './helpers';
+import { getInitialSourceType, OPERATORS } from './helpers';
 
 type SourceType = 'receiver' | 'fetcher';
 
-export const SourceTypeTabContent = ({
+export const OriginTabContent = ({
   formValidation,
   form,
 }: {
@@ -24,14 +25,16 @@ export const SourceTypeTabContent = ({
     initialSourceType,
   );
 
+  const operationType = Form.useWatch(['match', 'operator'], form);
+  const isMatchValueDisabled = operationType === 'exists';
+
   return (
     <div className="flex flex-col gap-2">
       <NotificationCard
         icon={<IconInfoCircle />}
-        description="CEL expression to match the incoming data."
+        description="Incoming data that matches the following criteria will be processed by this source"
       />
       <div className="flex gap-x-2">
-        {/* TODO: Add CEL expression editor */}
         <Form.Item
           className="w-full"
           name={['match', 'field']}
@@ -41,12 +44,36 @@ export const SourceTypeTabContent = ({
           <Input placeholder="Enter field" />
         </Form.Item>
         <Form.Item
+          name={['match', 'operator']}
+          label="Operator"
+          className="min-w-36"
+          rules={[formValidation]}
+        >
+          <Select
+            placeholder="Select operator"
+            onChange={() => {
+              form.setFields([
+                {
+                  name: ['match', 'value'],
+                  errors: [],
+                  value: '',
+                },
+              ]);
+            }}
+            options={OPERATORS.map((operator) => ({
+              label: operator,
+              value: operator,
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item
           className="w-full"
           name={['match', 'value']}
           label="Value"
           rules={[formValidation]}
         >
-          <Input placeholder="Enter value" />
+          <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
         </Form.Item>
       </div>
 

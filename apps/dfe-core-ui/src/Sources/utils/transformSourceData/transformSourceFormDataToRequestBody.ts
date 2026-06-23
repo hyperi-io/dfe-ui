@@ -13,9 +13,17 @@ import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): SourceUpdateRequestBody => {
-  const { fetcher, ...rest } = source;
+  const { fetcher, match, ...rest } = source;
+
+  let apiMatch: SourceUpdateRequestBody['match'] | undefined;
+  if (match) {
+    const { operator: _operator, field, value } = match;
+    apiMatch = { field, value: value ?? '' };
+  }
+
   const transformedSource: SourceUpdateRequestBody = {
     ...rest,
+    ...(apiMatch ? { match: apiMatch } : {}),
     fetcher:
       Object.keys(fetcher ?? {}).length > 0
         ? {

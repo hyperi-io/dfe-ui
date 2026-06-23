@@ -32,7 +32,7 @@ describe('transformSourceFormDataToRequestBody', () => {
           type: 'none',
         },
       },
-      match: { field: 'field', value: 'value' },
+      match: { field: 'field', value: 'value', operator: 'equals' },
     };
 
     const result = transformSourceFormDataToRequestBody(source);

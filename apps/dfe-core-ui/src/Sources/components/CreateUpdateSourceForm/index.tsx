@@ -7,13 +7,13 @@ import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { getValidationErrors, type FormValidationErrors } from './helpers';
 import { MappingStandardsTabContent } from './MappingStandardsTabContent';
+import { OriginTabContent } from './OriginTabContent';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
-import { SourceTypeTabContent } from './SourceTypeTabContent';
 import { TransformTabContent } from './TransformTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
@@ -37,7 +37,7 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
 const TAB_LABEL_MAP = {
   sourceDetails: 'Details',
   mappingStandards: 'Mapping',
-  sourceType: 'Origin',
+  origin: 'Origin',
   schemaConfig: 'Meta Schema',
   transform: 'Transform',
 };
@@ -59,7 +59,7 @@ export const CreateUpdateSourceFormBase = ({
     useState<FormValidationErrors>({
       sourceDetails: [],
       mappingStandards: [],
-      sourceType: [],
+      origin: [],
       schemaConfig: [],
       transform: [],
     });
@@ -106,6 +106,11 @@ export const CreateUpdateSourceFormBase = ({
       onFinish={handleFinish}
       initialValues={{
         enabled: true,
+        match: {
+          field: '',
+          operator: 'equals',
+          value: '',
+        },
         ...initialValues,
       }}
       layout="vertical"
@@ -121,15 +126,12 @@ export const CreateUpdateSourceFormBase = ({
             label: (
               <TabLabel
                 label="Origin"
-                validationErrors={validationErrors?.sourceType}
+                validationErrors={validationErrors?.origin}
               />
             ),
             forceRender: true,
             children: (
-              <SourceTypeTabContent
-                formValidation={formValidation}
-                form={form}
-              />
+              <OriginTabContent formValidation={formValidation} form={form} />
             ),
           },
           {

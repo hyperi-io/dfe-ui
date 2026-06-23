@@ -7,7 +7,15 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconCopy } from '@repo/dfe-icons';
-import { Button, ButtonProps, Input, Modal, Select, Switch } from 'antd';
+import {
+  Button,
+  ButtonProps,
+  Input,
+  Modal,
+  Select,
+  Switch,
+  Tooltip,
+} from 'antd';
 import { cloneElement, useState } from 'react';
 import z from 'zod';
 
@@ -87,14 +95,16 @@ export const CloneSourceModal = ({
               },
             })
           ) : (
-            <Button
-              type="default"
-              shape="circle"
-              size="small"
-              aria-label={`Clone ${name}`}
-              icon={<IconCopy />}
-              onClick={handleOpen}
-            />
+            <Tooltip destroyOnHidden title={`Clone ${name}`}>
+              <Button
+                type="default"
+                shape="circle"
+                size="small"
+                aria-label={`Clone ${name}`}
+                icon={<IconCopy />}
+                onClick={handleOpen}
+              />
+            </Tooltip>
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
@@ -147,7 +157,7 @@ export const CloneSourceModal = ({
               name="source"
               label="Source"
               rules={[formValidation]}
-              className="mb-2 w-full"
+              className="w-full mb-2"
             >
               <Input placeholder={`${name}_copy`} />
             </Form.Item>
@@ -160,7 +170,7 @@ export const CloneSourceModal = ({
             name="version"
             label="Version"
             rules={[formValidation]}
-            className="mb-2 w-full"
+            className="w-full mb-2"
           >
             <Select
               options={versions.map((version) => ({

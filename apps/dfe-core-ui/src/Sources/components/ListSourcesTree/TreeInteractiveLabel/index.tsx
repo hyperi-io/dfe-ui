@@ -6,6 +6,7 @@ interface TreeInteractiveLabelProps {
   title: React.ReactNode | string;
   onClick?: () => void;
   selected?: boolean;
+  hoverActions?: React.ReactNode;
   actions?: React.ReactNode;
 }
 export const TreeInteractiveLabel = ({
@@ -13,10 +14,11 @@ export const TreeInteractiveLabel = ({
   title,
   onClick,
   selected,
+  hoverActions,
   actions,
 }: TreeInteractiveLabelProps) => {
   return (
-    <div className="group relative flex w-full min-w-0 max-w-full items-center">
+    <div className="relative flex items-center w-full max-w-full min-w-0 group">
       <Typography.Text
         onClick={onClick}
         className={cn(
@@ -25,7 +27,7 @@ export const TreeInteractiveLabel = ({
         )}
       >
         <span className="mt-1">{icon}</span>
-        <span className="flex min-w-0 flex-1 items-center gap-x-1 overflow-hidden">
+        <span className="flex items-center flex-1 min-w-0 overflow-hidden gap-x-1">
           {typeof title === 'string' ? (
             <span className="min-w-0 truncate">{title}</span>
           ) : (
@@ -34,16 +36,28 @@ export const TreeInteractiveLabel = ({
         </span>
       </Typography.Text>
 
-      {actions ? (
+      {hoverActions || actions ? (
         <div
           className={cn(
             //Layout
-            'absolute top-1/2 right-0 z-10 flex -translate-y-1/2 items-center gap-x-1',
-            //Visibility - Only show actions when hovering or focusing on the label
-            'pointer-events-none opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100',
+            'flex items-center gap-x-1',
+            // Position
+            'absolute  top-1/2 right-0 z-10 -translate-y-1/2',
           )}
         >
-          {actions}
+          {hoverActions && (
+            <div
+              className={cn(
+                //Layout
+                'flex items-center gap-x-1',
+                //Visibility - Only show actions when hovering or focusing on the label
+                'pointer-events-none opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100',
+              )}
+            >
+              {hoverActions}
+            </div>
+          )}
+          {actions && <>{actions}</>}
         </div>
       ) : null}
     </div>

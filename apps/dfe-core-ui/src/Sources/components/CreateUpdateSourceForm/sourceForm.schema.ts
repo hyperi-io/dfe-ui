@@ -2,6 +2,7 @@ import { sourceNameValidator } from '@/Sources/utils/validation';
 import z from 'zod';
 
 const AUTH_TYPES = ['none', 'oauth2', 'api_key'] as const;
+const MATCH_OPERATORS = ['equals', 'exists'] as const;
 
 const sourceDetailsTabSchema = {
   source: sourceNameValidator,
@@ -14,11 +15,29 @@ const mappingStandardsTabSchema = {
   mapping_standards: z.array(z.string()).optional(),
 };
 
-const sourceTypeTabSchema = {
-  match: z.object({
-    field: z.string({ message: 'Field is required' }),
-    value: z.string({ message: 'Value is required' }),
-  }),
+const originTabSchema = {
+  match: z
+    .object({
+      field: z.string().min(1, { message: 'Field is required' }),
+      operator: z
+        .string()
+        .refine((v) => (MATCH_OPERATORS as readonly string[]).includes(v), {
+          message: 'Operator is required',
+        }),
+      value: z.string().optional().nullable(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.operator === 'exists') {
+        return;
+      }
+      if (!data.value?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Value is required',
+          path: ['value'],
+        });
+      }
+    }),
   fetcher: z
     .object({
       source_type: z
@@ -117,7 +136,7 @@ const transformTabSchema = {
 export const formSchema = z.object({
   ...sourceDetailsTabSchema,
   ...mappingStandardsTabSchema,
-  ...sourceTypeTabSchema,
+  ...originTabSchema,
   ...schemaConfigTabSchema,
   ...transformTabSchema,
 });
@@ -126,14 +145,14 @@ export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
 
 const sourceDetailsTabFormKeys = Object.keys(sourceDetailsTabSchema);
 const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
-const sourceTypeTabFormKeys = Object.keys(sourceTypeTabSchema);
+const originTabFormKeys = Object.keys(originTabSchema);
 const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
 const transformTabFormKeys = Object.keys(transformTabSchema);
 
 export const TAB_FORM_VALIDATION_KEY_MAP = {
   sourceDetails: sourceDetailsTabFormKeys,
   mappingStandards: mappingStandardsTabFormKeys,
-  sourceType: sourceTypeTabFormKeys,
+  origin: originTabFormKeys,
   schemaConfig: schemaConfigTabFormKeys,
   transform: transformTabFormKeys,
 };

@@ -38,6 +38,11 @@ describe('transformSourceRequestBodyToFormData', () => {
     expect(result.source).toBe('source');
     expect(result.display_name).toBe('display name');
     expect(result.enabled).toBe(false);
+    expect(result.match).toEqual({
+      field: 'field',
+      value: 'value',
+      operator: 'equals',
+    });
   });
 
   test('when fetcher is an empty object, should return fetcher: null', () => {

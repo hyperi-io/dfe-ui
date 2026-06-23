@@ -2,8 +2,15 @@ import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
 import { SourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
-import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
-import { notification, Tooltip, TreeDataNode } from 'antd';
+import { cn } from '@/core/utils/style';
+import {
+  IconCapture,
+  IconCaptureOff,
+  IconFile,
+  IconFolder,
+  IconStarFilled,
+} from '@repo/dfe-icons';
+import { Button, notification, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
@@ -64,7 +71,7 @@ const buildVersionChildren = (
             <span className="min-w-0 truncate">{version}</span>
             {version === source.current && (
               <Tooltip destroyOnHidden title="Current version">
-                <IconStarFilled className="shrink-0 text-yellow-500" />
+                <IconStarFilled className="text-yellow-500 shrink-0" />
               </Tooltip>
             )}
           </>
@@ -139,6 +146,30 @@ const sourceSummaryToTreeData = ({
             selectedSourceVersion === source.current
           }
           actions={
+            <>
+              <Tooltip
+                destroyOnHidden
+                title={
+                  source.enabled ? 'Source is enabled' : 'Source is disabled'
+                }
+                placement="right"
+              >
+                <Button
+                  type="default"
+                  shape="circle"
+                  size="small"
+                  className={cn(
+                    'p-0.5',
+                    source.enabled
+                      ? 'text-success border-success bg-background dark:bg-dark-background'
+                      : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
+                  )}
+                  icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
+                />
+              </Tooltip>
+            </>
+          }
+          hoverActions={
             <>
               <CloneSourceModal
                 name={source.name}
