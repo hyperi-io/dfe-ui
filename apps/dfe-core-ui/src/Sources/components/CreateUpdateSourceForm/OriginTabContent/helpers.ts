@@ -25,3 +25,5 @@ export const getInitialSourceType = ({
   }
   return null;
 };
+
+export const OPERATORS = ['equals', 'exists'];
