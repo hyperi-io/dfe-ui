@@ -11,9 +11,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import { useUpdateAlert } from '.';
-import { AlertUpdateRequest, AlertUpdateResponse } from './types.d';
-import { server } from './useUpdateAlert.mocks';
+import { useDeleteAlert } from '.';
+import { server } from './useDeleteAlert.mocks';
 
 beforeAll(() =>
   server.listen({
@@ -25,48 +24,30 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.useUpdateAlert', () => {
-  const parameters: AlertUpdateRequest = {
-    name: 'string',
-    url: 'string',
-    description: 'string',
-    enabled: true,
-  };
+describe('.useDeleteAlert', () => {
+  const name = 'alert_name';
   describe('onSuccess', () => {
-    test('should call onSuccess when updating', async () => {
+    test('should call onSuccess', async () => {
       const onSuccess = vi.fn();
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateAlert({ onSuccess, onError, name: 'alert_name' }),
+        () => useDeleteAlert({ onSuccess, onError }),
         { wrapper },
       );
 
-      result.current.mutate({
-        name: parameters.name,
-        url: parameters.url,
-        description: parameters.description,
-        enabled: parameters.enabled,
-      });
-
-      const expectedResponse: AlertUpdateResponse = {
-        name: 'string',
-        url: 'string',
-        description: 'string',
-        enabled: true,
-      };
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(result.current).toEqual({
           isPending: false,
           error: null,
           mutate: expect.any(Function),
-          data: expectedResponse,
         });
       });
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith(expectedResponse);
+        expect(onSuccess).toHaveBeenCalled();
       });
 
       await waitFor(() => {
@@ -76,31 +57,19 @@ describe('.useUpdateAlert', () => {
   });
 
   describe('onError', () => {
-    const requestBody: AlertUpdateRequest = {
-      name: 'string',
-      url: 'string',
-      description: 'string',
-      enabled: true,
-    };
-
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.alerts.destination.put.error());
+      server.use(API_CONFIG_MOCKS.alerts.destination.delete.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateAlert({ onSuccess, onError, name: 'alert_name' }),
+        () => useDeleteAlert({ onSuccess, onError }),
         { wrapper },
       );
 
-      result.current.mutate({
-        name: requestBody.name,
-        url: requestBody.url,
-        description: requestBody.description,
-        enabled: requestBody.enabled,
-      });
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();
