@@ -46,7 +46,10 @@ export const ViewHuntDetail = () => {
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h4 className="flex items-center w-full gap-2 text-lg font-medium">
-          Rule Configuration:
+          <span className="text-foreground/50 dark:text-dark-foreground/50">
+            Hunt Configuration:
+          </span>
+          {huntDetail.display_name ?? huntDetail.name}
         </h4>
         <HuntDetailActionMenu hunt={huntDetail} />
       </div>
