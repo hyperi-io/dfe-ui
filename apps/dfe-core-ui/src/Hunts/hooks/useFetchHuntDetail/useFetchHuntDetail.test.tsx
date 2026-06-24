@@ -50,7 +50,6 @@ describe('.useFetchHuntDetail', () => {
         checkpoint_timestamp_field: 'string',
         scheduling_mode: 'string',
         min_interval_seconds: 0,
-        explain_queries: false,
       };
 
       await waitFor(() => {

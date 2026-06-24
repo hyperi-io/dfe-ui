@@ -4,85 +4,105 @@ import {
   CreateUpdateHuntForm,
   CreateUpdateHuntFormData,
 } from '@/Hunts/components/CreateUpdateHuntForm';
-import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
-import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
 import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { useUpdateHunt } from '@/Hunts/hooks/useUpdateHunt';
+import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
+import {
+  transformHuntDetailToFormData,
+  transformHuntFormDataToUpdateRequest,
+} from '@/Hunts/utils/transformHuntData/transformHuntDetailToFormData';
+import { IconEdit } from '@repo/dfe-icons';
+import { Button, ButtonProps, notification } from 'antd';
+import { cloneElement, useMemo, useState } from 'react';
 
-import { IconPlus } from '@repo/dfe-icons';
-import { Button, notification } from 'antd';
-import { useState } from 'react';
-
-export const CreateHuntDrawer = ({
-  open,
-  onClose,
-  hunt,
-}: {
+interface UpdateHuntDrawerProps {
+  hunt: HuntDetailResponse;
   open?: boolean;
   onClose?: () => void;
-  hunt: HuntDetailResponse;
-}) => {
-  const title = 'Add Hunt';
+  trigger?: React.ReactElement<ButtonProps>;
+  onSuccess?: (hunt: HuntUpdateResponse) => void;
+}
+
+export const UpdateHuntDrawer = ({
+  hunt,
+  open,
+  onClose,
+  trigger,
+  onSuccess,
+}: UpdateHuntDrawerProps) => {
+  const title = 'Edit Hunt';
   const [api, contextHolder] = notification.useNotification();
   const [isDrawerVisible, setIsDrawerVisible] = useState(open);
+
+  const initialValues = useMemo(
+    () => transformHuntDetailToFormData(hunt),
+    [hunt],
+  );
 
   const handleClose = () => {
     setIsDrawerVisible(false);
     onClose?.();
   };
 
-  const { refetch: refetchHunts, setSelectedHuntId } = useListHuntsContext();
   const {
-    mutate: createHuntMutation,
+    mutate: updateHuntMutation,
     isPending,
     error,
-  } = useCreateHunt({
+  } = useUpdateHunt({
+    hunt_id: hunt.hunt_id,
     onSuccess: (response) => {
-      setSelectedHuntId(response.hunt_id);
-      refetchHunts();
       setIsDrawerVisible(false);
+      onClose?.();
+      onSuccess?.(response);
       api.success({
-        title: 'Hunt created successfully',
+        title: `${response.hunt_id} updated successfully`,
         placement: 'bottomLeft',
       });
     },
   });
-  const handleCreateHunt = (values: CreateUpdateHuntFormData) => {
-    createHuntMutation({
-      ...values,
-      cron: '* * * * *',
-      log_buffer: 60,
-      global_target_table_name: '',
-    });
+
+  const handleUpdateHunt = (values: CreateUpdateHuntFormData) => {
+    updateHuntMutation(transformHuntFormDataToUpdateRequest(values, hunt));
   };
+
   return (
     <>
       {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.hunt_write}>
         <RbacProtected.Unrestricted>
-          <Button
-            type="default"
-            className="border border-tertiary text-tertiary"
-            icon={<IconPlus className="text-tertiary" />}
-            onClick={() => setIsDrawerVisible(true)}
-          >
-            {title}
-          </Button>
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              onClick: (event: React.MouseEvent<HTMLElement>) => {
+                setIsDrawerVisible(true);
+                trigger.props.onClick?.(event);
+              },
+            })
+          ) : (
+            <Button
+              type="default"
+              className="border border-tertiary text-tertiary"
+              icon={<IconEdit className="text-tertiary" />}
+              onClick={() => setIsDrawerVisible(true)}
+            >
+              {title}
+            </Button>
+          )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          tooltip={{
-            show: true,
-            placement: 'bottom',
-          }}
+          className="opacity-100 justify-start"
+          tooltip={{ show: true, placement: 'left' }}
         >
-          <Button
-            type="default"
-            disabled
-            className="border border-tertiary text-tertiary"
-            icon={<IconPlus className="text-tertiary" />}
-            onClick={() => setIsDrawerVisible(true)}
-          >
-            {title}
-          </Button>
+          {trigger ? (
+            cloneElement(trigger, {
+              ...trigger.props,
+              disabled: true,
+            })
+          ) : (
+            <Button type="default" disabled icon={<IconEdit />}>
+              {title}
+            </Button>
+          )}
         </RbacProtected.Restricted>
       </RbacProtected>
 
@@ -93,11 +113,12 @@ export const CreateHuntDrawer = ({
         onClose={handleClose}
       >
         <CreateUpdateHuntForm
-          onFinish={handleCreateHunt}
+          key={hunt.hunt_id}
+          onFinish={handleUpdateHunt}
           isPending={isPending}
           error={error}
           buttonLabel={title}
-          initialValues={hunt}
+          initialValues={initialValues}
         />
       </Drawer>
     </>
