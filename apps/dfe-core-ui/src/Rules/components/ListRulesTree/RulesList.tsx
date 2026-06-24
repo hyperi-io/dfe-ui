@@ -12,8 +12,8 @@ export const RulesList = ({ className }: { className?: string }) => {
     isLoading,
     loadMoreRef,
     isFetchingNextPage,
-    selectedRuleId,
-    setSelectedRuleId,
+    selectedRuleName,
+    setSelectedRuleName,
     filters,
     hasFilters,
     setFilters,
@@ -54,9 +54,9 @@ export const RulesList = ({ className }: { className?: string }) => {
       )}
     >
       {rules.map((rule: RuleListItem) => {
-        const isSelected = selectedRuleId === rule.rule_id;
+        const isSelected = selectedRuleName === rule.name;
         return (
-          <li key={rule.rule_id} className="w-full">
+          <li key={rule.name} className="w-full">
             <button
               type="button"
               className={cn(
@@ -64,7 +64,7 @@ export const RulesList = ({ className }: { className?: string }) => {
                 'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
                 isSelected && 'bg-gray-200 dark:bg-gray-700',
               )}
-              onClick={() => setSelectedRuleId(rule.rule_id)}
+              onClick={() => setSelectedRuleName(rule.name)}
             >
               <dl className="w-full min-w-0">
                 <dt className="font-medium truncate">{rule.name}</dt>

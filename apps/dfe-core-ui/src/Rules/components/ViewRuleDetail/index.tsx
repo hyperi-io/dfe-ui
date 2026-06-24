@@ -14,13 +14,13 @@ const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
 export const ViewRuleDetail = () => {
-  const { selectedRuleId } = useListRulesContext();
+  const { selectedRuleName } = useListRulesContext();
   const {
     data: ruleDetail,
     isLoading,
     error,
   } = useFetchRuleDetail({
-    rule_id: selectedRuleId,
+    name: selectedRuleName,
   });
 
   if (isLoading) {

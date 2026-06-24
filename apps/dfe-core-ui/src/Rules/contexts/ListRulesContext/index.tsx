@@ -23,7 +23,7 @@ interface ListRulesQueryParams extends Omit<
   UseFetchInfiniteFilteredRulesProps,
   'page'
 > {
-  rule_id?: string;
+  name?: string;
 }
 
 const parseFiltersFromParams = (
@@ -52,7 +52,7 @@ const filtersToSearchString = (f: ListRulesQueryParams): string => {
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.per_page) params.set('per_page', String(f.per_page));
-  if (f.rule_id) params.set('rule_id', f.rule_id);
+  if (f.name) params.set('name', f.name);
   return params.toString();
 };
 
@@ -75,8 +75,8 @@ export interface ListRulesContextValue {
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
-  selectedRuleId: string | null;
-  setSelectedRuleId: (rule_id: string | null) => void;
+  selectedRuleName: string | null;
+  setSelectedRuleName: (name: string | null) => void;
 }
 
 const DEFAULT_RULE_LIST_RESPONSE: RuleListResponse = {
@@ -101,9 +101,7 @@ export const ListRulesProvider = ({
   defaultFilters = {},
 }: ListRulesProviderProps) => {
   const queryClient = useQueryClient();
-  const [selectedRuleId, setSelectedRuleIdState] = useState<string | null>(
-    null,
-  );
+  const [selectedRuleName, setSelectedRuleName] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -114,9 +112,9 @@ export const ListRulesProvider = ({
   }, [searchParams, defaultFilters]);
 
   useEffect(() => {
-    const rule_id = searchParams.get('rule_id');
+    const name = searchParams.get('name');
     startTransition(() =>
-      setSelectedRuleIdState(rule_id && rule_id !== '' ? rule_id : null),
+      setSelectedRuleName(name && name !== '' ? name : null),
     );
   }, [searchParams]);
 
@@ -147,20 +145,20 @@ export const ListRulesProvider = ({
       const updated: ListRulesQueryParams = {
         ...filters,
         ...newFilters,
-        rule_id: selectedRuleId ?? undefined,
+        name: selectedRuleName ?? undefined,
       };
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [queryClient, router, pathname, filters, selectedRuleId],
+    [queryClient, router, pathname, filters, selectedRuleName],
   );
 
-  const handleSetSelectedRuleId = useCallback(
-    (rule_id: string | null) => {
-      setSelectedRuleIdState(rule_id);
+  const handleSetSelectedRuleName = useCallback(
+    (name: string | null) => {
+      setSelectedRuleName(name);
       const query = filtersToSearchString({
         ...filters,
-        rule_id: rule_id ?? '',
+        name: name ?? '',
       });
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
@@ -181,8 +179,8 @@ export const ListRulesProvider = ({
       hasNextPage,
       loadMoreRef,
       isFetchingNextPage,
-      selectedRuleId,
-      setSelectedRuleId: handleSetSelectedRuleId,
+      selectedRuleName,
+      setSelectedRuleName: handleSetSelectedRuleName,
     }),
     [
       data,
@@ -197,8 +195,8 @@ export const ListRulesProvider = ({
       hasNextPage,
       loadMoreRef,
       isFetchingNextPage,
-      selectedRuleId,
-      handleSetSelectedRuleId,
+      selectedRuleName,
+      handleSetSelectedRuleName,
     ],
   );
 

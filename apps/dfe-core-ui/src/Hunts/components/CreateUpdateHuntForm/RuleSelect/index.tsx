@@ -12,8 +12,8 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
   const options = useMemo(() => {
     const fromApi =
       rules?.map((rule) => ({
-        label: rule.name,
-        value: rule.rule_id,
+        label: rule.display_name,
+        value: rule.name,
       })) ?? [];
     const selectedIds = Array.isArray(value)
       ? value
@@ -22,8 +22,8 @@ export const RuleSelect = ({ value, ...props }: SelectProps) => {
         : [];
     const knownIds = new Set(fromApi.map((option) => option.value));
     const fromInitialValues = selectedIds
-      .filter((ruleId) => !knownIds.has(ruleId))
-      .map((ruleId) => ({ label: ruleId, value: ruleId }));
+      .filter((name) => !knownIds.has(name))
+      .map((name) => ({ label: name, value: name }));
 
     return [...fromInitialValues, ...fromApi];
   }, [rules, value]);

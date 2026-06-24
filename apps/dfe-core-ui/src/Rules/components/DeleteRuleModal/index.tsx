@@ -26,7 +26,7 @@ export const DeleteRuleModal = ({
     },
   });
   const handleDeleteRule = () => {
-    mutate(rule.rule_id);
+    mutate(rule.name);
   };
 
   return (

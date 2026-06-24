@@ -886,12 +886,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
   },
   rules: {
     rule: {
-      mockedUrl: '/api/v1/rules/{rule_id}',
+      mockedUrl: '/api/v1/rules/{name}',
       get: {
         success: ({
           mockedResponse = {
-            rule_id: 'string',
             name: 'string',
+            display_name: 'string',
             severity: 'string',
             source: 'string',
             source_db: 'string',
@@ -902,13 +902,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
             hunt_name: 'string',
             created_at: 'string',
           },
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['RuleResponse'];
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -917,14 +917,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -935,8 +935,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             rule: {
-              rule_id: 'string',
               name: 'string',
+              display_name: 'string',
               severity: 'string',
               source_db: 'string',
               source_table: 'string',
@@ -967,13 +967,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
               warnings: ['string'],
             },
           },
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['RuleCreateResponse'];
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -982,14 +982,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -997,9 +997,9 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
       delete: {
-        success: ({ rule_id = 'rule_id' }: { rule_id?: string } = {}) => {
+        success: ({ name = 'name' }: { name?: string } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json({});
             },
@@ -1008,14 +1008,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -1030,8 +1030,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             items: [
               {
-                rule_id: 'string',
                 name: 'string',
+                display_name: 'string',
                 severity: 'string',
                 source: 'string',
                 source_db: 'string',
@@ -1070,8 +1070,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             rule: {
-              rule_id: 'string',
               name: 'string',
+              display_name: 'string',
               severity: 'string',
               source_db: 'string',
               source_table: 'string',

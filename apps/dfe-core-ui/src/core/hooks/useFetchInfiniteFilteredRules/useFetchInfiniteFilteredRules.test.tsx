@@ -82,8 +82,8 @@ describe('useFetchInfiniteFilteredRules', () => {
         expect(result.current.isLoading).toBe(false);
       });
       const responseItem: RuleListItem = {
-        rule_id: 'string',
         name: 'string',
+        display_name: 'string',
         severity: 'string',
         source: 'string',
         source_db: 'string',
