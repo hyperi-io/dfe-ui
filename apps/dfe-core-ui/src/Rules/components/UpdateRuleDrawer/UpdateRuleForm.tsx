@@ -63,7 +63,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
           name: true,
         }}
         initialValues={{
-          name: rule.name,
+          ...rule,
           user_sql: rule.original_sql,
           severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
           cel_filter: rule.cel_filter ?? undefined,

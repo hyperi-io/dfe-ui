@@ -67,7 +67,9 @@ export const RulesList = ({ className }: { className?: string }) => {
               onClick={() => setSelectedRuleName(rule.name)}
             >
               <dl className="w-full min-w-0">
-                <dt className="font-medium truncate">{rule.name}</dt>
+                <dt className="font-medium truncate">
+                  {rule.display_name ?? rule.name}
+                </dt>
                 <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
                   {rule.severity}
                   {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}

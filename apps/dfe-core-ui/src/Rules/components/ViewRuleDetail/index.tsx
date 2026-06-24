@@ -53,7 +53,10 @@ export const ViewRuleDetail = () => {
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h4 className="flex items-center w-full gap-2 text-lg font-medium">
-          Rule Configuration:
+          <span className="text-foreground/50 dark:text-dark-foreground/50">
+            Rule Configuration:
+          </span>{' '}
+          {ruleDetail.display_name}
         </h4>
         <RuleDetailActionMenu rule={ruleDetail} />
       </div>
