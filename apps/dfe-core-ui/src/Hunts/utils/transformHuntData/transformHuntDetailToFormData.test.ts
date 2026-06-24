@@ -53,21 +53,21 @@ describe('transformHuntFormDataToUpdateRequest', () => {
     const formValues = transformHuntDetailToFormData(huntDetail);
     formValues.name = 'Updated Hunt';
 
-    expect(transformHuntFormDataToUpdateRequest(formValues, huntDetail)).toEqual(
-      {
-        name: 'Updated Hunt',
-        cron: '0 * * * *',
-        log_buffer: 120,
-        global_target_table_name: 'target',
-        global_source_table_name: null,
-        customers: ['org_a'],
-        rules: formValues.rules,
-        customer_filters: null,
-        checkpoint_timestamp_field: null,
-        scheduling_mode: null,
-        min_interval_seconds: null,
-        explain_queries: null,
-      },
-    );
+    expect(
+      transformHuntFormDataToUpdateRequest(formValues, huntDetail),
+    ).toEqual({
+      name: 'Updated Hunt',
+      cron: '0 * * * *',
+      log_buffer: 120,
+      global_target_table_name: 'target',
+      global_source_table_name: null,
+      customers: ['org_a'],
+      rules: formValues.rules,
+      customer_filters: null,
+      checkpoint_timestamp_field: null,
+      scheduling_mode: null,
+      min_interval_seconds: null,
+      explain_queries: null,
+    });
   });
 });
