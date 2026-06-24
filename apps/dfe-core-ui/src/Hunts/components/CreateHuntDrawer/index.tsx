@@ -6,6 +6,7 @@ import {
 } from '@/Hunts/components/CreateUpdateHuntForm';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
+import { mapSelectedRuleIdsToHuntRuleEntries } from '@/Hunts/utils/transformHuntData/transformHuntDetailToFormData';
 
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -45,10 +46,13 @@ export const CreateHuntDrawer = ({
   });
   const handleCreateHunt = (values: CreateUpdateHuntFormData) => {
     createHuntMutation({
-      ...values,
-      cron: '* * * * *',
-      log_buffer: 60,
+      hunt_id: values.hunt_id,
+      name: values.name,
+      customers: values.customers,
+      cron: values.cron,
+      log_buffer: values.log_buffer,
       global_target_table_name: '',
+      rules: mapSelectedRuleIdsToHuntRuleEntries(values.rules),
     });
   };
   return (

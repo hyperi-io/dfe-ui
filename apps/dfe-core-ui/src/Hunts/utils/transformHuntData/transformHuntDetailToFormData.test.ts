@@ -36,14 +36,7 @@ describe('transformHuntDetailToFormData', () => {
       cron: '0 * * * *',
       log_buffer: 120,
       customers: ['org_a'],
-      rules: [
-        {
-          rule_name: 'rule_one',
-          target_table_name: '',
-          source: '',
-          initial_checkpoint_lookback_minutes: 0,
-        },
-      ],
+      rules: ['rule_one'],
     });
   });
 });
@@ -62,7 +55,14 @@ describe('transformHuntFormDataToUpdateRequest', () => {
       global_target_table_name: 'target',
       global_source_table_name: null,
       customers: ['org_a'],
-      rules: formValues.rules,
+      rules: [
+        {
+          rule_name: 'rule_one',
+          target_table_name: '',
+          source: '',
+          initial_checkpoint_lookback_minutes: 0,
+        },
+      ],
       customer_filters: null,
       checkpoint_timestamp_field: null,
       scheduling_mode: null,

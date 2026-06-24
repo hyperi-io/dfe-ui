@@ -20,18 +20,7 @@ const formSchema = z.object({
   name: z.string().min(1, { message: 'Display Name is required' }),
   customers: z.array(z.string()).min(1, { message: 'Customers are required' }),
   rules: z
-    .array(
-      z.object({
-        rule_name: z.string().min(1, { message: 'Rule name is required' }),
-        target_table_name: z
-          .string()
-          .min(1, { message: 'Target table name is required' }),
-        source: z.string().min(1, { message: 'Source is required' }),
-        initial_checkpoint_lookback_minutes: z.number().min(0, {
-          message: 'Initial checkpoint lookback minutes is required',
-        }),
-      }),
-    )
+    .array(z.string().min(1, { message: 'Rule is required' }))
     .min(1, { message: 'Rules are required' }),
   cron: z.string().min(1, { message: 'Cron is required' }),
   log_buffer: z.number().min(1, { message: 'Log buffer is required' }),
