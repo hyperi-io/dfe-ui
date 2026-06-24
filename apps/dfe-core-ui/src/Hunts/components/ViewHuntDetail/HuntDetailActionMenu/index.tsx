@@ -1,4 +1,5 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
@@ -6,7 +7,7 @@ import { HuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
-import { IconEdit, IconTrash } from '@repo/dfe-icons';
+import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
 
@@ -24,7 +25,7 @@ export const HuntDetailActionMenu = ({
 
   const queryClient = useQueryClient();
 
-  const _onCloneSuccess = (hunt: HuntCreateResponse) => {
+  const onCloneSuccess = (hunt: HuntCreateResponse) => {
     setSelectedHuntName(hunt.name);
     refetchHunts();
     notification.success({
@@ -79,7 +80,7 @@ export const HuntDetailActionMenu = ({
         }
         onSuccess={onEditSuccess}
       />
-      {/* <CloneHuntModal
+      <CloneHuntModal
         key="clone-hunt"
         hunt={hunt}
         trigger={
@@ -93,7 +94,7 @@ export const HuntDetailActionMenu = ({
           </Button>
         }
         onSuccess={onCloneSuccess}
-      />*/}
+      />
 
       <DeleteHuntModal
         key="delete-hunt"
