@@ -52,7 +52,7 @@ export const ViewHuntDetail = () => {
       </div>
 
       <AceEditor
-        value={JSON.stringify(huntDetail.config, null, 2)}
+        value={JSON.stringify(huntDetail, null, 2)}
         mode="json"
         height="300px"
         readOnly

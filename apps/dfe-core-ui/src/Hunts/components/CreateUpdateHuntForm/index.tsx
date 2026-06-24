@@ -12,7 +12,7 @@ const HUNT_ID_REGEX = /^[a-z][a-z0-9_]*$/;
 const formSchema = z.object({
   hunt_id: z
     .string()
-    .min(1, { message: 'ID is required' })
+    .min(1, { message: 'Identifier is required' })
     .refine((v) => HUNT_ID_REGEX.test(v), {
       message:
         'Identifier must contain only lowercase letters, numbers, and underscores',
@@ -92,6 +92,10 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item name="rules" label="Rules" rules={[formValidation]}>
         <RuleSelect mode="multiple" placeholder="Select rules" />
+      </Form.Item>
+
+      <Form.Item name="cron" label="Cron" rules={[formValidation]}>
+        <Input placeholder="Enter cron expression" />
       </Form.Item>
 
       {error && (

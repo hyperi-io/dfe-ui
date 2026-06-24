@@ -2561,14 +2561,29 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             hunt_id: 'string',
-            config: {
-              name: 'string',
-              cron: 'string',
-              log_buffer: 0,
-              global_target_table_name: 'string',
-              global_source_table_name: 'string',
-              customers: ['string'],
+            name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
             },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
+            explain_queries: false,
           },
         }: {
           mockedResponse?: components['schemas']['HuntDetailResponse'];
@@ -2614,14 +2629,28 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             hunt_id: 'string',
-            config: {
-              name: 'string',
-              cron: 'string',
-              log_buffer: 0,
-              global_target_table_name: 'string',
-              global_source_table_name: 'string',
-              customers: ['string'],
+            name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
             },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
           },
           hunt_id = 'hunt_id',
         }: {
@@ -2640,14 +2669,28 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             hunt_id: 'string',
-            config: {
-              name: 'string',
-              cron: 'string',
-              log_buffer: 0,
-              global_target_table_name: 'string',
-              global_source_table_name: 'string',
-              customers: ['string'],
+            name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
             },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
           },
           hunt_id = 'hunt_id',
         }: {
