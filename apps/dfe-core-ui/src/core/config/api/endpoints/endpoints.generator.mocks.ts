@@ -1199,8 +1199,36 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            url: 'string',
+            description: 'string',
+            enabled: true,
+          },
+        }: {
+          mockedResponse?: components['schemas']['AlertDestination'];
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
