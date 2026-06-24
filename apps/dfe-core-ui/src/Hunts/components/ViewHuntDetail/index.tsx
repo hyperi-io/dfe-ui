@@ -1,6 +1,6 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
 import { Spin } from 'antd';
@@ -54,12 +54,7 @@ export const ViewHuntDetail = () => {
         <HuntDetailActionMenu hunt={huntDetail} />
       </div>
 
-      <AceEditor
-        value={JSON.stringify(huntDetail, null, 2)}
-        mode="json"
-        height="300px"
-        readOnly
-      />
+      <ViewHuntDetailTabs selectedHuntName={selectedHuntName} {...huntDetail} />
     </div>
   );
 };
