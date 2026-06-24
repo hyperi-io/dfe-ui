@@ -12,8 +12,8 @@ export const HuntList = ({ className }: { className?: string }) => {
     isLoading,
     loadMoreRef,
     isFetchingNextPage,
-    selectedHuntId,
-    setSelectedHuntId,
+    selectedHuntName,
+    setSelectedHuntName,
     filters,
     hasFilters,
     setFilters,
@@ -53,9 +53,9 @@ export const HuntList = ({ className }: { className?: string }) => {
       )}
     >
       {hunts.map((hunt: HuntListItem) => {
-        const isSelected = selectedHuntId === hunt.hunt_id;
+        const isSelected = selectedHuntName === hunt.name;
         return (
-          <li key={hunt.hunt_id} className="w-full">
+          <li key={hunt.name} className="w-full">
             <button
               type="button"
               className={cn(
@@ -63,9 +63,9 @@ export const HuntList = ({ className }: { className?: string }) => {
                 'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
                 isSelected && 'bg-gray-200 dark:bg-gray-700',
               )}
-              onClick={() => setSelectedHuntId(hunt.hunt_id)}
+              onClick={() => setSelectedHuntName(hunt.name)}
             >
-              {hunt.name}
+              {hunt.display_name}
             </button>
           </li>
         );

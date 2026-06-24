@@ -12,7 +12,7 @@ const normalizeCron = (cron: HuntDetailResponse['cron']): string => {
 export const transformHuntDetailToFormData = (
   hunt: HuntDetailResponse,
 ): CreateUpdateHuntFormData => ({
-  hunt_id: hunt.hunt_id,
+  display_name: hunt.display_name,
   name: hunt.name,
   customers: hunt.customers,
   cron: normalizeCron(hunt.cron),
@@ -24,7 +24,7 @@ export const transformHuntFormDataToUpdateRequest = (
   values: CreateUpdateHuntFormData,
   hunt: HuntDetailResponse,
 ): HuntUpdateRequest => ({
-  name: values.name,
+  display_name: values.display_name ?? null,
   cron: values.cron,
   log_buffer: values.log_buffer,
   global_target_table_name: hunt.global_target_table_name,

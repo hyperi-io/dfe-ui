@@ -10,9 +10,9 @@ export const useDeleteHunt = ({
   onError?: (error: Error) => void;
 }) => {
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (hunt_id: string) => {
+    mutationFn: (name: string) => {
       return apiClient.delete(API_CONFIG.hunts.hunt, {
-        pathParams: { hunt_id },
+        pathParams: { name },
       });
     },
     onSuccess: () => {

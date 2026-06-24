@@ -2,24 +2,20 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
 
-export const HUNT_DETAIL_QUERY_KEY = (hunt_id?: string | null) => [
+export const HUNT_DETAIL_QUERY_KEY = (name?: string | null) => [
   'huntDetail',
-  hunt_id,
+  name,
 ];
 
-export const useFetchHuntDetail = ({
-  hunt_id,
-}: {
-  hunt_id?: string | null;
-}) => {
+export const useFetchHuntDetail = ({ name }: { name?: string | null }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: HUNT_DETAIL_QUERY_KEY(hunt_id),
+    queryKey: HUNT_DETAIL_QUERY_KEY(name),
     queryFn: ({ signal }) =>
       apiClient.get(API_CONFIG.hunts.hunt, {
-        pathParams: { hunt_id: hunt_id ?? '' },
+        pathParams: { name: name ?? '' },
         signal,
       }),
-    enabled: !!hunt_id,
+    enabled: !!name,
   });
 
   return { data, isLoading, error };

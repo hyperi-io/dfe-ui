@@ -1,3 +1,4 @@
+import { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHuntForm';
 import type { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { HuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 import { describe, expect, it } from 'vitest';
@@ -7,8 +8,8 @@ import {
 } from './transformHuntDetailToFormData';
 
 const huntDetail: HuntDetailResponse = {
-  hunt_id: 'my_hunt',
-  name: 'My Hunt',
+  display_name: 'My Hunt',
+  name: 'my_hunt',
   cron: ['0 * * * *', '0 0 * * *'],
   log_buffer: 120,
   global_target_table_name: 'target',
@@ -31,14 +32,15 @@ const huntDetail: HuntDetailResponse = {
 
 describe('transformHuntDetailToFormData', () => {
   it('normalizes API hunt detail into strict form values', () => {
-    expect(transformHuntDetailToFormData(huntDetail)).toEqual({
-      hunt_id: 'my_hunt',
-      name: 'My Hunt',
+    const expectedFormData: CreateUpdateHuntFormData = {
+      name: 'my_hunt',
+      display_name: 'My Hunt',
       cron: '0 * * * *',
       log_buffer: 120,
       customers: ['org_a'],
       rules: ['rule_one'],
-    });
+    };
+    expect(transformHuntDetailToFormData(huntDetail)).toEqual(expectedFormData);
   });
 });
 
@@ -48,7 +50,7 @@ describe('transformHuntFormDataToUpdateRequest', () => {
     formValues.name = 'Updated Hunt';
 
     const expectedRequest: HuntUpdateRequest = {
-      name: 'Updated Hunt',
+      display_name: 'My Hunt',
       cron: '0 * * * *',
       log_buffer: 120,
       global_target_table_name: 'target',

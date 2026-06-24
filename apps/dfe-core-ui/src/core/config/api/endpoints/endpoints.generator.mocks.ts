@@ -2522,7 +2522,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             items: [
               {
-                hunt_id: 'string',
+                display_name: 'string',
                 name: 'string',
                 source_table: 'string',
                 target_table: 'string',
@@ -2560,7 +2560,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       post: {
         success: ({
           mockedResponse = {
-            hunt_id: 'string',
+            display_name: 'string',
             name: 'string',
             cron: 'string',
             log_buffer: 0,
@@ -2624,11 +2624,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     hunt: {
-      mockedUrl: '/api/v1/hunts/{hunt_id}',
+      mockedUrl: '/api/v1/hunts/{name}',
       get: {
         success: ({
           mockedResponse = {
-            hunt_id: 'string',
+            display_name: 'string',
             name: 'string',
             cron: 'string',
             log_buffer: 0,
@@ -2652,13 +2652,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
             scheduling_mode: 'string',
             min_interval_seconds: 0,
           },
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HuntDetailResponse'];
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -2668,8 +2668,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
       put: {
         success: ({
           mockedResponse = {
-            hunt_id: 'string',
             name: 'string',
+            display_name: 'string',
             cron: 'string',
             log_buffer: 0,
             global_target_table_name: 'string',
@@ -2692,13 +2692,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
             scheduling_mode: 'string',
             min_interval_seconds: 0,
           },
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HuntDetailResponse'];
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -2707,14 +2707,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -2724,10 +2724,10 @@ export const API_CONFIG_MOCKS = Object.freeze({
       delete: {
         success: ({
           status = 204,
-          hunt_id = 'hunt_id',
-        }: { status?: number; hunt_id?: string } = {}) => {
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json({}, { status });
             },
@@ -2736,14 +2736,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{hunt_id}', hunt_id),
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -2752,23 +2752,20 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     huntRun: {
-      mockedUrl: '/api/v1/hunts/{hunt_id}/run',
+      mockedUrl: '/api/v1/hunts/{name}/run',
       post: {
         success: ({
           mockedResponse = {
             task_id: 'string',
             hunt_name: 'string',
           },
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['TriggerResponse'];
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.post(
-            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace(
-              '{hunt_id}',
-              hunt_id,
-            ),
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -2777,17 +2774,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          hunt_id = 'hunt_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          hunt_id?: string;
+          name?: string;
         } = {}) => {
           return http.post(
-            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace(
-              '{hunt_id}',
-              hunt_id,
-            ),
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },

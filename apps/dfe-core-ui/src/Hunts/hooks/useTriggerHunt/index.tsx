@@ -6,16 +6,16 @@ import { TriggerRequest, TriggerResponse } from './types';
 export const useTriggerHunt = ({
   onSuccess,
   onError,
-  hunt_id,
+  name,
 }: {
-  hunt_id: string;
+  name: string;
   onSuccess?: (data: TriggerResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (triggerRequest: TriggerRequest) => {
       return apiClient.post(API_CONFIG.hunts.huntRun, {
-        pathParams: { hunt_id },
+        pathParams: { name },
         body: triggerRequest,
       });
     },

@@ -7,13 +7,13 @@ import { Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
 
 export const ViewHuntDetail = () => {
-  const { selectedHuntId } = useListHuntsContext();
+  const { selectedHuntName } = useListHuntsContext();
   const {
     data: huntDetail,
     isLoading,
     error,
   } = useFetchHuntDetail({
-    hunt_id: selectedHuntId,
+    name: selectedHuntName,
   });
 
   if (isLoading) {

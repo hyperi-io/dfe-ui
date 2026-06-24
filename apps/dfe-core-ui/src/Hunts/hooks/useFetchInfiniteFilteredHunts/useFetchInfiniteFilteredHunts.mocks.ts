@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node';
 import { HuntListResponse } from './types';
 
 const HUNT_ITEM: HuntListResponse['items'][number] = {
-  hunt_id: 'string',
+  display_name: 'string',
   name: 'string',
   source_table: 'string',
   target_table: 'string',

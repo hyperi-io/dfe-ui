@@ -24,7 +24,7 @@ interface ListHuntsQueryParams extends Omit<
   UseFetchInfiniteFilteredHuntsProps,
   'page'
 > {
-  hunt_id?: string;
+  name?: string;
 }
 
 const parseFiltersFromParams = (
@@ -46,7 +46,7 @@ const filtersToSearchString = (f: ListHuntsQueryParams): string => {
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.per_page) params.set('per_page', String(f.per_page));
-  if (f.hunt_id) params.set('hunt_id', f.hunt_id);
+  if (f.name) params.set('name', f.name);
   return params.toString();
 };
 
@@ -68,8 +68,8 @@ export interface ListHuntsContextValue {
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
-  selectedHuntId: string | null;
-  setSelectedHuntId: (hunt_id: string | null) => void;
+  selectedHuntName: string | null;
+  setSelectedHuntName: (name: string | null) => void;
 }
 
 const DEFAULT_HUNT_LIST_RESPONSE: HuntListResponse = {
@@ -94,9 +94,7 @@ export const ListHuntsProvider = ({
   defaultFilters = {},
 }: ListHuntsProviderProps) => {
   const queryClient = useQueryClient();
-  const [selectedHuntId, setSelectedHuntIdState] = useState<string | null>(
-    null,
-  );
+  const [selectedHuntName, setSelectedHuntName] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -107,9 +105,9 @@ export const ListHuntsProvider = ({
   }, [searchParams, defaultFilters]);
 
   useEffect(() => {
-    const hunt_id = searchParams.get('hunt_id');
+    const name = searchParams.get('name');
     startTransition(() =>
-      setSelectedHuntIdState(hunt_id && hunt_id !== '' ? hunt_id : null),
+      setSelectedHuntName(name && name !== '' ? name : null),
     );
   }, [searchParams]);
 
@@ -139,20 +137,20 @@ export const ListHuntsProvider = ({
       const updated: ListHuntsQueryParams = {
         ...filters,
         ...newFilters,
-        hunt_id: selectedHuntId ?? undefined,
+        name: selectedHuntName ?? undefined,
       };
       const query = filtersToSearchString(updated);
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [queryClient, router, pathname, filters, selectedHuntId],
+    [queryClient, router, pathname, filters, selectedHuntName],
   );
 
-  const handleSetSelectedHuntId = useCallback(
-    (hunt_id: string | null) => {
-      setSelectedHuntIdState(hunt_id);
+  const handleSetSelectedHuntName = useCallback(
+    (name: string | null) => {
+      setSelectedHuntName(name);
       const query = filtersToSearchString({
         ...filters,
-        hunt_id: hunt_id ?? '',
+        name: name ?? '',
       });
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
@@ -173,8 +171,8 @@ export const ListHuntsProvider = ({
       hasNextPage,
       loadMoreRef,
       isFetchingNextPage,
-      selectedHuntId,
-      setSelectedHuntId: handleSetSelectedHuntId,
+      selectedHuntName,
+      setSelectedHuntName: handleSetSelectedHuntName,
     }),
     [
       data,
@@ -189,8 +187,8 @@ export const ListHuntsProvider = ({
       hasNextPage,
       loadMoreRef,
       isFetchingNextPage,
-      selectedHuntId,
-      handleSetSelectedHuntId,
+      selectedHuntName,
+      handleSetSelectedHuntName,
     ],
   );
 

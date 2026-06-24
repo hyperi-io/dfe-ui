@@ -27,14 +27,14 @@ export const CreateHuntDrawer = ({
     onClose?.();
   };
 
-  const { refetch: refetchHunts, setSelectedHuntId } = useListHuntsContext();
+  const { refetch: refetchHunts, setSelectedHuntName } = useListHuntsContext();
   const {
     mutate: createHuntMutation,
     isPending,
     error,
   } = useCreateHunt({
     onSuccess: (response) => {
-      setSelectedHuntId(response.hunt_id);
+      setSelectedHuntName(response.name);
       refetchHunts();
       setIsDrawerVisible(false);
       api.success({
@@ -45,7 +45,7 @@ export const CreateHuntDrawer = ({
   });
   const handleCreateHunt = (values: CreateUpdateHuntFormData) => {
     createHuntMutation({
-      hunt_id: values.hunt_id,
+      display_name: values.display_name,
       name: values.name,
       customers: values.customers,
       cron: values.cron,
@@ -103,7 +103,7 @@ export const CreateHuntDrawer = ({
             rules: [],
             cron: '* * * * *',
             log_buffer: 60,
-            hunt_id: '',
+            display_name: '',
           }}
         />
       </Drawer>

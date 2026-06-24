@@ -4,11 +4,11 @@ import { useMutation } from '@tanstack/react-query';
 import { HuntUpdateRequest, HuntUpdateResponse } from './types';
 
 export const useUpdateHunt = ({
-  hunt_id,
+  name,
   onSuccess,
   onError,
 }: {
-  hunt_id: string;
+  name: string;
   onSuccess?: (data: HuntUpdateResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -16,7 +16,7 @@ export const useUpdateHunt = ({
     mutationFn: (hunt: HuntUpdateRequest) =>
       apiClient.put(API_CONFIG.hunts.hunt, {
         body: hunt,
-        pathParams: { hunt_id },
+        pathParams: { name },
       }),
     onSuccess: (data) => {
       onSuccess?.(data);

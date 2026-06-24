@@ -22,37 +22,37 @@ export const HuntDetailActionMenu = ({
   onEditSuccess: onEditSuccessProp,
 }: HuntDetailActionMenuProps) => {
   const { notification } = App.useApp();
-  const { refetch: refetchHunts, setSelectedHuntId } = useListHuntsContext();
+  const { refetch: refetchHunts, setSelectedHuntName } = useListHuntsContext();
 
   const queryClient = useQueryClient();
 
   const _onCloneSuccess = (hunt: HuntCreateResponse) => {
-    setSelectedHuntId(hunt.hunt_id);
+    setSelectedHuntName(hunt.name);
     refetchHunts();
     notification.success({
-      title: `Hunt ${hunt.hunt_id} cloned successfully`,
+      title: `Hunt ${hunt.name} cloned successfully`,
       placement: 'bottomLeft',
     });
   };
 
   const _onDeleteSuccess = () => {
-    setSelectedHuntId(null);
+    setSelectedHuntName(null);
     refetchHunts();
     notification.success({
-      title: `Hunt ${hunt.hunt_id} deleted successfully`,
+      title: `Hunt ${hunt.name} deleted successfully`,
       placement: 'bottomLeft',
     });
   };
 
   const onEditSuccess = (hunt: HuntUpdateResponse) => {
-    setSelectedHuntId(hunt.hunt_id);
+    setSelectedHuntName(hunt.name);
 
     void queryClient.invalidateQueries({
-      queryKey: HUNT_DETAIL_QUERY_KEY(hunt.hunt_id),
+      queryKey: HUNT_DETAIL_QUERY_KEY(hunt.name),
     });
 
     notification.success({
-      title: `Hunt ${hunt.hunt_id} updated successfully`,
+      title: `Hunt ${hunt.name} updated successfully`,
       placement: 'bottomLeft',
     });
     onEditSuccessProp?.(hunt);

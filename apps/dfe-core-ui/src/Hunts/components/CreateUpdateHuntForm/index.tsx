@@ -7,17 +7,17 @@ import z from 'zod';
 import { OrganisationSelect } from './OrganisationSelect';
 import { RuleSelect } from './RuleSelect';
 
-const HUNT_ID_REGEX = /^[a-z][a-z0-9_]*$/;
+const NAME_REGEX = /^[a-z][a-z0-9_]*$/;
 
 const formSchema = z.object({
-  hunt_id: z
+  name: z
     .string()
     .min(1, { message: 'Identifier is required' })
-    .refine((v) => HUNT_ID_REGEX.test(v), {
+    .refine((v) => NAME_REGEX.test(v), {
       message:
         'Identifier must contain only lowercase letters, numbers, and underscores',
     }),
-  name: z.string().min(1, { message: 'Display Name is required' }),
+  display_name: z.string().optional().nullable(),
   customers: z.array(z.string()).min(1, { message: 'Customers are required' }),
   rules: z
     .array(z.string().min(1, { message: 'Rule is required' }))
@@ -28,7 +28,7 @@ const formSchema = z.object({
 export type CreateUpdateHuntFormData = z.infer<typeof formSchema>;
 
 interface DisabledFields {
-  hunt_id?: boolean;
+  name?: boolean;
 }
 
 type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
@@ -64,10 +64,14 @@ export const CreateUpdateHuntForm = ({
       initialValues={initialValues}
       {...props}
     >
-      <Form.Item name="hunt_id" label="Identifier" rules={[formValidation]}>
-        <Input placeholder="Enter name" disabled={disabledFields?.hunt_id} />
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
+        <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
-      <Form.Item name="name" label="Display Name" rules={[formValidation]}>
+      <Form.Item
+        name="display_name"
+        label="Display Name"
+        rules={[formValidation]}
+      >
         <Input placeholder="Enter name" />
       </Form.Item>
       <Form.Item

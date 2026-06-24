@@ -60,8 +60,8 @@ export const ListHuntsFilterForm = ({
         sortByValue={filters.sort_by}
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
-          { label: 'Hunt ID', value: 'hunt_id' },
-          { label: 'Hunt Name', value: 'hunt_name' },
+          { label: 'Name', value: 'name' },
+          { label: 'Display Name', value: 'display_name' },
           { label: 'Source Table', value: 'source_table' },
           { label: 'Target Table', value: 'target_table' },
         ]}

@@ -27,7 +27,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateHunt', () => {
   const parameters: HuntUpdateRequest = {
-    name: 'string',
+    display_name: 'string',
     cron: 'string',
     log_buffer: 0,
     global_target_table_name: 'string',
@@ -50,12 +50,12 @@ describe('.useUpdateHunt', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateHunt({ onSuccess, onError, hunt_id: 'hunt_id' }),
+        () => useUpdateHunt({ onSuccess, onError, name: 'name' }),
         { wrapper },
       );
 
       result.current.mutate({
-        name: parameters.name,
+        display_name: parameters.display_name,
         cron: parameters.cron,
         log_buffer: parameters.log_buffer,
         global_target_table_name: parameters.global_target_table_name,
@@ -70,8 +70,8 @@ describe('.useUpdateHunt', () => {
       });
 
       const expectedResponse: HuntUpdateResponse = {
-        hunt_id: 'string',
         name: 'string',
+        display_name: 'string',
         cron: 'string',
         log_buffer: 0,
         global_target_table_name: 'string',
@@ -116,7 +116,7 @@ describe('.useUpdateHunt', () => {
 
   describe('onError', () => {
     const requestBody: HuntUpdateRequest = {
-      name: 'string',
+      display_name: 'string',
       cron: 'string',
       log_buffer: 0,
       global_target_table_name: 'string',
@@ -142,12 +142,12 @@ describe('.useUpdateHunt', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateHunt({ onSuccess, onError, hunt_id: 'hunt_id' }),
+        () => useUpdateHunt({ onSuccess, onError, name: 'name' }),
         { wrapper },
       );
 
       result.current.mutate({
-        name: requestBody.name,
+        display_name: requestBody.display_name,
         cron: requestBody.cron,
         log_buffer: requestBody.log_buffer,
         global_target_table_name: requestBody.global_target_table_name,

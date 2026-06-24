@@ -84,7 +84,7 @@ export const API_CONFIG = Object.freeze({
   hunts: {
     default: '/api/v1/hunts',
     engineStatus: '/api/v1/hunts/status',
-    hunt: '/api/v1/hunts/{hunt_id}',
-    huntRun: '/api/v1/hunts/{hunt_id}/run',
+    hunt: '/api/v1/hunts/{name}',
+    huntRun: '/api/v1/hunts/{name}/run',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

@@ -10,7 +10,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 /** useFetchInfiniteFilteredHunts props */
 /**
  * @param search - The search query to filter the hunts by name and description.
- * @param sort_by - The field to sort the hunts by (hunt_id, name, source_table, target_table).
+ * @param sort_by - The field to sort the hunts by (name, display_name, source_table, target_table).
  * @param sort_order - The order to sort the hunts by.
  * @param per_page - The number of hunts to fetch per page.
  */

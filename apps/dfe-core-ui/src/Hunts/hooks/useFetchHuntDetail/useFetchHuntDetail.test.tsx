@@ -16,18 +16,18 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useFetchHuntDetail', () => {
-  describe('hunt_id is provided', () => {
+  describe('name is provided', () => {
     test('should return hunt detail', async () => {
       const { result } = renderHook(
         () =>
           useFetchHuntDetail({
-            hunt_id: 'hunt_id',
+            name: 'name',
           }),
         { wrapper },
       );
 
       const response: HuntDetailResponse = {
-        hunt_id: 'string',
+        display_name: 'string',
         name: 'string',
         cron: 'string',
         log_buffer: 0,
@@ -62,10 +62,10 @@ describe('.useFetchHuntDetail', () => {
     });
   });
 
-  describe('hunt_id is not provided', () => {
+  describe('name is not provided', () => {
     test('should not fetch and should not return data', async () => {
       const { result } = renderHook(
-        () => useFetchHuntDetail({ hunt_id: undefined }),
+        () => useFetchHuntDetail({ name: undefined }),
         { wrapper },
       );
 
@@ -78,11 +78,10 @@ describe('.useFetchHuntDetail', () => {
       });
     });
 
-    test('should not fetch when hunt_id is null', async () => {
-      const { result } = renderHook(
-        () => useFetchHuntDetail({ hunt_id: null }),
-        { wrapper },
-      );
+    test('should not fetch when name is null', async () => {
+      const { result } = renderHook(() => useFetchHuntDetail({ name: null }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current).toEqual({

@@ -67,7 +67,7 @@ describe('useFetchInfiniteFilteredHunts', () => {
         expect(result.current.isLoading).toBe(false);
       });
       const responseItem: HuntListResponse['items'][number] = {
-        hunt_id: 'string',
+        display_name: 'string',
         name: 'string',
         source_table: 'string',
         target_table: 'string',
@@ -287,7 +287,7 @@ describe('useFetchInfiniteFilteredHunts', () => {
 
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredHunts({ sort_by: 'hunt_id' }),
+        () => useFetchInfiniteFilteredHunts({ sort_by: 'name' }),
         {
           wrapper,
         },
@@ -305,7 +305,7 @@ describe('useFetchInfiniteFilteredHunts', () => {
         () =>
           useFetchInfiniteFilteredHunts({
             search: 'test',
-            sort_by: 'hunt_id',
+            sort_by: 'name',
             sort_order: 'asc',
             per_page: 20,
           }),

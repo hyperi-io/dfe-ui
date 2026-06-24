@@ -49,13 +49,13 @@ export const UpdateHuntDrawer = ({
     isPending,
     error,
   } = useUpdateHunt({
-    hunt_id: hunt.hunt_id,
+    name: hunt.name,
     onSuccess: (response) => {
       setIsDrawerVisible(false);
       onClose?.();
       onSuccess?.(response);
       api.success({
-        title: `${response.hunt_id} updated successfully`,
+        title: `${response.name} updated successfully`,
         placement: 'bottomLeft',
       });
     },
@@ -113,14 +113,14 @@ export const UpdateHuntDrawer = ({
         onClose={handleClose}
       >
         <CreateUpdateHuntForm
-          key={hunt.hunt_id}
+          key={hunt.name}
           onFinish={handleUpdateHunt}
           isPending={isPending}
           error={error}
           buttonLabel={title}
           initialValues={initialValues}
           disabledFields={{
-            hunt_id: true,
+            name: true,
           }}
         />
       </Drawer>

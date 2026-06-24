@@ -27,7 +27,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateHunt', () => {
   const requestBody: HuntCreateRequest = {
-    hunt_id: 'string',
+    display_name: 'string',
     name: 'string',
     cron: 'string',
     log_buffer: 0,
@@ -54,11 +54,11 @@ describe('.useCreateHunt', () => {
         global_source_table_name: requestBody.global_source_table_name,
         customers: requestBody.customers,
         rules: requestBody.rules,
-        hunt_id: requestBody.hunt_id,
+        display_name: requestBody.display_name,
       });
 
       const expectedResponse: HuntCreateResponse = {
-        hunt_id: 'string',
+        display_name: 'string',
         name: 'string',
         cron: 'string',
         log_buffer: 0,
@@ -124,7 +124,7 @@ describe('.useCreateHunt', () => {
         global_source_table_name: requestBody.global_source_table_name,
         customers: requestBody.customers,
         rules: requestBody.rules,
-        hunt_id: requestBody.hunt_id,
+        display_name: requestBody.display_name,
       });
 
       await waitFor(() => {

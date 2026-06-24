@@ -25,7 +25,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useDeleteHunt', () => {
-  const huntId = 'hunt_id';
+  const name = 'name';
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
       const onSuccess = vi.fn();
@@ -36,7 +36,7 @@ describe('.useDeleteHunt', () => {
         { wrapper },
       );
 
-      result.current.mutate(huntId);
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -69,7 +69,7 @@ describe('.useDeleteHunt', () => {
         { wrapper },
       );
 
-      result.current.mutate(huntId);
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

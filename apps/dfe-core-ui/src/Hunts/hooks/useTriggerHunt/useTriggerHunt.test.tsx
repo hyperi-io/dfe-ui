@@ -35,7 +35,7 @@ describe('.useTriggerHunt', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useTriggerHunt({ onSuccess, onError, hunt_id: 'hunt_id' }),
+        () => useTriggerHunt({ onSuccess, onError, name: 'name' }),
         { wrapper },
       );
 
@@ -74,7 +74,7 @@ describe('.useTriggerHunt', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useTriggerHunt({ onSuccess, onError, hunt_id: 'hunt_id' }),
+        () => useTriggerHunt({ onSuccess, onError, name: 'name' }),
         { wrapper },
       );
 
