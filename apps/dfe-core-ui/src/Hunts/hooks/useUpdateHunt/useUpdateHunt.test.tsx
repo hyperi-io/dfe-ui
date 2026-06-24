@@ -33,14 +33,7 @@ describe('.useUpdateHunt', () => {
     global_target_table_name: 'string',
     global_source_table_name: 'string',
     customers: ['string'],
-    rules: [
-      {
-        rule_name: 'string',
-        target_table_name: 'string',
-        source: 'string',
-        initial_checkpoint_lookback_minutes: 0,
-      },
-    ],
+    rules: ['string'],
     customer_filters: {
       string: {
         filters: ['string'],
@@ -129,14 +122,7 @@ describe('.useUpdateHunt', () => {
       global_target_table_name: 'string',
       global_source_table_name: 'string',
       customers: ['string'],
-      rules: [
-        {
-          rule_name: 'string',
-          target_table_name: 'string',
-          source: 'string',
-          initial_checkpoint_lookback_minutes: 0,
-        },
-      ],
+      rules: ['string'],
       customer_filters: {
         string: {
           filters: ['string'],

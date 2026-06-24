@@ -1,9 +1,6 @@
 import type { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHuntForm';
 import type { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import type { HuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
-import type { components } from '@repo/dfe-engine-types';
-
-type HuntRuleEntry = components['schemas']['HuntRuleEntry'];
 
 const normalizeCron = (cron: HuntDetailResponse['cron']): string => {
   if (Array.isArray(cron)) {
@@ -11,29 +8,6 @@ const normalizeCron = (cron: HuntDetailResponse['cron']): string => {
   }
   return cron ?? '';
 };
-
-export const mapSelectedRuleIdsToHuntRuleEntries = (
-  ruleIds: string[],
-  existingRules: HuntDetailResponse['rules'] = [],
-): HuntRuleEntry[] =>
-  ruleIds.map((ruleId) => {
-    const existing = existingRules.find((rule) => rule.rule_name === ruleId);
-    if (existing) {
-      return {
-        rule_name: existing.rule_name,
-        target_table_name: existing.target_table_name ?? '',
-        source: existing.source ?? '',
-        initial_checkpoint_lookback_minutes:
-          existing.initial_checkpoint_lookback_minutes ?? 0,
-      };
-    }
-    return {
-      rule_name: ruleId,
-      target_table_name: '',
-      source: '',
-      initial_checkpoint_lookback_minutes: 0,
-    };
-  });
 
 export const transformHuntDetailToFormData = (
   hunt: HuntDetailResponse,
@@ -56,7 +30,7 @@ export const transformHuntFormDataToUpdateRequest = (
   global_target_table_name: hunt.global_target_table_name,
   global_source_table_name: hunt.global_source_table_name ?? null,
   customers: values.customers,
-  rules: mapSelectedRuleIdsToHuntRuleEntries(values.rules, hunt.rules),
+  rules: values.rules,
   customer_filters: hunt.customer_filters ?? null,
   checkpoint_timestamp_field: hunt.checkpoint_timestamp_field ?? null,
   scheduling_mode: hunt.scheduling_mode ?? null,
