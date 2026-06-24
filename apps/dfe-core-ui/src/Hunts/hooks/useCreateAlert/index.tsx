@@ -10,7 +10,7 @@ export const useCreateAlert = ({
   onSuccess: (data: AlertCreateResponse) => void;
   onError: (error: Error) => void;
 }) => {
-  const { mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error } = useMutation({
     mutationFn: (alert: AlertCreateRequest) =>
       apiClient.post(API_CONFIG.alerts.destinations, { body: alert }),
     onSuccess: (data) => {
@@ -20,5 +20,5 @@ export const useCreateAlert = ({
       onError?.(error);
     },
   });
-  return { mutate, isPending, error };
+  return { data, mutate, isPending, error };
 };
