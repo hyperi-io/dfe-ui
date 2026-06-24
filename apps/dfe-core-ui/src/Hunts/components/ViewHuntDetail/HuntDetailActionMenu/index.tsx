@@ -2,11 +2,15 @@ import { ActionsMenu } from '@/core/components/ActionsMenu';
 // import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 // import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 // import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
+import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { HuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
-import { App } from 'antd';
+import { IconEdit } from '@repo/dfe-icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { App, Button } from 'antd';
 
 interface HuntDetailActionMenuProps {
   onEditSuccess?: (hunt: HuntUpdateResponse) => void;
@@ -15,10 +19,12 @@ interface HuntDetailActionMenuProps {
 
 export const HuntDetailActionMenu = ({
   hunt,
-  onEditSuccess: _onEditSuccess,
+  onEditSuccess: onEditSuccessProp,
 }: HuntDetailActionMenuProps) => {
   const { notification } = App.useApp();
   const { refetch: refetchHunts, setSelectedHuntId } = useListHuntsContext();
+
+  const queryClient = useQueryClient();
 
   const _onCloneSuccess = (hunt: HuntCreateResponse) => {
     setSelectedHuntId(hunt.hunt_id);
@@ -38,6 +44,20 @@ export const HuntDetailActionMenu = ({
     });
   };
 
+  const onEditSuccess = (hunt: HuntUpdateResponse) => {
+    setSelectedHuntId(hunt.hunt_id);
+
+    void queryClient.invalidateQueries({
+      queryKey: HUNT_DETAIL_QUERY_KEY(hunt.hunt_id),
+    });
+
+    notification.success({
+      title: `Hunt ${hunt.hunt_id} updated successfully`,
+      placement: 'bottomLeft',
+    });
+    onEditSuccessProp?.(hunt);
+  };
+
   return (
     <ActionsMenu
       placement="left"
@@ -46,7 +66,7 @@ export const HuntDetailActionMenu = ({
       }}
     >
       <></>
-      {/* <UpdateHuntDrawer
+      <UpdateHuntDrawer
         key="update-hunt"
         hunt={hunt}
         trigger={
@@ -61,7 +81,7 @@ export const HuntDetailActionMenu = ({
         }
         onSuccess={onEditSuccess}
       />
-      <CloneHuntModal
+      {/* <CloneHuntModal
         key="clone-hunt"
         hunt={hunt}
         trigger={

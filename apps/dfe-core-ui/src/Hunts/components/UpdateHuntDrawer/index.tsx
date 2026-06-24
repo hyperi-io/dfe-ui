@@ -90,7 +90,7 @@ export const UpdateHuntDrawer = ({
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
-          className="opacity-100 justify-start"
+          className="justify-start opacity-100"
           tooltip={{ show: true, placement: 'left' }}
         >
           {trigger ? (
@@ -119,6 +119,9 @@ export const UpdateHuntDrawer = ({
           error={error}
           buttonLabel={title}
           initialValues={initialValues}
+          disabledFields={{
+            hunt_id: true,
+          }}
         />
       </Drawer>
     </>

@@ -2,7 +2,7 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
 
-const HUNT_DETAIL_QUERY_KEY = (hunt_id?: string | null) => [
+export const HUNT_DETAIL_QUERY_KEY = (hunt_id?: string | null) => [
   'huntDetail',
   hunt_id,
 ];

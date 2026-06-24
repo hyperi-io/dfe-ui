@@ -38,9 +38,8 @@ const formSchema = z.object({
 });
 export type CreateUpdateHuntFormData = z.infer<typeof formSchema>;
 
-export interface DisabledFields {
-  name?: boolean;
-  id?: boolean;
+interface DisabledFields {
+  hunt_id?: boolean;
 }
 
 type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
@@ -49,6 +48,7 @@ type CreateUpdateHuntFormProps = FormProps<CreateUpdateHuntFormData> & {
   isPending: boolean;
   error: Error | null;
   buttonLabel?: string;
+  disabledFields?: DisabledFields;
 };
 
 export const CreateUpdateHuntForm = ({
@@ -57,6 +57,7 @@ export const CreateUpdateHuntForm = ({
   isPending,
   error,
   buttonLabel = 'Save Hunt',
+  disabledFields,
   ...props
 }: CreateUpdateHuntFormProps) => {
   const [form] = Form.useForm<CreateUpdateHuntFormData>();
@@ -75,7 +76,7 @@ export const CreateUpdateHuntForm = ({
       {...props}
     >
       <Form.Item name="hunt_id" label="Identifier" rules={[formValidation]}>
-        <Input placeholder="Enter name" />
+        <Input placeholder="Enter name" disabled={disabledFields?.hunt_id} />
       </Form.Item>
       <Form.Item name="name" label="Display Name" rules={[formValidation]}>
         <Input placeholder="Enter name" />
