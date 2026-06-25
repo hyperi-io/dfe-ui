@@ -1739,6 +1739,8 @@ export interface paths {
         /**
          * Get Schema Columns
          * @description Get composed schema columns for a source version (profile + meta/derived/additional).
+         *
+         *     Use ``per_page=-1`` to return all columns in one page.
          */
         get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
         put?: never;
@@ -1794,6 +1796,36 @@ export interface paths {
          *     distinct example values; ``?stats=true`` adds coverage + distinct counts.
          */
         get: operations["discover_json_paths_api_v1_schemas__source_name__json_paths_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/sample-rows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sample Source Rows
+         * @description Return random sample rows for a source, scoped to its match rule.
+         *
+         *     Resolves the requested ``version`` (or the source's current version). A
+         *     version with a ``meta_schema`` owns its own table, so sampling runs against
+         *     ``db.<source>`` unfiltered. Otherwise the version's data still lives in the
+         *     shared catch-all landing table, so sampling runs against ``db.<landing>``
+         *     filtered by the version's match rule.
+         *
+         *     Intended for inspecting real data while authoring a match condition or CEL
+         *     before promoting any JSON path -- a row-level companion to the per-path
+         *     ``?samples=N`` on ``/json-paths``.
+         */
+        get: operations["sample_source_rows_api_v1_schemas__source_name__sample_rows_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3166,13 +3198,8 @@ export interface components {
              * @description Current version of the schema
              */
             current: string;
-            /**
-             * Versions
-             * @description Dictionary of versions and their metadata
-             */
-            versions: {
-                [key: string]: components["schemas"]["SchemaVersion-Input"];
-            };
+            /** @description Dictionary of versions and their metadata */
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_-Input"];
             /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
@@ -3194,13 +3221,8 @@ export interface components {
              * @description Current version of the schema
              */
             current: string;
-            /**
-             * Versions
-             * @description Dictionary of versions and their metadata
-             */
-            versions: {
-                [key: string]: components["schemas"]["SchemaVersion-Output"];
-            };
+            /** @description Dictionary of versions and their metadata */
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_-Output"];
             /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
@@ -3223,11 +3245,8 @@ export interface components {
              * @description Human-readable summary stored on the new version
              */
             summary?: string | null;
-            /**
-             * Columns
-             * @description Complete column snapshot for the new version (at least one column)
-             */
-            columns: components["schemas"]["SchemaColumn-Input"][];
+            /** @description Complete column snapshot for the new version (at least one column) */
+            columns: components["schemas"]["NonEmptyList_SchemaColumn__MinLen_min_length_1_"];
         };
         /**
          * MetaSchemaGetResponse
@@ -3321,6 +3340,16 @@ export interface components {
              */
             group: string;
         };
+        "NonEmptyDict_str_SchemaVersion_-Input": {
+            [key: string]: components["schemas"]["SchemaVersion-Input"];
+        };
+        "NonEmptyDict_str_SchemaVersion_-Output": {
+            [key: string]: components["schemas"]["SchemaVersion-Output"];
+        };
+        NonEmptyList_Annotated_str__AfterValidator__: string[];
+        "NonEmptyList_SchemaColumn_-Input": components["schemas"]["SchemaColumn-Input"][];
+        "NonEmptyList_SchemaColumn_-Output": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+        NonEmptyList_SchemaColumn__MinLen_min_length_1_: components["schemas"]["SchemaColumn-Input"][];
         /** OrgResponse */
         OrgResponse: {
             /** Name */
@@ -4108,6 +4137,44 @@ export interface components {
             };
         };
         /**
+         * SampleRowsResponse
+         * @description Random sample rows for a source, scoped to its match rule.
+         */
+        SampleRowsResponse: {
+            /**
+             * Source Name
+             * @description The source these rows were sampled for.
+             */
+            source_name: string;
+            /**
+             * Table
+             * @description Fully-qualified ClickHouse table actually sampled ('db.table'). The source's own table when the selected version has a meta_schema, otherwise the shared catch-all landing table.
+             */
+            table: string;
+            /**
+             * Match Field
+             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample).
+             */
+            match_field?: string | null;
+            /**
+             * Match Value
+             * @description Match value rows were filtered on, or null for a whole-table sample.
+             */
+            match_value?: string | null;
+            /**
+             * Columns
+             * @description Column names present in the sampled rows.
+             */
+            columns: string[];
+            /**
+             * Rows
+             * @description Sampled rows, each a column-name -> value mapping. Empty when nothing matched.
+             */
+            rows: {
+                [key: string]: unknown;
+            }[];
+        };
+        /**
          * SchemaColumn
          * @description A column in the schema.
          */
@@ -4185,11 +4252,8 @@ export interface components {
              * @description Current version of the schema
              */
             current: string;
-            /**
-             * Versions
-             * @description List of versions
-             */
-            versions: string[];
+            /** @description List of versions */
+            versions: components["schemas"]["NonEmptyList_Annotated_str__AfterValidator__"];
             /**
              * Updated At
              * @description Last updated timestamp
@@ -4221,11 +4285,8 @@ export interface components {
              * @description Summary of the version
              */
             summary: string;
-            /**
-             * Columns
-             * @description List of columns in the version
-             */
-            columns: components["schemas"]["SchemaColumn-Input"][];
+            /** @description List of columns in the version */
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Input"];
         };
         /**
          * SchemaVersion
@@ -4247,11 +4308,8 @@ export interface components {
              * @description Summary of the version
              */
             summary: string;
-            /**
-             * Columns
-             * @description List of columns in the version
-             */
-            columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            /** @description List of columns in the version */
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Output"];
         };
         /**
          * SchemaVersionGet
@@ -4349,6 +4407,8 @@ export interface components {
             clickhouse_host: string;
             /** Clickhouse Database */
             clickhouse_database: string;
+            /** Clickhouse Data Database */
+            clickhouse_data_database: string;
             /** Sources Dir */
             sources_dir: string;
             /** Services Config Dir */
@@ -4510,7 +4570,7 @@ export interface components {
         SourceMatch: {
             /**
              * Field
-             * @description JSON field to inspect
+             * @description Field to match on. Prefix with '_json.' to match a path inside the JSON column (e.g. '_json._source_fetcher'); a bare name matches a real top-level column (e.g. '_org_id').
              */
             field: string;
             /**
@@ -5369,6 +5429,32 @@ export interface components {
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
             /** Items */
             items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[SchemaColumn] */
+        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___3: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -9034,6 +9120,8 @@ export interface operations {
             query?: {
                 /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
+                page?: number;
+                per_page?: number;
             };
             header?: never;
             path: {
@@ -9049,7 +9137,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___3"];
                 };
             };
             /** @description Validation Error */
@@ -9124,6 +9212,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JsonPathsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_source_rows_api_v1_schemas__source_name__sample_rows_get: {
+        parameters: {
+            query?: {
+                /** @description Number of random rows to sample */
+                limit?: number;
+                /** @description Source version to sample against (defaults to current) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleRowsResponse"];
                 };
             };
             /** @description Validation Error */
