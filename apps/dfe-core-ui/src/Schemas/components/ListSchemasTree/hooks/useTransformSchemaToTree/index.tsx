@@ -139,7 +139,7 @@ const schemaSummaryToTreeData = ({
           actions={
             <>
               <CloneSchemaModal
-                schema={schema.name}
+                schema={schema}
                 versions={schema.versions ?? []}
                 onSuccess={(schema) =>
                   apiNotification.success({

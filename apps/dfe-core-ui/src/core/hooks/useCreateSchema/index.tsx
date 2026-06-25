@@ -6,6 +6,7 @@ import { SchemaCreateRequest, SchemaCreateResponse } from './types';
 interface UseCreateSchemaProps {
   onSuccess?: (data: SchemaCreateResponse) => void;
   onError?: (error: Error) => void;
+  pathPrefix: string;
 }
 
 /**
@@ -19,6 +20,7 @@ interface UseCreateSchemaProps {
  *
  * @param onSuccess - Callback function to be called when the mutation is successful
  * @param onError - Callback function to be called when the mutation fails
+ * @param pathPrefix - The prefix to add to the path
  * @returns {
  *   data: SchemaCreateResponse;
  *   mutate: (schema: SchemaCreateRequest) => void;
@@ -34,6 +36,7 @@ interface UseCreateSchemaProps {
  *   onError: (error) => {
  *     console.error('Mutation failed', error);
  *   },
+ *   pathPrefix: 'sub_folder',
  * });
  *
  * mutate({
@@ -52,12 +55,16 @@ interface UseCreateSchemaProps {
 export const useCreateSchema = ({
   onSuccess,
   onError,
-}: UseCreateSchemaProps = {}) => {
+  pathPrefix,
+}: UseCreateSchemaProps) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (schema: SchemaCreateRequest) =>
       apiClient.post(API_CONFIG.schemas.schema, {
-        body: schema,
-        pathParams: { schema_path: schema.path ?? '' },
+        body: {
+          ...schema,
+          path: `${pathPrefix}/${schema.path ?? ''}`,
+        },
+        pathParams: { schema_path: `${pathPrefix}/${schema.path ?? ''}` },
       }),
     onSuccess: (data) => {
       onSuccess?.(data);

@@ -62,6 +62,7 @@ export const CreateSchemaDrawerBase = ({
 
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
+      pathPrefix: 'meta',
       onSuccess: (response) => {
         // TODO: Move this to the onSuccess prop defined by parent
         if (isSchemaDetail) {

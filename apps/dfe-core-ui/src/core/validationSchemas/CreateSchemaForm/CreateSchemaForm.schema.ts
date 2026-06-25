@@ -11,7 +11,7 @@ const schemaDetails = {
   path: schemaGroupValidator.optional(),
   version: schemaVersionValidator,
   type: z.enum(['model', 'addition', 'revision']),
-  description: z.string().optional(),
+  description: z.string().min(1, { message: 'Description is required' }),
 };
 const uploadedColumnsTabSchema = {
   uploadedColumns: z.array(rowSchema).optional(),

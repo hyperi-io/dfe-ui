@@ -49,6 +49,7 @@ export const useCloneSchema = ({
     isPending,
     error: createSourceError,
   } = useCreateSchema({
+    pathPrefix: '',
     onSuccess,
     onError,
   });
