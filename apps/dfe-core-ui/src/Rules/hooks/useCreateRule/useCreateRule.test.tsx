@@ -51,8 +51,8 @@ describe('.useCreateRule', () => {
 
       const expectedResponse: RuleCreateResponse = {
         rule: {
-          rule_id: 'string',
           name: 'string',
+          display_name: 'string',
           severity: 'string',
           source_db: 'string',
           source_table: 'string',

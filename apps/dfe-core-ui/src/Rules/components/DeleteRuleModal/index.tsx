@@ -26,7 +26,7 @@ export const DeleteRuleModal = ({
     },
   });
   const handleDeleteRule = () => {
-    mutate(rule.rule_id);
+    mutate(rule.name);
   };
 
   return (
@@ -47,7 +47,7 @@ export const DeleteRuleModal = ({
               shape="circle"
               size="small"
               className="hover:border-error hover:text-error"
-              aria-label={`Delete ${rule.name}`}
+              aria-label={`Delete ${rule.display_name ?? rule.name}`}
               icon={<IconTrash />}
               onClick={() => setOpen(true)}
             />
@@ -74,7 +74,7 @@ export const DeleteRuleModal = ({
                 size="small"
                 disabled
                 className="hover:border-error hover:text-error"
-                aria-label={`Delete ${rule.name}`}
+                aria-label={`Delete ${rule.display_name ?? rule.name}`}
                 icon={<IconTrash />}
                 onClick={() => setOpen(true)}
               />
@@ -84,7 +84,7 @@ export const DeleteRuleModal = ({
       </RbacProtected>
 
       <Modal
-        title={`Delete ${rule.name}`}
+        title={`Delete ${rule.display_name ?? rule.name}`}
         open={open}
         onCancel={() => setOpen(false)}
         footer={

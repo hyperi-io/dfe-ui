@@ -18,6 +18,7 @@ import { RuleSettings } from './RuleSettings';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
+  display_name: z.string().optional().nullable(),
   user_sql: z.string().min(1, { message: 'User SQL is required' }),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   source_type: z.enum(['raw', 'hyperdx']).optional().nullable(),

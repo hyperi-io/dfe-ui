@@ -19,22 +19,22 @@ export const RuleDetailActionMenu = ({
   onEditSuccess,
 }: RuleDetailActionMenuProps) => {
   const { notification } = App.useApp();
-  const { refetch: refetchRules, setSelectedRuleId } = useListRulesContext();
+  const { refetch: refetchRules, setSelectedRuleName } = useListRulesContext();
 
-  const onCloneSuccess = (rule: RuleCreateResponse) => {
-    setSelectedRuleId(rule.rule.rule_id);
+  const onCloneSuccess = (response: RuleCreateResponse) => {
+    setSelectedRuleName(response.rule.name);
     refetchRules();
     notification.success({
-      title: `Rule ${rule.rule.name} cloned successfully`,
+      title: `Rule ${response.rule.display_name ?? response.rule.name} cloned successfully`,
       placement: 'bottomLeft',
     });
   };
 
   const onDeleteSuccess = () => {
-    setSelectedRuleId(null);
+    setSelectedRuleName(null);
     refetchRules();
     notification.success({
-      title: `Rule ${rule.name} deleted successfully`,
+      title: `Rule ${rule.display_name ?? rule.name} deleted successfully`,
       placement: 'bottomLeft',
     });
   };

@@ -35,7 +35,7 @@ describe('.useDeleteRule', () => {
         { wrapper },
       );
 
-      result.current.mutate('rule_id');
+      result.current.mutate('name');
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -68,7 +68,7 @@ describe('.useDeleteRule', () => {
         { wrapper },
       );
 
-      result.current.mutate('rule_id');
+      result.current.mutate('name');
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

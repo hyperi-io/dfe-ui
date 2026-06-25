@@ -40,13 +40,13 @@ export const ViewSourceDetail = () => {
     <>
       <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-lg font-medium flex items-center gap-2 w-full">
+          <h4 className="flex items-center w-full gap-2 text-lg font-medium">
             <span className="text-foreground/50 dark:text-dark-foreground/50">
-              Source:
+              Source Configuration:
             </span>
             {sourceDetailData.display_name || sourceDetailData.source}
             <SourceEnabledTag
-              className="text-sm font-normal max-h-6 ml-auto mr-2"
+              className="ml-auto mr-2 text-sm font-normal max-h-6"
               enabled={sourceDetailData.enabled}
             />
           </h4>

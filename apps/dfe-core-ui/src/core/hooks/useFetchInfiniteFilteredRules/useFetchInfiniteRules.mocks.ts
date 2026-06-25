@@ -3,10 +3,10 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { RuleListItem } from './types';
 
-export const MOCK_RULE_ID = 'rule_id';
+export const MOCK_RULE_NAME = 'rule_name';
 
 const RULE_ITEM: RuleListItem = {
-  rule_id: 'string',
+  display_name: 'string',
   name: 'string',
   severity: 'string',
   source: 'string',

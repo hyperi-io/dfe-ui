@@ -1,15 +1,30 @@
 /**
  * Import scope rule: only allow imports to current scope or @/core.
  *
- * - Feature scopes (@/Schemas, @/Sources, @/Rules, @/Settings) may only import
+ * - Feature scopes (top-level src dirs except app, core, types) may only import
  *   from their own scope or @/core.
  * - Core (@/core) may only import from @/core.
  * - Relative parent imports (../) are not allowed; use @/ path aliases.
  */
 
+import { readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const ERROR = 'error';
 
-export const SCOPES = ['Schemas', 'Sources', 'Rules', 'Settings'];
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SRC_ROOT = join(__dirname, '../src');
+
+/** Not feature scopes — routing shell, shared kernel, ambient types. */
+const SCOPE_EXCLUDED_DIRS = new Set(['app', 'core', 'types']);
+
+/** Top-level `src/` directories that enforce cross-scope import boundaries. */
+export const SCOPES = readdirSync(SRC_ROOT, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .filter((name) => !SCOPE_EXCLUDED_DIRS.has(name))
+  .sort();
 
 const otherScopes = (current) =>
   SCOPES.filter((s) => s !== current).flatMap((s) => [`@/${s}`, `@/${s}/**`]);

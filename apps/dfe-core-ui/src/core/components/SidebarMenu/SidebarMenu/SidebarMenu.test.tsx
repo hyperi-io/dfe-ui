@@ -32,6 +32,7 @@ describe('SidebarMenu', () => {
         'Sources',
         'Schemas',
         'Rules',
+        'Hunts',
         // 'Field Maps',
         // 'Transforms',
         // 'Services',
