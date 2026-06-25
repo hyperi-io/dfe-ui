@@ -1049,7 +1049,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/rules/{rule_id}": {
+    "/api/v1/rules/{name}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1058,20 +1058,20 @@ export interface paths {
         };
         /**
          * Get Rule
-         * @description Get a detection rule by ID.
+         * @description Get a detection rule by file name.
          */
-        get: operations["get_rule_api_v1_rules__rule_id__get"];
+        get: operations["get_rule_api_v1_rules__name__get"];
         /**
          * Update Rule
          * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
          */
-        put: operations["update_rule_api_v1_rules__rule_id__put"];
+        put: operations["update_rule_api_v1_rules__name__put"];
         post?: never;
         /**
          * Delete Rule
          * @description Delete a detection rule.
          */
-        delete: operations["delete_rule_api_v1_rules__rule_id__delete"];
+        delete: operations["delete_rule_api_v1_rules__name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1308,12 +1308,44 @@ export interface paths {
         };
         /**
          * List Hunts
-         * @description List all configured hunts across all schedulers.
+         * @description List persisted hunt configurations with pagination and search.
          */
         get: operations["list_hunts_api_v1_hunts_get"];
         put?: never;
-        post?: never;
+        /**
+         * Create Hunt
+         * @description Create a new hunt configuration YAML.
+         */
+        post: operations["create_hunt_api_v1_hunts_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hunts/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Hunt
+         * @description Get full hunt configuration by file name.
+         */
+        get: operations["get_hunt_api_v1_hunts__name__get"];
+        /**
+         * Update Hunt
+         * @description Replace an existing hunt configuration.
+         */
+        put: operations["update_hunt_api_v1_hunts__name__put"];
+        post?: never;
+        /**
+         * Delete Hunt
+         * @description Delete a hunt configuration.
+         */
+        delete: operations["delete_hunt_api_v1_hunts__name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2129,6 +2161,11 @@ export interface components {
              * @default true
              */
             enabled: boolean;
+            /**
+             * Hunt Name
+             * @description Hunt file stem when this destination is owned by a hunt (set via API)
+             */
+            hunt_name?: string | null;
         };
         /** AlertDestinationSummary */
         AlertDestinationSummary: {
@@ -2973,6 +3010,98 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HuntCreateRequest */
+        HuntCreateRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on write)
+             */
+            display_name?: string | null;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Rules
+             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             */
+            rules: string[];
+            /**
+             * Name
+             * @description Hunt file name (YAML stem); must be unique
+             */
+            name: string;
+        };
+        /**
+         * HuntDetailResponse
+         * @description Full hunt configuration returned from GET/create/update.
+         */
+        HuntDetailResponse: {
+            /**
+             * Display Name
+             * @description Resolved human-readable label
+             */
+            display_name: string;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Name
+             * @description Hunt file name (YAML stem)
+             */
+            name: string;
+            /** Rules */
+            rules: components["schemas"]["HuntRuleEntry"][];
+        };
         /**
          * HuntEngineStatus
          * @description Current state of the background hunt scheduler.
@@ -2997,19 +3126,48 @@ export interface components {
             scheduling_mode: string;
         };
         /**
+         * HuntRuleEntry
+         * @description Per-rule hunt configuration as stored in YAML.
+         */
+        HuntRuleEntry: {
+            /** Rule Name */
+            rule_name: string;
+            /** Target Table Name */
+            target_table_name?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Initial Checkpoint Lookback Minutes */
+            initial_checkpoint_lookback_minutes?: number | null;
+        };
+        /**
          * HuntSummary
          * @description Summary of a configured hunt.
          */
         HuntSummary: {
-            /** Name */
+            /**
+             * Name
+             * @description Hunt file name (YAML stem, unique)
+             */
             name: string;
-            /** Customer */
+            /**
+             * Display Name
+             * @description Human-readable hunt label
+             */
+            display_name: string;
+            /**
+             * Customer
+             * @description First customer in config (legacy summary field)
+             * @default
+             */
             customer: string;
+            /** Customers */
+            customers?: string[];
             /**
              * Cron
-             * @description Cron schedule expression
+             * @description Cron schedule expression(s)
+             * @default
              */
-            cron: string;
+            cron: string | string[];
             /** Rules */
             rules?: string[];
             /**
@@ -3022,6 +3180,50 @@ export interface components {
              * @default
              */
             target_table: string;
+        };
+        /**
+         * HuntWriteRequest
+         * @description Hunt scheduler payload for create/update (without hunt file ``name``).
+         */
+        HuntWriteRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on write)
+             */
+            display_name?: string | null;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Rules
+             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             */
+            rules: string[];
         };
         /**
          * JsonPathInfo
@@ -3434,6 +3636,32 @@ export interface components {
         PaginatedResponse_FieldMapSummary_: {
             /** Items */
             items: components["schemas"]["FieldMapSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[HuntSummary] */
+        PaginatedResponse_HuntSummary_: {
+            /** Items */
+            items: components["schemas"]["HuntSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -3960,22 +4188,16 @@ export interface components {
          */
         RuleCreateRequest: {
             /**
-             * Name
-             * @description Human-readable rule name
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
              */
-            name: string;
+            display_name?: string | null;
             /**
              * Severity
              * @description low|medium|high|critical
              * @default medium
              */
             severity: string;
-            /**
-             * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
-             * @default raw
-             */
-            source_type: string;
             /**
              * User Sql
              * @description User-authored SQL WHERE fragment
@@ -4008,6 +4230,17 @@ export interface components {
              * @default 60
              */
             cost_window_minutes: number;
+            /**
+             * Name
+             * @description Rule file name (YAML stem); must be unique
+             */
+            name: string;
+            /**
+             * Source Type
+             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @default raw
+             */
+            source_type: string;
         };
         /** RuleCreateResponse */
         RuleCreateResponse: {
@@ -4022,10 +4255,16 @@ export interface components {
         };
         /** RuleResponse */
         RuleResponse: {
-            /** Rule Id */
-            rule_id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
             name: string;
+            /**
+             * Display Name
+             * @description Human-readable rule label
+             */
+            display_name: string;
             /** Severity */
             severity: string;
             /** Source Db */
@@ -4051,10 +4290,13 @@ export interface components {
         };
         /** RuleSummary */
         RuleSummary: {
-            /** Rule Id */
-            rule_id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
             name: string;
+            /** Display Name */
+            display_name: string;
             /** Severity */
             severity: string;
             /** Source */
@@ -4074,10 +4316,10 @@ export interface components {
          */
         RuleUpdateRequest: {
             /**
-             * Name
-             * @description Rule name; omitted to keep existing
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
              */
-            name?: string | null;
+            display_name?: string | null;
             /**
              * Severity
              * @description low|medium|high|critical
@@ -5126,7 +5368,7 @@ export interface components {
             task_id: string;
             /**
              * Hunt Name
-             * @description Name of the triggered hunt
+             * @description Display name of the triggered hunt
              */
             hunt_name: string;
         };
@@ -7829,13 +8071,13 @@ export interface operations {
     list_rules_api_v1_rules_get: {
         parameters: {
             query?: {
-                /** @description Case-insensitive search in rule_id, name, source, hunt_name, severity */
+                /** @description Case-insensitive search in name, display_name, source, hunt_name, severity */
                 search?: string | null;
                 /** @description Filter by severity */
                 severity?: string | null;
                 /** @description Filter by source label */
                 source?: string | null;
-                /** @description Sort field (rule_id, name, severity, source, hunt_name, created_at) */
+                /** @description Sort field (name, display_name, severity, source, hunt_name, created_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
@@ -7934,12 +8176,12 @@ export interface operations {
             };
         };
     };
-    get_rule_api_v1_rules__rule_id__get: {
+    get_rule_api_v1_rules__name__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -7965,12 +8207,12 @@ export interface operations {
             };
         };
     };
-    update_rule_api_v1_rules__rule_id__put: {
+    update_rule_api_v1_rules__name__put: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -8000,12 +8242,12 @@ export interface operations {
             };
         };
     };
-    delete_rule_api_v1_rules__rule_id__delete: {
+    delete_rule_api_v1_rules__name__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -8034,6 +8276,8 @@ export interface operations {
             query?: {
                 /** @description Search in name/description */
                 search?: string | null;
+                /** @description Hunt file name (YAML stem); only destinations referenced in that hunt's alerts */
+                hunt?: string | null;
                 /** @description Sort field (name, enabled) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
@@ -8405,7 +8649,16 @@ export interface operations {
     };
     list_hunts_api_v1_hunts_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Case-insensitive search in name, display_name, customers, rules, source_table, target_table */
+                search?: string | null;
+                /** @description Sort field (name, display_name, source_table, target_table) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -8418,7 +8671,144 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HuntSummary"][];
+                    "application/json": components["schemas"]["PaginatedResponse_HuntSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_hunt_api_v1_hunts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuntCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_hunt_api_v1_hunts__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_hunt_api_v1_hunts__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuntWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_hunt_api_v1_hunts__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
