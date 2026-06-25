@@ -54,3 +54,13 @@ export const transformFormDataToRequestBody = (
 
   return { requestBody, uploadedColumns, schemaColumns };
 };
+
+export const joinSchemaApiPath = (pathPrefix: string, path: string) => {
+  if (!pathPrefix) {
+    return path;
+  }
+  if (!path) {
+    return pathPrefix;
+  }
+  return `${pathPrefix}/${path}`;
+};

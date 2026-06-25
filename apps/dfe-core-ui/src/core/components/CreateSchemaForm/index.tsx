@@ -110,9 +110,14 @@ const CreateSchemaFormBase = ({
         setFormErrorMessage(null);
         handleFormValuesChange(changedValues, allValues);
       }}
-      initialValues={initialValues}
+      initialValues={{
+        path: '',
+        name: '',
+        description: '',
+        ...initialValues,
+      }}
     >
-      <div className="flex gap-2 w-full">
+      <div className="flex w-full gap-2">
         <Form.Item
           className="w-full"
           name="path"
@@ -132,7 +137,7 @@ const CreateSchemaFormBase = ({
           <Input placeholder="Enter name" disabled={disabledFields?.name} />
         </Form.Item>
       </div>
-      <div className="flex gap-2 w-full">
+      <div className="flex w-full gap-2">
         <Form.Item
           className="w-full"
           name="type"
