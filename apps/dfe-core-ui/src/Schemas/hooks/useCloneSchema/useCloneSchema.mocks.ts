@@ -14,7 +14,7 @@ const schemaDetailColumn = {
 
 const handlers = [
   API_CONFIG_MOCKS.schemas.schemaDetail.get.success({
-    schema_path: CLONE_SOURCE_SCHEMA_PATH,
+    schema_path: `${CLONE_SOURCE_SCHEMA_PATH}`,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
       current: '1.0.0',
@@ -37,7 +37,7 @@ const handlers = [
     },
   }),
   API_CONFIG_MOCKS.schemas.schema.post.success({
-    schema_path: CLONE_TARGET_SCHEMA_PATH,
+    schema_path: `meta/${CLONE_TARGET_SCHEMA_PATH}`,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
       current: '1.0.0',

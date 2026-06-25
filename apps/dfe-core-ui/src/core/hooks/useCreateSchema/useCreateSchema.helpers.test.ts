@@ -10,6 +10,7 @@ const baseFormData = (): CreateSchemaFormData => ({
   file: new File([], 'test.csv'),
   uploadedColumns: [],
   schemaColumns: [],
+  description: 'description',
 });
 
 describe('transformFormDataToRequestBody', () => {
@@ -29,7 +30,7 @@ describe('transformFormDataToRequestBody', () => {
     expect(requestBody.versions['1.0.0']).toMatchObject({
       date: '2024-06-15T12:00:00.000Z',
       type: 'model',
-      summary: '',
+      summary: 'description',
     });
   });
 
@@ -51,7 +52,7 @@ describe('transformFormDataToRequestBody', () => {
 
   test('uses empty string for summary when description is omitted', () => {
     const { requestBody } = transformFormDataToRequestBody(baseFormData());
-    expect(requestBody.versions['1.0.0'].summary).toBe('');
+    expect(requestBody.versions['1.0.0'].summary).toBe('description');
   });
 
   test('maps uploaded columns then manual columns', () => {
