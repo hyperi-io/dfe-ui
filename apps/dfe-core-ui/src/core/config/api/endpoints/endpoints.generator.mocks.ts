@@ -1822,8 +1822,43 @@ export const API_CONFIG_MOCKS = Object.freeze({
     jsonPaths: {
       mockedUrl: '/api/v1/schemas/{source_name}/json-paths',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            json_column: 'string',
+            paths: [
+              {
+                path: 'string',
+                types: ['string'],
+                is_consistent: true,
+                promoted_to: 'string',
+                column: {
+                  name: 'string',
+                  type: 'string',
+                  attribute: ['string'],
+                  use_case: 'string',
+                  expr: 'string',
+                  comment: 'string',
+                },
+                coverage_pct: 100,
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['JsonPathsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.jsonPaths.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
     },
