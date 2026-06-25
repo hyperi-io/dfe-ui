@@ -1865,8 +1865,55 @@ export const API_CONFIG_MOCKS = Object.freeze({
     promoteField: {
       mockedUrl: '/api/v1/schemas/{source_name}/promote-field',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            schema_version: 'string',
+            results: [
+              {
+                json_path: 'string',
+                status: 'ok',
+                column_name: 'string',
+                data_type: 'string',
+                index_type: 'string',
+                copy_cel: 'string',
+                error: 'string',
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['PromoteFieldResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
