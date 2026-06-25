@@ -7,9 +7,9 @@ export const useCreateAlert = ({
   onSuccess,
   onError,
 }: {
-  onSuccess: (data: AlertCreateResponse) => void;
-  onError: (error: Error) => void;
-}) => {
+  onSuccess?: (data: AlertCreateResponse) => void;
+  onError?: (error: Error) => void;
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (alert: AlertCreateRequest) =>
       apiClient.post(API_CONFIG.alerts.destinations, { body: alert }),

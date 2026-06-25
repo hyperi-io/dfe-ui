@@ -8,8 +8,8 @@ export const useUpdateAlert = ({
   onSuccess,
   onError,
 }: {
-  onSuccess: (data: AlertUpdateResponse) => void;
-  onError: (error: Error) => void;
+  onSuccess?: (data: AlertUpdateResponse) => void;
+  onError?: (error: Error) => void;
   name: string;
 }) => {
   const { data, mutate, isPending, error } = useMutation({

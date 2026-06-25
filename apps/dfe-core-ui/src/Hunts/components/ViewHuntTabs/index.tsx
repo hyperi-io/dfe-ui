@@ -5,7 +5,6 @@ import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
-import { AlertsConfigTab } from './AlertsConfigTab';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
 
 const HUNT_DETAIL_TAB_KEY_MAP = {
@@ -71,11 +70,6 @@ export const ViewHuntDetailTabs = ({
           key: 'configuration',
           label: HUNT_DETAIL_TAB_KEY_MAP['configuration'],
           children: <ConfigurationDetailsTabContent {...huntDetailData} />,
-        },
-        {
-          key: 'alerts',
-          label: HUNT_DETAIL_TAB_KEY_MAP['alerts'],
-          children: <AlertsConfigTab />,
         },
       ]}
     />
