@@ -53,6 +53,8 @@ const fieldmap_scopes = {
 
 const hunt_scopes = {
   hunt_read: "hunt:read",
+  hunt_write: "hunt:write",
+  hunt_delete: "hunt:delete",
   hunt_execute: "hunt:execute",
 } as const;
 
