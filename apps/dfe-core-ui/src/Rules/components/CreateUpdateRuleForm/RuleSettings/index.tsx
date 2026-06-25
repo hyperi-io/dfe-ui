@@ -36,6 +36,16 @@ export const RuleSettings = ({
           </Form.Item>
 
           <Form.Item
+            name="display_name"
+            label="Display Name"
+            className="m-0! grow text-sm w-full"
+            layout="vertical"
+            rules={[formValidation]}
+          >
+            <Input disabled={disabledFields?.name} className="w-full" />
+          </Form.Item>
+
+          <Form.Item
             label="Severity"
             name="severity"
             className="m-0! grow text-sm w-full"

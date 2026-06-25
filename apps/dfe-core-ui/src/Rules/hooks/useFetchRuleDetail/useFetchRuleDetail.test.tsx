@@ -16,18 +16,18 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useFetchRuleDetail', () => {
-  describe('rule_id is provided', () => {
+  describe('name is provided', () => {
     test('should return data', async () => {
       const { result } = renderHook(
         () =>
           useFetchRuleDetail({
-            rule_id: 'rule_id',
+            name: 'name',
           }),
         { wrapper },
       );
 
       const response: RuleDetail = {
-        rule_id: 'string',
+        display_name: 'string',
         name: 'string',
         severity: 'string',
         source: 'string',

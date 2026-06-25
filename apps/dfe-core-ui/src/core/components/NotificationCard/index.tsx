@@ -8,12 +8,14 @@ export const NotificationCard = ({
   className,
   type = 'default',
   title,
+  action,
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
   className?: string;
   type?: DisplayType;
   title?: string | React.ReactNode;
+  action?: React.ReactNode;
 }) => {
   const displayType = {
     default: cn(
@@ -65,6 +67,7 @@ export const NotificationCard = ({
           description
         )}
       </div>
+      {action && <div className="ml-auto">{action}</div>}
     </div>
   );
 };

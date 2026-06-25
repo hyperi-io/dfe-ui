@@ -1,9 +1,22 @@
 /**
  * @vitest-environment node
  */
+import { readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 import { ESLint } from 'eslint';
 import { importScopeOverrides, RULE_ID, SCOPES } from './import-scope.mjs';
+
+const SRC_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../src');
+const SCOPE_EXCLUDED_DIRS = new Set(['app', 'core', 'types']);
+
+const expectedScopesFromFilesystem = () =>
+  readdirSync(SRC_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => !SCOPE_EXCLUDED_DIRS.has(name))
+    .sort();
 
 const createLinter = async () => {
   const eslint = new ESLint({
@@ -44,11 +57,17 @@ const lint = async (
 
 describe('import-scope', () => {
   describe('SCOPES', () => {
-    test('includes all feature scopes', () => {
+    test('matches feature directories under src (excluding app, core, types)', () => {
+      expect(SCOPES).toEqual(expectedScopesFromFilesystem());
       expect(SCOPES).toEqual(
-        expect.arrayContaining(['Schemas', 'Sources', 'Rules', 'Settings']),
+        expect.arrayContaining([
+          'Hunts',
+          'Schemas',
+          'Sources',
+          'Rules',
+          'Settings',
+        ]),
       );
-      expect(SCOPES).toHaveLength(4);
     });
   });
 
@@ -93,6 +112,19 @@ describe('import-scope', () => {
         'src/Sources/components/Baz.tsx',
       );
       expect(errors.filter((e) => e.ruleId === RULE_ID)).toHaveLength(0);
+    });
+
+    test('Hunts cannot import from Rules', async () => {
+      const { errors } = await lint(
+        `import { ListRulesTree } from '@/Rules/components/ListRulesTree';`,
+        'src/Hunts/scenes/HuntListScene/index.tsx',
+      );
+      expect(errors).toContainEqual(
+        expect.objectContaining({
+          ruleId: RULE_ID,
+          message: expect.stringContaining('Use only @/Hunts or @/core'),
+        }),
+      );
     });
 
     test('Settings cannot import from Sources', async () => {
