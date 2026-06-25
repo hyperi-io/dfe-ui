@@ -1,4 +1,4 @@
-import { useFetchOrganisations } from '@/Settings/hooks/useFetchOrganisations';
+import { useFetchOrganisations } from '@/core/hooks/useFetchOrganisations';
 import { Select, SelectProps } from 'antd';
 import { useMemo } from 'react';
 

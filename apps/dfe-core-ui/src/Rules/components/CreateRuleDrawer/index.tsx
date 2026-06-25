@@ -29,7 +29,7 @@ export const CreateRuleDrawer = ({
     onClose?.();
   };
 
-  const { refetch: refetchRules, setSelectedRuleId } = useListRulesContext();
+  const { refetch: refetchRules, setSelectedRuleName } = useListRulesContext();
   const {
     mutate: createRuleMutation,
     isPending,
@@ -37,7 +37,7 @@ export const CreateRuleDrawer = ({
     reset: resetCreateRule,
   } = useCreateRule({
     onSuccess: (response) => {
-      setSelectedRuleId(response.rule.rule_id);
+      setSelectedRuleName(response.rule.name);
       refetchRules();
       setIsDrawerVisible(false);
       api.success({

@@ -16,7 +16,7 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
   const handleClose = () => {
     setOpen(false);
     onClose?.();
-    router.push(`/rules?rule_id=${response?.rule?.rule_id}`);
+    router.push(`/rules?name=${response?.rule?.name}`);
   };
 
   const {

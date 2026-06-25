@@ -27,7 +27,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateRule', () => {
   const requestBody: RuleUpdateRequest = {
-    name: 'string',
+    display_name: 'string',
     severity: 'string',
     source: 'string',
     user_sql: 'string',
@@ -37,7 +37,7 @@ describe('.useUpdateRule', () => {
     cost_window_minutes: 60,
   };
 
-  const rule_id = 'rule_id';
+  const name = 'name';
 
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -45,7 +45,7 @@ describe('.useUpdateRule', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateRule({ onSuccess, onError, rule_id }),
+        () => useUpdateRule({ onSuccess, onError, name }),
         { wrapper },
       );
 
@@ -53,7 +53,7 @@ describe('.useUpdateRule', () => {
 
       const expectedResponse: RuleUpdateResponse = {
         rule: {
-          rule_id: 'string',
+          display_name: 'string',
           name: 'string',
           severity: 'string',
           source_db: 'string',
@@ -113,7 +113,7 @@ describe('.useUpdateRule', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useUpdateRule({ onSuccess, onError, rule_id }),
+        () => useUpdateRule({ onSuccess, onError, name }),
         { wrapper },
       );
 

@@ -2,7 +2,7 @@ import { DeleteOrganisationModal } from '@/Settings/components/OrganisationManag
 import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
-import { Organisation } from '@/Settings/hooks/useFetchOrganisations/types';
+import { Organisation } from '@/core/hooks/useFetchOrganisations/types';
 import { IconLockFilled } from '@repo/dfe-icons';
 
 export const OrganisationCard = ({
