@@ -52,7 +52,7 @@ describe('.useCreateSchema', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useCreateSchema({ onSuccess, onError }),
+        () => useCreateSchema({ onSuccess, onError, pathPrefix: 'meta' }),
         { wrapper },
       );
 
@@ -100,14 +100,18 @@ describe('.useCreateSchema', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.schemas.schema.post.error());
+      server.use(
+        API_CONFIG_MOCKS.schemas.schema.post.error({
+          schema_path: 'meta/path',
+        }),
+      );
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useCreateSchema({ onSuccess, onError }),
+        () => useCreateSchema({ onSuccess, onError, pathPrefix: 'meta' }),
         { wrapper },
       );
 
