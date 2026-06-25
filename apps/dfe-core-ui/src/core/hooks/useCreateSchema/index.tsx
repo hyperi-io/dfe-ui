@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { joinSchemaApiPath } from './useCreateSchema.helpers';
 import { SchemaCreateRequest, SchemaCreateResponse } from './types';
 
 interface UseCreateSchemaProps {
@@ -58,14 +59,16 @@ export const useCreateSchema = ({
   pathPrefix,
 }: UseCreateSchemaProps) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (schema: SchemaCreateRequest) =>
-      apiClient.post(API_CONFIG.schemas.schema, {
+    mutationFn: (schema: SchemaCreateRequest) => {
+      const schemaPath = joinSchemaApiPath(pathPrefix, schema.path ?? '');
+      return apiClient.post(API_CONFIG.schemas.schema, {
         body: {
           ...schema,
-          path: `${pathPrefix}/${schema.path ?? ''}`,
+          path: schemaPath,
         },
-        pathParams: { schema_path: `${pathPrefix}/${schema.path ?? ''}` },
-      }),
+        pathParams: { schema_path: schemaPath },
+      });
+    },
     onSuccess: (data) => {
       onSuccess?.(data);
     },

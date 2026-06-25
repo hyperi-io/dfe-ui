@@ -49,6 +49,7 @@ export const useCloneSchema = ({
     isPending,
     error: createSourceError,
   } = useCreateSchema({
+    // meta is pulled from schema_path so should not be included
     pathPrefix: '',
     onSuccess,
     onError,

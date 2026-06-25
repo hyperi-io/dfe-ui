@@ -1,6 +1,9 @@
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { transformFormDataToRequestBody } from './useCreateSchema.helpers';
+import {
+  joinSchemaApiPath,
+  transformFormDataToRequestBody,
+} from './useCreateSchema.helpers';
 
 const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
@@ -196,5 +199,21 @@ describe('transformFormDataToRequestBody', () => {
       expect(uploadedColumns).toEqual([]);
       expect(schemaColumns).toEqual([]);
     });
+  });
+});
+
+describe('joinSchemaApiPath', () => {
+  test('returns path when prefix is empty', () => {
+    expect(joinSchemaApiPath('', 'source/display_name')).toBe(
+      'source/display_name',
+    );
+  });
+
+  test('returns prefix when path is empty', () => {
+    expect(joinSchemaApiPath('meta', '')).toBe('meta');
+  });
+
+  test('joins prefix and path', () => {
+    expect(joinSchemaApiPath('meta', 'path')).toBe('meta/path');
   });
 });
