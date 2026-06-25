@@ -4,6 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
+import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   schemaGroupValidator,
@@ -20,13 +21,13 @@ const formSchema = z.object({
   path: schemaGroupValidator.optional(),
   name: schemaNameValidator,
   version: schemaVersionValidator,
-  description: z.string().optional(),
+  description: z.string().min(1, { message: 'Description is required' }),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface CloneSchemaModalProps {
-  schema: string;
+  schema: NonNullable<SchemaListResponse['objects']['items']>[number];
   versions: string[];
   onSuccess?: (data: SchemaCreateResponse) => void;
   onError?: (error: Error) => void;
@@ -50,13 +51,14 @@ export const CloneSchemaModal = ({
     onSuccessProp?.(data);
     setOpen(false);
   };
+  const schemaFullName = schema.name;
 
   const {
     mutate: cloneSchemaMutation,
     isPending,
     error,
   } = useCloneSchema({
-    schema_path: schema,
+    schema_path: schemaFullName,
     version,
     onSuccess,
     onError,
@@ -73,19 +75,19 @@ export const CloneSchemaModal = ({
     });
   };
 
-  const path = schema.split('/').slice(0, -1).join('/');
-  const name = schema.split('/').pop();
+  const path = schemaFullName.split('/').slice(0, -1).join('/');
+  const name = schemaFullName.split('/').pop();
 
   return (
     <>
       <RbacProtected action={RbacProtected.rbacActions.schema_write}>
         <RbacProtected.Unrestricted>
-          <Tooltip title={`Clone ${schema}`} destroyOnHidden>
+          <Tooltip title={`Clone ${name}`} destroyOnHidden>
             <Button
               type="default"
               shape="circle"
               size="small"
-              aria-label={`Clone ${schema}`}
+              aria-label={`Clone ${name}`}
               icon={<IconCopy />}
               onClick={() => {
                 setOpen(true);
@@ -103,7 +105,7 @@ export const CloneSchemaModal = ({
               disabled
               shape="circle"
               size="small"
-              aria-label={`Clone ${schema}`}
+              aria-label={`Clone ${name}`}
               icon={<IconCopy />}
             />
           </span>
@@ -111,7 +113,7 @@ export const CloneSchemaModal = ({
       </RbacProtected>
 
       <Modal
-        title={`Clone ${schema}`}
+        title={`Clone ${name}`}
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
@@ -123,6 +125,7 @@ export const CloneSchemaModal = ({
           initialValues={{
             path,
             name: `${name}_copy`,
+            description: `Copy: ${name}`,
           }}
         >
           <div className="flex gap-x-2">
@@ -130,7 +133,7 @@ export const CloneSchemaModal = ({
               name="path"
               label="Path"
               rules={[formValidation]}
-              className="mb-2 w-full"
+              className="w-full mb-2"
             >
               <Input placeholder={`${path ?? ''}`} />
             </Form.Item>
@@ -138,7 +141,7 @@ export const CloneSchemaModal = ({
               name="name"
               label="Name"
               rules={[formValidation]}
-              className="mb-2 w-full"
+              className="w-full mb-2"
             >
               <Input placeholder={`${name}`} />
             </Form.Item>
@@ -148,7 +151,7 @@ export const CloneSchemaModal = ({
             name="version"
             label="Version"
             rules={[formValidation]}
-            className="mb-2 w-full"
+            className="w-full mb-2"
           >
             <Select
               options={versions.map((version) => ({
@@ -162,7 +165,7 @@ export const CloneSchemaModal = ({
             name="description"
             label="Description"
             rules={[formValidation]}
-            className="mb-2 w-full"
+            className="w-full mb-2"
           >
             <Input.TextArea placeholder="Enter description" />
           </Form.Item>
