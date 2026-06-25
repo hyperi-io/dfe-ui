@@ -1790,6 +1790,51 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
+    sampleRows: {
+      mockedUrl: '/api/v1/schemas/{source_name}/sample-rows',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            match_field: 'string',
+            match_value: 'string',
+            columns: ['string'],
+            rows: [{ string: 'string' }],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SampleRowsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.sampleRows.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    jsonPaths: {
+      mockedUrl: '/api/v1/schemas/{source_name}/json-paths',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    promoteField: {
+      mockedUrl: '/api/v1/schemas/{source_name}/promote-field',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
   },
   orgs: {
     default: {
