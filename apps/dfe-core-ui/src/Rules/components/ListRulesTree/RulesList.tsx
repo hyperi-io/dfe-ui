@@ -1,5 +1,5 @@
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { RuleListItem } from '@/Rules/hooks/useFetchInfiniteFilteredRules/types';
+import { RuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -12,8 +12,8 @@ export const RulesList = ({ className }: { className?: string }) => {
     isLoading,
     loadMoreRef,
     isFetchingNextPage,
-    selectedRuleId,
-    setSelectedRuleId,
+    selectedRuleName,
+    setSelectedRuleName,
     filters,
     hasFilters,
     setFilters,
@@ -54,9 +54,9 @@ export const RulesList = ({ className }: { className?: string }) => {
       )}
     >
       {rules.map((rule: RuleListItem) => {
-        const isSelected = selectedRuleId === rule.rule_id;
+        const isSelected = selectedRuleName === rule.name;
         return (
-          <li key={rule.rule_id} className="w-full">
+          <li key={rule.name} className="w-full">
             <button
               type="button"
               className={cn(
@@ -64,11 +64,13 @@ export const RulesList = ({ className }: { className?: string }) => {
                 'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
                 isSelected && 'bg-gray-200 dark:bg-gray-700',
               )}
-              onClick={() => setSelectedRuleId(rule.rule_id)}
+              onClick={() => setSelectedRuleName(rule.name)}
             >
-              <dl className="min-w-0 w-full">
-                <dt className="truncate font-medium">{rule.name}</dt>
-                <dd className="text-sm text-gray-500 dark:text-gray-400 truncate capitalize">
+              <dl className="w-full min-w-0">
+                <dt className="font-medium truncate">
+                  {rule.display_name ?? rule.name}
+                </dt>
+                <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
                   {rule.severity}
                   {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}
                 </dd>
@@ -77,7 +79,7 @@ export const RulesList = ({ className }: { className?: string }) => {
           </li>
         );
       })}
-      <div ref={loadMoreRef} className="h-4 flex justify-center">
+      <div ref={loadMoreRef} className="flex justify-center h-4">
         {isFetchingNextPage && <Spin size="small" />}
       </div>
     </ul>

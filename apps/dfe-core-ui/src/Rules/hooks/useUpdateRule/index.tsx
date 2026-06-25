@@ -6,17 +6,17 @@ import { RuleUpdateRequest, RuleUpdateResponse } from './types';
 export const useUpdateRule = ({
   onSuccess,
   onError,
-  rule_id,
+  name,
 }: {
   onSuccess?: (data: RuleUpdateResponse) => void;
   onError?: (error: Error) => void;
-  rule_id: string;
+  name: string;
 }) => {
   const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (rule: RuleUpdateRequest) =>
       apiClient.put(API_CONFIG.rules.rule, {
         body: rule,
-        pathParams: { rule_id },
+        pathParams: { name },
       }),
     onSuccess: (data) => {
       onSuccess?.(data);

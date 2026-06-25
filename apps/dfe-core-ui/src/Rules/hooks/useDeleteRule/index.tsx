@@ -10,8 +10,8 @@ export const useDeleteRule = ({
   onError?: (error: Error) => void;
 }) => {
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (rule_id: string) =>
-      apiClient.delete(API_CONFIG.rules.rule, { pathParams: { rule_id } }),
+    mutationFn: (name: string) =>
+      apiClient.delete(API_CONFIG.rules.rule, { pathParams: { name } }),
     onSuccess: () => {
       onSuccess?.();
     },

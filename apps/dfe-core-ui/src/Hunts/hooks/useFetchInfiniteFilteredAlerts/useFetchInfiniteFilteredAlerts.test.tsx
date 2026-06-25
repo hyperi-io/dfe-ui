@@ -10,10 +10,9 @@ import {
   it,
   vi,
 } from 'vitest';
-import { useFetchInfiniteFilteredRules } from '.';
-import { RuleListItem } from './types';
-import { RuleListRequestParams } from './types.d';
-import { server } from './useFetchInfiniteRules.mocks';
+import { useFetchInfiniteFilteredAlerts } from '.';
+import { AlertListResponse } from './types.d';
+import { server } from './useFetchInfiniteFilteredAlerts.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -26,14 +25,6 @@ global.IntersectionObserver = MockIntersectionObserver as any;
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-const DEFAULT_HOOK_PROPS: RuleListRequestParams = {
-  source: 'string',
-  severity: 'low',
-  sort_by: 'name',
-  sort_order: 'asc',
-  per_page: 10,
-};
-
 beforeAll(() =>
   server.listen({
     onUnhandledRequest: 'error',
@@ -44,15 +35,12 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-describe('useFetchInfiniteFilteredRules', () => {
+describe('useFetchInfiniteFilteredAlerts', () => {
   describe('initial loading state', () => {
     it('should start with loading state and empty data', () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
@@ -70,26 +58,19 @@ describe('useFetchInfiniteFilteredRules', () => {
   });
 
   describe('successful data fetch', () => {
-    it('should fetch and return first page of rules', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+    it('should fetch and return first page of filtered alerts', async () => {
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: RuleListItem = {
-        rule_id: 'string',
+      const responseItem: AlertListResponse['items'][number] = {
         name: 'string',
-        severity: 'string',
-        source: 'string',
-        source_db: 'string',
-        source_table: 'string',
-        hunt_name: 'string',
-        created_at: 'string',
+        description: 'string',
+        enabled: true,
+        url_scheme: 'string',
       };
 
       expect(result.current.data).toBeDefined();
@@ -99,12 +80,9 @@ describe('useFetchInfiniteFilteredRules', () => {
     });
 
     it('should return all expected properties', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -137,12 +115,9 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('pagination', () => {
     it('should fetch next page when fetchNextPage is called', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       // Wait for first page to load
       await waitFor(() => {
@@ -169,12 +144,9 @@ describe('useFetchInfiniteFilteredRules', () => {
     });
 
     it('should flatten multiple pages correctly', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -201,11 +173,7 @@ describe('useFetchInfiniteFilteredRules', () => {
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredRules({
-            ...DEFAULT_HOOK_PROPS,
-            per_page: 10,
-          }),
+        () => useFetchInfiniteFilteredAlerts({ per_page: 10 }),
         {
           wrapper,
         },
@@ -241,11 +209,7 @@ describe('useFetchInfiniteFilteredRules', () => {
   describe('custom page size', () => {
     it('should respect per_page parameter', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredRules({
-            ...DEFAULT_HOOK_PROPS,
-            per_page: 5,
-          }),
+        () => useFetchInfiniteFilteredAlerts({ per_page: 5 }),
         {
           wrapper,
         },
@@ -260,11 +224,7 @@ describe('useFetchInfiniteFilteredRules', () => {
 
     it('should handle per_page larger than available data', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredRules({
-            ...DEFAULT_HOOK_PROPS,
-            per_page: 100,
-          }),
+        () => useFetchInfiniteFilteredAlerts({ per_page: 100 }),
         {
           wrapper,
         },
@@ -281,14 +241,11 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('error handling', () => {
     it('should handle error state correctly', async () => {
-      server.use(API_CONFIG_MOCKS.rules.default.get.error());
+      server.use(API_CONFIG_MOCKS.alerts.destinations.get.error());
 
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -310,9 +267,9 @@ describe('useFetchInfiniteFilteredRules', () => {
   });
 
   describe('search parameters', () => {
-    it('should include source filter in query', async () => {
+    it('should include search in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules({ source: 'test' }),
+        () => useFetchInfiniteFilteredAlerts({ search: 'test' }),
         {
           wrapper,
         },
@@ -325,13 +282,9 @@ describe('useFetchInfiniteFilteredRules', () => {
       expect(result.current.data.items).toBeDefined();
     });
 
-    it('should include severity filter in query', async () => {
+    it('should include hunt filter in query', async () => {
       const { result } = renderHook(
-        () =>
-          useFetchInfiniteFilteredRules({
-            ...DEFAULT_HOOK_PROPS,
-            severity: 'test',
-          }),
+        () => useFetchInfiniteFilteredAlerts({ hunt: 'test' }),
         {
           wrapper,
         },
@@ -344,12 +297,29 @@ describe('useFetchInfiniteFilteredRules', () => {
       expect(result.current.data.items).toBeDefined();
     });
 
-    it('should include per_page filter in query', async () => {
+    it('should include sort_by filter in query', async () => {
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredAlerts({ sort_by: 'name' }),
+        {
+          wrapper,
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.data.items).toBeDefined();
+    });
+
+    it('should handle multiple filters simultaneously', async () => {
       const { result } = renderHook(
         () =>
-          useFetchInfiniteFilteredRules({
-            ...DEFAULT_HOOK_PROPS,
-            per_page: 10,
+          useFetchInfiniteFilteredAlerts({
+            search: 'test',
+            sort_by: 'name',
+            sort_order: 'asc',
+            per_page: 20,
           }),
         {
           wrapper,
@@ -366,12 +336,9 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('refetch functionality', () => {
     it('should refetch data when refetch is called', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -394,12 +361,9 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('loadMoreRef', () => {
     it('should provide a ref object for infinite scroll', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -412,12 +376,9 @@ describe('useFetchInfiniteFilteredRules', () => {
 
   describe('isFetchingNextPage state', () => {
     it('should handle fetchNextPage and complete successfully', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -444,12 +405,9 @@ describe('useFetchInfiniteFilteredRules', () => {
     });
 
     it('should keep isFetchingNextPage false when not fetching', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -462,25 +420,22 @@ describe('useFetchInfiniteFilteredRules', () => {
   describe('empty results', () => {
     it('should handle empty searches array', async () => {
       server.use(
-        API_CONFIG_MOCKS.rules.default.get.success({
+        API_CONFIG_MOCKS.alerts.destinations.get.success({
           mockedResponse: {
             items: [],
             total: 0,
-            page: 1,
-            per_page: 10,
+            page: 0,
+            per_page: 0,
             total_pages: 0,
-            next_page: null,
-            prev_page: null,
+            next_page: 0,
+            prev_page: 0,
           },
         }),
       );
 
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredRules(DEFAULT_HOOK_PROPS),
-        {
-          wrapper,
-        },
-      );
+      const { result } = renderHook(() => useFetchInfiniteFilteredAlerts(), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -488,6 +443,28 @@ describe('useFetchInfiniteFilteredRules', () => {
 
       expect(result.current.data.items).toHaveLength(0);
       expect(result.current.isError).toBe(false);
+    });
+  });
+
+  describe('debounced parameters', () => {
+    it('should debounce keyword parameter', async () => {
+      const { result, rerender } = renderHook(
+        ({ search }) => useFetchInfiniteFilteredAlerts({ search }),
+        {
+          wrapper,
+          initialProps: { search: '' },
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      // Change keyword - should trigger debounce
+      rerender({ search: 'new search' });
+
+      // The query should still be using the old keyword initially
+      expect(result.current.data.items).toBeDefined();
     });
   });
 });

@@ -36,7 +36,7 @@ export const UpdateRuleDrawer = ({
     onClose?.();
     onSuccess?.(response);
     api.success({
-      title: `${response.rule.name} updated successfully`,
+      title: `${response.rule.display_name ?? response.rule.name} updated successfully`,
       placement: 'bottomLeft',
     });
   };

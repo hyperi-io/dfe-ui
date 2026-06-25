@@ -1,11 +1,11 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Organisation } from '@/core/hooks/useFetchOrganisations/types';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
 } from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
 import { ORGANISATION_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchOrganisationDetail';
-import { Organisation } from '@/Settings/hooks/useFetchOrganisations/types';
 import { useUpdateOrganisation } from '@/Settings/hooks/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';

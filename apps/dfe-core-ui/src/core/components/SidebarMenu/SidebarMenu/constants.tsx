@@ -9,6 +9,7 @@ import {
   IconSettings2,
   IconShieldCheck,
   IconTable,
+  IconTargetArrow,
 } from '@repo/dfe-icons';
 
 const { rbacActions } = RbacProtected;
@@ -211,6 +212,38 @@ export const featureFlagSidebarMenuItems = [
               key: '/rules',
               icon: <IconWrapper icon={<IconShieldCheck />} />,
               label: 'Rules',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
+    ),
+  },
+  {
+    key: '/hunts',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected action={rbacActions.hunt_read}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/hunts',
+              icon: <IconWrapper icon={<IconTargetArrow />} />,
+              label: 'Hunts',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/hunts',
+              icon: <IconWrapper icon={<IconTargetArrow />} />,
+              label: 'Hunts',
               external: false,
             }}
           />

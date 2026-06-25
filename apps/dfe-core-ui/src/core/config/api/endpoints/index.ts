@@ -40,7 +40,7 @@ export const API_CONFIG = Object.freeze({
   rules: {
     default: '/api/v1/rules',
     validate: '/api/v1/rules/validate',
-    rule: '/api/v1/rules/{rule_id}',
+    rule: '/api/v1/rules/{name}',
   },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
@@ -80,5 +80,11 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/auth/roles',
     role: '/api/v1/auth/roles/{name}',
     scopes: '/api/v1/auth/roles/scopes',
+  },
+  hunts: {
+    default: '/api/v1/hunts',
+    engineStatus: '/api/v1/hunts/status',
+    hunt: '/api/v1/hunts/{name}',
+    huntRun: '/api/v1/hunts/{name}/run',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);
