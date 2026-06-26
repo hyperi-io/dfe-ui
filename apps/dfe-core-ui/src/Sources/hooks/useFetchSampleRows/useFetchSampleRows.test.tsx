@@ -22,6 +22,7 @@ describe('.useFetchSampleRows', () => {
         () =>
           useFetchSampleRows({
             source_name: 'source',
+            version: '1.0.0',
           }),
         { wrapper },
       );

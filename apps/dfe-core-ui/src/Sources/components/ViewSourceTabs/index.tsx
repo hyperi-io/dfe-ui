@@ -69,7 +69,7 @@ export const ViewSourceDetailTabs = ({
 
   return (
     <Tabs
-      className="min-h-0 flex-1 -mt-3"
+      className="flex-1 min-h-0 -mt-3"
       activeKey={activeTab}
       onChange={handleTabChange}
       items={[
@@ -84,8 +84,8 @@ export const ViewSourceDetailTabs = ({
           label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
           children: (
             <SampleEventsTabContent
-              source_name={selectedSourceName}
-              schema={sourceDetailData.version.schema}
+              source={sourceDetailData}
+              version={selectedSourceVersion}
             />
           ),
         },
