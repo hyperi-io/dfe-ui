@@ -8,6 +8,7 @@ import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent
 import { SampleEventsTabContent } from './SampleEventsTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
 import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
+import { PromoteRowsProvider } from './contexts/PromoteRows.context';
 
 const SOURCE_DETAIL_TAB_KEY_MAP = {
   configuration: 'Configuration Details',
@@ -83,10 +84,15 @@ export const ViewSourceDetailTabs = ({
           key: 'sample-events',
           label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
           children: (
-            <SampleEventsTabContent
-              source={sourceDetailData}
+            <PromoteRowsProvider
+              source_name={selectedSourceName}
               version={selectedSourceVersion}
-            />
+            >
+              <SampleEventsTabContent
+                source={sourceDetailData}
+                version={selectedSourceVersion}
+              />
+            </PromoteRowsProvider>
           ),
         },
 

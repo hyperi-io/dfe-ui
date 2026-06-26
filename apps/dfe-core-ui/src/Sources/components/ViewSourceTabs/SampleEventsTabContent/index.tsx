@@ -1,9 +1,11 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useFetchSampleRows } from '@/Sources/hooks/useFetchSampleRows';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
+import { FieldPromoteBanner } from './FieldPromoteBanner';
 import { SampleRowsCard } from './SampleRowsCard';
 
 export const SampleEventsTabContent = ({
@@ -28,6 +30,8 @@ export const SampleEventsTabContent = ({
     queryEnabled: canViewSampleRows,
   });
 
+  const { fieldsToPromote } = usePromoteRowsContext();
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-full">
@@ -45,6 +49,12 @@ export const SampleEventsTabContent = ({
 
   return (
     <div className="flex flex-col gap-y-4">
+      {fieldsToPromote.size > 0 && (
+        <FieldPromoteBanner
+          selectedSourceName={source.source}
+          selectedSourceVersion={version}
+        />
+      )}
       {!isMetaSchemaDefined && (
         <NotificationCard
           icon={<IconInfoCircle className="w-4 h-4" />}

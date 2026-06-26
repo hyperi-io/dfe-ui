@@ -1,5 +1,6 @@
 import { SampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
 import { Card } from 'antd';
+import { RecursiveRowRenderer } from './RecursiveRowRenderer';
 
 export const SampleRowsCard = ({
   row,
@@ -8,7 +9,7 @@ export const SampleRowsCard = ({
 }) => {
   return (
     <Card size="small">
-      <pre className="font-mono text-sm">{JSON.stringify(row, null, 2)}</pre>
+      <RecursiveRowRenderer row={row} />
     </Card>
   );
 };
