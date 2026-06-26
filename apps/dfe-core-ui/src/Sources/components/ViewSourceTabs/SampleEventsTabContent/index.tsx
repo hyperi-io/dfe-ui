@@ -48,7 +48,7 @@ export const SampleEventsTabContent = ({
     );
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-3">
       {fieldsToPromote.size > 0 && (
         <FieldPromoteBanner
           selectedSourceName={source.source}
@@ -74,7 +74,7 @@ export const SampleEventsTabContent = ({
         />
       )}
       {canViewSampleRows && (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-y-3 mt-2 h-[calc(100vh-290px)] css-custom-scrollbar">
           {sampleRows?.rows.map((row) => (
             <li key={row._uuid as string}>
               <SampleRowsCard row={row} />

@@ -52,7 +52,7 @@ export const PromoteRowsProvider = ({
   const handleRemovePromoteField = useCallback((fieldPath: string) => {
     setFieldsToPromote((prev) => {
       const newSet = new Set(prev);
-      newSet.delete(fieldPath);
+      newSet.delete(fieldPath.replace('_json.', ''));
       return newSet;
     });
   }, []);
