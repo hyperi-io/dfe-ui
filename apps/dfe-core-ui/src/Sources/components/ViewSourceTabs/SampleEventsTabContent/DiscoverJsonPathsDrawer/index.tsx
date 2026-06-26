@@ -20,8 +20,9 @@ export const DiscoverJsonPathsDrawer = ({
         Promote Fields
       </Button>
       <Drawer
-        title="Discover JSON Paths"
+        title="Promote Fields"
         open={isDrawerVisible}
+        size="80%"
         onClose={() => setIsDrawerVisible(false)}
       >
         <DiscoverJsonPathsDetails

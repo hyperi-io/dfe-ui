@@ -23,12 +23,12 @@ export type RowSchema = z.infer<typeof rowSchema>;
 const EMPTY_COLUMNS: SchemaColumnRow[] = [];
 
 /** Row shape from Form.List — spread `...restField` onto nested Form.Items so `isListField` registers correctly. */
-type SchemaColumnListRow = FormListFieldData & {
+export type SchemaColumnListRow = FormListFieldData & {
   isListField?: boolean;
   fieldKey?: number;
 };
 
-export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
+interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   initialValues?: SchemaColumnRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
   resetListWhenEmpty?: boolean;
@@ -43,6 +43,12 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
   visibleColumns?: string[];
   lockedColumns?: string[];
+  additionalColumns?: {
+    title: string;
+    dataIndex: string;
+    key: string;
+    render: (record: SchemaColumnListRow) => React.ReactNode;
+  }[];
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -93,6 +99,7 @@ export const AddSchemaTable = ({
   lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
+  additionalColumns = [],
   ...tableProps
 }: AddSchemaTableProps) => {
   const visibleColumns = visibleColumnsProp ?? [
@@ -329,6 +336,7 @@ export const AddSchemaTable = ({
               );
             },
           },
+          ...additionalColumns,
         ];
 
         return (
