@@ -23,12 +23,12 @@ export type RowSchema = z.infer<typeof rowSchema>;
 const EMPTY_COLUMNS: SchemaColumnRow[] = [];
 
 /** Row shape from Form.List — spread `...restField` onto nested Form.Items so `isListField` registers correctly. */
-export type SchemaColumnListRow = FormListFieldData & {
+type SchemaColumnListRow = FormListFieldData & {
   isListField?: boolean;
   fieldKey?: number;
 };
 
-interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
+export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   initialValues?: SchemaColumnRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
   resetListWhenEmpty?: boolean;
