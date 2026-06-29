@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/PromoteJsonPaths';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
@@ -72,9 +73,19 @@ export const DiscoverJsonPathsDrawer = ({
 
   return (
     <>
-      <Button type="primary" onClick={() => setIsDrawerVisible(true)}>
-        Promote Fields
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.schema_write}>
+        <RbacProtected.Unrestricted>
+          <Button type="primary" onClick={() => setIsDrawerVisible(true)}>
+            Promote Fields
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true, placement: 'bottom' }}>
+          <Button type="primary" disabled>
+            Promote Fields
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Promote Fields"
         open={isDrawerVisible}

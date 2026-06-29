@@ -1,6 +1,8 @@
 'use client';
 
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
@@ -70,29 +72,48 @@ export const ViewSourceDetailTabs = ({
 
   return (
     <Tabs
-      className="flex-1 min-h-0 -mt-3"
+      className={cn('flex-1 min-h-0 -mt-3 [&_.ant-tabs-content]:h-full')}
+      classNames={{
+        content: 'h-full',
+      }}
       activeKey={activeTab}
       onChange={handleTabChange}
       items={[
         {
           key: 'configuration',
           label: SOURCE_DETAIL_TAB_KEY_MAP['configuration'],
-          children: <ConfigurationDetailsTabContent {...sourceDetailData} />,
+          children: (
+            <RbacProtected action={RbacProtected.rbacActions.source_read}>
+              <RbacProtected.Unrestricted>
+                <ConfigurationDetailsTabContent {...sourceDetailData} />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="h-full">
+                <RbacProtected.RestrictedRoute />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
         },
 
         {
           key: 'sample-events',
           label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
           children: (
-            <PromoteRowsProvider
-              source_name={selectedSourceName}
-              version={selectedSourceVersion}
-            >
-              <SampleEventsTabContent
-                source={sourceDetailData}
-                version={selectedSourceVersion}
-              />
-            </PromoteRowsProvider>
+            <RbacProtected action={RbacProtected.rbacActions.schema_read}>
+              <RbacProtected.Unrestricted>
+                <PromoteRowsProvider
+                  source_name={selectedSourceName}
+                  version={selectedSourceVersion}
+                >
+                  <SampleEventsTabContent
+                    source={sourceDetailData}
+                    version={selectedSourceVersion}
+                  />
+                </PromoteRowsProvider>
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="h-full">
+                <RbacProtected.RestrictedRoute />
+              </RbacProtected.Restricted>
+            </RbacProtected>
           ),
         },
 
@@ -108,17 +129,33 @@ export const ViewSourceDetailTabs = ({
                 key: 'columns',
                 label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
                 children: (
-                  <SourceColumnsTabContent source_name={selectedSourceName} />
+                  <RbacProtected action={RbacProtected.rbacActions.source_read}>
+                    <RbacProtected.Unrestricted>
+                      <SourceColumnsTabContent
+                        source_name={selectedSourceName}
+                      />
+                    </RbacProtected.Unrestricted>
+                    <RbacProtected.Restricted className="h-full">
+                      <RbacProtected.RestrictedRoute />
+                    </RbacProtected.Restricted>
+                  </RbacProtected>
                 ),
               },
               {
                 key: 'ddl-preview',
                 label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
                 children: (
-                  <SourceDdlPreviewTabContent
-                    source_name={selectedSourceName}
-                    source_version={selectedSourceVersion}
-                  />
+                  <RbacProtected action={RbacProtected.rbacActions.source_read}>
+                    <RbacProtected.Unrestricted>
+                      <SourceDdlPreviewTabContent
+                        source_name={selectedSourceName}
+                        source_version={selectedSourceVersion}
+                      />
+                    </RbacProtected.Unrestricted>
+                    <RbacProtected.Restricted className="h-full">
+                      <RbacProtected.RestrictedRoute />
+                    </RbacProtected.Restricted>
+                  </RbacProtected>
                 ),
               },
               // {
