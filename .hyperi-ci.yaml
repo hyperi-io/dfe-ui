@@ -21,5 +21,11 @@ build:
 publish:
   enabled: true
   target: internal
+  # Build + publish the container to ghcr.io/hyperi-io/dfe-ui. Explicit `true`
+  # (not the default `auto`) so a missing/broken Dockerfile fails the build loudly
+  # -- dfe-ui is a deployed service, the image must always ship.
+  container:
+    enabled: true
+    dockerfile: Dockerfile
 typescript:
   package_manager: auto
