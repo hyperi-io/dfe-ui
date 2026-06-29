@@ -11,9 +11,9 @@ import {
   test,
   vi,
 } from 'vitest';
-import { usePromoteField } from '.';
+import { usePromoteFields } from '.';
 import { PromoteFieldRequest, PromoteFieldResponse } from './types';
-import { server } from './usePromoteField.mocks';
+import { server } from './usePromoteFields.mocks';
 
 beforeAll(() =>
   server.listen({
@@ -25,7 +25,7 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.usePromoteField', () => {
+describe('.usePromoteFields', () => {
   const requestBody: PromoteFieldRequest = {
     json_path: ['string'],
     atomic: false,
@@ -40,11 +40,10 @@ describe('.usePromoteField', () => {
 
       const { result } = renderHook(
         () =>
-          usePromoteField({
+          usePromoteFields({
             onSuccess,
             onError,
             source_name: 'source',
-            dry_run: false,
           }),
         { wrapper },
       );
@@ -94,7 +93,7 @@ describe('.usePromoteField', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => usePromoteField({ onSuccess, onError, source_name: 'source' }),
+        () => usePromoteFields({ onSuccess, onError, source_name: 'source' }),
         { wrapper },
       );
 

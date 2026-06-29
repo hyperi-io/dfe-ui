@@ -1,24 +1,34 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { Table } from '@/core/components/Table';
+import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
-import { IconArrowMoveUp } from '@repo/dfe-icons';
-import { Button, Spin, Tooltip } from 'antd';
-import { useMemo } from 'react';
-
-const EmptyCell = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
-);
+import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
+import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { Button, Spin } from 'antd';
+import { useEffect, useMemo } from 'react';
 
 export const DiscoverJsonPathsDetails = ({
   selectedSourceName,
   selectedSourceVersion,
   fieldsToPromote,
+  onSuccess,
+  onDataLoad,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
   fieldsToPromote: string[];
+  onSuccess: (response: PromoteFieldResponse) => void;
+  onDataLoad: (response: JsonPaths) => void;
 }) => {
+  const {
+    mutate: promoteFields,
+    isPending: isPromotingFields,
+    error: errorPromotingFields,
+  } = usePromoteFields({
+    source_name: selectedSourceName,
+    onSuccess,
+  });
+
   const {
     data: jsonPaths,
     isLoading: isLoadingJsonPaths,
@@ -29,154 +39,18 @@ export const DiscoverJsonPathsDetails = ({
     paths: fieldsToPromote.join(','),
   });
 
-  const columns = [
-    {
-      title: '',
-      dataIndex: 'additionalInfo',
-      key: 'additionalInfo',
-      align: 'center' as const,
-      width: 30,
-      render: (value: JsonPaths['paths'][number]) => {
-        const {
-          path,
-          coverage_pct,
-          types,
-          is_consistent,
-          promoted_to,
-          column,
-          distinct_count,
-          samples,
-        } = value;
-
-        return (
-          <Tooltip
-            classNames={{
-              container: 'w-fit',
-              root: 'w-fit max-w-full',
-            }}
-            title={
-              <div className="flex flex-col gap-y-1">
-                <h1 className="text-sm font-medium">Additional Information</h1>
-                <dl className="text-xs grid grid-cols-[auto_1fr] gap-x-4">
-                  {path && (
-                    <>
-                      <dt>Path</dt>
-                      <dd>{value?.path}</dd>
-                    </>
-                  )}
-                  {types && types.length > 0 && (
-                    <>
-                      <dt>Types</dt>
-                      <dd>{types.join(', ')}</dd>
-                    </>
-                  )}
-                  {is_consistent && (
-                    <>
-                      <dt>Is Consistent</dt>
-                      <dd>{is_consistent ? 'Yes' : 'No'}</dd>
-                    </>
-                  )}
-                  {coverage_pct && (
-                    <>
-                      <dt>Coverage %</dt>
-                      <dd>{coverage_pct}</dd>
-                    </>
-                  )}
-                  {promoted_to && (
-                    <>
-                      <dt>Promoted To</dt>
-                      <dd>{promoted_to}</dd>
-                    </>
-                  )}
-                  {column && (
-                    <>
-                      <dt>Column</dt>
-                      <dd>{column.name}</dd>
-                    </>
-                  )}
-                  {distinct_count && (
-                    <>
-                      <dt>Distinct Count</dt>
-                      <dd>{distinct_count}</dd>
-                    </>
-                  )}
-                  {samples && samples.length > 0 && (
-                    <>
-                      <dt>Samples</dt>
-                      <dd>{samples.join(', ')}</dd>
-                    </>
-                  )}
-                </dl>
-              </div>
-            }
-            destroyOnHidden
-          >
-            <Button
-              icon={<IconArrowMoveUp />}
-              size="small"
-              shape="circle"
-              type="default"
-            />
-          </Tooltip>
-        );
-      },
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      render: (value: string) => {
-        return value ? value : <EmptyCell />;
-      },
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      render: (value: string) => {
-        return value ? value : <EmptyCell />;
-      },
-    },
-    {
-      title: 'Index Type',
-      dataIndex: 'use_case',
-      key: 'use_case',
-      render: (value: string) => {
-        return value ? value : <EmptyCell />;
-      },
-    },
-    {
-      title: 'Attributes',
-      dataIndex: 'attribute',
-      key: 'attribute',
-      render: (value: string[]) => {
-        return value.length > 0 ? value.join(', ') : <EmptyCell />;
-      },
-    },
-    {
-      title: 'Expression (CTE)',
-      dataIndex: 'expr',
-      key: 'expr',
-      render: (value: string) => {
-        return value ? value : <EmptyCell />;
-      },
-    },
-    {
-      title: 'Comment',
-      dataIndex: 'comment',
-      key: 'comment',
-      render: (value: string) => {
-        return value ? value : <EmptyCell />;
-      },
-    },
-  ];
+  useEffect(() => {
+    if (jsonPaths) {
+      onDataLoad(jsonPaths);
+    }
+  }, [jsonPaths, onDataLoad]);
 
   const tableValues = useMemo(
     () =>
       jsonPaths?.paths.map((path) => ({
         id: path.path,
         ...path.column,
-        additionalInfo: { ...path, column: undefined },
+        main_action: { ...path, column: undefined },
       })) ?? [],
     [jsonPaths],
   );
@@ -195,5 +69,42 @@ export const DiscoverJsonPathsDetails = ({
     );
   }
 
-  return <Table dataSource={tableValues} columns={columns} />;
+  return (
+    <div className="flex flex-col gap-y-4">
+      <JsonPromoteColumnsTable
+        title={
+          tableValues.length > 0 ? (
+            <>
+              {tableValues.length} path{tableValues.length > 1 ? 's' : ''} can
+              be promoted
+            </>
+          ) : (
+            <>No JSON paths loaded</>
+          )
+        }
+        tableValues={tableValues}
+      />
+
+      {errorPromotingFields && (
+        <NotificationCard
+          description={errorPromotingFields.message}
+          type="error"
+        />
+      )}
+      <Button
+        className="ml-auto"
+        type="primary"
+        loading={isPromotingFields}
+        onClick={() =>
+          promoteFields({
+            json_path: jsonPaths?.paths.map((path) => path.path) ?? [],
+            dry_run: true,
+            atomic: false,
+          })
+        }
+      >
+        Test Promote
+      </Button>
+    </div>
+  );
 };
