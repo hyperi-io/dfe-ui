@@ -43,12 +43,6 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
   visibleColumns?: string[];
   lockedColumns?: string[];
-  additionalColumns?: {
-    title: string;
-    dataIndex: string;
-    key: string;
-    render: (record: SchemaColumnListRow) => React.ReactNode;
-  }[];
 }
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
@@ -99,7 +93,7 @@ export const AddSchemaTable = ({
   lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
-  additionalColumns = [],
+
   ...tableProps
 }: AddSchemaTableProps) => {
   const visibleColumns = visibleColumnsProp ?? [
@@ -336,7 +330,6 @@ export const AddSchemaTable = ({
               );
             },
           },
-          ...additionalColumns,
         ];
 
         return (
