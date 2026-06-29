@@ -75,8 +75,8 @@ export const DiscoverJsonPathsDetails = ({
         title={
           tableValues.length > 0 ? (
             <>
-              {tableValues.length} path{tableValues.length > 1 ? 's' : ''} can
-              be promoted
+              {tableValues.length} field{tableValues.length > 1 ? 's' : ''}{' '}
+              selected to be promoted
             </>
           ) : (
             <>No JSON paths loaded</>

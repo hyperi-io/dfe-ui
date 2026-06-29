@@ -47,14 +47,21 @@ export const PromoteJsonPaths = ({
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex flex-col gap-y-4 max-h-[calc(100vh-230px)] css-custom-scrollbar">
-        <JsonPromoteColumnsTable
-          tableValues={tableValues}
-          title={
-            <h2 className="font-semibold">
-              The following columns will be created:
-            </h2>
-          }
-        />
+        {tableValues.length > 0 ? (
+          <JsonPromoteColumnsTable
+            tableValues={tableValues}
+            title={
+              <h2 className="font-semibold">
+                The following columns will be created:
+              </h2>
+            }
+          />
+        ) : (
+          <NotificationCard
+            description="None of the selected fields can be promoted"
+            type="warning"
+          />
+        )}
         <ul className="flex flex-col gap-y-2">
           {data?.results.map((result, index) => (
             <li key={result.json_path}>

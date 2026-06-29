@@ -48,9 +48,11 @@ export const PromoteJsonPathsResultCard = ({
           </Tooltip>
           <span className="flex items-center gap-x-2">
             {json_path}
-            <span className="bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1 text-xs">
-              {column_name}
-            </span>
+            {column_name && (
+              <span className="bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1 text-xs">
+                {column_name}
+              </span>
+            )}
           </span>
         </span>
       }

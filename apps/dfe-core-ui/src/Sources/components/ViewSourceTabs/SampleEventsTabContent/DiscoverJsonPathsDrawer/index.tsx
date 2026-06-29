@@ -2,11 +2,15 @@ import { Drawer } from '@/core/components/Drawer';
 import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/PromoteJsonPaths';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { IconAlertCircle } from '@repo/dfe-icons';
 import { App, Button, Tabs } from 'antd';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DiscoverJsonPathsDetails } from './DiscoverJsonPathsDetails';
 
 type ActiveTab = 'discover' | 'review';
+
+const UNCOMMITTED_CLOSE_MESSAGE =
+  'Field promotions have not been committed. Leave anyway and discard your review?';
 export const DiscoverJsonPathsDrawer = ({
   selectedSourceName,
   selectedSourceVersion,
@@ -16,13 +20,55 @@ export const DiscoverJsonPathsDrawer = ({
   selectedSourceVersion: string;
   fieldsToPromote: Set<string>;
 }) => {
-  const { notification } = App.useApp();
+  const { notification, modal } = App.useApp();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('discover');
   const [canPromote, setCanPromote] = useState(false);
   const [promoteTestResponse, setPromoteTestResponse] =
     useState<PromoteFieldResponse | null>(null);
   const [jsonPaths, setJsonPaths] = useState<JsonPaths | null>(null);
+
+  const hasUncommittedChanges = isDrawerVisible && promoteTestResponse != null;
+
+  const closeDrawer = useCallback(() => {
+    setIsDrawerVisible(false);
+    setActiveTab('discover');
+    setCanPromote(false);
+    setPromoteTestResponse(null);
+    setJsonPaths(null);
+  }, []);
+
+  const requestCloseDrawer = useCallback(() => {
+    if (!hasUncommittedChanges) {
+      closeDrawer();
+      return;
+    }
+    modal.confirm({
+      title: (
+        <span className="flex items-center gap-x-2">
+          <IconAlertCircle /> Uncommitted changes
+        </span>
+      ),
+      content: UNCOMMITTED_CLOSE_MESSAGE,
+      okText: 'Discard',
+      okButtonProps: { danger: true },
+      cancelText: 'Keep editing',
+      icon: null,
+      onOk: closeDrawer,
+    });
+  }, [closeDrawer, hasUncommittedChanges, modal]);
+
+  useEffect(() => {
+    if (!hasUncommittedChanges) {
+      return;
+    }
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [hasUncommittedChanges]);
 
   return (
     <>
@@ -33,7 +79,7 @@ export const DiscoverJsonPathsDrawer = ({
         title="Promote Fields"
         open={isDrawerVisible}
         size="80%"
-        onClose={() => setIsDrawerVisible(false)}
+        onClose={requestCloseDrawer}
         destroyOnHidden
       >
         <Tabs
@@ -69,7 +115,7 @@ export const DiscoverJsonPathsDrawer = ({
                   data={promoteTestResponse}
                   jsonPaths={jsonPaths}
                   onSuccess={() => {
-                    setIsDrawerVisible(false);
+                    closeDrawer();
                     notification.success({
                       title: 'Fields promoted successfully',
                       placement: 'bottomLeft',
