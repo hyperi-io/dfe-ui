@@ -41,6 +41,7 @@ export const PromoteJsonPaths = ({
         ...column,
         attribute: column.attribute?.split(','),
         id: column.name,
+        _field_type: column._field_type || 'user_defined',
       })) ?? []
     );
   }, [data?.diff?.new_columns]);

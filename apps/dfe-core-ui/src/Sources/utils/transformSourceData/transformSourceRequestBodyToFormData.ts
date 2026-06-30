@@ -16,6 +16,13 @@ export const transformSourceRequestBodyToFormData = (
     source: source?.source ?? '',
     enabled: source?.enabled ?? false,
     ...source?.version,
+    header: source?.version?.header
+      ? {
+          ...source?.version?.header,
+          type: source?.version?.header?.type ?? '',
+          version: source?.version?.header?.version ?? '',
+        }
+      : undefined,
     // Manual cast because schema form rules are stricter than the source request body
     schema: source?.version?.schema
       ? {

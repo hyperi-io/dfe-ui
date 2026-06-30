@@ -16,6 +16,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       source: 'source',
       display_name: 'display name',
       fetcher: null,
+      match: { field: '', value: '' },
     });
   });
 

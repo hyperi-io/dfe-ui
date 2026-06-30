@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateAlert } from '.';
-import { AlertUpdateRequest, AlertUpdateResponse } from './types.d';
+import { AlertUpdateRequest, AlertUpdateResponse } from './types';
 import { server } from './useUpdateAlert.mocks';
 
 beforeAll(() =>

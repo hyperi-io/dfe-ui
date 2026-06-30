@@ -72,6 +72,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
 
       const responseItem: components['schemas']['SchemaSummaryObject'] = {
         name: 'string',
+        resource_type: 'custom',
         current: 'string',
         versions: ['string'],
         updated_at: 'string',

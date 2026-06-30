@@ -13,8 +13,8 @@ export const FieldMapSelect = (props: SelectProps) => {
     isFetchingNextPage,
   } = useFetchInfiniteFilteredFieldMaps({
     search: search,
-    order_by: 'standard',
-    order_direction: 'asc',
+    sort_by: 'standard',
+    sort_order: 'asc',
   });
 
   const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {

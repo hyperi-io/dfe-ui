@@ -75,7 +75,10 @@ export const useCloneSchema = ({
           date: new Date().toISOString(),
           type: 'model',
           summary: values.description ?? '',
-          columns: schemaDetailData.version.columns.items,
+          columns: schemaDetailData.version.columns.items.map((column) => ({
+            ...column,
+            _field_type: column._field_type ?? 'user_defined',
+          })),
         },
       },
     };

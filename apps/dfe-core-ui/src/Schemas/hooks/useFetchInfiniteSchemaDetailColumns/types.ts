@@ -33,4 +33,4 @@ export type MetaSchemaDetailResponse =
   components['schemas']['MetaSchemaGetResponse'];
 
 export type MetaSchemaDetailColumnItem =
-  components['schemas']['SchemaColumn-Output'];
+  components['schemas']['dfe_engine__schema__models__SchemaColumn'];

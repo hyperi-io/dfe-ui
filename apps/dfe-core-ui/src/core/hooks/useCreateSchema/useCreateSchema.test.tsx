@@ -41,6 +41,7 @@ describe('.useCreateSchema', () => {
             attribute: ['string'],
             use_case: 'string',
             expr: 'string',
+            _field_type: 'base',
           },
         ],
       },
@@ -61,6 +62,7 @@ describe('.useCreateSchema', () => {
       const expectedResponse: SchemaCreateResponse = {
         path: 'string',
         current: 'string',
+        resource_type: 'core',
         versions: {
           string: {
             date: 'string',
@@ -73,6 +75,7 @@ describe('.useCreateSchema', () => {
                 attribute: ['string'],
                 use_case: 'string',
                 expr: 'string',
+                _field_type: 'base',
               },
             ],
           },

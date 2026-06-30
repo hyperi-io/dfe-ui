@@ -285,7 +285,7 @@ describe('useFetchInfiniteFilteredRoles', () => {
 
     it('should include enabled filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoles({ resource_type: 'test' }),
+        () => useFetchInfiniteFilteredRoles({ resource_type: 'core' }),
         {
           wrapper,
         },
@@ -300,7 +300,7 @@ describe('useFetchInfiniteFilteredRoles', () => {
 
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoles({ resource_type: 'test' }),
+        () => useFetchInfiniteFilteredRoles({ resource_type: 'core' }),
         {
           wrapper,
         },
@@ -318,7 +318,7 @@ describe('useFetchInfiniteFilteredRoles', () => {
         () =>
           useFetchInfiniteFilteredRoles({
             search: 'test',
-            resource_type: 'test',
+            resource_type: 'core',
             per_page: 20,
           }),
         {

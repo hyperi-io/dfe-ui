@@ -13,6 +13,6 @@ export interface FieldMapListRequestParams {
 }
 
 export type UseFetchInfiniteFilteredFieldMapsProps = Omit<
-  SourceListRequestParams,
+  FieldMapListRequestParams,
   'page'
 >;

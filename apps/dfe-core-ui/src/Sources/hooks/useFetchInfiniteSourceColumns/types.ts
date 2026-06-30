@@ -1,10 +1,10 @@
 import { components } from '@repo/dfe-engine-types';
 
 export type UseFetchInfiniteSourceColumnsItem =
-  components['schemas']['PaginatedSourceColumnsResponse']['items'][number];
+  components['schemas']['SourceSchemaColumnsResponse']['items'][number];
 
 export type UseFetchInfiniteSourceColumnsResponse =
-  components['schemas']['PaginatedSourceColumnsResponse'];
+  components['schemas']['SourceSchemaColumnsResponse'];
 
 export interface UseFetchInfiniteSourceColumnsProps {
   source_name?: string;
