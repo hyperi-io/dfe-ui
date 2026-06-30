@@ -1,20 +1,17 @@
-import { getSession } from 'next-auth/react';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+  resetCachedSession,
+  setCachedSession,
+} from '@/core/auth/cachedSession';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { getApiAuthHeaders } from './getApiAuthHeaders';
-
-vi.mock('next-auth/react', () => ({
-  getSession: vi.fn(),
-}));
-
-const getSessionMock = vi.mocked(getSession);
 
 describe('getApiAuthHeaders', () => {
   beforeEach(() => {
-    getSessionMock.mockReset();
+    resetCachedSession();
   });
 
-  test('returns Authorization when session has accessToken', async () => {
-    getSessionMock.mockResolvedValue({
+  test('returns Authorization when cached session has accessToken', async () => {
+    setCachedSession({
       user: {
         id: 'test-user',
         accessToken: 'token123',
@@ -28,7 +25,7 @@ describe('getApiAuthHeaders', () => {
   });
 
   test('returns empty object when there is no token', async () => {
-    getSessionMock.mockResolvedValue(null);
+    setCachedSession(null);
 
     await expect(getApiAuthHeaders()).resolves.toEqual({});
   });
