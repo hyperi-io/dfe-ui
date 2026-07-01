@@ -41,6 +41,10 @@ export const SESSION_REFETCH_INTERVAL_SECONDS = parsePositiveInt(
   DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS,
 );
 
+/** Shared interval for auth store session + `/auth/me` refresh (milliseconds). */
+export const SESSION_AUTH_REFRESH_INTERVAL_MS =
+  SESSION_REFETCH_INTERVAL_SECONDS * 1000;
+
 export const shouldRefreshAccessToken = ({
   accessTokenExpiresAt,
   sessionError,

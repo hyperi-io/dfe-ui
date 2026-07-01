@@ -1,6 +1,6 @@
 import { cn } from '@/core/utils/style';
 
-type DisplayType = 'default' | 'warning' | 'error' | 'info';
+type DisplayType = 'default' | 'warning' | 'error' | 'info' | 'action';
 
 export const NotificationCard = ({
   icon,
@@ -33,6 +33,10 @@ export const NotificationCard = ({
     info: cn(
       // Card Border & Background
       'border-info/30 bg-info/10 dark:border-dark-info/50 dark:bg-dark-info/10',
+    ),
+    action: cn(
+      // Card Border & Background
+      'border-purple-500/30 bg-purple-500/10',
     ),
   };
   return (

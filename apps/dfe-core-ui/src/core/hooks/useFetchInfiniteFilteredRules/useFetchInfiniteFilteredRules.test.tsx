@@ -11,8 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredRules } from '.';
-import { RuleListItem } from './types';
-import { RuleListRequestParams } from './types.d';
+import { RuleListItem, RuleListRequestParams } from './types';
 import { server } from './useFetchInfiniteRules.mocks';
 
 class MockIntersectionObserver {

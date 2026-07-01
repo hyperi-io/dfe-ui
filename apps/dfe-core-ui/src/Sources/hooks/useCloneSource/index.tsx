@@ -67,7 +67,7 @@ export const useCloneSource = ({
       display_name: values.display_name,
       enabled: values.enabled,
       ...sourceDetailData.version,
-      date_time: undefined,
+      match: { field: '', value: '' },
     };
     mutate(body);
   };

@@ -11,8 +11,10 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteSourceColumns } from '.';
-import { UseFetchInfiniteSourceColumnsItem } from './types';
-import { UseFetchInfiniteSourceColumnsProps } from './types.d';
+import {
+  UseFetchInfiniteSourceColumnsItem,
+  UseFetchInfiniteSourceColumnsProps,
+} from './types';
 import {
   MOCK_SOURCE_NAME,
   server,

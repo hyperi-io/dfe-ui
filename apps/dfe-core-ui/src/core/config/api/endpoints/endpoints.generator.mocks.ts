@@ -1463,6 +1463,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 versions: ['string'],
                 updated_at: 'string',
                 column_count: 0,
+                resource_type: 'core',
               },
             ],
             total: 0,
@@ -1553,6 +1554,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             path: 'string',
             current: 'string',
+            resource_type: 'core',
             versions: {
               string: {
                 date: 'string',
@@ -1565,6 +1567,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
+                    _field_type: 'base',
                   },
                 ],
               },
@@ -1572,7 +1575,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          mockedResponse?: components['schemas']['MetaSchema'];
           schema_path?: string;
         } = {}) => {
           return http.post(
@@ -1692,6 +1695,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             current: 'string',
             selected: 'string',
             versions: ['1.0.0'],
+            resource_type: 'core',
             version: {
               date: 'string',
               type: 'string',
@@ -1704,6 +1708,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
+                    _field_type: 'base',
                   },
                 ],
                 total: 1,
@@ -1765,7 +1770,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'][];
+          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
@@ -1783,6 +1788,133 @@ export const API_CONFIG_MOCKS = Object.freeze({
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    sampleRows: {
+      mockedUrl: '/api/v1/schemas/{source_name}/sample-rows',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            match_field: 'string',
+            match_value: 'string',
+            columns: ['string'],
+            rows: [{ string: 'string' }],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SampleRowsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.sampleRows.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    jsonPaths: {
+      mockedUrl: '/api/v1/schemas/{source_name}/json-paths',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            json_column: 'string',
+            paths: [
+              {
+                path: 'string',
+                types: ['string'],
+                is_consistent: true,
+                promoted_to: 'string',
+                column: {
+                  name: 'string',
+                  type: 'string',
+                  attribute: ['string'],
+                  use_case: 'string',
+                  expr: 'string',
+                  comment: 'string',
+                },
+                coverage_pct: 100,
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['JsonPathsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.jsonPaths.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    promoteField: {
+      mockedUrl: '/api/v1/schemas/{source_name}/promote-field',
+      post: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            schema_version: 'string',
+            results: [
+              {
+                json_path: 'string',
+                status: 'ok',
+                column_name: 'string',
+                data_type: 'string',
+                index_type: 'string',
+                copy_cel: 'string',
+                error: 'string',
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['PromoteFieldResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },

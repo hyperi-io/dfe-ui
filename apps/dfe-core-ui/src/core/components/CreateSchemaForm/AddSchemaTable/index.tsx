@@ -93,17 +93,18 @@ export const AddSchemaTable = ({
   lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
+
   ...tableProps
 }: AddSchemaTableProps) => {
   const visibleColumns = visibleColumnsProp ?? [
+    'main_action',
     'name',
     'type',
     '__rowId',
-    'delete',
     'expr',
     'comment',
   ];
-  const lockedColumns = lockedColumnsProp ?? ['__rowId', 'delete', 'name'];
+  const lockedColumns = lockedColumnsProp ?? ['__rowId', 'main_action', 'name'];
   const form = Form.useFormInstance();
 
   /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */
@@ -147,8 +148,8 @@ export const AddSchemaTable = ({
                 />
               </Tooltip>
             ) : null,
-            dataIndex: 'delete',
-            key: 'delete',
+            dataIndex: 'main_action',
+            key: 'main_action',
             align: 'center' as const,
             width: 30,
             render: (_: unknown, record: SchemaColumnListRow) => {
@@ -169,20 +170,6 @@ export const AddSchemaTable = ({
                   />
                 </Tooltip>
               ) : null;
-            },
-          },
-          /** Ant Design Form only persists fields registered via Form.Item — `id` must be stored for Form.List merges and promotion. */
-          {
-            title: '',
-            key: '__rowId',
-            width: 0,
-            render: (_: unknown, record: SchemaColumnListRow) => {
-              const { key: _rowKey, name: rowIndex, ...restField } = record;
-              return (
-                <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
-                  <Input type="hidden" />
-                </Form.Item>
-              );
             },
           },
           {
@@ -325,6 +312,20 @@ export const AddSchemaTable = ({
                       config.defaultEditFields.includes('comment')
                     }
                   />
+                </Form.Item>
+              );
+            },
+          },
+          /** Ant Design Form only persists fields registered via Form.Item — `id` must be stored for Form.List merges and promotion. */
+          {
+            title: '',
+            key: '__rowId',
+            width: 0,
+            render: (_: unknown, record: SchemaColumnListRow) => {
+              const { key: _rowKey, name: rowIndex, ...restField } = record;
+              return (
+                <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
+                  <Input type="hidden" />
                 </Form.Item>
               );
             },

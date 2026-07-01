@@ -36,7 +36,7 @@ export const AdminControlsScene = () => {
         onChange={handleTabChange}
         classNames={{
           root: 'min-h-0',
-          header: 'w-60 max-w-60 shrink-0',
+          header: 'w-full max-w-64 shrink-0',
           content: 'min-w-0 flex-1 pl-6',
         }}
         items={[

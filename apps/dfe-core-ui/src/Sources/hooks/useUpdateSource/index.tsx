@@ -16,7 +16,7 @@ export const useUpdateSource = ({
     mutationFn: (source: SourceUpdateRequestBody) =>
       apiClient.put(API_CONFIG.sources.source, {
         body: source,
-        pathParams: { name: source.source },
+        pathParams: { name: source.source ?? '' },
       }),
     onSuccess: (data) => {
       onSuccess?.(data);
