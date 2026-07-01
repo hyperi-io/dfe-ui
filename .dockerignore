@@ -1,0 +1,18 @@
+# Keep the build context lean + never ship host artefacts into the image.
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/coverage
+**/storybook-static
+.git
+.github
+.claude
+.vscode
+.yarn/cache
+.yarn/install-state.gz
+**/*.log
+**/.DS_Store
+docs
+*.md
+!apps/dfe-core-ui/README.md
