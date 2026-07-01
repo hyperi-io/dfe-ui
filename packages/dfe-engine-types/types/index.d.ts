@@ -530,6 +530,9 @@ export interface paths {
         /**
          * Create Source
          * @description Create a new source from a flat source definition (initial version ``1.0.0``).
+         *
+         *     ``header`` is optional: when omitted, no common-header profile is stored on the
+         *     version (DDL compose uses meta/derived columns only until a header is set).
          */
         post: operations["create_source_api_v1_sources_post"];
         delete?: never;
@@ -3394,37 +3397,21 @@ export interface components {
          *         versions: Dictionary of versions and their metadata.
          *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
          */
-        "MetaSchema-Input": {
+        MetaSchema: {
+            /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
             /**
              * Current
              * @description Current version of the schema
              */
             current: string;
             /** @description Dictionary of versions and their metadata */
-            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_-Input"];
-            /**
-             * Path
-             * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
-             */
-            path?: string | null;
-        };
-        /**
-         * MetaSchema
-         * @description A schema for a ClickHouse table.
-         *
-         *     Attributes:
-         *         current: Current version of the schema.
-         *         versions: Dictionary of versions and their metadata.
-         *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
-         */
-        "MetaSchema-Output": {
-            /**
-             * Current
-             * @description Current version of the schema
-             */
-            current: string;
-            /** @description Dictionary of versions and their metadata */
-            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_-Output"];
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_"];
             /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
@@ -3448,13 +3435,38 @@ export interface components {
              */
             summary?: string | null;
             /** @description Complete column snapshot for the new version (at least one column) */
-            columns: components["schemas"]["NonEmptyList_SchemaColumn__MinLen_min_length_1_"];
+            columns: components["schemas"]["NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_"];
+        };
+        /**
+         * MetaSchemaCreateRequest
+         * @description Create a new custom meta-schema (``resource_type`` is set by the server).
+         */
+        MetaSchemaCreateRequest: {
+            /**
+             * Current
+             * @description Current version of the schema
+             */
+            current: string;
+            /** @description Dictionary of versions and their metadata */
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersionCreate_"];
+            /**
+             * Path
+             * @description DirectoryConfigStore table key / relative path (must match URL when set)
+             */
+            path?: string | null;
         };
         /**
          * MetaSchemaGetResponse
          * @description Meta-schema definition for a single requested version.
          */
         MetaSchemaGetResponse: {
+            /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
             /**
              * Current
              * @description Current version of the schema
@@ -3542,16 +3554,16 @@ export interface components {
              */
             group: string;
         };
-        "NonEmptyDict_str_SchemaVersion_-Input": {
-            [key: string]: components["schemas"]["SchemaVersion-Input"];
+        NonEmptyDict_str_SchemaVersionCreate_: {
+            [key: string]: components["schemas"]["SchemaVersionCreate"];
         };
-        "NonEmptyDict_str_SchemaVersion_-Output": {
-            [key: string]: components["schemas"]["SchemaVersion-Output"];
+        NonEmptyDict_str_SchemaVersion_: {
+            [key: string]: components["schemas"]["SchemaVersion"];
         };
         NonEmptyList_Annotated_str__AfterValidator__: string[];
-        "NonEmptyList_SchemaColumn_-Input": components["schemas"]["SchemaColumn-Input"][];
-        "NonEmptyList_SchemaColumn_-Output": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
-        NonEmptyList_SchemaColumn__MinLen_min_length_1_: components["schemas"]["SchemaColumn-Input"][];
+        NonEmptyList_SchemaColumnWrite_: components["schemas"]["SchemaColumnWrite"][];
+        NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
+        NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
         /** OrgResponse */
         OrgResponse: {
             /** Name */
@@ -4417,10 +4429,10 @@ export interface components {
             }[];
         };
         /**
-         * SchemaColumn
-         * @description A column in the schema.
+         * SchemaColumnWrite
+         * @description Column payload for API writes (create schema / add version).
          */
-        "SchemaColumn-Input": {
+        SchemaColumnWrite: {
             /**
              * Name
              * @description Name of the column
@@ -4451,6 +4463,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type: string;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
@@ -4490,6 +4507,13 @@ export interface components {
              */
             name: string;
             /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
              * Current
              * @description Current version of the schema
              */
@@ -4511,7 +4535,7 @@ export interface components {
          * SchemaVersion
          * @description A version in the schema.
          */
-        "SchemaVersion-Input": {
+        SchemaVersion: {
             /**
              * Date
              * @description Date of the version
@@ -4528,13 +4552,13 @@ export interface components {
              */
             summary: string;
             /** @description List of columns in the version */
-            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Input"];
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_"];
         };
         /**
-         * SchemaVersion
-         * @description A version in the schema.
+         * SchemaVersionCreate
+         * @description Initial version entry when creating a meta-schema via the API.
          */
-        "SchemaVersion-Output": {
+        SchemaVersionCreate: {
             /**
              * Date
              * @description Date of the version
@@ -4551,7 +4575,7 @@ export interface components {
              */
             summary: string;
             /** @description List of columns in the version */
-            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Output"];
+            columns: components["schemas"]["NonEmptyList_SchemaColumnWrite_"];
         };
         /**
          * SchemaVersionGet
@@ -4905,6 +4929,42 @@ export interface components {
             engine: string;
         };
         /**
+         * SourceSchemaColumnsResponse
+         * @description Composed source columns plus meta-schema ``resource_type``.
+         */
+        SourceSchemaColumnsResponse: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /**
+             * Resource Type
+             * @description resource_type from the source version's meta-schema, when configured
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /**
          * SourceSigma
          * @description Sigma field mapping configuration for this source.
          */
@@ -5030,8 +5090,8 @@ export interface components {
              * @description Version creation date (YYYY-MM-DD)
              */
             date_time: string;
-            /** @description Common schema header configuration */
-            header?: components["schemas"]["SourceHeader"];
+            /** @description Common schema header configuration (optional; applied at DDL compose time) */
+            header?: components["schemas"]["SourceHeader"] | null;
             /** @description Schema configuration */
             schema?: components["schemas"]["SourceSchema"];
             /**
@@ -5670,33 +5730,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
             /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** Total Pages */
-            readonly total_pages: number;
-            /** Next Page */
-            readonly next_page: number | null;
-            /** Prev Page */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[SchemaColumn] */
-        dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___3: {
-            /** Items */
-            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -5785,6 +5819,11 @@ export interface components {
              * @default
              */
             description: string;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type?: string | null;
         };
         /** SeedResponse */
         dfe_engine__api__v1__services__SeedResponse: {
@@ -5863,7 +5902,7 @@ export interface components {
          * SchemaColumn
          * @description A column in the schema.
          */
-        "dfe_engine__schema__models__SchemaColumn-Output": {
+        dfe_engine__schema__models__SchemaColumn: {
             /**
              * Name
              * @description Name of the column
@@ -5894,6 +5933,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type?: string | null;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
@@ -9372,7 +9416,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MetaSchema-Input"];
+                "application/json": components["schemas"]["MetaSchemaCreateRequest"];
             };
         };
         responses: {
@@ -9382,7 +9426,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MetaSchema-Output"];
+                    "application/json": components["schemas"]["MetaSchema"];
                 };
             };
             /** @description Validation Error */
@@ -9482,7 +9526,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
                 };
             };
             /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
@@ -9527,7 +9571,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___3"];
+                    "application/json": components["schemas"]["SourceSchemaColumnsResponse"];
                 };
             };
             /** @description Validation Error */
