@@ -1,35 +1,36 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { Table } from '@/core/components/Table';
-import { useDevAlert } from '@/core/hooks/useDevAlert';
-import { useFetchSampleEvents } from '@/Sources/hooks/useFetchSampleEvents';
+import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
+import { useFetchSampleRows } from '@/Sources/hooks/useFetchSampleRows';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { IconInfoCircle } from '@repo/dfe-icons';
-import { Alert, Spin } from 'antd';
-import { useMemo } from 'react';
-import { getSampleEventsTableColumns } from './SampleEventsTabContent.helpers';
+import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
+import { Spin } from 'antd';
+import { FieldPromoteBanner } from './FieldPromoteBanner';
+import { SampleRowsCard } from './SampleRowsCard';
 
 export const SampleEventsTabContent = ({
-  source_name,
-  schema,
+  source,
+  version,
 }: {
-  source_name: string;
-  schema: SourceVersionDetail['version']['schema'];
+  source: SourceVersionDetail;
+  version: string;
 }) => {
+  const { version: { schema } = {} } = source;
+  const isMetaSchemaDefined = !!schema?.meta_schema || !!schema?.derived_schema;
+  const isDeployedVersion = version === source.deployed_version;
+  const canViewSampleRows = !isMetaSchemaDefined || isDeployedVersion;
+
   const {
-    data: sampleEvents,
+    data: sampleRows,
     isLoading,
     error,
-  } = useFetchSampleEvents({
-    source_name,
+  } = useFetchSampleRows({
+    source_name: source.source,
+    version,
+    queryEnabled: canViewSampleRows,
   });
 
-  const { isDevAlertsEnabled } = useDevAlert();
-
-  const columns = useMemo(
-    () => getSampleEventsTableColumns(sampleEvents ?? []),
-    [sampleEvents],
-  );
+  const { fieldsToPromote } = usePromoteRowsContext();
 
   if (isLoading)
     return (
@@ -46,31 +47,41 @@ export const SampleEventsTabContent = ({
       />
     );
 
-  const isMetaSchemaDefined = !!schema?.meta_schema || !!schema?.derived_schema;
-
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-3">
+      {fieldsToPromote.size > 0 && (
+        <FieldPromoteBanner
+          selectedSourceName={source.source}
+          selectedSourceVersion={version}
+        />
+      )}
       {!isMetaSchemaDefined && (
         <NotificationCard
           icon={<IconInfoCircle className="w-4 h-4" />}
           description={
             <p className="flex gap-2">
-              This source has no meta or derived schema defined. Results will
-              subsequently be sent to{' '}
-              <span className="font-semibold">_default_land.</span>
+              This source has no meta or derived schema defined. Results will be
+              sent to <span className="font-semibold">_default_land.</span>
             </p>
           }
         />
       )}
-      {isDevAlertsEnabled && (
-        <Alert type="error" title="Dev Alert - Mocked Data" />
+      {!canViewSampleRows && (
+        <NotificationCard
+          type="warning"
+          icon={<IconAlertCircle />}
+          description="You can only view sample rows for source versions that are sent to _default_land or are deployed."
+        />
       )}
-      <Table
-        dataSource={sampleEvents}
-        columns={columns}
-        pagination={false}
-        rowKey="_uuid"
-      />
+      {canViewSampleRows && (
+        <ul className="flex flex-col gap-y-3 mt-2 h-[calc(100vh-290px)] css-custom-scrollbar">
+          {sampleRows?.rows.map((row) => (
+            <li key={row._uuid as string}>
+              <SampleRowsCard row={row} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

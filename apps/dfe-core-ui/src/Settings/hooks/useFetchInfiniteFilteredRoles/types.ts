@@ -4,7 +4,7 @@ export type RoleListResponse =
   components['schemas']['PaginatedResponse_RoleResponse_'];
 export type RoleListItem = RoleListResponse['items'][number];
 
-export type ResourceType = components['schemas']['ResourceType'];
+export type ResourceType = 'core' | 'custom';
 
 export interface UseFetchInfiniteFilteredRolesProps {
   search?: string;

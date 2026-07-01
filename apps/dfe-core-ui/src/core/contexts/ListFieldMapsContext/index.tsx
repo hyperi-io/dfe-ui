@@ -24,6 +24,8 @@ interface ListFieldMapsQueryParams extends Omit<
   'page'
 > {
   standard?: string;
+  map_standard?: string; // selected mapping standard
+  map_source?: string; // selected mapping source
 }
 
 const parseFiltersFromParams = (

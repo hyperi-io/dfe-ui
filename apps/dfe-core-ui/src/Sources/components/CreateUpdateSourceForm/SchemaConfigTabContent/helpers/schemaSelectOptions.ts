@@ -121,10 +121,7 @@ export const isSelectableSchemaOptionValue = (value: string) =>
 
 /** Version keys from a create/update meta-schema response for the version Select. */
 export const versionsFromMetaSchemaOutput = (
-  response: Pick<
-    components['schemas']['MetaSchema-Output'],
-    'current' | 'versions'
-  >,
+  response: Pick<components['schemas']['MetaSchema'], 'current' | 'versions'>,
 ): string[] => {
   const keys = Object.keys(response.versions ?? {});
   if (keys.length > 0) {

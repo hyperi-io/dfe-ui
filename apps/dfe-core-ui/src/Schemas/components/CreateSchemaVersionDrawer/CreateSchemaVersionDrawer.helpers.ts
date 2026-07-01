@@ -26,6 +26,7 @@ export const transformFormDataToRequestBody = (
     attribute: column.attribute,
     use_case: column.use_case,
     expr: column.expr,
+    _field_type: 'imported',
   }));
   const schemaColumns = (values.schemaColumns ?? []).map((column) => ({
     name: column.name,
@@ -33,6 +34,7 @@ export const transformFormDataToRequestBody = (
     attribute: column.attribute,
     use_case: column.use_case,
     expr: column.expr,
+    _field_type: 'user_defined',
   }));
 
   return {

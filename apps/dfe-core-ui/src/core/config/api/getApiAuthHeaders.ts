@@ -1,7 +1,17 @@
-import { getSession } from 'next-auth/react';
+import {
+  getAccessTokenFromCache,
+  loadSession,
+} from '@/core/auth/cachedSession';
 
 export async function getApiAuthHeaders(): Promise<HeadersInit> {
-  const session = await getSession();
+  const cachedToken = getAccessTokenFromCache();
+  if (cachedToken) {
+    return {
+      Authorization: `Bearer ${cachedToken}`,
+    };
+  }
+
+  const session = await loadSession();
   const accessToken = session?.user?.accessToken;
 
   if (!accessToken) {

@@ -27,7 +27,6 @@ export const FieldMapsList = ({ className }: { className?: string }) => {
         defaultFilters={{
           ...filters,
           search: undefined,
-          enabled: undefined,
         }}
       />
     );

@@ -10,6 +10,8 @@ const schemaDetailColumn = {
   attribute: ['string'],
   use_case: 'string',
   expr: 'string',
+  _field_type: 'base',
+  _matched_searchable: ['string'],
 };
 
 const handlers = [
@@ -17,6 +19,7 @@ const handlers = [
     schema_path: `${CLONE_SOURCE_SCHEMA_PATH}`,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
+      resource_type: 'custom',
       current: '1.0.0',
       selected: '1.0.0',
       versions: ['1.0.0'],
@@ -40,6 +43,7 @@ const handlers = [
     schema_path: CLONE_TARGET_SCHEMA_PATH,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
+      resource_type: 'custom',
       current: '1.0.0',
       versions: {
         '1.0.0': {

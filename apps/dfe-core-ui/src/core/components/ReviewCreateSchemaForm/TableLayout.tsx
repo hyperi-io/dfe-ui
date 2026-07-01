@@ -178,11 +178,11 @@ export const TableLayout = ({
           'imported',
           'name',
           'type',
-          'delete',
+          'main_action',
           'expr',
           'comment',
         ]}
-        lockedColumns={['__rowId', 'imported', 'delete', 'name']}
+        lockedColumns={['__rowId', 'imported', 'main_action', 'name']}
         columns={tableColumns}
         dataSource={allColumns}
         rowKey="name"

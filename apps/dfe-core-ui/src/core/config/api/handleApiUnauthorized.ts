@@ -1,5 +1,7 @@
 'use client';
 
+import { getAccessTokenRefreshInFlight } from '@/core/auth/accessTokenRefreshFlight';
+import { executeAccessTokenRefresh } from '@/core/auth/refreshAccessToken';
 import { signOut } from 'next-auth/react';
 
 let signingOut = false;
@@ -7,6 +9,23 @@ let signingOut = false;
 export async function handleApiUnauthorized() {
   if (signingOut || typeof window === 'undefined') {
     return;
+  }
+
+  const refreshInFlight = getAccessTokenRefreshInFlight();
+  if (refreshInFlight) {
+    try {
+      await refreshInFlight;
+      return;
+    } catch {
+      return;
+    }
+  }
+
+  try {
+    await executeAccessTokenRefresh();
+    return;
+  } catch {
+    // Fall through to sign-out when refresh cannot recover the session.
   }
 
   const { pathname, search } = window.location;

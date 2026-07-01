@@ -94,6 +94,7 @@ describe('transformFormDataToRequestBody', () => {
         attribute: ['nullable'],
         use_case: 'id',
         comment: 'note',
+        _field_type: 'imported',
       },
       {
         name: 'col_b',
@@ -101,6 +102,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined,
+        _field_type: 'user_defined',
       },
     ]);
   });
@@ -139,6 +141,7 @@ describe('transformFormDataToRequestBody', () => {
           attribute: ['nullable'],
           use_case: 'id',
           comment: 'note',
+          _field_type: 'imported',
         },
       ]);
       expect(schemaColumns).toEqual([]);
@@ -170,6 +173,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
+          _field_type: 'user_defined',
         },
       ]);
     });

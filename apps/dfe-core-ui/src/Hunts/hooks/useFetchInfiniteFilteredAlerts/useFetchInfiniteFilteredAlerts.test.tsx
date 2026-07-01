@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredAlerts } from '.';
-import { AlertListResponse } from './types.d';
+import { AlertListResponse } from './types';
 import { server } from './useFetchInfiniteFilteredAlerts.mocks';
 
 class MockIntersectionObserver {

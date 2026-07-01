@@ -2,7 +2,7 @@ import { components } from '@repo/dfe-engine-types';
 
 export type RuleListResponse =
   components['schemas']['PaginatedResponse_RuleSummary_'];
-export type RuleListItem = RulesListResponse['items'][number];
+export type RuleListItem = RuleListResponse['items'][number];
 
 export interface RuleListRequestParams {
   search?: string;

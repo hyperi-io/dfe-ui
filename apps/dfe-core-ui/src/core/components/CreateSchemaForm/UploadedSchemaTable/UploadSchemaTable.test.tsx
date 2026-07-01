@@ -73,6 +73,7 @@ const validUploadedColumn = {
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: 'import',
 };
 
 const renderUploadedSchemaTable = (form?: FormInstance) => {
@@ -175,11 +176,11 @@ describe('UploadedSchemaTable', () => {
 
     const { onRemoveRow } = addSchemaTableSpy.mock.calls[0][0];
 
-    // @ts-expect-error - testValue override
+    // @ts-expect-error - test data
     onRemoveRow?.({ id: 42 });
-    // @ts-expect-error - testValue override
+    // @ts-expect-error - test data
     onRemoveRow?.({ id: undefined });
-    // @ts-expect-error - testValue override
+    // @ts-expect-error - test data
     onRemoveRow?.({});
 
     expect(handleRemoveUploadedSchemaColumn).toHaveBeenCalledWith(undefined);

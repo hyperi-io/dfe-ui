@@ -12,6 +12,7 @@ type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
 const schemaEntry = (
   overrides: Partial<SchemaSummaryObject> & Pick<SchemaSummaryObject, 'name'>,
 ): SchemaSummaryObject => ({
+  resource_type: 'custom',
   current: '1.0.0',
   versions: ['1.0.0'],
   updated_at: '',

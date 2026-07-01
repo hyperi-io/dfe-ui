@@ -23,7 +23,7 @@ export const transformSourceFormDataToRequestBody = (
 
   const transformedSource: SourceUpdateRequestBody = {
     ...rest,
-    ...(apiMatch ? { match: apiMatch } : {}),
+    ...(apiMatch ? { match: apiMatch } : { match: { field: '', value: '' } }),
     fetcher:
       Object.keys(fetcher ?? {}).length > 0
         ? {

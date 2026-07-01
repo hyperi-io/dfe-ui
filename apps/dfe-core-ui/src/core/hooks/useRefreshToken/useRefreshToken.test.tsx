@@ -15,14 +15,18 @@ import { useRefreshToken } from '.';
 import { RefreshTokenResponse } from './types';
 import { server } from './useRefreshToken.mocks';
 
-const mockUpdate = vi.fn();
+const persistRefreshedSessionMock = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/core/auth/persistRefreshedSession', () => ({
+  persistRefreshedSession: (...args: unknown[]) =>
+    persistRefreshedSessionMock(...args),
+}));
 
 vi.mock('next-auth/react', () => ({
   getSession: vi.fn().mockResolvedValue({
-    user: { id: 'test-user', accessToken: 'current-token' },
+    user: { id: 'test-user', accessToken: 'refreshed-token' },
     expires: '2099-01-01',
   }),
-  useSession: () => ({ update: mockUpdate }),
 }));
 
 beforeAll(() =>
@@ -32,7 +36,7 @@ beforeAll(() =>
 );
 afterEach(() => {
   server.resetHandlers();
-  mockUpdate.mockReset();
+  persistRefreshedSessionMock.mockClear();
 });
 afterAll(() => server.close());
 
@@ -40,9 +44,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useRefreshToken', () => {
   describe('onSuccess', () => {
-    test('refreshes token and updates session', async () => {
-      mockUpdate.mockResolvedValue(undefined);
-
+    test('refreshes token and persists session', async () => {
       const { result } = renderHook(() => useRefreshToken(), { wrapper });
 
       result.current.mutate();
@@ -60,11 +62,9 @@ describe('.useRefreshToken', () => {
         expect(result.current.data).toEqual(expectedResponse);
       });
 
-      expect(mockUpdate).toHaveBeenCalledWith({
-        accessToken: 'refreshed-token',
-        expiresIn: 3600,
-        roles: ['string'],
-      });
+      expect(persistRefreshedSessionMock).toHaveBeenCalledWith(
+        expectedResponse,
+      );
     });
   });
 
@@ -82,7 +82,7 @@ describe('.useRefreshToken', () => {
         expect(result.current.error).toBeDefined();
       });
 
-      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(persistRefreshedSessionMock).not.toHaveBeenCalled();
     });
   });
 });

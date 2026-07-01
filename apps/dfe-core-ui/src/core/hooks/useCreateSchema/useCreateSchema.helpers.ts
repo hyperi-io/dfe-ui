@@ -18,6 +18,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
+    _field_type: 'imported',
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),
@@ -31,6 +32,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
+    _field_type: 'user_defined',
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),

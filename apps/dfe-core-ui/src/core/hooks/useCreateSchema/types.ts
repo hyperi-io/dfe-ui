@@ -1,10 +1,11 @@
 import { components } from '@repo/dfe-engine-types';
 
-export type SchemaCreateRequest = components['schemas']['MetaSchema-Input'];
+export type SchemaCreateRequest =
+  components['schemas']['MetaSchemaCreateRequest'];
 export type SchemaCreateRequestColumn =
-  components['schemas']['SchemaColumn-Input'];
+  components['schemas']['SchemaColumnWrite'];
 
-export type SchemaCreateResponse = components['schemas']['MetaSchema-Output'];
+export type SchemaCreateResponse = components['schemas']['MetaSchema'];
 
 // TODO: API response type is not aligned, fix this
 export interface SchemaCreateValidationErrorResponse {

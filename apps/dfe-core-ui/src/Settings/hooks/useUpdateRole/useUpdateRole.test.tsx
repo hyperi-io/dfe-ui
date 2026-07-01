@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateRole } from '.';
-import { RoleUpdateRequest, RoleUpdateResponse } from './types.d';
+import { RoleUpdateRequest, RoleUpdateResponse } from './types';
 import { server } from './useUpdateRole.mocks';
 
 beforeAll(() =>

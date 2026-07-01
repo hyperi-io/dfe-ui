@@ -175,7 +175,10 @@ export function createApiClient(config: ApiClientConfig) {
       }
 
       if (res.status === 401) {
-        await onUnauthorized?.();
+        const isAuthRefreshRequest = resolvedPath.endsWith('/auth/refresh');
+        if (!isAuthRefreshRequest) {
+          await onUnauthorized?.();
+        }
       }
 
       throw new ApiError(res.status, res.statusText, detail);

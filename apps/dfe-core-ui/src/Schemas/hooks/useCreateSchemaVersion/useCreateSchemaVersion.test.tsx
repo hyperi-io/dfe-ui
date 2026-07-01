@@ -38,6 +38,7 @@ describe('.useCreateSchemaVersion', () => {
         attribute: ['string'],
         use_case: 'string',
         expr: 'string',
+        _field_type: 'base',
       },
     ],
   };

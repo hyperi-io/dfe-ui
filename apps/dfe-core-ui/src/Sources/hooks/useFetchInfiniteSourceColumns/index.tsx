@@ -2,7 +2,7 @@ import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { UseFetchInfiniteSourceColumnsProps } from './types.d';
+import { UseFetchInfiniteSourceColumnsProps } from './types';
 
 /** useFetchInfiniteSourceColumns props */
 /**

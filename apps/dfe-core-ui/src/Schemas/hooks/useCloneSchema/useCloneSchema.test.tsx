@@ -73,6 +73,7 @@ describe('.useCloneSchema', () => {
 
       const response: SchemaCreateResponse = {
         path: 'source',
+        resource_type: 'custom',
         current: '1.0.0',
         versions: {
           '1.0.0': {
@@ -86,6 +87,8 @@ describe('.useCloneSchema', () => {
                 attribute: ['string'],
                 use_case: 'string',
                 expr: 'string',
+                _field_type: 'base',
+                _matched_searchable: ['string'],
               },
             ],
           },
