@@ -172,11 +172,6 @@ export const CreateSchemaVersionDrawerBase = ({
               buttonLabel="Review Schema Version"
               onFinish={handleReview}
               isPending={isCreatingSchemaVersion}
-              config={{
-                defaultEdit: false,
-                defaultAddColumns: true,
-                defaultRemoveColumns: true,
-              }}
               disabledFields={{
                 version: true,
                 path: true,
@@ -184,7 +179,7 @@ export const CreateSchemaVersionDrawerBase = ({
               }}
               hideFields={{
                 version: true,
-                uploadSchema: true,
+                uploadSchemaInput: true,
               }}
               initialValues={formInitialValues}
             />

@@ -11,7 +11,6 @@ export const rowSchema = z.object({
   comment: z.string().optional(),
   /** Used for form control of uploaded schema */
   id: z.string(),
-  imported: z.boolean().optional(),
 });
 
 export type RowFormSchema = z.infer<typeof rowSchema>;

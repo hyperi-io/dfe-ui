@@ -49,13 +49,23 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-const TestHarness = ({ children }: { children: ReactNode }) => (
-  <CreateSchemaFormProvider>{children}</CreateSchemaFormProvider>
+const TestHarness = ({
+  children,
+  initialValues,
+}: {
+  children: ReactNode;
+  initialValues?: Partial<CreateSchemaFormData>;
+}) => (
+  <CreateSchemaFormProvider initialValues={initialValues}>
+    {children}
+  </CreateSchemaFormProvider>
 );
 
-const renderContext = () =>
+const renderContext = (initialValues?: Partial<CreateSchemaFormData>) =>
   renderHook(() => useCreateSchemaFormContext(), {
-    wrapper: ({ children }) => <TestHarness>{children}</TestHarness>,
+    wrapper: ({ children }) => (
+      <TestHarness initialValues={initialValues}>{children}</TestHarness>
+    ),
   });
 
 const renderContextWithTestValue = (
@@ -97,6 +107,14 @@ describe('useCreateSchemaFormContext', () => {
 });
 
 describe('CreateSchemaFormProvider', () => {
+  test('seeds uploaded and schema columns from initialValues on first render', () => {
+    const uploaded = [validRow('u1')];
+    const { result } = renderContext({ uploadedColumns: uploaded });
+
+    expect(result.current.uploadedSchemaColumns).toEqual(uploaded);
+    expect(result.current.uploadedSchemaColumns).toHaveLength(1);
+  });
+
   test('exposes context value and updates schema columns', () => {
     const { result } = renderContext();
     const form = result.current.form;
@@ -460,6 +478,24 @@ describe('CreateSchemaFormProvider', () => {
           uploadedColumns: [],
         });
       });
+    });
+
+    test('does not clear seeded uploaded columns when form uploadedColumns is still empty', () => {
+      const { result } = renderContext({ uploadedColumns: [validRow('seed')] });
+      const form = result.current.form;
+
+      vi.spyOn(form, 'getFieldValue').mockImplementation((key) =>
+        key === 'uploadedColumns' ? [] : undefined,
+      );
+
+      act(() => {
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
+      });
+
+      expect(result.current.uploadedSchemaColumns).toHaveLength(1);
+      expect(result.current.uploadedSchemaColumns[0]?.id).toBe('seed');
     });
 
     test('syncs form uploadedColumns into context when there are no invalid imported rows', () => {

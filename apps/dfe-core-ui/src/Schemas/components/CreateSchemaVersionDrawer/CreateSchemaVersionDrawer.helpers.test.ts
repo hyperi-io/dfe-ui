@@ -43,12 +43,12 @@ describe('metaSchemaDetailToCreateVersionFormInitialValues', () => {
     expect(result.name).toBe('cloudtrail');
     expect(result.type).toBe('model');
     expect(result.description).toBe('CloudTrail schema');
-    expect(result.schemaColumns).toHaveLength(1);
-    expect(result.schemaColumns?.[0]).toMatchObject({
+    expect(result.uploadedColumns).toHaveLength(1);
+    expect(result.uploadedColumns?.[0]).toMatchObject({
       name: 'event_id',
       type: 'String',
       _field_type: 'base',
     });
-    expect(result.schemaColumns?.[0]?.id).toBeTruthy();
+    expect(result.uploadedColumns?.[0]?.id).toBeTruthy();
   });
 });

@@ -152,6 +152,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: 'user_defined',
       }),
     ).toBe(true);
     expect(
@@ -162,11 +163,20 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: 'imported',
       }),
     ).toBe(true);
   });
 
-  test('returns false when any field is populated or row is imported', () => {
+  test('returns true when _field_type is present', () => {
+    expect(
+      isBlankSchemaListRow({
+        _field_type: 'base',
+      }),
+    ).toBe(true);
+  });
+
+  test('returns false when any field is populated and ignores _field_type', () => {
     expect(isBlankSchemaListRow({ ...validRow(), name: 'x' })).toBe(false);
     expect(
       isBlankSchemaListRow({
@@ -177,6 +187,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: 'user_defined',
       }),
     ).toBe(false);
     expect(
@@ -184,11 +195,11 @@ describe('isBlankSchemaListRow', () => {
         id: '',
         name: '',
         type: '',
-        attribute: [],
+        attribute: undefined,
         use_case: '',
-        expr: '',
+        expr: 'test',
         comment: '',
-        imported: true,
+        _field_type: 'base',
       }),
     ).toBe(false);
   });

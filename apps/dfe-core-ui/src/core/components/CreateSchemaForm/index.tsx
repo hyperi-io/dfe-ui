@@ -4,7 +4,7 @@ import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReview
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Button, FormProps, Input, Select } from 'antd';
-import { AddSchemaTable, isBlankSchemaListRow } from './AddSchemaTable';
+import { isBlankSchemaListRow } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
   CreateSchemaFormProvider,
@@ -22,12 +22,7 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   initialValues?: Partial<CreateSchemaFormData>;
   hideFields?: {
     version?: boolean;
-    uploadSchema?: boolean;
-  };
-  config?: {
-    defaultEdit?: boolean;
-    defaultAddColumns?: boolean;
-    defaultRemoveColumns?: boolean;
+    uploadSchemaInput?: boolean;
   };
 }
 
@@ -39,7 +34,6 @@ const CreateSchemaFormBase = ({
   initialValues,
   disabledFields,
   hideFields,
-  config,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -181,11 +175,12 @@ const CreateSchemaFormBase = ({
         />
       </Form.Item>
 
-      {!hideFields?.uploadSchema && (
-        <SchemaUploadCollapse disabledFields={disabledFields} />
-      )}
+      <SchemaUploadCollapse
+        hideFields={hideFields}
+        disabledFields={disabledFields}
+      />
 
-      {hideFields?.uploadSchema === true && (
+      {/* {hideFields?.uploadSchema === true && (
         <AddSchemaTable
           config={{
             ...config,
@@ -199,7 +194,7 @@ const CreateSchemaFormBase = ({
           formValidation={formValidation}
           initialValues={schemaColumns}
         />
-      )}
+      )} */}
 
       {formErrorMessage && (
         <FormNotification

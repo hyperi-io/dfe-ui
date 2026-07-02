@@ -39,6 +39,19 @@ import {
 const CreateSchemaUploadContext =
   createContext<CreateSchemaFormContextValue | null>(null);
 
+const invalidUploadedFromColumns = (
+  columns: UploadedSchemaRow[],
+): InvalidColumns[] =>
+  columns
+    .map((value) => {
+      const validationResult = rowSchema.safeParse(value);
+      if (!validationResult.success) {
+        return { ...validationResult, data: value };
+      }
+      return validationResult;
+    })
+    .filter((value) => !value.success) as InvalidColumns[];
+
 export const CreateSchemaFormProvider = ({
   children,
   testValue: testValueProp,
@@ -51,12 +64,16 @@ export const CreateSchemaFormProvider = ({
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
 
-  const [schemaColumns, setSchemaColumns] = useState<RowSchema[]>([]);
+  const [schemaColumns, setSchemaColumns] = useState<RowSchema[]>(
+    () => initialValuesProp?.schemaColumns ?? [],
+  );
   const [uploadedSchemaColumns, setUploadedSchemaColumns] = useState<
     UploadedSchemaRow[]
-  >([]);
+  >(() => initialValuesProp?.uploadedColumns ?? []);
   const [invalidUploadedSchemaColumns, setInvalidUploadedSchemaColumns] =
-    useState<InvalidColumns[]>([]);
+    useState<InvalidColumns[]>(() =>
+      invalidUploadedFromColumns(initialValuesProp?.uploadedColumns ?? []),
+    );
 
   const [validationErrors, setValidationErrors] =
     useState<SchemaFormValidationErrors>(() => createEmptyValidationErrors());
@@ -179,18 +196,7 @@ export const CreateSchemaFormProvider = ({
 
   const handleSetUploadedSchemaColumns = useCallback(
     (columns: UploadedSchemaRow[]) => {
-      const validatedData = columns.map((value) => {
-        const validationResult = rowSchema.safeParse(value);
-        if (!validationResult.success) {
-          return {
-            ...validationResult,
-            data: value,
-          };
-        }
-        return validationResult;
-      });
-
-      const invalidData = validatedData.filter((value) => !value.success);
+      const invalidData = invalidUploadedFromColumns(columns);
 
       setUploadedSchemaColumns(columns);
       setInvalidUploadedSchemaColumns(invalidData);
@@ -215,6 +221,19 @@ export const CreateSchemaFormProvider = ({
     }
     if (initialUploadedColumns?.length) {
       handleSetUploadedSchemaColumns(initialUploadedColumns);
+      const invalidInitial = invalidUploadedFromColumns(initialUploadedColumns);
+      form.setFieldsValue({
+        uploadedColumns: initialUploadedColumns.map((c) =>
+          listItemFromPartial(c),
+        ),
+        ...(invalidInitial.length > 0
+          ? {
+              invalidColumns: invalidInitial.map((inv) =>
+                listItemFromPartial(inv.data),
+              ),
+            }
+          : {}),
+      });
     }
     // Seed once when the provider mounts (drawer uses destroyOnHidden).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only seed
@@ -321,6 +340,12 @@ export const CreateSchemaFormProvider = ({
       const uploaded = uploadedSchemaColumnsRef.current;
       if (invalid.length === 0) {
         const nextUploaded = uploadedFormRows as UploadedSchemaRow[];
+        if (
+          nextUploaded.length === 0 &&
+          uploadedSchemaColumnsRef.current.length > 0
+        ) {
+          return;
+        }
         setUploadedSchemaColumns(nextUploaded);
         uploadedSchemaColumnsRef.current = nextUploaded;
         return;

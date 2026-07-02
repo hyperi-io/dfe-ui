@@ -69,7 +69,6 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'id',
         expr: '',
         comment: 'note',
-        imported: true,
         _field_type: 'imported',
       },
     ];
@@ -128,7 +127,6 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'id',
           expr: '',
           comment: 'note',
-          imported: true,
           _field_type: 'imported',
         },
       ];

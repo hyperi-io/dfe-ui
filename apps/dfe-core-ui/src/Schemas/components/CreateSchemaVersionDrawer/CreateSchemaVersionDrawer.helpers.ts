@@ -45,7 +45,7 @@ export const metaSchemaDetailToCreateVersionFormInitialValues = (
     ...base,
     ...(formType ? { type: formType } : {}),
     description: schema.version.summary ?? '',
-    schemaColumns,
+    uploadedColumns: schemaColumns,
   };
 };
 
