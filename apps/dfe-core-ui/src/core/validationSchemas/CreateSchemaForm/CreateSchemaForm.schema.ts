@@ -7,6 +7,7 @@ import {
 import z from 'zod';
 /** Used for building the request body */
 const schemaDetails = {
+  _field_type: z.enum(['base', 'promoted', 'imported', 'user_defined']),
   name: schemaNameValidator,
   path: schemaGroupValidator.optional(),
   version: schemaVersionValidator,

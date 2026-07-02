@@ -1,5 +1,6 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
@@ -10,7 +11,7 @@ import {
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, Input, Select } from 'antd';
+import { Button, Input, Select, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { UIEventHandler, useCallback, useMemo } from 'react';
 import {
@@ -57,6 +58,7 @@ export const ViewSchemaDetails = ({
   onScroll,
   onClearAllFilters,
   showSearchableColumns,
+  resource_type,
 }: ViewSchemaDetailsProps) => {
   const {
     selectedSchemaVersion,
@@ -74,6 +76,7 @@ export const ViewSchemaDetails = ({
     [path, setSelectedSchema, onClearAllFilters],
   );
   const totalColumns = selectedVersion.columns.total;
+  const coreResource = resource_type === 'core';
 
   const { componentHeight } = useSetComponentHeight({
     offset: 360,
@@ -93,6 +96,23 @@ export const ViewSchemaDetails = ({
       );
 
     return [
+      {
+        dataIndex: '_field_type',
+        key: '_field_type',
+        width: 40,
+        render: (field_type: string) => {
+          return (
+            <Tooltip destroyOnHidden title={field_type}>
+              <Button
+                type="text"
+                size="small"
+                shape="circle"
+                icon={fieldTypeIconSwitch(field_type)}
+              />
+            </Tooltip>
+          );
+        },
+      },
       {
         dataIndex: 'name',
         key: 'name',
@@ -243,14 +263,15 @@ export const ViewSchemaDetails = ({
                   version={selectedSchemaVersion ?? ''}
                   summary={selectedVersion.summary}
                   onSuccess={onSuccess}
+                  editable={!coreResource}
                 />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="opacity-100">
                 <UpdateVersionSummaryInput
-                  editable={false}
                   path={path}
                   version={selectedSchemaVersion ?? ''}
                   summary={selectedVersion.summary}
+                  editable={false}
                   onSuccess={onSuccess}
                 />
               </RbacProtected.Restricted>
@@ -270,13 +291,16 @@ export const ViewSchemaDetails = ({
               }}
             />
           </div>
-          <CreateSchemaVersionDrawer classNames={{ trigger: 'ml-auto' }} />
+          <CreateSchemaVersionDrawer
+            disabled={coreResource}
+            classNames={{ trigger: 'ml-auto' }}
+          />
         </div>
       </div>
 
       <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
-        visibleColumns={['name', 'type', 'expr', 'comment']}
+        visibleColumns={['_field_type', 'name', 'type', 'expr', 'comment']}
         showSearchableColumns={showSearchableColumns}
         title={() => (
           <div className="flex items-center justify-between w-full">

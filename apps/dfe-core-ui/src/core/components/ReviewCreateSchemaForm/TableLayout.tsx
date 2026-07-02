@@ -1,10 +1,11 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
-import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
+import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button, Select, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
 
@@ -47,13 +48,13 @@ export const TableLayout = ({
   const tableColumns = [
     {
       title: '',
-      dataIndex: 'imported',
-      key: 'imported',
+      dataIndex: '_field_type',
+      key: '_field_type',
       width: 30,
-      render: (imported: boolean) => {
+      render: (value: string) => {
         return (
-          <Tooltip title={imported ? 'Imported' : 'Manual'} destroyOnHidden>
-            <span>{imported ? <IconUpload /> : <IconHandFinger />}</span>
+          <Tooltip title={value} destroyOnHidden>
+            <span>{fieldTypeIconSwitch(value)}</span>
           </Tooltip>
         );
       },
@@ -174,6 +175,7 @@ export const TableLayout = ({
 
       <SchemaTable
         visibleColumns={[
+          '_field_type',
           '__rowId',
           'imported',
           'name',

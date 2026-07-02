@@ -21,7 +21,7 @@ export const transformDataToUploadedSchemaRow = (
 
     return {
       id: uuidv4(),
-      imported: true as const,
+      _field_type: 'imported',
       name,
       type,
       attribute,

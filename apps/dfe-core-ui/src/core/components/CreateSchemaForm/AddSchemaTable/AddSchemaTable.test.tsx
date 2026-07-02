@@ -1,3 +1,4 @@
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -13,7 +14,6 @@ import {
   isBlankSchemaListRow,
   type RowSchema,
 } from './index';
-import type { SchemaColumnRow } from './types';
 
 const bypassFormValidation = {
   validator: async () => Promise.resolve(),
@@ -29,6 +29,7 @@ const validRow = (overrides: Partial<RowSchema> = {}): RowSchema => ({
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: 'imported',
   ...overrides,
 });
 
@@ -228,7 +229,8 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       'Index Type': 'count',
       'Expression (CTE)': 'count()',
       Comment: 'note',
-    } as unknown as SchemaColumnRow;
+      _field_type: 'imported',
+    } as unknown as UploadedSchemaRow;
     const onColumns = vi.fn();
     renderAddSchemaTable(
       {

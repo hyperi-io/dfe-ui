@@ -14,6 +14,7 @@ const baseFormData = (): CreateSchemaFormData => ({
   uploadedColumns: [],
   schemaColumns: [],
   description: 'description',
+  _field_type: 'user_defined',
 });
 
 describe('transformFormDataToRequestBody', () => {
@@ -59,7 +60,7 @@ describe('transformFormDataToRequestBody', () => {
   });
 
   test('maps uploaded columns then manual columns', () => {
-    const uploaded = [
+    const uploaded: CreateSchemaFormData['uploadedColumns'] = [
       {
         id: '1',
         name: 'col_a',
@@ -69,9 +70,10 @@ describe('transformFormDataToRequestBody', () => {
         expr: '',
         comment: 'note',
         imported: true,
+        _field_type: 'imported',
       },
     ];
-    const manual = [
+    const manual: CreateSchemaFormData['schemaColumns'] = [
       {
         id: '2',
         name: 'col_b',
@@ -80,6 +82,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined as string | undefined,
+        _field_type: 'user_defined',
       },
     ];
     const { requestBody } = transformFormDataToRequestBody({
@@ -116,7 +119,7 @@ describe('transformFormDataToRequestBody', () => {
     });
 
     test('outputs uploaded columns when present', () => {
-      const uploaded = [
+      const uploaded: CreateSchemaFormData['uploadedColumns'] = [
         {
           id: '1',
           name: 'col_a',
@@ -126,6 +129,7 @@ describe('transformFormDataToRequestBody', () => {
           expr: '',
           comment: 'note',
           imported: true,
+          _field_type: 'imported',
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(
@@ -148,7 +152,7 @@ describe('transformFormDataToRequestBody', () => {
     });
 
     test('outputs schema columns when present', () => {
-      const manual = [
+      const manual: CreateSchemaFormData['schemaColumns'] = [
         {
           id: '2',
           name: 'col_b',
@@ -157,6 +161,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
+          _field_type: 'user_defined',
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(

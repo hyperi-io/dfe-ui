@@ -206,9 +206,12 @@ export const CreateSchemaFormProvider = ({
         const nextInvalidLen =
           invIdx === -1 ? prevInv.length + 1 : prevInv.length;
 
-        setInvalidUploadedSchemaColumns((prev) => {
+        setInvalidUploadedSchemaColumns((prev: InvalidColumns[]) => {
           const idx = prev.findIndex((inv) => inv.data.id === column.id);
-          const entry = { ...validatedColumn, data: column };
+          const entry = {
+            ...validatedColumn,
+            data: column as UploadedSchemaRow,
+          };
           if (idx === -1) {
             return [...prev, entry];
           }

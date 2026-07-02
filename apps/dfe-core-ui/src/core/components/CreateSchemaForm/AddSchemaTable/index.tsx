@@ -1,3 +1,4 @@
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
@@ -15,12 +16,11 @@ import {
   PRIMITIVE_OPTIONS,
   USE_CASE_OPTIONS,
 } from './fieldOptions.constants';
-import { SchemaColumnRow } from './types';
 
 export type RowSchema = z.infer<typeof rowSchema>;
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
-const EMPTY_COLUMNS: SchemaColumnRow[] = [];
+const EMPTY_COLUMNS: UploadedSchemaRow[] = [];
 
 /** Row shape from Form.List — spread `...restField` onto nested Form.Items so `isListField` registers correctly. */
 type SchemaColumnListRow = FormListFieldData & {
@@ -29,7 +29,7 @@ type SchemaColumnListRow = FormListFieldData & {
 };
 
 export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
-  initialValues?: SchemaColumnRow[];
+  initialValues?: UploadedSchemaRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
   resetListWhenEmpty?: boolean;
   name?: string;
@@ -40,7 +40,7 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
     defaultRemoveColumns?: boolean;
   };
   onMount?: () => void;
-  onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
+  onRemoveRow?: (row: Partial<UploadedSchemaRow> | undefined) => void;
   visibleColumns?: string[];
   lockedColumns?: string[];
 }
@@ -53,6 +53,7 @@ const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: 'imported',
 });
 
 /** Same shape as {@link defaultEmptyRow} — append-only adds skip preemptive validate.
@@ -162,7 +163,7 @@ export const AddSchemaTable = ({
                     type="default"
                     onClick={() => {
                       const rows = (form.getFieldValue(name) ??
-                        []) as SchemaColumnRow[];
+                        []) as UploadedSchemaRow[];
                       const rowSnapshot = rows[record.name as number];
                       remove(record.name);
                       onRemoveRow?.(rowSnapshot);

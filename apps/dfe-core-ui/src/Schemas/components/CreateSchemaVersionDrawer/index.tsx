@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
+import { ReviewCreateSchemaForm } from '@/core/components/ReviewCreateSchemaForm';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import {
   CreateSchemaReviewProvider,
@@ -12,7 +12,7 @@ import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { cn } from '@/core/utils/style';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
-import { IconPlus } from '@repo/dfe-icons';
+import { IconLock, IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 import {
@@ -25,11 +25,13 @@ interface CreateSchemaVersionDrawerProps {
   classNames?: {
     trigger?: string;
   };
+  disabled?: boolean;
 }
 
 export const CreateSchemaVersionDrawerBase = ({
   onClose,
   classNames,
+  disabled,
 }: CreateSchemaVersionDrawerProps) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
 
@@ -97,11 +99,14 @@ export const CreateSchemaVersionDrawerBase = ({
           <Button
             type="default"
             className={cn(
-              'border border-tertiary text-tertiary',
+              !disabled && 'border border-tertiary text-tertiary',
               classNames?.trigger,
             )}
-            icon={<IconPlus className="text-tertiary" />}
+            icon={
+              disabled ? <IconLock /> : <IconPlus className="text-tertiary" />
+            }
             onClick={() => setIsDrawerVisible(true)}
+            disabled={disabled}
           >
             Add Schema Version
           </Button>
@@ -151,7 +156,7 @@ export const CreateSchemaVersionDrawerBase = ({
           />
         </div>
         {isReviewing && (
-          <ReviewForm
+          <ReviewCreateSchemaForm
             values={reviewValues}
             buttonLabel="Add Schema Version"
             onFinish={handleSubmit}

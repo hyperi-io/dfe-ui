@@ -5,6 +5,7 @@ import {
   SchemaDetailColumnFilterField,
   SchemaDetailColumnFilters,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { IconLock } from '@repo/dfe-icons';
 import { notification, Spin } from 'antd';
 import { useCallback, useState } from 'react';
 import { EmptyDetail } from './EmptyDetail';
@@ -100,7 +101,12 @@ export const ListSchemaDetail = () => {
     <>
       {contextHolder}
       <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <h4 className="text-lg font-medium">Schema Configuration</h4>
+        <h4 className="text-lg font-medium flex items-center gap-2">
+          <span className="text-foreground/50 dark:text-dark-foreground/50">
+            Schema Configuration:
+          </span>
+          <IconLock /> {schema_path.split('/').pop()}
+        </h4>
         <ViewSchemaDetails
           {...schemaDetailData}
           columnFilters={columnFilters}

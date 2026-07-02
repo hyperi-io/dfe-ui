@@ -25,6 +25,7 @@ const { wrapper } = buildTestWrapper()
             name: 'override-name',
             type: 'string',
             id: 'override-id',
+            _field_type: 'imported',
           },
         },
       ],

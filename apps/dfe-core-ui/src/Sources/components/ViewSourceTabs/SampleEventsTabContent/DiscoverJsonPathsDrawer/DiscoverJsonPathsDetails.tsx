@@ -51,6 +51,7 @@ export const DiscoverJsonPathsDetails = ({
         id: path.path,
         ...path.column,
         main_action: { ...path, column: undefined },
+        _field_type: 'promoted',
       })) ?? [],
     [jsonPaths],
   );

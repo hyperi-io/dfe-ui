@@ -23,6 +23,7 @@ const validRow = (
   id,
   name: `col_${id}`,
   type: 'string',
+  _field_type: 'imported',
   ...overrides,
 });
 
@@ -470,7 +471,12 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       setUploadedFormRows(form, [
-        { id: 'only', name: 'col_only', type: 'string' },
+        {
+          id: 'only',
+          name: 'col_only',
+          type: 'string',
+          _field_type: 'imported',
+        },
       ]);
 
       act(() => {
@@ -487,13 +493,24 @@ describe('CreateSchemaFormProvider', () => {
       const form = result.current.form;
       const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
 
-      const badImport: UploadedSchemaRow = { id: 'm1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'm1',
+        name: '',
+        type: '',
+        _field_type: 'imported',
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
       setUploadedFormRows(form, [
-        { id: 'm1', name: 'fixed_name', type: 'string', attribute: [] },
+        {
+          id: 'm1',
+          name: 'fixed_name',
+          type: 'string',
+          attribute: [],
+          _field_type: 'imported',
+        },
       ]);
 
       act(() => {
@@ -513,7 +530,12 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'rowKey', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'rowKey',
+        name: '',
+        type: '',
+        _field_type: 'imported',
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
@@ -564,7 +586,12 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'idx', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'idx',
+        name: '',
+        type: '',
+        _field_type: 'imported',
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
@@ -572,7 +599,12 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows(form, [
         // @ts-expect-error - test data
         undefined,
-        { name: 'from_index', type: 'string', id: 'idx' },
+        {
+          name: 'from_index',
+          type: 'string',
+          id: 'idx',
+          _field_type: 'imported',
+        },
       ]);
 
       act(() => {
@@ -590,13 +622,23 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'z1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'z1',
+        name: '',
+        type: '',
+        _field_type: 'imported',
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
       setUploadedFormRows(form, [
-        { id: 'z1', name: 'bad name!', type: 'string' },
+        {
+          id: 'z1',
+          name: 'bad name!',
+          type: 'string',
+          _field_type: 'imported',
+        },
       ]);
 
       act(() => {
@@ -613,12 +655,19 @@ describe('CreateSchemaFormProvider', () => {
       const form = result.current.form;
       const validateFields = vi.spyOn(form, 'validateFields');
 
-      const badImport: UploadedSchemaRow = { id: 'q1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'q1',
+        name: '',
+        type: '',
+        _field_type: 'imported',
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows(form, [{ id: 'q1', name: 'still', type: '' }]);
+      setUploadedFormRows(form, [
+        { id: 'q1', name: 'still', type: '', _field_type: 'imported' },
+      ]);
 
       const n = validateFields.mock.calls.length;
 

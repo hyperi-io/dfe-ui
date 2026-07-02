@@ -2,6 +2,7 @@ import type { AddSchemaTableProps } from '@/core/components/CreateSchemaForm/Add
 import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { createEmptyValidationErrors } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, within } from '@testing-library/react';
@@ -89,7 +90,7 @@ vi.mock(
 
 const { wrapper } = buildTestWrapper().withTheme();
 
-const validUploadedColumn = {
+const validUploadedColumn: UploadedSchemaRow = {
   id: 'up-1',
   name: 'field_a',
   type: 'string',
@@ -97,6 +98,7 @@ const validUploadedColumn = {
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: 'imported',
 };
 
 const renderSchemaUploadCollapse = (form?: FormInstance) => {
