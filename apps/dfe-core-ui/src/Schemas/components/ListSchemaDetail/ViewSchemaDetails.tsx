@@ -50,6 +50,7 @@ export const ViewSchemaDetails = ({
   versions: allVersions,
   version: selectedVersion,
   path,
+  selected,
   columnFilters,
   columnFilterResetKey,
   onColumnFilterChange,
@@ -294,6 +295,14 @@ export const ViewSchemaDetails = ({
           <CreateSchemaVersionDrawer
             disabled={coreResource}
             classNames={{ trigger: 'ml-auto' }}
+            schema={{
+              path,
+              current: currentVersion,
+              selected: selected ?? selectedSchemaVersion ?? '',
+              version: selectedVersion,
+              versions: allVersions,
+              resource_type,
+            }}
           />
         </div>
       </div>

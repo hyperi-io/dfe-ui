@@ -12,10 +12,13 @@ import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { cn } from '@/core/utils/style';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
+import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
+import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconLock, IconPlus } from '@repo/dfe-icons';
-import { Button, notification } from 'antd';
-import { useState } from 'react';
+import { Button, notification, Spin } from 'antd';
+import { useMemo, useState } from 'react';
 import {
+  metaSchemaDetailToCreateVersionFormInitialValues,
   transformFormDataToRequestBody,
   transformFormDataToReviewRequestBody,
 } from './CreateSchemaVersionDrawer.helpers';
@@ -26,12 +29,14 @@ interface CreateSchemaVersionDrawerProps {
     trigger?: string;
   };
   disabled?: boolean;
+  schema?: MetaSchemaDetailResponse;
 }
 
 export const CreateSchemaVersionDrawerBase = ({
   onClose,
   classNames,
   disabled,
+  schema,
 }: CreateSchemaVersionDrawerProps) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
 
@@ -91,6 +96,32 @@ export const CreateSchemaVersionDrawerBase = ({
   const path = selectedSchemaPath?.split('/').slice(0, -1).join('/');
   const name = selectedSchemaPath?.split('/').pop();
 
+  const sourceVersion = schema?.selected ?? null;
+
+  const { data: fullSchemaDetail, isLoading: isLoadingSchemaDetail } =
+    useFetchInfiniteFilteredSchemaDetailColumns({
+      schema_path: selectedSchemaPath,
+      version: sourceVersion,
+      per_page: -1,
+      enabled: isDrawerVisible,
+    });
+
+  const detailForForm = fullSchemaDetail ?? schema;
+
+  const formInitialValues = useMemo(
+    () =>
+      metaSchemaDetailToCreateVersionFormInitialValues(detailForForm, {
+        path,
+        name,
+      }),
+    [detailForForm, path, name],
+  );
+
+  const formReady =
+    isDrawerVisible &&
+    !isReviewing &&
+    (!isLoadingSchemaDetail || fullSchemaDetail != null);
+
   return (
     <>
       {notificationContextHolder}
@@ -135,25 +166,33 @@ export const CreateSchemaVersionDrawerBase = ({
         onClose={handleClose}
       >
         <div className={isReviewing ? 'hidden' : undefined}>
-          <CreateSchemaForm
-            buttonLabel="Review Schema Version"
-            onFinish={handleReview}
-            isPending={isCreatingSchemaVersion}
-            disabledFields={{
-              version: true,
-              path: true,
-              name: true,
-            }}
-            hideFields={{
-              version: true,
-            }}
-            initialValues={
-              reviewValues ?? {
-                path,
-                name,
-              }
-            }
-          />
+          {formReady ? (
+            <CreateSchemaForm
+              key={`${selectedSchemaPath}-${sourceVersion}-${detailForForm?.version.columns.items.length ?? 0}`}
+              buttonLabel="Review Schema Version"
+              onFinish={handleReview}
+              isPending={isCreatingSchemaVersion}
+              config={{
+                defaultEdit: false,
+                defaultAddColumns: true,
+                defaultRemoveColumns: true,
+              }}
+              disabledFields={{
+                version: true,
+                path: true,
+                name: true,
+              }}
+              hideFields={{
+                version: true,
+                uploadSchema: true,
+              }}
+              initialValues={formInitialValues}
+            />
+          ) : (
+            <div className="flex h-[calc(100vh-120px)] items-center justify-center">
+              <Spin />
+            </div>
+          )}
         </div>
         {isReviewing && (
           <ReviewCreateSchemaForm

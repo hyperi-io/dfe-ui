@@ -42,9 +42,11 @@ const CreateSchemaUploadContext =
 export const CreateSchemaFormProvider = ({
   children,
   testValue: testValueProp,
+  initialValues: initialValuesProp,
 }: {
   children: ReactNode;
   testValue?: Partial<CreateSchemaFormContextValue>;
+  initialValues?: Partial<CreateSchemaFormData>;
 }) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
@@ -195,6 +197,28 @@ export const CreateSchemaFormProvider = ({
     },
     [],
   );
+
+  useLayoutEffect(() => {
+    if (!initialValuesProp) return;
+
+    const {
+      schemaColumns: initialSchemaColumns,
+      uploadedColumns: initialUploadedColumns,
+      ...formFields
+    } = initialValuesProp;
+
+    if (Object.keys(formFields).length > 0) {
+      form.setFieldsValue(formFields);
+    }
+    if (initialSchemaColumns?.length) {
+      handleSetSchemaColumns(initialSchemaColumns);
+    }
+    if (initialUploadedColumns?.length) {
+      handleSetUploadedSchemaColumns(initialUploadedColumns);
+    }
+    // Seed once when the provider mounts (drawer uses destroyOnHidden).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only seed
+  }, []);
 
   const handleUpdateInvalidUploadedSchemaColumn = useCallback(
     (column: RowSchema) => {

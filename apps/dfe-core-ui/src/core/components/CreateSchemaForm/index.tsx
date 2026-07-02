@@ -4,7 +4,7 @@ import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReview
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Button, FormProps, Input, Select } from 'antd';
-import { isBlankSchemaListRow } from './AddSchemaTable';
+import { AddSchemaTable, isBlankSchemaListRow } from './AddSchemaTable';
 import { TYPE_OPTIONS } from './AddSchemaTable/fieldOptions.constants';
 import {
   CreateSchemaFormProvider,
@@ -22,6 +22,12 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   initialValues?: Partial<CreateSchemaFormData>;
   hideFields?: {
     version?: boolean;
+    uploadSchema?: boolean;
+  };
+  config?: {
+    defaultEdit?: boolean;
+    defaultAddColumns?: boolean;
+    defaultRemoveColumns?: boolean;
   };
 }
 
@@ -33,6 +39,7 @@ const CreateSchemaFormBase = ({
   initialValues,
   disabledFields,
   hideFields,
+  config,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -174,7 +181,25 @@ const CreateSchemaFormBase = ({
         />
       </Form.Item>
 
-      <SchemaUploadCollapse disabledFields={disabledFields} />
+      {!hideFields?.uploadSchema && (
+        <SchemaUploadCollapse disabledFields={disabledFields} />
+      )}
+
+      {hideFields?.uploadSchema === true && (
+        <AddSchemaTable
+          config={{
+            ...config,
+            ...(!config?.defaultEdit
+              ? {
+                  defaultEditFields: [],
+                }
+              : undefined),
+          }}
+          name="schemaColumns"
+          formValidation={formValidation}
+          initialValues={schemaColumns}
+        />
+      )}
 
       {formErrorMessage && (
         <FormNotification
@@ -210,10 +235,13 @@ const CreateSchemaFormBase = ({
   );
 };
 
-export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
+export const CreateSchemaForm = ({
+  initialValues,
+  ...props
+}: CreateSchemaFormProps) => {
   return (
-    <CreateSchemaFormProvider>
-      <CreateSchemaFormBase {...props} />
+    <CreateSchemaFormProvider initialValues={initialValues}>
+      <CreateSchemaFormBase {...props} initialValues={initialValues} />
     </CreateSchemaFormProvider>
   );
 };
