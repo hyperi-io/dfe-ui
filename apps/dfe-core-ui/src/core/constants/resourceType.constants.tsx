@@ -1,4 +1,7 @@
-import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import {
+  RESOURCE_TYPES,
+  SCHEMA_FIELD_TYPES,
+} from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
   IconArrowUpFromArc,
   IconLock,
@@ -25,9 +28,9 @@ export const fieldTypeIconSwitch = (field_type: string) => {
 
 export const resourceTypeIconSwitch = (resource_type: string) => {
   switch (resource_type) {
-    case 'core':
+    case RESOURCE_TYPES.CORE:
       return <IconLock />;
-    case 'custom':
+    case RESOURCE_TYPES.CUSTOM:
       return <IconSettingsBolt />;
     default:
       return <IconQuestionMark />;

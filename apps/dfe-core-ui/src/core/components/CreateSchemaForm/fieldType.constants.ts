@@ -7,6 +7,11 @@ export const SCHEMA_FIELD_TYPES = Object.freeze({
   ELASTIC_IMPORT: 'elastic_imported',
 });
 
+export const RESOURCE_TYPES = Object.freeze({
+  CORE: 'core',
+  CUSTOM: 'custom',
+});
+
 export const COLUMN_LIST_USER_EDITABLE_KEYS = [
   'name',
   'type',

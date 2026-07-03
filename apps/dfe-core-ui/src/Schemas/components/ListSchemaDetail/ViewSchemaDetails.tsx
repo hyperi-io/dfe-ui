@@ -1,3 +1,4 @@
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
@@ -77,7 +78,7 @@ export const ViewSchemaDetails = ({
     [path, setSelectedSchema, onClearAllFilters],
   );
   const totalColumns = selectedVersion.columns.total;
-  const coreResource = resource_type === 'core';
+  const coreResource = resource_type === RESOURCE_TYPES.CORE;
 
   const { componentHeight } = useSetComponentHeight({
     offset: 360,

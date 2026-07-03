@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
-import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import {
+  RESOURCE_TYPES,
+  SCHEMA_FIELD_TYPES,
+} from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1464,7 +1467,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 versions: ['string'],
                 updated_at: 'string',
                 column_count: 0,
-                resource_type: 'core',
+                resource_type: RESOURCE_TYPES.CORE,
               },
             ],
             total: 0,
@@ -1555,7 +1558,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             path: 'string',
             current: 'string',
-            resource_type: 'core',
+            resource_type: RESOURCE_TYPES.CORE,
             versions: {
               string: {
                 date: 'string',
@@ -1696,7 +1699,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             current: 'string',
             selected: 'string',
             versions: ['1.0.0'],
-            resource_type: 'core',
+            resource_type: RESOURCE_TYPES.CORE,
             version: {
               date: 'string',
               type: 'string',
