@@ -20,7 +20,7 @@ export interface ReviewFormProps {
   transformToReview?: ReviewFormTransform;
 }
 
-export const ReviewForm = ({
+export const ReviewCreateSchemaForm = ({
   values,
   onFinish,
   buttonLabel,

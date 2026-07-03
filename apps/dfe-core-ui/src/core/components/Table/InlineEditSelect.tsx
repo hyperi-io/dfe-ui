@@ -101,8 +101,6 @@ export const InlineEditSelect = ({
     onEdit?.();
   };
 
-  const isMultiple = props.mode === 'multiple' && Array.isArray(resolved);
-
   const hasError = props['aria-invalid'] === 'true';
   const prevHadErrorRef = useRef(false);
   useEffect(() => {
@@ -123,7 +121,7 @@ export const InlineEditSelect = ({
         >
           <Select
             {...props}
-            className={cn('w-full', classNames?.select)}
+            className={cn('w-full max-w-96', classNames?.select)}
             size="small"
             onChange={(v) => setDraft(v)}
             value={draft}
@@ -131,6 +129,7 @@ export const InlineEditSelect = ({
             showSearch={{
               onSearch: setSearch,
             }}
+            allowClear
           />
           <Button
             className={classNames?.cancelButton}
@@ -150,8 +149,7 @@ export const InlineEditSelect = ({
       ) : (
         <div
           className={cn(
-            'flex items-center gap-1',
-            isMultiple && 'flex-wrap',
+            'flex items-center gap-1 max-w-96',
             classNames?.labelContainer,
           )}
         >
@@ -164,7 +162,14 @@ export const InlineEditSelect = ({
               onClick={handleEdit}
             />
           )}
-          <div className={classNames?.label}>{transformLabel(resolved)}</div>
+          <div
+            className={cn(
+              'flex items-center gap-1 flex-wrap',
+              classNames?.label,
+            )}
+          >
+            {transformLabel(resolved)}
+          </div>
         </div>
       )}
     </>

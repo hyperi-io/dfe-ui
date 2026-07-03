@@ -27,6 +27,7 @@ export type UseFetchInfiniteFilteredSchemaDetailColumnsProps = {
   comment?: string;
   attribute?: string;
   per_page?: number;
+  enabled?: boolean;
 };
 
 export type MetaSchemaDetailResponse =

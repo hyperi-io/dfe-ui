@@ -1,6 +1,7 @@
 import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
+import { resourceTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
 import { notification, Tooltip, TreeDataNode } from 'antd';
@@ -124,7 +125,16 @@ const schemaSummaryToTreeData = ({
       title: (
         <TreeInteractiveLabel
           icon={fileIcon}
-          title={schema.name.split('/').pop() ?? ''}
+          title={
+            <span className="flex items-center gap-x-1">
+              <span className="min-w-0 truncate">
+                {schema.name.split('/').pop() ?? ''}
+              </span>
+              <span className="opacity-50">
+                {resourceTypeIconSwitch(schema.resource_type)}
+              </span>
+            </span>
+          }
           onClick={() => {
             expandTreeNode(schemaTreeKey(schema.name));
             setSelectedSchema({

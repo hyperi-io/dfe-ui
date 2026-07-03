@@ -1,9 +1,18 @@
 import {
+  COLUMN_LIST_USER_EDITABLE_KEYS,
+  SCHEMA_FIELD_TYPES,
+} from '@/core/components/CreateSchemaForm/fieldType.constants';
+import {
   SCHEMA_TAB_FORM_VALIDATION_KEY_MAP,
   SchemaFormValidationErrors,
 } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { FieldError } from '@rc-component/form/es/interface';
 import { type InvalidColumns } from './CreateSchemaForm.context.d';
+
+export type ColumnListFormKey =
+  | 'uploadedColumns'
+  | 'invalidColumns'
+  | 'schemaColumns';
 
 /**
  * Whether `onValuesChange` includes edits under column tabs (`schemaColumns` / upload lists).
@@ -51,12 +60,80 @@ export const UPLOADED_ROW_FIELD_KEYS = [
   'expr',
   'comment',
   'id',
+  '_field_type',
 ] as const;
 
-export type ColumnListFormKey =
-  | 'uploadedColumns'
-  | 'invalidColumns'
-  | 'schemaColumns';
+const USER_EDITABLE_KEY_SET = new Set<string>(COLUMN_LIST_USER_EDITABLE_KEYS);
+
+export const rowPatchHasUserEditableField = (row: unknown): boolean => {
+  if (row == null || typeof row !== 'object' || Array.isArray(row)) {
+    return false;
+  }
+  return Object.keys(row as object).some((k) => USER_EDITABLE_KEY_SET.has(k));
+};
+
+/** Row indices touched in `onValuesChange` for a Form.List column table. */
+export const indicesOfUserEditedListRows = (
+  changed: unknown,
+  listKey: ColumnListFormKey,
+): Set<number> => {
+  const indices = new Set<number>();
+
+  const collectFromListShape = (list: unknown) => {
+    if (Array.isArray(list)) {
+      list.forEach((entry, i) => {
+        if (rowPatchHasUserEditableField(entry)) {
+          indices.add(i);
+        }
+      });
+      return;
+    }
+    if (list != null && typeof list === 'object') {
+      for (const [idx, entry] of Object.entries(
+        list as Record<string, unknown>,
+      )) {
+        const i = Number(idx);
+        if (!Number.isNaN(i) && rowPatchHasUserEditableField(entry)) {
+          indices.add(i);
+        }
+      }
+    }
+  };
+
+  const walk = (node: unknown) => {
+    if (node == null || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach((entry) => walk(entry));
+      return;
+    }
+    const rec = node as Record<string, unknown>;
+    if (Object.hasOwn(rec, listKey)) {
+      collectFromListShape(rec[listKey]);
+    }
+    for (const value of Object.values(rec)) {
+      if (typeof value === 'object' && value !== null) {
+        walk(value);
+      }
+    }
+  };
+
+  walk(changed);
+  return indices;
+};
+
+export const withUserDefinedFieldTypeOnEditedRows = <
+  T extends { _field_type?: string },
+>(
+  rows: T[],
+  editedIndices: Set<number>,
+): T[] => {
+  if (editedIndices.size === 0) return rows;
+  return rows.map((row, i) =>
+    editedIndices.has(i)
+      ? { ...row, _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED }
+      : row,
+  );
+};
 
 /**
  * Ant Design `validateFields` name paths for every cell in a column table list.

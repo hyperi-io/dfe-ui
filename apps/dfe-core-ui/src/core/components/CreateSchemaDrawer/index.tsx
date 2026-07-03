@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 
 import { CreateSchemaForm } from '@/core/components/CreateSchemaForm';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ReviewForm } from '@/core/components/ReviewCreateSchemaForm';
+import { ReviewCreateSchemaForm } from '@/core/components/ReviewCreateSchemaForm';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import {
   CreateSchemaReviewProvider,
@@ -37,7 +37,7 @@ export const CreateSchemaDrawerBase = ({
   );
 
   const pathname = usePathname();
-  const isSchemaDetail = pathname.includes('/schemas/');
+  const isSchemaDetail = pathname.split('?')[0].includes('/schemas');
 
   const {
     drawerTitle,
@@ -147,7 +147,7 @@ export const CreateSchemaDrawerBase = ({
           />
         </div>
         {isReviewing && (
-          <ReviewForm
+          <ReviewCreateSchemaForm
             values={reviewValues}
             buttonLabel={buttonLabel}
             onFinish={handleSubmit}

@@ -12,64 +12,76 @@ import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 
 export const SchemaUploadCollapse = ({
   disabledFields,
+  hideFields,
 }: {
   disabledFields?: {
     [key in keyof CreateSchemaFormData]?: boolean;
   };
+  hideFields?: {
+    uploadSchemaInput?: boolean;
+  };
 }) => {
+  const {
+    formValidation,
+    uploadedSchemaColumns,
+    invalidUploadedSchemaColumns,
+    validationErrors,
+  } = useCreateSchemaFormContext();
+  const hasUploadedSchema =
+    uploadedSchemaColumns.length > 0 || invalidUploadedSchemaColumns.length > 0;
+
   const [activeKey, setActiveKey] = useState<
     'uploadedColumns' | 'schemaColumns'
-  >('schemaColumns');
-  const { formValidation, uploadedSchemaColumns, validationErrors } =
-    useCreateSchemaFormContext();
-  const [showFileUpload, setShowFileUpload] = useState(true);
+  >(hasUploadedSchema ? 'uploadedColumns' : 'schemaColumns');
 
-  const hasUploadedSchema = uploadedSchemaColumns.length > 0;
+  const [showFileUpload, setShowFileUpload] = useState(true);
 
   return (
     <>
-      <div className="relative w-full">
-        <button
-          type="button"
-          className="absolute top-0 right-0 z-2 cursor-pointer p-1"
-          onClick={() => setShowFileUpload(!showFileUpload)}
-        >
-          {showFileUpload ? <IconChevronUp /> : <IconChevronDown />}
-        </button>
+      {!hideFields?.uploadSchemaInput && (
+        <div className="relative w-full">
+          <button
+            type="button"
+            className="absolute top-0 right-0 z-2 cursor-pointer p-1"
+            onClick={() => setShowFileUpload(!showFileUpload)}
+          >
+            {showFileUpload ? <IconChevronUp /> : <IconChevronDown />}
+          </button>
 
-        <button
-          type="button"
-          className={cn(
-            'cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2',
-            showFileUpload && 'border-b-0 pb-0',
+          <button
+            type="button"
+            className={cn(
+              'cursor-pointer border-b border-foreground/10 dark:border-dark-foreground/10 w-full text-left pb-2',
+              showFileUpload && 'border-b-0 pb-0',
+            )}
+            onClick={() => setShowFileUpload(true)}
+          >
+            <p>Upload from file</p>
+          </button>
+
+          {showFileUpload && (
+            <div className="flex flex-col gap-y-2">
+              <Form.Item name="uploadType" initialValue="csv">
+                <Radio.Group
+                  className="flex flex-row w-full mt-3"
+                  disabled={disabledFields?.uploadType}
+                >
+                  <Radio.Button value="csv" className="w-1/2 text-center">
+                    DFE CSV
+                  </Radio.Button>
+                  <Radio.Button value="json" className="w-1/2 text-center">
+                    ELASTIC INDEX TEMPLATE
+                  </Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+
+              <SchemaUploadFileSection
+                onUpload={() => setActiveKey('uploadedColumns')}
+              />
+            </div>
           )}
-          onClick={() => setShowFileUpload(true)}
-        >
-          <p>Upload from file</p>
-        </button>
-
-        {showFileUpload && (
-          <div className="flex flex-col gap-y-2">
-            <Form.Item name="uploadType" initialValue="csv">
-              <Radio.Group
-                className="flex flex-row w-full mt-3"
-                disabled={disabledFields?.uploadType}
-              >
-                <Radio.Button value="csv" className="w-1/2 text-center">
-                  DFE CSV
-                </Radio.Button>
-                <Radio.Button value="json" className="w-1/2 text-center">
-                  ELASTIC INDEX TEMPLATE
-                </Radio.Button>
-              </Radio.Group>
-            </Form.Item>
-
-            <SchemaUploadFileSection
-              onUpload={() => setActiveKey('uploadedColumns')}
-            />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <Tabs
         destroyOnHidden={false}

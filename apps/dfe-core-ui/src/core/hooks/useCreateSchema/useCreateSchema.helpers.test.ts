@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
@@ -14,6 +15,7 @@ const baseFormData = (): CreateSchemaFormData => ({
   uploadedColumns: [],
   schemaColumns: [],
   description: 'description',
+  _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
 });
 
 describe('transformFormDataToRequestBody', () => {
@@ -59,7 +61,7 @@ describe('transformFormDataToRequestBody', () => {
   });
 
   test('maps uploaded columns then manual columns', () => {
-    const uploaded = [
+    const uploaded: CreateSchemaFormData['uploadedColumns'] = [
       {
         id: '1',
         name: 'col_a',
@@ -68,10 +70,10 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'id',
         expr: '',
         comment: 'note',
-        imported: true,
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       },
     ];
-    const manual = [
+    const manual: CreateSchemaFormData['schemaColumns'] = [
       {
         id: '2',
         name: 'col_b',
@@ -80,6 +82,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined as string | undefined,
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       },
     ];
     const { requestBody } = transformFormDataToRequestBody({
@@ -94,7 +97,7 @@ describe('transformFormDataToRequestBody', () => {
         attribute: ['nullable'],
         use_case: 'id',
         comment: 'note',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       },
       {
         name: 'col_b',
@@ -102,7 +105,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined,
-        _field_type: 'user_defined',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       },
     ]);
   });
@@ -116,7 +119,7 @@ describe('transformFormDataToRequestBody', () => {
     });
 
     test('outputs uploaded columns when present', () => {
-      const uploaded = [
+      const uploaded: CreateSchemaFormData['uploadedColumns'] = [
         {
           id: '1',
           name: 'col_a',
@@ -125,7 +128,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'id',
           expr: '',
           comment: 'note',
-          imported: true,
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(
@@ -141,14 +144,14 @@ describe('transformFormDataToRequestBody', () => {
           attribute: ['nullable'],
           use_case: 'id',
           comment: 'note',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
       expect(schemaColumns).toEqual([]);
     });
 
     test('outputs schema columns when present', () => {
-      const manual = [
+      const manual: CreateSchemaFormData['schemaColumns'] = [
         {
           id: '2',
           name: 'col_b',
@@ -157,6 +160,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
+          _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(
@@ -173,7 +177,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
-          _field_type: 'user_defined',
+          _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
         },
       ]);
     });

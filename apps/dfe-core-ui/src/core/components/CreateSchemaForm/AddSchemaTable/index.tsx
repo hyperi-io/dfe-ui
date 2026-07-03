@@ -1,3 +1,5 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
@@ -15,12 +17,11 @@ import {
   PRIMITIVE_OPTIONS,
   USE_CASE_OPTIONS,
 } from './fieldOptions.constants';
-import { SchemaColumnRow } from './types';
 
 export type RowSchema = z.infer<typeof rowSchema>;
 
 /** Stable default so layout effect does not treat a new `[]` each render as an update. */
-const EMPTY_COLUMNS: SchemaColumnRow[] = [];
+const EMPTY_COLUMNS: UploadedSchemaRow[] = [];
 
 /** Row shape from Form.List — spread `...restField` onto nested Form.Items so `isListField` registers correctly. */
 type SchemaColumnListRow = FormListFieldData & {
@@ -29,7 +30,7 @@ type SchemaColumnListRow = FormListFieldData & {
 };
 
 export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
-  initialValues?: SchemaColumnRow[];
+  initialValues?: UploadedSchemaRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
   resetListWhenEmpty?: boolean;
   name?: string;
@@ -40,7 +41,7 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
     defaultRemoveColumns?: boolean;
   };
   onMount?: () => void;
-  onRemoveRow?: (row: SchemaColumnRow | undefined) => void;
+  onRemoveRow?: (row: Partial<UploadedSchemaRow> | undefined) => void;
   visibleColumns?: string[];
   lockedColumns?: string[];
 }
@@ -53,18 +54,20 @@ const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
 });
 
 /** Same shape as {@link defaultEmptyRow} — append-only adds skip preemptive validate.
  * @param row - The row to check.
  * @returns True if the row is a blank schema list row.
  * @example
- * isBlankSchemaListRow({ id: '', name: '', type: '', attribute: [], use_case: '', expr: '', comment: '', imported: false }) // true
- * isBlankSchemaListRow({ id: '1', name: 'test', type: 'string', attribute: ['test'], use_case: 'test', expr: 'test', comment: 'test', imported: false }) // false
+ * isBlankSchemaListRow({ id: '', name: '', type: '', attribute: [], use_case: '', expr: '', comment: '', _field_type: SCHEMA_FIELD_TYPES.CSV_IMPORT }) // true
+ * isBlankSchemaListRow({ id: '1', name: 'test', type: 'string', attribute: ['test'], use_case: 'test', expr: 'test', comment: 'test', _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED }) // false
  */
 export const isBlankSchemaListRow = (row: unknown): boolean => {
   if (!row || typeof row !== 'object') return false;
   const r = row as Record<string, unknown>;
+
   const empty = (v: unknown) => v === '' || v === undefined || v === null;
   const attrs = r.attribute;
   return (
@@ -74,7 +77,6 @@ export const isBlankSchemaListRow = (row: unknown): boolean => {
     empty(r.use_case) &&
     empty(r.expr) &&
     empty(r.comment) &&
-    r.imported !== true &&
     (attrs === undefined || (Array.isArray(attrs) && attrs.length === 0))
   );
 };
@@ -162,7 +164,7 @@ export const AddSchemaTable = ({
                     type="default"
                     onClick={() => {
                       const rows = (form.getFieldValue(name) ??
-                        []) as SchemaColumnRow[];
+                        []) as UploadedSchemaRow[];
                       const rowSnapshot = rows[record.name as number];
                       remove(record.name);
                       onRemoveRow?.(rowSnapshot);
@@ -252,6 +254,7 @@ export const AddSchemaTable = ({
             title: 'Attributes',
             dataIndex: 'attribute',
             key: 'attribute',
+            width: 200,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
@@ -316,7 +319,7 @@ export const AddSchemaTable = ({
               );
             },
           },
-          /** Ant Design Form only persists fields registered via Form.Item — `id` must be stored for Form.List merges and promotion. */
+          /** Ant Design Form only persists fields registered via Form.Item — `id` / `_field_type` must be stored for list merges and API mapping. */
           {
             title: '',
             key: '__rowId',
@@ -324,9 +327,18 @@ export const AddSchemaTable = ({
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
-                <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
-                  <Input type="hidden" />
-                </Form.Item>
+                <>
+                  <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
+                    <Input type="hidden" />
+                  </Form.Item>
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, '_field_type']}
+                    hidden
+                  >
+                    <Input type="hidden" />
+                  </Form.Item>
+                </>
               );
             },
           },

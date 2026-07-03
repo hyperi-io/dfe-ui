@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
   SchemaCreateRequest,
   SchemaCreateRequestColumn,
@@ -18,7 +19,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    _field_type: 'imported',
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),
@@ -32,7 +33,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
-    _field_type: 'user_defined',
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),
