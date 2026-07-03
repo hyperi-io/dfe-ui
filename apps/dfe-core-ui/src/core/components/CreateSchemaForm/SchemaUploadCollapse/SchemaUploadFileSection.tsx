@@ -22,7 +22,9 @@ export const SchemaUploadFileSection = ({
     useCreateSchemaFormContext();
   const { mutate: convertElasticSchema } = useElasticConvert({
     onSuccess: (data) => {
-      handleSetUploadedSchemaColumns(transformDataToUploadedSchemaRow(data, 'elastic'));
+      handleSetUploadedSchemaColumns(
+        transformDataToUploadedSchemaRow(data, 'elastic'),
+      );
     },
     onError: (error) => {
       form.setFields([{ name: 'file', errors: [(error as Error).message] }]);

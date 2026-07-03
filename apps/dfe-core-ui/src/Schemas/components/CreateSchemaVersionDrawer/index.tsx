@@ -119,8 +119,7 @@ export const CreateSchemaVersionDrawerBase = ({
 
   /** Keep the form mounted while reviewing (hidden) so column state is preserved on Back. */
   const formReady =
-    isDrawerVisible &&
-    (!isLoadingSchemaDetail || fullSchemaDetail != null);
+    isDrawerVisible && (!isLoadingSchemaDetail || fullSchemaDetail != null);
 
   return (
     <>
