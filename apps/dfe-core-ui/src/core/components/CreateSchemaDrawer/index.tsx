@@ -37,7 +37,7 @@ export const CreateSchemaDrawerBase = ({
   );
 
   const pathname = usePathname();
-  const isSchemaDetail = pathname.includes('/schemas/');
+  const isSchemaDetail = pathname.split('?')[0].includes('/schemas');
 
   const {
     drawerTitle,

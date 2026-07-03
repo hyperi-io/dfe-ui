@@ -180,22 +180,6 @@ const CreateSchemaFormBase = ({
         disabledFields={disabledFields}
       />
 
-      {/* {hideFields?.uploadSchema === true && (
-        <AddSchemaTable
-          config={{
-            ...config,
-            ...(!config?.defaultEdit
-              ? {
-                  defaultEditFields: [],
-                }
-              : undefined),
-          }}
-          name="schemaColumns"
-          formValidation={formValidation}
-          initialValues={schemaColumns}
-        />
-      )} */}
-
       {formErrorMessage && (
         <FormNotification
           type="error"

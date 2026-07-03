@@ -117,9 +117,9 @@ export const CreateSchemaVersionDrawerBase = ({
     [detailForForm, path, name],
   );
 
+  /** Keep the form mounted while reviewing (hidden) so column state is preserved on Back. */
   const formReady =
     isDrawerVisible &&
-    !isReviewing &&
     (!isLoadingSchemaDetail || fullSchemaDetail != null);
 
   return (
@@ -181,7 +181,7 @@ export const CreateSchemaVersionDrawerBase = ({
                 version: true,
                 uploadSchemaInput: true,
               }}
-              initialValues={formInitialValues}
+              initialValues={reviewValues ?? formInitialValues}
             />
           ) : (
             <div className="flex h-[calc(100vh-120px)] items-center justify-center">
