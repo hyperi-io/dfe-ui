@@ -2728,6 +2728,11 @@ export interface components {
              * @description Human-readable column description (defaults to the source path).
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification for JSON promotion drafts (always 'promoted').
+             */
+            _field_type: string;
         };
         /** EmittedRecord */
         EmittedRecord: {
@@ -5092,8 +5097,8 @@ export interface components {
             date_time: string;
             /** @description Common schema header configuration (optional; applied at DDL compose time) */
             header?: components["schemas"]["SourceHeader"] | null;
-            /** @description Schema configuration */
-            schema?: components["schemas"]["SourceSchema"];
+            /** @description Schema configuration (None when the version did not author one) */
+            schema?: components["schemas"]["SourceSchema"] | null;
             /**
              * Mapping Standards
              * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
