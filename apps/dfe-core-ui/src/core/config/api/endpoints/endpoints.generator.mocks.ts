@@ -1768,6 +1768,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
               attribute: ['string'],
               use_case: 'string',
               expr: 'string',
+              _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
             },
           ],
         }: {
@@ -1846,6 +1847,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                   use_case: 'string',
                   expr: 'string',
                   comment: 'string',
+                  _field_type: SCHEMA_FIELD_TYPES.PROMOTED,
                 },
                 coverage_pct: 100,
               },
