@@ -655,22 +655,22 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           );
         },
-      },
-      error: ({
-        mockedResponse = DEFAULT_VALIDATION_ERROR,
-        status = 422,
-        name = 'source',
-      }: {
-        mockedResponse?: components['schemas']['HTTPValidationError'];
-        status?: number;
-        name?: string;
-      } = {}) => {
-        return http.post(
-          API_CONFIG_MOCKS.sources.deploy.mockedUrl.replace('{name}', name),
-          () => {
-            return HttpResponse.json(mockedResponse, { status });
-          },
-        );
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.deploy.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
   },
