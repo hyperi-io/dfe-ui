@@ -1,3 +1,4 @@
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
@@ -6,7 +7,7 @@ import {
   SchemaDetailColumnFilters,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconLock } from '@repo/dfe-icons';
-import { notification, Spin } from 'antd';
+import { notification, Spin, Tooltip } from 'antd';
 import { useCallback, useState } from 'react';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';
@@ -97,6 +98,8 @@ export const ListSchemaDetail = () => {
     return <EmptyDetail />;
   }
 
+  const coreResource = schemaDetailData.resource_type === RESOURCE_TYPES.CORE;
+
   return (
     <>
       {contextHolder}
@@ -105,7 +108,22 @@ export const ListSchemaDetail = () => {
           <span className="text-foreground/50 dark:text-dark-foreground/50">
             Schema Configuration:
           </span>
-          <IconLock /> {schema_path.split('/').pop()}
+          {coreResource && (
+            <Tooltip
+              destroyOnHidden
+              title={
+                <div className="text-sm flex flex-col gap-1">
+                  <span className="font-medium">Core Resource</span>
+                  <span className="opacity-80">
+                    Core resources are restricted and cannot be modified.
+                  </span>
+                </div>
+              }
+            >
+              <IconLock />
+            </Tooltip>
+          )}{' '}
+          {schema_path.split('/').pop()}
         </h4>
         <ViewSchemaDetails
           {...schemaDetailData}
