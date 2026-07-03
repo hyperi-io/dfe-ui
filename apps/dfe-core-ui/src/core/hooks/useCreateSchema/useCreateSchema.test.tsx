@@ -1,3 +1,7 @@
+import {
+  RESOURCE_TYPES,
+  SCHEMA_FIELD_TYPES,
+} from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -41,7 +45,7 @@ describe('.useCreateSchema', () => {
             attribute: ['string'],
             use_case: 'string',
             expr: 'string',
-            _field_type: 'base',
+            _field_type: SCHEMA_FIELD_TYPES.BASE,
           },
         ],
       },
@@ -62,7 +66,7 @@ describe('.useCreateSchema', () => {
       const expectedResponse: SchemaCreateResponse = {
         path: 'string',
         current: 'string',
-        resource_type: 'core',
+        resource_type: RESOURCE_TYPES.CORE,
         versions: {
           string: {
             date: 'string',
@@ -75,7 +79,7 @@ describe('.useCreateSchema', () => {
                 attribute: ['string'],
                 use_case: 'string',
                 expr: 'string',
-                _field_type: 'base',
+                _field_type: SCHEMA_FIELD_TYPES.BASE,
               },
             ],
           },

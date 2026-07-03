@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
@@ -87,7 +88,7 @@ describe('.useCloneSchema', () => {
                 attribute: ['string'],
                 use_case: 'string',
                 expr: 'string',
-                _field_type: 'base',
+                _field_type: SCHEMA_FIELD_TYPES.BASE,
                 _matched_searchable: ['string'],
               },
             ],

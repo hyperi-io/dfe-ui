@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { FieldError } from '@rc-component/form/es/interface';
 import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
@@ -6,10 +7,12 @@ import {
   UPLOADED_ROW_FIELD_KEYS,
   changedValuesMayAffectTabLists,
   createEmptyValidationErrors,
+  indicesOfUserEditedListRows,
   mergeImportInvalidIntoUploadedTab,
   rowListFieldValidatePaths,
   transformFieldErrorsToTabErrors,
   uploadedAndInvalidColumnListValidatePaths,
+  withUserDefinedFieldTypeOnEditedRows,
 } from './CreateSchemaForm.context.helpers';
 
 const emptyTabErrors = createEmptyValidationErrors();
@@ -29,6 +32,26 @@ const makeInvalidColumn = (messages: string[]): InvalidColumns[] =>
         data: {} as InvalidColumns['data'],
       }) as InvalidColumns,
   );
+
+describe('indicesOfUserEditedListRows', () => {
+  test('collects row indices with user-editable field patches', () => {
+    const indices = indicesOfUserEditedListRows(
+      { uploadedColumns: [{ name: 'edited' }] },
+      'uploadedColumns',
+    );
+    expect([...indices]).toEqual([0]);
+  });
+
+  test('withUserDefinedFieldTypeOnEditedRows marks only edited indices', () => {
+    const rows = [
+      { id: '1', _field_type: SCHEMA_FIELD_TYPES.CSV_IMPORT, name: 'a' },
+      { id: '2', _field_type: SCHEMA_FIELD_TYPES.BASE, name: 'b' },
+    ];
+    const next = withUserDefinedFieldTypeOnEditedRows(rows, new Set([0]));
+    expect(next[0]?._field_type).toBe(SCHEMA_FIELD_TYPES.USER_DEFINED);
+    expect(next[1]?._field_type).toBe(SCHEMA_FIELD_TYPES.BASE);
+  });
+});
 
 describe('rowListFieldValidatePaths', () => {
   test('returns empty list for non-positive row count', () => {
@@ -91,6 +114,7 @@ describe('UPLOADED_ROW_FIELD_KEYS', () => {
       'expr',
       'comment',
       'id',
+      '_field_type',
     ]);
   });
 });

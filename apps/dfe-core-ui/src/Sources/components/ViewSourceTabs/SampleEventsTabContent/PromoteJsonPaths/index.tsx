@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
@@ -41,7 +42,7 @@ export const PromoteJsonPaths = ({
         ...column,
         attribute: column.attribute?.split(','),
         id: column.name,
-        _field_type: column._field_type || 'user_defined',
+        _field_type: column._field_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
       })) ?? []
     );
   }, [data?.diff?.new_columns]);

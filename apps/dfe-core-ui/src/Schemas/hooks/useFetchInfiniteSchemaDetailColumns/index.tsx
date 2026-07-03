@@ -39,6 +39,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   comment,
   attribute,
   per_page = 10,
+  enabled = true,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
   const searchableColumnsOptions: {
     label: string;
@@ -77,7 +78,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    enabled: !!schema_path && !!version,
+    enabled: enabled && !!schema_path && !!version,
     queryKey: [
       'schema-detail-columns',
       schema_path,

@@ -1,6 +1,7 @@
 import { AddSchemaTable } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import { useCreateSchemaFormContext } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import { InvalidColumnsTable } from '@/core/components/CreateSchemaForm/InvalidColumnsTable';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 
 export const UploadedSchemaTable = () => {
   const {
@@ -11,6 +12,9 @@ export const UploadedSchemaTable = () => {
   } = useCreateSchemaFormContext();
 
   const hasInvalidColumns = invalidUploadedSchemaColumns.length > 0;
+  const { componentHeight } = useSetComponentHeight({
+    offset: 620,
+  });
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -28,6 +32,10 @@ export const UploadedSchemaTable = () => {
             defaultEditFields: false,
             defaultAddColumns: false,
             defaultRemoveColumns: true,
+          }}
+          scroll={{
+            y: componentHeight,
+            x: 'max-content',
           }}
           pagination={{
             defaultPageSize: 50,

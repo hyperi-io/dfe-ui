@@ -1,3 +1,4 @@
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { cn } from '@/core/utils/style';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { CloneRoleModal } from '@/Settings/components/RoleManagement/CloneRoleModal';
@@ -17,7 +18,7 @@ export const RoleCard = ({
   role: RoleListItem;
   refetch: () => void;
 }) => {
-  const isCoreRole = role.resource_type === 'core';
+  const isCoreRole = role.resource_type === RESOURCE_TYPES.CORE;
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
       <div className="flex flex-col gap-1">

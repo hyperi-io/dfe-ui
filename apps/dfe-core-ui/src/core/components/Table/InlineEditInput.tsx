@@ -106,6 +106,7 @@ export const InlineEditInput = ({
             size="small"
             onChange={(e) => setDraft(e.target.value)}
             value={draft}
+            allowClear
           />
           <Button
             className={classNames?.cancelButton}

@@ -2,8 +2,10 @@ import type { AddSchemaTableProps } from '@/core/components/CreateSchemaForm/Add
 import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { createEmptyValidationErrors } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';
@@ -89,15 +91,18 @@ vi.mock(
 
 const { wrapper } = buildTestWrapper().withTheme();
 
-const validUploadedColumn = {
-  id: 'up-1',
-  name: 'field_a',
-  type: 'string',
-  attribute: [] as string[],
-  use_case: '',
-  expr: '',
-  comment: '',
-};
+const validUploadedColumn: CreateSchemaFormData['uploadedColumns'] = [
+  {
+    id: 'up-1',
+    name: 'field_a',
+    type: 'string',
+    attribute: [] as string[],
+    use_case: '',
+    expr: '',
+    comment: '',
+    _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+  },
+];
 
 const renderSchemaUploadCollapse = (form?: FormInstance) => {
   const FormShell = () => {
@@ -191,10 +196,35 @@ describe('SchemaUploadCollapse', () => {
     expect(screen.getByText('DFE CSV')).toBeInTheDocument();
   });
 
+  test('shows uploaded columns tab when provider initialValues include uploadedColumns', () => {
+    contextPatch = {
+      formValidation: bypassFormValidation,
+      validationErrors: createEmptyValidationErrors(),
+    };
+
+    const FormShell = () => (
+      <CreateSchemaFormProvider
+        initialValues={{
+          uploadedColumns: validUploadedColumn,
+        }}
+      >
+        <Form>
+          <SchemaUploadCollapse />
+        </Form>
+      </CreateSchemaFormProvider>
+    );
+
+    render(<FormShell />, { wrapper });
+
+    expect(
+      screen.getByTestId('tab-label-Uploaded-Columns'),
+    ).toBeInTheDocument();
+  });
+
   test('renders uploaded column tabs and passes validation errors to tab labels', async () => {
     const user = userEvent.setup();
     contextPatch = {
-      uploadedSchemaColumns: [validUploadedColumn],
+      uploadedSchemaColumns: validUploadedColumn,
       formValidation: bypassFormValidation,
       validationErrors: {
         ...createEmptyValidationErrors(),
@@ -241,7 +271,7 @@ describe('SchemaUploadCollapse', () => {
 
   test('defaults missing tab validation error buckets to empty arrays', () => {
     contextPatch = {
-      uploadedSchemaColumns: [validUploadedColumn],
+      uploadedSchemaColumns: validUploadedColumn,
       formValidation: bypassFormValidation,
       validationErrors: {
         ...createEmptyValidationErrors(),

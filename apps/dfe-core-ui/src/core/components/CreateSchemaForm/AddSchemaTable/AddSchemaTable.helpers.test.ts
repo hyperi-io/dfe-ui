@@ -1,3 +1,5 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { RowFormSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { describe, expect, test } from 'vitest';
 import { listItemFromPartial } from './AddSchemaTable.helpers';
 import type { SchemaColumnRow } from './types';
@@ -12,8 +14,10 @@ describe('listItemFromPartial', () => {
       use_case: 'id',
       expr: 'col',
       comment: 'pk',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     };
-    expect(listItemFromPartial(column)).toEqual({
+
+    const expectedResponse: RowFormSchema = {
       id: '1',
       name: 'user_id',
       type: 'String',
@@ -21,7 +25,9 @@ describe('listItemFromPartial', () => {
       use_case: 'id',
       expr: 'col',
       comment: 'pk',
-    });
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+    };
+    expect(listItemFromPartial(column)).toEqual(expectedResponse);
   });
 
   test('reads PascalCase CSV-style keys (Name, Type, …)', () => {
@@ -33,6 +39,7 @@ describe('listItemFromPartial', () => {
       'Index Type': 'count',
       'Expression (CTE)': 'count()',
       Comment: '',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column)).toEqual({
       id: '1',
@@ -42,6 +49,7 @@ describe('listItemFromPartial', () => {
       use_case: 'count',
       expr: 'count()',
       comment: '',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     });
   });
 
@@ -49,6 +57,7 @@ describe('listItemFromPartial', () => {
     const column = {
       NAME: 'x',
       tYpE: 'Bool',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column)).toMatchObject({
       name: 'x',
@@ -89,6 +98,7 @@ describe('listItemFromPartial', () => {
       name: 'c',
       type: 'String',
       attribute: '  only  ',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column).attribute).toEqual(['only']);
   });
@@ -98,6 +108,7 @@ describe('listItemFromPartial', () => {
       name: 'c',
       type: 'String',
       attribute: [1, true],
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     } as unknown as SchemaColumnRow;
     expect(listItemFromPartial(column).attribute).toEqual(['1', 'true']);
   });
@@ -110,6 +121,7 @@ describe('listItemFromPartial', () => {
       use_case: 'fallback_use',
       expr: 'e',
       comment: 'co',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     };
     expect(listItemFromPartial(column)).toMatchObject({
       name: 'n',
@@ -121,7 +133,12 @@ describe('listItemFromPartial', () => {
   });
 
   test('uses empty strings for missing name and type', () => {
-    expect(listItemFromPartial({ id: '1' })).toMatchObject({
+    expect(
+      listItemFromPartial({
+        id: '1',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      }),
+    ).toMatchObject({
       id: '1',
       name: '',
       type: '',

@@ -1,5 +1,4 @@
 import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
-import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type {
   CreateSchemaFormData,
@@ -40,7 +39,7 @@ export interface CreateSchemaFormContextValue {
   handleValidateColumnListsOnly: () => void;
 }
 
-export type InvalidColumns<T extends SchemaColumnRow = SchemaColumnRow> = {
+export type InvalidColumns<T extends UploadedSchemaRow = UploadedSchemaRow> = {
   success: boolean;
   error: z.ZodError<RowSchema>;
   data: T;

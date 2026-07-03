@@ -22,6 +22,7 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   initialValues?: Partial<CreateSchemaFormData>;
   hideFields?: {
     version?: boolean;
+    uploadSchemaInput?: boolean;
   };
 }
 
@@ -174,7 +175,10 @@ const CreateSchemaFormBase = ({
         />
       </Form.Item>
 
-      <SchemaUploadCollapse disabledFields={disabledFields} />
+      <SchemaUploadCollapse
+        hideFields={hideFields}
+        disabledFields={disabledFields}
+      />
 
       {formErrorMessage && (
         <FormNotification
@@ -210,10 +214,13 @@ const CreateSchemaFormBase = ({
   );
 };
 
-export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
+export const CreateSchemaForm = ({
+  initialValues,
+  ...props
+}: CreateSchemaFormProps) => {
   return (
-    <CreateSchemaFormProvider>
-      <CreateSchemaFormBase {...props} />
+    <CreateSchemaFormProvider initialValues={initialValues}>
+      <CreateSchemaFormBase {...props} initialValues={initialValues} />
     </CreateSchemaFormProvider>
   );
 };

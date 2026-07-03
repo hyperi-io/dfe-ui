@@ -22,7 +22,9 @@ export const SchemaUploadFileSection = ({
     useCreateSchemaFormContext();
   const { mutate: convertElasticSchema } = useElasticConvert({
     onSuccess: (data) => {
-      handleSetUploadedSchemaColumns(transformDataToUploadedSchemaRow(data));
+      handleSetUploadedSchemaColumns(
+        transformDataToUploadedSchemaRow(data, 'elastic'),
+      );
     },
     onError: (error) => {
       form.setFields([{ name: 'file', errors: [(error as Error).message] }]);
@@ -49,7 +51,7 @@ export const SchemaUploadFileSection = ({
         try {
           const jsonSchema = await convertCsv(file);
           handleSetUploadedSchemaColumns(
-            transformDataToUploadedSchemaRow(jsonSchema),
+            transformDataToUploadedSchemaRow(jsonSchema, 'csv'),
           );
         } catch (error: unknown) {
           const message =

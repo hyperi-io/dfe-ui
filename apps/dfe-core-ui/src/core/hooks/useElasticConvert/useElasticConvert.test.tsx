@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -52,6 +53,7 @@ describe('.useElasticConvert', () => {
           attribute: ['string'],
           use_case: 'string',
           expr: 'string',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ];
 
