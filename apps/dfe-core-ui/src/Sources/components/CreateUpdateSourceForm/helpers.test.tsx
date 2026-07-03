@@ -128,7 +128,7 @@ const ALL_FIELDS = [
     validating: false,
     errors: [],
     warnings: [],
-    name: ['schema', 'derived_schema'],
+    name: ['schema'],
     validated: true,
   },
   {
@@ -136,7 +136,7 @@ const ALL_FIELDS = [
     validating: false,
     errors: [],
     warnings: [],
-    name: ['schema', 'additional_fields'],
+    name: ['schema'],
     validated: true,
   },
   {

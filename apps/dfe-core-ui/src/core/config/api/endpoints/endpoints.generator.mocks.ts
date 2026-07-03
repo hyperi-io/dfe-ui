@@ -456,8 +456,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
               schema: {
                 meta_schema: 'string',
                 meta_schema_version: 'string',
-                derived_schema: 'string',
-                additional_fields: 'string',
                 ttl_days: 0,
                 engine: 'string',
               },

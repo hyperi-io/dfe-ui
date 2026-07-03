@@ -7,9 +7,9 @@ export const usePlanSource = ({
   onSuccess,
   onError,
 }: {
-  onSuccess: (data: SourcePlanResponse) => void;
-  onError: (error: Error) => void;
-}) => {
+  onSuccess?: (data: SourcePlanResponse) => void;
+  onError?: (error: Error) => void;
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({ name, version }: SourcePlanRequest) => {
       return apiClient.post(API_CONFIG.sources.plan, {
@@ -22,10 +22,10 @@ export const usePlanSource = ({
       });
     },
     onSuccess: (data) => {
-      onSuccess(data);
+      onSuccess?.(data);
     },
     onError: (error) => {
-      onError(error);
+      onError?.(error);
     },
   });
 

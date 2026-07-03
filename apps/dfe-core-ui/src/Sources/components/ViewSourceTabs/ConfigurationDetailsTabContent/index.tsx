@@ -16,14 +16,13 @@ export const ConfigurationDetailsTabContent = ({
   description,
   version: { header, schema, transform, match, fetcher, mapping_standards },
 }: SourceVersionDetail) => {
-  const hasSchema =
-    schema?.meta_schema || schema?.derived_schema || header?.type;
+  const hasSchema = schema?.meta_schema || header?.type;
   const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
   const hasMappingStandards =
     mapping_standards && mapping_standards?.length > 0;
   return (
     <div className="relative h-full min-h-0">
-      <dl className="grid grid-cols-[140px_1fr] gap-x-6 gap-y-1 mb-4">
+      <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1 mb-4">
         <dt className={dataListTermStyle}>File Pathname:</dt>
         <dd>{source}</dd>
         <dt className={dataListTermStyle}>Display Name:</dt>
@@ -40,7 +39,7 @@ export const ConfigurationDetailsTabContent = ({
           title="Schema"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Header Type:</dt>
             <dd>
               <span className="text-foreground/40 dark:text-dark-foreground/40">
@@ -77,58 +76,26 @@ export const ConfigurationDetailsTabContent = ({
                 </dd>
               </>
             )}
-            {schema && (
+            {schema?.meta_schema ? (
               <>
-                {schema?.meta_schema ? (
-                  <>
-                    <dt className={dataListTermStyle}>Meta Schema:</dt>
-                    <dd>
-                      <span className="text-foreground/40 dark:text-dark-foreground/40">
-                        {/* Meta schema path */}
-                        {schema?.meta_schema?.split('/').slice(0, -1).join('/')}
-                        /
-                      </span>
-                      {/* Meta schema name */}
-                      {schema?.meta_schema?.split('/').pop()}.yaml
-                    </dd>
-                    <dt className={dataListTermStyle}>Meta Schema Version:</dt>
-                    <dd>{schema?.meta_schema_version}</dd>
-                  </>
-                ) : (
-                  <>
-                    <dt className={dataListTermStyle}>Meta Schema:</dt>
-                    <dd>
-                      <EmptyData />
-                    </dd>
-                  </>
-                )}
-                {schema?.derived_schema ? (
-                  <>
-                    <dt className={dataListTermStyle}>Derived Schema:</dt>
-                    <dd>{schema?.derived_schema}</dd>
-                  </>
-                ) : (
-                  <>
-                    <dt className={dataListTermStyle}>Derived Schema:</dt>
-                    <dd>
-                      <EmptyData />
-                    </dd>
-                  </>
-                )}
-
-                {schema?.additional_fields ? (
-                  <>
-                    <dt className={dataListTermStyle}>Additional Fields:</dt>
-                    <dd>{schema?.additional_fields}</dd>
-                  </>
-                ) : (
-                  <>
-                    <dt className={dataListTermStyle}>Additional Fields:</dt>
-                    <dd>
-                      <EmptyData />
-                    </dd>
-                  </>
-                )}
+                <dt className={dataListTermStyle}>Meta Schema:</dt>
+                <dd>
+                  <span className="text-foreground/40 dark:text-dark-foreground/40">
+                    {/* Meta schema path */}
+                    {schema?.meta_schema?.split('/').slice(0, -1).join('/')}/
+                  </span>
+                  {/* Meta schema name */}
+                  {schema?.meta_schema?.split('/').pop()}.yaml
+                </dd>
+                <dt className={dataListTermStyle}>Meta Schema Version:</dt>
+                <dd>{schema?.meta_schema_version}</dd>
+              </>
+            ) : (
+              <>
+                <dt className={dataListTermStyle}>Meta Schema:</dt>
+                <dd>
+                  <EmptyData />
+                </dd>
               </>
             )}
           </dl>
@@ -144,7 +111,7 @@ export const ConfigurationDetailsTabContent = ({
           title="Origin"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Field:</dt>
             <dd>{match?.field ? match?.field : <EmptyData />}</dd>
             <dt className={dataListTermStyle}>Value:</dt>
@@ -161,7 +128,7 @@ export const ConfigurationDetailsTabContent = ({
               title="Fetcher"
               defaultOpen={true}
             >
-              <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+              <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
                 <dt className={dataListTermStyle}>Source Type:</dt>
                 <dd>
                   {fetcher?.source_type ? fetcher?.source_type : <EmptyData />}
@@ -178,7 +145,7 @@ export const ConfigurationDetailsTabContent = ({
                 </dd>
               </dl>
               <p className={cn(dataListTermStyle, 'mt-2')}>Auth Details</p>
-              <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+              <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
                 <dt className={dataListTermStyle}>Auth Type:</dt>
                 <dd>
                   {fetcher?.auth?.type ? fetcher?.auth?.type : <EmptyData />}
@@ -238,7 +205,7 @@ export const ConfigurationDetailsTabContent = ({
           title="Transform"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Engine:</dt>
             <dd>{transform?.engine ? transform?.engine : <EmptyData />}</dd>
             <dt className={dataListTermStyle}>Config File:</dt>
@@ -277,7 +244,7 @@ export const ConfigurationDetailsTabContent = ({
           title="Mapping"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[140px_1fr_140px_1fr] gap-x-6 gap-y-1">
+          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Mapping Standards:</dt>
             <dd>
               {mapping_standards?.join(', ') ? (
