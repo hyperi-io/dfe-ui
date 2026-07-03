@@ -4,6 +4,7 @@ import type {
   CreateSchemaFormContextValue,
   InvalidColumns,
 } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
@@ -74,7 +75,7 @@ const validUploadedColumn: UploadedSchemaRow = {
   use_case: '',
   expr: '',
   comment: '',
-  _field_type: 'imported',
+  _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
 };
 
 const renderUploadedSchemaTable = (form?: FormInstance) => {

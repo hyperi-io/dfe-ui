@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import {
   SchemaCreateRequest,
@@ -77,7 +78,7 @@ export const useCloneSchema = ({
           summary: values.description ?? '',
           columns: schemaDetailData.version.columns.items.map((column) => ({
             ...column,
-            _field_type: column._field_type ?? 'user_defined',
+            _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
           })),
         },
       },

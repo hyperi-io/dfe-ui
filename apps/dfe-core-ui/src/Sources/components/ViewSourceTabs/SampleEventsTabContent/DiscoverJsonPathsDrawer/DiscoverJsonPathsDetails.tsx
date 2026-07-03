@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
@@ -51,7 +52,7 @@ export const DiscoverJsonPathsDetails = ({
         id: path.path,
         ...path.column,
         main_action: { ...path, column: undefined },
-        _field_type: 'promoted',
+        _field_type: SCHEMA_FIELD_TYPES.PROMOTED,
       })) ?? [],
     [jsonPaths],
   );

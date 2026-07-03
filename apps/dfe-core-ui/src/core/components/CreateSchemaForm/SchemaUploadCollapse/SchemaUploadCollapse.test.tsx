@@ -2,6 +2,7 @@ import type { AddSchemaTableProps } from '@/core/components/CreateSchemaForm/Add
 import { CreateSchemaFormProvider } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context';
 import type { CreateSchemaFormContextValue } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.d';
 import { createEmptyValidationErrors } from '@/core/components/CreateSchemaForm/contexts/CreateSchemaForm.context.helpers';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
@@ -99,7 +100,7 @@ const validUploadedColumn: CreateSchemaFormData['uploadedColumns'] = [
     use_case: '',
     expr: '',
     comment: '',
-    _field_type: 'imported',
+    _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
   },
 ];
 

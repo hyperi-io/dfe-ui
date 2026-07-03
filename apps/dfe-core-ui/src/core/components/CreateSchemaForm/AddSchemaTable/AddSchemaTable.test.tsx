@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
@@ -29,7 +30,7 @@ const validRow = (overrides: Partial<RowSchema> = {}): RowSchema => ({
   use_case: '',
   expr: '',
   comment: '',
-  _field_type: 'imported',
+  _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
   ...overrides,
 });
 
@@ -152,7 +153,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
-        _field_type: 'user_defined',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       }),
     ).toBe(true);
     expect(
@@ -163,7 +164,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       }),
     ).toBe(true);
   });
@@ -171,7 +172,7 @@ describe('isBlankSchemaListRow', () => {
   test('returns true when _field_type is present', () => {
     expect(
       isBlankSchemaListRow({
-        _field_type: 'base',
+        _field_type: SCHEMA_FIELD_TYPES.BASE,
       }),
     ).toBe(true);
   });
@@ -187,7 +188,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
-        _field_type: 'user_defined',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       }),
     ).toBe(false);
     expect(
@@ -199,7 +200,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: 'test',
         comment: '',
-        _field_type: 'base',
+        _field_type: SCHEMA_FIELD_TYPES.BASE,
       }),
     ).toBe(false);
   });
@@ -240,7 +241,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       'Index Type': 'count',
       'Expression (CTE)': 'count()',
       Comment: 'note',
-      _field_type: 'imported',
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
     } as unknown as UploadedSchemaRow;
     const onColumns = vi.fn();
     renderAddSchemaTable(

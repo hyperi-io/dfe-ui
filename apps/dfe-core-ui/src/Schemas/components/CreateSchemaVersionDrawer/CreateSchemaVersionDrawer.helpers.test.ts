@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { describe, expect, test } from 'vitest';
 import { metaSchemaDetailToCreateVersionFormInitialValues } from './CreateSchemaVersionDrawer.helpers';
 
@@ -19,7 +20,7 @@ describe('metaSchemaDetailToCreateVersionFormInitialValues', () => {
               {
                 name: 'event_id',
                 type: 'String',
-                _field_type: 'base',
+                _field_type: SCHEMA_FIELD_TYPES.BASE,
                 attribute: ['event_id'],
                 use_case: 'event_id',
                 expr: 'event_id',
@@ -47,7 +48,7 @@ describe('metaSchemaDetailToCreateVersionFormInitialValues', () => {
     expect(result.uploadedColumns?.[0]).toMatchObject({
       name: 'event_id',
       type: 'String',
-      _field_type: 'base',
+      _field_type: SCHEMA_FIELD_TYPES.BASE,
     });
     expect(result.uploadedColumns?.[0]?.id).toBeTruthy();
   });

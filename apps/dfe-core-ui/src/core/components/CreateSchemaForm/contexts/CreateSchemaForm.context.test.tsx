@@ -1,4 +1,5 @@
 import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import type { FieldError } from '@rc-component/form/es/interface';
@@ -23,7 +24,7 @@ const validRow = (
   id,
   name: `col_${id}`,
   type: 'string',
-  _field_type: 'imported',
+  _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
   ...overrides,
 });
 
@@ -376,7 +377,9 @@ describe('CreateSchemaFormProvider', () => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(fixed);
       });
 
-      expect(result.current.uploadedSchemaColumns).toEqual([fixed]);
+      expect(result.current.uploadedSchemaColumns).toEqual([
+        { ...fixed, _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED },
+      ]);
       expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
       expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: expect.any(Array),
@@ -511,7 +514,7 @@ describe('CreateSchemaFormProvider', () => {
           id: 'only',
           name: 'col_only',
           type: 'string',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
 
@@ -533,7 +536,7 @@ describe('CreateSchemaFormProvider', () => {
         id: 'm1',
         name: '',
         type: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
@@ -545,7 +548,7 @@ describe('CreateSchemaFormProvider', () => {
           name: 'fixed_name',
           type: 'string',
           attribute: [],
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
 
@@ -570,7 +573,7 @@ describe('CreateSchemaFormProvider', () => {
         id: 'rowKey',
         name: '',
         type: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
@@ -626,7 +629,7 @@ describe('CreateSchemaFormProvider', () => {
         id: 'idx',
         name: '',
         type: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
@@ -639,7 +642,7 @@ describe('CreateSchemaFormProvider', () => {
           name: 'from_index',
           type: 'string',
           id: 'idx',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
 
@@ -662,7 +665,7 @@ describe('CreateSchemaFormProvider', () => {
         id: 'z1',
         name: '',
         type: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
@@ -673,7 +676,7 @@ describe('CreateSchemaFormProvider', () => {
           id: 'z1',
           name: 'bad name!',
           type: 'string',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
 
@@ -695,14 +698,19 @@ describe('CreateSchemaFormProvider', () => {
         id: 'q1',
         name: '',
         type: '',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
       setUploadedFormRows(form, [
-        { id: 'q1', name: 'still', type: '', _field_type: 'imported' },
+        {
+          id: 'q1',
+          name: 'still',
+          type: '',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
       ]);
 
       const n = validateFields.mock.calls.length;

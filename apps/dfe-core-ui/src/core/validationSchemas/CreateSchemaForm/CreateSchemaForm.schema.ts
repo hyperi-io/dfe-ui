@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   schemaGroupValidator,
@@ -7,7 +8,13 @@ import {
 import z from 'zod';
 /** Used for building the request body */
 const schemaDetails = {
-  _field_type: z.enum(['base', 'promoted', 'imported', 'user_defined']),
+  _field_type: z.enum([
+    SCHEMA_FIELD_TYPES.BASE,
+    SCHEMA_FIELD_TYPES.PROMOTED,
+    SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+    SCHEMA_FIELD_TYPES.CSV_IMPORT,
+    SCHEMA_FIELD_TYPES.USER_DEFINED,
+  ]),
   name: schemaNameValidator,
   path: schemaGroupValidator.optional(),
   version: schemaVersionValidator,

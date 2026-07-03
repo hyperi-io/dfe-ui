@@ -3,6 +3,7 @@ import {
   RowSchema,
 } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -30,10 +31,13 @@ import {
   allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
   createEmptyValidationErrors,
+  indicesOfUserEditedListRows,
   mergeImportInvalidIntoUploadedTab,
   transformFieldErrorsToTabErrors,
   UPLOADED_ROW_FIELD_KEYS,
   uploadedAndInvalidColumnListValidatePaths,
+  withUserDefinedFieldTypeOnEditedRows,
+  type ColumnListFormKey,
 } from './CreateSchemaForm.context.helpers';
 
 const CreateSchemaUploadContext =
@@ -281,7 +285,10 @@ export const CreateSchemaFormProvider = ({
       if (replaceIndex === -1) return;
 
       const nextUploaded = [...prevUploaded];
-      nextUploaded[replaceIndex] = validatedColumn.data;
+      nextUploaded[replaceIndex] = {
+        ...validatedColumn.data,
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+      };
 
       const nextInvalid = prevInvalid.filter(
         (inv) => inv.data.id !== column.id,
@@ -403,14 +410,61 @@ export const CreateSchemaFormProvider = ({
     );
   }, [form, __internal_collectTabErrorsAfterValidate]);
 
+  const applyUserDefinedFieldTypeOnColumnEdits = useCallback(
+    (
+      changedValues: unknown,
+      allValues: CreateSchemaFormData,
+    ): CreateSchemaFormData => {
+      const listKeys: ColumnListFormKey[] = [
+        'uploadedColumns',
+        'schemaColumns',
+        'invalidColumns',
+      ];
+      let nextValues = allValues;
+      const formPatches: Partial<CreateSchemaFormData> = {};
+
+      for (const listKey of listKeys) {
+        const editedIndices = indicesOfUserEditedListRows(
+          changedValues,
+          listKey,
+        );
+        if (editedIndices.size === 0) continue;
+
+        const rows = allValues[listKey];
+        if (!Array.isArray(rows)) continue;
+
+        const marked = withUserDefinedFieldTypeOnEditedRows(
+          rows as { _field_type?: string }[],
+          editedIndices,
+        );
+        const normalized = marked.map((column) => listItemFromPartial(column));
+        formPatches[listKey] =
+          normalized as CreateSchemaFormData[typeof listKey];
+        nextValues = { ...nextValues, [listKey]: normalized };
+      }
+
+      if (Object.keys(formPatches).length > 0) {
+        form.setFieldsValue(formPatches);
+      }
+
+      return nextValues;
+    },
+    [form],
+  );
+
   const handleFormValuesChange = useCallback(
     (changedValues: unknown, allValues: CreateSchemaFormData) => {
+      const valuesAfterFieldType = applyUserDefinedFieldTypeOnColumnEdits(
+        changedValues,
+        allValues,
+      );
+
       handleUpdateUploadedSchemaColumns(changedValues);
-      handleUpdateSchemaColumns(changedValues, allValues);
+      handleUpdateSchemaColumns(changedValues, valuesAfterFieldType);
 
       const touchedLists = changedValuesTriggerInvalidTabErrors(changedValues);
       const cv = changedValues as Record<string, unknown>;
-      const schemaCols = allValues.schemaColumns;
+      const schemaCols = valuesAfterFieldType.schemaColumns;
       const nextLen = Array.isArray(schemaCols) ? schemaCols.length : 0;
       const prevLen = prevSchemaColumnsLengthRef.current;
 
@@ -443,6 +497,7 @@ export const CreateSchemaFormProvider = ({
     [
       handleUpdateUploadedSchemaColumns,
       handleUpdateSchemaColumns,
+      applyUserDefinedFieldTypeOnColumnEdits,
       changedValuesTriggerInvalidTabErrors,
       recomputeValidationErrors,
       handleValidateColumnListsOnly,

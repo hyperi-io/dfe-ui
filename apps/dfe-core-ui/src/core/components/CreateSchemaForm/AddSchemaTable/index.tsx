@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { SchemaTable } from '@/core/components/SchemaTable';
@@ -53,15 +54,15 @@ const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
   use_case: '',
   expr: '',
   comment: '',
-  _field_type: 'user_defined',
+  _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
 });
 
 /** Same shape as {@link defaultEmptyRow} — append-only adds skip preemptive validate.
  * @param row - The row to check.
  * @returns True if the row is a blank schema list row.
  * @example
- * isBlankSchemaListRow({ id: '', name: '', type: '', attribute: [], use_case: '', expr: '', comment: '', _field_type: 'imported' }) // true
- * isBlankSchemaListRow({ id: '1', name: 'test', type: 'string', attribute: ['test'], use_case: 'test', expr: 'test', comment: 'test', _field_type: 'user_defined' }) // false
+ * isBlankSchemaListRow({ id: '', name: '', type: '', attribute: [], use_case: '', expr: '', comment: '', _field_type: SCHEMA_FIELD_TYPES.CSV_IMPORT }) // true
+ * isBlankSchemaListRow({ id: '1', name: 'test', type: 'string', attribute: ['test'], use_case: 'test', expr: 'test', comment: 'test', _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED }) // false
  */
 export const isBlankSchemaListRow = (row: unknown): boolean => {
   if (!row || typeof row !== 'object') return false;
@@ -317,7 +318,7 @@ export const AddSchemaTable = ({
               );
             },
           },
-          /** Ant Design Form only persists fields registered via Form.Item — `id` must be stored for Form.List merges and promotion. */
+          /** Ant Design Form only persists fields registered via Form.Item — `id` / `_field_type` must be stored for list merges and API mapping. */
           {
             title: '',
             key: '__rowId',
@@ -325,9 +326,18 @@ export const AddSchemaTable = ({
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
-                <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
-                  <Input type="hidden" />
-                </Form.Item>
+                <>
+                  <Form.Item {...restField} name={[rowIndex, 'id']} hidden>
+                    <Input type="hidden" />
+                  </Form.Item>
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, '_field_type']}
+                    hidden
+                  >
+                    <Input type="hidden" />
+                  </Form.Item>
+                </>
               );
             },
           },

@@ -1,4 +1,5 @@
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
@@ -37,7 +38,7 @@ export const metaSchemaDetailToCreateVersionFormInitialValues = (
     listItemFromPartial({
       ...column,
       id: uuidv4(),
-      _field_type: column._field_type ?? 'user_defined',
+      _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     }),
   );
 
@@ -74,7 +75,7 @@ export const transformFormDataToRequestBody = (
     attribute: column.attribute,
     use_case: column.use_case,
     expr: column.expr,
-    _field_type: 'imported',
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
   }));
   const schemaColumns = (values.schemaColumns ?? []).map((column) => ({
     name: column.name,
@@ -83,7 +84,7 @@ export const transformFormDataToRequestBody = (
     use_case: column.use_case,
     expr: column.expr,
     comment: column.comment,
-    _field_type: column._field_type ?? 'user_defined',
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
   }));
 
   return {

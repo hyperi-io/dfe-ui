@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
@@ -14,7 +15,7 @@ const baseFormData = (): CreateSchemaFormData => ({
   uploadedColumns: [],
   schemaColumns: [],
   description: 'description',
-  _field_type: 'user_defined',
+  _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
 });
 
 describe('transformFormDataToRequestBody', () => {
@@ -69,7 +70,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'id',
         expr: '',
         comment: 'note',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       },
     ];
     const manual: CreateSchemaFormData['schemaColumns'] = [
@@ -81,7 +82,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined as string | undefined,
-        _field_type: 'user_defined',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       },
     ];
     const { requestBody } = transformFormDataToRequestBody({
@@ -96,7 +97,7 @@ describe('transformFormDataToRequestBody', () => {
         attribute: ['nullable'],
         use_case: 'id',
         comment: 'note',
-        _field_type: 'imported',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       },
       {
         name: 'col_b',
@@ -104,7 +105,7 @@ describe('transformFormDataToRequestBody', () => {
         use_case: 'count',
         expr: 'count()',
         comment: undefined,
-        _field_type: 'user_defined',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       },
     ]);
   });
@@ -127,7 +128,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'id',
           expr: '',
           comment: 'note',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(
@@ -143,7 +144,7 @@ describe('transformFormDataToRequestBody', () => {
           attribute: ['nullable'],
           use_case: 'id',
           comment: 'note',
-          _field_type: 'imported',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
         },
       ]);
       expect(schemaColumns).toEqual([]);
@@ -159,7 +160,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
-          _field_type: 'user_defined',
+          _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
         },
       ];
       const { uploadedColumns, schemaColumns } = transformFormDataToRequestBody(
@@ -176,7 +177,7 @@ describe('transformFormDataToRequestBody', () => {
           use_case: 'count',
           expr: 'count()',
           comment: undefined,
-          _field_type: 'user_defined',
+          _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
         },
       ]);
     });

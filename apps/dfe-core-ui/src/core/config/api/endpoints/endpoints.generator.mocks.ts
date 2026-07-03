@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1567,7 +1568,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
-                    _field_type: 'base',
+                    _field_type: SCHEMA_FIELD_TYPES.BASE,
                   },
                 ],
               },
@@ -1708,7 +1709,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
-                    _field_type: 'base',
+                    _field_type: SCHEMA_FIELD_TYPES.BASE,
                   },
                 ],
                 total: 1,

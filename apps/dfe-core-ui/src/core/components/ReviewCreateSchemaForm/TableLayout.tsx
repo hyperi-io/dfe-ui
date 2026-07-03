@@ -177,14 +177,14 @@ export const TableLayout = ({
         visibleColumns={[
           '_field_type',
           '__rowId',
-          'imported',
+          '_field_type',
           'name',
           'type',
           'main_action',
           'expr',
           'comment',
         ]}
-        lockedColumns={['__rowId', 'imported', 'main_action', 'name']}
+        lockedColumns={['__rowId', '_field_type', 'main_action', 'name']}
         columns={tableColumns}
         dataSource={allColumns}
         rowKey="name"

@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import z from 'zod';
@@ -37,7 +38,7 @@ const normalizeAttribute = (raw: unknown): string[] => {
 };
 
 export const listItemFromPartial = (
-  column: Partial<UploadedSchemaRow> & { _field_type: string },
+  column: Partial<UploadedSchemaRow> & { _field_type?: string },
 ): z.infer<typeof rowSchema> => {
   const name = String(rowLookup(column, 'name', 'Name') ?? '');
   const type = String(rowLookup(column, 'type', 'Type') ?? '');
@@ -55,7 +56,7 @@ export const listItemFromPartial = (
 
   return {
     id: column.id ?? '',
-    _field_type: column._field_type,
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     name,
     type,
     attribute: normalizeAttribute(attributeRaw),

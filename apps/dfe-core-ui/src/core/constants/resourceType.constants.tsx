@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
   IconArrowUpFromArc,
   IconLock,
@@ -8,13 +9,14 @@ import {
 
 export const fieldTypeIconSwitch = (field_type: string) => {
   switch (field_type) {
-    case 'base':
+    case SCHEMA_FIELD_TYPES.BASE:
       return <IconLock />;
-    case 'promoted':
-      return <IconArrowUpFromArc />;
-    case 'imported':
+    case SCHEMA_FIELD_TYPES.PROMOTED:
+      return <IconArrowUpFromArc className="rotate-180" />;
+    case SCHEMA_FIELD_TYPES.ELASTIC_IMPORT:
+    case SCHEMA_FIELD_TYPES.CSV_IMPORT:
       return <IconUpload />;
-    case 'user_defined':
+    case SCHEMA_FIELD_TYPES.USER_DEFINED:
       return <IconSettingsBolt />;
     default:
       return <IconQuestionMark />;
