@@ -254,6 +254,7 @@ export const AddSchemaTable = ({
             title: 'Attributes',
             dataIndex: 'attribute',
             key: 'attribute',
+            width: 200,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
               return (
