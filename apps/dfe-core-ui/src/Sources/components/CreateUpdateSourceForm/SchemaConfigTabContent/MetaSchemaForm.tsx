@@ -5,7 +5,6 @@ import {
   Button,
   FormInstance,
   FormRule,
-  Input,
   InputNumber,
   Popover,
   Select,
@@ -172,29 +171,6 @@ export const MetaSchemaForm = ({
               : 'Select meta schema first to access versions'
           }
         />
-      </Form.Item>
-      <Form.Item
-        className="w-full"
-        name={['schema', 'derived_schema']}
-        label={
-          <>
-            Derived Schema
-            <span className="ml-1 text-foreground-muted/40 dark:text-foreground-muted/40">
-              (Coming soon!)
-            </span>
-          </>
-        }
-        rules={[formValidation]}
-      >
-        <Input disabled placeholder="Enter derived schema" />
-      </Form.Item>
-      <Form.Item
-        className="w-full"
-        name={['schema', 'additional_fields']}
-        label="Additional Fields"
-        rules={[formValidation]}
-      >
-        <Input placeholder="Enter additional fields" />
       </Form.Item>
 
       <Form.Item

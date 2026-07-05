@@ -15,6 +15,8 @@ export const API_CONFIG = Object.freeze({
     sourceVersion: '/api/v1/sources/{name}/versions',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
+    plan: '/api/v1/sources/{name}/plan',
+    deploy: '/api/v1/sources/{name}/deploy',
   },
   services: {
     default: '/api/v1/services',

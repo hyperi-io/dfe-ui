@@ -16,7 +16,7 @@ export const SampleEventsTabContent = ({
   version: string;
 }) => {
   const { version: { schema } = {} } = source;
-  const isMetaSchemaDefined = !!schema?.meta_schema || !!schema?.derived_schema;
+  const isMetaSchemaDefined = !!schema?.meta_schema;
   const isDeployedVersion = version === source.deployed_version;
   const canViewSampleRows = !isMetaSchemaDefined || isDeployedVersion;
 
@@ -49,6 +49,12 @@ export const SampleEventsTabContent = ({
 
   return (
     <div className="flex flex-col gap-y-3">
+      {sampleRows?.rows.length === 0 && (
+        <NotificationCard
+          title="No fields to promote"
+          description="Sample rows were analysed and no fields were found for promotion."
+        />
+      )}
       {fieldsToPromote.size > 0 && (
         <FieldPromoteBanner
           selectedSourceName={source.source}
@@ -60,8 +66,8 @@ export const SampleEventsTabContent = ({
           icon={<IconInfoCircle className="w-4 h-4" />}
           description={
             <p className="flex gap-2">
-              This source has no meta or derived schema defined. Results will be
-              sent to <span className="font-semibold">_default_land.</span>
+              This source has no meta schema defined. Results will be sent to{' '}
+              <span className="font-semibold">_default_land.</span>
             </p>
           }
         />

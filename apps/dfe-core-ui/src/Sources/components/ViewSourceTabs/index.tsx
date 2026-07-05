@@ -66,9 +66,7 @@ export const ViewSourceDetailTabs = ({
     [pathname, router, searchParams],
   );
 
-  const isMetaSchemaDefined =
-    !!sourceDetailData.version.schema?.meta_schema ||
-    !!sourceDetailData.version.schema?.derived_schema;
+  const isMetaSchemaDefined = !!sourceDetailData.version.schema?.meta_schema;
 
   return (
     <Tabs
@@ -117,7 +115,7 @@ export const ViewSourceDetailTabs = ({
           ),
         },
 
-        /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
+        /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
         ...(isMetaSchemaDefined
           ? [
               // {

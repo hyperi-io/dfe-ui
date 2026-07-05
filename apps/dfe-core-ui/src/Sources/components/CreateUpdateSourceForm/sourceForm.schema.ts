@@ -107,8 +107,6 @@ const schemaConfigTabSchema = {
       meta_schema_version: z.string({
         message: 'Meta schema version is required',
       }),
-      derived_schema: z.string().optional().nullable(),
-      additional_fields: z.string().optional().nullable(),
       ttl_days: z.number().optional().nullable(),
       engine: z.string({ message: 'Engine is required' }),
     })

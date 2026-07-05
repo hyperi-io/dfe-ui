@@ -97,8 +97,7 @@ export const CreateUpdateSourceFormBase = ({
   };
 
   const metaSchema = Form.useWatch(['schema'], form);
-  const isMetaSchemaDefined =
-    !!metaSchema?.meta_schema || !!metaSchema?.derived_schema;
+  const isMetaSchemaDefined = !!metaSchema?.meta_schema;
 
   return (
     <Form
@@ -169,7 +168,7 @@ export const CreateUpdateSourceFormBase = ({
           },
 
           ...(isMetaSchemaDefined
-            ? /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
+            ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
               [
                 {
                   key: 'transform',
