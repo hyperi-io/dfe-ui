@@ -72,7 +72,7 @@ const buildVersionChildren = (
           <>
             {version === source.deployed_version && (
               <Tooltip destroyOnHidden title="Deployed version">
-                <IconRocket className="text-tertiary shrink-0 absolute top-2 -left-4" />
+                <IconRocket className="text-tertiary shrink-0 absolute top-2 -left-5.5" />
               </Tooltip>
             )}
             <span className="min-w-0 truncate">{version}</span>
