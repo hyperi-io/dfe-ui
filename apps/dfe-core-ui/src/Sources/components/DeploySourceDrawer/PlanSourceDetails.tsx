@@ -106,10 +106,8 @@ export const PlanSourceDetails = ({
               title={<span className="font-medium">Statements</span>}
               defaultOpen={true}
             >
-              <AceEditor value={JSON.stringify(data)} />
               <AceEditor
                 height="300px"
-                name="ddl_executed"
                 mode="sql"
                 value={statements?.join('\n\n')}
               />
