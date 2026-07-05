@@ -26,6 +26,8 @@ export const SourceDdlPreviewTabContent = ({
         onClick={() => mutate({ source_name, source_version })}
         isPending={isPending}
         error={error}
+        source_name={source_name}
+        version={source_version}
       />
 
       {buildResult && (
