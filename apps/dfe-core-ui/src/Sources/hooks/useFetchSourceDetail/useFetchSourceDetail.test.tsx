@@ -22,7 +22,7 @@ describe('.useFetchSourceDetail', () => {
         () =>
           useFetchSourceDetail({
             source_name: 'source',
-            source_version: 'string',
+            source_version: '1.0.0',
           }),
         { wrapper },
       );

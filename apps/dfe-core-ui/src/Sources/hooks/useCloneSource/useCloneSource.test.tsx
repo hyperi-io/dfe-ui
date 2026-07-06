@@ -30,7 +30,7 @@ describe('.useCloneSource', () => {
       expect(testWrapper.queryClient).not.toBeNull();
       const detailQuery = testWrapper
         .queryClient!.getQueryCache()
-        .findAll({ queryKey: ['source', sourceName] })
+        .findAll({ queryKey: ['source', sourceName, '1.0.0'] })
         .at(0);
       expect(detailQuery?.state.status).toBe('success');
     });
@@ -44,7 +44,7 @@ describe('.useCloneSource', () => {
           useCloneSource({
             source_name: 'source',
             onSuccess,
-            source_version: 'string',
+            source_version: '1.0.0',
             queryEnabled: true,
           }),
         { wrapper: testWrapper.wrapper },
@@ -107,7 +107,7 @@ describe('.useCloneSource', () => {
       () =>
         useCloneSource({
           source_name: 'source',
-          source_version: 'string',
+          source_version: '1.0.0',
           queryEnabled: true,
         }),
       { wrapper: testWrapper.wrapper },
@@ -132,7 +132,7 @@ describe('.useCloneSource', () => {
       () =>
         useCloneSource({
           source_name: 'source',
-          source_version: 'string',
+          source_version: '1.0.0',
           queryEnabled: true,
         }),
       { wrapper: testWrapper.wrapper },
