@@ -1,11 +1,11 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { DeployedSourceDetails } from '@/Sources/components/DeployedSourceDetails';
 import { useDeploySource } from '@/Sources/hooks/useDeploySource';
 import { usePlanSource } from '@/Sources/hooks/usePlanSource';
 import { IconRocket } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { DeploySourceDetails } from './DeploySourceDetails';
 import { PlanSourceDetails } from './PlanSourceDetails';
 
 export const DeploySourceDrawer = ({
@@ -68,7 +68,7 @@ export const DeploySourceDrawer = ({
       >
         <div className="flex flex-col gap-4">
           {(deploySourceData.data || deploySourceData.error) && (
-            <DeploySourceDetails {...deploySourceData} />
+            <DeployedSourceDetails {...deploySourceData} />
           )}
           {!deploySourceData.data &&
             (planSourceData.data || planSourceData.error) && (
