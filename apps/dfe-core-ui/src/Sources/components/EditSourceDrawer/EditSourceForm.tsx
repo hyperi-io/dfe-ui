@@ -46,7 +46,7 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
         source_version: response.current,
       });
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(response.source),
+        queryKey: SOURCE_DETAIL_QUERY_KEY(response.source, source_version),
       });
       refetchSources();
       onSuccess?.(response);

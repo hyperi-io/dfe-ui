@@ -13,8 +13,8 @@ import { GeneratedViewsTabContent } from './GeneratedViewsTabContent';
 export const SourceDdlPreviewTabContent = ({
   source_name,
   source_version,
-  build_result,
-  deploy_result,
+  build_result: buildResult,
+  deploy_result: deployResult,
 }: {
   source_name: string;
   source_version: string;
@@ -22,7 +22,6 @@ export const SourceDdlPreviewTabContent = ({
   deploy_result: SourceVersionDetail['version']['source_deployment'];
 }) => {
   const {
-    data: buildSourceData,
     mutate: buildSourceMutation,
     isPending: isPendingBuildSource,
     error: errorBuildSource,
@@ -32,10 +31,6 @@ export const SourceDdlPreviewTabContent = ({
   useEffect(() => {
     resetBuildSource();
   }, [source_name, source_version, resetBuildSource]);
-
-  const buildResult = buildSourceData ? buildSourceData : build_result;
-
-  const deployResult = deploy_result;
 
   return (
     <div className="h-[calc(100vh-225px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
@@ -93,7 +88,7 @@ export const SourceDdlPreviewTabContent = ({
               <ViewDeployedSourceDrawer
                 source_name={source_name}
                 version={source_version}
-                deploy_result={deploy_result}
+                deploy_result={deployResult}
               />
             ) : (
               <DeploySourceDrawer
