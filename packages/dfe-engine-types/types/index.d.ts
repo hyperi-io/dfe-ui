@@ -541,7 +541,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sources/{name}/versions": {
+    "/api/v1/sources/{name}/versions/{version}": {
         parameters: {
             query?: never;
             header?: never;
@@ -550,9 +550,9 @@ export interface paths {
         };
         /**
          * Get Source Version
-         * @description Get one immutable source version snapshot by id, with build/plan/deploy status.
+         * @description Get one immutable source version snapshot by id, with build/deploy status.
          */
-        get: operations["get_source_version_api_v1_sources__name__versions_get"];
+        get: operations["get_source_version_api_v1_sources__name__versions__version__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -613,15 +613,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Source Plan
-         * @description Return a saved deploy plan for a source version (from source-plans).
-         */
-        get: operations["get_source_plan_api_v1_sources__name__plan_get"];
+        get?: never;
         put?: never;
         /**
          * Plan Source Deploy
-         * @description Dry-run ClickHouse deploy: DDL statements, validation errors, persisted plan.
+         * @description Dry-run ClickHouse deploy: DDL statements and validation errors (not persisted).
          */
         post: operations["plan_source_deploy_api_v1_sources__name__plan_post"];
         delete?: never;
@@ -659,12 +655,18 @@ export interface paths {
         };
         /**
          * Get Source
-         * @description Get a full source definition by name, including build/plan/deploy per version.
+         * @description Get a full source definition by name, including build/deploy per version.
          */
         get: operations["get_source_api_v1_sources__name__get"];
         /**
          * Update Source
-         * @description Update a source from a flat revision body (appends next major version).
+         * @description Update a source from a flat revision body.
+         *
+         *     Before the first deploy, edits update the working version in place. After deploy, a new
+         *     major version is created only when ``current`` equals ``deployed_version`` and schema pins
+         *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
+         *     ``field_mappings``, ``sigma``, or ``transform`` change. Draft versions (``current`` not deployed) update
+         *     in place.
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
@@ -4955,6 +4957,11 @@ export interface components {
              * @default false
              */
             ready: boolean;
+            /**
+             * Ready Reason
+             * @description Why the plan is or is not ready to deploy
+             */
+            ready_reason?: string | null;
         };
         /**
          * SourceResponse
@@ -5175,7 +5182,7 @@ export interface components {
         };
         /**
          * SourceVersionDetail
-         * @description Source version snapshot plus persisted build/plan/deploy payloads.
+         * @description Source version snapshot plus persisted build/deploy payloads.
          */
         SourceVersionDetail: {
             /**
@@ -5207,8 +5214,6 @@ export interface components {
             transform?: components["schemas"]["SourceTransform"] | null;
             /** @description Last schema build for this version (source-builds) */
             source_build?: components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"] | null;
-            /** @description Last deploy plan for this version (source-plans) */
-            source_plan?: components["schemas"]["SourcePlanResponse"] | null;
             /** @description Last deploy run for this version (source-deploys) */
             source_deployment?: components["schemas"]["SourceDeployResponse"] | null;
         };
@@ -5250,7 +5255,7 @@ export interface components {
             deployed_version?: string | null;
             /**
              * Selected
-             * @description Version id requested via query parameter
+             * @description Version id requested in the URL path
              */
             selected: string;
             /**
@@ -5258,6 +5263,11 @@ export interface components {
              * @description All version ids defined on this source
              */
             versions: string[];
+            /**
+             * Previous Deployed Versions
+             * @description Version ids with a successful deploy in source-deploys history, excluding the live deployed_version
+             */
+            previous_deployed_versions?: string[];
             /** @description Configuration snapshot for ``selected`` plus pipeline artifacts */
             version: components["schemas"]["SourceVersionDetail"];
         };
@@ -7279,15 +7289,13 @@ export interface operations {
             };
         };
     };
-    get_source_version_api_v1_sources__name__versions_get: {
+    get_source_version_api_v1_sources__name__versions__version__get: {
         parameters: {
-            query: {
-                /** @description Source version id to return (required) */
-                version: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 name: string;
+                version: string;
             };
             cookie?: never;
         };
@@ -7370,40 +7378,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_source_plan_api_v1_sources__name__plan_get: {
-        parameters: {
-            query: {
-                /** @description Source version id to retrieve the plan for */
-                version: string;
-            };
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SourcePlanResponse"];
                 };
             };
             /** @description Validation Error */
