@@ -3,6 +3,7 @@ import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
 } from '@/Rules/components/CreateUpdateRuleForm';
+import { RULE_DETAIL_QUERY_KEY } from '@/Rules/hooks/useFetchRuleDetail';
 import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -25,7 +26,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   } = useUpdateRule({
     onSuccess: (response) => {
       queryClient.invalidateQueries({
-        queryKey: ['rule', rule.name],
+        queryKey: RULE_DETAIL_QUERY_KEY(rule.name),
       });
       onSuccess?.(response);
     },
