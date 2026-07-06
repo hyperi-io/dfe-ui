@@ -1,34 +1,104 @@
+import { FormNotification } from '@/core/components/FormNotification';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { DeploySourceDrawer } from '@/Sources/components/DeploySourceDrawer';
+import { ViewDeployedSourceDrawer } from '@/Sources/components/ViewDeployedSourceDrawer';
 import { useBuildSource } from '@/Sources/hooks/useBuildSource';
-import { Tabs } from 'antd';
+import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { IconPlayerPlay } from '@repo/dfe-icons';
+import { Button, Tabs } from 'antd';
 import { useEffect } from 'react';
-import { BuildSourceBanner } from './BuildSourceBanner';
 import { GeneratedDdlTabContent } from './GeneratedDdlTabContent';
 import { GeneratedViewsTabContent } from './GeneratedViewsTabContent';
 
 export const SourceDdlPreviewTabContent = ({
   source_name,
   source_version,
+  build_result: buildResult,
+  deploy_result: deployResult,
 }: {
   source_name: string;
   source_version: string;
+  build_result: SourceVersionDetail['version']['source_build'];
+  deploy_result: SourceVersionDetail['version']['source_deployment'];
 }) => {
-  const { data, mutate, isPending, error, reset } = useBuildSource();
+  const {
+    mutate: buildSourceMutation,
+    isPending: isPendingBuildSource,
+    error: errorBuildSource,
+    reset: resetBuildSource,
+  } = useBuildSource();
 
   useEffect(() => {
-    reset();
-  }, [source_name, source_version, reset]);
-
-  const buildResult = data?.version === source_version ? data : undefined;
+    resetBuildSource();
+  }, [source_name, source_version, resetBuildSource]);
 
   return (
     <div className="h-[calc(100vh-225px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-      <BuildSourceBanner
-        onClick={() => mutate({ source_name, source_version })}
-        isPending={isPending}
-        error={error}
-        source_name={source_name}
-        version={source_version}
-      />
+      {!buildResult && (
+        <NotificationCard
+          title="Build Source"
+          type="action"
+          description={
+            <div className="flex flex-col gap-1">
+              <p>Build source to see DDL preview</p>
+
+              {errorBuildSource && (
+                <FormNotification
+                  text={errorBuildSource.message}
+                  type="error"
+                />
+              )}
+            </div>
+          }
+          action={
+            <Button
+              type="primary"
+              loading={isPendingBuildSource}
+              onClick={() =>
+                buildSourceMutation({ source_name, source_version })
+              }
+            >
+              Build <IconPlayerPlay />
+            </Button>
+          }
+        />
+      )}
+
+      {buildResult && (
+        <NotificationCard
+          title={deployResult ? 'View Deployed Source' : 'Deploy Source'}
+          type="action"
+          description={
+            <p>
+              {deployResult ? (
+                'View generated DDL and views of deployed source'
+              ) : (
+                <span>
+                  Deploy{' '}
+                  <span className="font-semibold">
+                    {source_name}@{source_version}
+                  </span>{' '}
+                  to Clickhouse table
+                </span>
+              )}
+            </p>
+          }
+          action={
+            deployResult ? (
+              <ViewDeployedSourceDrawer
+                source_name={source_name}
+                version={source_version}
+                deploy_result={deployResult}
+              />
+            ) : (
+              <DeploySourceDrawer
+                source_name={source_name}
+                version={source_version}
+              />
+            )
+          }
+        />
+      )}
 
       {buildResult && (
         <Tabs

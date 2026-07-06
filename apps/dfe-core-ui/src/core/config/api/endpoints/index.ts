@@ -12,7 +12,7 @@ export const API_CONFIG = Object.freeze({
     source: '/api/v1/sources/{name}',
     sourceColumns: '/api/v1/sources/{name}/columns',
     sourceBuild: '/api/v1/sources/{name}/build',
-    sourceVersion: '/api/v1/sources/{name}/versions',
+    sourceVersion: '/api/v1/sources/{name}/versions/{version}',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
     plan: '/api/v1/sources/{name}/plan',

@@ -83,6 +83,7 @@ describe('useTransformSourceToTree', () => {
   it('maps nested children and sources into TreeDataNode keys and hierarchy', () => {
     const setSelectedSource = vi.fn();
 
+    // Version nodes only include entries matching current or deployed_version.
     const source_objects: SourceListResponse['objects'] = {
       items: [],
       children: {
@@ -94,7 +95,8 @@ describe('useTransformSourceToTree', () => {
                 baseSource({
                   name: 'azure/activity_log/source1',
                   versions: ['v1', 'v2'],
-                  current: 'v1',
+                  current: 'v2',
+                  deployed_version: 'v1',
                 }),
               ],
             },

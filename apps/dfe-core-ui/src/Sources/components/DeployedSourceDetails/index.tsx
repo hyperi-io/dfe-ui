@@ -5,7 +5,7 @@ import { SourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 
-export const DeploySourceDetails = ({
+export const DeployedSourceDetails = ({
   data,
   isPending,
   error,

@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useMutation } from '@tanstack/react-query';
+import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UseDeleteSourceProps {
   onSuccess?: () => void;
@@ -11,6 +12,8 @@ export const useDeleteSource = ({
   onSuccess,
   onError,
 }: UseDeleteSourceProps) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isPending, error } = useMutation({
     mutationFn: (source: string) => {
       return apiClient.delete(API_CONFIG.sources.source, {
@@ -18,6 +21,9 @@ export const useDeleteSource = ({
       });
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: INFINITE_SOURCES_QUERY_KEY(),
+      });
       onSuccess?.();
     },
     onError: (error) => {

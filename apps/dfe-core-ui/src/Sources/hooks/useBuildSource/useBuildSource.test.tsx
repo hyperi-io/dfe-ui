@@ -11,7 +11,7 @@ import {
   test,
 } from 'vitest';
 import { useBuildSource } from '.';
-import { SchemaBuildResponse } from './types';
+import { SourceBuildResponse } from './types';
 import { server } from './useBuildSource.mocks';
 
 const { wrapper } = buildTestWrapper().withReactQuery();
@@ -25,7 +25,7 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 describe('.useBuildSource', () => {
-  const expectedResponse: SchemaBuildResponse = {
+  const expectedResponse: SourceBuildResponse = {
     source_name: 'source',
     version: 'string',
     columns: [],

@@ -27,8 +27,7 @@ export const CreateSourceDrawer = ({
     onClose?.();
   };
 
-  const { refetch: refetchSources, setSelectedSource } =
-    useListSourcesContext();
+  const { setSelectedSource } = useListSourcesContext();
   const {
     mutate: createSourceMutation,
     isPending,
@@ -40,7 +39,6 @@ export const CreateSourceDrawer = ({
         source_name: response.source,
         source_version: response.current,
       });
-      refetchSources();
       setIsDrawerVisible(false);
       api.success({
         title: 'Source created successfully',

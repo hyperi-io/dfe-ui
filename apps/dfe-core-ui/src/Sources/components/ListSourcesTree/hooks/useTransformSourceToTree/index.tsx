@@ -63,8 +63,24 @@ const buildVersionChildren = (
   selectedSourcePath: string | null,
   selectedSourceVersion: string | null,
   expandTreeNode: (key: string) => void,
-): TreeDataNode[] =>
-  (source.versions ?? []).map((version) => ({
+): TreeDataNode[] => {
+  const displayVersion = (version: string) => {
+    return version === source.deployed_version || version === source.current;
+  };
+  const versionLabel = (version: string) => {
+    if (version === source.current && version === source.deployed_version) {
+      return 'Current Deployed';
+    }
+    if (version === source.current) {
+      return 'Working Copy';
+    }
+    if (version === source.deployed_version) {
+      return 'Deployed';
+    }
+
+    return version;
+  };
+  return (source.versions ?? []).filter(displayVersion).map((version) => ({
     key: versionTreeKey(source.name, version),
     title: (
       <TreeInteractiveLabel
@@ -75,7 +91,7 @@ const buildVersionChildren = (
                 <IconRocket className="text-tertiary shrink-0 absolute top-2 -left-5.5" />
               </Tooltip>
             )}
-            <span className="min-w-0 truncate">{version}</span>
+            <span className="min-w-0 truncate">{versionLabel(version)}</span>
             {version === source.current && (
               <Tooltip destroyOnHidden title="Current version">
                 <IconStarFilled className="text-yellow-500 shrink-0" />
@@ -98,6 +114,7 @@ const buildVersionChildren = (
     ),
     isLeaf: true,
   }));
+};
 
 const sourceSummaryToTreeData = ({
   node,

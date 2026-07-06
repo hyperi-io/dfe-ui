@@ -35,6 +35,7 @@ export const PlanSourceDetails = ({
     validation_errors,
     statements,
     ready,
+    ready_reason,
   } = data || {};
 
   return (
@@ -46,20 +47,28 @@ export const PlanSourceDetails = ({
       )}
       {data && (
         <div className="flex flex-col gap-4">
-          <NotificationCard
-            title="Review Plan"
-            description="Review the planned schema before deploying."
-            action={
-              <Button
-                className="flex items-center gap-2"
-                type="primary"
-                onClick={() => handleDeploySource()}
-              >
-                Deploy <IconRocket />
-              </Button>
-            }
-            type="action"
-          />
+          {ready ? (
+            <NotificationCard
+              title="Review Deploy Plan"
+              description="Review the planned schema before deploying."
+              action={
+                <Button
+                  className="flex items-center gap-2"
+                  type="primary"
+                  onClick={() => handleDeploySource()}
+                >
+                  Deploy <IconRocket />
+                </Button>
+              }
+              type="action"
+            />
+          ) : (
+            <NotificationCard
+              title="Deployment Not Ready"
+              description={ready_reason}
+              type="error"
+            />
+          )}
           <dl className="grid grid-cols-[120px_1fr_120px_1fr] gap-x-2 gap-y-1 [&_dt]:font-medium [&_dd]:items-center [&_dd]:flex [&_dd]:gap-2">
             <dt>Source Name:</dt>
             <dd>{planned_source_name}</dd>
@@ -70,7 +79,7 @@ export const PlanSourceDetails = ({
             <dt>Table Exists:</dt>
             <dd>{table_exists ? 'Yes' : 'No'}</dd>
             <dt>Ready:</dt>
-            <dd>
+            <dd className="col-span-3">
               {ready ? (
                 <>
                   <IconCircleCheck className="w-4 h-4 text-success" />
@@ -79,7 +88,7 @@ export const PlanSourceDetails = ({
               ) : (
                 <>
                   <IconCircleX className="w-4 h-4 text-error" />
-                  Not Ready
+                  Not Ready - {ready_reason}
                 </>
               )}
             </dd>

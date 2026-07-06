@@ -435,7 +435,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     sourceVersion: {
-      mockedUrl: '/api/v1/sources/{name}/versions',
+      mockedUrl: '/api/v1/sources/{name}/versions/{version}',
       get: {
         success: ({
           mockedResponse = {
@@ -494,15 +494,16 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
           name = 'source',
+          version = '1.0.0',
         }: {
           mockedResponse?: components['schemas']['SourceVersionGetDetailResponse'];
           name?: string;
+          version?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.sources.sourceVersion.mockedUrl.replace(
-              '{name}',
-              name,
-            ),
+            API_CONFIG_MOCKS.sources.sourceVersion.mockedUrl
+              .replace('{name}', name)
+              .replace('{version}', version),
             () => {
               return HttpResponse.json(mockedResponse);
             },

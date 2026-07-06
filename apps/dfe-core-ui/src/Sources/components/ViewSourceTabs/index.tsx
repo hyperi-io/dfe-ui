@@ -148,6 +148,10 @@ export const ViewSourceDetailTabs = ({
                       <SourceDdlPreviewTabContent
                         source_name={selectedSourceName}
                         source_version={selectedSourceVersion}
+                        build_result={sourceDetailData.version.source_build}
+                        deploy_result={
+                          sourceDetailData.version.source_deployment
+                        }
                       />
                     </RbacProtected.Unrestricted>
                     <RbacProtected.Restricted className="h-full">

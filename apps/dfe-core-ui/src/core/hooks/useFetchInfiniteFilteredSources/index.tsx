@@ -7,6 +7,20 @@ import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+export const INFINITE_SOURCES_QUERY_KEY = (
+  search?: string | null,
+  enabled?: boolean,
+  sort_by?: string | null,
+  sort_order?: string | null,
+  per_page?: number | null,
+) => [
+  'sources',
+  search ?? '',
+  enabled,
+  sort_by ?? '',
+  sort_order ?? '',
+  per_page ?? 10,
+];
 /** useFetchInfiniteFilteredSources props */
 /**
  * @param search - The search query to filter the sources by display name.
@@ -37,14 +51,13 @@ export const useFetchInfiniteFilteredSources = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [
-      'sources',
-      debouncedSearch,
+    queryKey: INFINITE_SOURCES_QUERY_KEY(
+      search,
       enabled,
       sort_by,
       sort_order,
       per_page,
-    ],
+    ),
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.sources.default, {
         queryParams: {
