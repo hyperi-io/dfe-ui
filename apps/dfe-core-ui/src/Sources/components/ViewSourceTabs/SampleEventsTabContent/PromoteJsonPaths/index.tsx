@@ -24,7 +24,7 @@ export const PromoteJsonPaths = ({
   attachedSchemaPath?: string | null;
 }) => {
   const {
-    mutate: promoteFields,
+    mutate: promoteFieldsMutation,
     isPending: isPromotingFields,
     error: errorPromotingFields,
   } = usePromoteFields({
@@ -34,7 +34,7 @@ export const PromoteJsonPaths = ({
   });
 
   const handlePromoteFields = () => {
-    promoteFields({
+    promoteFieldsMutation({
       json_path: jsonPaths?.paths.map((path) => path.path) ?? [],
       dry_run: false,
       atomic: false,

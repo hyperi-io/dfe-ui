@@ -28,7 +28,7 @@ export const DiscoverJsonPathsDetails = ({
 }) => {
   const [form] = Form.useForm<{ schema_path: string }>();
   const {
-    mutate: promoteFields,
+    mutate: promoteFieldsMutation,
     isPending: isPromotingFields,
     error: errorPromotingFields,
   } = usePromoteFields({
@@ -79,11 +79,11 @@ export const DiscoverJsonPathsDetails = ({
 
   const handleTestPromoteSubmit = () => {
     void form.validateFields().then((values) => {
-      promoteFields({
-        json_path: fieldsToPromote.join(','),
+      promoteFieldsMutation({
+        json_path: fieldsToPromote,
         dry_run: true,
         atomic: false,
-        schema_path: values.schema_path,
+        schema_path: values.schema_path ?? '',
       });
     });
   };
