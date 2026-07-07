@@ -29,6 +29,7 @@ COPY apps/ apps/
 COPY packages/ packages/
 
 RUN yarn install --immutable
+ENV NEXT_PUBLIC_API_URL=""
 # turbo builds the workspace packages (@repo/*) then the Next app.
 RUN yarn build
 
