@@ -1867,10 +1867,9 @@ export interface paths {
          * @description Discover JSON paths inside a source's ``_json`` column.
          *
          *     Resolves the requested ``version`` (or the source's current version). If that
-         *     version defines a ``meta_schema`` the source owns its own table and discovery
-         *     runs against ``db.<source>``. Otherwise the source's data still lives in the
-         *     shared catch-all landing table, so discovery runs against ``db.<landing>``
-         *     filtered by the version's match rule.
+         *     version defines a ``meta_schema`` it uses ``db.<source>`` only after deploy;
+         *     until then discovery runs on ``db.<landing>`` filtered by the version's
+         *     match rule. Versions without ``meta_schema`` always use the landing table.
          *
          *     Returns one record per path with observed types, a suggested column name,
          *     and whether the path is already promoted. ``?samples=N`` adds random
@@ -1897,10 +1896,9 @@ export interface paths {
          * @description Return random sample rows for a source, scoped to its match rule.
          *
          *     Resolves the requested ``version`` (or the source's current version). A
-         *     version with a ``meta_schema`` owns its own table, so sampling runs against
-         *     ``db.<source>`` unfiltered. Otherwise the version's data still lives in the
-         *     shared catch-all landing table, so sampling runs against ``db.<landing>``
-         *     filtered by the version's match rule.
+         *     version with a ``meta_schema`` uses ``db.<source>`` only after that version
+         *     is deployed and the table exists; otherwise rows are read from
+         *     ``db.<landing>`` filtered by the version's match rule.
          *
          *     Intended for inspecting real data while authoring a match condition or CEL
          *     before promoting any JSON path -- a row-level companion to the per-path
@@ -1928,9 +1926,12 @@ export interface paths {
          * Promote Field
          * @description Promote JSON path(s) into dedicated typed columns.
          *
-         *     Creates a new schema version on the source's meta-schema, adding one column
-         *     per path with a ``@copy`` directive so dfe-loader copies the value forward.
-         *     ``?dry_run=true`` returns the proposed diff + DDL without committing.
+         *     Creates a new schema version on the source's meta-schema (or on ``schema_path``
+         *     when the source has none), adding one column per path with a ``@copy`` directive
+         *     so dfe-loader copies the value forward. Core meta-schemas are forked to
+         *     ``{source_name}_{schema_stem}`` under the same parent path before promoting.
+         *     ``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,
+         *     adding meta-schema versions, or updating the source.
          */
         post: operations["promote_field_api_v1_schemas__source_name__promote_field_post"];
         delete?: never;
@@ -4010,6 +4011,11 @@ export interface components {
              * @default true
              */
             atomic: boolean;
+            /**
+             * Schema Path
+             * @description Meta-schema path when the source version has no meta_schema assigned (forbidden if meta_schema is already set on the source)
+             */
+            schema_path?: string | null;
         };
         /**
          * PromoteFieldResponse
@@ -4050,6 +4056,22 @@ export interface components {
             copy_cel?: string | null;
             /** Error */
             error?: string | null;
+        };
+        /**
+         * PromotedJsonField
+         * @description A JSON path already materialized as a typed meta-schema column.
+         */
+        PromotedJsonField: {
+            /**
+             * Name
+             * @description Promoted column name in the meta-schema
+             */
+            name: string;
+            /**
+             * Key
+             * @description Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
+             */
+            key: string;
         };
         /**
          * ProviderResponse
@@ -4467,6 +4489,11 @@ export interface components {
              */
             match_value?: string | null;
             /**
+             * Match Operator
+             * @description Match operator used when filtering (equals, exists, includes, …).
+             */
+            match_operator?: string | null;
+            /**
              * Columns
              * @description Column names present in the sampled rows.
              */
@@ -4478,6 +4505,11 @@ export interface components {
             rows: {
                 [key: string]: unknown;
             }[];
+            /**
+             * Promoted
+             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no @copy columns)
+             */
+            promoted?: components["schemas"]["PromotedJsonField"][];
         };
         /**
          * SchemaColumnWrite
@@ -4908,8 +4940,16 @@ export interface components {
              */
             field: string;
             /**
+             * Operator
+             * @description How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals
+             * @default equals
+             * @enum {string}
+             */
+            operator: "equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with";
+            /**
              * Value
-             * @description Expected value (exact match)
+             * @description Operand for the operator (not used when operator is ``exists``)
+             * @default
              */
             value: string;
         };
