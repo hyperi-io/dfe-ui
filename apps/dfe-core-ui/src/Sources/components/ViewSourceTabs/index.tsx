@@ -1,5 +1,6 @@
 'use client';
 
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
@@ -66,8 +67,7 @@ export const ViewSourceDetailTabs = ({
     [pathname, router, searchParams],
   );
 
-  const isMetaSchemaDefined = !!sourceDetailData.version.schema?.meta_schema;
-
+  const { isMetaSchemaDefined } = useSourceDetailsContext();
   return (
     <Tabs
       className={cn('flex-1 min-h-0 -mt-3 [&_.ant-tabs-content]:h-full')}

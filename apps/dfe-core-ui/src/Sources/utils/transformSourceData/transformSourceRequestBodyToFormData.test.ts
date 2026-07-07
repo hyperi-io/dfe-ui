@@ -22,6 +22,7 @@ describe('transformSourceRequestBodyToFormData', () => {
         match: {
           field: 'field',
           value: 'value',
+          operator: 'equals',
         },
       },
     };
