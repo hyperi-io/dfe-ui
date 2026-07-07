@@ -13,6 +13,7 @@ export interface PromoteRowsContextValue {
   fieldsToPromote: Set<string>;
   handleAddPromoteField: (fieldPath: string) => void;
   handleRemovePromoteField: (fieldPath: string) => void;
+  handleClearFieldsToPromote: () => void;
   isFieldPromoted: (fieldPath: string) => boolean;
 }
 
@@ -57,6 +58,10 @@ export const PromoteRowsProvider = ({
     });
   }, []);
 
+  const handleClearFieldsToPromote = useCallback(() => {
+    setFieldsToPromote(new Set());
+  }, []);
+
   const isFieldPromoted = useCallback(
     (fieldPath: string) => {
       return fieldsToPromote.has(fieldPath.replace('_json.', ''));
@@ -69,12 +74,14 @@ export const PromoteRowsProvider = ({
       fieldsToPromote,
       handleAddPromoteField,
       handleRemovePromoteField,
+      handleClearFieldsToPromote,
       isFieldPromoted,
     }),
     [
       fieldsToPromote,
       handleAddPromoteField,
       handleRemovePromoteField,
+      handleClearFieldsToPromote,
       isFieldPromoted,
     ],
   );
