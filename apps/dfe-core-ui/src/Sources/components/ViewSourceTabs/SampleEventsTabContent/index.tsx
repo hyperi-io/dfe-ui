@@ -1,6 +1,7 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useFetchSampleRows } from '@/Sources/hooks/useFetchSampleRows';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
@@ -15,8 +16,7 @@ export const SampleEventsTabContent = ({
   source: SourceVersionDetail;
   version: string;
 }) => {
-  const { version: { schema } = {} } = source;
-  const isMetaSchemaDefined = !!schema?.meta_schema;
+  const { isMetaSchemaDefined } = useSourceDetailsContext();
   const isDeployedVersion = version === source.deployed_version;
   const canViewSampleRows = !isMetaSchemaDefined || isDeployedVersion;
 
@@ -59,7 +59,6 @@ export const SampleEventsTabContent = ({
         <FieldPromoteBanner
           selectedSourceName={source.source}
           selectedSourceVersion={version}
-          isSchemaDefined={isMetaSchemaDefined}
         />
       )}
       {!isMetaSchemaDefined && (

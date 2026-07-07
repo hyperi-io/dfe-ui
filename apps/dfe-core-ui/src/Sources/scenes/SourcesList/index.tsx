@@ -6,6 +6,7 @@ import { Splitter } from '@/core/components/Splitter';
 import { ListSourcesTree } from '@/Sources/components/ListSourcesTree';
 import { ViewSourceDetail } from '@/Sources/components/ViewSourceDetail';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
+import { SourceDetailsProvider } from '@/Sources/contexts/SourceDetailsContext';
 
 export const SourcesListScene = () => {
   return (
@@ -15,7 +16,11 @@ export const SourcesListScene = () => {
           <ListSourcesProvider>
             <Splitter
               leftPanelContent={<ListSourcesTree />}
-              rightPanelContent={<ViewSourceDetail />}
+              rightPanelContent={
+                <SourceDetailsProvider>
+                  <ViewSourceDetail />
+                </SourceDetailsProvider>
+              }
             />
           </ListSourcesProvider>
         </RbacProtected.Unrestricted>

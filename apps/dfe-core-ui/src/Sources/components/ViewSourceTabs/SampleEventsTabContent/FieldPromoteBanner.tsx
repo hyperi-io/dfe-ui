@@ -7,11 +7,9 @@ import { DiscoverJsonPathsDrawer } from './DiscoverJsonPathsDrawer';
 export const FieldPromoteBanner = ({
   selectedSourceName,
   selectedSourceVersion,
-  isSchemaDefined,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  isSchemaDefined: boolean;
 }) => {
   const { fieldsToPromote, handleRemovePromoteField } = usePromoteRowsContext();
 
@@ -52,7 +50,6 @@ export const FieldPromoteBanner = ({
           selectedSourceName={selectedSourceName}
           selectedSourceVersion={selectedSourceVersion}
           fieldsToPromote={fieldsToPromote}
-          isSchemaDefined={isSchemaDefined}
         />
       }
     />

@@ -2,6 +2,7 @@ import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { MetaSchemaSelectCreate } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/MetaSchemaSelectCreate';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
@@ -13,7 +14,7 @@ export const DiscoverJsonPathsDetails = ({
   selectedSourceName,
   selectedSourceVersion,
   fieldsToPromote,
-  isSchemaDefined,
+
   onSuccess,
   onDataLoad,
   setAttachedSchemaPath,
@@ -21,11 +22,11 @@ export const DiscoverJsonPathsDetails = ({
   selectedSourceName: string;
   selectedSourceVersion: string;
   fieldsToPromote: string[];
-  isSchemaDefined: boolean;
   onSuccess: (response: PromoteFieldResponse) => void;
   onDataLoad: (response: JsonPaths) => void;
   setAttachedSchemaPath?: (schemaPath: string) => void;
 }) => {
+  const { isMetaSchemaDefined } = useSourceDetailsContext();
   const [form] = Form.useForm<{ schema_path: string }>();
   const {
     mutate: promoteFieldsMutation,
@@ -90,7 +91,7 @@ export const DiscoverJsonPathsDetails = ({
 
   return (
     <div className="flex flex-col gap-y-4">
-      {!isSchemaDefined && (
+      {!isMetaSchemaDefined && (
         <NotificationCard
           title="No schema defined for this source"
           description="There is no schema defined for this source. Select a schema to extend to promote fields."
