@@ -19,9 +19,7 @@ interface SidebarMenuProps {
   isNewViewEnabled?: boolean;
 }
 
-const hyperdxUrl = process.env.NEXT_PUBLIC_HYPERDX_URL as string | undefined;
-
-export const featureFlagSidebarMenuItems = [
+export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   ...(hyperdxUrl
     ? [
         {

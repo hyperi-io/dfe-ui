@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
+import { HyperdxPortProvider } from '@/core/contexts/HyperdxContext';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -96,6 +97,18 @@ class TestWrapperBuilder {
   withTheme() {
     this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
       return <ThemeProvider>{children}</ThemeProvider>;
+    });
+    return this;
+  }
+
+  /**
+   * Adds HyperdxPortProvider to the test wrapper
+   * @example
+   *  const { wrapper } = buildTestWrapper().withHyperdxPort('8090')
+   */
+  withHyperdxPort(port?: string) {
+    this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
+      return <HyperdxPortProvider port={port}>{children}</HyperdxPortProvider>;
     });
     return this;
   }

@@ -1,5 +1,6 @@
 import { AppLayout } from '@/core/components/AppLayout';
 import { authOptions } from '@/core/config/auth';
+import { HyperdxPortProvider } from '@/core/contexts/HyperdxContext';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
@@ -18,5 +19,15 @@ export default async function RootLayout({
     redirect('/login');
   }
 
-  return <AppLayout>{children}</AppLayout>;
+  // Read at request time (this layout is dynamic via getServerSession) so the
+  // HyperDX port is a runtime/deployment value, not baked into the client
+  // bundle. The browser-facing URL is derived from window.location + this port
+  // client-side (see useHyperdxUrl), so it is correct for any access host.
+  const hyperdxPort = process.env.HYPERDX_PORT || undefined;
+
+  return (
+    <HyperdxPortProvider port={hyperdxPort}>
+      <AppLayout>{children}</AppLayout>
+    </HyperdxPortProvider>
+  );
 }
