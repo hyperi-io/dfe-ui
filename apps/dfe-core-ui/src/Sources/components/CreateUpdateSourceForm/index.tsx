@@ -108,6 +108,7 @@ export const CreateUpdateSourceFormBase = ({
           field: '',
           operator: 'equals',
           value: '',
+          ...initialValues?.match,
         },
         ...initialValues,
       }}

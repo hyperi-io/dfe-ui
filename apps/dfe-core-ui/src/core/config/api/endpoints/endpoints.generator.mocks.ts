@@ -220,6 +220,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             current: 'string',
             match: {
               field: 'string',
+              operator: 'equals',
               value: 'string',
             },
             transform: {
@@ -234,6 +235,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 },
                 match: {
                   field: 'string',
+                  operator: 'equals',
                   value: 'string',
                 },
               },
@@ -489,6 +491,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
               },
               match: {
                 field: 'string',
+                operator: 'equals',
                 value: 'string',
               },
             },
