@@ -78,6 +78,7 @@ describe('.useFetchSourceDetail', () => {
           mapping_standards: ['string'],
           match: {
             field: 'string',
+            operator: 'equals',
             value: 'string',
           },
         },

@@ -1,11 +1,12 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import { MATCH_OPERATORS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormInstance, FormRule, Input, Select } from 'antd';
 import { useState } from 'react';
-import { CreateUpdateSourceFormData } from '../..';
-import { getInitialSourceType, OPERATORS } from './helpers';
+import { getInitialSourceType } from './helpers';
 
 type SourceType = 'receiver' | 'fetcher';
 
@@ -54,16 +55,18 @@ export const OriginFormSection = ({
         >
           <Select
             placeholder="Select operator"
-            onChange={() => {
-              form.setFields([
-                {
-                  name: ['match', 'value'],
-                  errors: [],
-                  value: '',
-                },
-              ]);
+            onChange={(value) => {
+              if (value === 'exists') {
+                form.setFields([
+                  {
+                    name: ['match', 'value'],
+                    errors: [],
+                    value: '',
+                  },
+                ]);
+              }
             }}
-            options={OPERATORS.map((operator) => ({
+            options={MATCH_OPERATORS.map((operator) => ({
               label: operator,
               value: operator,
             }))}
