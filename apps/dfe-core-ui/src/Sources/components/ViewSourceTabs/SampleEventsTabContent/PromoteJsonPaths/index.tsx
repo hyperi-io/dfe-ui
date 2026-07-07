@@ -1,5 +1,6 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
@@ -10,29 +11,39 @@ import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
 
 export const PromoteJsonPaths = ({
   selectedSourceName,
+  selectedSourceVersion,
   data,
   jsonPaths,
   onSuccess,
+  attachedSchemaPath,
 }: {
   selectedSourceName: string;
+  selectedSourceVersion: string;
   data: PromoteFieldResponse | null;
   jsonPaths: JsonPaths | null;
-  onSuccess?: () => void;
+  onSuccess?: (response: PromoteFieldResponse) => void;
+  attachedSchemaPath?: string | null;
 }) => {
+  const { handleClearFieldsToPromote } = usePromoteRowsContext();
   const {
-    mutate: promoteFields,
+    mutate: promoteFieldsMutation,
     isPending: isPromotingFields,
     error: errorPromotingFields,
   } = usePromoteFields({
     source_name: selectedSourceName,
-    onSuccess,
+    source_version: selectedSourceVersion,
+    onSuccess: (response) => {
+      handleClearFieldsToPromote();
+      onSuccess?.(response);
+    },
   });
 
   const handlePromoteFields = () => {
-    promoteFields({
+    promoteFieldsMutation({
       json_path: jsonPaths?.paths.map((path) => path.path) ?? [],
       dry_run: false,
       atomic: false,
+      schema_path: attachedSchemaPath,
     });
   };
 

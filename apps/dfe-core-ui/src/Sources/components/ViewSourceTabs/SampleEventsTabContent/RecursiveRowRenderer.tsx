@@ -17,12 +17,15 @@ export const RecursiveRowRenderer = ({
   const plainRow = isPlainObject(row) ? row : null;
   const keys = plainRow ? Object.keys(plainRow) : [];
 
-  const { isFieldPromoted } = usePromoteRowsContext();
+  const { isFieldPromoted, promotedOnSchemaFieldsSet } =
+    usePromoteRowsContext();
 
   if (!plainRow) {
     return null;
   }
 
+  const isPromotedOnSchema = (fieldPath: string) =>
+    promotedOnSchemaFieldsSet.has(fieldPath);
   return (
     <div className="flex flex-col gap-2">
       <ul className="flex gap-1 flex-wrap">
@@ -39,6 +42,8 @@ export const RecursiveRowRenderer = ({
                   'bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/20',
                   isFieldPromoted(fieldPath) &&
                     'bg-purple-500/20 dark:bg-purple-500/30',
+                  isPromotedOnSchema(fieldPath) &&
+                    'bg-tertiary/20 dark:bg-tertiary/30',
                   'mb-auto flex items-center',
                 )}
               >

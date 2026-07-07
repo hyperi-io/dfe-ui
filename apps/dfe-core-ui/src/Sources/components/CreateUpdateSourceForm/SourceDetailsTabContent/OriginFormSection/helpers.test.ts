@@ -5,6 +5,7 @@ import { getInitialSourceType } from './helpers';
 const MATCH: components['schemas']['SourceMatch'] = {
   field: 'field',
   value: 'value',
+  operator: 'equals',
 };
 const FETCHER: components['schemas']['SourceFetcher'] = {
   source_type: 'source_type',

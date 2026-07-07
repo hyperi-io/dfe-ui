@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
+import { SAMPLE_ROWS_QUERY_KEY } from '@/Sources/hooks/useFetchSampleRows';
 import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SourceUpdateRequestBody, SourceUpdateResponse } from './types';
@@ -29,6 +30,9 @@ export const useUpdateSource = ({
         }),
         void queryClient.invalidateQueries({
           queryKey: INFINITE_SOURCES_QUERY_KEY(),
+        }),
+        void queryClient.invalidateQueries({
+          queryKey: SAMPLE_ROWS_QUERY_KEY(data.source, data.current),
         }),
       ]);
       onSuccess?.(data);

@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
+import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SourceCreateRequestBody, SourceCreateResponse } from './types';
 
@@ -21,6 +22,9 @@ export const useCreateSource = ({
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: INFINITE_SOURCES_QUERY_KEY(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: SOURCE_DETAIL_QUERY_KEY(data.source, data.current),
       });
       onSuccess?.(data);
     },

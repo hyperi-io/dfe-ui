@@ -56,11 +56,8 @@ export const transformSourceRequestBodyToFormData = (
           }
         : null,
     match: source?.version?.match
-      ? {
-          ...source.version.match,
-          operator: 'equals',
-        }
-      : { field: '', value: '', operator: 'equals' },
+      ? { ...source.version.match }
+      : { field: '', value: '' },
   };
   return transformedSource;
 };

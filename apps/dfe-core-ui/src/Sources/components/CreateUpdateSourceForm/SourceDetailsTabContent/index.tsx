@@ -1,13 +1,19 @@
 import { Form } from '@/core/components/Form';
-import { type DisabledFields } from '@/Sources/components/CreateUpdateSourceForm';
-import { FormRule, Input, Switch } from 'antd';
+import {
+  CreateUpdateSourceFormData,
+  type DisabledFields,
+} from '@/Sources/components/CreateUpdateSourceForm';
+import { OriginFormSection } from '@/Sources/components/CreateUpdateSourceForm/SourceDetailsTabContent/OriginFormSection';
+import { FormInstance, FormRule, Input, Switch } from 'antd';
 
 export const SourceDetailsTabContent = ({
   formValidation,
   disabledFields,
+  form,
 }: {
   formValidation: FormRule;
   disabledFields?: DisabledFields;
+  form: FormInstance<CreateUpdateSourceFormData>;
 }) => (
   <div className="flex flex-col gap-2">
     <div className="flex gap-x-2">
@@ -35,5 +41,11 @@ export const SourceDetailsTabContent = ({
     <Form.Item name="description" label="Description" rules={[formValidation]}>
       <Input.TextArea placeholder="Enter description" />
     </Form.Item>
+
+    <OriginFormSection
+      formValidation={formValidation}
+      form={form}
+      className="mt-2"
+    />
   </div>
 );

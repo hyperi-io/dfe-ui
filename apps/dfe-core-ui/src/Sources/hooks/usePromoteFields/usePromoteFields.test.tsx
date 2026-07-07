@@ -44,6 +44,7 @@ describe('.usePromoteFields', () => {
             onSuccess,
             onError,
             source_name: 'source',
+            source_version: 'version',
           }),
         { wrapper },
       );
@@ -93,7 +94,13 @@ describe('.usePromoteFields', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => usePromoteFields({ onSuccess, onError, source_name: 'source' }),
+        () =>
+          usePromoteFields({
+            onSuccess,
+            onError,
+            source_name: 'source',
+            source_version: 'version',
+          }),
         { wrapper },
       );
 

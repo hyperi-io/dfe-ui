@@ -1,7 +1,7 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { ViewSourceDetailTabs } from '@/Sources/components/ViewSourceTabs';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 import { SourceDetailActionMenu } from './SourceDetailActionMenu';
@@ -12,23 +12,24 @@ export const ViewSourceDetail = () => {
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
   } = useListSourcesContext();
-  const {
-    data: sourceDetailData,
-    isLoading: isFetchingSourceDetail,
-    error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name, source_version });
 
-  if (isFetchingSourceDetail)
+  const {
+    sourceDetail: sourceDetailData,
+    isLoadingSourceDetail,
+    errorSourceDetail,
+  } = useSourceDetailsContext();
+
+  if (isLoadingSourceDetail)
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
       </div>
     );
-  if (fetchSourceDetailError)
+  if (errorSourceDetail)
     return (
       <GenericErrorCard
         title="Error fetching source detail"
-        description={fetchSourceDetailError.message}
+        description={errorSourceDetail.message}
       />
     );
 
