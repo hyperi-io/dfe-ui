@@ -1,5 +1,7 @@
 'use client';
 
+import { useFetchSampleRows } from '@/Sources/hooks/useFetchSampleRows';
+import { SampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
 import {
   createContext,
   useCallback,
@@ -15,6 +17,10 @@ export interface PromoteRowsContextValue {
   handleRemovePromoteField: (fieldPath: string) => void;
   handleClearFieldsToPromote: () => void;
   isFieldPromoted: (fieldPath: string) => boolean;
+  sampleRows: SampleRowsResponse | undefined;
+  isLoadingSampleRows: boolean;
+  errorSampleRows: Error | null;
+  promotedOnSchemaFieldsSet: Set<string>;
 }
 
 const PromoteRowsContext = createContext<PromoteRowsContextValue | null>(null);
@@ -37,12 +43,25 @@ export interface PromoteRowsProviderProps {
 
 export const PromoteRowsProvider = ({
   children,
-  source_name: _source_name,
-  version: _version,
+  source_name,
+  version,
 }: PromoteRowsProviderProps) => {
   const [fieldsToPromote, setFieldsToPromote] = useState<Set<string>>(
     new Set(),
   );
+
+  const {
+    data: sampleRows,
+    isLoading: isLoadingSampleRows,
+    error: errorSampleRows,
+  } = useFetchSampleRows({
+    source_name,
+    version,
+  });
+  const { promoted = [] } = sampleRows || {};
+  const promotedOnSchemaFieldsSet = useMemo(() => {
+    return new Set(promoted.map((promoted) => promoted.key));
+  }, [promoted]);
 
   const handleAddPromoteField = useCallback((fieldPath: string) => {
     setFieldsToPromote(
@@ -68,7 +87,6 @@ export const PromoteRowsProvider = ({
     },
     [fieldsToPromote],
   );
-
   const value = useMemo<PromoteRowsContextValue>(
     () => ({
       fieldsToPromote,
@@ -76,6 +94,10 @@ export const PromoteRowsProvider = ({
       handleRemovePromoteField,
       handleClearFieldsToPromote,
       isFieldPromoted,
+      sampleRows,
+      isLoadingSampleRows,
+      errorSampleRows,
+      promotedOnSchemaFieldsSet,
     }),
     [
       fieldsToPromote,
@@ -83,6 +105,10 @@ export const PromoteRowsProvider = ({
       handleRemovePromoteField,
       handleClearFieldsToPromote,
       isFieldPromoted,
+      sampleRows,
+      isLoadingSampleRows,
+      errorSampleRows,
+      promotedOnSchemaFieldsSet,
     ],
   );
 

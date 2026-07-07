@@ -1,7 +1,7 @@
 import { cn } from '@/core/utils/style';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
-import { IconDots, IconMinus, IconPlus } from '@repo/dfe-icons';
-import { Button, Popover } from 'antd';
+import { IconCheck, IconDots, IconMinus, IconPlus } from '@repo/dfe-icons';
+import { Button, Popover, Tooltip } from 'antd';
 import { useState } from 'react';
 
 export const RecursiveRendererActionMenu = ({
@@ -11,11 +11,35 @@ export const RecursiveRendererActionMenu = ({
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const { handleAddPromoteField, handleRemovePromoteField, isFieldPromoted } =
-    usePromoteRowsContext();
+  const {
+    handleAddPromoteField,
+    handleRemovePromoteField,
+    isFieldPromoted,
+    promotedOnSchemaFieldsSet,
+  } = usePromoteRowsContext();
   const isPromoted = isFieldPromoted(fieldPath);
 
-  return (
+  const isPromotedOnSchema = promotedOnSchemaFieldsSet.has(fieldPath);
+
+  return isPromotedOnSchema ? (
+    <Tooltip
+      destroyOnHidden
+      title="This field is already promoted on the schema"
+    >
+      <button
+        aria-label={`Actions for ${fieldPath}`}
+        className={cn(
+          // Spacing
+          'ml-2',
+          // Chip
+          'bg-background dark:bg-dark-background rounded-full p-0.5',
+        )}
+        type="button"
+      >
+        <IconCheck className="w-3 h-3" />
+      </button>
+    </Tooltip>
+  ) : (
     <Popover
       destroyOnHidden
       trigger="click"
