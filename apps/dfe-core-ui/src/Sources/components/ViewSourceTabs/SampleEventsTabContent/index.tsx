@@ -59,6 +59,7 @@ export const SampleEventsTabContent = ({
         <FieldPromoteBanner
           selectedSourceName={source.source}
           selectedSourceVersion={version}
+          isSchemaDefined={isMetaSchemaDefined}
         />
       )}
       {!isMetaSchemaDefined && (

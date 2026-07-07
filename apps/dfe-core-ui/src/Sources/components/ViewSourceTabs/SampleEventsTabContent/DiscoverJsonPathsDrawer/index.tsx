@@ -16,11 +16,16 @@ export const DiscoverJsonPathsDrawer = ({
   selectedSourceName,
   selectedSourceVersion,
   fieldsToPromote,
+  isSchemaDefined,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
   fieldsToPromote: Set<string>;
+  isSchemaDefined: boolean;
 }) => {
+  const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
+    null,
+  );
   const { notification, modal } = App.useApp();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('discover');
@@ -105,6 +110,7 @@ export const DiscoverJsonPathsDrawer = ({
                   selectedSourceName={selectedSourceName}
                   selectedSourceVersion={selectedSourceVersion}
                   fieldsToPromote={Array.from(fieldsToPromote)}
+                  isSchemaDefined={isSchemaDefined}
                   onSuccess={(response) => {
                     setCanPromote(true);
                     setActiveTab('review');
@@ -112,6 +118,9 @@ export const DiscoverJsonPathsDrawer = ({
                   }}
                   onDataLoad={(response) => {
                     setJsonPaths(response);
+                  }}
+                  setAttachedSchemaPath={(schemaPath) => {
+                    setAttachedSchemaPath(schemaPath);
                   }}
                 />
               ),
@@ -123,6 +132,7 @@ export const DiscoverJsonPathsDrawer = ({
               children: (
                 <PromoteJsonPaths
                   selectedSourceName={selectedSourceName}
+                  selectedSourceVersion={selectedSourceVersion}
                   data={promoteTestResponse}
                   jsonPaths={jsonPaths}
                   onSuccess={() => {
@@ -132,6 +142,7 @@ export const DiscoverJsonPathsDrawer = ({
                       placement: 'bottomLeft',
                     });
                   }}
+                  attachedSchemaPath={attachedSchemaPath}
                 />
               ),
             },

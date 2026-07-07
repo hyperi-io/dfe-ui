@@ -10,14 +10,18 @@ import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
 
 export const PromoteJsonPaths = ({
   selectedSourceName,
+  selectedSourceVersion,
   data,
   jsonPaths,
   onSuccess,
+  attachedSchemaPath,
 }: {
   selectedSourceName: string;
+  selectedSourceVersion: string;
   data: PromoteFieldResponse | null;
   jsonPaths: JsonPaths | null;
   onSuccess?: () => void;
+  attachedSchemaPath?: string | null;
 }) => {
   const {
     mutate: promoteFields,
@@ -25,6 +29,7 @@ export const PromoteJsonPaths = ({
     error: errorPromotingFields,
   } = usePromoteFields({
     source_name: selectedSourceName,
+    source_version: selectedSourceVersion,
     onSuccess,
   });
 
@@ -33,6 +38,7 @@ export const PromoteJsonPaths = ({
       json_path: jsonPaths?.paths.map((path) => path.path) ?? [],
       dry_run: false,
       atomic: false,
+      schema_path: attachedSchemaPath,
     });
   };
 
