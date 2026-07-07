@@ -16,12 +16,10 @@ export const DiscoverJsonPathsDrawer = ({
   selectedSourceName,
   selectedSourceVersion,
   fieldsToPromote,
-  isSchemaDefined,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
   fieldsToPromote: Set<string>;
-  isSchemaDefined: boolean;
 }) => {
   const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
     null,
@@ -110,7 +108,6 @@ export const DiscoverJsonPathsDrawer = ({
                   selectedSourceName={selectedSourceName}
                   selectedSourceVersion={selectedSourceVersion}
                   fieldsToPromote={Array.from(fieldsToPromote)}
-                  isSchemaDefined={isSchemaDefined}
                   onSuccess={(response) => {
                     setCanPromote(true);
                     setActiveTab('review');
