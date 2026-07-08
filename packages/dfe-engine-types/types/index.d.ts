@@ -680,7 +680,14 @@ export interface paths {
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Patch Source Enabled
+         * @description Enable or disable a source without changing versioned configuration.
+         *
+         *     Does not create a new source version. Enabling may return ``409 match_conflict``
+         *     if another enabled source already uses the same receiver match rule.
+         */
+        patch: operations["patch_source_enabled_api_v1_sources__name__patch"];
         trace?: never;
     };
     "/api/v1/sources/bulk": {
@@ -4879,6 +4886,17 @@ export interface components {
             readonly transform: components["schemas"]["SourceTransform"] | null;
         };
         /**
+         * SourceEnabledPatchRequest
+         * @description Partial update for source enabled status only.
+         */
+        SourceEnabledPatchRequest: {
+            /**
+             * Enabled
+             * @description Whether the source is active
+             */
+            enabled: boolean;
+        };
+        /**
          * SourceFetcher
          * @description Fetcher configuration for SaaS API pull sources.
          */
@@ -7594,6 +7612,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_source_enabled_api_v1_sources__name__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceEnabledPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description Enabling would duplicate another enabled source's receiver match */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
