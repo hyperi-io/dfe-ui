@@ -106,7 +106,12 @@ export const AddSchemaTable = ({
     'expr',
     'comment',
   ];
-  const lockedColumns = lockedColumnsProp ?? ['__rowId', 'main_action', 'name'];
+  const lockedColumns = lockedColumnsProp ?? [
+    '_field_type',
+    '__rowId',
+    'main_action',
+    'name',
+  ];
   const form = Form.useFormInstance();
 
   /** New array refs from parents (e.g. `.map(...)`) must not retrigger a sync unless content changed. */

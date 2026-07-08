@@ -24,6 +24,12 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
     version?: boolean;
     uploadSchemaInput?: boolean;
   };
+  config?: {
+    uploadedTab: {
+      tabTitle: string;
+      tableTitle: string;
+    };
+  };
 }
 
 const CreateSchemaFormBase = ({
@@ -34,6 +40,7 @@ const CreateSchemaFormBase = ({
   initialValues,
   disabledFields,
   hideFields,
+  config,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -178,6 +185,7 @@ const CreateSchemaFormBase = ({
       <SchemaUploadCollapse
         hideFields={hideFields}
         disabledFields={disabledFields}
+        config={config}
       />
 
       {formErrorMessage && (

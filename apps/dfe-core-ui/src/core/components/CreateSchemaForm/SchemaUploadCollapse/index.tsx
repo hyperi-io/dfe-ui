@@ -13,7 +13,14 @@ import { SchemaUploadFileSection } from './SchemaUploadFileSection';
 export const SchemaUploadCollapse = ({
   disabledFields,
   hideFields,
+  config,
 }: {
+  config?: {
+    uploadedTab: {
+      tabTitle: string;
+      tableTitle: string;
+    };
+  };
   disabledFields?: {
     [key in keyof CreateSchemaFormData]?: boolean;
   };
@@ -22,6 +29,7 @@ export const SchemaUploadCollapse = ({
   };
 }) => {
   const {
+    form,
     formValidation,
     uploadedSchemaColumns,
     invalidUploadedSchemaColumns,
@@ -29,6 +37,14 @@ export const SchemaUploadCollapse = ({
   } = useCreateSchemaFormContext();
   const hasUploadedSchema =
     uploadedSchemaColumns.length > 0 || invalidUploadedSchemaColumns.length > 0;
+
+  const uploadType = form.getFieldValue('uploadType');
+  const tableTitle =
+    uploadType === 'csv'
+      ? 'CSV Imports'
+      : uploadType === 'json'
+        ? 'Elastic Index Template Imports'
+        : undefined;
 
   const [activeKey, setActiveKey] = useState<
     'uploadedColumns' | 'schemaColumns'
@@ -96,12 +112,18 @@ export const SchemaUploadCollapse = ({
                   key: 'uploadedColumns',
                   label: (
                     <TabLabel
-                      label="Uploaded Columns"
+                      label={
+                        config?.uploadedTab?.tabTitle ?? 'Uploaded Columns'
+                      }
                       validationErrors={validationErrors.uploadedColumns ?? []}
                     />
                   ),
                   forceRender: true,
-                  children: <UploadedSchemaTable />,
+                  children: (
+                    <UploadedSchemaTable
+                      title={config?.uploadedTab?.tableTitle ?? tableTitle}
+                    />
+                  ),
                 },
               ]
             : []),

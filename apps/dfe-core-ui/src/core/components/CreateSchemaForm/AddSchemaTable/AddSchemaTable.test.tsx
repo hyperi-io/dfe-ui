@@ -99,7 +99,7 @@ const renderAddSchemaTable = (
       <FormColumnsProbe listName={listName} onColumns={onColumns} />
       <AddSchemaTable
         formValidation={bypassFormValidation}
-        lockedColumns={['__rowId', 'main_action', 'name']}
+        lockedColumns={['_field_type', '__rowId', 'main_action', 'name']}
         visibleColumns={[
           'name',
           'type',
