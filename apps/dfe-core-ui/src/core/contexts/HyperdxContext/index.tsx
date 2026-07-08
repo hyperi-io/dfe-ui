@@ -1,8 +1,19 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useSyncExternalStore } from 'react';
 
 const HyperdxPortContext = createContext<string | undefined>(undefined);
+
+const subscribeToLocation = (): (() => void) => {
+  return () => {};
+};
+
+const getLocationOrigin = (): string | undefined => {
+  const { hostname, protocol } = window.location;
+  return `${protocol}//${hostname}`;
+};
+
+const getServerLocationOrigin = (): undefined => undefined;
 
 export const HyperdxPortProvider = ({
   children,
@@ -34,16 +45,14 @@ export const HyperdxPortProvider = ({
  */
 export const useHyperdxUrl = (): string | undefined => {
   const port = useContext(HyperdxPortContext);
-  const [url, setUrl] = useState<string | undefined>(undefined);
+  const origin = useSyncExternalStore(
+    subscribeToLocation,
+    getLocationOrigin,
+    getServerLocationOrigin,
+  );
 
-  useEffect(() => {
-    if (!port) {
-      setUrl(undefined);
-      return;
-    }
-    const { hostname, protocol } = window.location;
-    setUrl(`${protocol}//${hostname}:${port}`);
-  }, [port]);
-
-  return url;
+  if (!port || !origin) {
+    return undefined;
+  }
+  return `${origin}:${port}`;
 };
