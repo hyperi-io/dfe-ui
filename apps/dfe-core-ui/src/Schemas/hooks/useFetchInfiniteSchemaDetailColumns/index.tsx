@@ -47,10 +47,10 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   }[] = [
     { label: 'Name', value: 'name' },
     { label: 'Type', value: 'type' },
-    { label: 'Use Case', value: 'use_case' },
+    { label: 'Attribute', value: 'attribute' },
+    { label: 'Index Type', value: 'use_case' },
     { label: 'Expression (CTE)', value: 'expr' },
     { label: 'Comment', value: 'comment' },
-    { label: 'Attribute', value: 'attribute' },
   ];
 
   const [selectedSearchableColumns, setSelectedSearchableColumns] = useState<
