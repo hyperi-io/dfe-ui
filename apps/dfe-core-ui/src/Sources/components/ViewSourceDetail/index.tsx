@@ -5,6 +5,7 @@ import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext
 import { Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 import { SourceDetailActionMenu } from './SourceDetailActionMenu';
+import { SourceDetailHighlight } from './SourceDetailHighlight';
 import { SourceEnabledTag } from './SourceEnabledTag';
 
 export const ViewSourceDetail = () => {
@@ -54,6 +55,7 @@ export const ViewSourceDetail = () => {
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />
         </div>
+        <SourceDetailHighlight source={sourceDetailData} />
         <ViewSourceDetailTabs
           selectedSourceName={source_name ?? ''}
           selectedSourceVersion={source_version ?? ''}
