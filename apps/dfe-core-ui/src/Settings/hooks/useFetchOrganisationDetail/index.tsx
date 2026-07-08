@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const ORGANISATION_DETAIL_QUERY_KEY = (org_name?: string | null) => [
   'organisation',
-  org_name,
+  ...(org_name ? [org_name] : []),
 ];
 
 export const useFetchOrganisationDetail = ({

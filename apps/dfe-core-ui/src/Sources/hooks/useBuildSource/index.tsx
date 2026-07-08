@@ -13,7 +13,11 @@ export type BuildSourceVariables = {
 export const BUILD_SOURCE_QUERY_KEY = (
   source_name: string,
   source_version: string,
-) => ['build-source', source_name, source_version];
+) => [
+  'build-source',
+  ...(source_name ? [source_name] : []),
+  ...(source_version ? [source_version] : []),
+];
 
 export const useBuildSource = ({
   onSuccess,

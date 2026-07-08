@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const RULE_DETAIL_QUERY_KEY = (name: string | null) => [
   'rule',
-  name ?? '',
+  ...(name ? [name] : []),
 ];
 /**
  * useFetchRuleDetail

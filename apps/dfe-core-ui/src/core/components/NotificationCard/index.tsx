@@ -15,6 +15,7 @@ export const NotificationCard = ({
   type = 'default',
   title,
   action,
+  classNames,
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
@@ -22,6 +23,13 @@ export const NotificationCard = ({
   type?: DisplayType;
   title?: string | React.ReactNode;
   action?: React.ReactNode;
+  classNames?: {
+    root?: string;
+    container?: string;
+    title?: string;
+    description?: string;
+    action?: string;
+  };
 }) => {
   const displayType = {
     default: cn(
@@ -60,13 +68,19 @@ export const NotificationCard = ({
         'rounded-lg px-3 py-2',
         displayType[type],
         className,
+        classNames?.root,
       )}
     >
       {icon && icon}
 
-      <div className="flex flex-col gap-1">
+      <div className={cn('flex flex-col gap-1', classNames?.container)}>
         {typeof title === 'string' ? (
-          <h3 className="text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted">
+          <h3
+            className={cn(
+              'text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted',
+              classNames?.title,
+            )}
+          >
             {title}
           </h3>
         ) : (
@@ -74,14 +88,21 @@ export const NotificationCard = ({
         )}
 
         {typeof description === 'string' ? (
-          <p className="text-sm text-foreground-muted dark:text-dark-foreground-muted">
+          <p
+            className={cn(
+              'text-sm text-foreground-muted dark:text-dark-foreground-muted',
+              classNames?.description,
+            )}
+          >
             {description}
           </p>
         ) : (
           description
         )}
       </div>
-      {action && <div className="ml-auto">{action}</div>}
+      {action && (
+        <div className={cn('ml-auto', classNames?.action)}>{action}</div>
+      )}
     </div>
   );
 };

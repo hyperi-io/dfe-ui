@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const HUNT_DETAIL_QUERY_KEY = (name?: string | null) => [
   'huntDetail',
-  name,
+  ...(name ? [name] : []),
 ];
 
 export const useFetchHuntDetail = ({ name }: { name?: string | null }) => {

@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 
 export const SAMPLE_ROWS_QUERY_KEY = (source_name: string, version: string) => [
   'sample-rows',
-  source_name,
-  version,
+  ...(source_name ? [source_name] : []),
+  ...(version ? [version] : []),
 ];
 /**
  * useFetchSampleRows

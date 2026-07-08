@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const ROLE_DETAIL_QUERY_KEY = (role_name?: string | null) => [
   'role',
-  role_name,
+  ...(role_name ? [role_name] : []),
 ];
 export const useFetchRoleDetail = ({
   role_name,
