@@ -307,6 +307,42 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      patch: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            versions: ['string'],
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          name?: string;
+        } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
       delete: {
         success: ({ name = 'source' }: { name?: string } = {}) => {
           return http.delete(

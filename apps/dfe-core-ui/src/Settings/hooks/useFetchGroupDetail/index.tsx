@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const GROUP_DETAIL_QUERY_KEY = (group_name?: string | null) => [
   'group',
-  group_name,
+  ...(group_name ? [group_name] : []),
 ];
 
 export const useFetchGroupDetail = ({

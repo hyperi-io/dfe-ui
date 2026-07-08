@@ -172,29 +172,13 @@ export const MetaSchemaForm = ({
           }
         />
       </Form.Item>
-
-      <Form.Item
-        className="w-full"
-        name={['schema', 'engine']}
-        label="Schema Engine"
-        rules={[formValidation]}
-      >
-        <Select
-          placeholder="Enter engine"
-          options={[
-            { label: 'MergeTree', value: 'MergeTree' },
-            { label: 'ReplicatedMergeTree', value: 'ReplicatedMergeTree' },
-            { label: 'SharedMergeTree', value: 'SharedMergeTree' },
-          ]}
-        />
-      </Form.Item>
       <Form.Item
         className="w-full"
         name={['schema', 'ttl_days']}
         label="TTL Days"
         rules={[formValidation]}
       >
-        <InputNumber placeholder="Enter TTL days" />
+        <InputNumber className="w-full" placeholder="Enter TTL days" />
       </Form.Item>
     </div>
   );
