@@ -667,6 +667,9 @@ export interface paths {
          *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
          *     ``field_mappings``, ``sigma``, or ``transform`` change. Draft versions (``current`` not deployed) update
          *     in place.
+         *
+         *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
+         *     (same as create). Send ``header`` explicitly to set or change it.
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
