@@ -15,11 +15,11 @@ export const INFINITE_SOURCES_QUERY_KEY = (
   per_page?: number | null,
 ) => [
   'sources',
-  search ?? '',
-  enabled,
-  sort_by ?? '',
-  sort_order ?? '',
-  per_page ?? 10,
+  ...(search ? [search] : []),
+  ...(enabled ? [enabled] : []),
+  ...(sort_by ? [sort_by] : []),
+  ...(sort_order ? [sort_order] : []),
+  ...(per_page ? [per_page] : []),
 ];
 /** useFetchInfiniteFilteredSources props */
 /**

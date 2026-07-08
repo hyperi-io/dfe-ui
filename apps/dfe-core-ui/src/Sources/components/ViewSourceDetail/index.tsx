@@ -49,6 +49,7 @@ export const ViewSourceDetail = () => {
             <SourceEnabledTag
               className="ml-auto mr-2 text-sm font-normal max-h-6"
               enabled={sourceDetailData.enabled}
+              sourceName={sourceDetailData.source}
             />
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />

@@ -5,7 +5,11 @@ import { useQuery } from '@tanstack/react-query';
 export const SOURCE_DETAIL_QUERY_KEY = (
   source_name: string | null,
   source_version: string | null = null,
-) => ['source', source_name, source_version ?? ''];
+) => [
+  'source',
+  ...(source_name ? [source_name] : []),
+  ...(source_version ? [source_version] : []),
+];
 
 export const useFetchSourceDetail = ({
   source_name,
