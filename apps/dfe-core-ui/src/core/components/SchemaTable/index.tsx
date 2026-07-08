@@ -6,6 +6,17 @@ import { useMemo, useState } from 'react';
 import { getColumnTitleText } from './SchemaTable.helpers';
 import { SchemaTableTitle } from './SchemaTableTitle';
 
+const TABLE_COLUMN_TITLE_DICT = {
+  _field_type: 'Field Type',
+  __rowId: 'Row ID',
+  main_action: 'Main Action',
+  name: 'Name',
+  type: 'Type',
+  expr: 'Expression',
+  comment: 'Comment',
+  attribute: 'Attribute',
+  use_case: 'Index Type',
+};
 interface SchemaTableProps<T extends object> extends TableProps<T> {
   searchableColumns?: string[];
   visibleColumns?: string[];
@@ -77,7 +88,7 @@ export const SchemaTable = <T extends object>({
           <div className="flex items-center justify-center relative">
             {columnSearchMatches.length > 0 && (
               <Tooltip
-                title={`Additional search matches on columns: ${columnSearchMatches.join(', ')}`}
+                title={`Additional search matches on columns: ${columnSearchMatches.map((column) => TABLE_COLUMN_TITLE_DICT[column as keyof typeof TABLE_COLUMN_TITLE_DICT] ?? column).join(', ')}`}
                 destroyOnHidden
                 key={index}
                 placement="left"
