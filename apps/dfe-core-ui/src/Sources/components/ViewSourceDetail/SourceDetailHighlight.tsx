@@ -23,12 +23,13 @@ export const SourceDetailHighlight = ({
       <NotificationCard
         type="info"
         classNames={{
-          container: 'w-full',
+          root: '@container w-full',
+          container: 'w-full min-w-0',
         }}
         description={
           <ul
             className={cn(
-              'grid grid-cols-[1fr_1fr] gap-x-6 gap-y-1',
+              'grid grid-cols-1 @xl:grid-cols-2 gap-x-6 gap-y-1',
               '[&_li]:flex [&_li]:items-center [&_li]:gap-2',
             )}
           >
@@ -52,7 +53,7 @@ export const SourceDetailHighlight = ({
                 {schema?.meta_schema}@{schema?.meta_schema_version}
               </Link>
             </li>
-            <li>
+            <li className="@xl:col-span-2">
               <span className="font-medium">Deployed:</span>
               {isSelectedVersionDeployed ? (
                 <>
