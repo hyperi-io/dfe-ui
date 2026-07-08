@@ -1,6 +1,8 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { IconLink } from '@repo/dfe-icons';
+import Link from 'next/link';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -50,6 +52,34 @@ export const ConfigurationDetailsTabContent = ({
             </dd>
             <dt className={dataListTermStyle}>Header Version:</dt>
             <dd>{header?.version}</dd>
+            {schema?.meta_schema ? (
+              <>
+                <dt className={dataListTermStyle}>Meta Schema:</dt>
+                <dd>
+                  <Link
+                    className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
+                    href={`/schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
+                  >
+                    <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
+                    <span className="text-foreground/40 dark:text-dark-foreground/40">
+                      {/* Meta schema path */}
+                      {schema?.meta_schema?.split('/').slice(0, -1).join('/')}/
+                    </span>
+                    {/* Meta schema name */}
+                    {schema?.meta_schema?.split('/').pop()}.yaml
+                  </Link>
+                </dd>
+                <dt className={dataListTermStyle}>Meta Schema Version:</dt>
+                <dd>{schema?.meta_schema_version}</dd>
+              </>
+            ) : (
+              <>
+                <dt className={dataListTermStyle}>Meta Schema:</dt>
+                <dd>
+                  <EmptyData />
+                </dd>
+              </>
+            )}
             {schema?.engine ? (
               <>
                 <dt className={dataListTermStyle}>Engine:</dt>
@@ -71,28 +101,6 @@ export const ConfigurationDetailsTabContent = ({
             ) : (
               <>
                 <dt className={dataListTermStyle}>TTL Days:</dt>
-                <dd>
-                  <EmptyData />
-                </dd>
-              </>
-            )}
-            {schema?.meta_schema ? (
-              <>
-                <dt className={dataListTermStyle}>Meta Schema:</dt>
-                <dd>
-                  <span className="text-foreground/40 dark:text-dark-foreground/40">
-                    {/* Meta schema path */}
-                    {schema?.meta_schema?.split('/').slice(0, -1).join('/')}/
-                  </span>
-                  {/* Meta schema name */}
-                  {schema?.meta_schema?.split('/').pop()}.yaml
-                </dd>
-                <dt className={dataListTermStyle}>Meta Schema Version:</dt>
-                <dd>{schema?.meta_schema_version}</dd>
-              </>
-            ) : (
-              <>
-                <dt className={dataListTermStyle}>Meta Schema:</dt>
                 <dd>
                   <EmptyData />
                 </dd>
