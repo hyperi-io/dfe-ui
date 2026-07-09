@@ -1,8 +1,11 @@
+import { type ReactElement } from 'react';
+
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
+  IconBookmark,
   IconChartDots,
   IconDatabase,
   IconLayoutGrid,
@@ -20,107 +23,62 @@ interface SidebarMenuProps {
 
 const hyperdxUrl = process.env.NEXT_PUBLIC_HYPERDX_URL as string | undefined;
 
+// HyperDX features embedded as seamless siblings via /observe/* (an iframe of the
+// chromeless fork -- dfe-ui owns the nav). These route INTERNALLY (external: false)
+// to the embed page, which iframes `${hyperdxUrl}/<feature>?embed=1`. Gated on
+// hyperdxUrl being configured + the dashboard_read RBAC action.
+const hyperdxFeatures: { path: string; label: string; icon: ReactElement }[] = [
+  { path: '/observe/search', label: 'Search', icon: <IconTable /> },
+  {
+    path: '/observe/search/list',
+    label: 'Saved Searches',
+    icon: <IconBookmark />,
+  },
+  { path: '/observe/chart', label: 'Chart Explorer', icon: <IconChartDots /> },
+  {
+    path: '/observe/dashboards',
+    label: 'Dashboards',
+    icon: <IconLayoutGrid />,
+  },
+];
+
+const hyperdxSidebarItems = hyperdxUrl
+  ? hyperdxFeatures.map(({ path, label, icon }) => ({
+      key: path,
+      Component: ({ collapsed }: SidebarMenuProps) => (
+        <RbacProtected action={rbacActions.dashboard_read}>
+          <RbacProtected.Unrestricted>
+            <SidebarLink
+              collapsed={collapsed}
+              item={{
+                key: path,
+                icon: <IconWrapper icon={icon} />,
+                label,
+                external: false,
+              }}
+            />
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted
+            tooltip={{ show: true, placement: 'right', showIcon: true }}
+          >
+            <SidebarLink
+              collapsed={collapsed}
+              disabled
+              item={{
+                key: path,
+                icon: <IconWrapper icon={icon} />,
+                label,
+                external: false,
+              }}
+            />
+          </RbacProtected.Restricted>
+        </RbacProtected>
+      ),
+    }))
+  : [];
+
 export const featureFlagSidebarMenuItems = [
-  ...(hyperdxUrl
-    ? [
-        {
-          key: `${hyperdxUrl}/search`,
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: `${hyperdxUrl}/search`,
-                    icon: <IconWrapper icon={<IconTable />} />,
-                    label: 'Search',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: `${hyperdxUrl}/search`,
-                    icon: <IconWrapper icon={<IconTable />} />,
-                    label: 'Search',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-        {
-          key: `${hyperdxUrl}/chart`,
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: `${hyperdxUrl}/chart`,
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: `${hyperdxUrl}/chart`,
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-        {
-          key: `${hyperdxUrl}/dashboards`,
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: `${hyperdxUrl}/dashboards`,
-                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                    label: 'Dashboards',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: `${hyperdxUrl}/dashboards`,
-                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                    label: 'Dashboards',
-                    external: true,
-                  }}
-                />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-      ]
-    : []),
+  ...hyperdxSidebarItems,
   {
     key: '/sources',
     Component: ({ collapsed }: SidebarMenuProps) => (
