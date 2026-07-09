@@ -1,5 +1,7 @@
 import { authOptions } from '@/core/config/auth';
+import { isProxyAuthMode } from '@/core/config/proxyTrust';
 import { LoginScene } from '@/core/scenes/LoginScene';
+import { ProxyTrustGate } from '@/core/scenes/LoginScene/ProxyTrustGate';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
@@ -18,5 +20,12 @@ export default async function Login({
     (typeof params?.callbackUrl === 'string'
       ? params.callbackUrl
       : params?.callbackUrl?.[0]) ?? '/';
+
+  // Behind the proxy: auto-establish the session from the forwarded engine
+  // token instead of showing the password form (falls back to it on failure).
+  if (isProxyAuthMode()) {
+    return <ProxyTrustGate callbackUrl={callbackUrl} />;
+  }
+
   return <LoginScene callbackUrl={callbackUrl} />;
 }
