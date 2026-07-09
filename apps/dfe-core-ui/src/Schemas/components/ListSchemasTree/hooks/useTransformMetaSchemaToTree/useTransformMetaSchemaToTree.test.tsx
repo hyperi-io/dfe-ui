@@ -3,7 +3,10 @@ import { components } from '@repo/dfe-engine-types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { getExpandedKeysForSchemaSelection, useTransformSchemaToTree } from '.';
+import {
+  getExpandedKeysForSchemaSelection,
+  useTransformMetaSchemaToTree,
+} from '.';
 
 type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
 
@@ -56,11 +59,11 @@ describe('getExpandedKeysForSchemaSelection', () => {
   });
 });
 
-describe('useTransformSchemaToTree', () => {
+describe('useTransformMetaSchemaToTree', () => {
   it('returns an empty tree for empty objects', () => {
     const setSelectedSchema = vi.fn();
     const { result } = renderHook(() =>
-      useTransformSchemaToTree({
+      useTransformMetaSchemaToTree({
         schemaObjects: {},
         setSelectedSchema,
         ...defaultSelection,
@@ -104,7 +107,7 @@ describe('useTransformSchemaToTree', () => {
     };
 
     const { result } = renderHook(() =>
-      useTransformSchemaToTree({
+      useTransformMetaSchemaToTree({
         schemaObjects: schema_objects,
         setSelectedSchema,
         ...defaultSelection,
@@ -142,7 +145,7 @@ describe('useTransformSchemaToTree', () => {
 
   it('lists root-level schemas with no children', () => {
     const { result } = renderHook(() =>
-      useTransformSchemaToTree({
+      useTransformMetaSchemaToTree({
         schemaObjects: {
           items: [baseSchema({ name: 'solo.schema', versions: [] })],
         },
@@ -160,7 +163,7 @@ describe('useTransformSchemaToTree', () => {
 
   it('uses distinct keys when a root schema and folder share the same name', () => {
     const { result } = renderHook(() =>
-      useTransformSchemaToTree({
+      useTransformMetaSchemaToTree({
         schemaObjects: {
           items: [baseSchema({ name: 'test', versions: ['v1'] })],
           children: {
@@ -196,7 +199,7 @@ describe('useTransformSchemaToTree', () => {
         onSelect: typeof setSelectedSchema;
         onExpand: typeof expandTreeNode;
       }) =>
-        useTransformSchemaToTree({
+        useTransformMetaSchemaToTree({
           schemaObjects: schema,
           setSelectedSchema: onSelect,
           selectedSchemaPath: null,

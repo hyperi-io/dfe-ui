@@ -111,11 +111,17 @@ export const ConfigurationDetailsTabContent = ({
           <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Header Type:</dt>
             <dd>
-              <span className="text-foreground/40 dark:text-dark-foreground/40">
-                {header?.type?.split('/').slice(0, -1).join('/')}/
-              </span>
-              {/* Header type name */}
-              {header?.type?.split('/').pop()}.yaml
+              <Link
+                className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
+                href={`/schemas/other-schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
+              >
+                <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
+                <span className="text-foreground/40 dark:text-dark-foreground/40">
+                  {header?.type?.split('/').slice(0, -1).join('/')}/
+                </span>
+                {/* Header type name */}
+                {header?.type?.split('/').pop()}.yaml
+              </Link>
             </dd>
             <dt className={dataListTermStyle}>Header Version:</dt>
             <dd>{header?.version}</dd>
@@ -125,7 +131,7 @@ export const ConfigurationDetailsTabContent = ({
                 <dd>
                   <Link
                     className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                    href={`/schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
+                    href={`/schemas/meta-schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
                   >
                     <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                     <span className="text-foreground/40 dark:text-dark-foreground/40">

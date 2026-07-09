@@ -250,8 +250,8 @@ export const JsonPromoteColumnsTable = ({
   }, [search, showMainActionColumn]);
 
   const lockedColumns = showMainActionColumn
-    ? (['main_action', 'name'] as const)
-    : (['name'] as const);
+    ? (['_field_type', 'main_action', 'name'] as const)
+    : (['_field_type', 'name'] as const);
 
   return (
     <SchemaTable

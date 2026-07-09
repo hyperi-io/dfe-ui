@@ -87,6 +87,7 @@ export const InvalidColumnsTable = () => {
 
       <AddSchemaTable
         name="invalidColumns"
+        requireAtLeastOneRow={false}
         initialValues={initialValues}
         resetListWhenEmpty
         formValidation={formValidation}

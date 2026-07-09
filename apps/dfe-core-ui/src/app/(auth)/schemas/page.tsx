@@ -1,5 +1,5 @@
-import { SchemaListScene } from '@/Schemas/scenes/SchemaList';
+import { redirect } from 'next/navigation';
 
 export default async function SchemasPage() {
-  return <SchemaListScene />;
+  return redirect('/schemas/meta-schemas');
 }

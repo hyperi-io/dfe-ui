@@ -181,6 +181,12 @@ export const CreateSchemaVersionDrawerBase = ({
                 uploadSchemaInput: true,
               }}
               initialValues={reviewValues ?? formInitialValues}
+              config={{
+                uploadedTab: {
+                  tabTitle: 'Schema Columns',
+                  tableTitle: 'Base Schema Columns',
+                },
+              }}
             />
           ) : (
             <div className="flex h-[calc(100vh-120px)] items-center justify-center">

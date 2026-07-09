@@ -43,6 +43,7 @@ export const transformFormDataToRequestBody = (
   }));
 
   const requestBody: SchemaCreateRequest = {
+    schema_type: formData.schema_type,
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
     current: formData.version,
     versions: {
@@ -58,12 +59,18 @@ export const transformFormDataToRequestBody = (
   return { requestBody, uploadedColumns, schemaColumns };
 };
 
-export const joinSchemaApiPath = (pathPrefix: string, path: string) => {
-  if (!pathPrefix) {
+export const joinSchemaApiPath = ({
+  schema_type,
+  path,
+}: {
+  schema_type?: string;
+  path: string;
+}) => {
+  if (!schema_type) {
     return path;
   }
   if (!path) {
-    return pathPrefix;
+    return schema_type;
   }
-  return `${pathPrefix}/${path}`;
+  return `${schema_type}/${path}`;
 };

@@ -2,6 +2,7 @@ import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTabl
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
+// Used by antd form
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';
@@ -192,6 +193,31 @@ describe('CreateSchemaFormProvider', () => {
         result.current.validationErrors.uploadedColumns.length,
       ).toBeGreaterThan(0);
     });
+  });
+
+  test('recomputeValidationErrors clears tab errors when the form has no field errors', () => {
+    const { result } = renderContext();
+    const getFieldsError = vi.spyOn(result.current.form, 'getFieldsError');
+
+    getFieldsError.mockReturnValue([
+      fieldErr(['schemaColumns'], 'At least one schema column is required'),
+    ]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toContain(
+      'At least one schema column is required',
+    );
+
+    getFieldsError.mockReturnValue([]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toEqual([]);
   });
 
   test('handleValidate refreshes validationErrors asynchronously', async () => {

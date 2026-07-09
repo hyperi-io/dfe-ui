@@ -50,8 +50,6 @@ export const useCloneSchema = ({
     isPending,
     error: createSourceError,
   } = useCreateSchema({
-    // meta is pulled from schema_path so should not be included
-    pathPrefix: '',
     onSuccess,
     onError,
   });
@@ -68,7 +66,7 @@ export const useCloneSchema = ({
       onError?.(new Error(errMessage));
       return;
     }
-    const body: SchemaCreateRequest = {
+    const body: Omit<SchemaCreateRequest, 'schema_type'> = {
       path: values.path ? `${values.path}/${values.name}` : values.name,
       current: values.version,
       versions: {

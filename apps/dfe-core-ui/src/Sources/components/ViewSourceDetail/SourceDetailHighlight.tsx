@@ -23,12 +23,13 @@ export const SourceDetailHighlight = ({
       <NotificationCard
         type="info"
         classNames={{
-          container: 'w-full',
+          root: '@container w-full',
+          container: 'w-full min-w-0',
         }}
         description={
           <ul
             className={cn(
-              'grid grid-cols-[1fr_1fr] gap-x-6 gap-y-1',
+              'grid grid-cols-1 @xl:grid-cols-2 gap-x-6 gap-y-1',
               '[&_li]:flex [&_li]:items-center [&_li]:gap-2',
             )}
           >
@@ -36,7 +37,7 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Header:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
+                href={`/schemas/other-schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 {header?.type}@{header?.version}
@@ -46,13 +47,13 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Schema:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
+                href={`/schemas/meta-schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 {schema?.meta_schema}@{schema?.meta_schema_version}
               </Link>
             </li>
-            <li>
+            <li className="@xl:col-span-2">
               <span className="font-medium">Deployed:</span>
               {isSelectedVersionDeployed ? (
                 <>
