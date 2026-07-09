@@ -15,11 +15,11 @@ export const INFINITE_SCHEMAS_QUERY_KEY = ({
   per_page,
 }: UseFetchInfiniteFilteredSchemasProps = {}) => [
   'schemas',
-  search,
-  schema_type,
-  sort_by,
-  sort_order,
-  per_page,
+  ...(search ? [search] : []),
+  ...(schema_type ? [schema_type] : []),
+  ...(sort_by ? [sort_by] : []),
+  ...(sort_order ? [sort_order] : []),
+  ...(per_page ? [per_page] : []),
 ];
 /** useFetchInfiniteFilteredSchemas props */
 /**
