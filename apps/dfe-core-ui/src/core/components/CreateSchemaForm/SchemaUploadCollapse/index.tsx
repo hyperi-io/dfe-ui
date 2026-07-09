@@ -142,6 +142,7 @@ export const SchemaUploadCollapse = ({
               <AddSchemaTable
                 key="schemaColumns"
                 name="schemaColumns"
+                requireAtLeastOneRow={!hasUploadedSchema}
                 formValidation={formValidation}
               />
             ),

@@ -2,6 +2,7 @@ import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTabl
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
+// Used by antd form
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';

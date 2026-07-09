@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   AddSchemaTable,
+  AT_LEAST_ONE_SCHEMA_ROW_MESSAGE,
   type AddSchemaTableProps,
   isBlankSchemaListRow,
   type RowSchema,
@@ -78,6 +79,7 @@ const renderAddSchemaTable = (
     initialFormValues?: Record<string, unknown>;
     listName?: string;
     onColumns?: (columns: unknown) => void;
+    onForm?: (form: FormInstance) => void;
   },
 ) => {
   const listName = props.name ?? options?.listName ?? 'columns';
@@ -85,6 +87,7 @@ const renderAddSchemaTable = (
   const onMount = props.onMount ?? vi.fn();
   const onRemoveRow = 'onRemoveRow' in props ? props.onRemoveRow : vi.fn();
   const onColumns = options?.onColumns ?? vi.fn();
+  const onForm = options?.onForm;
   const { onMount: _om, onRemoveRow: _orr, ...tableProps } = props;
 
   const view = render(
@@ -96,9 +99,11 @@ const renderAddSchemaTable = (
         }
       }
     >
+      {onForm ? <CaptureFormInstance onForm={onForm} /> : null}
       <FormColumnsProbe listName={listName} onColumns={onColumns} />
       <AddSchemaTable
         formValidation={bypassFormValidation}
+        requireAtLeastOneRow={false}
         lockedColumns={['_field_type', '__rowId', 'main_action', 'name']}
         visibleColumns={[
           'name',
@@ -353,6 +358,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
           <FormColumnsProbe listName="columns" onColumns={onColumns} />
           <AddSchemaTable
             formValidation={bypassFormValidation}
+            requireAtLeastOneRow={false}
             initialValues={[validRow({ id: 'ghost' })]}
           />
         </Form>
@@ -501,5 +507,51 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
 
     expect(document.querySelector('.custom-schema-table')).toBeInTheDocument();
     expect(screen.getByText('Add columns to your schema')).toBeInTheDocument();
+  });
+
+  test('rejects validation when requireAtLeastOneRow is true and all rows are blank', async () => {
+    let capturedForm: FormInstance | undefined;
+    renderAddSchemaTable(
+      { requireAtLeastOneRow: true },
+      {
+        onForm: (f) => {
+          capturedForm = f;
+        },
+      },
+    );
+
+    await waitFor(() => expect(capturedForm).toBeDefined());
+
+    await expect(
+      capturedForm!.validateFields(['columns']),
+    ).rejects.toMatchObject({
+      errorFields: expect.arrayContaining([
+        expect.objectContaining({
+          name: ['columns'],
+          errors: expect.arrayContaining([AT_LEAST_ONE_SCHEMA_ROW_MESSAGE]),
+        }),
+      ]),
+    });
+  });
+
+  test('passes list validation when at least one row is non-blank', async () => {
+    let capturedForm: FormInstance | undefined;
+    renderAddSchemaTable(
+      {
+        requireAtLeastOneRow: true,
+        initialValues: [validRow()],
+      },
+      {
+        onForm: (f) => {
+          capturedForm = f;
+        },
+      },
+    );
+
+    await waitFor(() => expect(capturedForm).toBeDefined());
+
+    await expect(
+      capturedForm!.validateFields(['columns']),
+    ).resolves.toBeDefined();
   });
 });

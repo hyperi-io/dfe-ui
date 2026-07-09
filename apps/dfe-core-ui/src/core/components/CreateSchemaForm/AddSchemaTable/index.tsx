@@ -9,6 +9,7 @@ import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTa
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
+import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';
 import { listItemFromPartial } from './AddSchemaTable.helpers';
@@ -33,6 +34,8 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   initialValues?: UploadedSchemaRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
   resetListWhenEmpty?: boolean;
+  /** Require at least one non-blank row before the list passes validation. */
+  requireAtLeastOneRow?: boolean;
   name?: string;
   formValidation: FormRule;
   config?: {
@@ -81,10 +84,23 @@ export const isBlankSchemaListRow = (row: unknown): boolean => {
   );
 };
 
+export const AT_LEAST_ONE_SCHEMA_ROW_MESSAGE =
+  'At least one schema column is required';
+
+const atLeastOneNonBlankSchemaRowRule = (): ValidatorRule => ({
+  validator: async (_, value) => {
+    const rows = Array.isArray(value) ? value : [];
+    if (!rows.some((row) => !isBlankSchemaListRow(row))) {
+      return Promise.reject(new Error(AT_LEAST_ONE_SCHEMA_ROW_MESSAGE));
+    }
+  },
+});
+
 export const AddSchemaTable = ({
   initialValues = EMPTY_COLUMNS,
   name = 'columns',
   resetListWhenEmpty = false,
+  requireAtLeastOneRow = true,
   formValidation,
   config = {
     defaultEditFields: true,
@@ -136,7 +152,12 @@ export const AddSchemaTable = ({
   }, [onMount]);
 
   return (
-    <Form.List name={name}>
+    <Form.List
+      name={name}
+      rules={
+        requireAtLeastOneRow ? [atLeastOneNonBlankSchemaRowRule()] : undefined
+      }
+    >
       {(fields, { add, remove }) => {
         const handleAddColumn = () => {
           add(defaultEmptyRow());

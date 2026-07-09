@@ -1,8 +1,10 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import type { FieldError } from '@rc-component/form/es/interface';
+
 import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
 import type { InvalidColumns } from './CreateSchemaForm.context.d';
+// Used by antd form
+import type { FieldError } from '@rc-component/form/es/interface';
 import {
   UPLOADED_ROW_FIELD_KEYS,
   changedValuesMayAffectTabLists,
