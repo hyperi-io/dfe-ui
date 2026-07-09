@@ -3,6 +3,7 @@ import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
+import { MappingStandardsModal } from './MappingStandardsModal';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -316,11 +317,16 @@ export const ConfigurationDetailsTabContent = ({
           title="Mapping"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
+          <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1">
             <dt className={dataListTermStyle}>Mapping Standards:</dt>
-            <dd>
-              {mapping_standards?.join(', ') ? (
-                mapping_standards?.join(', ')
+            <dd className="flex gap-3 flex-wrap">
+              {mapping_standards?.length > 0 ? (
+                mapping_standards?.map((standard) => (
+                  <MappingStandardsModal
+                    key={standard}
+                    mappingStandard={standard}
+                  />
+                ))
               ) : (
                 <EmptyData />
               )}
