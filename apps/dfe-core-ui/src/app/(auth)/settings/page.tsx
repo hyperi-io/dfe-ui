@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
-export default async function FieldMapsPage() {
+export default async function SettingsPage() {
   return redirect('/settings/admin');
 }

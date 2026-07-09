@@ -8,6 +8,7 @@ import {
 
 const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
+  schema_type: 'meta',
   version: '1.0.0',
   type: 'model',
   uploadType: 'csv',
@@ -212,16 +213,18 @@ describe('transformFormDataToRequestBody', () => {
 
 describe('joinSchemaApiPath', () => {
   test('returns path when prefix is empty', () => {
-    expect(joinSchemaApiPath('', 'source/display_name')).toBe(
-      'source/display_name',
-    );
+    expect(
+      joinSchemaApiPath({ schema_type: '', path: 'source/display_name' }),
+    ).toBe('source/display_name');
   });
 
   test('returns prefix when path is empty', () => {
-    expect(joinSchemaApiPath('meta', '')).toBe('meta');
+    expect(joinSchemaApiPath({ schema_type: 'meta', path: '' })).toBe('meta');
   });
 
   test('joins prefix and path', () => {
-    expect(joinSchemaApiPath('meta', 'path')).toBe('meta/path');
+    expect(joinSchemaApiPath({ schema_type: 'meta', path: 'path' })).toBe(
+      'meta/path',
+    );
   });
 });

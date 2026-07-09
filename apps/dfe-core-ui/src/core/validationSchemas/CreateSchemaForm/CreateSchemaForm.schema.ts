@@ -8,6 +8,7 @@ import {
 import z from 'zod';
 /** Used for building the request body */
 const schemaDetails = {
+  schema_type: z.enum(['meta', 'common_header', 'hunts']),
   _field_type: z.enum([
     SCHEMA_FIELD_TYPES.BASE,
     SCHEMA_FIELD_TYPES.PROMOTED,

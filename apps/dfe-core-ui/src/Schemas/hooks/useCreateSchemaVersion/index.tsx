@@ -1,6 +1,8 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useMutation } from '@tanstack/react-query';
+import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   SchemaCreateVersionRequest,
   SchemaCreateVersionResponse,
@@ -53,6 +55,8 @@ export const useCreateSchemaVersion = ({
   onSuccess,
   onError,
 }: UseCreateSchemaVersionProps = {}) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({
       schema,
@@ -71,6 +75,15 @@ export const useCreateSchemaVersion = ({
     },
 
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY({
+          schema_path: data.path,
+          version: data.current,
+        }),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

@@ -4,6 +4,12 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { CreateSchemaForm } from './index';
 
+vi.mock('@/core/contexts/ListSchemasContext', () => ({
+  useListSchemasContext: vi.fn(() => ({
+    schemaTypesScope: ['meta'],
+  })),
+}));
+
 vi.mock('./SchemaUploadCollapse', () => ({
   SchemaUploadCollapse: () => (
     <div data-testid="schema-upload-collapse">Upload section</div>

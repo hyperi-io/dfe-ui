@@ -6,12 +6,12 @@ import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import {
   getExpandedKeysForSchemaSelection,
-  useTransformSchemaToTree,
-} from './hooks/useTransformSchemaToTree';
+  useTransformMetaSchemaToTree,
+} from './hooks/useTransformMetaSchemaToTree';
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
-    data: { items: metaSchemas, objects: schemaObjects },
+    data: { items: metaSchemas, objects: schemaObjectsResponse },
     error,
     loadMoreRef,
     isFetchingNextPage,
@@ -21,9 +21,15 @@ export const SchemaList = ({ className }: { className?: string }) => {
     filters,
     hasFilters,
     setFilters,
+    schemaTypesScope,
   } = useListSchemasContext();
 
-  const metaSchemaObjects = schemaObjects.children?.meta ?? {};
+  const hasOnlyMetaSchemas =
+    schemaTypesScope?.length === 1 && schemaTypesScope[0] === 'meta';
+
+  const schemaObjects = hasOnlyMetaSchemas
+    ? (schemaObjectsResponse.children?.meta ?? {})
+    : schemaObjectsResponse;
 
   const [userExpandedKeys, setUserExpandedKeys] = useState<string[]>([]);
 
@@ -32,8 +38,8 @@ export const SchemaList = ({ className }: { className?: string }) => {
   }, []);
 
   const { tree: treeData, notificationContextHolder } =
-    useTransformSchemaToTree({
-      schemaObjects: metaSchemaObjects,
+    useTransformMetaSchemaToTree({
+      schemaObjects,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,
@@ -93,6 +99,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
           expandedKeys={expandedKeys}
           onExpand={(keys) => setUserExpandedKeys(keys as string[])}
         />
+
         <div ref={loadMoreRef} className="h-4 flex justify-center">
           {isFetchingNextPage && <Spin size="small" />}
         </div>

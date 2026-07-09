@@ -94,7 +94,7 @@ export const SourceColumnsTabContent = ({
         </div>
       )}
       visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}
-      lockedColumns={['name']}
+      lockedColumns={['_field_type', 'name']}
       dataSource={sourceColumns ?? []}
       columns={columns}
       loading={isFetchingNextPageSourceColumns}

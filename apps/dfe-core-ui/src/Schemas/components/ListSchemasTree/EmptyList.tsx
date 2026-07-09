@@ -1,4 +1,6 @@
 import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
+import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -15,6 +17,14 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredSchemasProps;
   className?: string;
 }) => {
+  const { setSelectedSchema } = useListSchemasContext();
+  const handleSuccess = (response: SchemaCreateResponse) => {
+    setSelectedSchema({
+      schema_path: response.path ?? '',
+      schema_version: response.current,
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -38,7 +48,7 @@ export const EmptyList = ({
           Clear Filters
         </Button>
       ) : (
-        <CreateSchemaDrawer />
+        <CreateSchemaDrawer onSuccess={handleSuccess} />
       )}
     </div>
   );

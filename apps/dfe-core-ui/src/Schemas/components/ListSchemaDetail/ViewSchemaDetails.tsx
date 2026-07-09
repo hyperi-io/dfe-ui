@@ -311,6 +311,7 @@ export const ViewSchemaDetails = ({
       <SchemaTable<SchemaColumnItem>
         columns={tableColumns}
         visibleColumns={['_field_type', 'name', 'type', 'expr', 'comment']}
+        lockedColumns={['_field_type', 'name']}
         showSearchableColumns={showSearchableColumns}
         title={() => (
           <div className="flex items-center justify-between w-full">

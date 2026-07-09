@@ -8,17 +8,12 @@ import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
 } from '@/core/contexts/CreateSchemaReviewContext';
-import {
-  ListSchemasProvider,
-  useListSchemasContext,
-} from '@/core/contexts/ListSchemasContext';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
 import { transformFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
-import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 interface CreateSchemaDrawerProps {
@@ -35,9 +30,6 @@ export const CreateSchemaDrawerBase = ({
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(
     open ?? false,
   );
-
-  const pathname = usePathname();
-  const isSchemaDetail = pathname.split('?')[0].includes('/schemas');
 
   const {
     drawerTitle,
@@ -57,21 +49,9 @@ export const CreateSchemaDrawerBase = ({
     onClose?.();
   };
 
-  const { refetch: refetchSchemas, setSelectedSchema } =
-    useListSchemasContext();
-
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
-      pathPrefix: 'meta',
       onSuccess: (response) => {
-        // TODO: Move this to the onSuccess prop defined by parent
-        if (isSchemaDetail) {
-          setSelectedSchema({
-            schema_path: response.path ?? '',
-            schema_version: response.current,
-          });
-        }
-        refetchSchemas();
         api.success({
           title: 'Schema created successfully',
           placement: 'bottomLeft',
@@ -158,12 +138,10 @@ export const CreateSchemaDrawerBase = ({
   );
 };
 
-export const CreateSchemaDrawer = ({ ...props }: CreateSchemaDrawerProps) => {
+export const CreateSchemaDrawer = (props: CreateSchemaDrawerProps) => {
   return (
     <CreateSchemaReviewProvider>
-      <ListSchemasProvider>
-        <CreateSchemaDrawerBase {...props} />
-      </ListSchemasProvider>
+      <CreateSchemaDrawerBase {...props} />
     </CreateSchemaReviewProvider>
   );
 };

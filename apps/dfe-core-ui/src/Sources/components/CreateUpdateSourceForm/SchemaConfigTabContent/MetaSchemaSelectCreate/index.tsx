@@ -1,4 +1,5 @@
 import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
+import { ListSchemasProvider } from '@/core/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import {
   getSchemaLeafName,
@@ -192,15 +193,17 @@ export const MetaSchemaSelectCreate = ({
         allowClear={searchValue !== ''}
         onClear={handleSearchClear}
       />
-      <CreateSchemaDrawer
-        onSuccess={(response) => {
-          void refetchSchemas();
-          applySchemaSelection(
-            response.path ?? '',
-            versionsFromMetaSchemaOutput(response),
-          );
-        }}
-      />
+      <ListSchemasProvider schemaTypes={['meta']}>
+        <CreateSchemaDrawer
+          onSuccess={(response) => {
+            void refetchSchemas();
+            applySchemaSelection(
+              response.path ?? '',
+              versionsFromMetaSchemaOutput(response),
+            );
+          }}
+        />
+      </ListSchemasProvider>
     </div>
   );
 };
