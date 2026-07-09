@@ -7,6 +7,20 @@ import { UseFetchInfiniteFilteredSchemasProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+export const INFINITE_SCHEMAS_QUERY_KEY = ({
+  search,
+  schema_type,
+  sort_by,
+  sort_order,
+  per_page,
+}: UseFetchInfiniteFilteredSchemasProps = {}) => [
+  'schemas',
+  search,
+  schema_type,
+  sort_by,
+  sort_order,
+  per_page,
+];
 /** useFetchInfiniteFilteredSchemas props */
 /**
  * @param search - The search query to filter the schemas by path, version and version ids.
@@ -37,7 +51,13 @@ export const useFetchInfiniteFilteredSchemas = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['schemas', debouncedSearch, sort_by, sort_order, per_page],
+    queryKey: INFINITE_SCHEMAS_QUERY_KEY({
+      search,
+      schema_type,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.schemas.default, {
         queryParams: {

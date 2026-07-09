@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useMutation } from '@tanstack/react-query';
+import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SchemaCreateRequest, SchemaCreateResponse } from './types';
 import { joinSchemaApiPath } from './useCreateSchema.helpers';
 
@@ -54,6 +55,7 @@ export const useCreateSchema = ({
   onSuccess,
   onError,
 }: UseCreateSchemaProps) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({ schema_type, ...schema }: SchemaCreateRequest) => {
       const schemaPath = joinSchemaApiPath({
@@ -69,6 +71,9 @@ export const useCreateSchema = ({
       });
     },
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

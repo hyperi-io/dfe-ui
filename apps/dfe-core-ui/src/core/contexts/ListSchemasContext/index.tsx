@@ -100,7 +100,7 @@ export interface ListSchemasContextValue {
     schema_path: string | null;
     schema_version: string | null;
   }) => void;
-  schemaTypesScope: string[] | undefined;
+  schemaTypesScope: string[];
 }
 
 const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
@@ -119,7 +119,7 @@ const ListSchemasContext = createContext<ListSchemasContextValue | null>(null);
 export interface ListSchemasProviderProps {
   children: ReactNode;
   defaultFilters?: UseFetchInfiniteFilteredSchemasProps;
-  schemaTypes?: string[];
+  schemaTypes: string[];
 }
 
 export const ListSchemasProvider = ({

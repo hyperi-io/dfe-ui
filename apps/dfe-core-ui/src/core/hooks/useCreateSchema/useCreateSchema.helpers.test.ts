@@ -8,6 +8,7 @@ import {
 
 const baseFormData = (): CreateSchemaFormData => ({
   name: 'my_schema',
+  schema_type: 'meta',
   version: '1.0.0',
   type: 'model',
   uploadType: 'csv',

@@ -10,7 +10,7 @@ import { ListSchemasTree } from '@/Schemas/components/ListSchemasTree';
 export const SchemaListScene = ({
   meta,
 }: {
-  meta?: {
+  meta: {
     schemaTypes: string[];
   };
 }) => {

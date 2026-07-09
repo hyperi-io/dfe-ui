@@ -33,10 +33,10 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   };
 }
 
-const SCHEMA_TYPE_OPTIONS = [
-  { label: 'Meta Schema', value: 'meta' },
-  { label: 'Header', value: 'common_header' },
-  { label: 'Additional Schema', value: 'additional' },
+const META_SCHEMA_TYPE_OPTIONS = [{ label: 'Meta Schema', value: 'meta' }];
+
+const OTHER_SCHEMA_TYPE_OPTIONS = [
+  { label: 'Header Schema', value: 'common_header' },
   { label: 'Hunt Schema', value: 'hunts' },
 ];
 
@@ -135,7 +135,7 @@ const CreateSchemaFormBase = ({
         path: '',
         name: '',
         description: '',
-        schema_type: 'meta',
+        schema_type: isMetaSchemaScope ? 'meta' : 'common_header',
         ...initialValues,
       }}
     >
@@ -146,7 +146,14 @@ const CreateSchemaFormBase = ({
           label="Schema Type"
           rules={[formValidation]}
         >
-          <Select disabled={isMetaSchemaScope} options={SCHEMA_TYPE_OPTIONS} />
+          <Select
+            disabled={isMetaSchemaScope}
+            options={
+              isMetaSchemaScope
+                ? META_SCHEMA_TYPE_OPTIONS
+                : OTHER_SCHEMA_TYPE_OPTIONS
+            }
+          />
         </Form.Item>
         <Form.Item
           className="w-full"

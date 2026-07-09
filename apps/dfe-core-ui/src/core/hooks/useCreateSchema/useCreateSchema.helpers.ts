@@ -43,6 +43,7 @@ export const transformFormDataToRequestBody = (
   }));
 
   const requestBody: SchemaCreateRequest = {
+    schema_type: formData.schema_type,
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
     current: formData.version,
     versions: {
