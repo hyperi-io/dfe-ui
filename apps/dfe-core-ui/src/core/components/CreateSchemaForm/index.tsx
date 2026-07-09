@@ -57,6 +57,8 @@ const CreateSchemaFormBase = ({
     schemaColumns,
     invalidUploadedSchemaColumns,
     handleFormValuesChange,
+    recomputeValidationErrors,
+    handleValidate,
   } = useCreateSchemaFormContext();
 
   const { schemaTypesScope } = useListSchemasContext();
@@ -65,6 +67,8 @@ const CreateSchemaFormBase = ({
     useCreateSchemaReviewContext();
 
   const onFinish = (values: CreateSchemaFormData) => {
+    recomputeValidationErrors();
+
     const isUploadedColumnsValid = uploadedSchemaColumns
       .map((column) => {
         return rowSchema.safeParse(column);
@@ -125,6 +129,7 @@ const CreateSchemaFormBase = ({
             'There are validation errors in the form. Please fix them and try again.',
           errors: [],
         });
+        handleValidate();
       }}
       preserve
       onValuesChange={(changedValues, allValues) => {

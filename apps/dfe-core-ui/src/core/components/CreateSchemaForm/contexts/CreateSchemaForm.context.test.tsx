@@ -195,6 +195,31 @@ describe('CreateSchemaFormProvider', () => {
     });
   });
 
+  test('recomputeValidationErrors clears tab errors when the form has no field errors', () => {
+    const { result } = renderContext();
+    const getFieldsError = vi.spyOn(result.current.form, 'getFieldsError');
+
+    getFieldsError.mockReturnValue([
+      fieldErr(['schemaColumns'], 'At least one schema column is required'),
+    ]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toContain(
+      'At least one schema column is required',
+    );
+
+    getFieldsError.mockReturnValue([]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toEqual([]);
+  });
+
   test('handleValidate refreshes validationErrors asynchronously', async () => {
     const { result } = renderContext();
     vi.spyOn(result.current.form, 'getFieldsError').mockReturnValue([
