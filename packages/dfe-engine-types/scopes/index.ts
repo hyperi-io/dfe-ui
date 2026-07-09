@@ -80,11 +80,20 @@ const query_scopes = {
   query_execute: "query:execute",
 } as const;
 
+const repository_scopes = {
+  repository_read: "repository:read",
+  repository_write: "repository:write",
+} as const;
+
 const role_scopes = {
   role_read: "role:read",
   role_write: "role:write",
   role_delete: "role:delete",
   role_scopes: "role:scopes",
+} as const;
+
+const sampler_scopes = {
+  sampler_read: "sampler:read",
 } as const;
 
 const rules_scopes = {
@@ -153,7 +162,9 @@ export const scopes = {
   ...org_scopes,
   ...pipeline_scopes,
   ...query_scopes,
+  ...repository_scopes,
   ...role_scopes,
+  ...sampler_scopes,
   ...rules_scopes,
   ...schemas_scopes,
   ...service_surfaces_scopes,

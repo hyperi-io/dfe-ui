@@ -84,6 +84,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/oidc/{provider}/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Oidc Login
+         * @description Redirect the user agent to the IdP to begin the OIDC auth-code flow.
+         */
+        get: operations["oidc_login_api_v1_auth_oidc__provider__login_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/oidc/{provider}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Oidc Callback
+         * @description Complete the OIDC flow and re-mint the engine token (single issuer).
+         */
+        get: operations["oidc_callback_api_v1_auth_oidc__provider__callback_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/accounts": {
         parameters: {
             query?: never;
@@ -165,13 +205,13 @@ export interface paths {
         };
         /**
          * List Groups
-         * @description List all groups (admin only).
+         * @description List groups visible to the caller (own memberships + scope grants).
          */
         get: operations["list_groups_api_v1_auth_groups_get"];
         put?: never;
         /**
          * Create Group
-         * @description Create a new RBAC group (admin only).
+         * @description Create a new RBAC group at a scope.
          */
         post: operations["create_group_api_v1_auth_groups_post"];
         delete?: never;
@@ -189,18 +229,18 @@ export interface paths {
         };
         /**
          * Get Group
-         * @description Get a single group by name (admin only).
+         * @description Get a single group by name (404 when not visible to the caller).
          */
         get: operations["get_group_api_v1_auth_groups__name__get"];
         /**
          * Update Group
-         * @description Update group roles, description, or members (admin only).
+         * @description Update group roles, description, or members (group:write at the group's scope).
          */
         put: operations["update_group_api_v1_auth_groups__name__put"];
         post?: never;
         /**
          * Delete Group
-         * @description Delete a group (admin only).
+         * @description Delete a group (checked at the group's scope).
          */
         delete: operations["delete_group_api_v1_auth_groups__name__delete"];
         options?: never;
@@ -219,7 +259,7 @@ export interface paths {
         put?: never;
         /**
          * Add Member
-         * @description Add a member to a group (admin only, idempotent).
+         * @description Add a member to a group (idempotent; checked at the group's scope).
          */
         post: operations["add_member_api_v1_auth_groups__name__members_post"];
         delete?: never;
@@ -240,7 +280,7 @@ export interface paths {
         post?: never;
         /**
          * Remove Member
-         * @description Remove a member from a group (admin only).
+         * @description Remove a member from a group (checked at the group's scope).
          */
         delete: operations["remove_member_api_v1_auth_groups__name__members__username__delete"];
         options?: never;
@@ -468,7 +508,10 @@ export interface paths {
         };
         /**
          * List Orgs
-         * @description List all organisations.
+         * @description List organisations visible to the caller.
+         *
+         *     System-scope org:read holders see every org; org-scope holders see
+         *     only the orgs their grants cover.
          */
         get: operations["list_orgs_api_v1_orgs_get"];
         put?: never;
@@ -495,7 +538,7 @@ export interface paths {
         };
         /**
          * Get Org
-         * @description Get a single organisation by name.
+         * @description Get a single organisation by name (org:read at that org's scope).
          */
         get: operations["get_org_api_v1_orgs__name__get"];
         /**
@@ -636,10 +679,16 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Deploy Source
-         * @description Apply DDL for a source version to ClickHouse and set deployed_version.
+         * Deploy Source Schema
+         * @description Plan (``dry_run=true``) or deploy a source version's schema to ClickHouse.
+         *
+         *     Runs the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard
+         *     views) and validation errors are returned for review WITHOUT touching
+         *     ClickHouse. In deploy mode the DDL is applied - it is idempotent (CREATE ... IF
+         *     NOT EXISTS) so a re-deploy is a no-op. A schema that failed validation is never
+         *     deployed.
          */
-        post: operations["deploy_source_api_v1_sources__name__deploy_post"];
+        post: operations["deploy_source_schema_api_v1_sources__name__deploy_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1347,7 +1396,12 @@ export interface paths {
         };
         /**
          * Get Engine Status
-         * @description Get the current status of the hunt scheduler.
+         * @description Report hunt scheduling status.
+         *
+         *     Hunts execute in the separate dfe-hunt-runner service (pull-based, coordinated
+         *     via ClickHouse), not in this API process. ``running`` reflects whether any
+         *     runner currently holds a hunt lease; ``hunt_count`` is the configured-hunt
+         *     count.
          */
         get: operations["get_engine_status_api_v1_hunts_status_get"];
         put?: never;
@@ -1423,8 +1477,9 @@ export interface paths {
          * Trigger Hunt
          * @description Trigger an ad-hoc hunt execution.
          *
-         *     Returns 202 with a task_id that can be polled via ``GET /tasks/{task_id}``
-         *     or streamed via ``GET /tasks/{task_id}/stream``.
+         *     Hunts run in the separate dfe-hunt-runner service on their schedule. On-demand
+         *     execution from the API (enqueue a one-shot fire the runner claims) is not wired
+         *     yet, so this returns 501 after validating the hunt exists.
          */
         post: operations["trigger_hunt_api_v1_hunts__name__run_post"];
         delete?: never;
@@ -1534,6 +1589,86 @@ export interface paths {
          *     ``query:execute`` permission.
          */
         post: operations["execute_raw_query_api_v1_queries_raw_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{source}/sample": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sample Source
+         * @description Sample a registered source. The path ``source`` wins over any in the body.
+         */
+        post: operations["sample_source_api_v1_sources__source__sample_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sample": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sample Adhoc
+         * @description Ad-hoc sample - supply an explicit ``table``/``topic`` (or a ``source``).
+         */
+        post: operations["sample_adhoc_api_v1_sample_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/samples/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Sample
+         * @description Poll a sample task's status and result.
+         */
+        get: operations["get_sample_api_v1_samples__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/samples": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Samples
+         * @description List recent sample tasks (most recent first).
+         */
+        get: operations["list_samples_api_v1_samples_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1950,6 +2085,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scim/v2/Users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Users
+         * @description List users (SCIM ListResponse). Supports ``userName eq`` filter + paging.
+         */
+        get: operations["list_users_api_v1_scim_v2_Users_get"];
+        put?: never;
+        /**
+         * Create User
+         * @description Provision a user. IdP-owned; local password is randomised when omitted.
+         */
+        post: operations["create_user_api_v1_scim_v2_Users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scim/v2/Users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get User
+         * @description Fetch a single user by id (username).
+         */
+        get: operations["get_user_api_v1_scim_v2_Users__user_id__get"];
+        /**
+         * Replace User
+         * @description Replace a user's writable attributes (SCIM PUT).
+         */
+        put: operations["replace_user_api_v1_scim_v2_Users__user_id__put"];
+        post?: never;
+        /**
+         * Delete User
+         * @description Delete a user (SCIM 204).
+         */
+        delete: operations["delete_user_api_v1_scim_v2_Users__user_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Patch User
+         * @description Apply a PatchOp - primarily the ``active`` toggle IdPs use to deprovision.
+         */
+        patch: operations["patch_user_api_v1_scim_v2_Users__user_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/scim/v2/Groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Groups
+         * @description List groups (SCIM ListResponse). Supports ``displayName eq`` filter + paging.
+         */
+        get: operations["list_groups_api_v1_scim_v2_Groups_get"];
+        put?: never;
+        /**
+         * Create Group
+         * @description Provision a group with its member set (member Account.groups kept in sync).
+         */
+        post: operations["create_group_api_v1_scim_v2_Groups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scim/v2/Groups/{group_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Group
+         * @description Fetch a single group by id (name).
+         */
+        get: operations["get_group_api_v1_scim_v2_Groups__group_id__get"];
+        /**
+         * Replace Group
+         * @description Replace a group's member set (SCIM PUT).
+         */
+        put: operations["replace_group_api_v1_scim_v2_Groups__group_id__put"];
+        post?: never;
+        /**
+         * Delete Group
+         * @description Delete a group. Members are detached first so the store permits removal.
+         */
+        delete: operations["delete_group_api_v1_scim_v2_Groups__group_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Patch Group
+         * @description Apply a PatchOp on group membership (add/remove/replace members).
+         */
+        patch: operations["patch_group_api_v1_scim_v2_Groups__group_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/scim/v2/ServiceProviderConfig": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Service Provider Config
+         * @description Static SCIM capability advertisement (RFC 7643 s5).
+         */
+        get: operations["service_provider_config_api_v1_scim_v2_ServiceProviderConfig_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scim/v2/ResourceTypes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resource Types
+         * @description Advertise the User and Group resource types.
+         */
+        get: operations["resource_types_api_v1_scim_v2_ResourceTypes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scim/v2/Schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Schemas
+         * @description Advertise the User and Group core schemas (generated from scim2-models).
+         */
+        get: operations["schemas_api_v1_scim_v2_Schemas_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sigma/mappings/{source_name}": {
         parameters: {
             query?: never;
@@ -2072,7 +2379,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health/live": {
+    "/api/v1/helm/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -2080,13 +2387,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Liveness
-         * @description Liveness probe -- is the process alive?
-         *
-         *     Checks run concurrently via ``run_blocking`` with per-check
-         *     timeout so a single slow check can't stall the kubelet probe.
+         * List Files
+         * @description List helm-var overlay resources.
          */
-        get: operations["liveness_health_live_get"];
+        get: operations["list_files_api_v1_helm_files_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2095,15 +2399,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health/ready": {
+    "/api/v1/helm/files/{name}/vars": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Readiness */
-        get: operations["readiness_health_ready_get"];
+        /**
+         * List Vars
+         * @description Flattened dot-path vars for a resource, each marked protected or not.
+         */
+        get: operations["list_vars_api_v1_helm_files__name__vars_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2112,18 +2419,460 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health/startup": {
+    "/api/v1/helm/files/{name}/vars/{path}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Startup */
-        get: operations["startup_health_startup_get"];
+        get?: never;
+        /**
+         * Set Var
+         * @description Set a helm var (-> gitops commit). 409 on stale If-Match; 403 if protected.
+         */
+        put: operations["set_var_api_v1_helm_files__name__vars__path__put"];
+        post?: never;
+        /**
+         * Delete Var
+         * @description Revert a helm var to its chart default (remove the override).
+         */
+        delete: operations["delete_var_api_v1_helm_files__name__vars__path__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Actions */
+        get: operations["list_actions_api_v1_governance_actions_get"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/actions/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Action */
+        get: operations["get_action_api_v1_governance_actions__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/actions/{name}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invoke Action
+         * @description Invoke a defined action - gated on the action's OWN required_action.
+         */
+        post: operations["invoke_action_api_v1_governance_actions__name__invoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/admin/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Action */
+        post: operations["create_action_api_v1_governance_admin_actions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/admin/actions/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Action */
+        delete: operations["delete_action_api_v1_governance_admin_actions__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/admin/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Policy */
+        post: operations["create_policy_api_v1_governance_admin_policies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/admin/policies/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Policy */
+        delete: operations["delete_policy_api_v1_governance_admin_policies__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/ch-rbac/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reconcile Ch Rbac Endpoint
+         * @description Reconcile CH quota tiers + service roles + per-org row policies into
+         *     ClickHouse, minting the service-user secrets via the secrets seam. Idempotent.
+         *     governance:write.
+         */
+        post: operations["reconcile_ch_rbac_endpoint_api_v1_governance_ch_rbac_reconcile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gitops/auto-merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Auto Merge
+         * @description Auto-merge status for the UI banner: stored flag, gate verdict, net effect.
+         */
+        get: operations["get_auto_merge_api_v1_gitops_auto_merge_get"];
+        /**
+         * Put Auto Merge
+         * @description Toggle auto-merge. Enabling requires the deployment gate; disabling always works.
+         */
+        put: operations["put_auto_merge_api_v1_gitops_auto_merge_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gitops/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Log
+         * @description Gitcrud audit log: every governed-ops git change, newest-first.
+         *
+         *     Flat + cursor-paginated by default; ?group_by= buckets the page for
+         *     summaries. applied_revision (the Argo-synced SHA) turns state into
+         *     applied/pending; without it every entry is 'committed'.
+         */
+        get: operations["get_log_api_v1_gitops_log_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lifecycle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Services
+         * @description List services with their tier and current lifecycle state.
+         */
+        get: operations["list_services_api_v1_lifecycle_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lifecycle/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set Lifecycle
+         * @description Set a service's lifecycle state - per-service RBAC; pinned services are 404.
+         */
+        post: operations["set_lifecycle_api_v1_lifecycle__name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/from-hyperdx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * From Hyperdx
+         * @description Strip a HyperDX query's time bounds -> {window}, ready to save as a rule.
+         */
+        post: operations["from_hyperdx_api_v1_authoring_from_hyperdx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/scaffold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Scaffold
+         * @description A starter SELECT over discovered columns (source meta + landed _json keys).
+         */
+        post: operations["scaffold_api_v1_authoring_scaffold_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/ai/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ai Review */
+        post: operations["ai_review_api_v1_authoring_ai_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/ai/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ai Create */
+        post: operations["ai_create_api_v1_authoring_ai_create_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/ai/generate-vrl": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ai Generate Vrl */
+        post: operations["ai_generate_vrl_api_v1_authoring_ai_generate_vrl_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/authoring/ai/suggest-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ai Suggest Schema */
+        post: operations["ai_suggest_schema_api_v1_authoring_ai_suggest_schema_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/config/client": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Client Config
+         * @description Runtime config for the web UI (no secrets).
+         */
+        get: operations["client_config_api_v1_config_client_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/repository/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Preferences
+         * @description Effective merged preferences for the caller (system -> org -> group -> user).
+         */
+        get: operations["get_preferences_api_v1_repository_preferences_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Patch Preferences
+         * @description Apply a JSON merge patch to the caller's USER preference layer.
+         *
+         *     The theme toggle is one call: ``PATCH {"theme": "dark"}``. ``null``
+         *     removes a user-layer key (falling back to the inherited value).
+         */
+        patch: operations["patch_preferences_api_v1_repository_preferences_patch"];
+        trace?: never;
+    };
+    "/api/v1/repository/objects/{scope}/{scope_id}/{namespace}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Objects
+         * @description List object metadata in a (scope, scope_id, namespace).
+         */
+        get: operations["list_objects_api_v1_repository_objects__scope___scope_id___namespace__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/repository/objects/{scope}/{scope_id}/{namespace}/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Object
+         * @description Raw object bytes with the stored Content-Type and ETag headers.
+         */
+        get: operations["get_object_api_v1_repository_objects__scope___scope_id___namespace___key__get"];
+        /**
+         * Put Object
+         * @description Store raw bytes (body) under a scope-aligned key.
+         */
+        put: operations["put_object_api_v1_repository_objects__scope___scope_id___namespace___key__put"];
+        post?: never;
+        /**
+         * Delete Object
+         * @description Tombstone an object (INSERT with is_deleted=1, never a mutation).
+         */
+        delete: operations["delete_object_api_v1_repository_objects__scope___scope_id___namespace___key__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2133,6 +2882,58 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AIModuleResult
+         * @description Result of an AI module execution.
+         */
+        AIModuleResult: {
+            /**
+             * Task Id
+             * @description Unique task identifier
+             */
+            task_id: string;
+            /**
+             * Module Name
+             * @description Module that produced this result
+             */
+            module_name: string;
+            /** @description Module type */
+            module_type: components["schemas"]["AIModuleType"];
+            /**
+             * @description Task status
+             * @default pending
+             */
+            status: components["schemas"]["AIModuleStatus"];
+            /**
+             * Output
+             * @description Module-specific output
+             */
+            output?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Error
+             * @description Error message if failed
+             */
+            error?: string | null;
+            /**
+             * Duration Ms
+             * @description Execution duration in milliseconds
+             */
+            duration_ms?: number | null;
+        };
+        /**
+         * AIModuleStatus
+         * @description Status of an async AI module task.
+         * @enum {string}
+         */
+        AIModuleStatus: "pending" | "running" | "completed" | "failed";
+        /**
+         * AIModuleType
+         * @description Discriminator for AI module types.
+         * @enum {string}
+         */
+        AIModuleType: "query_optimiser" | "query_generator" | "schema_optimiser" | "log_parser";
         /**
          * APIKeyCreatedResponse
          * @description Returned exactly once at creation — includes the full key.
@@ -2189,6 +2990,26 @@ export interface components {
             created_at: string;
             /** Updated At */
             updated_at: string;
+        };
+        /**
+         * ActionDef
+         * @description A curated, RBAC-gated bundle of var changes (a "big dial").
+         *
+         *     Invoking the action applies ALL ``changes`` in ONE commit, gated on
+         *     ``required_action`` (an RBAC string checked at invoke time).
+         */
+        ActionDef: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Required Action */
+            required_action: string;
+            /** Changes */
+            changes?: components["schemas"]["VarChange"][];
         };
         /** AddMemberRequest */
         AddMemberRequest: {
@@ -2247,6 +3068,22 @@ export interface components {
              * @default
              */
             url_scheme: string;
+        };
+        /** AutoMergeRequest */
+        AutoMergeRequest: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** AutoMergeStatus */
+        AutoMergeStatus: {
+            /** Stored */
+            stored: boolean;
+            /** Effective */
+            effective: boolean;
+            /** Allowed */
+            allowed: boolean;
+            /** Reason */
+            reason: string;
         };
         /** Body_elastic_converter_api_v1_schemas_elastic_converter_post */
         Body_elastic_converter_api_v1_schemas_elastic_converter_post: {
@@ -2420,6 +3257,33 @@ export interface components {
              */
             opt_in_required?: string | null;
         };
+        /** ClientConfig */
+        ClientConfig: {
+            /**
+             * Api Base
+             * @default
+             */
+            api_base: string;
+            /**
+             * @default {
+             *       "enabled": false,
+             *       "url": ""
+             *     }
+             */
+            hyperdx: components["schemas"]["HyperDXConfig"];
+            /**
+             * Auth Mode
+             * @default jwt
+             */
+            auth_mode: string;
+            /**
+             * Features
+             * @default {}
+             */
+            features: {
+                [key: string]: boolean;
+            };
+        };
         /**
          * ColumnInfo
          * @description A column in a ClickHouse table.
@@ -2568,6 +3432,12 @@ export interface components {
              */
             description: string;
             /**
+             * Scope
+             * @description 'system' (roles bind system-wide) or 'org:<name>' (group exists only inside that org; roles bind at that org's scope)
+             * @default system
+             */
+            scope: string;
+            /**
              * Members
              * @description Account usernames in this group (local login resolves roles from this list)
              */
@@ -2591,12 +3461,6 @@ export interface components {
              * @description Tenant IDs for ClickHouse row-level security
              */
             org_ids?: string[];
-            /**
-             * Dedicated Database
-             * @description Whether to provision a dedicated ClickHouse database
-             * @default false
-             */
-            dedicated_database: boolean;
         };
         /** CreateProviderRequest */
         CreateProviderRequest: {
@@ -2608,8 +3472,9 @@ export interface components {
             /**
              * Type
              * @description Provider type: generic, google, entra_id, okta
+             * @enum {string}
              */
-            type: string;
+            type: "generic" | "google" | "entra_id" | "okta";
             /**
              * Display Name
              * @description Human-readable label
@@ -2629,6 +3494,17 @@ export interface components {
              */
             client_id_env: string;
             groups?: components["schemas"]["GroupResolutionRequest"];
+        };
+        /** CreateRequest */
+        CreateRequest: {
+            /** Prompt */
+            prompt: string;
+            /** Source Name */
+            source_name?: string | null;
+            /** Columns */
+            columns?: {
+                [key: string]: unknown;
+            }[];
         };
         /** CreateRoleRequest */
         CreateRoleRequest: {
@@ -2973,14 +3849,22 @@ export interface components {
          * @enum {string}
          */
         FilterTier: "tier1" | "tier2" | "tier3";
+        /** FromHyperdxRequest */
+        FromHyperdxRequest: {
+            /** Query */
+            query: string;
+            /** Time Fields */
+            time_fields?: string[] | null;
+        };
         /** GroupResolutionRequest */
         GroupResolutionRequest: {
             /**
              * Mode
              * @description Group resolution mode: manual, token_claim, api
              * @default manual
+             * @enum {string}
              */
-            mode: string;
+            mode: "manual" | "token_claim" | "api";
             /**
              * Claim Name
              * @description Token claim name for group IDs
@@ -3069,6 +3953,13 @@ export interface components {
             roles: string[];
             /** Members */
             members: string[];
+            /** Scope */
+            scope: string;
+        };
+        /** GroupedLogResponse */
+        GroupedLogResponse: {
+            /** Groups */
+            groups: components["schemas"]["LogGroup"][];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -3290,6 +4181,37 @@ export interface components {
              */
             rules: string[];
         };
+        /** HyperDXConfig */
+        HyperDXConfig: {
+            /**
+             * Enabled
+             * @default false
+             */
+            enabled: boolean;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+        };
+        /** InvokeResponse */
+        InvokeResponse: {
+            /** Dry Run */
+            dry_run: boolean;
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /** Diff */
+            diff: {
+                [key: string]: unknown;
+            }[];
+        };
         /**
          * JsonPathInfo
          * @description One JSON path discovered inside a source's ``_json`` column.
@@ -3358,6 +4280,76 @@ export interface components {
              * @description One entry per distinct JSON path found in the column.
              */
             paths: components["schemas"]["JsonPathInfo"][];
+        };
+        /** LifecycleRequest */
+        LifecycleRequest: {
+            state: components["schemas"]["LifecycleState"];
+        };
+        /** LifecycleResponse */
+        LifecycleResponse: {
+            /** Name */
+            name: string;
+            /** State */
+            state: string;
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Pending Reconcile
+             * @default true
+             */
+            pending_reconcile: boolean;
+        };
+        /**
+         * LifecycleState
+         * @description The gitops state dial value.
+         * @enum {string}
+         */
+        LifecycleState: "running" | "paused" | "stopped";
+        /** LogEntryModel */
+        LogEntryModel: {
+            /** Sha */
+            sha: string;
+            /** Timestamp */
+            timestamp: number;
+            /** Ctype */
+            ctype: string;
+            /** Scope */
+            scope: string;
+            /** Summary */
+            summary: string;
+            /** Actor */
+            actor: string;
+            /** Role */
+            role: string;
+            /** Action */
+            action: string;
+            /** Request Id */
+            request_id: string;
+            /** Files */
+            files: string[];
+            /** Resources */
+            resources: string[];
+            /** Conforming */
+            conforming: boolean;
+            /** State */
+            state: string;
+        };
+        /** LogGroup */
+        LogGroup: {
+            /** Key */
+            key: string;
+            /** Count */
+            count: number;
+            latest: components["schemas"]["LogEntryModel"];
+        };
+        /** LogResponse */
+        LogResponse: {
+            /** Entries */
+            entries: components["schemas"]["LogEntryModel"][];
+            /** Next Before */
+            next_before?: string | null;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -3626,6 +4618,54 @@ export interface components {
         NonEmptyList_SchemaColumnWrite_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+        /**
+         * ObjectEntry
+         * @description Metadata for one key in a namespace listing.
+         */
+        ObjectEntry: {
+            /** Key */
+            key: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
+            /** Updated By */
+            updated_by: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Etag */
+            etag: string;
+        };
+        /**
+         * ObjectMetadata
+         * @description Metadata for a stored object (PUT response).
+         */
+        ObjectMetadata: {
+            /** Scope */
+            scope: string;
+            /** Scope Id */
+            scope_id: string;
+            /** Namespace */
+            namespace: string;
+            /** Key */
+            key: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
+            /** Updated By */
+            updated_by: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Etag */
+            etag: string;
+        };
         /** OrgResponse */
         OrgResponse: {
             /** Name */
@@ -3636,8 +4676,6 @@ export interface components {
             org_ids: string[];
             /** Enabled */
             enabled: boolean;
-            /** Dedicated Database */
-            dedicated_database: boolean;
             /** Created At */
             created_at: string;
             /** Updated At */
@@ -3991,6 +5029,18 @@ export interface components {
             name: string;
         };
         /**
+         * PreferencesResponse
+         * @description Effective merged preferences plus the caller's user-layer etag.
+         */
+        PreferencesResponse: {
+            /** Preferences */
+            preferences: {
+                [key: string]: unknown;
+            };
+            /** Etag */
+            etag?: string | null;
+        };
+        /**
          * PromoteFieldRequest
          * @description Promote one or more JSON paths into dedicated typed columns.
          */
@@ -4082,6 +5132,24 @@ export interface components {
              * @description Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
              */
             key: string;
+        };
+        /**
+         * ProtectedPolicy
+         * @description Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.
+         *
+         *     e.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.
+         *     A protected var can only be changed by a caller holding the override grant.
+         */
+        ProtectedPolicy: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Protected */
+            protected?: string[];
         };
         /**
          * ProviderResponse
@@ -4261,6 +5329,15 @@ export interface components {
              */
             new_password: string;
         };
+        /** ReviewRequest */
+        ReviewRequest: {
+            /** Sql */
+            sql: string;
+            /** Execution Profile */
+            execution_profile?: {
+                [key: string]: unknown;
+            };
+        };
         /** RoleResponse */
         RoleResponse: {
             /** Name */
@@ -4334,8 +5411,9 @@ export interface components {
              * Source Type
              * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
              * @default raw
+             * @enum {string}
              */
-            source_type: string;
+            source_type: "raw" | "hyperdx";
         };
         /** RuleCreateResponse */
         RuleCreateResponse: {
@@ -4454,6 +5532,24 @@ export interface components {
              */
             cost_window_minutes: number;
         };
+        /**
+         * SampleBackend
+         * @description Where the data is read from.
+         * @enum {string}
+         */
+        SampleBackend: "clickhouse" | "kafka";
+        /**
+         * SampleMode
+         * @description How to pick the sample.
+         *
+         *     - ``recent``  - newest rows first (fast tail; ClickHouse ORDER BY ts DESC,
+         *       Kafka reads from the partition high-watermark backwards).
+         *     - ``random``  - uniform-ish random rows (fair distribution, no recency bias).
+         *     - ``smart``   - logreducer representative/diverse sample (default). Gated.
+         *     - ``anomaly`` - logreducer isolation-forest outliers (the weird events). Gated.
+         * @enum {string}
+         */
+        SampleMode: "recent" | "random" | "smart" | "anomaly";
         /** SampleRecord */
         SampleRecord: {
             /**
@@ -4472,6 +5568,134 @@ export interface components {
             headers?: {
                 [key: string]: string;
             };
+        };
+        /**
+         * SampleRequest
+         * @description A request to sample a source.
+         *
+         *     Provide EITHER a registered ``source`` (its CH table / land topic are
+         *     resolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source
+         *     that is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL
+         *     predicate (ClickHouse backend only), consistent with the query-authoring
+         *     surface - callers already hold the sampler scope.
+         */
+        SampleRequest: {
+            /** @default smart */
+            mode: components["schemas"]["SampleMode"];
+            /** @default clickhouse */
+            backend: components["schemas"]["SampleBackend"];
+            /**
+             * Limit
+             * @description Rows to return (defaults to sampler.default_limit)
+             */
+            limit?: number | null;
+            /**
+             * Source
+             * @description Registered source name
+             */
+            source?: string | null;
+            /**
+             * Table
+             * @description Explicit ClickHouse table (overrides source's table)
+             */
+            table?: string | null;
+            /**
+             * Topic
+             * @description Explicit Kafka topic (overrides source's land topic)
+             */
+            topic?: string | null;
+            /**
+             * Filter
+             * @description Trusted SQL WHERE predicate (ClickHouse backend only)
+             */
+            filter?: string | null;
+            /**
+             * Since
+             * @description Lower time bound (ISO 8601) on the timestamp column
+             */
+            since?: string | null;
+            /**
+             * Until
+             * @description Upper time bound (ISO 8601) on the timestamp column
+             */
+            until?: string | null;
+            /**
+             * Seed
+             * @description Seed for random mode (determinism)
+             */
+            seed?: number | null;
+            /**
+             * Level
+             * @description logreducer level override: standard | enhanced | maximum
+             */
+            level?: string | null;
+            /**
+             * Wait
+             * @description Seconds to block for inline completion before returning pending
+             */
+            wait?: number | null;
+        };
+        /**
+         * SampleResult
+         * @description The sampled data + provenance.
+         */
+        SampleResult: {
+            mode: components["schemas"]["SampleMode"];
+            backend: components["schemas"]["SampleBackend"];
+            /** Source */
+            source?: string | null;
+            /**
+             * Target
+             * @description Resolved table or topic sampled
+             * @default
+             */
+            target: string;
+            /**
+             * Count
+             * @description Rows returned
+             * @default 0
+             */
+            count: number;
+            /**
+             * Requested Limit
+             * @default 0
+             */
+            requested_limit: number;
+            /**
+             * Lines
+             * @description Raw event strings (_json / Kafka message values)
+             */
+            lines?: string[];
+            /**
+             * Rows
+             * @description Parsed JSON objects (best-effort; skips non-JSON)
+             */
+            rows?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Keys
+             * @description Top-level keys discovered across the sample
+             */
+            keys?: string[];
+            /**
+             * Truncated
+             * @description True when more rows were available than returned
+             * @default false
+             */
+            truncated: boolean;
+            /**
+             * Stats
+             * @description Mode-specific stats (scan counts, logreducer stop reason)
+             */
+            stats?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Note
+             * @description Any caveat about how the sample was taken
+             */
+            note?: string | null;
         };
         /**
          * SampleRowsResponse
@@ -4522,6 +5746,40 @@ export interface components {
             promoted?: components["schemas"]["PromotedJsonField"][];
         };
         /**
+         * SampleSubmitResponse
+         * @description Envelope returned by a sample submit and by the poll endpoint.
+         */
+        SampleSubmitResponse: {
+            /**
+             * Task Id
+             * @description Task ID; poll via GET /samples/{task_id}
+             */
+            task_id: string;
+            /** @description pending | running | completed | failed | cancelled */
+            status: components["schemas"]["TaskStatus"];
+            /** @description Present once completed */
+            result?: components["schemas"]["SampleResult"] | null;
+            /**
+             * Error
+             * @description Present on failure
+             */
+            error?: string | null;
+        };
+        /** ScaffoldRequest */
+        ScaffoldRequest: {
+            /** Table */
+            table: string;
+            /** Columns */
+            columns?: string[];
+            /** Source */
+            source?: string | null;
+            /**
+             * Limit
+             * @default 100
+             */
+            limit: number;
+        };
+        /**
          * SchemaColumnWrite
          * @description Column payload for API writes (create schema / add version).
          */
@@ -4568,6 +5826,45 @@ export interface components {
             matched_searchable?: string[];
         };
         /**
+         * SchemaDeployResult
+         * @description Plan / deploy result for a source's schema.
+         */
+        SchemaDeployResult: {
+            /** Source Name */
+            source_name: string;
+            /** Version */
+            version: string;
+            /**
+             * Dry Run
+             * @description True = plan only; the DDL was NOT applied
+             */
+            dry_run: boolean;
+            /**
+             * Applied
+             * @description Whether the DDL was executed against ClickHouse
+             */
+            applied: boolean;
+            /**
+             * Create Table
+             * @description CREATE TABLE DDL
+             */
+            create_table: string;
+            /**
+             * Views
+             * @description View name → DDL
+             */
+            views?: {
+                [key: string]: string;
+            };
+            /** Validation Errors */
+            validation_errors?: string[];
+            /**
+             * Statements Applied
+             * @default 0
+             */
+            statements_applied: number;
+        };
+        /**
          * SchemaDiff
          * @description Proposed schema change returned by ``?dry_run=true``.
          */
@@ -4581,6 +5878,17 @@ export interface components {
             ddl?: string[];
             /** Copy Directives */
             copy_directives?: string[];
+        };
+        /** SchemaSuggestRequest */
+        SchemaSuggestRequest: {
+            /** Source Name */
+            source_name: string;
+            /** Source Schema */
+            source_schema?: {
+                [key: string]: unknown;
+            };
+            /** Query Patterns */
+            query_patterns?: string[];
         };
         /**
          * SchemaSummaryObject
@@ -4725,6 +6033,15 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /** ServiceInfo */
+        ServiceInfo: {
+            /** Name */
+            name: string;
+            /** Tier */
+            tier: string;
+            /** State */
+            state: string;
+        };
         /**
          * ServiceSurface
          * @description Complete surface definition for a Rust service.
@@ -4756,6 +6073,11 @@ export interface components {
              * @default
              */
             discovered_at: string;
+        };
+        /** SetVarRequest */
+        SetVarRequest: {
+            /** Value */
+            value: unknown;
         };
         /**
          * SettingsSummary
@@ -5084,8 +6406,8 @@ export interface components {
             ttl_days?: number | null;
             /**
              * Engine
-             * @description Table engine (MergeTree, ReplicatedMergeTree, SharedMergeTree)
-             * @default MergeTree
+             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the topology (single vs Replicated/Shared/Cloud) is resolved at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).
+             * @default
              */
             engine: string;
         };
@@ -5650,17 +6972,6 @@ export interface components {
              * @description Enable or disable the org
              */
             enabled?: boolean | null;
-            /**
-             * Dedicated Database
-             * @description Enable or disable a dedicated ClickHouse database
-             */
-            dedicated_database?: boolean | null;
-            /**
-             * Confirm Merge
-             * @description Required when disabling dedicated_database — confirms data migration is handled
-             * @default false
-             */
-            confirm_merge: boolean;
         };
         /** UpdateProviderRequest */
         UpdateProviderRequest: {
@@ -5720,6 +7031,20 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /**
+         * VarChange
+         * @description One var mutation in an action: set ``cls/name`` dot-``path`` to ``value``.
+         */
+        VarChange: {
+            /** Cls */
+            cls: string;
+            /** Name */
+            name: string;
+            /** Path */
+            path: string;
+            /** Value */
+            value: unknown;
         };
         /** VersionResponse */
         VersionResponse: {
@@ -5870,6 +7195,25 @@ export interface components {
              * @description Allowed values (renders as dropdown in UI)
              */
             enum?: unknown[] | null;
+        };
+        /** VrlRequest */
+        VrlRequest: {
+            /** Samples */
+            samples: string[];
+            /** Source Hint */
+            source_hint?: string | null;
+        };
+        /** WriteResult */
+        WriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
         };
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1: {
@@ -6224,6 +7568,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PermissionsResponse"];
+                };
+            };
+        };
+    };
+    oidc_login_api_v1_auth_oidc__provider__login_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    oidc_callback_api_v1_auth_oidc__provider__callback_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -7486,11 +8892,13 @@ export interface operations {
             };
         };
     };
-    deploy_source_api_v1_sources__name__deploy_post: {
+    deploy_source_schema_api_v1_sources__name__deploy_post: {
         parameters: {
             query?: {
-                /** @description Source version id to deploy (defaults to current working version) */
+                /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
+                /** @description Plan only: generate + validate the DDL without applying it */
+                dry_run?: boolean;
             };
             header?: never;
             path: {
@@ -7506,7 +8914,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceDeployResponse"];
+                    "application/json": components["schemas"]["SchemaDeployResult"];
                 };
             };
             /** @description Validation Error */
@@ -9335,6 +10743,125 @@ export interface operations {
             };
         };
     };
+    sample_source_api_v1_sources__source__sample_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SampleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleSubmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_adhoc_api_v1_sample_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SampleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleSubmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sample_api_v1_samples__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleSubmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_samples_api_v1_samples_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskInfo"][];
+                };
+            };
+        };
+    };
     list_templates_api_v1_pipeline_templates_get: {
         parameters: {
             query?: never;
@@ -10025,6 +11552,394 @@ export interface operations {
             };
         };
     };
+    list_users_api_v1_scim_v2_Users_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    create_user_api_v1_scim_v2_Users_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_user_api_v1_scim_v2_Users__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_user_api_v1_scim_v2_Users__user_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_api_v1_scim_v2_Users__user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_user_api_v1_scim_v2_Users__user_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_groups_api_v1_scim_v2_Groups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    create_group_api_v1_scim_v2_Groups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_group_api_v1_scim_v2_Groups__group_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_group_api_v1_scim_v2_Groups__group_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_group_api_v1_scim_v2_Groups__group_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_group_api_v1_scim_v2_Groups__group_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    service_provider_config_api_v1_scim_v2_ServiceProviderConfig_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    resource_types_api_v1_scim_v2_ResourceTypes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    schemas_api_v1_scim_v2_Schemas_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     get_field_mappings_api_v1_sigma_mappings__source_name__get: {
         parameters: {
             query?: never;
@@ -10223,11 +12138,823 @@ export interface operations {
             };
         };
     };
-    liveness_health_live_get: {
+    list_files_api_v1_helm_files_get: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    list_vars_api_v1_helm_files__name__vars_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_var_api_v1_helm_files__name__vars__path__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                name: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetVarRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_var_api_v1_helm_files__name__vars__path__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_actions_api_v1_governance_actions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    get_action_api_v1_governance_actions__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionDef"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invoke_action_api_v1_governance_actions__name__invoke_post: {
+        parameters: {
+            query?: {
+                dry_run?: boolean;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvokeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_action_api_v1_governance_admin_actions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionDef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionDef"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_action_api_v1_governance_admin_actions__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_policy_api_v1_governance_admin_policies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProtectedPolicy"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtectedPolicy"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_policy_api_v1_governance_admin_policies__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reconcile_ch_rbac_endpoint_api_v1_governance_ch_rbac_reconcile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    get_auto_merge_api_v1_gitops_auto_merge_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutoMergeStatus"];
+                };
+            };
+        };
+    };
+    put_auto_merge_api_v1_gitops_auto_merge_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AutoMergeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutoMergeStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_log_api_v1_gitops_log_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                before?: string | null;
+                group_by?: string | null;
+                applied_revision?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogResponse"] | components["schemas"]["GroupedLogResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_services_api_v1_lifecycle_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceInfo"][];
+                };
+            };
+        };
+    };
+    set_lifecycle_api_v1_lifecycle__name__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LifecycleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LifecycleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    from_hyperdx_api_v1_authoring_from_hyperdx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromHyperdxRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scaffold_api_v1_authoring_scaffold_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScaffoldRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_review_api_v1_authoring_ai_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIModuleResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_create_api_v1_authoring_ai_create_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIModuleResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_generate_vrl_api_v1_authoring_ai_generate_vrl_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VrlRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIModuleResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_suggest_schema_api_v1_authoring_ai_suggest_schema_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SchemaSuggestRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIModuleResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    client_config_api_v1_config_client_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+        };
+    };
+    get_preferences_api_v1_repository_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesResponse"];
+                };
+            };
+        };
+    };
+    patch_preferences_api_v1_repository_preferences_patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_objects_api_v1_repository_objects__scope___scope_id___namespace__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope: string;
+                scope_id: string;
+                namespace: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ObjectEntry"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_object_api_v1_repository_objects__scope___scope_id___namespace___key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope: string;
+                scope_id: string;
+                namespace: string;
+                key: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -10241,33 +12968,29 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
-        };
-    };
-    readiness_health_ready_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
     };
-    startup_health_startup_get: {
+    put_object_api_v1_repository_objects__scope___scope_id___namespace___key__put: {
         parameters: {
             query?: never;
-            header?: never;
-            path?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                scope: string;
+                scope_id: string;
+                namespace: string;
+                key: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -10278,7 +13001,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ObjectMetadata"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_object_api_v1_repository_objects__scope___scope_id___namespace___key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scope: string;
+                scope_id: string;
+                namespace: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
