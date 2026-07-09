@@ -100,6 +100,7 @@ export interface ListSchemasContextValue {
     schema_path: string | null;
     schema_version: string | null;
   }) => void;
+  schemaTypesScope: string[] | undefined;
 }
 
 const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
@@ -118,10 +119,12 @@ const ListSchemasContext = createContext<ListSchemasContextValue | null>(null);
 export interface ListSchemasProviderProps {
   children: ReactNode;
   defaultFilters?: UseFetchInfiniteFilteredSchemasProps;
+  schemaTypes?: string[];
 }
 
 export const ListSchemasProvider = ({
   children,
+  schemaTypes: schemaTypesScope,
   defaultFilters = {},
 }: ListSchemasProviderProps) => {
   const queryClient = useQueryClient();
@@ -167,7 +170,10 @@ export const ListSchemasProvider = ({
     hasNextPage,
     loadMoreRef,
     isFetchingNextPage,
-  } = useFetchInfiniteFilteredSchemas({ ...filters, schema_type: ['meta'] });
+  } = useFetchInfiniteFilteredSchemas({
+    ...filters,
+    schema_type: schemaTypesScope,
+  });
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSchemasProps) => {
@@ -220,6 +226,7 @@ export const ListSchemasProvider = ({
       selectedSchemaPath,
       setSelectedSchema: handleSetSelectedSchema,
       selectedSchemaVersion,
+      schemaTypesScope,
     }),
     [
       data,
@@ -237,6 +244,7 @@ export const ListSchemasProvider = ({
       selectedSchemaPath,
       handleSetSelectedSchema,
       selectedSchemaVersion,
+      schemaTypesScope,
     ],
   );
 

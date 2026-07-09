@@ -37,7 +37,7 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Header:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
+                href={`/schemas/other-schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 {header?.type}@{header?.version}
@@ -47,7 +47,7 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Schema:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
+                href={`/schemas/meta-schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 {schema?.meta_schema}@{schema?.meta_schema_version}

@@ -57,12 +57,10 @@ export const CreateSchemaDrawerBase = ({
     onClose?.();
   };
 
-  const { refetch: refetchSchemas, setSelectedSchema } =
-    useListSchemasContext();
+  const { setSelectedSchema } = useListSchemasContext();
 
   const { mutate: createSchema, isPending: isCreatingSchema } = useCreateSchema(
     {
-      pathPrefix: 'meta',
       onSuccess: (response) => {
         // TODO: Move this to the onSuccess prop defined by parent
         if (isSchemaDetail) {
@@ -71,7 +69,6 @@ export const CreateSchemaDrawerBase = ({
             schema_version: response.current,
           });
         }
-        refetchSchemas();
         api.success({
           title: 'Schema created successfully',
           placement: 'bottomLeft',

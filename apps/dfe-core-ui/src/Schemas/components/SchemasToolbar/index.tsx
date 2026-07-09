@@ -11,8 +11,13 @@ export const SchemasToolbar = () => {
   const pathname = usePathname();
   const routes = [
     {
-      path: '/schemas',
-      label: 'Schemas',
+      path: '/schemas/meta-schemas',
+      label: 'Meta Schemas',
+      disabled: false,
+    },
+    {
+      path: '/schemas/other-schemas',
+      label: 'Other Schemas',
       disabled: false,
     },
   ];

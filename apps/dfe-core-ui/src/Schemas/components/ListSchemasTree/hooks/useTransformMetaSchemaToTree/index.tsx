@@ -159,16 +159,18 @@ const schemaSummaryToTreeData = ({
                   })
                 }
               />
-              <DeleteSchemaModal
-                schemaPath={`${schema.name}`}
-                onSuccess={(schemaPath) =>
-                  apiNotification.success({
-                    title: 'Schema deleted successfully',
-                    description: `${schemaPath} has been deleted successfully`,
-                    placement: 'bottomLeft',
-                  })
-                }
-              />
+              {schema.resource_type !== 'core' && (
+                <DeleteSchemaModal
+                  schemaPath={`${schema.name}`}
+                  onSuccess={(schemaPath) =>
+                    apiNotification.success({
+                      title: 'Schema deleted successfully',
+                      description: `${schemaPath} has been deleted successfully`,
+                      placement: 'bottomLeft',
+                    })
+                  }
+                />
+              )}
             </>
           }
         />
@@ -215,7 +217,7 @@ const schemaSummaryToTreeData = ({
   return out;
 };
 
-export const useTransformSchemaToTree = ({
+export const useTransformMetaSchemaToTree = ({
   schemaObjects,
   setSelectedSchema,
   selectedSchemaPath,

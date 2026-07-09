@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Button, FormProps, Input, Select } from 'antd';
@@ -32,6 +33,13 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   };
 }
 
+const SCHEMA_TYPE_OPTIONS = [
+  { label: 'Meta Schema', value: 'meta' },
+  { label: 'Header', value: 'common_header' },
+  { label: 'Additional Schema', value: 'additional' },
+  { label: 'Hunt Schema', value: 'hunts' },
+];
+
 const CreateSchemaFormBase = ({
   hasReset = false,
   isPending = false,
@@ -50,6 +58,8 @@ const CreateSchemaFormBase = ({
     invalidUploadedSchemaColumns,
     handleFormValuesChange,
   } = useCreateSchemaFormContext();
+
+  const { schemaTypesScope } = useListSchemasContext();
 
   const { formErrorMessage, setFormErrorMessage } =
     useCreateSchemaReviewContext();
@@ -101,6 +111,9 @@ const CreateSchemaFormBase = ({
     });
   };
 
+  const isMetaSchemaScope =
+    schemaTypesScope?.length === 1 && schemaTypesScope[0] === 'meta';
+
   return (
     <Form
       className="h-[calc(100vh-120px)] css-custom-scrollbar"
@@ -122,10 +135,19 @@ const CreateSchemaFormBase = ({
         path: '',
         name: '',
         description: '',
+        schema_type: 'meta',
         ...initialValues,
       }}
     >
       <div className="flex w-full gap-2">
+        <Form.Item
+          className="w-96"
+          name="schema_type"
+          label="Schema Type"
+          rules={[formValidation]}
+        >
+          <Select disabled={isMetaSchemaScope} options={SCHEMA_TYPE_OPTIONS} />
+        </Form.Item>
         <Form.Item
           className="w-full"
           name="path"
