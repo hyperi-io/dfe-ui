@@ -55,6 +55,7 @@ import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types'
 import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
 import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
 import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
+import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -490,7 +491,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__v1__sources__SchemaBuildResult'];
+          mockedResponse?: TSourceBuildResponse;
           source_name?: string;
         } = {}) => {
           return http.post(

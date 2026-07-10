@@ -1,4 +1,9 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { buildSourcePath } from './api';
 
-export type SourceBuildResponse =
-  components['schemas']['dfe_engine__api__v1__sources__SchemaBuildResult'];
+export type TSourceBuildResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof buildSourcePath, 'post'>
+>;
