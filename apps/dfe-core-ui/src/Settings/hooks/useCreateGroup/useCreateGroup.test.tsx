@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateGroup } from '.';
-import { GroupCreateRequestBody, GroupCreateResponse } from './types';
+import { TGroupCreateRequestBody, TGroupCreateResponse } from './types';
 import { server } from './useCreateGroup.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateGroup', () => {
-  const requestBody: GroupCreateRequestBody = {
+  const requestBody: TGroupCreateRequestBody = {
     name: 'group_name',
     description: 'string',
     roles: ['string'],
@@ -44,7 +44,7 @@ describe('.useCreateGroup', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: GroupCreateResponse = {
+      const expectedResponse: TGroupCreateResponse = {
         name: 'group_name',
         description: 'string',
         roles: ['string'],

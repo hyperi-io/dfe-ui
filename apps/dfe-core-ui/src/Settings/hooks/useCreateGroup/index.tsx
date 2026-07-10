@@ -1,10 +1,9 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { GroupCreateRequestBody, GroupCreateResponse } from './types';
+import { createGroup } from './api';
+import { TGroupCreateRequestBody, TGroupCreateResponse } from './types';
 
 interface UseCreateGroupProps {
-  onSuccess?: (data: GroupCreateResponse) => void;
+  onSuccess?: (data: TGroupCreateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -13,11 +12,10 @@ export const useCreateGroup = ({
   onError,
 }: UseCreateGroupProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (group: GroupCreateRequestBody) => {
-      return apiClient.post(API_CONFIG.groups.default, {
+    mutationFn: (group: TGroupCreateRequestBody) =>
+      createGroup({
         body: group,
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },
