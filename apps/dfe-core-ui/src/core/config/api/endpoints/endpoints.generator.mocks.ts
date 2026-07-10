@@ -41,6 +41,7 @@ import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetP
 import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/types';
 import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types';
 import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
+import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2178,7 +2179,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             updated_at: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'];
+          mockedResponse?: TOrganisationCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

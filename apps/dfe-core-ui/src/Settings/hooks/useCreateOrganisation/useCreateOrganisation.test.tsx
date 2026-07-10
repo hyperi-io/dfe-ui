@@ -13,8 +13,8 @@ import {
 } from 'vitest';
 import { useCreateOrganisation } from '.';
 import {
-  OrganisationCreateRequestBody,
-  OrganisationCreateResponse,
+  TOrganisationCreateRequestBody,
+  TOrganisationCreateResponse,
 } from './types';
 import { server } from './useCreateOrganisation.mocks';
 
@@ -29,7 +29,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateOrganisation', () => {
-  const requestBody: OrganisationCreateRequestBody = {
+  const requestBody: TOrganisationCreateRequestBody = {
     name: 'org_name',
     display_name: 'string',
     dedicated_database: true,
@@ -46,7 +46,7 @@ describe('.useCreateOrganisation', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: OrganisationCreateResponse = {
+      const expectedResponse: TOrganisationCreateResponse = {
         name: 'org_name',
         display_name: 'string',
         org_ids: ['string'],
