@@ -42,8 +42,8 @@ export default function ObservePage() {
   if (!HYPERDX_URL) {
     return (
       <div className="p-6 text-md">
-        HyperDX is not configured for this deployment
-        (NEXT_PUBLIC_HYPERDX_URL is unset).
+        HyperDX is not configured for this deployment (NEXT_PUBLIC_HYPERDX_URL
+        is unset).
       </div>
     );
   }
