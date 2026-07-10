@@ -7,7 +7,7 @@ import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useValidateRule } from '@/Rules/hooks/useValidateRule';
-import { SqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
+import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps } from 'antd';
 import { useEffect } from 'react';
@@ -44,7 +44,7 @@ type CreateUpdateRuleFormProps = FormProps<CreateUpdateRuleFormData> & {
   buttonLabel?: string;
   disabledFields?: DisabledFields;
   hideAdvancedSettings?: boolean;
-  onValidateSuccess?: (data: SqlValidationResponse) => void;
+  onValidateSuccess?: (data: TSqlValidationResponse) => void;
 };
 
 const CreateUpdateRuleFormBase = ({

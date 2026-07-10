@@ -33,6 +33,7 @@ import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1332,7 +1333,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             ],
           },
         }: {
-          mockedResponse?: components['schemas']['SqlValidationResponse'];
+          mockedResponse?: TSqlValidationResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.validate.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

@@ -1,10 +1,9 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import type { SqlValidationRequest, SqlValidationResponse } from './types';
+import { validateRule } from './api';
+import type { TSqlValidationRequest, TSqlValidationResponse } from './types';
 
 interface UseValidateRuleProps {
-  onSuccess?: (data: SqlValidationResponse) => void;
+  onSuccess?: (data: TSqlValidationResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -13,8 +12,7 @@ export const useValidateRule = ({
   onError,
 }: UseValidateRuleProps = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: (rule: SqlValidationRequest) =>
-      apiClient.post(API_CONFIG.rules.validate, { body: rule }),
+    mutationFn: (rule: TSqlValidationRequest) => validateRule({ body: rule }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },
