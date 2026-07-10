@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useAccountResetPassword } from '.';
-import { AccountResetPasswordRequestBody } from './types';
+import { TAccountResetPasswordRequestBody } from './types';
 import { server } from './useAccountResetPassword.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useAccountResetPassword', () => {
-  const requestBody: AccountResetPasswordRequestBody = {
+  const requestBody: TAccountResetPasswordRequestBody = {
     new_password: 'string',
   };
   describe('onSuccess', () => {

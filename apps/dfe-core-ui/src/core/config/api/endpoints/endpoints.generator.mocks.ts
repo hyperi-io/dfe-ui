@@ -37,6 +37,7 @@ import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { TSchemaCreateVersionResponse } from '@/Schemas/hooks/useCreateSchemaVersion/types';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { TMetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
+import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetPassword/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2790,7 +2791,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {},
           username = 'string',
         }: {
-          mockedResponse?: Record<string, never>;
+          mockedResponse?: TAccountResetPasswordResponse;
           username?: string;
         } = {}) => {
           return http.post(
@@ -2799,7 +2800,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
               username,
             ),
             () => {
-              return HttpResponse.json(mockedResponse);
+              return HttpResponse.json(JSON.stringify(mockedResponse));
             },
           );
         },
