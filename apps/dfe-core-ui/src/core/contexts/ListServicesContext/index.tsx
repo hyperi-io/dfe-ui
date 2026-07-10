@@ -2,7 +2,7 @@
 
 import { useFetchInfiniteFilteredServices } from '@/core/hooks/useFetchInfiniteFilteredServices';
 import type {
-  ServiceListResponse,
+  TServiceListResponse,
   UseFetchInfiniteFilteredServicesProps,
 } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 
@@ -61,7 +61,7 @@ const hasAnyFilters = (f: ListServicesQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListServicesContextValue {
-  data: ServiceListResponse;
+  data: TServiceListResponse;
   filters: UseFetchInfiniteFilteredServicesProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredServicesProps) => void;
@@ -86,8 +86,8 @@ export interface ListServicesContextValue {
   }) => void;
 }
 
-const DEFAULT_SERVICE_LIST_RESPONSE: ServiceListResponse = {
-  items: [] as ServiceListResponse['items'],
+const DEFAULT_SERVICE_LIST_RESPONSE: TServiceListResponse = {
+  items: [] as TServiceListResponse['items'],
   total: 0,
   page: 1,
   per_page: 10,

@@ -17,6 +17,7 @@ import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
 import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -747,7 +748,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_ServiceConfigSummary_'];
+          mockedResponse?: TServiceListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
