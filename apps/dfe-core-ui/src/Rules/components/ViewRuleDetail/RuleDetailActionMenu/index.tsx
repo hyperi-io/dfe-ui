@@ -5,12 +5,12 @@ import { UpdateRuleDrawer } from '@/Rules/components/UpdateRuleDrawer';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 
 interface RuleDetailActionMenuProps {
-  onEditSuccess?: (rule: RuleUpdateResponse) => void;
+  onEditSuccess?: (rule: TRuleUpdateResponse) => void;
   rule: TRuleDetail;
 }
 

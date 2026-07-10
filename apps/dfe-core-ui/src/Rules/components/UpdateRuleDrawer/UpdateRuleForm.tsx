@@ -6,13 +6,13 @@ import {
 import { RULE_DETAIL_QUERY_KEY } from '@/Rules/hooks/useFetchRuleDetail';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
-import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { Spin } from 'antd';
 
 interface UpdateRuleFormProps {
   rule: TRuleDetail;
-  onSuccess?: (response: RuleUpdateResponse) => void;
+  onSuccess?: (response: TRuleUpdateResponse) => void;
 }
 
 export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {

@@ -32,6 +32,7 @@ import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1166,7 +1167,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['RuleCreateResponse'];
+          mockedResponse?: TRuleUpdateResponse;
           name?: string;
         } = {}) => {
           return http.put(
