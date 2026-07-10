@@ -1,4 +1,4 @@
-import { AlertListResponseItem } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
+import { TAlertListResponseItem } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { useUpdateAlert } from '@/Hunts/hooks/useUpdateAlert';
 import {
   CreateUpdateAlertForm,
@@ -10,7 +10,7 @@ export const UpdateAlertForm = ({
   alert,
 }: {
   onFinish?: (values: EditAlertCardFormData) => void;
-  alert: AlertListResponseItem;
+  alert: TAlertListResponseItem;
 }) => {
   const {
     mutate: updateAlert,

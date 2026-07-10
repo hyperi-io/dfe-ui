@@ -26,6 +26,7 @@ import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { TAlertDetailResponse } from '@/Hunts/hooks/useFetchAlertDetail/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1365,7 +1366,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_AlertDestinationSummary_'];
+          mockedResponse?: TAlertListResponse;
         } = {}) => {
           return http.get(
             API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
