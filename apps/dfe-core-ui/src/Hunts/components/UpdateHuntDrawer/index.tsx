@@ -6,7 +6,7 @@ import {
 } from '@/Hunts/components/CreateUpdateHuntForm';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { useUpdateHunt } from '@/Hunts/hooks/useUpdateHunt';
-import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
+import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
 import {
   transformHuntDetailToFormData,
   transformHuntFormDataToUpdateRequest,
@@ -20,7 +20,7 @@ interface UpdateHuntDrawerProps {
   open?: boolean;
   onClose?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
-  onSuccess?: (hunt: HuntUpdateResponse) => void;
+  onSuccess?: (hunt: THuntUpdateResponse) => void;
 }
 
 export const UpdateHuntDrawer = ({

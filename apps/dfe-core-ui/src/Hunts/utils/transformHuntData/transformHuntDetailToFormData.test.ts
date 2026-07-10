@@ -1,6 +1,6 @@
 import { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHuntForm';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
-import { HuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
+import { THuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 import { describe, expect, it } from 'vitest';
 import {
   transformHuntDetailToFormData,
@@ -49,7 +49,7 @@ describe('transformHuntFormDataToUpdateRequest', () => {
     const formValues = transformHuntDetailToFormData(huntDetail);
     formValues.name = 'Updated Hunt';
 
-    const expectedRequest: HuntUpdateRequest = {
+    const expectedRequest: THuntUpdateRequest = {
       display_name: 'My Hunt',
       cron: '0 * * * *',
       log_buffer: 120,

@@ -1,7 +1,6 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { HuntUpdateRequest, HuntUpdateResponse } from './types';
+import { updateHunt } from './api';
+import { THuntUpdateRequest, THuntUpdateResponse } from './types';
 
 export const useUpdateHunt = ({
   name,
@@ -9,12 +8,12 @@ export const useUpdateHunt = ({
   onError,
 }: {
   name: string;
-  onSuccess?: (data: HuntUpdateResponse) => void;
+  onSuccess?: (data: THuntUpdateResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (hunt: HuntUpdateRequest) =>
-      apiClient.put(API_CONFIG.hunts.hunt, {
+    mutationFn: (hunt: THuntUpdateRequest) =>
+      updateHunt({
         body: hunt,
         pathParams: { name },
       }),

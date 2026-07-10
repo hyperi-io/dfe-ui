@@ -6,13 +6,13 @@ import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
-import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
+import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button } from 'antd';
 
 interface HuntDetailActionMenuProps {
-  onEditSuccess?: (hunt: HuntUpdateResponse) => void;
+  onEditSuccess?: (hunt: THuntUpdateResponse) => void;
   hunt: THuntDetailResponse;
 }
 
@@ -43,7 +43,7 @@ export const HuntDetailActionMenu = ({
     });
   };
 
-  const onEditSuccess = (hunt: HuntUpdateResponse) => {
+  const onEditSuccess = (hunt: THuntUpdateResponse) => {
     setSelectedHuntName(hunt.name);
 
     void queryClient.invalidateQueries({
