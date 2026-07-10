@@ -2,6 +2,7 @@ import {
   TFetchStandardFieldMapResponse,
   TSourceFieldMapResponse,
 } from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
+import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
 import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
@@ -762,12 +763,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             service: 'service',
             instance: 'instance',
-            updated_at: '2021-01-01T00:00:00Z',
+            config: {},
           },
           service = 'service',
           instance = 'instance',
         }: {
-          mockedResponse?: object;
+          mockedResponse?: TFetchServiceDetailResponse;
           service?: string;
           instance?: string;
         } = {}) => {
