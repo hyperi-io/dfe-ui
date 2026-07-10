@@ -1,7 +1,7 @@
 import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
-import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { IconArrowMoveUp } from '@repo/dfe-icons';
 import { Button, Input, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
@@ -18,7 +18,7 @@ const buildColumns = (search: string) => [
     key: 'main_action',
     align: 'center' as const,
     width: 30,
-    render: (value: JsonPaths['paths'][number] | undefined) => {
+    render: (value: TJsonPathsResponse['paths'][number] | undefined) => {
       if (!value) {
         return null;
       }
@@ -215,7 +215,9 @@ export const JsonPromoteColumnsTable = ({
   title,
 }: {
   tableValues: TableProps<
-    SchemaColumnRow & { main_action?: Partial<JsonPaths['paths'][number]> }
+    SchemaColumnRow & {
+      main_action?: Partial<TJsonPathsResponse['paths'][number]>;
+    }
   >['dataSource'];
   title: string | React.ReactNode;
 }) => {

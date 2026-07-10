@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/PromoteJsonPaths';
-import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { App, Button, Tabs } from 'antd';
@@ -30,7 +30,7 @@ export const DiscoverJsonPathsDrawer = ({
   const [canPromote, setCanPromote] = useState(false);
   const [promoteTestResponse, setPromoteTestResponse] =
     useState<PromoteFieldResponse | null>(null);
-  const [jsonPaths, setJsonPaths] = useState<JsonPaths | null>(null);
+  const [jsonPaths, setJsonPaths] = useState<TJsonPathsResponse | null>(null);
 
   const hasUncommittedChanges = isDrawerVisible && promoteTestResponse != null;
 

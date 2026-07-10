@@ -4,7 +4,7 @@ import { MetaSchemaSelectCreate } from '@/Sources/components/CreateUpdateSourceF
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
-import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
 import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { Button, Spin } from 'antd';
@@ -23,7 +23,7 @@ export const DiscoverJsonPathsDetails = ({
   selectedSourceVersion: string;
   fieldsToPromote: string[];
   onSuccess: (response: PromoteFieldResponse) => void;
-  onDataLoad: (response: JsonPaths) => void;
+  onDataLoad: (response: TJsonPathsResponse) => void;
   setAttachedSchemaPath?: (schemaPath: string) => void;
 }) => {
   const { isMetaSchemaDefined } = useSourceDetailsContext();

@@ -2,7 +2,7 @@ import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
-import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
 import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { Button } from 'antd';
@@ -20,7 +20,7 @@ export const PromoteJsonPaths = ({
   selectedSourceName: string;
   selectedSourceVersion: string;
   data: PromoteFieldResponse | null;
-  jsonPaths: JsonPaths | null;
+  jsonPaths: TJsonPathsResponse | null;
   onSuccess?: (response: PromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
 }) => {

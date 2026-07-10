@@ -59,6 +59,7 @@ import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2078,7 +2079,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['JsonPathsResponse'];
+          mockedResponse?: TJsonPathsResponse;
           source_name?: string;
         } = {}) => {
           return http.get(
