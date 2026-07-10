@@ -21,6 +21,7 @@ import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServi
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
+import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -3107,7 +3108,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             scheduling_mode: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['HuntEngineStatus'];
+          mockedResponse?: THuntEngineStatus;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.hunts.engineStatus.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
