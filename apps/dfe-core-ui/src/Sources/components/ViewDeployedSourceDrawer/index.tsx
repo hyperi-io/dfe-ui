@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { DeployedSourceDetails } from '@/Sources/components/DeployedSourceDetails';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconEye } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
@@ -16,7 +16,7 @@ export const ViewDeployedSourceDrawer = ({
 }: {
   open?: boolean;
   onClose?: () => void;
-  deploy_result: SourceVersionDetail['version']['source_deployment'];
+  deploy_result: TSourceVersionDetail['version']['source_deployment'];
   source_name: string;
   version: string;
 }) => {

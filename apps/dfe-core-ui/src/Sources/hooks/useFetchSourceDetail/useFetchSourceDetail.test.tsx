@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchSourceDetail } from '.';
-import { SourceVersionDetail } from './types';
+import { TSourceVersionDetail } from './types';
 import { server } from './useFetchSourceDetail.mocks';
 
 beforeAll(() =>
@@ -27,7 +27,7 @@ describe('.useFetchSourceDetail', () => {
         { wrapper },
       );
 
-      const response: SourceVersionDetail = {
+      const response: TSourceVersionDetail = {
         source: 'source',
         enabled: true,
         display_name: 'string',

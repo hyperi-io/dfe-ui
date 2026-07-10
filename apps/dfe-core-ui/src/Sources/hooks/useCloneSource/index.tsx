@@ -5,7 +5,7 @@ import {
   TSourceCreateResponse,
 } from '@/Sources/hooks/useCreateSource/types';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useState } from 'react';
 
 interface UseCloneSourceProps {
@@ -22,7 +22,7 @@ const cloneSourceError = ({
 }: {
   source_version: string | null;
   isFetchingSourceDetail: boolean;
-  sourceDetailData: SourceVersionDetail | undefined;
+  sourceDetailData: TSourceVersionDetail | undefined;
 }) => {
   if (isFetchingSourceDetail) return;
   if (!source_version) return;

@@ -2,7 +2,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { FieldPromoteBanner } from './FieldPromoteBanner';
@@ -12,7 +12,7 @@ export const SampleEventsTabContent = ({
   source,
   version,
 }: {
-  source: SourceVersionDetail;
+  source: TSourceVersionDetail;
   version: string;
 }) => {
   const { isMetaSchemaDefined } = useSourceDetailsContext();

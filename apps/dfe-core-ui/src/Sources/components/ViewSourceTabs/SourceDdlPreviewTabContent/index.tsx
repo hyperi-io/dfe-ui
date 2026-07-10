@@ -3,7 +3,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { DeploySourceDrawer } from '@/Sources/components/DeploySourceDrawer';
 import { ViewDeployedSourceDrawer } from '@/Sources/components/ViewDeployedSourceDrawer';
 import { useBuildSource } from '@/Sources/hooks/useBuildSource';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconPlayerPlay } from '@repo/dfe-icons';
 import { Button, Tabs } from 'antd';
 import { useEffect } from 'react';
@@ -18,8 +18,8 @@ export const SourceDdlPreviewTabContent = ({
 }: {
   source_name: string;
   source_version: string;
-  build_result: SourceVersionDetail['version']['source_build'];
-  deploy_result: SourceVersionDetail['version']['source_deployment'];
+  build_result: TSourceVersionDetail['version']['source_build'];
+  deploy_result: TSourceVersionDetail['version']['source_deployment'];
 }) => {
   const {
     mutate: buildSourceMutation,
