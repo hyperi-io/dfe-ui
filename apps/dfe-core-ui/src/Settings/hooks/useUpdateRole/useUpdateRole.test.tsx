@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateRole } from '.';
-import { RoleUpdateRequest, RoleUpdateResponse } from './types';
+import { TRoleUpdateRequest, TRoleUpdateResponse } from './types';
 import { server } from './useUpdateRole.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateRole', () => {
-  const requestBody: RoleUpdateRequest = {
+  const requestBody: TRoleUpdateRequest = {
     description: 'string',
     permissions: ['string'],
     scoped: false,
@@ -48,7 +48,7 @@ describe('.useUpdateRole', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: RoleUpdateResponse = {
+      const expectedResponse: TRoleUpdateResponse = {
         name: 'string',
         description: 'string',
         permissions: ['string'],

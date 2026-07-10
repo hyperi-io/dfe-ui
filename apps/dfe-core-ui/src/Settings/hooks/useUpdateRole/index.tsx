@@ -1,7 +1,6 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { RoleUpdateRequest, UseUpdateRoleProps } from './types';
+import { updateRole } from './api';
+import { TRoleUpdateRequest, UseUpdateRoleProps } from './types';
 
 export const useUpdateRole = ({
   role_name,
@@ -9,8 +8,8 @@ export const useUpdateRole = ({
   onError,
 }: UseUpdateRoleProps) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (role: RoleUpdateRequest) =>
-      apiClient.put(API_CONFIG.roles.role, {
+    mutationFn: (role: TRoleUpdateRequest) =>
+      updateRole({
         body: role,
         pathParams: { name: role_name },
       }),
