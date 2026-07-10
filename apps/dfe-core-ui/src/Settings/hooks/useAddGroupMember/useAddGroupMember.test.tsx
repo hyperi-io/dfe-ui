@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useAddGroupMember } from '.';
-import { AddGroupMemberRequestBody, AddGroupMemberResponse } from './types';
+import { TAddGroupMemberRequestBody, TAddGroupMemberResponse } from './types';
 import { server } from './useAddGroupMember.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useAddGroupMember', () => {
-  const requestBody: AddGroupMemberRequestBody = {
+  const requestBody: TAddGroupMemberRequestBody = {
     username: 'string',
   };
   describe('onSuccess', () => {
@@ -46,7 +46,7 @@ describe('.useAddGroupMember', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: AddGroupMemberResponse = {
+      const expectedResponse: TAddGroupMemberResponse = {
         name: 'group_name',
         description: 'string',
         roles: ['string'],

@@ -38,6 +38,7 @@ import { TSchemaCreateVersionResponse } from '@/Schemas/hooks/useCreateSchemaVer
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { TMetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
 import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetPassword/types';
+import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2508,7 +2509,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TAddGroupMemberResponse;
           group_name?: string;
         } = {}) => {
           return http.post(
