@@ -2,7 +2,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
-import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react';
 
 interface TableLayoutProps {
   formValues: CreateSchemaFormData;
-  requestBody: SchemaCreateRequest;
+  requestBody: TCreateSchemaRequest;
   onFinish?: () => void;
   buttonLabel: string;
   hideFields?: {

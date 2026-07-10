@@ -12,6 +12,7 @@ import {
 import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
+import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1752,7 +1753,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema'];
+          mockedResponse?: TCreateSchemaResponse;
           schema_path?: string;
         } = {}) => {
           return http.post(

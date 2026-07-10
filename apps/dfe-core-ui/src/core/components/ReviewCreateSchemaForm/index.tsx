@@ -1,4 +1,4 @@
-import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
 import { transformFormDataToRequestBody as transformCreateSchemaFormDataToRequestBody } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Radio } from 'antd';
@@ -7,7 +7,7 @@ import { TableLayout } from './TableLayout';
 import { YamlLayout } from './YamlLayout';
 
 export type ReviewFormTransform = (values: CreateSchemaFormData) => {
-  requestBody: SchemaCreateRequest;
+  requestBody: TCreateSchemaRequest;
 };
 
 export interface ReviewFormProps {

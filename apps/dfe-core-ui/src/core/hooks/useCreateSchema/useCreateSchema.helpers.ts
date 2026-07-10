@@ -1,7 +1,7 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
-  SchemaCreateRequest,
-  SchemaCreateRequestColumn,
+  TCreateSchemaRequest,
+  TCreateSchemaRequestColumn,
 } from '@/core/hooks/useCreateSchema/types';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 
@@ -14,7 +14,7 @@ import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/
 export const transformFormDataToRequestBody = (
   formData: CreateSchemaFormData,
 ) => {
-  const uploadedColumns: SchemaCreateRequestColumn[] = (
+  const uploadedColumns: TCreateSchemaRequestColumn[] = (
     formData.uploadedColumns ?? []
   ).map((column) => ({
     name: column.name,
@@ -28,7 +28,7 @@ export const transformFormDataToRequestBody = (
     ...(column.comment ? { comment: column.comment } : {}),
   }));
 
-  const schemaColumns: SchemaCreateRequestColumn[] = (
+  const schemaColumns: TCreateSchemaRequestColumn[] = (
     formData.schemaColumns ?? []
   ).map((column) => ({
     name: column.name,
@@ -42,7 +42,7 @@ export const transformFormDataToRequestBody = (
     ...(column.comment ? { comment: column.comment } : {}),
   }));
 
-  const requestBody: SchemaCreateRequest = {
+  const requestBody: TCreateSchemaRequest = {
     schema_type: formData.schema_type,
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
     current: formData.version,

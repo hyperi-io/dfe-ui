@@ -1,8 +1,8 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import {
-  SchemaCreateRequest,
-  SchemaCreateResponse,
+  TCreateSchemaRequest,
+  TCreateSchemaResponse,
 } from '@/core/hooks/useCreateSchema/types';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
@@ -10,7 +10,7 @@ import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchema
 import { useState } from 'react';
 
 interface UseCloneSchemaProps {
-  onSuccess?: (schema: SchemaCreateResponse) => void;
+  onSuccess?: (schema: TCreateSchemaResponse) => void;
   onError?: (error: Error) => void;
   schema_path: string;
   version: string | null;
@@ -66,7 +66,7 @@ export const useCloneSchema = ({
       onError?.(new Error(errMessage));
       return;
     }
-    const body: Omit<SchemaCreateRequest, 'schema_type'> = {
+    const body: Omit<TCreateSchemaRequest, 'schema_type'> = {
       path: values.path ? `${values.path}/${values.name}` : values.name,
       current: values.version,
       versions: {
