@@ -1,8 +1,14 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchInfiniteFieldMapsPath } from './api';
 
-export type FieldMapListResponse =
-  components['schemas']['PaginatedResponse_FieldMapSummary_'];
-export type FieldMapSummary = components['schemas']['FieldMapSummary'];
+export type TFieldMapListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchInfiniteFieldMapsPath, 'get'>
+>;
+
+export type TFieldMapSummary = TFieldMapListResponse['items'][number];
 export interface FieldMapListRequestParams {
   search?: string;
   standard?: string;

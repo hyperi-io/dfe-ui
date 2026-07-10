@@ -14,6 +14,7 @@ import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
+import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -929,7 +930,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_FieldMapSummary_'];
+          mockedResponse?: TFieldMapListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
