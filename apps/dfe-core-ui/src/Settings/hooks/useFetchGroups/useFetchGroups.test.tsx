@@ -11,7 +11,7 @@ import {
   test,
 } from 'vitest';
 import { useFetchGroups } from '.';
-import { Group } from './types';
+import { TGroupsResponse } from './types';
 import { server } from './useFetchGroups.mocks';
 
 beforeAll(() =>
@@ -36,7 +36,7 @@ describe('.useFetchGroups', () => {
         refetch: expect.any(Function),
       });
 
-      const expectedResponse: Group[] = [
+      const expectedResponse: TGroupsResponse = [
         {
           name: 'string',
           description: 'string',

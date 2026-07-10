@@ -1,3 +1,11 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchGroupsPath } from './api';
 
-export type Group = components['schemas']['GroupResponse'];
+export type TGroupsResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchGroupsPath, 'get'>
+>;
+
+export type TGroupsItemSummary = TGroupsResponse[number];
