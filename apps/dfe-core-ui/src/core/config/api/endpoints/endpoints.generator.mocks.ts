@@ -9,6 +9,7 @@ import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -115,7 +116,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             permissions: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['PermissionsResponse'];
+          mockedResponse?: TFetchPermissionsResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.auth.permissions.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

@@ -11,7 +11,7 @@ import {
   test,
 } from 'vitest';
 import { useFetchPermissions } from '.';
-import { Permissions } from './types';
+import { TFetchPermissionsResponse } from './types';
 import { server } from './useFetchPermissions.mocks';
 
 beforeAll(() =>
@@ -35,7 +35,7 @@ describe('.useFetchPermissions', () => {
         error: null,
       });
 
-      const expectedResponse: Permissions = {
+      const expectedResponse: TFetchPermissionsResponse = {
         roles: ['string'],
         permissions: ['string'],
       };
