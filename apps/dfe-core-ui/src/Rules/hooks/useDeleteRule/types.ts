@@ -1,3 +1,9 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { deleteRulePath } from './api';
 
-export type RuleDeleteResponse = components['schemas']['RuleResponse'];
+export type TRuleDeleteResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof deleteRulePath, 'delete'>
+>;
