@@ -1,11 +1,10 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { fetchAccounts } from './api';
 
 export const useFetchAccounts = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['accounts'],
-    queryFn: () => apiClient.get(API_CONFIG.accounts.default),
+    queryFn: () => fetchAccounts(),
   });
 
   return { data, isLoading, error, refetch };

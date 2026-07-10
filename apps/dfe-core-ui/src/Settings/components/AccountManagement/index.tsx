@@ -6,7 +6,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
-import { Account } from '@/Settings/hooks/useFetchAccounts/types';
+import { TAccountsItemSummary } from '@/Settings/hooks/useFetchAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin, Table, Tag, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
@@ -69,7 +69,7 @@ export const AccountManagement = () => {
       key: 'actions',
       width: 85,
       align: 'center' as const,
-      render: (_: unknown, record: Account) => (
+      render: (_: unknown, record: TAccountsItemSummary) => (
         <RowActions
           username={record.username}
           isActive={record.enabled}

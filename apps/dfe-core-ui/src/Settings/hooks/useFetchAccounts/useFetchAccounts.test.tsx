@@ -11,7 +11,7 @@ import {
   test,
 } from 'vitest';
 import { useFetchAccounts } from '.';
-import { Account } from './types';
+import { TAccountsItemSummary } from './types';
 import { server } from './useFetchAccounts.mocks';
 
 beforeAll(() =>
@@ -36,7 +36,7 @@ describe('.useFetchAccounts', () => {
         refetch: expect.any(Function),
       });
 
-      const expectedResponse: Account[] = [
+      const expectedResponse: TAccountsItemSummary[] = [
         {
           username: 'string',
           enabled: true,

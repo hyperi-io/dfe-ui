@@ -1,3 +1,11 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchAccountsPath } from './api';
 
-export type Account = components['schemas']['AccountResponse'];
+export type TAccountsResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchAccountsPath, 'get'>
+>;
+
+export type TAccountsItemSummary = TAccountsResponse[number];
