@@ -43,6 +43,7 @@ import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types'
 import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
 import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
 import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
+import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2676,7 +2677,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'];
+          mockedResponse?: TAccountDetailResponse;
           username?: string;
         } = {}) => {
           return http.get(
