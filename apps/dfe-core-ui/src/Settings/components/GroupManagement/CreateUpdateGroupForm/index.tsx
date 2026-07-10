@@ -4,7 +4,7 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
-import { Button, Input } from 'antd';
+import { Button, Input, Select } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -18,6 +18,7 @@ const formSchema = z.object({
   description: z.string(),
   roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
   members: z.array(z.string()).optional(),
+  scope: z.enum(['org', 'system']),
 });
 
 export type CreateUpdateGroupFormData = z.infer<typeof formSchema>;
@@ -33,6 +34,7 @@ export const CreateUpdateGroupForm = ({
     description: '',
     roles: [],
     members: [],
+    scope: 'org',
   },
   disabledFields,
   showMembersField = false,
@@ -73,6 +75,15 @@ export const CreateUpdateGroupForm = ({
 
       <Form.Item name="roles" label="Roles" rules={[formValidation]}>
         <GroupRoleSelect />
+      </Form.Item>
+
+      <Form.Item name="scope" label="Scope" rules={[formValidation]}>
+        <Select
+          options={[
+            { label: 'Org', value: 'org' },
+            { label: 'System', value: 'system' },
+          ]}
+        />
       </Form.Item>
 
       {showMembersField && (

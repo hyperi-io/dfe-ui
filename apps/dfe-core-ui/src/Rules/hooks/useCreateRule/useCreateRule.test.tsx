@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateRule } from '.';
-import { TRuleCreateResponse } from './types';
+import { TRuleCreateRequest, TRuleCreateResponse } from './types';
 import { server } from './useCreateRule.mocks';
 
 beforeAll(() =>
@@ -26,10 +26,10 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateRule', () => {
-  const requestBody = {
+  const requestBody: TRuleCreateRequest = {
     name: 'string',
     severity: 'string',
-    source_type: 'string',
+    source_type: 'raw',
     user_sql: 'string',
     cel_filter: 'string',
     hunt_name: 'string',

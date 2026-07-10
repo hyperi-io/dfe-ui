@@ -66,7 +66,6 @@ export const CreateOrganisationDrawer = ({
       >
         <CreateUpdateOrganisationForm
           initialValues={{
-            dedicated_database: false,
             display_name: '',
             org_ids: [],
             name: '',

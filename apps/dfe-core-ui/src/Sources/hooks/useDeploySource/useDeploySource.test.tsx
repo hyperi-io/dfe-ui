@@ -49,11 +49,10 @@ describe('.useDeploySource', () => {
       const expectedResponse: TSourceDeployResponse = {
         source_name: 'string',
         version: 'string',
-        success: true,
-        deployed_version: 'string',
-        deployed_at: 'string',
-        ddl_executed: ['string'],
-        ddl_failed: [],
+        dry_run: false,
+        applied: true,
+        create_table: 'string',
+        statements_applied: 0,
       };
 
       await waitFor(() => {

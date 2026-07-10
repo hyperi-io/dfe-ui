@@ -758,11 +758,10 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             source_name: 'string',
             version: 'string',
-            success: true,
-            deployed_version: 'string',
-            deployed_at: 'string',
-            ddl_executed: ['string'],
-            ddl_failed: [],
+            dry_run: false,
+            applied: true,
+            create_table: 'string',
+            statements_applied: 0,
           },
           name = 'source',
         }: {
@@ -2187,7 +2186,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
               display_name: 'string',
               org_ids: ['string'],
               enabled: true,
-              dedicated_database: true,
               created_at: 'string',
               updated_at: 'string',
             },
@@ -2218,7 +2216,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
@@ -2251,7 +2248,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
@@ -2291,7 +2287,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
@@ -2366,6 +2361,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
               description: 'string',
               roles: ['string'],
               members: ['string'],
+              scope: 'string',
             },
           ],
         }: {
@@ -2394,6 +2390,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
         }: {
           mockedResponse?: TGroupCreateResponse;
@@ -2424,6 +2421,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
@@ -2467,6 +2465,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
@@ -2553,6 +2552,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
@@ -2604,6 +2604,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
           username = 'string',

@@ -31,6 +31,7 @@ describe('.useCreateGroup', () => {
     description: 'string',
     roles: ['string'],
     members: [],
+    scope: 'string',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -49,6 +50,7 @@ describe('.useCreateGroup', () => {
         description: 'string',
         roles: ['string'],
         members: ['string'],
+        scope: 'string',
       };
 
       await waitFor(() => {

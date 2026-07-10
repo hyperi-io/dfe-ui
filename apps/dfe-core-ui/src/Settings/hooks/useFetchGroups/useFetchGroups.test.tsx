@@ -42,6 +42,7 @@ describe('.useFetchGroups', () => {
           description: 'string',
           roles: ['string'],
           members: ['string'],
+          scope: 'string',
         },
       ];
 

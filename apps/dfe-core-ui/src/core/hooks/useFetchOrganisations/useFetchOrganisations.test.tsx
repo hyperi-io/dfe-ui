@@ -42,7 +42,6 @@ describe('.useFetchOrganisations', () => {
           display_name: 'string',
           org_ids: ['string'],
           enabled: true,
-          dedicated_database: true,
           created_at: 'string',
           updated_at: 'string',
         },

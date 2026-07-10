@@ -51,6 +51,7 @@ describe('.useAddGroupMember', () => {
         description: 'string',
         roles: ['string'],
         members: ['string'],
+        scope: 'string',
       };
 
       await waitFor(() => {

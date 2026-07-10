@@ -66,6 +66,7 @@ export const UpdateGroupForm = ({
         description: groupDetailData.description,
         roles: groupDetailData.roles,
         members: groupDetailData.members,
+        scope: groupDetailData.scope as 'org' | 'system',
       }}
       disabledFields={{
         name: true,

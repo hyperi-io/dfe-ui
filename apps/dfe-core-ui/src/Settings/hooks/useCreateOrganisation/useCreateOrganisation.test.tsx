@@ -32,7 +32,6 @@ describe('.useCreateOrganisation', () => {
   const requestBody: TOrganisationCreateRequestBody = {
     name: 'org_name',
     display_name: 'string',
-    dedicated_database: true,
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -51,7 +50,6 @@ describe('.useCreateOrganisation', () => {
         display_name: 'string',
         org_ids: ['string'],
         enabled: true,
-        dedicated_database: true,
         created_at: 'string',
         updated_at: 'string',
       };

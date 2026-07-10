@@ -29,8 +29,8 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
   });
 
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
-    const { name, description, roles, members = [] } = values;
-    createGroup({ name, description, roles, members });
+    const { name, description, roles, members = [], scope } = values;
+    createGroup({ name, description, roles, members, scope });
   };
 
   return (

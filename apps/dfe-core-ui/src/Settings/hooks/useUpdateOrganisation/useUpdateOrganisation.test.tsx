@@ -33,8 +33,6 @@ describe('.useUpdateOrganisation', () => {
     display_name: 'string',
     org_ids: ['string'],
     enabled: true,
-    dedicated_database: true,
-    confirm_merge: true,
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -58,7 +56,6 @@ describe('.useUpdateOrganisation', () => {
         display_name: 'string',
         org_ids: ['string'],
         enabled: true,
-        dedicated_database: true,
         created_at: 'string',
         updated_at: 'string',
       };

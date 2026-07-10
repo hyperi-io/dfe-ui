@@ -50,8 +50,6 @@ export const EditOrganisationDrawer = ({
       display_name: values.display_name,
       org_ids: values.org_ids,
       enabled: organisation.enabled,
-      dedicated_database: values.dedicated_database,
-      confirm_merge: values.confirm_merge ?? false,
     });
   };
   return (
@@ -81,11 +79,7 @@ export const EditOrganisationDrawer = ({
         onClose={() => setOpen(false)}
       >
         <CreateUpdateOrganisationForm
-          showConfirmMergeField
-          initialValues={{
-            ...organisation,
-            confirm_merge: false,
-          }}
+          initialValues={organisation}
           onFinish={handleUpdateOrganisation}
           error={error}
           isPending={isPending}
