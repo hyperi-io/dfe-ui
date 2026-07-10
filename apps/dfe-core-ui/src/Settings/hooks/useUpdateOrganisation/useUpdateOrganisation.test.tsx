@@ -13,8 +13,8 @@ import {
 } from 'vitest';
 import { useUpdateOrganisation } from '.';
 import {
-  OrganisationUpdateRequestBody,
-  OrganisationUpdateResponse,
+  TOrganisationUpdateRequestBody,
+  TOrganisationUpdateResponse,
 } from './types';
 import { server } from './useUpdateOrganisation.mocks';
 
@@ -29,7 +29,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateOrganisation', () => {
-  const requestBody: OrganisationUpdateRequestBody = {
+  const requestBody: TOrganisationUpdateRequestBody = {
     display_name: 'string',
     org_ids: ['string'],
     enabled: true,
@@ -53,7 +53,7 @@ describe('.useUpdateOrganisation', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: OrganisationUpdateResponse = {
+      const expectedResponse: TOrganisationUpdateResponse = {
         name: 'org_name',
         display_name: 'string',
         org_ids: ['string'],
