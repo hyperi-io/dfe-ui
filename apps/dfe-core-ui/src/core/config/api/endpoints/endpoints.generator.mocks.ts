@@ -47,6 +47,7 @@ import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/t
 import { TAccountsResponse } from '@/Settings/hooks/useFetchAccounts/types';
 import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
 import { TGroupsResponse } from '@/Settings/hooks/useFetchGroups/types';
+import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -3012,7 +3013,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             notes: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['CasbinScopesResponse'];
+          mockedResponse?: TRoleScopesResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
