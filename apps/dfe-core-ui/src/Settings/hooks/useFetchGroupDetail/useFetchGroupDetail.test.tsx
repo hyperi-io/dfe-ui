@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchGroupDetail } from '.';
-import { GroupDetail } from './types';
+import { TGroupDetailResponse } from './types';
 import { server } from './useFetchGroupDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchGroupDetail', () => {
         { wrapper },
       );
 
-      const response: GroupDetail = {
+      const response: TGroupDetailResponse = {
         name: 'group_name',
         description: 'string',
         roles: ['string'],
