@@ -1,9 +1,15 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchInfiniteFilteredRolesPath } from './api';
 
-export type RoleListResponse =
-  components['schemas']['PaginatedResponse_RoleResponse_'];
-export type RoleListItem = RoleListResponse['items'][number];
+export type TRoleListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchInfiniteFilteredRolesPath, 'get'>
+>;
+
+export type TRoleListItem = TRoleListResponse['items'][number];
 
 export type ResourceType = (typeof RESOURCE_TYPES)[keyof typeof RESOURCE_TYPES];
 
