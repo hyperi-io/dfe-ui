@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { HuntListResponse } from './types';
+import { THuntListItem } from './types';
 
-const HUNT_ITEM: HuntListResponse['items'][number] = {
+const HUNT_ITEM: THuntListItem = {
   display_name: 'string',
   name: 'string',
   source_table: 'string',

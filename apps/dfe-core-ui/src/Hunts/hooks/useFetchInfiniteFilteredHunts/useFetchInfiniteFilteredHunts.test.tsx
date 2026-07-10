@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredHunts } from '.';
-import { HuntListResponse } from './types';
+import { THuntListItem } from './types';
 import { server } from './useFetchInfiniteFilteredHunts.mocks';
 
 class MockIntersectionObserver {
@@ -66,7 +66,7 @@ describe('useFetchInfiniteFilteredHunts', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: HuntListResponse['items'][number] = {
+      const responseItem: THuntListItem = {
         display_name: 'string',
         name: 'string',
         source_table: 'string',
