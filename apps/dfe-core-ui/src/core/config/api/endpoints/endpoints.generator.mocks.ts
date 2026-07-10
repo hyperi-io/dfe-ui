@@ -34,6 +34,7 @@ import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
+import { TSchemaCreateVersionResponse } from '@/Schemas/hooks/useCreateSchemaVersion/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1712,7 +1713,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          mockedResponse?: TSchemaCreateVersionResponse;
           schema_path?: string;
         } = {}) => {
           return http.post(
