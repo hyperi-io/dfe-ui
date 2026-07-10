@@ -3,6 +3,7 @@ import {
   TSourceFieldMapResponse,
 } from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
 import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
+import { TTestTransformResponse } from '@/_Transforms/hooks/_useTestTransform/types';
 import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
@@ -1602,7 +1603,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             wasm_memory_bytes: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__v1__transforms__TestResponse'];
+          mockedResponse?: TTestTransformResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
