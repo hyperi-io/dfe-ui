@@ -1,7 +1,6 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { DeploySourceDrawer } from '@/Sources/components/DeploySourceDrawer';
-import { ViewDeployedSourceDrawer } from '@/Sources/components/ViewDeployedSourceDrawer';
 import { useBuildSource } from '@/Sources/hooks/useBuildSource';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconPlayerPlay } from '@repo/dfe-icons';
@@ -84,18 +83,10 @@ export const SourceDdlPreviewTabContent = ({
             </p>
           }
           action={
-            deployResult ? (
-              <ViewDeployedSourceDrawer
-                source_name={source_name}
-                version={source_version}
-                deploy_result={deployResult}
-              />
-            ) : (
-              <DeploySourceDrawer
-                source_name={source_name}
-                version={source_version}
-              />
-            )
+            <DeploySourceDrawer
+              source_name={source_name}
+              version={source_version}
+            />
           }
         />
       )}
