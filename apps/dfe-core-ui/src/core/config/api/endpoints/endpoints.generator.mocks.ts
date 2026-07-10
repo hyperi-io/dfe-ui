@@ -57,6 +57,7 @@ import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisat
 import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -737,7 +738,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourceDeployResponse'];
+          mockedResponse?: TSourceDeployResponse;
           name?: string;
         } = {}) => {
           return http.post(

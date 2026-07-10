@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useDeploySource } from '.';
-import { SourceDeployRequest, SourceDeployResponse } from './types';
+import { SourceDeployRequest, TSourceDeployResponse } from './types';
 import { server } from './useDeploySource.mocks';
 
 beforeAll(() =>
@@ -46,7 +46,7 @@ describe('.useDeploySource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourceDeployResponse = {
+      const expectedResponse: TSourceDeployResponse = {
         source_name: 'string',
         version: 'string',
         success: true,
