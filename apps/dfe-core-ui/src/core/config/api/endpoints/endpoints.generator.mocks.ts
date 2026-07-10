@@ -18,6 +18,7 @@ import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFiel
 import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
+import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -178,7 +179,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedSourceSummaryResponse'];
+          mockedResponse?: TSourceListResponse;
         } = {}) =>
           http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

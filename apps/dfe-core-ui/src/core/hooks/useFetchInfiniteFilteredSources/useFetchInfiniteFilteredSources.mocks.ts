@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { SourceListResponse, SourceListSummary } from './types';
+import { TSourceListResponse, TSourceListSummary } from './types';
 
-const SOURCE_ITEM: SourceListSummary = {
+const SOURCE_ITEM: TSourceListSummary = {
   name: 'string',
   display_name: 'string',
   enabled: true,
@@ -32,7 +32,7 @@ function createPaginatedSourcesHandler() {
     const items = ALL_ITEMS.slice(start, start + perPage);
     const totalPages = Math.ceil(TOTAL_ITEMS / perPage);
 
-    const response: SourceListResponse = {
+    const response: TSourceListResponse = {
       items,
       total: TOTAL_ITEMS,
       objects: ALL_ITEMS.reduce(
@@ -40,7 +40,7 @@ function createPaginatedSourcesHandler() {
           acc[item.name] = item;
           return acc;
         },
-        {} as Record<string, SourceListSummary>,
+        {} as Record<string, TSourceListSummary>,
       ),
       page,
       per_page: perPage,

@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSources } from '.';
-import { SourceListResponse, SourceListSummary } from './types';
+import { TSourceListResponse, TSourceListSummary } from './types';
 import { server } from './useFetchInfiniteFilteredSources.mocks';
 
 class MockIntersectionObserver {
@@ -43,7 +43,7 @@ describe('useFetchInfiniteFilteredSources', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      const expectedResponse: SourceListResponse = {
+      const expectedResponse: TSourceListResponse = {
         items: [],
         objects: {},
         total: 0,
@@ -69,7 +69,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: SourceListSummary = {
+      const responseItem: TSourceListSummary = {
         name: 'string',
         display_name: 'string',
         enabled: true,
@@ -264,7 +264,7 @@ describe('useFetchInfiniteFilteredSources', () => {
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
 
-      const expectedResponse: SourceListResponse = {
+      const expectedResponse: TSourceListResponse = {
         items: [],
         objects: {},
         total: 0,
