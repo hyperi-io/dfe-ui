@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import {
   SchemaCreateRequest,
@@ -65,7 +66,7 @@ export const useCloneSchema = ({
       onError?.(new Error(errMessage));
       return;
     }
-    const body: SchemaCreateRequest = {
+    const body: Omit<SchemaCreateRequest, 'schema_type'> = {
       path: values.path ? `${values.path}/${values.name}` : values.name,
       current: values.version,
       versions: {
@@ -73,7 +74,10 @@ export const useCloneSchema = ({
           date: new Date().toISOString(),
           type: 'model',
           summary: values.description ?? '',
-          columns: schemaDetailData.version.columns.items,
+          columns: schemaDetailData.version.columns.items.map((column) => ({
+            ...column,
+            _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
+          })),
         },
       },
     };

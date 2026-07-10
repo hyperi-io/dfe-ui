@@ -1,20 +1,25 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+
+export const RULE_DETAIL_QUERY_KEY = (name: string | null) => [
+  'rule',
+  ...(name ? [name] : []),
+];
 /**
  * useFetchRuleDetail
- * @param rule_id - The ID of the rule to fetch.
+ * @param name - The name of the rule to fetch.
  * @returns The rule detail.
  */
-export const useFetchRuleDetail = ({ rule_id }: { rule_id: string | null }) => {
+export const useFetchRuleDetail = ({ name }: { name: string | null }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['rule', rule_id],
+    queryKey: RULE_DETAIL_QUERY_KEY(name),
     queryFn: ({ signal }) =>
       apiClient.get(API_CONFIG.rules.rule, {
-        pathParams: { rule_id: rule_id ?? '' },
+        pathParams: { name: name ?? '' },
         signal,
       }),
-    enabled: !!rule_id,
+    enabled: !!name,
   });
 
   return {

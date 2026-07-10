@@ -1,11 +1,13 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
+import { useDebounce } from '@/core/hooks/useDebounce';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
-import { IconHandFinger, IconInfoCircle, IconUpload } from '@repo/dfe-icons';
-import { Button, Select, Tooltip } from 'antd';
+import { IconInfoCircle } from '@repo/dfe-icons';
+import { Button, Input, Select, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
 
 interface TableLayoutProps {
@@ -18,6 +20,8 @@ interface TableLayoutProps {
   };
 }
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export const TableLayout = ({
   formValues,
   requestBody,
@@ -25,6 +29,9 @@ export const TableLayout = ({
   buttonLabel,
   hideFields,
 }: TableLayoutProps) => {
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE_MS);
+
   const [showVersion, setShowVersion] = useState<string>(requestBody.current);
 
   const { handleGoBack, formErrorMessage } = useCreateSchemaReviewContext();
@@ -44,16 +51,22 @@ export const TableLayout = ({
     ];
   }, [formValues.uploadedColumns, formValues.schemaColumns]);
 
+  const filteredColumns = useMemo(() => {
+    return allColumns.filter((column) =>
+      column.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
+  }, [allColumns, debouncedSearch]);
+
   const tableColumns = [
     {
       title: '',
-      dataIndex: 'imported',
-      key: 'imported',
+      dataIndex: '_field_type',
+      key: '_field_type',
       width: 30,
-      render: (imported: boolean) => {
+      render: (value: string) => {
         return (
-          <Tooltip title={imported ? 'Imported' : 'Manual'} destroyOnHidden>
-            <span>{imported ? <IconUpload /> : <IconHandFinger />}</span>
+          <Tooltip title={value} destroyOnHidden>
+            <span>{fieldTypeIconSwitch(value)}</span>
           </Tooltip>
         );
       },
@@ -174,23 +187,42 @@ export const TableLayout = ({
 
       <SchemaTable
         visibleColumns={[
+          '_field_type',
           '__rowId',
-          'imported',
+          '_field_type',
           'name',
           'type',
-          'delete',
+          'main_action',
           'expr',
           'comment',
         ]}
-        lockedColumns={['__rowId', 'imported', 'delete', 'name']}
+        lockedColumns={[
+          '_field_type',
+          '__rowId',
+          '_field_type',
+          'main_action',
+          'name',
+        ]}
         columns={tableColumns}
-        dataSource={allColumns}
+        dataSource={filteredColumns}
         rowKey="name"
         pagination={{
           defaultPageSize: 50,
           showSizeChanger: true,
           pageSizeOptions: [10, 25, 50, 100],
         }}
+        title={() => (
+          <div className="flex items-center justify-between w-full">
+            <span className="font-medium">Columns</span>
+            <Input.Search
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ml-auto w-96"
+              placeholder="Search"
+              allowClear
+            />
+          </div>
+        )}
         locale={{
           emptyText: (
             <div className="flex items-center justify-center gap-2 text-foreground-muted dark:text-dark-foreground-muted">

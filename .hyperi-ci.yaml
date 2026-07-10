@@ -21,6 +21,12 @@ build:
 publish:
   enabled: true
   target: internal
+  # dfe-ui is a private, deployed application ("private": true), not an npm
+  # library -- opt out of the default npm publish (destinations_oss.npm: npmjs)
+  # so the publish stage does not try to `npm publish` (which fails on the
+  # missing NPM_TOKEN). Only the container ships.
+  destinations_oss:
+    npm: false
   # Build + publish the container to ghcr.io/hyperi-io/dfe-ui. Explicit `true`
   # (not the default `auto`) so a missing/broken Dockerfile fails the build loudly
   # -- dfe-ui is a deployed service, the image must always ship.

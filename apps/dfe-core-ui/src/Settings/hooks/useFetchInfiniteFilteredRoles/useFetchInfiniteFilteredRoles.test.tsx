@@ -1,3 +1,4 @@
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -285,7 +286,8 @@ describe('useFetchInfiniteFilteredRoles', () => {
 
     it('should include enabled filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoles({ resource_type: 'test' }),
+        () =>
+          useFetchInfiniteFilteredRoles({ resource_type: RESOURCE_TYPES.CORE }),
         {
           wrapper,
         },
@@ -300,7 +302,8 @@ describe('useFetchInfiniteFilteredRoles', () => {
 
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoles({ resource_type: 'test' }),
+        () =>
+          useFetchInfiniteFilteredRoles({ resource_type: RESOURCE_TYPES.CORE }),
         {
           wrapper,
         },
@@ -318,7 +321,7 @@ describe('useFetchInfiniteFilteredRoles', () => {
         () =>
           useFetchInfiniteFilteredRoles({
             search: 'test',
-            resource_type: 'test',
+            resource_type: RESOURCE_TYPES.CORE,
             per_page: 20,
           }),
         {

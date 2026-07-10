@@ -18,12 +18,14 @@ export const transformSourceFormDataToRequestBody = (
   let apiMatch: SourceUpdateRequestBody['match'] | undefined;
   if (match) {
     const { operator: _operator, field, value } = match;
-    apiMatch = { field, value: value ?? '' };
+    apiMatch = { field, operator: _operator ?? 'equals', value: value ?? '' };
   }
 
   const transformedSource: SourceUpdateRequestBody = {
     ...rest,
-    ...(apiMatch ? { match: apiMatch } : {}),
+    ...(apiMatch
+      ? { match: apiMatch }
+      : { match: { field: '', operator: 'equals', value: '' } }),
     fetcher:
       Object.keys(fetcher ?? {}).length > 0
         ? {

@@ -7,7 +7,6 @@ import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { getValidationErrors, type FormValidationErrors } from './helpers';
 import { MappingStandardsTabContent } from './MappingStandardsTabContent';
-import { OriginTabContent } from './OriginTabContent';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
@@ -35,7 +34,7 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
 };
 
 const TAB_LABEL_MAP = {
-  sourceDetails: 'Details',
+  sourceDetails: 'Configuration',
   mappingStandards: 'Mapping',
   origin: 'Origin',
   schemaConfig: 'Meta Schema',
@@ -97,8 +96,7 @@ export const CreateUpdateSourceFormBase = ({
   };
 
   const metaSchema = Form.useWatch(['schema'], form);
-  const isMetaSchemaDefined =
-    !!metaSchema?.meta_schema || !!metaSchema?.derived_schema;
+  const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
   return (
     <Form
@@ -110,6 +108,7 @@ export const CreateUpdateSourceFormBase = ({
           field: '',
           operator: 'equals',
           value: '',
+          ...initialValues?.match,
         },
         ...initialValues,
       }}
@@ -122,23 +121,10 @@ export const CreateUpdateSourceFormBase = ({
         destroyOnHidden={false}
         items={[
           {
-            key: 'sourceType',
-            label: (
-              <TabLabel
-                label="Origin"
-                validationErrors={validationErrors?.origin}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <OriginTabContent formValidation={formValidation} form={form} />
-            ),
-          },
-          {
             key: 'sourceDetails',
             label: (
               <TabLabel
-                label="Details"
+                label={TAB_LABEL_MAP['sourceDetails']}
                 validationErrors={validationErrors?.sourceDetails}
               />
             ),
@@ -147,10 +133,10 @@ export const CreateUpdateSourceFormBase = ({
               <SourceDetailsTabContent
                 formValidation={formValidation}
                 disabledFields={disabledFields}
+                form={form}
               />
             ),
           },
-
           {
             key: 'schemaConfig',
             label: (
@@ -168,8 +154,8 @@ export const CreateUpdateSourceFormBase = ({
             ),
           },
 
-          ...(isMetaSchemaDefined
-            ? /* Progressive disclosure - the next tab Items are hidden until meta/derived schema is defined */
+          ...(isMetaSchemaFormValueDefined
+            ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
               [
                 {
                   key: 'transform',

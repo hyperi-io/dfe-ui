@@ -13,8 +13,29 @@ name: CI
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: false
+        default: ''
+        description: 'Tag to re-publish (existing tag). Omit + set from-head to release HEAD.'
+      from-head:
+        type: string
+        required: false
+        default: ''
+        description: "'true' to release/retry the current HEAD — the CI creates the tag (issue #35)."
+      bump:
+        type: string
+        required: false
+        default: 'auto'
+        description: 'Version resolution for from-head: auto | patch | minor (forced — release even with no release-worthy commit) | X.Y.Z (exact version).'
 
 jobs:
   ci:
     uses: hyperi-io/hyperi-ci/.github/workflows/ts-ci.yml@main
-    secrets: inherit
+    with:
+      tag: ${{ inputs.tag || '' }}
+      from-head: ${{ inputs.from-head || '' }}
+      bump: ${{ inputs.bump || 'auto' }}
+    # The called workflow is our own hyperi-io/hyperi-ci ts-ci.yml (not a third party) and needs the full secret set for publishing (registry tokens, R2 credentials, GH App token). Matches the documented hyperi-ci.yml template.
+    secrets: inherit # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit

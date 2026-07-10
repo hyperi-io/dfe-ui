@@ -1,4 +1,8 @@
 /* eslint-disable no-console */
+import {
+  RESOURCE_TYPES,
+  SCHEMA_FIELD_TYPES,
+} from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -216,6 +220,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             current: 'string',
             match: {
               field: 'string',
+              operator: 'equals',
               value: 'string',
             },
             transform: {
@@ -230,6 +235,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 },
                 match: {
                   field: 'string',
+                  operator: 'equals',
                   value: 'string',
                 },
               },
@@ -237,7 +243,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['Source'];
+          mockedResponse?: components['schemas']['SourceDetailResponse'];
           name?: string;
         } = {}) => {
           return http.get(
@@ -294,6 +300,42 @@ export const API_CONFIG_MOCKS = Object.freeze({
           name?: string;
         } = {}) => {
           return http.put(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      patch: {
+        success: ({
+          mockedResponse = {
+            path: 'string',
+            current: 'string',
+            versions: ['string'],
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          name?: string;
+        } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.patch(
             API_CONFIG_MOCKS.sources.source.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
@@ -431,7 +473,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
     sourceVersion: {
-      mockedUrl: '/api/v1/sources/{name}/versions',
+      mockedUrl: '/api/v1/sources/{name}/versions/{version}',
       get: {
         success: ({
           mockedResponse = {
@@ -452,8 +494,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
               schema: {
                 meta_schema: 'string',
                 meta_schema_version: 'string',
-                derived_schema: 'string',
-                additional_fields: 'string',
                 ttl_days: 0,
                 engine: 'string',
               },
@@ -487,20 +527,22 @@ export const API_CONFIG_MOCKS = Object.freeze({
               },
               match: {
                 field: 'string',
+                operator: 'equals',
                 value: 'string',
               },
             },
           },
           name = 'source',
+          version = '1.0.0',
         }: {
-          mockedResponse?: components['schemas']['SourceVersionGetResponse'];
+          mockedResponse?: components['schemas']['SourceVersionGetDetailResponse'];
           name?: string;
+          version?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.sources.sourceVersion.mockedUrl.replace(
-              '{name}',
-              name,
-            ),
+            API_CONFIG_MOCKS.sources.sourceVersion.mockedUrl
+              .replace('{name}', name)
+              .replace('{version}', version),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -540,6 +582,132 @@ export const API_CONFIG_MOCKS = Object.freeze({
       post: {
         success: () => {
           console.error('Not implemented');
+        },
+      },
+    },
+    plan: {
+      mockedUrl: '/api/v1/sources/{name}/plan',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'string',
+            version: 'string',
+            planned_at: 'string',
+            table_exists: true,
+            validation_errors: ['string'],
+            statements: ['string'],
+            ddl: {
+              source_name: 'string',
+              create_table: 'string',
+              views: {
+                view1: 'string',
+                view2: 'string',
+              },
+            },
+            ready: true,
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SourcePlanResponse'];
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.sources.plan.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            source_name: 'string',
+            version: 'string',
+            planned_at: 'string',
+            table_exists: true,
+            validation_errors: ['string'],
+            statements: ['string'],
+            ddl: {
+              source_name: 'string',
+              create_table: 'string',
+              views: {
+                view1: 'string',
+                view2: 'string',
+              },
+            },
+            ready: true,
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SourcePlanResponse'];
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.plan.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.plan.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    deploy: {
+      mockedUrl: '/api/v1/sources/{name}/deploy',
+      post: {
+        success: ({
+          mockedResponse = {
+            source_name: 'string',
+            version: 'string',
+            success: true,
+            deployed_version: 'string',
+            deployed_at: 'string',
+            ddl_executed: ['string'],
+            ddl_failed: [],
+          },
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SourceDeployResponse'];
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.deploy.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.sources.deploy.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
@@ -886,12 +1054,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
   },
   rules: {
     rule: {
-      mockedUrl: '/api/v1/rules/{rule_id}',
+      mockedUrl: '/api/v1/rules/{name}',
       get: {
         success: ({
           mockedResponse = {
-            rule_id: 'string',
             name: 'string',
+            display_name: 'string',
             severity: 'string',
             source: 'string',
             source_db: 'string',
@@ -902,13 +1070,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
             hunt_name: 'string',
             created_at: 'string',
           },
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['RuleResponse'];
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -917,14 +1085,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.get(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -935,8 +1103,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             rule: {
-              rule_id: 'string',
               name: 'string',
+              display_name: 'string',
               severity: 'string',
               source_db: 'string',
               source_table: 'string',
@@ -967,13 +1135,13 @@ export const API_CONFIG_MOCKS = Object.freeze({
               warnings: ['string'],
             },
           },
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['RuleCreateResponse'];
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse);
             },
@@ -982,14 +1150,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.put(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -997,9 +1165,9 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
       delete: {
-        success: ({ rule_id = 'rule_id' }: { rule_id?: string } = {}) => {
+        success: ({ name = 'name' }: { name?: string } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json({});
             },
@@ -1008,14 +1176,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
         error: ({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
-          rule_id = 'rule_id',
+          name = 'name',
         }: {
           mockedResponse?: components['schemas']['HTTPValidationError'];
           status?: number;
-          rule_id?: string;
+          name?: string;
         } = {}) => {
           return http.delete(
-            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{rule_id}', rule_id),
+            API_CONFIG_MOCKS.rules.rule.mockedUrl.replace('{name}', name),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -1030,8 +1198,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             items: [
               {
-                rule_id: 'string',
                 name: 'string',
+                display_name: 'string',
                 severity: 'string',
                 source: 'string',
                 source_db: 'string',
@@ -1070,8 +1238,8 @@ export const API_CONFIG_MOCKS = Object.freeze({
         success: ({
           mockedResponse = {
             rule: {
-              rule_id: 'string',
               name: 'string',
+              display_name: 'string',
               severity: 'string',
               source_db: 'string',
               source_table: 'string',
@@ -1156,31 +1324,203 @@ export const API_CONFIG_MOCKS = Object.freeze({
     destinations: {
       mockedUrl: '/api/v1/alerts/destinations',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                enabled: true,
+                url_scheme: 'string',
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_AlertDestinationSummary_'];
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            url: 'string',
+            description: 'string',
+            enabled: true,
+          },
+        }: {
+          mockedResponse?: components['schemas']['AlertDestination'];
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
     destination: {
       mockedUrl: '/api/v1/alerts/destinations/{name}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            url: 'string',
+            description: 'string',
+            enabled: true,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['AlertDestination'];
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       put: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            url: 'string',
+            description: 'string',
+            enabled: true,
+          },
+          name = 'alert_name',
+        }: {
+          mockedResponse?: components['schemas']['AlertDestination'];
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'alert_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
       delete: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          status = 204,
+          name = 'alert_name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'alert_name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.alerts.destination.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
@@ -1291,6 +1631,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 versions: ['string'],
                 updated_at: 'string',
                 column_count: 0,
+                resource_type: RESOURCE_TYPES.CORE,
               },
             ],
             total: 0,
@@ -1381,6 +1722,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             path: 'string',
             current: 'string',
+            resource_type: RESOURCE_TYPES.CORE,
             versions: {
               string: {
                 date: 'string',
@@ -1393,6 +1735,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
+                    _field_type: SCHEMA_FIELD_TYPES.BASE,
                   },
                 ],
               },
@@ -1400,7 +1743,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema-Output'];
+          mockedResponse?: components['schemas']['MetaSchema'];
           schema_path?: string;
         } = {}) => {
           return http.post(
@@ -1520,6 +1863,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             current: 'string',
             selected: 'string',
             versions: ['1.0.0'],
+            resource_type: RESOURCE_TYPES.CORE,
             version: {
               date: 'string',
               type: 'string',
@@ -1532,6 +1876,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                     attribute: ['string'],
                     use_case: 'string',
                     expr: 'string',
+                    _field_type: SCHEMA_FIELD_TYPES.BASE,
                   },
                 ],
                 total: 1,
@@ -1590,10 +1935,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
               attribute: ['string'],
               use_case: 'string',
               expr: 'string',
+              _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn-Output'][];
+          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
@@ -1611,6 +1957,134 @@ export const API_CONFIG_MOCKS = Object.freeze({
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    sampleRows: {
+      mockedUrl: '/api/v1/schemas/{source_name}/sample-rows',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            match_field: 'string',
+            match_value: 'string',
+            columns: ['string'],
+            rows: [{ string: 'string' }],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['SampleRowsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.sampleRows.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    jsonPaths: {
+      mockedUrl: '/api/v1/schemas/{source_name}/json-paths',
+      get: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            table: 'string',
+            json_column: 'string',
+            paths: [
+              {
+                path: 'string',
+                types: ['string'],
+                is_consistent: true,
+                promoted_to: 'string',
+                column: {
+                  name: 'string',
+                  type: 'string',
+                  attribute: ['string'],
+                  use_case: 'string',
+                  expr: 'string',
+                  comment: 'string',
+                  _field_type: SCHEMA_FIELD_TYPES.PROMOTED,
+                },
+                coverage_pct: 100,
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['JsonPathsResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.schemas.jsonPaths.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    promoteField: {
+      mockedUrl: '/api/v1/schemas/{source_name}/promote-field',
+      post: {
+        success: ({
+          mockedResponse = {
+            source_name: 'source',
+            schema_version: 'string',
+            results: [
+              {
+                json_path: 'string',
+                status: 'ok',
+                column_name: 'string',
+                data_type: 'string',
+                index_type: 'string',
+                copy_cel: 'string',
+                error: 'string',
+              },
+            ],
+          },
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['PromoteFieldResponse'];
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          source_name = 'source',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          source_name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.schemas.promoteField.mockedUrl.replace(
+              '{source_name}',
+              source_name,
+            ),
             () => {
               return HttpResponse.json(mockedResponse, { status });
             },
@@ -2510,6 +2984,282 @@ export const API_CONFIG_MOCKS = Object.freeze({
           return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
             return HttpResponse.json(mockedResponse, { status });
           });
+        },
+      },
+    },
+  },
+  hunts: {
+    default: {
+      mockedUrl: '/api/v1/hunts',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                display_name: 'string',
+                name: 'string',
+                source_table: 'string',
+                target_table: 'string',
+                customer: 'string',
+                cron: 'string',
+                rules: ['string'],
+              },
+            ],
+            total: 0,
+            page: 0,
+            per_page: 0,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          },
+        }: {
+          mockedResponse?: components['schemas']['PaginatedResponse_HuntSummary_'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+      post: {
+        success: ({
+          mockedResponse = {
+            display_name: 'string',
+            name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
+            },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
+            explain_queries: false,
+          },
+        }: {
+          mockedResponse?: components['schemas']['HuntDetailResponse'];
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+        } = {}) => {
+          return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    engineStatus: {
+      mockedUrl: '/api/v1/hunts/status',
+      get: {
+        success: ({
+          mockedResponse = {
+            running: true,
+            hunt_count: 1,
+            scheduling_mode: 'string',
+          },
+        }: {
+          mockedResponse?: components['schemas']['HuntEngineStatus'];
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.hunts.engineStatus.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    hunt: {
+      mockedUrl: '/api/v1/hunts/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            display_name: 'string',
+            name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
+            },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            display_name: 'string',
+            cron: 'string',
+            log_buffer: 0,
+            global_target_table_name: 'string',
+            global_source_table_name: 'string',
+            customers: ['string'],
+            rules: [
+              {
+                rule_name: 'string',
+                target_table_name: 'string',
+                source: 'string',
+                initial_checkpoint_lookback_minutes: 0,
+              },
+            ],
+            customer_filters: {
+              string: {
+                filters: ['string'],
+              },
+            },
+            checkpoint_timestamp_field: 'string',
+            scheduling_mode: 'string',
+            min_interval_seconds: 0,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.hunts.hunt.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    huntRun: {
+      mockedUrl: '/api/v1/hunts/{name}/run',
+      post: {
+        success: ({
+          mockedResponse = {
+            task_id: 'string',
+            hunt_name: 'string',
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['TriggerResponse'];
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: components['schemas']['HTTPValidationError'];
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.hunts.huntRun.mockedUrl.replace('{name}', name),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },

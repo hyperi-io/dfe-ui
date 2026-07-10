@@ -1,3 +1,4 @@
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -32,7 +33,7 @@ export const RoleManagement = () => {
     refetch: refetchCoreRoles,
     error: errorCoreRoles,
   } = useFetchInfiniteFilteredRoles({
-    resource_type: 'core',
+    resource_type: RESOURCE_TYPES.CORE,
     per_page: ROLE_LIMIT,
     search: coreRoleSearch,
   });

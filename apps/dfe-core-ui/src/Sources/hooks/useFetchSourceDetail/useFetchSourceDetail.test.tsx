@@ -22,7 +22,7 @@ describe('.useFetchSourceDetail', () => {
         () =>
           useFetchSourceDetail({
             source_name: 'source',
-            source_version: 'string',
+            source_version: '1.0.0',
           }),
         { wrapper },
       );
@@ -45,8 +45,6 @@ describe('.useFetchSourceDetail', () => {
           schema: {
             meta_schema: 'string',
             meta_schema_version: 'string',
-            derived_schema: 'string',
-            additional_fields: 'string',
             ttl_days: 0,
             engine: 'string',
           },
@@ -80,6 +78,7 @@ describe('.useFetchSourceDetail', () => {
           mapping_standards: ['string'],
           match: {
             field: 'string',
+            operator: 'equals',
             value: 'string',
           },
         },

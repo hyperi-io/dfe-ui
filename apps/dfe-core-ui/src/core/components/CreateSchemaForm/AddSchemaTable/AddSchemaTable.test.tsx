@@ -1,3 +1,5 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -9,11 +11,11 @@ import { useEffect } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   AddSchemaTable,
+  AT_LEAST_ONE_SCHEMA_ROW_MESSAGE,
   type AddSchemaTableProps,
   isBlankSchemaListRow,
   type RowSchema,
 } from './index';
-import type { SchemaColumnRow } from './types';
 
 const bypassFormValidation = {
   validator: async () => Promise.resolve(),
@@ -29,6 +31,7 @@ const validRow = (overrides: Partial<RowSchema> = {}): RowSchema => ({
   use_case: '',
   expr: '',
   comment: '',
+  _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
   ...overrides,
 });
 
@@ -76,6 +79,7 @@ const renderAddSchemaTable = (
     initialFormValues?: Record<string, unknown>;
     listName?: string;
     onColumns?: (columns: unknown) => void;
+    onForm?: (form: FormInstance) => void;
   },
 ) => {
   const listName = props.name ?? options?.listName ?? 'columns';
@@ -83,6 +87,7 @@ const renderAddSchemaTable = (
   const onMount = props.onMount ?? vi.fn();
   const onRemoveRow = 'onRemoveRow' in props ? props.onRemoveRow : vi.fn();
   const onColumns = options?.onColumns ?? vi.fn();
+  const onForm = options?.onForm;
   const { onMount: _om, onRemoveRow: _orr, ...tableProps } = props;
 
   const view = render(
@@ -94,15 +99,17 @@ const renderAddSchemaTable = (
         }
       }
     >
+      {onForm ? <CaptureFormInstance onForm={onForm} /> : null}
       <FormColumnsProbe listName={listName} onColumns={onColumns} />
       <AddSchemaTable
         formValidation={bypassFormValidation}
-        lockedColumns={['__rowId', 'delete', 'name']}
+        requireAtLeastOneRow={false}
+        lockedColumns={['_field_type', '__rowId', 'main_action', 'name']}
         visibleColumns={[
           'name',
           'type',
           '__rowId',
-          'delete',
+          'main_action',
           'expr',
           'comment',
         ]}
@@ -151,6 +158,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       }),
     ).toBe(true);
     expect(
@@ -161,11 +169,20 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
       }),
     ).toBe(true);
   });
 
-  test('returns false when any field is populated or row is imported', () => {
+  test('returns true when _field_type is present', () => {
+    expect(
+      isBlankSchemaListRow({
+        _field_type: SCHEMA_FIELD_TYPES.BASE,
+      }),
+    ).toBe(true);
+  });
+
+  test('returns false when any field is populated and ignores _field_type', () => {
     expect(isBlankSchemaListRow({ ...validRow(), name: 'x' })).toBe(false);
     expect(
       isBlankSchemaListRow({
@@ -176,6 +193,7 @@ describe('isBlankSchemaListRow', () => {
         use_case: '',
         expr: '',
         comment: '',
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
       }),
     ).toBe(false);
     expect(
@@ -183,11 +201,11 @@ describe('isBlankSchemaListRow', () => {
         id: '',
         name: '',
         type: '',
-        attribute: [],
+        attribute: undefined,
         use_case: '',
-        expr: '',
+        expr: 'test',
         comment: '',
-        imported: true,
+        _field_type: SCHEMA_FIELD_TYPES.BASE,
       }),
     ).toBe(false);
   });
@@ -228,7 +246,8 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       'Index Type': 'count',
       'Expression (CTE)': 'count()',
       Comment: 'note',
-    } as unknown as SchemaColumnRow;
+      _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+    } as unknown as UploadedSchemaRow;
     const onColumns = vi.fn();
     renderAddSchemaTable(
       {
@@ -237,7 +256,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
           'name',
           'type',
           '__rowId',
-          'delete',
+          'main_action',
           'use_case',
           'attribute',
           'expr',
@@ -339,6 +358,7 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
           <FormColumnsProbe listName="columns" onColumns={onColumns} />
           <AddSchemaTable
             formValidation={bypassFormValidation}
+            requireAtLeastOneRow={false}
             initialValues={[validRow({ id: 'ghost' })]}
           />
         </Form>
@@ -487,5 +507,51 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
 
     expect(document.querySelector('.custom-schema-table')).toBeInTheDocument();
     expect(screen.getByText('Add columns to your schema')).toBeInTheDocument();
+  });
+
+  test('rejects validation when requireAtLeastOneRow is true and all rows are blank', async () => {
+    let capturedForm: FormInstance | undefined;
+    renderAddSchemaTable(
+      { requireAtLeastOneRow: true },
+      {
+        onForm: (f) => {
+          capturedForm = f;
+        },
+      },
+    );
+
+    await waitFor(() => expect(capturedForm).toBeDefined());
+
+    await expect(
+      capturedForm!.validateFields(['columns']),
+    ).rejects.toMatchObject({
+      errorFields: expect.arrayContaining([
+        expect.objectContaining({
+          name: ['columns'],
+          errors: expect.arrayContaining([AT_LEAST_ONE_SCHEMA_ROW_MESSAGE]),
+        }),
+      ]),
+    });
+  });
+
+  test('passes list validation when at least one row is non-blank', async () => {
+    let capturedForm: FormInstance | undefined;
+    renderAddSchemaTable(
+      {
+        requireAtLeastOneRow: true,
+        initialValues: [validRow()],
+      },
+      {
+        onForm: (f) => {
+          capturedForm = f;
+        },
+      },
+    );
+
+    await waitFor(() => expect(capturedForm).toBeDefined());
+
+    await expect(
+      capturedForm!.validateFields(['columns']),
+    ).resolves.toBeDefined();
   });
 });

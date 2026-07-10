@@ -4,7 +4,8 @@ import {
   CreateUpdateSourceFormData,
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
+import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
@@ -26,10 +27,10 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
   } = useListSourcesContext();
 
   const {
-    data: sourceDetailData,
-    isLoading: isFetchingSourceDetail,
-    error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name, source_version });
+    sourceDetail: sourceDetailData,
+    isLoadingSourceDetail,
+    errorSourceDetail,
+  } = useSourceDetailsContext();
 
   const {
     mutate: updateSource,
@@ -43,7 +44,7 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
         source_version: response.current,
       });
       void queryClient.invalidateQueries({
-        queryKey: ['source', response.source],
+        queryKey: SOURCE_DETAIL_QUERY_KEY(response.source, source_version),
       });
       refetchSources();
       onSuccess?.(response);
@@ -54,17 +55,17 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
     const transformedValues = transformSourceFormDataToRequestBody(values);
     updateSource(transformedValues);
   };
-  if (isFetchingSourceDetail)
+  if (isLoadingSourceDetail)
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
       </div>
     );
-  if (fetchSourceDetailError)
+  if (errorSourceDetail)
     return (
       <GenericErrorCard
         title="Error fetching source detail"
-        description={fetchSourceDetailError.message}
+        description={errorSourceDetail.message}
       />
     );
 

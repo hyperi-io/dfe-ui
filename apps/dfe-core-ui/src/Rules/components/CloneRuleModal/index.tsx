@@ -93,7 +93,7 @@ export const CloneRuleModal = ({
               type="default"
               shape="circle"
               size="small"
-              aria-label={`Clone ${rule.name}`}
+              aria-label={`Clone ${rule.display_name ?? rule.name}`}
               icon={<IconCopy />}
               onClick={handleOpen}
             />
@@ -119,7 +119,7 @@ export const CloneRuleModal = ({
                 shape="circle"
                 disabled
                 size="small"
-                aria-label={`Clone ${rule.name}`}
+                aria-label={`Clone ${rule.display_name ?? rule.name}`}
                 icon={<IconCopy />}
                 onClick={handleOpen}
               />
@@ -129,7 +129,7 @@ export const CloneRuleModal = ({
       </RbacProtected>
 
       <Modal
-        title={`Clone ${rule.name}`}
+        title={`Clone ${rule.display_name ?? rule.name}`}
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
@@ -140,6 +140,7 @@ export const CloneRuleModal = ({
           onFinish={handleCloneRule}
           initialValues={{
             name: `${rule.name}_copy`,
+            display_name: `Copy: ${rule.display_name ?? rule.name}`,
             user_sql: rule.original_sql,
             severity: rule.severity,
             cel_filter: rule.cel_filter,

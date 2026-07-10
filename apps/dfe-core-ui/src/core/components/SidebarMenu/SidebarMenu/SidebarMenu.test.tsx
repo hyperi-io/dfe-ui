@@ -5,7 +5,10 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { SidebarMenu } from './index';
 import { server } from './SidebarMenu.mocks';
 
-const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+const { wrapper } = buildTestWrapper()
+  .withTheme()
+  .withReactQuery()
+  .withHyperdxPort('8090');
 
 beforeAll(() =>
   server.listen({
@@ -32,6 +35,7 @@ describe('SidebarMenu', () => {
         'Sources',
         'Schemas',
         'Rules',
+        'Hunts',
         // 'Field Maps',
         // 'Transforms',
         // 'Services',
@@ -44,7 +48,7 @@ describe('SidebarMenu', () => {
       const menuItems = await screen.findAllByRole('link');
       expect(menuItems[0]).toHaveAttribute(
         'href',
-        'https://localhost:8080/search',
+        'http://localhost:8090/search',
       );
     });
 
@@ -54,7 +58,7 @@ describe('SidebarMenu', () => {
 
       expect(menuItems[0]).toHaveAttribute(
         'href',
-        'https://localhost:8080/search',
+        'http://localhost:8090/search',
       );
     });
   });
@@ -96,7 +100,7 @@ describe('SidebarMenu', () => {
 
       expect(menuItemList[0]).toHaveAttribute(
         'href',
-        'https://localhost:8080/search',
+        'http://localhost:8090/search',
       );
     });
   });

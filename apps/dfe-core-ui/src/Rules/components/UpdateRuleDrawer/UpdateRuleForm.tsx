@@ -3,6 +3,7 @@ import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
 } from '@/Rules/components/CreateUpdateRuleForm';
+import { RULE_DETAIL_QUERY_KEY } from '@/Rules/hooks/useFetchRuleDetail';
 import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -25,11 +26,11 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   } = useUpdateRule({
     onSuccess: (response) => {
       queryClient.invalidateQueries({
-        queryKey: ['rule', rule.rule_id],
+        queryKey: RULE_DETAIL_QUERY_KEY(rule.name),
       });
       onSuccess?.(response);
     },
-    rule_id: rule.rule_id,
+    name: rule.name,
   });
 
   const handleUpdateRule = (values: CreateUpdateRuleFormData) => {
@@ -58,12 +59,12 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   return (
     <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
       <CreateUpdateRuleForm
-        key={rule.rule_id ?? 'empty'}
+        key={rule.name ?? 'empty'}
         disabledFields={{
           name: true,
         }}
         initialValues={{
-          name: rule.name,
+          ...rule,
           user_sql: rule.original_sql,
           severity: rule.severity as 'low' | 'medium' | 'high' | 'critical',
           cel_filter: rule.cel_filter ?? undefined,

@@ -4,10 +4,12 @@ import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeI
 import { SourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
 import {
+  IconBucket,
   IconCapture,
   IconCaptureOff,
   IconFile,
   IconFolder,
+  IconRocket,
   IconStarFilled,
 } from '@repo/dfe-icons';
 import { Button, notification, Tooltip, TreeDataNode } from 'antd';
@@ -61,14 +63,35 @@ const buildVersionChildren = (
   selectedSourcePath: string | null,
   selectedSourceVersion: string | null,
   expandTreeNode: (key: string) => void,
-): TreeDataNode[] =>
-  (source.versions ?? []).map((version) => ({
+): TreeDataNode[] => {
+  const displayVersion = (version: string) => {
+    return version === source.deployed_version || version === source.current;
+  };
+  const versionLabel = (version: string) => {
+    if (version === source.current && version === source.deployed_version) {
+      return 'Current Deployed';
+    }
+    if (version === source.current) {
+      return 'Working Copy';
+    }
+    if (version === source.deployed_version) {
+      return 'Deployed';
+    }
+
+    return version;
+  };
+  return (source.versions ?? []).filter(displayVersion).map((version) => ({
     key: versionTreeKey(source.name, version),
     title: (
       <TreeInteractiveLabel
         title={
           <>
-            <span className="min-w-0 truncate">{version}</span>
+            {version === source.deployed_version && (
+              <Tooltip destroyOnHidden title="Deployed version">
+                <IconRocket className="text-tertiary shrink-0 absolute top-2 -left-5.5" />
+              </Tooltip>
+            )}
+            <span className="min-w-0 truncate">{versionLabel(version)}</span>
             {version === source.current && (
               <Tooltip destroyOnHidden title="Current version">
                 <IconStarFilled className="text-yellow-500 shrink-0" />
@@ -91,6 +114,7 @@ const buildVersionChildren = (
     ),
     isLeaf: true,
   }));
+};
 
 const sourceSummaryToTreeData = ({
   node,
@@ -130,75 +154,93 @@ const sourceSummaryToTreeData = ({
     const sourceIsLeaf = versionChildren.length === 0;
     out.push({
       key: sourceTreeKey(source.name),
-      title: (
-        <TreeInteractiveLabel
-          icon={fileIcon}
-          title={source.name.split('/').pop() ?? ''}
-          onClick={() => {
-            expandTreeNode(sourceTreeKey(source.name));
-            setSelectedSource({
-              source_name: source.name,
-              source_version: source.current,
-            });
-          }}
-          selected={
-            selectedSourceName === source.name &&
-            selectedSourceVersion === source.current
-          }
-          actions={
-            <>
-              <Tooltip
-                destroyOnHidden
-                title={
-                  source.enabled ? 'Source is enabled' : 'Source is disabled'
-                }
-                placement="right"
-              >
-                <Button
-                  type="default"
-                  shape="circle"
-                  size="small"
-                  className={cn(
-                    'p-0.5',
-                    source.enabled
-                      ? 'text-success border-success bg-background dark:bg-dark-background'
-                      : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
-                  )}
-                  icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
+      title: () => {
+        const isDeployed = source.deployed_version;
+        return (
+          <TreeInteractiveLabel
+            icon={fileIcon}
+            title={
+              <span className="flex gap-2 items-center">
+                {source.name.split('/').pop() ?? ''}
+
+                {!isDeployed && (
+                  <Tooltip destroyOnHidden title="_default_land">
+                    <IconBucket className="opacity-80" />
+                  </Tooltip>
+                )}
+                {isDeployed && (
+                  <Tooltip destroyOnHidden title="Is deployed">
+                    <IconRocket className="text-tertiary opacity-80" />
+                  </Tooltip>
+                )}
+              </span>
+            }
+            onClick={() => {
+              expandTreeNode(sourceTreeKey(source.name));
+              setSelectedSource({
+                source_name: source.name,
+                source_version: source.current,
+              });
+            }}
+            selected={
+              selectedSourceName === source.name &&
+              selectedSourceVersion === source.current
+            }
+            actions={
+              <>
+                <Tooltip
+                  destroyOnHidden
+                  title={
+                    source.enabled ? 'Source is enabled' : 'Source is disabled'
+                  }
+                  placement="right"
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    size="small"
+                    className={cn(
+                      'p-0.5',
+                      source.enabled
+                        ? 'text-success border-success bg-background dark:bg-dark-background'
+                        : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
+                    )}
+                    icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
+                  />
+                </Tooltip>
+              </>
+            }
+            hoverActions={
+              <>
+                <CloneSourceModal
+                  name={source.name}
+                  display_name={source.display_name}
+                  enabled={source.enabled}
+                  versions={source.versions ?? []}
+                  onSuccess={(source) => {
+                    void refetchSources();
+                    apiNotification.success({
+                      title: 'Source cloned successfully',
+                      description: `${source.source} has been cloned successfully`,
+                      placement: 'bottomLeft',
+                    });
+                  }}
                 />
-              </Tooltip>
-            </>
-          }
-          hoverActions={
-            <>
-              <CloneSourceModal
-                name={source.name}
-                display_name={source.display_name}
-                enabled={source.enabled}
-                versions={source.versions ?? []}
-                onSuccess={(source) => {
-                  void refetchSources();
-                  apiNotification.success({
-                    title: 'Source cloned successfully',
-                    description: `${source.source} has been cloned successfully`,
-                    placement: 'bottomLeft',
-                  });
-                }}
-              />
-              <DeleteSourceModal
-                source={`${source.name}`}
-                onSuccess={() =>
-                  apiNotification.success({
-                    title: 'Source deleted successfully',
-                    description: `${source.name} has been deleted successfully`,
-                    placement: 'bottomLeft',
-                  })
-                }
-              />
-            </>
-          }
-        />
-      ),
+                <DeleteSourceModal
+                  source={`${source.name}`}
+                  onSuccess={() =>
+                    apiNotification.success({
+                      title: 'Source deleted successfully',
+                      description: `${source.name} has been deleted successfully`,
+                      placement: 'bottomLeft',
+                    })
+                  }
+                />
+              </>
+            }
+          />
+        );
+      },
       children: versionChildren.length > 0 ? versionChildren : undefined,
       isLeaf: sourceIsLeaf,
     });

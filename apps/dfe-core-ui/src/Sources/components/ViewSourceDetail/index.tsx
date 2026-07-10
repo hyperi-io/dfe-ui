@@ -1,10 +1,11 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { ViewSourceDetailTabs } from '@/Sources/components/ViewSourceTabs';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 import { SourceDetailActionMenu } from './SourceDetailActionMenu';
+import { SourceDetailHighlight } from './SourceDetailHighlight';
 import { SourceEnabledTag } from './SourceEnabledTag';
 
 export const ViewSourceDetail = () => {
@@ -12,23 +13,24 @@ export const ViewSourceDetail = () => {
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
   } = useListSourcesContext();
-  const {
-    data: sourceDetailData,
-    isLoading: isFetchingSourceDetail,
-    error: fetchSourceDetailError,
-  } = useFetchSourceDetail({ source_name, source_version });
 
-  if (isFetchingSourceDetail)
+  const {
+    sourceDetail: sourceDetailData,
+    isLoadingSourceDetail,
+    errorSourceDetail,
+  } = useSourceDetailsContext();
+
+  if (isLoadingSourceDetail)
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
       </div>
     );
-  if (fetchSourceDetailError)
+  if (errorSourceDetail)
     return (
       <GenericErrorCard
         title="Error fetching source detail"
-        description={fetchSourceDetailError.message}
+        description={errorSourceDetail.message}
       />
     );
 
@@ -40,18 +42,20 @@ export const ViewSourceDetail = () => {
     <>
       <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-lg font-medium flex items-center gap-2 w-full">
+          <h4 className="flex items-center w-full gap-2 text-lg font-medium">
             <span className="text-foreground/50 dark:text-dark-foreground/50">
-              Source:
+              Source Configuration:
             </span>
             {sourceDetailData.display_name || sourceDetailData.source}
             <SourceEnabledTag
-              className="text-sm font-normal max-h-6 ml-auto mr-2"
+              className="ml-auto mr-2 text-sm font-normal max-h-6"
               enabled={sourceDetailData.enabled}
+              sourceName={sourceDetailData.source}
             />
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />
         </div>
+        <SourceDetailHighlight source={sourceDetailData} />
         <ViewSourceDetailTabs
           selectedSourceName={source_name ?? ''}
           selectedSourceVersion={source_version ?? ''}

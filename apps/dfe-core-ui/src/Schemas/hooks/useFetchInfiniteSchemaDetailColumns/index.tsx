@@ -13,6 +13,35 @@ const TEXT_FILTER_DEBOUNCE_MS = 300;
 const optionalTextFilterParam = (value: string) =>
   value === '' ? undefined : value;
 
+export const INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY = ({
+  schema_path,
+  version,
+  search,
+  name,
+  type,
+  use_case,
+  expr,
+  comment,
+  attribute,
+  selectedSearchableColumns,
+  per_page,
+}: UseFetchInfiniteFilteredSchemaDetailColumnsProps & {
+  selectedSearchableColumns?: string[];
+}) => [
+  'schema-detail-columns',
+  schema_path,
+  version,
+  ...(search ? [search] : []),
+  ...(name ? [name] : []),
+  ...(type ? [type] : []),
+  ...(use_case ? [use_case] : []),
+  ...(expr ? [expr] : []),
+  ...(comment ? [comment] : []),
+  ...(attribute ? [attribute] : []),
+  ...(selectedSearchableColumns ? [selectedSearchableColumns] : []),
+  ...(per_page ? [per_page] : []),
+];
+
 /** useFetchInfiniteFilteredSchemas props */
 /**
  * @param schema_path - The path of the schema to fetch the detail columns for.
@@ -39,6 +68,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   comment,
   attribute,
   per_page = 10,
+  enabled = true,
 }: UseFetchInfiniteFilteredSchemaDetailColumnsProps) => {
   const searchableColumnsOptions: {
     label: string;
@@ -46,10 +76,10 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
   }[] = [
     { label: 'Name', value: 'name' },
     { label: 'Type', value: 'type' },
-    { label: 'Use Case', value: 'use_case' },
+    { label: 'Attribute', value: 'attribute' },
+    { label: 'Index Type', value: 'use_case' },
     { label: 'Expression (CTE)', value: 'expr' },
     { label: 'Comment', value: 'comment' },
-    { label: 'Attribute', value: 'attribute' },
   ];
 
   const [selectedSearchableColumns, setSelectedSearchableColumns] = useState<
@@ -77,21 +107,20 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    enabled: !!schema_path && !!version,
-    queryKey: [
-      'schema-detail-columns',
+    enabled: enabled && !!schema_path && !!version,
+    queryKey: INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY({
       schema_path,
       version,
-      optionalTextFilterParam(debouncedSearch),
-      optionalTextFilterParam(debouncedName),
-      optionalTextFilterParam(debouncedType),
-      optionalTextFilterParam(debouncedUseCase),
-      optionalTextFilterParam(debouncedExpr),
-      optionalTextFilterParam(debouncedComment),
-      optionalTextFilterParam(debouncedAttribute),
+      search: optionalTextFilterParam(debouncedSearch),
+      name: optionalTextFilterParam(debouncedName),
+      type: optionalTextFilterParam(debouncedType),
+      use_case: optionalTextFilterParam(debouncedUseCase),
+      expr: optionalTextFilterParam(debouncedExpr),
+      comment: optionalTextFilterParam(debouncedComment),
+      attribute: optionalTextFilterParam(debouncedAttribute),
       selectedSearchableColumns,
       per_page,
-    ],
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       apiClient.get(API_CONFIG.schemas.schemaDetail, {
         pathParams: { schema_path: schema_path ?? '' },

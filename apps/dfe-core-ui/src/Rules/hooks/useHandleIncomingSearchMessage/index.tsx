@@ -4,6 +4,7 @@ import {
   RuleFromSearchDb,
   type RuleFromSearchType,
 } from '@/core/config/indexedDB';
+import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +13,7 @@ type RuleMessage = Omit<RuleFromSearchType, 'id' | 'createdAt'>;
 
 export const useHandleIncomingSearchMessage = () => {
   const [search, setSearch] = useState<RuleFromSearchType | null>(null);
+  const hyperdxUrl = useHyperdxUrl();
   const searchParams = useSearchParams();
   const searchId = searchParams.get('searchId');
   const { replace } = useRouter();
@@ -20,7 +22,7 @@ export const useHandleIncomingSearchMessage = () => {
     const handleMessage = (
       event: MessageEvent<{ type: string; payload: RuleMessage }>,
     ) => {
-      if (event.origin !== process.env.NEXT_PUBLIC_HYPERDX_URL) {
+      if (!hyperdxUrl || event.origin !== hyperdxUrl) {
         return;
       }
       if (event.data?.type !== 'CREATE_RULE_FROM_SEARCH') {
@@ -57,7 +59,7 @@ export const useHandleIncomingSearchMessage = () => {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [searchId, replace]);
+  }, [searchId, replace, hyperdxUrl]);
 
   return { search };
 };

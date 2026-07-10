@@ -1,8 +1,16 @@
 import { sourceNameValidator } from '@/Sources/utils/validation';
+import { components } from '@repo/dfe-engine-types';
 import z from 'zod';
 
 const AUTH_TYPES = ['none', 'oauth2', 'api_key'] as const;
-const MATCH_OPERATORS = ['equals', 'exists'] as const;
+export const MATCH_OPERATORS = [
+  'equals',
+  'exists',
+  'includes',
+  'starts_with',
+  'ends_with',
+  'not_equals',
+] as components['schemas']['SourceMatch']['operator'][];
 
 const sourceDetailsTabSchema = {
   source: sourceNameValidator,
@@ -20,13 +28,19 @@ const originTabSchema = {
     .object({
       field: z.string().min(1, { message: 'Field is required' }),
       operator: z
-        .string()
-        .refine((v) => (MATCH_OPERATORS as readonly string[]).includes(v), {
-          message: 'Operator is required',
-        }),
+        .enum(MATCH_OPERATORS, { message: 'Operator is required' })
+        .optional(),
       value: z.string().optional().nullable(),
     })
     .superRefine((data, ctx) => {
+      if (!data.operator) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Operator is required',
+          path: ['operator'],
+        });
+        return;
+      }
       if (data.operator === 'exists') {
         return;
       }
@@ -107,8 +121,6 @@ const schemaConfigTabSchema = {
       meta_schema_version: z.string({
         message: 'Meta schema version is required',
       }),
-      derived_schema: z.string().optional().nullable(),
-      additional_fields: z.string().optional().nullable(),
       ttl_days: z.number().optional().nullable(),
       engine: z.string({ message: 'Engine is required' }),
     })

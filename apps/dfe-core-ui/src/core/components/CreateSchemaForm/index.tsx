@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
+import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { Button, FormProps, Input, Select } from 'antd';
@@ -22,8 +23,22 @@ interface CreateSchemaFormProps extends FormProps<CreateSchemaFormData> {
   initialValues?: Partial<CreateSchemaFormData>;
   hideFields?: {
     version?: boolean;
+    uploadSchemaInput?: boolean;
+  };
+  config?: {
+    uploadedTab: {
+      tabTitle: string;
+      tableTitle: string;
+    };
   };
 }
+
+const META_SCHEMA_TYPE_OPTIONS = [{ label: 'Meta Schema', value: 'meta' }];
+
+const OTHER_SCHEMA_TYPE_OPTIONS = [
+  { label: 'Header Schema', value: 'common_header' },
+  { label: 'Hunt Schema', value: 'hunts' },
+];
 
 const CreateSchemaFormBase = ({
   hasReset = false,
@@ -33,6 +48,7 @@ const CreateSchemaFormBase = ({
   initialValues,
   disabledFields,
   hideFields,
+  config,
 }: CreateSchemaFormProps) => {
   const {
     form,
@@ -41,12 +57,18 @@ const CreateSchemaFormBase = ({
     schemaColumns,
     invalidUploadedSchemaColumns,
     handleFormValuesChange,
+    recomputeValidationErrors,
+    handleValidate,
   } = useCreateSchemaFormContext();
+
+  const { schemaTypesScope } = useListSchemasContext();
 
   const { formErrorMessage, setFormErrorMessage } =
     useCreateSchemaReviewContext();
 
   const onFinish = (values: CreateSchemaFormData) => {
+    recomputeValidationErrors();
+
     const isUploadedColumnsValid = uploadedSchemaColumns
       .map((column) => {
         return rowSchema.safeParse(column);
@@ -93,6 +115,9 @@ const CreateSchemaFormBase = ({
     });
   };
 
+  const isMetaSchemaScope =
+    schemaTypesScope?.length === 1 && schemaTypesScope[0] === 'meta';
+
   return (
     <Form
       className="h-[calc(100vh-120px)] css-custom-scrollbar"
@@ -104,15 +129,37 @@ const CreateSchemaFormBase = ({
             'There are validation errors in the form. Please fix them and try again.',
           errors: [],
         });
+        handleValidate();
       }}
       preserve
       onValuesChange={(changedValues, allValues) => {
         setFormErrorMessage(null);
         handleFormValuesChange(changedValues, allValues);
       }}
-      initialValues={initialValues}
+      initialValues={{
+        path: '',
+        name: '',
+        description: '',
+        schema_type: isMetaSchemaScope ? 'meta' : 'common_header',
+        ...initialValues,
+      }}
     >
-      <div className="flex gap-2 w-full">
+      <div className="flex w-full gap-2">
+        <Form.Item
+          className="w-96"
+          name="schema_type"
+          label="Schema Type"
+          rules={[formValidation]}
+        >
+          <Select
+            disabled={isMetaSchemaScope}
+            options={
+              isMetaSchemaScope
+                ? META_SCHEMA_TYPE_OPTIONS
+                : OTHER_SCHEMA_TYPE_OPTIONS
+            }
+          />
+        </Form.Item>
         <Form.Item
           className="w-full"
           name="path"
@@ -132,7 +179,7 @@ const CreateSchemaFormBase = ({
           <Input placeholder="Enter name" disabled={disabledFields?.name} />
         </Form.Item>
       </div>
-      <div className="flex gap-2 w-full">
+      <div className="flex w-full gap-2">
         <Form.Item
           className="w-full"
           name="type"
@@ -169,7 +216,11 @@ const CreateSchemaFormBase = ({
         />
       </Form.Item>
 
-      <SchemaUploadCollapse disabledFields={disabledFields} />
+      <SchemaUploadCollapse
+        hideFields={hideFields}
+        disabledFields={disabledFields}
+        config={config}
+      />
 
       {formErrorMessage && (
         <FormNotification
@@ -205,10 +256,13 @@ const CreateSchemaFormBase = ({
   );
 };
 
-export const CreateSchemaForm = (props: CreateSchemaFormProps) => {
+export const CreateSchemaForm = ({
+  initialValues,
+  ...props
+}: CreateSchemaFormProps) => {
   return (
-    <CreateSchemaFormProvider>
-      <CreateSchemaFormBase {...props} />
+    <CreateSchemaFormProvider initialValues={initialValues}>
+      <CreateSchemaFormBase {...props} initialValues={initialValues} />
     </CreateSchemaFormProvider>
   );
 };

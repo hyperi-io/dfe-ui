@@ -530,6 +530,9 @@ export interface paths {
         /**
          * Create Source
          * @description Create a new source from a flat source definition (initial version ``1.0.0``).
+         *
+         *     ``header`` is optional: when omitted, no common-header profile is stored on the
+         *     version (DDL compose uses meta/derived columns only until a header is set).
          */
         post: operations["create_source_api_v1_sources_post"];
         delete?: never;
@@ -538,7 +541,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sources/{name}/versions": {
+    "/api/v1/sources/{name}/versions/{version}": {
         parameters: {
             query?: never;
             header?: never;
@@ -547,9 +550,9 @@ export interface paths {
         };
         /**
          * Get Source Version
-         * @description Get one immutable source version snapshot by id.
+         * @description Get one immutable source version snapshot by id, with build/deploy status.
          */
-        get: operations["get_source_version_api_v1_sources__name__versions_get"];
+        get: operations["get_source_version_api_v1_sources__name__versions__version__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -603,6 +606,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{name}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan Source Deploy
+         * @description Dry-run ClickHouse deploy: DDL statements and validation errors (not persisted).
+         */
+        post: operations["plan_source_deploy_api_v1_sources__name__plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{name}/deploy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deploy Source
+         * @description Apply DDL for a source version to ClickHouse and set deployed_version.
+         */
+        post: operations["deploy_source_api_v1_sources__name__deploy_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{name}": {
         parameters: {
             query?: never;
@@ -612,12 +655,21 @@ export interface paths {
         };
         /**
          * Get Source
-         * @description Get a full source definition by name.
+         * @description Get a full source definition by name, including build/deploy per version.
          */
         get: operations["get_source_api_v1_sources__name__get"];
         /**
          * Update Source
-         * @description Update a source from a flat revision body (appends next major version).
+         * @description Update a source from a flat revision body.
+         *
+         *     Before the first deploy, edits update the working version in place. After deploy, a new
+         *     major version is created only when ``current`` equals ``deployed_version`` and schema pins
+         *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
+         *     ``field_mappings``, ``sigma``, or ``transform`` change. Draft versions (``current`` not deployed) update
+         *     in place.
+         *
+         *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
+         *     (same as create). Send ``header`` explicitly to set or change it.
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
@@ -628,7 +680,14 @@ export interface paths {
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Patch Source Enabled
+         * @description Enable or disable a source without changing versioned configuration.
+         *
+         *     Does not create a new source version. Enabling may return ``409 match_conflict``
+         *     if another enabled source already uses the same receiver match rule.
+         */
+        patch: operations["patch_source_enabled_api_v1_sources__name__patch"];
         trace?: never;
     };
     "/api/v1/sources/bulk": {
@@ -1049,7 +1108,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/rules/{rule_id}": {
+    "/api/v1/rules/{name}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1058,20 +1117,20 @@ export interface paths {
         };
         /**
          * Get Rule
-         * @description Get a detection rule by ID.
+         * @description Get a detection rule by file name.
          */
-        get: operations["get_rule_api_v1_rules__rule_id__get"];
+        get: operations["get_rule_api_v1_rules__name__get"];
         /**
          * Update Rule
          * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
          */
-        put: operations["update_rule_api_v1_rules__rule_id__put"];
+        put: operations["update_rule_api_v1_rules__name__put"];
         post?: never;
         /**
          * Delete Rule
          * @description Delete a detection rule.
          */
-        delete: operations["delete_rule_api_v1_rules__rule_id__delete"];
+        delete: operations["delete_rule_api_v1_rules__name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1308,12 +1367,44 @@ export interface paths {
         };
         /**
          * List Hunts
-         * @description List all configured hunts across all schedulers.
+         * @description List persisted hunt configurations with pagination and search.
          */
         get: operations["list_hunts_api_v1_hunts_get"];
         put?: never;
-        post?: never;
+        /**
+         * Create Hunt
+         * @description Create a new hunt configuration YAML.
+         */
+        post: operations["create_hunt_api_v1_hunts_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hunts/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Hunt
+         * @description Get full hunt configuration by file name.
+         */
+        get: operations["get_hunt_api_v1_hunts__name__get"];
+        /**
+         * Update Hunt
+         * @description Replace an existing hunt configuration.
+         */
+        put: operations["update_hunt_api_v1_hunts__name__put"];
+        post?: never;
+        /**
+         * Delete Hunt
+         * @description Delete a hunt configuration.
+         */
+        delete: operations["delete_hunt_api_v1_hunts__name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1739,6 +1830,8 @@ export interface paths {
         /**
          * Get Schema Columns
          * @description Get composed schema columns for a source version (profile + meta/derived/additional).
+         *
+         *     Use ``per_page=-1`` to return all columns in one page.
          */
         get: operations["get_schema_columns_api_v1_schemas__source_name__columns_get"];
         put?: never;
@@ -1784,16 +1877,44 @@ export interface paths {
          * @description Discover JSON paths inside a source's ``_json`` column.
          *
          *     Resolves the requested ``version`` (or the source's current version). If that
-         *     version defines a ``meta_schema`` the source owns its own table and discovery
-         *     runs against ``db.<source>``. Otherwise the source's data still lives in the
-         *     shared catch-all landing table, so discovery runs against ``db.<landing>``
-         *     filtered by the version's match rule.
+         *     version defines a ``meta_schema`` it uses ``db.<source>`` only after deploy;
+         *     until then discovery runs on ``db.<landing>`` filtered by the version's
+         *     match rule. Versions without ``meta_schema`` always use the landing table.
          *
          *     Returns one record per path with observed types, a suggested column name,
          *     and whether the path is already promoted. ``?samples=N`` adds random
          *     distinct example values; ``?stats=true`` adds coverage + distinct counts.
          */
         get: operations["discover_json_paths_api_v1_schemas__source_name__json_paths_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/{source_name}/sample-rows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sample Source Rows
+         * @description Return random sample rows for a source, scoped to its match rule.
+         *
+         *     Resolves the requested ``version`` (or the source's current version). A
+         *     version with a ``meta_schema`` uses ``db.<source>`` only after that version
+         *     is deployed and the table exists; otherwise rows are read from
+         *     ``db.<landing>`` filtered by the version's match rule.
+         *
+         *     Intended for inspecting real data while authoring a match condition or CEL
+         *     before promoting any JSON path -- a row-level companion to the per-path
+         *     ``?samples=N`` on ``/json-paths``.
+         */
+        get: operations["sample_source_rows_api_v1_schemas__source_name__sample_rows_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1815,9 +1936,12 @@ export interface paths {
          * Promote Field
          * @description Promote JSON path(s) into dedicated typed columns.
          *
-         *     Creates a new schema version on the source's meta-schema, adding one column
-         *     per path with a ``@copy`` directive so dfe-loader copies the value forward.
-         *     ``?dry_run=true`` returns the proposed diff + DDL without committing.
+         *     Creates a new schema version on the source's meta-schema (or on ``schema_path``
+         *     when the source has none), adding one column per path with a ``@copy`` directive
+         *     so dfe-loader copies the value forward. Core meta-schemas are forked to
+         *     ``{source_name}_{schema_stem}`` under the same parent path before promoting.
+         *     ``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,
+         *     adding meta-schema versions, or updating the source.
          */
         post: operations["promote_field_api_v1_schemas__source_name__promote_field_post"];
         delete?: never;
@@ -2097,6 +2221,11 @@ export interface components {
              * @default true
              */
             enabled: boolean;
+            /**
+             * Hunt Name
+             * @description Hunt file stem when this destination is owned by a hunt (set via API)
+             */
+            hunt_name?: string | null;
         };
         /** AlertDestinationSummary */
         AlertDestinationSummary: {
@@ -2656,6 +2785,11 @@ export interface components {
              * @description Human-readable column description (defaults to the source path).
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification for JSON promotion drafts (always 'promoted').
+             */
+            _field_type: string;
         };
         /** EmittedRecord */
         EmittedRecord: {
@@ -2941,6 +3075,98 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HuntCreateRequest */
+        HuntCreateRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on write)
+             */
+            display_name?: string | null;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Rules
+             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             */
+            rules: string[];
+            /**
+             * Name
+             * @description Hunt file name (YAML stem); must be unique
+             */
+            name: string;
+        };
+        /**
+         * HuntDetailResponse
+         * @description Full hunt configuration returned from GET/create/update.
+         */
+        HuntDetailResponse: {
+            /**
+             * Display Name
+             * @description Resolved human-readable label
+             */
+            display_name: string;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Name
+             * @description Hunt file name (YAML stem)
+             */
+            name: string;
+            /** Rules */
+            rules: components["schemas"]["HuntRuleEntry"][];
+        };
         /**
          * HuntEngineStatus
          * @description Current state of the background hunt scheduler.
@@ -2965,19 +3191,48 @@ export interface components {
             scheduling_mode: string;
         };
         /**
+         * HuntRuleEntry
+         * @description Per-rule hunt configuration as stored in YAML.
+         */
+        HuntRuleEntry: {
+            /** Rule Name */
+            rule_name: string;
+            /** Target Table Name */
+            target_table_name?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Initial Checkpoint Lookback Minutes */
+            initial_checkpoint_lookback_minutes?: number | null;
+        };
+        /**
          * HuntSummary
          * @description Summary of a configured hunt.
          */
         HuntSummary: {
-            /** Name */
+            /**
+             * Name
+             * @description Hunt file name (YAML stem, unique)
+             */
             name: string;
-            /** Customer */
+            /**
+             * Display Name
+             * @description Human-readable hunt label
+             */
+            display_name: string;
+            /**
+             * Customer
+             * @description First customer in config (legacy summary field)
+             * @default
+             */
             customer: string;
+            /** Customers */
+            customers?: string[];
             /**
              * Cron
-             * @description Cron schedule expression
+             * @description Cron schedule expression(s)
+             * @default
              */
-            cron: string;
+            cron: string | string[];
             /** Rules */
             rules?: string[];
             /**
@@ -2990,6 +3245,50 @@ export interface components {
              * @default
              */
             target_table: string;
+        };
+        /**
+         * HuntWriteRequest
+         * @description Hunt scheduler payload for create/update (without hunt file ``name``).
+         */
+        HuntWriteRequest: {
+            /**
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on write)
+             */
+            display_name?: string | null;
+            /**
+             * Cron
+             * @description Cron expression or list of expressions
+             */
+            cron: string | string[];
+            /**
+             * Log Buffer
+             * @default 60
+             */
+            log_buffer: number;
+            /** Global Target Table Name */
+            global_target_table_name: string;
+            /** Global Source Table Name */
+            global_source_table_name?: string | null;
+            /** Customers */
+            customers: string[];
+            /** Customer Filters */
+            customer_filters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Checkpoint Timestamp Field */
+            checkpoint_timestamp_field?: string | null;
+            /** Scheduling Mode */
+            scheduling_mode?: string | null;
+            /** Min Interval Seconds */
+            min_interval_seconds?: number | null;
+            /** Explain Queries */
+            explain_queries?: boolean | null;
+            /**
+             * Rules
+             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             */
+            rules: string[];
         };
         /**
          * JsonPathInfo
@@ -3160,47 +3459,21 @@ export interface components {
          *         versions: Dictionary of versions and their metadata.
          *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
          */
-        "MetaSchema-Input": {
+        MetaSchema: {
+            /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
             /**
              * Current
              * @description Current version of the schema
              */
             current: string;
-            /**
-             * Versions
-             * @description Dictionary of versions and their metadata
-             */
-            versions: {
-                [key: string]: components["schemas"]["SchemaVersion-Input"];
-            };
-            /**
-             * Path
-             * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
-             */
-            path?: string | null;
-        };
-        /**
-         * MetaSchema
-         * @description A schema for a ClickHouse table.
-         *
-         *     Attributes:
-         *         current: Current version of the schema.
-         *         versions: Dictionary of versions and their metadata.
-         *         path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk.
-         */
-        "MetaSchema-Output": {
-            /**
-             * Current
-             * @description Current version of the schema
-             */
-            current: string;
-            /**
-             * Versions
-             * @description Dictionary of versions and their metadata
-             */
-            versions: {
-                [key: string]: components["schemas"]["SchemaVersion-Output"];
-            };
+            /** @description Dictionary of versions and their metadata */
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersion_"];
             /**
              * Path
              * @description DirectoryConfigStore table key / relative path (not stored in YAML files)
@@ -3223,17 +3496,39 @@ export interface components {
              * @description Human-readable summary stored on the new version
              */
             summary?: string | null;
+            /** @description Complete column snapshot for the new version (at least one column) */
+            columns: components["schemas"]["NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_"];
+        };
+        /**
+         * MetaSchemaCreateRequest
+         * @description Create a new custom meta-schema (``resource_type`` is set by the server).
+         */
+        MetaSchemaCreateRequest: {
             /**
-             * Columns
-             * @description Complete column snapshot for the new version (at least one column)
+             * Current
+             * @description Current version of the schema
              */
-            columns: components["schemas"]["SchemaColumn-Input"][];
+            current: string;
+            /** @description Dictionary of versions and their metadata */
+            versions: components["schemas"]["NonEmptyDict_str_SchemaVersionCreate_"];
+            /**
+             * Path
+             * @description DirectoryConfigStore table key / relative path (must match URL when set)
+             */
+            path?: string | null;
         };
         /**
          * MetaSchemaGetResponse
          * @description Meta-schema definition for a single requested version.
          */
         MetaSchemaGetResponse: {
+            /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
             /**
              * Current
              * @description Current version of the schema
@@ -3321,6 +3616,16 @@ export interface components {
              */
             group: string;
         };
+        NonEmptyDict_str_SchemaVersionCreate_: {
+            [key: string]: components["schemas"]["SchemaVersionCreate"];
+        };
+        NonEmptyDict_str_SchemaVersion_: {
+            [key: string]: components["schemas"]["SchemaVersion"];
+        };
+        NonEmptyList_Annotated_str__AfterValidator__: string[];
+        NonEmptyList_SchemaColumnWrite_: components["schemas"]["SchemaColumnWrite"][];
+        NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
+        NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
         /** OrgResponse */
         OrgResponse: {
             /** Name */
@@ -3405,6 +3710,32 @@ export interface components {
         PaginatedResponse_FieldMapSummary_: {
             /** Items */
             items: components["schemas"]["FieldMapSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[HuntSummary] */
+        PaginatedResponse_HuntSummary_: {
+            /** Items */
+            items: components["schemas"]["HuntSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -3690,6 +4021,11 @@ export interface components {
              * @default true
              */
             atomic: boolean;
+            /**
+             * Schema Path
+             * @description Meta-schema path when the source version has no meta_schema assigned (forbidden if meta_schema is already set on the source)
+             */
+            schema_path?: string | null;
         };
         /**
          * PromoteFieldResponse
@@ -3730,6 +4066,22 @@ export interface components {
             copy_cel?: string | null;
             /** Error */
             error?: string | null;
+        };
+        /**
+         * PromotedJsonField
+         * @description A JSON path already materialized as a typed meta-schema column.
+         */
+        PromotedJsonField: {
+            /**
+             * Name
+             * @description Promoted column name in the meta-schema
+             */
+            name: string;
+            /**
+             * Key
+             * @description Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
+             */
+            key: string;
         };
         /**
          * ProviderResponse
@@ -3931,22 +4283,16 @@ export interface components {
          */
         RuleCreateRequest: {
             /**
-             * Name
-             * @description Human-readable rule name
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
              */
-            name: string;
+            display_name?: string | null;
             /**
              * Severity
              * @description low|medium|high|critical
              * @default medium
              */
             severity: string;
-            /**
-             * Source Type
-             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
-             * @default raw
-             */
-            source_type: string;
             /**
              * User Sql
              * @description User-authored SQL WHERE fragment
@@ -3979,6 +4325,17 @@ export interface components {
              * @default 60
              */
             cost_window_minutes: number;
+            /**
+             * Name
+             * @description Rule file name (YAML stem); must be unique
+             */
+            name: string;
+            /**
+             * Source Type
+             * @description 'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)
+             * @default raw
+             */
+            source_type: string;
         };
         /** RuleCreateResponse */
         RuleCreateResponse: {
@@ -3993,10 +4350,16 @@ export interface components {
         };
         /** RuleResponse */
         RuleResponse: {
-            /** Rule Id */
-            rule_id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
             name: string;
+            /**
+             * Display Name
+             * @description Human-readable rule label
+             */
+            display_name: string;
             /** Severity */
             severity: string;
             /** Source Db */
@@ -4022,10 +4385,13 @@ export interface components {
         };
         /** RuleSummary */
         RuleSummary: {
-            /** Rule Id */
-            rule_id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Rule file name (YAML stem)
+             */
             name: string;
+            /** Display Name */
+            display_name: string;
             /** Severity */
             severity: string;
             /** Source */
@@ -4045,10 +4411,10 @@ export interface components {
          */
         RuleUpdateRequest: {
             /**
-             * Name
-             * @description Rule name; omitted to keep existing
+             * Display Name
+             * @description Human-readable label (defaults from ``name`` when omitted on create)
              */
-            name?: string | null;
+            display_name?: string | null;
             /**
              * Severity
              * @description low|medium|high|critical
@@ -4108,10 +4474,58 @@ export interface components {
             };
         };
         /**
-         * SchemaColumn
-         * @description A column in the schema.
+         * SampleRowsResponse
+         * @description Random sample rows for a source, scoped to its match rule.
          */
-        "SchemaColumn-Input": {
+        SampleRowsResponse: {
+            /**
+             * Source Name
+             * @description The source these rows were sampled for.
+             */
+            source_name: string;
+            /**
+             * Table
+             * @description Fully-qualified ClickHouse table actually sampled ('db.table'). The source's own table when the selected version has a meta_schema, otherwise the shared catch-all landing table.
+             */
+            table: string;
+            /**
+             * Match Field
+             * @description Match field rows were filtered on, or null when the source owns its own table (whole-table sample).
+             */
+            match_field?: string | null;
+            /**
+             * Match Value
+             * @description Match value rows were filtered on, or null for a whole-table sample.
+             */
+            match_value?: string | null;
+            /**
+             * Match Operator
+             * @description Match operator used when filtering (equals, exists, includes, …).
+             */
+            match_operator?: string | null;
+            /**
+             * Columns
+             * @description Column names present in the sampled rows.
+             */
+            columns: string[];
+            /**
+             * Rows
+             * @description Sampled rows, each a column-name -> value mapping. Empty when nothing matched.
+             */
+            rows: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Promoted
+             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no @copy columns)
+             */
+            promoted?: components["schemas"]["PromotedJsonField"][];
+        };
+        /**
+         * SchemaColumnWrite
+         * @description Column payload for API writes (create schema / add version).
+         */
+        SchemaColumnWrite: {
             /**
              * Name
              * @description Name of the column
@@ -4142,6 +4556,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type: string;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
@@ -4181,15 +4600,19 @@ export interface components {
              */
             name: string;
             /**
+             * Resource Type
+             * @description core for system schemas, custom for user-created schemas
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
              * Current
              * @description Current version of the schema
              */
             current: string;
-            /**
-             * Versions
-             * @description List of versions
-             */
-            versions: string[];
+            /** @description List of versions */
+            versions: components["schemas"]["NonEmptyList_Annotated_str__AfterValidator__"];
             /**
              * Updated At
              * @description Last updated timestamp
@@ -4205,7 +4628,7 @@ export interface components {
          * SchemaVersion
          * @description A version in the schema.
          */
-        "SchemaVersion-Input": {
+        SchemaVersion: {
             /**
              * Date
              * @description Date of the version
@@ -4221,17 +4644,14 @@ export interface components {
              * @description Summary of the version
              */
             summary: string;
-            /**
-             * Columns
-             * @description List of columns in the version
-             */
-            columns: components["schemas"]["SchemaColumn-Input"][];
+            /** @description List of columns in the version */
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_"];
         };
         /**
-         * SchemaVersion
-         * @description A version in the schema.
+         * SchemaVersionCreate
+         * @description Initial version entry when creating a meta-schema via the API.
          */
-        "SchemaVersion-Output": {
+        SchemaVersionCreate: {
             /**
              * Date
              * @description Date of the version
@@ -4247,11 +4667,8 @@ export interface components {
              * @description Summary of the version
              */
             summary: string;
-            /**
-             * Columns
-             * @description List of columns in the version
-             */
-            columns: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            /** @description List of columns in the version */
+            columns: components["schemas"]["NonEmptyList_SchemaColumnWrite_"];
         };
         /**
          * SchemaVersionGet
@@ -4349,6 +4766,8 @@ export interface components {
             clickhouse_host: string;
             /** Clickhouse Database */
             clickhouse_database: string;
+            /** Clickhouse Data Database */
+            clickhouse_data_database: string;
             /** Sources Dir */
             sources_dir: string;
             /** Services Config Dir */
@@ -4396,15 +4815,32 @@ export interface components {
             };
         };
         /**
-         * Source
-         * @description The top-level data entity in the DFE platform.
-         *
-         *     A Source represents a distinct data stream entering the platform.
-         *     Everything flows from the _source label.
-         *
-         *     See docs/SOURCE.md for the full specification.
+         * SourceDeployResponse
+         * @description Result of deploying a source version to ClickHouse.
          */
-        Source: {
+        SourceDeployResponse: {
+            /** Source Name */
+            source_name: string;
+            /** Version */
+            version: string;
+            /** Success */
+            success: boolean;
+            /** Deployed Version */
+            deployed_version?: string | null;
+            /** Deployed At */
+            deployed_at: string;
+            /** Ddl Executed */
+            ddl_executed?: string[];
+            /** Ddl Failed */
+            ddl_failed?: {
+                [key: string]: string;
+            }[];
+        };
+        /**
+         * SourceDetailResponse
+         * @description Full source definition with per-version build/plan/deploy status.
+         */
+        SourceDetailResponse: {
             /**
              * Source
              * @description The _source label — immutable identifier
@@ -4439,15 +4875,26 @@ export interface components {
             current: string;
             /**
              * Versions
-             * @description Version id → configuration snapshot
+             * @description Version id → configuration snapshot and pipeline artifacts
              */
             versions?: {
-                [key: string]: components["schemas"]["SourceVersion"];
+                [key: string]: components["schemas"]["SourceVersionDetail"];
             };
             /** @description Receiver match rule on the deployed version (serialized for API compat). */
             readonly match: components["schemas"]["SourceMatch"] | null;
             /** @description Transform config on the deployed version (serialized for API compat). */
             readonly transform: components["schemas"]["SourceTransform"] | null;
+        };
+        /**
+         * SourceEnabledPatchRequest
+         * @description Partial update for source enabled status only.
+         */
+        SourceEnabledPatchRequest: {
+            /**
+             * Enabled
+             * @description Whether the source is active
+             */
+            enabled: boolean;
         };
         /**
          * SourceFetcher
@@ -4510,12 +4957,20 @@ export interface components {
         SourceMatch: {
             /**
              * Field
-             * @description JSON field to inspect
+             * @description Field to match on. Prefix with '_json.' to match a path inside the JSON column (e.g. '_json._source_fetcher'); a bare name matches a real top-level column (e.g. '_org_id').
              */
             field: string;
             /**
+             * Operator
+             * @description How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals
+             * @default equals
+             * @enum {string}
+             */
+            operator: "equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with";
+            /**
              * Value
-             * @description Expected value (exact match)
+             * @description Operand for the operator (not used when operator is ``exists``)
+             * @default
              */
             value: string;
         };
@@ -4536,6 +4991,38 @@ export interface components {
             message: string;
             /** Errors */
             errors?: components["schemas"]["FieldError"][];
+        };
+        /**
+         * SourcePlanResponse
+         * @description Dry-run ClickHouse deploy plan for a source version.
+         */
+        SourcePlanResponse: {
+            /** Source Name */
+            source_name: string;
+            /** Version */
+            version: string;
+            /** Planned At */
+            planned_at: string;
+            /**
+             * Table Exists
+             * @default false
+             */
+            table_exists: boolean;
+            /** Validation Errors */
+            validation_errors?: string[];
+            /** Statements */
+            statements?: string[];
+            ddl?: components["schemas"]["DDLResult"] | null;
+            /**
+             * Ready
+             * @default false
+             */
+            ready: boolean;
+            /**
+             * Ready Reason
+             * @description Why the plan is or is not ready to deploy
+             */
+            ready_reason?: string | null;
         };
         /**
          * SourceResponse
@@ -4601,6 +5088,42 @@ export interface components {
              * @default MergeTree
              */
             engine: string;
+        };
+        /**
+         * SourceSchemaColumnsResponse
+         * @description Composed source columns plus meta-schema ``resource_type``.
+         */
+        SourceSchemaColumnsResponse: {
+            /** Items */
+            items: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /**
+             * Resource Type
+             * @description resource_type from the source version's meta-schema, when configured
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
         };
         /**
          * SourceSigma
@@ -4719,19 +5242,19 @@ export interface components {
             files?: string[];
         };
         /**
-         * SourceVersion
-         * @description Versioned source configuration snapshot (schema, mappings, fetcher, etc.).
+         * SourceVersionDetail
+         * @description Source version snapshot plus persisted build/deploy payloads.
          */
-        SourceVersion: {
+        SourceVersionDetail: {
             /**
              * Date Time
              * @description Version creation date (YYYY-MM-DD)
              */
             date_time: string;
-            /** @description Common schema header configuration */
-            header?: components["schemas"]["SourceHeader"];
-            /** @description Schema configuration */
-            schema?: components["schemas"]["SourceSchema"];
+            /** @description Common schema header configuration (optional; applied at DDL compose time) */
+            header?: components["schemas"]["SourceHeader"] | null;
+            /** @description Schema configuration (None when the version did not author one) */
+            schema?: components["schemas"]["SourceSchema"] | null;
             /**
              * Mapping Standards
              * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
@@ -4750,12 +5273,16 @@ export interface components {
             match: components["schemas"]["SourceMatch"];
             /** @description Transform stage (optional) */
             transform?: components["schemas"]["SourceTransform"] | null;
+            /** @description Last schema build for this version (source-builds) */
+            source_build?: components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"] | null;
+            /** @description Last deploy run for this version (source-deploys) */
+            source_deployment?: components["schemas"]["SourceDeployResponse"] | null;
         };
         /**
-         * SourceVersionGetResponse
-         * @description Source payload for a single requested version (mirrors ``MetaSchemaGetResponse``).
+         * SourceVersionGetDetailResponse
+         * @description Single-version GET with build/plan/deploy status on ``version``.
          */
-        SourceVersionGetResponse: {
+        SourceVersionGetDetailResponse: {
             /**
              * Source
              * @description Source name (_source label)
@@ -4789,7 +5316,7 @@ export interface components {
             deployed_version?: string | null;
             /**
              * Selected
-             * @description Version id requested via query parameter
+             * @description Version id requested in the URL path
              */
             selected: string;
             /**
@@ -4797,8 +5324,13 @@ export interface components {
              * @description All version ids defined on this source
              */
             versions: string[];
-            /** @description Immutable configuration snapshot for ``selected`` */
-            version: components["schemas"]["SourceVersion"];
+            /**
+             * Previous Deployed Versions
+             * @description Version ids with a successful deploy in source-deploys history, excluding the live deployed_version
+             */
+            previous_deployed_versions?: string[];
+            /** @description Configuration snapshot for ``selected`` plus pipeline artifacts */
+            version: components["schemas"]["SourceVersionDetail"];
         };
         /**
          * SourceWriteRequest
@@ -5066,7 +5598,7 @@ export interface components {
             task_id: string;
             /**
              * Hunt Name
-             * @description Name of the triggered hunt
+             * @description Display name of the triggered hunt
              */
             hunt_name: string;
         };
@@ -5368,7 +5900,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
             /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -5457,6 +5989,11 @@ export interface components {
              * @default
              */
             description: string;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type?: string | null;
         };
         /** SeedResponse */
         dfe_engine__api__v1__services__SeedResponse: {
@@ -5485,6 +6022,18 @@ export interface components {
             /** Columns */
             columns: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
             ddl?: components["schemas"]["DDLResult"] | null;
+            /** Validation Errors */
+            validation_errors?: string[];
+            /**
+             * Built At
+             * @description When the build was persisted (source-builds); omitted on live-only builds
+             */
+            built_at?: string | null;
+            /**
+             * Column Count
+             * @description Column count at build time when columns are not included in the payload
+             */
+            column_count?: number | null;
         };
         /**
          * SchemaColumn
@@ -5535,7 +6084,7 @@ export interface components {
          * SchemaColumn
          * @description A column in the schema.
          */
-        "dfe_engine__schema__models__SchemaColumn-Output": {
+        dfe_engine__schema__models__SchemaColumn: {
             /**
              * Name
              * @description Name of the column
@@ -5566,6 +6115,11 @@ export interface components {
              * @description Comment for the column
              */
             comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type?: string | null;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
@@ -6796,15 +7350,13 @@ export interface operations {
             };
         };
     };
-    get_source_version_api_v1_sources__name__versions_get: {
+    get_source_version_api_v1_sources__name__versions__version__get: {
         parameters: {
-            query: {
-                /** @description Source version id to return (required) */
-                version: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 name: string;
+                version: string;
             };
             cookie?: never;
         };
@@ -6816,7 +7368,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceVersionGetResponse"];
+                    "application/json": components["schemas"]["SourceVersionGetDetailResponse"];
                 };
             };
             /** @description Validation Error */
@@ -6900,6 +7452,74 @@ export interface operations {
             };
         };
     };
+    plan_source_deploy_api_v1_sources__name__plan_post: {
+        parameters: {
+            query?: {
+                /** @description Source version id (defaults to current working version) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourcePlanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deploy_source_api_v1_sources__name__deploy_post: {
+        parameters: {
+            query?: {
+                /** @description Source version id to deploy (defaults to current working version) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceDeployResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_source_api_v1_sources__name__get: {
         parameters: {
             query?: never;
@@ -6917,7 +7537,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Source"];
+                    "application/json": components["schemas"]["SourceDetailResponse"];
                 };
             };
             /** @description Validation Error */
@@ -6992,6 +7612,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_source_enabled_api_v1_sources__name__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceEnabledPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description Enabling would duplicate another enabled source's receiver match */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -7743,13 +8407,13 @@ export interface operations {
     list_rules_api_v1_rules_get: {
         parameters: {
             query?: {
-                /** @description Case-insensitive search in rule_id, name, source, hunt_name, severity */
+                /** @description Case-insensitive search in name, display_name, source, hunt_name, severity */
                 search?: string | null;
                 /** @description Filter by severity */
                 severity?: string | null;
                 /** @description Filter by source label */
                 source?: string | null;
-                /** @description Sort field (rule_id, name, severity, source, hunt_name, created_at) */
+                /** @description Sort field (name, display_name, severity, source, hunt_name, created_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
@@ -7848,12 +8512,12 @@ export interface operations {
             };
         };
     };
-    get_rule_api_v1_rules__rule_id__get: {
+    get_rule_api_v1_rules__name__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -7879,12 +8543,12 @@ export interface operations {
             };
         };
     };
-    update_rule_api_v1_rules__rule_id__put: {
+    update_rule_api_v1_rules__name__put: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -7914,12 +8578,12 @@ export interface operations {
             };
         };
     };
-    delete_rule_api_v1_rules__rule_id__delete: {
+    delete_rule_api_v1_rules__name__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
+                name: string;
             };
             cookie?: never;
         };
@@ -7948,6 +8612,8 @@ export interface operations {
             query?: {
                 /** @description Search in name/description */
                 search?: string | null;
+                /** @description Hunt file name (YAML stem); only destinations referenced in that hunt's alerts */
+                hunt?: string | null;
                 /** @description Sort field (name, enabled) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
@@ -8319,7 +8985,16 @@ export interface operations {
     };
     list_hunts_api_v1_hunts_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Case-insensitive search in name, display_name, customers, rules, source_table, target_table */
+                search?: string | null;
+                /** @description Sort field (name, display_name, source_table, target_table) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -8332,7 +9007,144 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HuntSummary"][];
+                    "application/json": components["schemas"]["PaginatedResponse_HuntSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_hunt_api_v1_hunts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuntCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_hunt_api_v1_hunts__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_hunt_api_v1_hunts__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuntWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HuntDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_hunt_api_v1_hunts__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -8896,7 +9708,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MetaSchema-Input"];
+                "application/json": components["schemas"]["MetaSchemaCreateRequest"];
             };
         };
         responses: {
@@ -8906,7 +9718,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MetaSchema-Output"];
+                    "application/json": components["schemas"]["MetaSchema"];
                 };
             };
             /** @description Validation Error */
@@ -9006,7 +9818,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
+                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
                 };
             };
             /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
@@ -9034,6 +9846,8 @@ export interface operations {
             query?: {
                 /** @description Source version id (defaults to deployed_version) */
                 version?: string | null;
+                page?: number;
+                per_page?: number;
             };
             header?: never;
             path: {
@@ -9049,7 +9863,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
+                    "application/json": components["schemas"]["SourceSchemaColumnsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -9124,6 +9938,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JsonPathsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_source_rows_api_v1_schemas__source_name__sample_rows_get: {
+        parameters: {
+            query?: {
+                /** @description Number of random rows to sample */
+                limit?: number;
+                /** @description Source version to sample against (defaults to current) */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleRowsResponse"];
                 };
             };
             /** @description Validation Error */

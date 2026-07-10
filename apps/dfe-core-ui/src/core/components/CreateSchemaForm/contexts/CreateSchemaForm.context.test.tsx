@@ -1,6 +1,8 @@
 import type { RowSchema } from '@/core/components/CreateSchemaForm/AddSchemaTable';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import type { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import type { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
+// Used by antd form
 import type { FieldError } from '@rc-component/form/es/interface';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FormInstance } from 'antd';
@@ -23,6 +25,7 @@ const validRow = (
   id,
   name: `col_${id}`,
   type: 'string',
+  _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
   ...overrides,
 });
 
@@ -48,13 +51,23 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-const TestHarness = ({ children }: { children: ReactNode }) => (
-  <CreateSchemaFormProvider>{children}</CreateSchemaFormProvider>
+const TestHarness = ({
+  children,
+  initialValues,
+}: {
+  children: ReactNode;
+  initialValues?: Partial<CreateSchemaFormData>;
+}) => (
+  <CreateSchemaFormProvider initialValues={initialValues}>
+    {children}
+  </CreateSchemaFormProvider>
 );
 
-const renderContext = () =>
+const renderContext = (initialValues?: Partial<CreateSchemaFormData>) =>
   renderHook(() => useCreateSchemaFormContext(), {
-    wrapper: ({ children }) => <TestHarness>{children}</TestHarness>,
+    wrapper: ({ children }) => (
+      <TestHarness initialValues={initialValues}>{children}</TestHarness>
+    ),
   });
 
 const renderContextWithTestValue = (
@@ -96,6 +109,14 @@ describe('useCreateSchemaFormContext', () => {
 });
 
 describe('CreateSchemaFormProvider', () => {
+  test('seeds uploaded and schema columns from initialValues on first render', () => {
+    const uploaded = [validRow('u1')];
+    const { result } = renderContext({ uploadedColumns: uploaded });
+
+    expect(result.current.uploadedSchemaColumns).toEqual(uploaded);
+    expect(result.current.uploadedSchemaColumns).toHaveLength(1);
+  });
+
   test('exposes context value and updates schema columns', () => {
     const { result } = renderContext();
     const form = result.current.form;
@@ -172,6 +193,31 @@ describe('CreateSchemaFormProvider', () => {
         result.current.validationErrors.uploadedColumns.length,
       ).toBeGreaterThan(0);
     });
+  });
+
+  test('recomputeValidationErrors clears tab errors when the form has no field errors', () => {
+    const { result } = renderContext();
+    const getFieldsError = vi.spyOn(result.current.form, 'getFieldsError');
+
+    getFieldsError.mockReturnValue([
+      fieldErr(['schemaColumns'], 'At least one schema column is required'),
+    ]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toContain(
+      'At least one schema column is required',
+    );
+
+    getFieldsError.mockReturnValue([]);
+
+    act(() => {
+      result.current.recomputeValidationErrors();
+    });
+
+    expect(result.current.validationErrors.schemaColumns).toEqual([]);
   });
 
   test('handleValidate refreshes validationErrors asynchronously', async () => {
@@ -357,7 +403,9 @@ describe('CreateSchemaFormProvider', () => {
         result.current.handleUpdateInvalidUploadedSchemaColumn(fixed);
       });
 
-      expect(result.current.uploadedSchemaColumns).toEqual([fixed]);
+      expect(result.current.uploadedSchemaColumns).toEqual([
+        { ...fixed, _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED },
+      ]);
       expect(result.current.invalidUploadedSchemaColumns).toEqual([]);
       expect(setFieldsValue).toHaveBeenCalledWith({
         uploadedColumns: expect.any(Array),
@@ -461,6 +509,24 @@ describe('CreateSchemaFormProvider', () => {
       });
     });
 
+    test('does not clear seeded uploaded columns when form uploadedColumns is still empty', () => {
+      const { result } = renderContext({ uploadedColumns: [validRow('seed')] });
+      const form = result.current.form;
+
+      vi.spyOn(form, 'getFieldValue').mockImplementation((key) =>
+        key === 'uploadedColumns' ? [] : undefined,
+      );
+
+      act(() => {
+        result.current.handleUpdateUploadedSchemaColumns({
+          uploadedColumns: [],
+        });
+      });
+
+      expect(result.current.uploadedSchemaColumns).toHaveLength(1);
+      expect(result.current.uploadedSchemaColumns[0]?.id).toBe('seed');
+    });
+
     test('syncs form uploadedColumns into context when there are no invalid imported rows', () => {
       const { result } = renderContext();
       const form = result.current.form;
@@ -470,7 +536,12 @@ describe('CreateSchemaFormProvider', () => {
       });
 
       setUploadedFormRows(form, [
-        { id: 'only', name: 'col_only', type: 'string' },
+        {
+          id: 'only',
+          name: 'col_only',
+          type: 'string',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
       ]);
 
       act(() => {
@@ -487,13 +558,24 @@ describe('CreateSchemaFormProvider', () => {
       const form = result.current.form;
       const setFieldsValue = vi.spyOn(form, 'setFieldsValue');
 
-      const badImport: UploadedSchemaRow = { id: 'm1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'm1',
+        name: '',
+        type: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
       setUploadedFormRows(form, [
-        { id: 'm1', name: 'fixed_name', type: 'string', attribute: [] },
+        {
+          id: 'm1',
+          name: 'fixed_name',
+          type: 'string',
+          attribute: [],
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
       ]);
 
       act(() => {
@@ -513,7 +595,12 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'rowKey', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'rowKey',
+        name: '',
+        type: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
@@ -564,7 +651,12 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'idx', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'idx',
+        name: '',
+        type: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
@@ -572,7 +664,12 @@ describe('CreateSchemaFormProvider', () => {
       setUploadedFormRows(form, [
         // @ts-expect-error - test data
         undefined,
-        { name: 'from_index', type: 'string', id: 'idx' },
+        {
+          name: 'from_index',
+          type: 'string',
+          id: 'idx',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
       ]);
 
       act(() => {
@@ -590,13 +687,23 @@ describe('CreateSchemaFormProvider', () => {
       const { result } = renderContext();
       const form = result.current.form;
 
-      const badImport: UploadedSchemaRow = { id: 'z1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'z1',
+        name: '',
+        type: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
       setUploadedFormRows(form, [
-        { id: 'z1', name: 'bad name!', type: 'string' },
+        {
+          id: 'z1',
+          name: 'bad name!',
+          type: 'string',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
       ]);
 
       act(() => {
@@ -613,12 +720,24 @@ describe('CreateSchemaFormProvider', () => {
       const form = result.current.form;
       const validateFields = vi.spyOn(form, 'validateFields');
 
-      const badImport: UploadedSchemaRow = { id: 'q1', name: '', type: '' };
+      const badImport: UploadedSchemaRow = {
+        id: 'q1',
+        name: '',
+        type: '',
+        _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+      };
       act(() => {
         result.current.handleSetUploadedSchemaColumns([badImport]);
       });
 
-      setUploadedFormRows(form, [{ id: 'q1', name: 'still', type: '' }]);
+      setUploadedFormRows(form, [
+        {
+          id: 'q1',
+          name: 'still',
+          type: '',
+          _field_type: SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+        },
+      ]);
 
       const n = validateFields.mock.calls.length;
 

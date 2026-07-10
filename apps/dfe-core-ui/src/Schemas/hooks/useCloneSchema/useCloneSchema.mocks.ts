@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { setupServer } from 'msw/node';
 
@@ -10,13 +11,16 @@ const schemaDetailColumn = {
   attribute: ['string'],
   use_case: 'string',
   expr: 'string',
+  _field_type: SCHEMA_FIELD_TYPES.BASE,
+  _matched_searchable: ['string'],
 };
 
 const handlers = [
   API_CONFIG_MOCKS.schemas.schemaDetail.get.success({
-    schema_path: CLONE_SOURCE_SCHEMA_PATH,
+    schema_path: `${CLONE_SOURCE_SCHEMA_PATH}`,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
+      resource_type: 'custom',
       current: '1.0.0',
       selected: '1.0.0',
       versions: ['1.0.0'],
@@ -40,6 +44,7 @@ const handlers = [
     schema_path: CLONE_TARGET_SCHEMA_PATH,
     mockedResponse: {
       path: CLONE_SOURCE_SCHEMA_PATH,
+      resource_type: 'custom',
       current: '1.0.0',
       versions: {
         '1.0.0': {

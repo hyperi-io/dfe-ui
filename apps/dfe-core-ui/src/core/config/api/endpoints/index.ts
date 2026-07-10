@@ -12,9 +12,11 @@ export const API_CONFIG = Object.freeze({
     source: '/api/v1/sources/{name}',
     sourceColumns: '/api/v1/sources/{name}/columns',
     sourceBuild: '/api/v1/sources/{name}/build',
-    sourceVersion: '/api/v1/sources/{name}/versions',
+    sourceVersion: '/api/v1/sources/{name}/versions/{version}',
     bulk: '/api/v1/sources/bulk',
     seed: '/api/v1/sources/seed',
+    plan: '/api/v1/sources/{name}/plan',
+    deploy: '/api/v1/sources/{name}/deploy',
   },
   services: {
     default: '/api/v1/services',
@@ -40,7 +42,7 @@ export const API_CONFIG = Object.freeze({
   rules: {
     default: '/api/v1/rules',
     validate: '/api/v1/rules/validate',
-    rule: '/api/v1/rules/{rule_id}',
+    rule: '/api/v1/rules/{name}',
   },
   alerts: {
     destinations: '/api/v1/alerts/destinations',
@@ -60,6 +62,9 @@ export const API_CONFIG = Object.freeze({
     schema: '/api/v1/schemas/definitions/{schema_path}',
     schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     elasticConvert: '/api/v1/schemas/elastic-converter',
+    sampleRows: '/api/v1/schemas/{source_name}/sample-rows',
+    jsonPaths: '/api/v1/schemas/{source_name}/json-paths',
+    promoteField: '/api/v1/schemas/{source_name}/promote-field',
   },
   orgs: {
     default: '/api/v1/orgs',
@@ -80,5 +85,11 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/auth/roles',
     role: '/api/v1/auth/roles/{name}',
     scopes: '/api/v1/auth/roles/scopes',
+  },
+  hunts: {
+    default: '/api/v1/hunts',
+    engineStatus: '/api/v1/hunts/status',
+    hunt: '/api/v1/hunts/{name}',
+    huntRun: '/api/v1/hunts/{name}/run',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

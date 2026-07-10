@@ -1,7 +1,9 @@
 import { apiClient } from '@/core/config/api';
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { useMutation } from '@tanstack/react-query';
+import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SchemaCreateRequest, SchemaCreateResponse } from './types';
+import { joinSchemaApiPath } from './useCreateSchema.helpers';
 
 interface UseCreateSchemaProps {
   onSuccess?: (data: SchemaCreateResponse) => void;
@@ -52,14 +54,26 @@ interface UseCreateSchemaProps {
 export const useCreateSchema = ({
   onSuccess,
   onError,
-}: UseCreateSchemaProps = {}) => {
+}: UseCreateSchemaProps) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (schema: SchemaCreateRequest) =>
-      apiClient.post(API_CONFIG.schemas.schema, {
-        body: schema,
-        pathParams: { schema_path: schema.path ?? '' },
-      }),
+    mutationFn: ({ schema_type, ...schema }: SchemaCreateRequest) => {
+      const schemaPath = joinSchemaApiPath({
+        schema_type,
+        path: schema.path ?? '',
+      });
+      return apiClient.post(API_CONFIG.schemas.schema, {
+        body: {
+          ...schema,
+          path: schemaPath,
+        },
+        pathParams: { schema_path: schemaPath },
+      });
+    },
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

@@ -3,6 +3,7 @@ import {
   RowSchema,
 } from '@/core/components/CreateSchemaForm/AddSchemaTable';
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
@@ -30,31 +31,53 @@ import {
   allColumnTabListValidatePaths,
   changedValuesMayAffectTabLists,
   createEmptyValidationErrors,
+  indicesOfUserEditedListRows,
   mergeImportInvalidIntoUploadedTab,
   transformFieldErrorsToTabErrors,
   UPLOADED_ROW_FIELD_KEYS,
   uploadedAndInvalidColumnListValidatePaths,
+  withUserDefinedFieldTypeOnEditedRows,
+  type ColumnListFormKey,
 } from './CreateSchemaForm.context.helpers';
 
 const CreateSchemaUploadContext =
   createContext<CreateSchemaFormContextValue | null>(null);
 
+const invalidUploadedFromColumns = (
+  columns: UploadedSchemaRow[],
+): InvalidColumns[] =>
+  columns
+    .map((value) => {
+      const validationResult = rowSchema.safeParse(value);
+      if (!validationResult.success) {
+        return { ...validationResult, data: value };
+      }
+      return validationResult;
+    })
+    .filter((value) => !value.success) as InvalidColumns[];
+
 export const CreateSchemaFormProvider = ({
   children,
   testValue: testValueProp,
+  initialValues: initialValuesProp,
 }: {
   children: ReactNode;
   testValue?: Partial<CreateSchemaFormContextValue>;
+  initialValues?: Partial<CreateSchemaFormData>;
 }) => {
   const [form] = Form.useForm<CreateSchemaFormData>();
   const formValidation = useAntdZodResolver<CreateSchemaFormData>(formSchema);
 
-  const [schemaColumns, setSchemaColumns] = useState<RowSchema[]>([]);
+  const [schemaColumns, setSchemaColumns] = useState<RowSchema[]>(
+    () => initialValuesProp?.schemaColumns ?? [],
+  );
   const [uploadedSchemaColumns, setUploadedSchemaColumns] = useState<
     UploadedSchemaRow[]
-  >([]);
+  >(() => initialValuesProp?.uploadedColumns ?? []);
   const [invalidUploadedSchemaColumns, setInvalidUploadedSchemaColumns] =
-    useState<InvalidColumns[]>([]);
+    useState<InvalidColumns[]>(() =>
+      invalidUploadedFromColumns(initialValuesProp?.uploadedColumns ?? []),
+    );
 
   const [validationErrors, setValidationErrors] =
     useState<SchemaFormValidationErrors>(() => createEmptyValidationErrors());
@@ -177,24 +200,48 @@ export const CreateSchemaFormProvider = ({
 
   const handleSetUploadedSchemaColumns = useCallback(
     (columns: UploadedSchemaRow[]) => {
-      const validatedData = columns.map((value) => {
-        const validationResult = rowSchema.safeParse(value);
-        if (!validationResult.success) {
-          return {
-            ...validationResult,
-            data: value,
-          };
-        }
-        return validationResult;
-      });
-
-      const invalidData = validatedData.filter((value) => !value.success);
+      const invalidData = invalidUploadedFromColumns(columns);
 
       setUploadedSchemaColumns(columns);
       setInvalidUploadedSchemaColumns(invalidData);
     },
     [],
   );
+
+  useLayoutEffect(() => {
+    if (!initialValuesProp) return;
+
+    const {
+      schemaColumns: initialSchemaColumns,
+      uploadedColumns: initialUploadedColumns,
+      ...formFields
+    } = initialValuesProp;
+
+    if (Object.keys(formFields).length > 0) {
+      form.setFieldsValue(formFields);
+    }
+    if (initialSchemaColumns?.length) {
+      handleSetSchemaColumns(initialSchemaColumns);
+    }
+    if (initialUploadedColumns?.length) {
+      handleSetUploadedSchemaColumns(initialUploadedColumns);
+      const invalidInitial = invalidUploadedFromColumns(initialUploadedColumns);
+      form.setFieldsValue({
+        uploadedColumns: initialUploadedColumns.map((c) =>
+          listItemFromPartial(c),
+        ),
+        ...(invalidInitial.length > 0
+          ? {
+              invalidColumns: invalidInitial.map((inv) =>
+                listItemFromPartial(inv.data),
+              ),
+            }
+          : {}),
+      });
+    }
+    // Seed once when the provider mounts (drawer uses destroyOnHidden).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only seed
+  }, []);
 
   const handleUpdateInvalidUploadedSchemaColumn = useCallback(
     (column: RowSchema) => {
@@ -206,9 +253,12 @@ export const CreateSchemaFormProvider = ({
         const nextInvalidLen =
           invIdx === -1 ? prevInv.length + 1 : prevInv.length;
 
-        setInvalidUploadedSchemaColumns((prev) => {
+        setInvalidUploadedSchemaColumns((prev: InvalidColumns[]) => {
           const idx = prev.findIndex((inv) => inv.data.id === column.id);
-          const entry = { ...validatedColumn, data: column };
+          const entry = {
+            ...validatedColumn,
+            data: column as UploadedSchemaRow,
+          };
           if (idx === -1) {
             return [...prev, entry];
           }
@@ -235,7 +285,10 @@ export const CreateSchemaFormProvider = ({
       if (replaceIndex === -1) return;
 
       const nextUploaded = [...prevUploaded];
-      nextUploaded[replaceIndex] = validatedColumn.data;
+      nextUploaded[replaceIndex] = {
+        ...validatedColumn.data,
+        _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+      };
 
       const nextInvalid = prevInvalid.filter(
         (inv) => inv.data.id !== column.id,
@@ -294,6 +347,12 @@ export const CreateSchemaFormProvider = ({
       const uploaded = uploadedSchemaColumnsRef.current;
       if (invalid.length === 0) {
         const nextUploaded = uploadedFormRows as UploadedSchemaRow[];
+        if (
+          nextUploaded.length === 0 &&
+          uploadedSchemaColumnsRef.current.length > 0
+        ) {
+          return;
+        }
         setUploadedSchemaColumns(nextUploaded);
         uploadedSchemaColumnsRef.current = nextUploaded;
         return;
@@ -351,14 +410,61 @@ export const CreateSchemaFormProvider = ({
     );
   }, [form, __internal_collectTabErrorsAfterValidate]);
 
+  const applyUserDefinedFieldTypeOnColumnEdits = useCallback(
+    (
+      changedValues: unknown,
+      allValues: CreateSchemaFormData,
+    ): CreateSchemaFormData => {
+      const listKeys: ColumnListFormKey[] = [
+        'uploadedColumns',
+        'schemaColumns',
+        'invalidColumns',
+      ];
+      let nextValues = allValues;
+      const formPatches: Partial<CreateSchemaFormData> = {};
+
+      for (const listKey of listKeys) {
+        const editedIndices = indicesOfUserEditedListRows(
+          changedValues,
+          listKey,
+        );
+        if (editedIndices.size === 0) continue;
+
+        const rows = allValues[listKey];
+        if (!Array.isArray(rows)) continue;
+
+        const marked = withUserDefinedFieldTypeOnEditedRows(
+          rows as { _field_type?: string }[],
+          editedIndices,
+        );
+        const normalized = marked.map((column) => listItemFromPartial(column));
+        formPatches[listKey] =
+          normalized as CreateSchemaFormData[typeof listKey];
+        nextValues = { ...nextValues, [listKey]: normalized };
+      }
+
+      if (Object.keys(formPatches).length > 0) {
+        form.setFieldsValue(formPatches);
+      }
+
+      return nextValues;
+    },
+    [form],
+  );
+
   const handleFormValuesChange = useCallback(
     (changedValues: unknown, allValues: CreateSchemaFormData) => {
+      const valuesAfterFieldType = applyUserDefinedFieldTypeOnColumnEdits(
+        changedValues,
+        allValues,
+      );
+
       handleUpdateUploadedSchemaColumns(changedValues);
-      handleUpdateSchemaColumns(changedValues, allValues);
+      handleUpdateSchemaColumns(changedValues, valuesAfterFieldType);
 
       const touchedLists = changedValuesTriggerInvalidTabErrors(changedValues);
       const cv = changedValues as Record<string, unknown>;
-      const schemaCols = allValues.schemaColumns;
+      const schemaCols = valuesAfterFieldType.schemaColumns;
       const nextLen = Array.isArray(schemaCols) ? schemaCols.length : 0;
       const prevLen = prevSchemaColumnsLengthRef.current;
 
@@ -391,6 +497,7 @@ export const CreateSchemaFormProvider = ({
     [
       handleUpdateUploadedSchemaColumns,
       handleUpdateSchemaColumns,
+      applyUserDefinedFieldTypeOnColumnEdits,
       changedValuesTriggerInvalidTabErrors,
       recomputeValidationErrors,
       handleValidateColumnListsOnly,

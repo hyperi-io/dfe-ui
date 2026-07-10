@@ -1,4 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceFormDataToRequestBody } from './transformSourceFormDataToRequestBody';
 
@@ -9,14 +10,19 @@ describe('transformSourceFormDataToRequestBody', () => {
       display_name: 'display name',
       // @ts-expect-error - test case
       fetcher: {},
+      enabled: true,
     };
 
     const result = transformSourceFormDataToRequestBody(source);
-    expect(result).toEqual({
+
+    const expectedResult: SourceUpdateRequestBody = {
       source: 'source',
       display_name: 'display name',
+      enabled: true,
       fetcher: null,
-    });
+      match: { field: '', operator: 'equals', value: '' },
+    };
+    expect(result).toEqual(expectedResult);
   });
 
   test('when fetcher auth type is none, should return fetcher.auth: null', () => {
@@ -36,7 +42,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     };
 
     const result = transformSourceFormDataToRequestBody(source);
-    expect(result).toEqual({
+    const expectedResult: SourceUpdateRequestBody = {
       source: 'source',
       display_name: 'display name',
       enabled: true,
@@ -46,7 +52,8 @@ describe('transformSourceFormDataToRequestBody', () => {
         poll_interval_secs: 300,
         auth: null,
       },
-      match: { field: 'field', value: 'value' },
-    });
+      match: { field: 'field', operator: 'equals', value: 'value' },
+    };
+    expect(result).toEqual(expectedResult);
   });
 });

@@ -1915,7 +1915,7 @@
           "Sources"
         ],
         "summary": "Create Source",
-        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).",
+        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).\n\n``header`` is optional: when omitted, no common-header profile is stored on the\nversion (DDL compose uses meta/derived columns only until a header is set).",
         "operationId": "create_source_api_v1_sources_post",
         "requestBody": {
           "required": true,
@@ -1981,14 +1981,14 @@
         ]
       }
     },
-    "/api/v1/sources/{name}/versions": {
+    "/api/v1/sources/{name}/versions/{version}": {
       "get": {
         "tags": [
           "Sources"
         ],
         "summary": "Get Source Version",
-        "description": "Get one immutable source version snapshot by id.",
-        "operationId": "get_source_version_api_v1_sources__name__versions_get",
+        "description": "Get one immutable source version snapshot by id, with build/deploy status.",
+        "operationId": "get_source_version_api_v1_sources__name__versions__version__get",
         "parameters": [
           {
             "name": "name",
@@ -2001,15 +2001,12 @@
           },
           {
             "name": "version",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1,
-              "description": "Source version id to return (required)",
               "title": "Version"
-            },
-            "description": "Source version id to return (required)"
+            }
           }
         ],
         "responses": {
@@ -2018,7 +2015,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SourceVersionGetResponse"
+                  "$ref": "#/components/schemas/SourceVersionGetDetailResponse"
                 }
               }
             }
@@ -2194,13 +2191,145 @@
         ]
       }
     },
+    "/api/v1/sources/{name}/plan": {
+      "post": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Plan Source Deploy",
+        "description": "Dry-run ClickHouse deploy: DDL statements and validation errors (not persisted).",
+        "operationId": "plan_source_deploy_api_v1_sources__name__plan_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Source version id (defaults to current working version)",
+              "title": "Version"
+            },
+            "description": "Source version id (defaults to current working version)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcePlanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sources/{name}/deploy": {
+      "post": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Deploy Source",
+        "description": "Apply DDL for a source version to ClickHouse and set deployed_version.",
+        "operationId": "deploy_source_api_v1_sources__name__deploy_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Source version id to deploy (defaults to current working version)",
+              "title": "Version"
+            },
+            "description": "Source version id to deploy (defaults to current working version)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceDeployResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/sources/{name}": {
       "get": {
         "tags": [
           "Sources"
         ],
         "summary": "Get Source",
-        "description": "Get a full source definition by name.",
+        "description": "Get a full source definition by name, including build/deploy per version.",
         "operationId": "get_source_api_v1_sources__name__get",
         "parameters": [
           {
@@ -2219,7 +2348,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Source"
+                  "$ref": "#/components/schemas/SourceDetailResponse"
                 }
               }
             }
@@ -2246,7 +2375,7 @@
           "Sources"
         ],
         "summary": "Update Source",
-        "description": "Update a source from a flat revision body (appends next major version).",
+        "description": "Update a source from a flat revision body.\n\nBefore the first deploy, edits update the working version in place. After deploy, a new\nmajor version is created only when ``current`` equals ``deployed_version`` and schema pins\n(``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),\n``field_mappings``, ``sigma``, or ``transform`` change. Draft versions (``current`` not deployed) update\nin place.\n\n``header`` is optional: when omitted, no header is stored on the written version snapshot\n(same as create). Send ``header`` explicitly to set or change it.",
         "operationId": "update_source_api_v1_sources__name__put",
         "parameters": [
           {
@@ -2282,6 +2411,72 @@
           },
           "409": {
             "description": "Receiver match duplicates another enabled source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Patch Source Enabled",
+        "description": "Enable or disable a source without changing versioned configuration.\n\nDoes not create a new source version. Enabling may return ``409 match_conflict``\nif another enabled source already uses the same receiver match rule.",
+        "operationId": "patch_source_enabled_api_v1_sources__name__patch",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceEnabledPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Enabling would duplicate another enabled source's receiver match",
             "content": {
               "application/json": {
                 "schema": {
@@ -3790,10 +3985,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Case-insensitive search in rule_id, name, source, hunt_name, severity",
+              "description": "Case-insensitive search in name, display_name, source, hunt_name, severity",
               "title": "Search"
             },
-            "description": "Case-insensitive search in rule_id, name, source, hunt_name, severity"
+            "description": "Case-insensitive search in name, display_name, source, hunt_name, severity"
           },
           {
             "name": "severity",
@@ -3844,10 +4039,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Sort field (rule_id, name, severity, source, hunt_name, created_at)",
+              "description": "Sort field (name, display_name, severity, source, hunt_name, created_at)",
               "title": "Sort By"
             },
-            "description": "Sort field (rule_id, name, severity, source, hunt_name, created_at)"
+            "description": "Sort field (name, display_name, severity, source, hunt_name, created_at)"
           },
           {
             "name": "sort_order",
@@ -4004,22 +4199,22 @@
         ]
       }
     },
-    "/api/v1/rules/{rule_id}": {
+    "/api/v1/rules/{name}": {
       "get": {
         "tags": [
           "Rules"
         ],
         "summary": "Get Rule",
-        "description": "Get a detection rule by ID.",
-        "operationId": "get_rule_api_v1_rules__rule_id__get",
+        "description": "Get a detection rule by file name.",
+        "operationId": "get_rule_api_v1_rules__name__get",
         "parameters": [
           {
-            "name": "rule_id",
+            "name": "name",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Rule Id"
+              "title": "Name"
             }
           }
         ],
@@ -4057,15 +4252,15 @@
         ],
         "summary": "Update Rule",
         "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).",
-        "operationId": "update_rule_api_v1_rules__rule_id__put",
+        "operationId": "update_rule_api_v1_rules__name__put",
         "parameters": [
           {
-            "name": "rule_id",
+            "name": "name",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Rule Id"
+              "title": "Name"
             }
           }
         ],
@@ -4113,15 +4308,15 @@
         ],
         "summary": "Delete Rule",
         "description": "Delete a detection rule.",
-        "operationId": "delete_rule_api_v1_rules__rule_id__delete",
+        "operationId": "delete_rule_api_v1_rules__name__delete",
         "parameters": [
           {
-            "name": "rule_id",
+            "name": "name",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Rule Id"
+              "title": "Name"
             }
           }
         ],
@@ -4173,6 +4368,24 @@
               "title": "Search"
             },
             "description": "Search in name/description"
+          },
+          {
+            "name": "hunt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Hunt file name (YAML stem); only destinations referenced in that hunt's alerts",
+              "title": "Hunt"
+            },
+            "description": "Hunt file name (YAML stem); only destinations referenced in that hunt's alerts"
           },
           {
             "name": "sort_by",
@@ -4751,19 +4964,284 @@
           "hunts"
         ],
         "summary": "List Hunts",
-        "description": "List all configured hunts across all schedulers.",
+        "description": "List persisted hunt configurations with pagination and search.",
         "operationId": "list_hunts_api_v1_hunts_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Case-insensitive search in name, display_name, customers, rules, source_table, target_table",
+              "title": "Search"
+            },
+            "description": "Case-insensitive search in name, display_name, customers, rules, source_table, target_table"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort field (name, display_name, source_table, target_table)",
+              "title": "Sort By"
+            },
+            "description": "Sort field (name, display_name, source_table, target_table)"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort order: asc/desc",
+              "default": "asc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order: asc/desc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/HuntSummary"
-                  },
-                  "type": "array",
-                  "title": "Response List Hunts Api V1 Hunts Get"
+                  "$ref": "#/components/schemas/PaginatedResponse_HuntSummary_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "hunts"
+        ],
+        "summary": "Create Hunt",
+        "description": "Create a new hunt configuration YAML.",
+        "operationId": "create_hunt_api_v1_hunts_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HuntCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HuntDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hunts/{name}": {
+      "get": {
+        "tags": [
+          "hunts"
+        ],
+        "summary": "Get Hunt",
+        "description": "Get full hunt configuration by file name.",
+        "operationId": "get_hunt_api_v1_hunts__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HuntDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "hunts"
+        ],
+        "summary": "Update Hunt",
+        "description": "Replace an existing hunt configuration.",
+        "operationId": "update_hunt_api_v1_hunts__name__put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HuntWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HuntDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "hunts"
+        ],
+        "summary": "Delete Hunt",
+        "description": "Delete a hunt configuration.",
+        "operationId": "delete_hunt_api_v1_hunts__name__delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -5920,7 +6398,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MetaSchema-Input"
+                "$ref": "#/components/schemas/MetaSchemaCreateRequest"
               }
             }
           }
@@ -5931,7 +6409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MetaSchema-Output"
+                  "$ref": "#/components/schemas/MetaSchema"
                 }
               }
             }
@@ -6092,7 +6570,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn-Output"
+                    "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn"
                   },
                   "type": "array",
                   "title": "Response Elastic Converter Api V1 Schemas Elastic Converter Post"
@@ -6134,7 +6612,7 @@
           "schemas"
         ],
         "summary": "Get Schema Columns",
-        "description": "Get composed schema columns for a source version (profile + meta/derived/additional).",
+        "description": "Get composed schema columns for a source version (profile + meta/derived/additional).\n\nUse ``per_page=-1`` to return all columns in one page.",
         "operationId": "get_schema_columns_api_v1_schemas__source_name__columns_get",
         "parameters": [
           {
@@ -6163,6 +6641,27 @@
               "title": "Version"
             },
             "description": "Source version id (defaults to deployed_version)"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
           }
         ],
         "responses": {
@@ -6171,11 +6670,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/dfe_engine__api__v1__schemas__SchemaColumn"
-                  },
-                  "title": "Response Get Schema Columns Api V1 Schemas  Source Name  Columns Get"
+                  "$ref": "#/components/schemas/SourceSchemaColumnsResponse"
                 }
               }
             }
@@ -6270,7 +6765,7 @@
           "schemas"
         ],
         "summary": "Discover Json Paths",
-        "description": "Discover JSON paths inside a source's ``_json`` column.\n\nResolves the requested ``version`` (or the source's current version). If that\nversion defines a ``meta_schema`` the source owns its own table and discovery\nruns against ``db.<source>``. Otherwise the source's data still lives in the\nshared catch-all landing table, so discovery runs against ``db.<landing>``\nfiltered by the version's match rule.\n\nReturns one record per path with observed types, a suggested column name,\nand whether the path is already promoted. ``?samples=N`` adds random\ndistinct example values; ``?stats=true`` adds coverage + distinct counts.",
+        "description": "Discover JSON paths inside a source's ``_json`` column.\n\nResolves the requested ``version`` (or the source's current version). If that\nversion defines a ``meta_schema`` it uses ``db.<source>`` only after deploy;\nuntil then discovery runs on ``db.<landing>`` filtered by the version's\nmatch rule. Versions without ``meta_schema`` always use the landing table.\n\nReturns one record per path with observed types, a suggested column name,\nand whether the path is already promoted. ``?samples=N`` adds random\ndistinct example values; ``?stats=true`` adds coverage + distinct counts.",
         "operationId": "discover_json_paths_api_v1_schemas__source_name__json_paths_get",
         "parameters": [
           {
@@ -6380,13 +6875,93 @@
         ]
       }
     },
+    "/api/v1/schemas/{source_name}/sample-rows": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Sample Source Rows",
+        "description": "Return random sample rows for a source, scoped to its match rule.\n\nResolves the requested ``version`` (or the source's current version). A\nversion with a ``meta_schema`` uses ``db.<source>`` only after that version\nis deployed and the table exists; otherwise rows are read from\n``db.<landing>`` filtered by the version's match rule.\n\nIntended for inspecting real data while authoring a match condition or CEL\nbefore promoting any JSON path -- a row-level companion to the per-path\n``?samples=N`` on ``/json-paths``.",
+        "operationId": "sample_source_rows_api_v1_schemas__source_name__sample_rows_get",
+        "parameters": [
+          {
+            "name": "source_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source Name"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Number of random rows to sample",
+              "default": 10,
+              "title": "Limit"
+            },
+            "description": "Number of random rows to sample"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Source version to sample against (defaults to current)",
+              "title": "Version"
+            },
+            "description": "Source version to sample against (defaults to current)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleRowsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/schemas/{source_name}/promote-field": {
       "post": {
         "tags": [
           "schemas"
         ],
         "summary": "Promote Field",
-        "description": "Promote JSON path(s) into dedicated typed columns.\n\nCreates a new schema version on the source's meta-schema, adding one column\nper path with a ``@copy`` directive so dfe-loader copies the value forward.\n``?dry_run=true`` returns the proposed diff + DDL without committing.",
+        "description": "Promote JSON path(s) into dedicated typed columns.\n\nCreates a new schema version on the source's meta-schema (or on ``schema_path``\nwhen the source has none), adding one column per path with a ``@copy`` directive\nso dfe-loader copies the value forward. Core meta-schemas are forked to\n``{source_name}_{schema_stem}`` under the same parent path before promoting.\n``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,\nadding meta-schema versions, or updating the source.",
         "operationId": "promote_field_api_v1_schemas__source_name__promote_field_post",
         "parameters": [
           {
@@ -7034,6 +7609,18 @@
             "type": "boolean",
             "title": "Enabled",
             "default": true
+          },
+          "hunt_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hunt Name",
+            "description": "Hunt file stem when this destination is owned by a hunt (set via API)"
           }
         },
         "type": "object",
@@ -8016,13 +8603,19 @@
             ],
             "title": "Comment",
             "description": "Human-readable column description (defaults to the source path)."
+          },
+          "_field_type": {
+            "type": "string",
+            "title": "Field Type",
+            "description": "Column classification for JSON promotion drafts (always 'promoted')."
           }
         },
         "type": "object",
         "required": [
           "name",
           "type",
-          "expr"
+          "expr",
+          "_field_type"
         ],
         "title": "DraftColumn",
         "description": "A ready-to-send meta-schema column derived from a discovered JSON path.\n\nShaped to drop straight into ``MetaSchemaAddVersionRequest.columns`` (the\ncreate-version endpoint) or a new meta-schema's version -- the UI sends these\nverbatim, no field mapping. ``type`` is derived from the first observed\nClickHouse type; for a multi-type path (``is_consistent=false``) confirm it\nbefore saving."
@@ -8510,6 +9103,278 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HuntCreateRequest": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "Human-readable label (defaults from ``name`` when omitted on write)"
+          },
+          "cron": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Cron",
+            "description": "Cron expression or list of expressions"
+          },
+          "log_buffer": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Log Buffer",
+            "default": 60
+          },
+          "global_target_table_name": {
+            "type": "string",
+            "title": "Global Target Table Name"
+          },
+          "global_source_table_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Source Table Name"
+          },
+          "customers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Customers"
+          },
+          "customer_filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Filters"
+          },
+          "checkpoint_timestamp_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Timestamp Field"
+          },
+          "scheduling_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduling Mode"
+          },
+          "min_interval_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Interval Seconds"
+          },
+          "explain_queries": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explain Queries"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rules",
+            "description": "Hunt rule template names (``{name}.jinja2`` under the rule repo)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Hunt file name (YAML stem); must be unique"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cron",
+          "global_target_table_name",
+          "customers",
+          "rules",
+          "name"
+        ],
+        "title": "HuntCreateRequest"
+      },
+      "HuntDetailResponse": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "description": "Resolved human-readable label"
+          },
+          "cron": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Cron",
+            "description": "Cron expression or list of expressions"
+          },
+          "log_buffer": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Log Buffer",
+            "default": 60
+          },
+          "global_target_table_name": {
+            "type": "string",
+            "title": "Global Target Table Name"
+          },
+          "global_source_table_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Source Table Name"
+          },
+          "customers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Customers"
+          },
+          "customer_filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Filters"
+          },
+          "checkpoint_timestamp_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Timestamp Field"
+          },
+          "scheduling_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduling Mode"
+          },
+          "min_interval_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Interval Seconds"
+          },
+          "explain_queries": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explain Queries"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Hunt file name (YAML stem)"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/HuntRuleEntry"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_name",
+          "cron",
+          "global_target_table_name",
+          "customers",
+          "name",
+          "rules"
+        ],
+        "title": "HuntDetailResponse",
+        "description": "Full hunt configuration returned from GET/create/update."
+      },
       "HuntEngineStatus": {
         "properties": {
           "running": {
@@ -8537,20 +9402,93 @@
         "title": "HuntEngineStatus",
         "description": "Current state of the background hunt scheduler."
       },
+      "HuntRuleEntry": {
+        "properties": {
+          "rule_name": {
+            "type": "string",
+            "title": "Rule Name"
+          },
+          "target_table_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Table Name"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "initial_checkpoint_lookback_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Checkpoint Lookback Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule_name"
+        ],
+        "title": "HuntRuleEntry",
+        "description": "Per-rule hunt configuration as stored in YAML."
+      },
       "HuntSummary": {
         "properties": {
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Hunt file name (YAML stem, unique)"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "description": "Human-readable hunt label"
           },
           "customer": {
             "type": "string",
-            "title": "Customer"
+            "title": "Customer",
+            "description": "First customer in config (legacy summary field)",
+            "default": ""
+          },
+          "customers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Customers"
           },
           "cron": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
             "title": "Cron",
-            "description": "Cron schedule expression"
+            "description": "Cron schedule expression(s)",
+            "default": ""
           },
           "rules": {
             "items": {
@@ -8573,11 +9511,144 @@
         "type": "object",
         "required": [
           "name",
-          "customer",
-          "cron"
+          "display_name"
         ],
         "title": "HuntSummary",
         "description": "Summary of a configured hunt."
+      },
+      "HuntWriteRequest": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "Human-readable label (defaults from ``name`` when omitted on write)"
+          },
+          "cron": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Cron",
+            "description": "Cron expression or list of expressions"
+          },
+          "log_buffer": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Log Buffer",
+            "default": 60
+          },
+          "global_target_table_name": {
+            "type": "string",
+            "title": "Global Target Table Name"
+          },
+          "global_source_table_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Source Table Name"
+          },
+          "customers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Customers"
+          },
+          "customer_filters": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Filters"
+          },
+          "checkpoint_timestamp_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Timestamp Field"
+          },
+          "scheduling_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduling Mode"
+          },
+          "min_interval_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Interval Seconds"
+          },
+          "explain_queries": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explain Queries"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Rules",
+            "description": "Hunt rule template names (``{name}.jinja2`` under the rule repo)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cron",
+          "global_target_table_name",
+          "customers",
+          "rules"
+        ],
+        "title": "HuntWriteRequest",
+        "description": "Hunt scheduler payload for create/update (without hunt file ``name``)."
       },
       "JsonPathInfo": {
         "properties": {
@@ -8834,55 +9905,25 @@
         "title": "MatchConflictErrorResponse",
         "description": "409 when two enabled sources share the same receiver match rule."
       },
-      "MetaSchema-Input": {
+      "MetaSchema": {
         "properties": {
-          "current": {
+          "resource_type": {
             "type": "string",
-            "title": "Current",
-            "description": "Current version of the schema"
-          },
-          "versions": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/SchemaVersion-Input"
-            },
-            "type": "object",
-            "title": "Versions",
-            "description": "Dictionary of versions and their metadata"
-          },
-          "path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "enum": [
+              "core",
+              "custom"
             ],
-            "title": "Path",
-            "description": "DirectoryConfigStore table key / relative path (not stored in YAML files)"
-          }
-        },
-        "type": "object",
-        "required": [
-          "current",
-          "versions"
-        ],
-        "title": "MetaSchema",
-        "description": "A schema for a ClickHouse table.\n\nAttributes:\n    current: Current version of the schema.\n    versions: Dictionary of versions and their metadata.\n    path: Registry path key (e.g. ``aws/cloudtrail``); omitted from YAML on disk."
-      },
-      "MetaSchema-Output": {
-        "properties": {
+            "title": "Resource Type",
+            "description": "core for system schemas, custom for user-created schemas",
+            "default": "custom"
+          },
           "current": {
             "type": "string",
             "title": "Current",
             "description": "Current version of the schema"
           },
           "versions": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/SchemaVersion-Output"
-            },
-            "type": "object",
-            "title": "Versions",
+            "$ref": "#/components/schemas/NonEmptyDict_str_SchemaVersion_",
             "description": "Dictionary of versions and their metadata"
           },
           "path": {
@@ -8931,12 +9972,8 @@
             "description": "Human-readable summary stored on the new version"
           },
           "columns": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaColumn-Input"
-            },
-            "type": "array",
+            "$ref": "#/components/schemas/NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_",
             "minItems": 1,
-            "title": "Columns",
             "description": "Complete column snapshot for the new version (at least one column)"
           }
         },
@@ -8949,8 +9986,51 @@
         "title": "MetaSchemaAddVersionRequest",
         "description": "Add a new schema version (semver bump from current)."
       },
+      "MetaSchemaCreateRequest": {
+        "properties": {
+          "current": {
+            "type": "string",
+            "title": "Current",
+            "description": "Current version of the schema"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/NonEmptyDict_str_SchemaVersionCreate_",
+            "description": "Dictionary of versions and their metadata"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path",
+            "description": "DirectoryConfigStore table key / relative path (must match URL when set)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "current",
+          "versions"
+        ],
+        "title": "MetaSchemaCreateRequest",
+        "description": "Create a new custom meta-schema (``resource_type`` is set by the server)."
+      },
       "MetaSchemaGetResponse": {
         "properties": {
+          "resource_type": {
+            "type": "string",
+            "enum": [
+              "core",
+              "custom"
+            ],
+            "title": "Resource Type",
+            "description": "core for system schemas, custom for user-created schemas",
+            "default": "custom"
+          },
           "current": {
             "type": "string",
             "title": "Current",
@@ -9092,6 +10172,42 @@
         ],
         "title": "MetricEntry",
         "description": "A single metric from the service's manifest."
+      },
+      "NonEmptyDict_str_SchemaVersionCreate_": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/SchemaVersionCreate"
+        },
+        "type": "object"
+      },
+      "NonEmptyDict_str_SchemaVersion_": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/SchemaVersion"
+        },
+        "type": "object"
+      },
+      "NonEmptyList_Annotated_str__AfterValidator__": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "NonEmptyList_SchemaColumnWrite_": {
+        "items": {
+          "$ref": "#/components/schemas/SchemaColumnWrite"
+        },
+        "type": "array"
+      },
+      "NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_": {
+        "items": {
+          "$ref": "#/components/schemas/SchemaColumnWrite"
+        },
+        "type": "array"
+      },
+      "NonEmptyList_SchemaColumn_": {
+        "items": {
+          "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn"
+        },
+        "type": "array"
       },
       "OrgResponse": {
         "properties": {
@@ -9367,6 +10483,72 @@
           "prev_page"
         ],
         "title": "PaginatedResponse[FieldMapSummary]"
+      },
+      "PaginatedResponse_HuntSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HuntSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total matching items across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "readOnly": true
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page",
+            "readOnly": true
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "total_pages",
+          "next_page",
+          "prev_page"
+        ],
+        "title": "PaginatedResponse[HuntSummary]"
       },
       "PaginatedResponse_RoleResponse_": {
         "properties": {
@@ -9918,6 +11100,18 @@
             "title": "Atomic",
             "description": "When true, all paths succeed or none commit; else best-effort",
             "default": true
+          },
+          "schema_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Path",
+            "description": "Meta-schema path when the source version has no meta_schema assigned (forbidden if meta_schema is already set on the source)"
           }
         },
         "type": "object",
@@ -10049,6 +11243,27 @@
         ],
         "title": "PromoteResult",
         "description": "Per-path outcome of a promotion."
+      },
+      "PromotedJsonField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Promoted column name in the meta-schema"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "key"
+        ],
+        "title": "PromotedJsonField",
+        "description": "A JSON path already materialized as a typed meta-schema column."
       },
       "ProviderResponse": {
         "properties": {
@@ -10425,22 +11640,23 @@
       },
       "RuleCreateRequest": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable rule name"
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "Human-readable label (defaults from ``name`` when omitted on create)"
           },
           "severity": {
             "type": "string",
             "title": "Severity",
             "description": "low|medium|high|critical",
             "default": "medium"
-          },
-          "source_type": {
-            "type": "string",
-            "title": "Source Type",
-            "description": "'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)",
-            "default": "raw"
           },
           "user_sql": {
             "type": "string",
@@ -10494,12 +11710,23 @@
             "title": "Cost Window Minutes",
             "description": "Window in minutes for cost estimate",
             "default": 60
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Rule file name (YAML stem); must be unique"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type",
+            "description": "'raw' (plain SQL) or 'hyperdx' (HyperDX saved search format)",
+            "default": "raw"
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "user_sql"
+          "user_sql",
+          "name"
         ],
         "title": "RuleCreateRequest",
         "description": "Create a hunt rule via RuleCreationService."
@@ -10540,13 +11767,15 @@
       },
       "RuleResponse": {
         "properties": {
-          "rule_id": {
-            "type": "string",
-            "title": "Rule Id"
-          },
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Rule file name (YAML stem)"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name",
+            "description": "Human-readable rule label"
           },
           "severity": {
             "type": "string",
@@ -10636,8 +11865,8 @@
         },
         "type": "object",
         "required": [
-          "rule_id",
           "name",
+          "display_name",
           "severity",
           "where_clause",
           "original_sql",
@@ -10647,13 +11876,14 @@
       },
       "RuleSummary": {
         "properties": {
-          "rule_id": {
-            "type": "string",
-            "title": "Rule Id"
-          },
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Rule file name (YAML stem)"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
           },
           "severity": {
             "type": "string",
@@ -10710,8 +11940,8 @@
         },
         "type": "object",
         "required": [
-          "rule_id",
           "name",
+          "display_name",
           "severity",
           "created_at"
         ],
@@ -10719,7 +11949,7 @@
       },
       "RuleUpdateRequest": {
         "properties": {
-          "name": {
+          "display_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -10728,8 +11958,8 @@
                 "type": "null"
               }
             ],
-            "title": "Name",
-            "description": "Rule name; omitted to keep existing"
+            "title": "Display Name",
+            "description": "Human-readable label (defaults from ``name`` when omitted on create)"
           },
           "severity": {
             "type": "string",
@@ -10828,7 +12058,91 @@
         ],
         "title": "SampleRecord"
       },
-      "SchemaColumn-Input": {
+      "SampleRowsResponse": {
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "title": "Source Name",
+            "description": "The source these rows were sampled for."
+          },
+          "table": {
+            "type": "string",
+            "title": "Table",
+            "description": "Fully-qualified ClickHouse table actually sampled ('db.table'). The source's own table when the selected version has a meta_schema, otherwise the shared catch-all landing table."
+          },
+          "match_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Field",
+            "description": "Match field rows were filtered on, or null when the source owns its own table (whole-table sample)."
+          },
+          "match_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Value",
+            "description": "Match value rows were filtered on, or null for a whole-table sample."
+          },
+          "match_operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Operator",
+            "description": "Match operator used when filtering (equals, exists, includes, \u2026)."
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns",
+            "description": "Column names present in the sampled rows."
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows",
+            "description": "Sampled rows, each a column-name -> value mapping. Empty when nothing matched."
+          },
+          "promoted": {
+            "items": {
+              "$ref": "#/components/schemas/PromotedJsonField"
+            },
+            "type": "array",
+            "title": "Promoted",
+            "description": "JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no @copy columns)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_name",
+          "table",
+          "columns",
+          "rows"
+        ],
+        "title": "SampleRowsResponse",
+        "description": "Random sample rows for a source, scoped to its match rule."
+      },
+      "SchemaColumnWrite": {
         "properties": {
           "name": {
             "type": "string",
@@ -10891,6 +12205,11 @@
             "title": "Comment",
             "description": "Comment for the column"
           },
+          "_field_type": {
+            "type": "string",
+            "title": "Field Type",
+            "description": "Column classification (e.g. base); stored as _field_type in YAML"
+          },
           "matched_searchable": {
             "items": {
               "type": "string"
@@ -10903,10 +12222,11 @@
         "type": "object",
         "required": [
           "name",
-          "type"
+          "type",
+          "_field_type"
         ],
-        "title": "SchemaColumn",
-        "description": "A column in the schema."
+        "title": "SchemaColumnWrite",
+        "description": "Column payload for API writes (create schema / add version)."
       },
       "SchemaDiff": {
         "properties": {
@@ -10947,17 +12267,23 @@
             "title": "Name",
             "description": "Name of the schema"
           },
+          "resource_type": {
+            "type": "string",
+            "enum": [
+              "core",
+              "custom"
+            ],
+            "title": "Resource Type",
+            "description": "core for system schemas, custom for user-created schemas",
+            "default": "custom"
+          },
           "current": {
             "type": "string",
             "title": "Current",
             "description": "Current version of the schema"
           },
           "versions": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Versions",
+            "$ref": "#/components/schemas/NonEmptyList_Annotated_str__AfterValidator__",
             "description": "List of versions"
           },
           "updated_at": {
@@ -10982,7 +12308,7 @@
         "title": "SchemaSummaryObject",
         "description": "Summary of a schema.\n\nAttributes:\n    name: Name of the schema.\n    current: Current version of the schema.\n    versions: List of versions.\n    updated_at: Last updated timestamp.\n    column_count: Number of columns in the schema."
       },
-      "SchemaVersion-Input": {
+      "SchemaVersion": {
         "properties": {
           "date": {
             "type": "string",
@@ -11000,11 +12326,7 @@
             "description": "Summary of the version"
           },
           "columns": {
-            "items": {
-              "$ref": "#/components/schemas/SchemaColumn-Input"
-            },
-            "type": "array",
-            "title": "Columns",
+            "$ref": "#/components/schemas/NonEmptyList_SchemaColumn_",
             "description": "List of columns in the version"
           }
         },
@@ -11018,7 +12340,7 @@
         "title": "SchemaVersion",
         "description": "A version in the schema."
       },
-      "SchemaVersion-Output": {
+      "SchemaVersionCreate": {
         "properties": {
           "date": {
             "type": "string",
@@ -11036,11 +12358,7 @@
             "description": "Summary of the version"
           },
           "columns": {
-            "items": {
-              "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn-Output"
-            },
-            "type": "array",
-            "title": "Columns",
+            "$ref": "#/components/schemas/NonEmptyList_SchemaColumnWrite_",
             "description": "List of columns in the version"
           }
         },
@@ -11051,8 +12369,8 @@
           "summary",
           "columns"
         ],
-        "title": "SchemaVersion",
-        "description": "A version in the schema."
+        "title": "SchemaVersionCreate",
+        "description": "Initial version entry when creating a meta-schema via the API."
       },
       "SchemaVersionGet": {
         "properties": {
@@ -11196,6 +12514,10 @@
             "type": "string",
             "title": "Clickhouse Database"
           },
+          "clickhouse_data_database": {
+            "type": "string",
+            "title": "Clickhouse Data Database"
+          },
           "sources_dir": {
             "type": "string",
             "title": "Sources Dir"
@@ -11236,6 +12558,7 @@
         "required": [
           "clickhouse_host",
           "clickhouse_database",
+          "clickhouse_data_database",
           "sources_dir",
           "services_config_dir",
           "hunt_dir",
@@ -11304,7 +12627,64 @@
         ],
         "title": "SizeResponse"
       },
-      "Source": {
+      "SourceDeployResponse": {
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "deployed_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployed Version"
+          },
+          "deployed_at": {
+            "type": "string",
+            "title": "Deployed At"
+          },
+          "ddl_executed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ddl Executed"
+          },
+          "ddl_failed": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Ddl Failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_name",
+          "version",
+          "success",
+          "deployed_at"
+        ],
+        "title": "SourceDeployResponse",
+        "description": "Result of deploying a source version to ClickHouse."
+      },
+      "SourceDetailResponse": {
         "properties": {
           "source": {
             "type": "string",
@@ -11361,11 +12741,11 @@
           },
           "versions": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/SourceVersion"
+              "$ref": "#/components/schemas/SourceVersionDetail"
             },
             "type": "object",
             "title": "Versions",
-            "description": "Version id \u2192 configuration snapshot"
+            "description": "Version id \u2192 configuration snapshot and pipeline artifacts"
           },
           "match": {
             "anyOf": [
@@ -11398,8 +12778,24 @@
           "match",
           "transform"
         ],
-        "title": "Source",
-        "description": "The top-level data entity in the DFE platform.\n\nA Source represents a distinct data stream entering the platform.\nEverything flows from the _source label.\n\nSee docs/SOURCE.md for the full specification."
+        "title": "SourceDetailResponse",
+        "description": "Full source definition with per-version build/plan/deploy status."
+      },
+      "SourceEnabledPatchRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Whether the source is active"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "SourceEnabledPatchRequest",
+        "description": "Partial update for source enabled status only."
       },
       "SourceFetcher": {
         "properties": {
@@ -11496,18 +12892,32 @@
           "field": {
             "type": "string",
             "title": "Field",
-            "description": "JSON field to inspect"
+            "description": "Field to match on. Prefix with '_json.' to match a path inside the JSON column (e.g. '_json._source_fetcher'); a bare name matches a real top-level column (e.g. '_org_id')."
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "exists",
+              "includes",
+              "starts_with",
+              "ends_with"
+            ],
+            "title": "Operator",
+            "description": "How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals",
+            "default": "equals"
           },
           "value": {
             "type": "string",
             "title": "Value",
-            "description": "Expected value (exact match)"
+            "description": "Operand for the operator (not used when operator is ``exists``)",
+            "default": ""
           }
         },
         "type": "object",
         "required": [
-          "field",
-          "value"
+          "field"
         ],
         "title": "SourceMatch",
         "description": "Receiver match rule \u2014 how the receiver identifies this source."
@@ -11539,6 +12949,76 @@
         ],
         "title": "SourceNameConflictErrorResponse",
         "description": "409 when POST /sources and the source name already exists."
+      },
+      "SourcePlanResponse": {
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "planned_at": {
+            "type": "string",
+            "title": "Planned At"
+          },
+          "table_exists": {
+            "type": "boolean",
+            "title": "Table Exists",
+            "default": false
+          },
+          "validation_errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Validation Errors"
+          },
+          "statements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Statements"
+          },
+          "ddl": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DDLResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready",
+            "default": false
+          },
+          "ready_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ready Reason",
+            "description": "Why the plan is or is not ready to deploy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_name",
+          "version",
+          "planned_at"
+        ],
+        "title": "SourcePlanResponse",
+        "description": "Dry-run ClickHouse deploy plan for a source version."
       },
       "SourceResponse": {
         "properties": {
@@ -11658,6 +13138,83 @@
         "type": "object",
         "title": "SourceSchema",
         "description": "Schema configuration for the source's ClickHouse table."
+      },
+      "SourceSchemaColumnsResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/dfe_engine__api__v1__schemas__SchemaColumn"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total matching items across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Items per page"
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": [
+              "core",
+              "custom"
+            ],
+            "title": "Resource Type",
+            "description": "resource_type from the source version's meta-schema, when configured",
+            "default": "custom"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "readOnly": true
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page",
+            "readOnly": true
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "total_pages",
+          "next_page",
+          "prev_page"
+        ],
+        "title": "SourceSchemaColumnsResponse",
+        "description": "Composed source columns plus meta-schema ``resource_type``."
       },
       "SourceSigma": {
         "properties": {
@@ -11839,7 +13396,7 @@
         "title": "SourceTransform",
         "description": "Transform stage configuration (vector or wasm)."
       },
-      "SourceVersion": {
+      "SourceVersionDetail": {
         "properties": {
           "date_time": {
             "type": "string",
@@ -11847,12 +13404,26 @@
             "description": "Version creation date (YYYY-MM-DD)"
           },
           "header": {
-            "$ref": "#/components/schemas/SourceHeader",
-            "description": "Common schema header configuration"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceHeader"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Common schema header configuration (optional; applied at DDL compose time)"
           },
           "schema": {
-            "$ref": "#/components/schemas/SourceSchema",
-            "description": "Schema configuration"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Schema configuration (None when the version did not author one)"
           },
           "mapping_standards": {
             "items": {
@@ -11913,6 +13484,28 @@
               }
             ],
             "description": "Transform stage (optional)"
+          },
+          "source_build": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dfe_engine__api__v1__sources__SchemaBuildResult"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last schema build for this version (source-builds)"
+          },
+          "source_deployment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceDeployResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last deploy run for this version (source-deploys)"
           }
         },
         "type": "object",
@@ -11920,10 +13513,10 @@
           "date_time",
           "match"
         ],
-        "title": "SourceVersion",
-        "description": "Versioned source configuration snapshot (schema, mappings, fetcher, etc.)."
+        "title": "SourceVersionDetail",
+        "description": "Source version snapshot plus persisted build/deploy payloads."
       },
-      "SourceVersionGetResponse": {
+      "SourceVersionGetDetailResponse": {
         "properties": {
           "source": {
             "type": "string",
@@ -11980,7 +13573,7 @@
           "selected": {
             "type": "string",
             "title": "Selected",
-            "description": "Version id requested via query parameter"
+            "description": "Version id requested in the URL path"
           },
           "versions": {
             "items": {
@@ -11990,9 +13583,17 @@
             "title": "Versions",
             "description": "All version ids defined on this source"
           },
+          "previous_deployed_versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Previous Deployed Versions",
+            "description": "Version ids with a successful deploy in source-deploys history, excluding the live deployed_version"
+          },
           "version": {
-            "$ref": "#/components/schemas/SourceVersion",
-            "description": "Immutable configuration snapshot for ``selected``"
+            "$ref": "#/components/schemas/SourceVersionDetail",
+            "description": "Configuration snapshot for ``selected`` plus pipeline artifacts"
           }
         },
         "type": "object",
@@ -12003,8 +13604,8 @@
           "versions",
           "version"
         ],
-        "title": "SourceVersionGetResponse",
-        "description": "Source payload for a single requested version (mirrors ``MetaSchemaGetResponse``)."
+        "title": "SourceVersionGetDetailResponse",
+        "description": "Single-version GET with build/plan/deploy status on ``version``."
       },
       "SourceWriteRequest": {
         "properties": {
@@ -12543,7 +14144,7 @@
           "hunt_name": {
             "type": "string",
             "title": "Hunt Name",
-            "description": "Name of the triggered hunt"
+            "description": "Display name of the triggered hunt"
           }
         },
         "type": "object",
@@ -13156,7 +14757,7 @@
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn-Output"
+              "$ref": "#/components/schemas/dfe_engine__schema__models__SchemaColumn"
             },
             "type": "array",
             "title": "Items"
@@ -13350,6 +14951,18 @@
             "type": "string",
             "title": "Description",
             "default": ""
+          },
+          "_field_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Type",
+            "description": "Column classification (e.g. base); stored as _field_type in YAML"
           }
         },
         "type": "object",
@@ -13420,6 +15033,37 @@
                 "type": "null"
               }
             ]
+          },
+          "validation_errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Validation Errors"
+          },
+          "built_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Built At",
+            "description": "When the build was persisted (source-builds); omitted on live-only builds"
+          },
+          "column_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column Count",
+            "description": "Column count at build time when columns are not included in the payload"
           }
         },
         "type": "object",
@@ -13505,7 +15149,7 @@
         ],
         "title": "TestResponse"
       },
-      "dfe_engine__schema__models__SchemaColumn-Output": {
+      "dfe_engine__schema__models__SchemaColumn": {
         "properties": {
           "name": {
             "type": "string",
@@ -13567,6 +15211,18 @@
             ],
             "title": "Comment",
             "description": "Comment for the column"
+          },
+          "_field_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Type",
+            "description": "Column classification (e.g. base); stored as _field_type in YAML"
           },
           "_matched_searchable": {
             "items": {

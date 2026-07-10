@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
   schemaGroupValidator,
@@ -7,11 +8,19 @@ import {
 import z from 'zod';
 /** Used for building the request body */
 const schemaDetails = {
+  schema_type: z.enum(['meta', 'common_header', 'hunts']),
+  _field_type: z.enum([
+    SCHEMA_FIELD_TYPES.BASE,
+    SCHEMA_FIELD_TYPES.PROMOTED,
+    SCHEMA_FIELD_TYPES.ELASTIC_IMPORT,
+    SCHEMA_FIELD_TYPES.CSV_IMPORT,
+    SCHEMA_FIELD_TYPES.USER_DEFINED,
+  ]),
   name: schemaNameValidator,
   path: schemaGroupValidator.optional(),
   version: schemaVersionValidator,
   type: z.enum(['model', 'addition', 'revision']),
-  description: z.string().optional(),
+  description: z.string().min(1, { message: 'Description is required' }),
 };
 const uploadedColumnsTabSchema = {
   uploadedColumns: z.array(rowSchema).optional(),

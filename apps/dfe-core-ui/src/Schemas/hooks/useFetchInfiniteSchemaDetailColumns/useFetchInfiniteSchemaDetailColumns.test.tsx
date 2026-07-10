@@ -499,6 +499,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
           schema_path: MOCK_SCHEMA_PATH,
           mockedResponse: {
             path: MOCK_SCHEMA_PATH,
+            resource_type: 'custom',
             current: '1.0.0',
             selected: '1.0.0',
             versions: ['1.0.0'],

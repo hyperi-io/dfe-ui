@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export const ACCOUNT_DETAIL_QUERY_KEY = (username?: string | null) => [
   'account',
-  username,
+  ...(username ? [username] : []),
 ];
 export const useFetchAccountDetail = ({
   username,

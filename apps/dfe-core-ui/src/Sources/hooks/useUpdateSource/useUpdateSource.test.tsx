@@ -35,6 +35,7 @@ describe('.useUpdateSource', () => {
       type: 'string',
       version: 'string',
     },
+    match: { field: 'string', operator: 'equals', value: 'string' },
     schema: {
       meta_schema: '',
       meta_schema_version: '',

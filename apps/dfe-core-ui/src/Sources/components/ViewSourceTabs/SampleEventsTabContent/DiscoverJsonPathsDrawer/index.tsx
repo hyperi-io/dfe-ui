@@ -1,0 +1,151 @@
+import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/PromoteJsonPaths';
+import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { IconAlertCircle } from '@repo/dfe-icons';
+import { App, Button, Tabs } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { DiscoverJsonPathsDetails } from './DiscoverJsonPathsDetails';
+
+type ActiveTab = 'discover' | 'review';
+
+const UNCOMMITTED_CLOSE_MESSAGE =
+  'Field promotions have not been committed. Leave anyway and discard your review?';
+export const DiscoverJsonPathsDrawer = ({
+  selectedSourceName,
+  selectedSourceVersion,
+  fieldsToPromote,
+}: {
+  selectedSourceName: string;
+  selectedSourceVersion: string;
+  fieldsToPromote: Set<string>;
+}) => {
+  const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
+    null,
+  );
+  const { notification, modal } = App.useApp();
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('discover');
+  const [canPromote, setCanPromote] = useState(false);
+  const [promoteTestResponse, setPromoteTestResponse] =
+    useState<PromoteFieldResponse | null>(null);
+  const [jsonPaths, setJsonPaths] = useState<JsonPaths | null>(null);
+
+  const hasUncommittedChanges = isDrawerVisible && promoteTestResponse != null;
+
+  const closeDrawer = useCallback(() => {
+    setIsDrawerVisible(false);
+    setActiveTab('discover');
+    setCanPromote(false);
+    setPromoteTestResponse(null);
+    setJsonPaths(null);
+  }, []);
+
+  const requestCloseDrawer = useCallback(() => {
+    if (!hasUncommittedChanges) {
+      closeDrawer();
+      return;
+    }
+    modal.confirm({
+      title: (
+        <span className="flex items-center gap-x-2">
+          <IconAlertCircle /> Uncommitted changes
+        </span>
+      ),
+      content: UNCOMMITTED_CLOSE_MESSAGE,
+      okText: 'Discard',
+      okButtonProps: { danger: true },
+      cancelText: 'Keep editing',
+      icon: null,
+      onOk: closeDrawer,
+    });
+  }, [closeDrawer, hasUncommittedChanges, modal]);
+
+  useEffect(() => {
+    if (!hasUncommittedChanges) {
+      return;
+    }
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [hasUncommittedChanges]);
+
+  return (
+    <>
+      <RbacProtected action={RbacProtected.rbacActions.schema_write}>
+        <RbacProtected.Unrestricted>
+          <Button type="primary" onClick={() => setIsDrawerVisible(true)}>
+            Promote Fields
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true, placement: 'bottom' }}>
+          <Button type="primary" disabled>
+            Promote Fields
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
+      <Drawer
+        title="Promote Fields"
+        open={isDrawerVisible}
+        size="80%"
+        onClose={requestCloseDrawer}
+        destroyOnHidden
+      >
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => setActiveTab(key as 'discover' | 'review')}
+          items={[
+            {
+              key: 'discover',
+              label: 'Discover',
+              children: (
+                <DiscoverJsonPathsDetails
+                  selectedSourceName={selectedSourceName}
+                  selectedSourceVersion={selectedSourceVersion}
+                  fieldsToPromote={Array.from(fieldsToPromote)}
+                  onSuccess={(response) => {
+                    setCanPromote(true);
+                    setActiveTab('review');
+                    setPromoteTestResponse(response);
+                  }}
+                  onDataLoad={(response) => {
+                    setJsonPaths(response);
+                  }}
+                  setAttachedSchemaPath={(schemaPath) => {
+                    setAttachedSchemaPath(schemaPath);
+                  }}
+                />
+              ),
+            },
+            {
+              key: 'review',
+              label: 'Review',
+              disabled: !canPromote,
+              children: (
+                <PromoteJsonPaths
+                  selectedSourceName={selectedSourceName}
+                  selectedSourceVersion={selectedSourceVersion}
+                  data={promoteTestResponse}
+                  jsonPaths={jsonPaths}
+                  onSuccess={() => {
+                    closeDrawer();
+                    notification.success({
+                      title: 'Fields promoted successfully',
+                      placement: 'bottomLeft',
+                    });
+                  }}
+                  attachedSchemaPath={attachedSchemaPath}
+                />
+              ),
+            },
+          ]}
+        />
+      </Drawer>
+    </>
+  );
+};

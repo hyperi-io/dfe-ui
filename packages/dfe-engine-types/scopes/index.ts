@@ -53,6 +53,8 @@ const fieldmap_scopes = {
 
 const hunt_scopes = {
   hunt_read: "hunt:read",
+  hunt_write: "hunt:write",
+  hunt_delete: "hunt:delete",
   hunt_execute: "hunt:execute",
 } as const;
 
@@ -119,6 +121,7 @@ const source_scopes = {
   source_read: "source:read",
   source_write: "source:write",
   source_delete: "source:delete",
+  source_deploy: "source:deploy",
 } as const;
 
 const system_scopes = {

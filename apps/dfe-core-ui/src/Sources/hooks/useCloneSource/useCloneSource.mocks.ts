@@ -20,8 +20,6 @@ const handlers = [
         schema: {
           meta_schema: 'string',
           meta_schema_version: 'string',
-          derived_schema: 'string',
-          additional_fields: 'string',
           ttl_days: 0,
           engine: 'string',
         },
@@ -55,6 +53,7 @@ const handlers = [
         mapping_standards: ['string'],
         match: {
           field: 'string',
+          operator: 'equals',
           value: 'string',
         },
       },

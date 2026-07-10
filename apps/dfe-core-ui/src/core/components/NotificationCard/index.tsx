@@ -1,6 +1,12 @@
 import { cn } from '@/core/utils/style';
 
-type DisplayType = 'default' | 'warning' | 'error' | 'info';
+type DisplayType =
+  | 'default'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'action'
+  | 'success';
 
 export const NotificationCard = ({
   icon,
@@ -8,12 +14,22 @@ export const NotificationCard = ({
   className,
   type = 'default',
   title,
+  action,
+  classNames,
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
   className?: string;
   type?: DisplayType;
   title?: string | React.ReactNode;
+  action?: React.ReactNode;
+  classNames?: {
+    root?: string;
+    container?: string;
+    title?: string;
+    description?: string;
+    action?: string;
+  };
 }) => {
   const displayType = {
     default: cn(
@@ -32,6 +48,14 @@ export const NotificationCard = ({
       // Card Border & Background
       'border-info/30 bg-info/10 dark:border-dark-info/50 dark:bg-dark-info/10',
     ),
+    action: cn(
+      // Card Border & Background
+      'border-purple-500/50 bg-purple-500/10',
+    ),
+    success: cn(
+      // Card Border & Background
+      'border-success/50 bg-success/10 dark:border-dark-success/50 dark:bg-dark-success/10',
+    ),
   };
   return (
     <div
@@ -44,13 +68,19 @@ export const NotificationCard = ({
         'rounded-lg px-3 py-2',
         displayType[type],
         className,
+        classNames?.root,
       )}
     >
       {icon && icon}
 
-      <div className="flex flex-col gap-1">
+      <div className={cn('flex flex-col gap-1', classNames?.container)}>
         {typeof title === 'string' ? (
-          <h3 className="text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted">
+          <h3
+            className={cn(
+              'text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted',
+              classNames?.title,
+            )}
+          >
             {title}
           </h3>
         ) : (
@@ -58,13 +88,21 @@ export const NotificationCard = ({
         )}
 
         {typeof description === 'string' ? (
-          <p className="text-sm text-foreground-muted dark:text-dark-foreground-muted">
+          <p
+            className={cn(
+              'text-sm text-foreground-muted dark:text-dark-foreground-muted',
+              classNames?.description,
+            )}
+          >
             {description}
           </p>
         ) : (
           description
         )}
       </div>
+      {action && (
+        <div className={cn('ml-auto', classNames?.action)}>{action}</div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,3 @@
-import { type ReactElement } from 'react';
-
 import { IconWrapper } from '@/core/components/IconWrapper';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
@@ -12,6 +10,7 @@ import {
   IconSettings2,
   IconShieldCheck,
   IconTable,
+  IconTargetArrow,
 } from '@repo/dfe-icons';
 
 const { rbacActions } = RbacProtected;
@@ -21,64 +20,144 @@ interface SidebarMenuProps {
   isNewViewEnabled?: boolean;
 }
 
-const hyperdxUrl = process.env.NEXT_PUBLIC_HYPERDX_URL as string | undefined;
-
-// HyperDX features embedded as seamless siblings via /observe/* (an iframe of the
-// chromeless fork -- dfe-ui owns the nav). These route INTERNALLY (external: false)
-// to the embed page, which iframes `${hyperdxUrl}/<feature>?embed=1`. Gated on
-// hyperdxUrl being configured + the dashboard_read RBAC action.
-const hyperdxFeatures: { path: string; label: string; icon: ReactElement }[] = [
-  { path: '/observe/search', label: 'Search', icon: <IconTable /> },
-  {
-    path: '/observe/search/list',
-    label: 'Saved Searches',
-    icon: <IconBookmark />,
-  },
-  { path: '/observe/chart', label: 'Chart Explorer', icon: <IconChartDots /> },
-  {
-    path: '/observe/dashboards',
-    label: 'Dashboards',
-    icon: <IconLayoutGrid />,
-  },
-];
-
-const hyperdxSidebarItems = hyperdxUrl
-  ? hyperdxFeatures.map(({ path, label, icon }) => ({
-      key: path,
-      Component: ({ collapsed }: SidebarMenuProps) => (
-        <RbacProtected action={rbacActions.dashboard_read}>
-          <RbacProtected.Unrestricted>
-            <SidebarLink
-              collapsed={collapsed}
-              item={{
-                key: path,
-                icon: <IconWrapper icon={icon} />,
-                label,
-                external: false,
-              }}
-            />
-          </RbacProtected.Unrestricted>
-          <RbacProtected.Restricted
-            tooltip={{ show: true, placement: 'right', showIcon: true }}
-          >
-            <SidebarLink
-              collapsed={collapsed}
-              disabled
-              item={{
-                key: path,
-                icon: <IconWrapper icon={icon} />,
-                label,
-                external: false,
-              }}
-            />
-          </RbacProtected.Restricted>
-        </RbacProtected>
-      ),
-    }))
-  : [];
-
-export const featureFlagSidebarMenuItems = [
-  ...hyperdxSidebarItems,
+export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
+  // HyperDX features embedded as seamless siblings via /observe/* (an iframe of
+  // the chromeless fork -- dfe-ui owns the nav). These route INTERNALLY
+  // (external: false) to the embed page, which iframes
+  // `${hyperdxUrl}/<feature>?embed=1`. Gated on hyperdxUrl being configured +
+  // the dashboard_read RBAC action.
+  ...(hyperdxUrl
+    ? [
+        {
+          key: '/observe/search',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/search',
+                    icon: <IconWrapper icon={<IconTable />} />,
+                    label: 'Search',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
+              >
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: '/observe/search',
+                    icon: <IconWrapper icon={<IconTable />} />,
+                    label: 'Search',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+        {
+          key: '/observe/search/list',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/search/list',
+                    icon: <IconWrapper icon={<IconBookmark />} />,
+                    label: 'Saved Searches',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
+              >
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: '/observe/search/list',
+                    icon: <IconWrapper icon={<IconBookmark />} />,
+                    label: 'Saved Searches',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+        {
+          key: '/observe/chart',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/chart',
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
+              >
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: '/observe/chart',
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+        {
+          key: '/observe/dashboards',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/dashboards',
+                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
+                    label: 'Dashboards',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
+              >
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: '/observe/dashboards',
+                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
+                    label: 'Dashboards',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+      ]
+    : []),
   {
     key: '/sources',
     Component: ({ collapsed }: SidebarMenuProps) => (
@@ -169,6 +248,38 @@ export const featureFlagSidebarMenuItems = [
               key: '/rules',
               icon: <IconWrapper icon={<IconShieldCheck />} />,
               label: 'Rules',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
+    ),
+  },
+  {
+    key: '/hunts',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected action={rbacActions.hunt_read}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/hunts',
+              icon: <IconWrapper icon={<IconTargetArrow />} />,
+              label: 'Hunts',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/hunts',
+              icon: <IconWrapper icon={<IconTargetArrow />} />,
+              label: 'Hunts',
               external: false,
             }}
           />

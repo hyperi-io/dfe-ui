@@ -1,3 +1,4 @@
+import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import {
   SchemaCreateRequest,
   SchemaCreateRequestColumn,
@@ -18,6 +19,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),
@@ -31,6 +33,7 @@ export const transformFormDataToRequestBody = (
   ).map((column) => ({
     name: column.name,
     type: column.type,
+    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     ...(column.attribute && column.attribute.length > 0
       ? { attribute: column.attribute }
       : {}),
@@ -40,6 +43,7 @@ export const transformFormDataToRequestBody = (
   }));
 
   const requestBody: SchemaCreateRequest = {
+    schema_type: formData.schema_type,
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
     current: formData.version,
     versions: {
@@ -53,4 +57,20 @@ export const transformFormDataToRequestBody = (
   };
 
   return { requestBody, uploadedColumns, schemaColumns };
+};
+
+export const joinSchemaApiPath = ({
+  schema_type,
+  path,
+}: {
+  schema_type?: string;
+  path: string;
+}) => {
+  if (!schema_type) {
+    return path;
+  }
+  if (!path) {
+    return schema_type;
+  }
+  return `${schema_type}/${path}`;
 };
