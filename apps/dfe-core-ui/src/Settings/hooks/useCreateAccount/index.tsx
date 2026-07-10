@@ -1,10 +1,9 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { AccountCreateRequestBody, AccountCreateResponse } from './types';
+import { createAccount } from './api';
+import { TAccountCreateRequestBody, TAccountCreateResponse } from './types';
 
 interface UseCreateAccountProps {
-  onSuccess?: (data: AccountCreateResponse) => void;
+  onSuccess?: (data: TAccountCreateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -13,11 +12,10 @@ export const useCreateAccount = ({
   onError,
 }: UseCreateAccountProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (account: AccountCreateRequestBody) => {
-      return apiClient.post(API_CONFIG.accounts.default, {
+    mutationFn: (account: TAccountCreateRequestBody) =>
+      createAccount({
         body: account,
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },
