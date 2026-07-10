@@ -4,14 +4,14 @@ import {
   CreateUpdateRuleFormData,
 } from '@/Rules/components/CreateUpdateRuleForm';
 import { RULE_DETAIL_QUERY_KEY } from '@/Rules/hooks/useFetchRuleDetail';
-import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { Spin } from 'antd';
 
 interface UpdateRuleFormProps {
-  rule: RuleDetail;
+  rule: TRuleDetail;
   onSuccess?: (response: RuleUpdateResponse) => void;
 }
 

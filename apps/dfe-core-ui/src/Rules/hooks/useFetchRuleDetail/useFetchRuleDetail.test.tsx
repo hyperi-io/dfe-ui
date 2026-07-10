@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchRuleDetail } from '.';
-import { RuleDetail } from './types';
+import { TRuleDetail } from './types';
 import { server } from './useFetchRuleDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchRuleDetail', () => {
         { wrapper },
       );
 
-      const response: RuleDetail = {
+      const response: TRuleDetail = {
         display_name: 'string',
         name: 'string',
         severity: 'string',
