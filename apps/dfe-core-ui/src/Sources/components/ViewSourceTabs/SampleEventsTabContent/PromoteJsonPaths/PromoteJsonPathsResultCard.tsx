@@ -2,7 +2,7 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
-import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconCheck, IconExclamationMark } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 
@@ -25,7 +25,7 @@ export const PromoteJsonPathsResultCard = ({
   ddl,
   copyDirective,
 }: {
-  result: PromoteFieldResponse['results'][number];
+  result: TPromoteFieldResponse['results'][number];
   ddl: string | undefined;
   copyDirective: string | undefined;
 }) => {

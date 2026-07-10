@@ -6,7 +6,7 @@ import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
-import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { Button, Spin } from 'antd';
 import { useEffect, useMemo } from 'react';
 
@@ -22,7 +22,7 @@ export const DiscoverJsonPathsDetails = ({
   selectedSourceName: string;
   selectedSourceVersion: string;
   fieldsToPromote: string[];
-  onSuccess: (response: PromoteFieldResponse) => void;
+  onSuccess: (response: TPromoteFieldResponse) => void;
   onDataLoad: (response: TJsonPathsResponse) => void;
   setAttachedSchemaPath?: (schemaPath: string) => void;
 }) => {

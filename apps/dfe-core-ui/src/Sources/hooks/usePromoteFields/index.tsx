@@ -1,8 +1,7 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PromoteFieldRequest, PromoteFieldResponse } from './types';
+import { promoteFields } from './api';
+import { TPromoteFieldRequest, TPromoteFieldResponse } from './types';
 
 export const usePromoteFields = ({
   source_name,
@@ -12,7 +11,7 @@ export const usePromoteFields = ({
 }: {
   source_name: string;
   source_version: string;
-  onSuccess?: (data: PromoteFieldResponse) => void;
+  onSuccess?: (data: TPromoteFieldResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
@@ -21,10 +20,10 @@ export const usePromoteFields = ({
     mutationFn: ({
       dry_run = true,
       ...fieldValues
-    }: PromoteFieldRequest & {
+    }: TPromoteFieldRequest & {
       dry_run?: boolean;
     }) =>
-      apiClient.post(API_CONFIG.schemas.promoteField, {
+      promoteFields({
         pathParams: { source_name: source_name ?? '' },
         queryParams: { dry_run },
         body: fieldValues,

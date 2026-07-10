@@ -4,7 +4,7 @@ import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/conte
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
-import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { Button } from 'antd';
 import { useMemo } from 'react';
 import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
@@ -19,9 +19,9 @@ export const PromoteJsonPaths = ({
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  data: PromoteFieldResponse | null;
+  data: TPromoteFieldResponse | null;
   jsonPaths: TJsonPathsResponse | null;
-  onSuccess?: (response: PromoteFieldResponse) => void;
+  onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
 }) => {
   const { handleClearFieldsToPromote } = usePromoteRowsContext();
