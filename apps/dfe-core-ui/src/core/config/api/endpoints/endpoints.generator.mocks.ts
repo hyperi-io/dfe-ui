@@ -1,4 +1,7 @@
-/* eslint-disable no-console */
+import {
+  TFetchStandardFieldMapResponse,
+  TSourceFieldMapResponse,
+} from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
 import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
@@ -988,7 +991,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           standard = 'standard',
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TFetchStandardFieldMapResponse;
           standard?: string;
           source?: string;
         } = {}) => {
@@ -1023,7 +1026,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           standard = 'standard',
           source = 'source',
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TSourceFieldMapResponse;
           standard?: string;
           source?: string;
         } = {}) => {
@@ -3265,4 +3268,3 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
   },
 });
-/* eslint-enable no-console */
