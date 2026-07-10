@@ -13,6 +13,7 @@ import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/typ
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
+import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1949,7 +1950,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
+          mockedResponse?: TElasticConvertResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
