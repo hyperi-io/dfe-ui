@@ -1,9 +1,9 @@
-import { CompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
+import { TCompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
 import { Modal } from '@/core/components/Modal';
 import { useState } from 'react';
 
 interface ResponseModalProps {
-  response?: CompileTransformResponse | null;
+  response?: TCompileTransformResponse | null;
   onClose?: () => void;
 }
 

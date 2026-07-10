@@ -4,6 +4,7 @@ import {
 } from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
 import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
 import { TTestTransformResponse } from '@/_Transforms/hooks/_useTestTransform/types';
+import { TCompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
 import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
@@ -1558,7 +1559,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             wasm_bytes: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['CompileResponse'];
+          mockedResponse?: TCompileTransformResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.transforms.compile.mockedUrl,
