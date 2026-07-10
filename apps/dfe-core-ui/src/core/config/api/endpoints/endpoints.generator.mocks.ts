@@ -42,6 +42,7 @@ import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/type
 import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types';
 import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
 import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
+import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2881,7 +2882,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             resource_type: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['RoleResponse'];
+          mockedResponse?: TRoleCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
