@@ -3,6 +3,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
+  IconBookmark,
   IconChartDots,
   IconDatabase,
   IconLayoutGrid,
@@ -20,20 +21,25 @@ interface SidebarMenuProps {
 }
 
 export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
+  // HyperDX features embedded as seamless siblings via /observe/* (an iframe of
+  // the chromeless fork -- dfe-ui owns the nav). These route INTERNALLY
+  // (external: false) to the embed page, which iframes
+  // `${hyperdxUrl}/<feature>?embed=1`. Gated on hyperdxUrl being configured +
+  // the dashboard_read RBAC action.
   ...(hyperdxUrl
     ? [
         {
-          key: `${hyperdxUrl}/search`,
+          key: '/observe/search',
           Component: ({ collapsed }: SidebarMenuProps) => (
             <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
                   item={{
-                    key: `${hyperdxUrl}/search`,
+                    key: '/observe/search',
                     icon: <IconWrapper icon={<IconTable />} />,
                     label: 'Search',
-                    external: true,
+                    external: false,
                   }}
                 />
               </RbacProtected.Unrestricted>
@@ -44,10 +50,10 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   collapsed={collapsed}
                   disabled
                   item={{
-                    key: `${hyperdxUrl}/search`,
+                    key: '/observe/search',
                     icon: <IconWrapper icon={<IconTable />} />,
                     label: 'Search',
-                    external: true,
+                    external: false,
                   }}
                 />
               </RbacProtected.Restricted>
@@ -55,17 +61,17 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
           ),
         },
         {
-          key: `${hyperdxUrl}/chart`,
+          key: '/observe/search/list',
           Component: ({ collapsed }: SidebarMenuProps) => (
             <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
                   item={{
-                    key: `${hyperdxUrl}/chart`,
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: true,
+                    key: '/observe/search/list',
+                    icon: <IconWrapper icon={<IconBookmark />} />,
+                    label: 'Saved Searches',
+                    external: false,
                   }}
                 />
               </RbacProtected.Unrestricted>
@@ -76,10 +82,10 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   collapsed={collapsed}
                   disabled
                   item={{
-                    key: `${hyperdxUrl}/chart`,
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: true,
+                    key: '/observe/search/list',
+                    icon: <IconWrapper icon={<IconBookmark />} />,
+                    label: 'Saved Searches',
+                    external: false,
                   }}
                 />
               </RbacProtected.Restricted>
@@ -87,17 +93,17 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
           ),
         },
         {
-          key: `${hyperdxUrl}/dashboards`,
+          key: '/observe/chart',
           Component: ({ collapsed }: SidebarMenuProps) => (
             <RbacProtected action={rbacActions.dashboard_read}>
               <RbacProtected.Unrestricted>
                 <SidebarLink
                   collapsed={collapsed}
                   item={{
-                    key: `${hyperdxUrl}/dashboards`,
-                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                    label: 'Dashboards',
-                    external: true,
+                    key: '/observe/chart',
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: false,
                   }}
                 />
               </RbacProtected.Unrestricted>
@@ -108,10 +114,42 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   collapsed={collapsed}
                   disabled
                   item={{
-                    key: `${hyperdxUrl}/dashboards`,
+                    key: '/observe/chart',
+                    icon: <IconWrapper icon={<IconChartDots />} />,
+                    label: 'Chart Explorer',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+        {
+          key: '/observe/dashboards',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/dashboards',
                     icon: <IconWrapper icon={<IconLayoutGrid />} />,
                     label: 'Dashboards',
-                    external: true,
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted
+                tooltip={{ show: true, placement: 'right', showIcon: true }}
+              >
+                <SidebarLink
+                  collapsed={collapsed}
+                  disabled
+                  item={{
+                    key: '/observe/dashboards',
+                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
+                    label: 'Dashboards',
+                    external: false,
                   }}
                 />
               </RbacProtected.Restricted>
