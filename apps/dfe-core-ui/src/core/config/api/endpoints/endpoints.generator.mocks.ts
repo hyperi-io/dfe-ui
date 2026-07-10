@@ -52,6 +52,7 @@ import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
 import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
+import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2436,7 +2437,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TGroupUpdateResponse;
           group_name?: string;
         } = {}) => {
           return http.put(

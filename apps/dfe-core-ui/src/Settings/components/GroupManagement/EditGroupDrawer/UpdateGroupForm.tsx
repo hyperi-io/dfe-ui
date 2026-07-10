@@ -4,10 +4,10 @@ import {
   CreateUpdateGroupFormData,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
 import { useFetchGroupDetail } from '@/Settings/hooks/useFetchGroupDetail';
-import { GroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
+import { TGroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
 import { Spin } from 'antd';
 
-export type UpdateGroupFormData = GroupUpdateRequestBody;
+export type UpdateGroupFormData = TGroupUpdateRequestBody;
 
 export const UpdateGroupForm = ({
   group_name,
