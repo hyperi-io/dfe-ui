@@ -56,7 +56,7 @@ describe('.useAccountResetPassword', () => {
       });
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith({});
+        expect(onSuccess).toHaveBeenCalledWith('{}');
       });
 
       await waitFor(() => {

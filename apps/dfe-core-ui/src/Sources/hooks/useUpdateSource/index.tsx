@@ -1,13 +1,12 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import { SAMPLE_ROWS_QUERY_KEY } from '@/Sources/hooks/useFetchSampleRows';
 import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { SourceUpdateRequestBody, SourceUpdateResponse } from './types';
+import { updateSource } from './api';
+import { TSourceUpdateRequestBody, TSourceUpdateResponse } from './types';
 
 interface UseUpdateSourceProps {
-  onSuccess?: (data: SourceUpdateResponse) => void;
+  onSuccess?: (data: TSourceUpdateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -18,8 +17,8 @@ export const useUpdateSource = ({
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: (source: SourceUpdateRequestBody) =>
-      apiClient.put(API_CONFIG.sources.source, {
+    mutationFn: (source: TSourceUpdateRequestBody) =>
+      updateSource({
         body: source,
         pathParams: { name: source.source ?? '' },
       }),

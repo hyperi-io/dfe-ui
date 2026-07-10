@@ -7,14 +7,14 @@ import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
-import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
+import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';
 import { Spin } from 'antd';
 
 interface EditSourceFormProps {
-  onSuccess?: (response: SourceUpdateResponse) => void;
+  onSuccess?: (response: TSourceUpdateResponse) => void;
 }
 
 export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {

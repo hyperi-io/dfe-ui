@@ -65,6 +65,7 @@ import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -342,7 +343,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourceResponse'];
+          mockedResponse?: TSourceUpdateResponse;
           name?: string;
         } = {}) => {
           return http.put(

@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
+import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';
@@ -10,7 +10,7 @@ interface EditSourceDrawerProps {
   open?: boolean;
   onClose?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
-  onSuccess?: (source: SourceUpdateResponse) => void;
+  onSuccess?: (source: TSourceUpdateResponse) => void;
 }
 
 export const EditSourceDrawer = ({
@@ -28,7 +28,7 @@ export const EditSourceDrawer = ({
     onClose?.();
   };
 
-  const handleOnSuccess = (response: SourceUpdateResponse) => {
+  const handleOnSuccess = (response: TSourceUpdateResponse) => {
     setIsDrawerVisible(false);
     onClose?.();
     onSuccess?.(response);

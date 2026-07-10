@@ -5,13 +5,13 @@ import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
+import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 interface SourceDetailActionMenuProps {
   source: TSourceVersionDetail;
-  onEditSuccess?: (source: SourceUpdateResponse) => void;
+  onEditSuccess?: (source: TSourceUpdateResponse) => void;
 }
 
 export const SourceDetailActionMenu = ({
