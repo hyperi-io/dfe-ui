@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchOrganisationDetail } from '.';
-import { OrganisationDetail } from './types';
+import { TOrganisationDetail } from './types';
 import { server } from './useFetchOrganisationDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchOrganisationDetail', () => {
         { wrapper },
       );
 
-      const response: OrganisationDetail = {
+      const response: TOrganisationDetail = {
         name: 'org_name',
         display_name: 'string',
         org_ids: ['string'],
