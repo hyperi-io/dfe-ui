@@ -21,7 +21,13 @@ export type DfeClientSuccessResponseBody<Op> = Op extends {
         };
       }
     ? R
-    : never;
+    : Op extends {
+          responses: {
+            202: { content: { 'application/json': infer R } };
+          };
+        }
+      ? R
+      : never;
 
 /** Request body when present (JSON or multipart; prefer FormData for multipart endpoints). */
 export type DfeClientRequestBody<Op> = Op extends {

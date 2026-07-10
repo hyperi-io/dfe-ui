@@ -28,6 +28,7 @@ import { TAlertDetailResponse } from '@/Hunts/hooks/useFetchAlertDetail/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { THuntListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -3260,7 +3261,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['TriggerResponse'];
+          mockedResponse?: TTriggerResponse;
           name?: string;
         } = {}) => {
           return http.post(

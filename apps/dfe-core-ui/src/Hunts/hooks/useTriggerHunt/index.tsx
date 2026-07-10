@@ -1,7 +1,6 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { TriggerRequest, TriggerResponse } from './types';
+import { triggerHunt } from './api';
+import { TTriggerRequest, TTriggerResponse } from './types';
 
 export const useTriggerHunt = ({
   onSuccess,
@@ -9,16 +8,15 @@ export const useTriggerHunt = ({
   name,
 }: {
   name: string;
-  onSuccess?: (data: TriggerResponse) => void;
+  onSuccess?: (data: TTriggerResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (triggerRequest: TriggerRequest) => {
-      return apiClient.post(API_CONFIG.hunts.huntRun, {
+    mutationFn: (triggerRequest: TTriggerRequest) =>
+      triggerHunt({
         pathParams: { name },
         body: triggerRequest,
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },
