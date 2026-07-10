@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { deleteGroup } from './api';
 
 export const useDeleteGroup = ({
   onSuccess,
@@ -10,11 +9,10 @@ export const useDeleteGroup = ({
   onError?: (error: Error) => void;
 }) => {
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (group_name: string) => {
-      return apiClient.delete(API_CONFIG.groups.group, {
+    mutationFn: (group_name: string) =>
+      deleteGroup({
         pathParams: { name: group_name },
-      });
-    },
+      }),
     onSuccess: () => {
       onSuccess?.();
     },
