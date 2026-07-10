@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { updateAccountPath } from './api';
 
-export type AccountUpdateRequestBody =
-  components['schemas']['UpdateAccountRequest'];
-export type AccountUpdateResponse = components['schemas']['AccountResponse'];
+export type TAccountUpdateRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof updateAccountPath, 'put'>
+>;
+export type TAccountUpdateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof updateAccountPath, 'put'>
+>;

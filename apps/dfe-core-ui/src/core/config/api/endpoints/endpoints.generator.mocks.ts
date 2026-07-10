@@ -51,6 +51,7 @@ import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRo
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
+import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2728,7 +2729,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'];
+          mockedResponse?: TAccountUpdateResponse;
           username?: string;
         } = {}) => {
           return http.put(
