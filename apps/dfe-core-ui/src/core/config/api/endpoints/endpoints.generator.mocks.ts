@@ -20,6 +20,7 @@ import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchema
 import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/types';
+import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -69,7 +70,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             roles: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['TokenResponse'];
+          mockedResponse?: TRefreshTokenResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

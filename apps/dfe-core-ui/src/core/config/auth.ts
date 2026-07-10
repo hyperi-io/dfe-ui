@@ -5,6 +5,7 @@ import {
   isProxyAuthMode,
   verifyEngineToken,
 } from '@/core/config/proxyTrust';
+import { loginPath } from '@/core/hooks/useLogin/api';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -23,7 +24,7 @@ const credentialsProvider = CredentialsProvider({
   },
   async authorize(credentials) {
     if (!credentials?.username || !credentials?.password) return null;
-    const loginRes = await fetch(`${baseUrl}${API_CONFIG.auth.login}`, {
+    const loginRes = await fetch(`${baseUrl}${loginPath}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
