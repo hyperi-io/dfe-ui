@@ -1,3 +1,11 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchOrganisationsPath } from './api';
 
-export type Organisation = components['schemas']['OrgResponse'];
+export type TOrganisationListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchOrganisationsPath, 'get'>
+>;
+
+export type TOrganisationListSummary = TOrganisationListResponse[number];

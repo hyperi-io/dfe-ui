@@ -11,7 +11,7 @@ import {
   test,
 } from 'vitest';
 import { useFetchOrganisations } from '.';
-import { Organisation } from './types';
+import { TOrganisationListResponse } from './types';
 import { server } from './useFetchOrganisations.mocks';
 
 beforeAll(() =>
@@ -36,7 +36,7 @@ describe('.useFetchOrganisations', () => {
         refetch: expect.any(Function),
       });
 
-      const expectedResponse: Organisation[] = [
+      const expectedResponse: TOrganisationListResponse = [
         {
           name: 'string',
           display_name: 'string',

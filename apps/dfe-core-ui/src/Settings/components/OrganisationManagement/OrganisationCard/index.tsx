@@ -2,14 +2,14 @@ import { DeleteOrganisationModal } from '@/Settings/components/OrganisationManag
 import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
-import { Organisation } from '@/core/hooks/useFetchOrganisations/types';
+import { TOrganisationListSummary } from '@/core/hooks/useFetchOrganisations/types';
 import { IconLockFilled } from '@repo/dfe-icons';
 
 export const OrganisationCard = ({
   organisation,
   refetch,
 }: {
-  organisation: Organisation;
+  organisation: TOrganisationListSummary;
   refetch: () => void;
 }) => {
   const isParentOrganisation = (organisation.org_ids?.length ?? 0) > 0;

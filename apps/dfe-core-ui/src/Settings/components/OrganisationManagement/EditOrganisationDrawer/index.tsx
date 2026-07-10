@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { Organisation } from '@/core/hooks/useFetchOrganisations/types';
+import { TOrganisationListSummary } from '@/core/hooks/useFetchOrganisations/types';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
@@ -16,7 +16,7 @@ export const EditOrganisationDrawer = ({
   organisation,
   refetch,
 }: {
-  organisation: Organisation;
+  organisation: TOrganisationListSummary;
   refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);

@@ -19,6 +19,7 @@ import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/ty
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2126,7 +2127,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'][];
+          mockedResponse?: TOrganisationListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
