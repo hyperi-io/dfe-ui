@@ -1,20 +1,19 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { AlertUpdateRequest, AlertUpdateResponse } from './types';
+import { updateAlert } from './api';
+import { TAlertUpdateRequest, TAlertUpdateResponse } from './types';
 
 export const useUpdateAlert = ({
   name,
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: AlertUpdateResponse) => void;
+  onSuccess?: (data: TAlertUpdateResponse) => void;
   onError?: (error: Error) => void;
   name: string;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (alert: AlertUpdateRequest) =>
-      apiClient.put(API_CONFIG.alerts.destination, {
+    mutationFn: (alert: TAlertUpdateRequest) =>
+      updateAlert({
         body: alert,
         pathParams: { name },
       }),
