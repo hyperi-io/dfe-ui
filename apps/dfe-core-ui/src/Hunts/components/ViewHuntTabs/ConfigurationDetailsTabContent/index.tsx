@@ -1,5 +1,5 @@
 import { cn } from '@/core/utils/style';
-import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { IconExternalLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 
@@ -18,7 +18,7 @@ export const ConfigurationDetailsTabContent = ({
   global_source_table_name,
   customers,
   rules,
-}: HuntDetailResponse) => {
+}: THuntDetailResponse) => {
   const rulesList = rules?.map((rule) => rule.rule_name);
   return (
     <div className="relative h-full min-h-0">

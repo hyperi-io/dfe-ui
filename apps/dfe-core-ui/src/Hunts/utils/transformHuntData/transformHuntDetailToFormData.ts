@@ -1,8 +1,8 @@
 import type { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHuntForm';
-import type { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import type { HuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 
-const normalizeCron = (cron: HuntDetailResponse['cron']): string => {
+const normalizeCron = (cron: THuntDetailResponse['cron']): string => {
   if (Array.isArray(cron)) {
     return cron[0] ?? '';
   }
@@ -10,7 +10,7 @@ const normalizeCron = (cron: HuntDetailResponse['cron']): string => {
 };
 
 export const transformHuntDetailToFormData = (
-  hunt: HuntDetailResponse,
+  hunt: THuntDetailResponse,
 ): CreateUpdateHuntFormData => ({
   display_name: hunt.display_name,
   name: hunt.name,
@@ -22,7 +22,7 @@ export const transformHuntDetailToFormData = (
 
 export const transformHuntFormDataToUpdateRequest = (
   values: CreateUpdateHuntFormData,
-  hunt: HuntDetailResponse,
+  hunt: THuntDetailResponse,
 ): HuntUpdateRequest => ({
   display_name: values.display_name ?? null,
   cron: values.cron,

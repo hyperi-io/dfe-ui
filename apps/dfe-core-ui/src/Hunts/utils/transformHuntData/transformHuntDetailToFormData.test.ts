@@ -1,5 +1,5 @@
 import { CreateUpdateHuntFormData } from '@/Hunts/components/CreateUpdateHuntForm';
-import type { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { HuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 import { describe, expect, it } from 'vitest';
 import {
@@ -7,7 +7,7 @@ import {
   transformHuntFormDataToUpdateRequest,
 } from './transformHuntDetailToFormData';
 
-const huntDetail: HuntDetailResponse = {
+const huntDetail: THuntDetailResponse = {
   display_name: 'My Hunt',
   name: 'my_hunt',
   cron: ['0 * * * *', '0 0 * * *'],
