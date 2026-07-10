@@ -58,6 +58,7 @@ import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
+import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -440,7 +441,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2'];
+          mockedResponse?: TSourceColumnsResponse;
           source_name?: string;
         } = {}) => {
           return http.get(
