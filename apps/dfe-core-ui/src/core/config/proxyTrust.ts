@@ -59,9 +59,7 @@ function engineJwtIssuer(): string | undefined {
  */
 const jwksCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
-function getRemoteJwks(
-  url: string,
-): ReturnType<typeof createRemoteJWKSet> {
+function getRemoteJwks(url: string): ReturnType<typeof createRemoteJWKSet> {
   let jwks = jwksCache.get(url);
   if (!jwks) {
     jwks = createRemoteJWKSet(new URL(url));
@@ -87,7 +85,10 @@ type AuthorizeRequest = {
 };
 
 /** Parse a single cookie value out of a raw Cookie header. */
-function readCookie(cookieHeader: string | undefined, name: string): string | null {
+function readCookie(
+  cookieHeader: string | undefined,
+  name: string,
+): string | null {
   if (!cookieHeader) return null;
   for (const part of cookieHeader.split(';')) {
     const [rawKey, ...rest] = part.split('=');
@@ -155,8 +156,7 @@ export async function verifyEngineToken(
           (g): g is string => typeof g === 'string',
         )
       : [];
-    const email =
-      typeof payload.email === 'string' ? payload.email : undefined;
+    const email = typeof payload.email === 'string' ? payload.email : undefined;
 
     const nowSeconds = Math.floor(Date.now() / 1000);
     const expiresIn =

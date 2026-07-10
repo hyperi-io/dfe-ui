@@ -51,10 +51,7 @@ export default function proxy(
     }
   }
 
-  return authMiddleware(
-    req as Parameters<typeof authMiddleware>[0],
-    event,
-  );
+  return authMiddleware(req as Parameters<typeof authMiddleware>[0], event);
 }
 
 export const config = {
