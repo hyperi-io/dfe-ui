@@ -30,6 +30,7 @@ import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts
 import { THuntListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
+import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1297,7 +1298,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['RuleCreateResponse'];
+          mockedResponse?: TRuleCreateResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

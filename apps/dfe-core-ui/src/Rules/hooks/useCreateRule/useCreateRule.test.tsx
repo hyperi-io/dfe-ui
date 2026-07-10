@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateRule } from '.';
-import { RuleCreateResponse } from './types';
+import { TRuleCreateResponse } from './types';
 import { server } from './useCreateRule.mocks';
 
 beforeAll(() =>
@@ -49,7 +49,7 @@ describe('.useCreateRule', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: RuleCreateResponse = {
+      const expectedResponse: TRuleCreateResponse = {
         rule: {
           name: 'string',
           display_name: 'string',
