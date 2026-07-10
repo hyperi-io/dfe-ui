@@ -62,6 +62,7 @@ import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceCo
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { TSampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -369,13 +370,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
       patch: {
         success: ({
           mockedResponse = {
-            path: 'string',
+            source: 'string',
+            message: 'ok',
             current: 'string',
             versions: ['string'],
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          mockedResponse?: TSourcePatchResponse;
           name?: string;
         } = {}) => {
           return http.patch(

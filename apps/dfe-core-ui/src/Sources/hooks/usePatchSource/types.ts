@@ -1,10 +1,17 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { sourcePath } from './api';
 
-export type SourcePatchRequestBody =
-  components['schemas']['MetaSchemaUpdateRequest'] & {
-    name: string;
-    enabled: boolean;
-  };
+export type TSourcePatchRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof sourcePath, 'patch'>
+> & {
+  name: string;
+  enabled: boolean;
+};
 
-export type SourcePatchResponse =
-  components['schemas']['MetaSchemaVersionWriteResponse'];
+export type TSourcePatchResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof sourcePath, 'patch'>
+>;

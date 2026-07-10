@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { usePatchSource } from '.';
-import { SourcePatchRequestBody, SourcePatchResponse } from './types';
+import { TSourcePatchRequestBody, TSourcePatchResponse } from './types';
 import { server } from './usePatchSource.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.usePatchSource', () => {
-  const requestBody: SourcePatchRequestBody = {
+  const requestBody: TSourcePatchRequestBody = {
     name: 'source',
     enabled: true,
   };
@@ -42,8 +42,9 @@ describe('.usePatchSource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourcePatchResponse = {
-        path: expect.any(String),
+      const expectedResponse: TSourcePatchResponse = {
+        source: expect.any(String),
+        message: expect.any(String),
         current: expect.any(String),
         versions: expect.any(Array),
       };

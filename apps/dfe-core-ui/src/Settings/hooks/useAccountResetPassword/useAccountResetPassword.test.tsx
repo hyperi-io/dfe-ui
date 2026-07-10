@@ -51,7 +51,7 @@ describe('.useAccountResetPassword', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
-          data: {},
+          data: '{}',
         });
       });
 
