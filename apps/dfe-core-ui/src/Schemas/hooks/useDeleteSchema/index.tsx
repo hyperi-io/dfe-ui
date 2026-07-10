@@ -1,7 +1,6 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteSchema } from './api';
 
 interface UseDeleteSchemaProps {
   onSuccess?: () => void;
@@ -14,11 +13,10 @@ export const useDeleteSchema = ({
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (schemaPath: string) => {
-      return apiClient.delete(API_CONFIG.schemas.schema, {
+    mutationFn: (schemaPath: string) =>
+      deleteSchema({
         pathParams: { schema_path: schemaPath },
-      });
-    },
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
