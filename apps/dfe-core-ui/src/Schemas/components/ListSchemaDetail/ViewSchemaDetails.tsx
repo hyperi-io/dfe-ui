@@ -10,7 +10,6 @@ import {
   SchemaDetailColumnFilters,
   TMetaSchemaDetailResponse,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
-import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button, Input, Select, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -44,7 +43,7 @@ interface ViewSchemaDetailsProps extends TMetaSchemaDetailResponse {
 }
 
 type SchemaColumnItem =
-  components['schemas']['MetaSchemaGetResponse']['version']['columns']['items'][number];
+  TMetaSchemaDetailResponse['version']['columns']['items'][number];
 
 export const ViewSchemaDetails = ({
   current: currentVersion,

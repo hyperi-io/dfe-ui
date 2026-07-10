@@ -1,8 +1,8 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchFieldMapDetail } from '.';
+import { TSourceFieldMapResponse } from './types';
 import { server } from './useFetchFieldMapDetail.mocks';
 
 beforeAll(() =>
@@ -23,7 +23,7 @@ describe('.useFetchFieldMapDetail', () => {
         { wrapper },
       );
 
-      const response: components['schemas']['FieldMap'] = {
+      const response: TSourceFieldMapResponse = {
         standard: 'standard',
         source: null,
         version: 'string',
@@ -54,7 +54,7 @@ describe('.useFetchFieldMapDetail', () => {
         { wrapper },
       );
 
-      const response: components['schemas']['FieldMap'] = {
+      const response: TSourceFieldMapResponse = {
         standard: 'standard',
         source: 'source',
         version: 'string',

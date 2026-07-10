@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
-import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { TSchemaSummary } from './types';
 
-const SCHEMA_ITEM: components['schemas']['SchemaSummaryObject'] = {
+const SCHEMA_ITEM: TSchemaSummary = {
   name: 'string',
   resource_type: 'custom',
   current: 'string',

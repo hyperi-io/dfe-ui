@@ -1,6 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -12,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemas } from '.';
-import { TSchemaListResponse } from './types';
+import { TSchemaListResponse, TSchemaSummary } from './types';
 import { server } from './useFetchInfiniteFilteredSchemas.mocks';
 
 class MockIntersectionObserver {
@@ -70,7 +69,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: components['schemas']['SchemaSummaryObject'] = {
+      const responseItem: TSchemaSummary = {
         name: 'string',
         resource_type: 'custom',
         current: 'string',

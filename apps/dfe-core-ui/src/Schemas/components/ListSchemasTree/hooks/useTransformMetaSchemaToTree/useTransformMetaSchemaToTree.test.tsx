@@ -1,5 +1,7 @@
-import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
-import { components } from '@repo/dfe-engine-types';
+import {
+  TSchemaListResponse,
+  TSchemaSummary,
+} from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -8,7 +10,7 @@ import {
   useTransformMetaSchemaToTree,
 } from '.';
 
-type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
+type SchemaSummaryObject = TSchemaSummary;
 
 const baseSchema = (
   overrides: Partial<SchemaSummaryObject> & Pick<SchemaSummaryObject, 'name'>,

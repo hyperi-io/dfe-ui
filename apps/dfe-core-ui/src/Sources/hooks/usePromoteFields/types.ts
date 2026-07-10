@@ -3,7 +3,6 @@ import {
   DfeClientRequestBody,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
-import { components } from '@repo/dfe-engine-types';
 import { promoteFieldsPath } from './api';
 
 export type TPromoteFieldRequest = DfeClientRequestBody<
@@ -13,5 +12,4 @@ export type TPromoteFieldRequest = DfeClientRequestBody<
 };
 export type TPromoteFieldResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof promoteFieldsPath, 'post'>
-> &
-  components['schemas']['PromoteFieldResponse'];
+>;
