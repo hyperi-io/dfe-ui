@@ -6,9 +6,9 @@ import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaVersionDrawer } from '@/Schemas/components/CreateSchemaVersionDrawer';
 import {
-  MetaSchemaDetailResponse,
   SchemaDetailColumnFilterField,
   SchemaDetailColumnFilters,
+  TMetaSchemaDetailResponse,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { components } from '@repo/dfe-engine-types';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -22,7 +22,7 @@ import {
 import { UpdateCurrentVersionSelect } from './UpdateCurrentVersionSelect';
 import { UpdateVersionSummaryInput } from './UpdateVersionSummaryInput';
 
-interface ViewSchemaDetailsProps extends MetaSchemaDetailResponse {
+interface ViewSchemaDetailsProps extends TMetaSchemaDetailResponse {
   columnFilters: SchemaDetailColumnFilters;
   columnFilterResetKey: number;
   onColumnFilterChange: (

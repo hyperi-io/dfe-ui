@@ -1,19 +1,21 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
-import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import {
+  TMetaSchemaDetailColumnItem,
+  TMetaSchemaDetailResponse,
+} from './types';
 
 export const MOCK_SCHEMA_PATH = 'path';
 
-const SCHEMA_DETAIL_COLUMN_ITEM: components['schemas']['MetaSchemaGetResponse']['version']['columns']['items'][number] =
-  {
-    name: 'string',
-    type: 'string',
-    attribute: ['string'],
-    use_case: 'string',
-    expr: 'string',
-    _matched_searchable: [],
-  };
+const SCHEMA_DETAIL_COLUMN_ITEM: TMetaSchemaDetailColumnItem = {
+  name: 'string',
+  type: 'string',
+  attribute: ['string'],
+  use_case: 'string',
+  expr: 'string',
+  _matched_searchable: [],
+};
 
 const TOTAL_ITEMS = 25;
 const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
@@ -23,7 +25,7 @@ const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
 function createMetaSchemaDetailResponse(
   page: number,
   perPage: number,
-): components['schemas']['MetaSchemaGetResponse'] {
+): TMetaSchemaDetailResponse {
   const start = (page - 1) * perPage;
   const items = ALL_ITEMS.slice(start, start + perPage);
   const totalPages = Math.ceil(TOTAL_ITEMS / perPage);

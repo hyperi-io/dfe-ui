@@ -6,7 +6,7 @@ import {
 } from '@/core/hooks/useCreateSchema/types';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
-import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { useState } from 'react';
 
 interface UseCloneSchemaProps {
@@ -23,7 +23,7 @@ const cloneSchemaError = ({
 }: {
   version: string | null;
   isFetchingSchemaDetail: boolean;
-  schemaDetailData: MetaSchemaDetailResponse | null;
+  schemaDetailData: TMetaSchemaDetailResponse | null;
 }) => {
   if (isFetchingSchemaDetail) return;
   if (!version) return;
