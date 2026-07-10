@@ -1,10 +1,10 @@
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import {
   PROXY_TRUST_PROVIDER_ID,
   extractEngineToken,
   isProxyAuthMode,
   verifyEngineToken,
 } from '@/core/config/proxyTrust';
+import { authMePath } from '@/core/hooks/useAuthMe/api';
 import { loginPath } from '@/core/hooks/useLogin/api';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -38,7 +38,7 @@ const credentialsProvider = CredentialsProvider({
       expires_in?: number;
     };
 
-    const meRes = await fetch(`${baseUrl}${API_CONFIG.auth.me}`, {
+    const meRes = await fetch(`${baseUrl}${authMePath}`, {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
       },
