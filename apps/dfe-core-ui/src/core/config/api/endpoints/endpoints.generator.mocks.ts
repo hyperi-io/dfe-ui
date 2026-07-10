@@ -22,6 +22,7 @@ import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSource
 import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
+import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1394,7 +1395,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             enabled: true,
           },
         }: {
-          mockedResponse?: components['schemas']['AlertDestination'];
+          mockedResponse?: TAlertCreateResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
