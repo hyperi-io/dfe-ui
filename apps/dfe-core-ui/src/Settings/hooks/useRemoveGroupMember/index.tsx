@@ -1,11 +1,10 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { RemoveGroupMemberResponse } from './types';
+import { removeGroupMember } from './api';
+import { TRemoveGroupMemberResponse } from './types';
 
 interface UseRemoveGroupMemberProps {
   group_name: string;
-  onSuccess?: (data: RemoveGroupMemberResponse) => void;
+  onSuccess?: (data: TRemoveGroupMemberResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -15,11 +14,10 @@ export const useRemoveGroupMember = ({
   onError,
 }: UseRemoveGroupMemberProps) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (username: string) => {
-      return apiClient.delete(API_CONFIG.groups.groupMember, {
+    mutationFn: (username: string) =>
+      removeGroupMember({
         pathParams: { name: group_name, username },
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

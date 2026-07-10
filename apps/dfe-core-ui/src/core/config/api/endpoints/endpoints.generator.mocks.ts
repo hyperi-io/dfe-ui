@@ -50,6 +50,7 @@ import { TGroupsResponse } from '@/Settings/hooks/useFetchGroups/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
+import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2572,7 +2573,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           group_name = 'group_name',
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TRemoveGroupMemberResponse;
           group_name?: string;
           username?: string;
         } = {}) => {

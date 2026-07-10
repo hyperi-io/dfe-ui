@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useRemoveGroupMember } from '.';
-import { RemoveGroupMemberResponse } from './types';
+import { TRemoveGroupMemberResponse } from './types';
 import { server } from './useRemoveGroupMember.mocks';
 
 beforeAll(() =>
@@ -44,7 +44,7 @@ describe('.useRemoveGroupMember', () => {
 
       result.current.mutate(username);
 
-      const expectedResponse: RemoveGroupMemberResponse = {
+      const expectedResponse: TRemoveGroupMemberResponse = {
         name: 'group_name',
         description: 'string',
         roles: ['string'],
