@@ -49,6 +49,7 @@ import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types
 import { TGroupsResponse } from '@/Settings/hooks/useFetchGroups/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
+import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -2920,7 +2921,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           role_name = 'role_name',
         }: {
-          mockedResponse?: components['schemas']['RoleResponse'];
+          mockedResponse?: TRoleDetail;
           role_name?: string;
         } = {}) => {
           return http.get(
