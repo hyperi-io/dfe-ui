@@ -1,15 +1,14 @@
 'use client';
 
 import { loadSession, resetCachedSession } from '@/core/auth/cachedSession';
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { SESSION_AUTH_REFRESH_INTERVAL_MS } from '@/core/config/authSession';
-import type { AuthMe } from '@/core/hooks/useAuthMe/types';
+import { fetchAuthMe } from '@/core/hooks/useAuthMe/api';
+import type { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import type { Session } from 'next-auth';
 import { create } from 'zustand';
 
 type AuthStoreState = {
-  me: AuthMe | null;
+  me: TAuthMeResponse | null;
   meLoading: boolean;
   meError: Error | null;
   meLastFetchedAt: number | null;
@@ -62,7 +61,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
     }
 
     try {
-      const nextMe = await apiClient.get(API_CONFIG.auth.me);
+      const nextMe = await fetchAuthMe();
       set({
         me: nextMe,
         meLastFetchedAt: Date.now(),

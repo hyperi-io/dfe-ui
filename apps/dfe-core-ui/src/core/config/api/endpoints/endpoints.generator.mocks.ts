@@ -10,6 +10,7 @@ import {
   SCHEMA_FIELD_TYPES,
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
+import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -89,7 +90,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             groups: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['UserResponse'];
+          mockedResponse?: TAuthMeResponse;
         } = {}) =>
           http.get(API_CONFIG_MOCKS.auth.me.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

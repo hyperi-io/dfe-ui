@@ -12,7 +12,7 @@ import {
   test,
 } from 'vitest';
 import { useAuthMe } from '.';
-import { AuthMe } from './types';
+import { TAuthMeResponse } from './types';
 import { server } from './useAuthMe.mocks';
 
 beforeAll(() =>
@@ -41,7 +41,7 @@ describe('.useAuthMe', () => {
         isError: false,
       });
 
-      const expectedResponse: AuthMe = {
+      const expectedResponse: TAuthMeResponse = {
         org_id: 'string',
         user_id: 'string',
         roles: ['string'],
