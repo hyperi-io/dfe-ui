@@ -15,6 +15,7 @@ import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
 import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
+import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1228,7 +1229,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_RuleSummary_'];
+          mockedResponse?: TRuleListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

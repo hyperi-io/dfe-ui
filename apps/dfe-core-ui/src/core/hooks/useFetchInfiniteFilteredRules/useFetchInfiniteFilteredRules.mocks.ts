@@ -1,11 +1,11 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { RuleListItem } from './types';
+import { TRuleListItem } from './types';
 
 export const MOCK_RULE_NAME = 'rule_name';
 
-const RULE_ITEM: RuleListItem = {
+const RULE_ITEM: TRuleListItem = {
   display_name: 'string',
   name: 'string',
   severity: 'string',

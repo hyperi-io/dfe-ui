@@ -1,8 +1,7 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
+import { fetchInfiniteRules } from './api';
 import { UseFetchInfiniteFilteredRulesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -43,7 +42,7 @@ export const useFetchInfiniteFilteredRules = ({
       per_page,
     ],
     queryFn: ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.rules.default, {
+      fetchInfiniteRules({
         queryParams: {
           search: debouncedSearch || undefined,
           source,
