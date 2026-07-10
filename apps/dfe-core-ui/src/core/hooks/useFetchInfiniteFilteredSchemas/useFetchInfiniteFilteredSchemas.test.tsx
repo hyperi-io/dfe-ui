@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemas } from '.';
-import { SchemaListResponse } from './types';
+import { TSchemaListResponse } from './types';
 import { server } from './useFetchInfiniteFilteredSchemas.mocks';
 
 class MockIntersectionObserver {
@@ -44,7 +44,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      const expectedResponse: SchemaListResponse = {
+      const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
         total: 0,
@@ -261,7 +261,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
 
-      const expectedResponse: SchemaListResponse = {
+      const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
         total: 0,

@@ -16,6 +16,7 @@ import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
 import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1664,7 +1665,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedSchemaSummaryResponse'];
+          mockedResponse?: TSchemaListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

@@ -4,7 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
-import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   schemaGroupValidator,
@@ -27,7 +27,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface CloneSchemaModalProps {
-  schema: NonNullable<SchemaListResponse['objects']['items']>[number];
+  schema: NonNullable<TSchemaListResponse['objects']['items']>[number];
   versions: string[];
   onSuccess?: (data: TCreateSchemaResponse) => void;
   onError?: (error: Error) => void;
