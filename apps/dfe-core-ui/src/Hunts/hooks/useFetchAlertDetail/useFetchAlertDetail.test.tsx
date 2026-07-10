@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchAlertDetail } from '.';
-import { AlertDetailResponse } from './types';
+import { TAlertDetailResponse } from './types';
 import { server } from './useFetchAlertDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchAlertDetail', () => {
         { wrapper },
       );
 
-      const response: AlertDetailResponse = {
+      const response: TAlertDetailResponse = {
         name: 'string',
         url: 'string',
         description: 'string',

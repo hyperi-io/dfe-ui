@@ -24,6 +24,7 @@ import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
 import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { TAlertDetailResponse } from '@/Hunts/hooks/useFetchAlertDetail/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -1433,7 +1434,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['AlertDestination'];
+          mockedResponse?: TAlertDetailResponse;
           name?: string;
         } = {}) => {
           return http.get(
