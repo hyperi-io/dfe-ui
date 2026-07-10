@@ -3,7 +3,7 @@ import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
-import { HuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { HuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
@@ -25,7 +25,7 @@ export const HuntDetailActionMenu = ({
 
   const queryClient = useQueryClient();
 
-  const onCloneSuccess = (hunt: HuntCreateResponse) => {
+  const onCloneSuccess = (hunt: THuntCreateResponse) => {
     setSelectedHuntName(hunt.name);
     refetchHunts();
     notification.success({

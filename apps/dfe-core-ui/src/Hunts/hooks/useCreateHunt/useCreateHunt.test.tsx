@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateHunt } from '.';
-import { HuntCreateRequest, HuntCreateResponse } from './types';
+import { THuntCreateRequest, THuntCreateResponse } from './types';
 import { server } from './useCreateHunt.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateHunt', () => {
-  const requestBody: HuntCreateRequest = {
+  const requestBody: THuntCreateRequest = {
     display_name: 'string',
     name: 'string',
     cron: 'string',
@@ -57,7 +57,7 @@ describe('.useCreateHunt', () => {
         display_name: requestBody.display_name,
       });
 
-      const expectedResponse: HuntCreateResponse = {
+      const expectedResponse: THuntCreateResponse = {
         display_name: 'string',
         name: 'string',
         cron: 'string',

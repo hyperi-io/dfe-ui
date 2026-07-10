@@ -23,6 +23,7 @@ import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/ty
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
 import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
+import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -3080,7 +3081,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             explain_queries: false,
           },
         }: {
-          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          mockedResponse?: THuntCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
