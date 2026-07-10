@@ -11,6 +11,7 @@ import {
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
+import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -959,7 +960,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TCreateFieldMapResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
