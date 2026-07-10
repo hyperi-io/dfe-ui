@@ -3,7 +3,7 @@ import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { SourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
@@ -57,7 +57,7 @@ export const SourceDetailActionMenu = ({
             Clone Source
           </Button>
         }
-        onSuccess={(newSource: SourceCreateResponse) => {
+        onSuccess={(newSource: TSourceCreateResponse) => {
           setSelectedSource({
             source_name: newSource.source,
             source_version: newSource.current,

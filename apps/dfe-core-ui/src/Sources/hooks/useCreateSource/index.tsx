@@ -1,12 +1,11 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { SourceCreateRequestBody, SourceCreateResponse } from './types';
+import { createSource } from './api';
+import { TSourceCreateRequestBody, TSourceCreateResponse } from './types';
 
 interface UseCreateSourceProps {
-  onSuccess?: (data: SourceCreateResponse) => void;
+  onSuccess?: (data: TSourceCreateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -17,8 +16,8 @@ export const useCreateSource = ({
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: (source: SourceCreateRequestBody) =>
-      apiClient.post(API_CONFIG.sources.default, { body: source }),
+    mutationFn: (source: TSourceCreateRequestBody) =>
+      createSource({ body: source }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: INFINITE_SOURCES_QUERY_KEY(),

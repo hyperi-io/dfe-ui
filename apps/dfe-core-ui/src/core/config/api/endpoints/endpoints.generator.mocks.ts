@@ -56,6 +56,7 @@ import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
 import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
 import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
+import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { components } from '@repo/dfe-engine-types';
 import { http, HttpResponse } from 'msw';
 
@@ -242,7 +243,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             versions: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['SourceResponse'];
+          mockedResponse?: TSourceCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);

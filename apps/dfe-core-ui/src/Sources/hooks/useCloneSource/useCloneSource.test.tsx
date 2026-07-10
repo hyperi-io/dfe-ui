@@ -1,6 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -66,7 +66,7 @@ describe('.useCloneSource', () => {
         });
       });
 
-      const response: SourceCreateResponse = {
+      const response: TSourceCreateResponse = {
         source: 'source',
         message: 'ok',
         current: 'string',
