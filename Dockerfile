@@ -13,7 +13,7 @@
 # builds the app + its @repo/* workspace packages.
 
 # --- Builder ---
-FROM node:22-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 # Toolchain for any native (node-gyp) transitive deps. Builder-only; discarded.
@@ -34,7 +34,7 @@ ENV NEXT_PUBLIC_API_URL=""
 RUN yarn build
 
 # --- Runtime (Next.js standalone) ---
-FROM node:22-bookworm-slim AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
