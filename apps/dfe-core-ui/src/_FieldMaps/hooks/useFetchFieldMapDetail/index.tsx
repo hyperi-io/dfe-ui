@@ -1,7 +1,4 @@
-import {
-  fetchSourceFieldMap,
-  fetchStandardFieldMap,
-} from './api';
+import { fetchSourceFieldMap, fetchStandardFieldMap } from './api';
 import { useQuery } from '@tanstack/react-query';
 
 export const useFetchFieldMapDetail = ({
