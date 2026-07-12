@@ -1,22 +1,25 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchGroups } from '@/Settings/hooks/useFetchGroups';
+import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfiniteFilteredGroups';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 
 export const AccountGroupSelect = (props: SelectProps) => {
   const [search, setSearch] = useState('');
-  const { data: groups = [], isLoading, error } = useFetchGroups();
+  const {
+    data: { items: groups = [] },
+    isLoading,
+    error,
+  } = useFetchInfiniteFilteredGroups({
+    search,
+  });
 
   const options = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return groups
-      .filter((group) => !query || group.name.toLowerCase().includes(query))
-      .map((group) => ({
-        label: group.name,
-        value: group.name,
-      }));
-  }, [groups, search]);
+    return groups.map((group) => ({
+      label: group.name,
+      value: group.name,
+    }));
+  }, [groups]);
 
   return (
     <RbacProtected action={RbacProtected.rbacActions.group_read}>

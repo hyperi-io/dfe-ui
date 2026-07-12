@@ -3,7 +3,7 @@ import { DeleteGroupModal } from '@/Settings/components/GroupManagement/DeleteGr
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
-import { TGroupsItemSummary } from '@/Settings/hooks/useFetchGroups/types';
+import { TGroupsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
 import { TAG_LIMIT, TagList } from './TagList';
 
 export const GroupCard = ({

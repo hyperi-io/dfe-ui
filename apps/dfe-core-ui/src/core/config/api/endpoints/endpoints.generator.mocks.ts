@@ -47,7 +47,7 @@ import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
 import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
 import { TAccountsResponse } from '@/Settings/hooks/useFetchAccounts/types';
 import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
-import { TGroupsResponse } from '@/Settings/hooks/useFetchGroups/types';
+import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
 import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
@@ -2355,15 +2355,23 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/auth/groups',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              name: 'string',
-              description: 'string',
-              roles: ['string'],
-              members: ['string'],
-              scope: 'string',
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                roles: ['string'],
+                members: ['string'],
+                scope: 'string',
+              },
+            ],
+            total: 25,
+            page: 1,
+            per_page: 10,
+            total_pages: 3,
+            next_page: 2,
+            prev_page: 0,
+          },
         }: {
           mockedResponse?: TGroupsResponse;
         } = {}) => {
