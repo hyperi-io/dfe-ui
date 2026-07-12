@@ -5,30 +5,22 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
-import { TAccountsItemSummary } from '@/Settings/hooks/useFetchAccounts/types';
+import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts';
+import { TAccountsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin, Table, Tag, Tooltip } from 'antd';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { RowActions } from './RowActions';
 
 export const AccountManagement = () => {
   const [search, setSearch] = useState('');
-  const { data: accounts, isLoading, error, refetch } = useFetchAccounts();
-
-  const filteredAccounts = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!accounts) {
-      return [];
-    }
-    if (!query) {
-      return accounts;
-    }
-    return accounts.filter((account) =>
-      account.username.toLowerCase().includes(query),
-    );
-  }, [accounts, search]);
+  const {
+    data: { items: accounts = [] },
+    isLoading,
+    error,
+    refetch,
+  } = useFetchInfiniteFilteredAccounts({ search });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 450,
@@ -117,18 +109,18 @@ export const AccountManagement = () => {
                 description={error.message}
               />
             )}
-            {!isLoading && !error && filteredAccounts.length === 0 && (
+            {!isLoading && !error && accounts.length === 0 && (
               <NotificationCard
                 className="w-full"
                 description="No accounts found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {!isLoading && !error && filteredAccounts.length > 0 && (
+            {!isLoading && !error && accounts.length > 0 && (
               <Table
                 rowKey="username"
                 scroll={{ y: componentHeight }}
-                dataSource={filteredAccounts}
+                dataSource={accounts}
                 columns={columns}
                 pagination={false}
               />

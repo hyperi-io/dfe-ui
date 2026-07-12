@@ -8,4 +8,12 @@ export type TAccountsResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof fetchAccountsPath, 'get'>
 >;
 
-export type TAccountsItemSummary = TAccountsResponse[number];
+export type TAccountsItemSummary = TAccountsResponse['items'][number];
+
+export interface useFetchInfiniteFilteredAccountsProps {
+  search?: string;
+  sort_by?: 'created_at' | 'updated_at';
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  per_page?: number;
+}

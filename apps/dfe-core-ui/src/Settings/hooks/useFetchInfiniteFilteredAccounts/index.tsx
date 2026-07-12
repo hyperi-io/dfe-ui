@@ -1,19 +1,19 @@
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { fetchGroups } from './api';
-import { useFetchInfiniteFilteredGroupsProps } from './types';
+import { fetchAccounts } from './api';
+import { useFetchInfiniteFilteredAccountsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const GROUPS_QUERY_KEY = (
+export const ACCOUNTS_QUERY_KEY = (
   search?: string,
-  sort_by?: 'name' | 'scope',
+  sort_by?: 'created_at' | 'updated_at',
   sort_order?: 'asc' | 'desc',
   page?: number,
   per_page?: number,
 ) => [
-  'groups',
+  'accounts',
   ...(search ? [search] : []),
   ...(sort_by ? [sort_by] : []),
   ...(sort_order ? [sort_order] : []),
@@ -21,24 +21,24 @@ export const GROUPS_QUERY_KEY = (
   ...(per_page ? [per_page] : []),
 ];
 
-/** useFetchInfiniteFilteredGroups props */
+/** useFetchInfiniteFilteredAccounts props */
 /**
- * @param search - The search query to filter the groups.
- * @param sort_by - The field to sort the groups by.
- * @param sort_order - The order to sort the groups by.
+ * @param search - The search query to filter the accounts.
+ * @param sort_by - The field to sort the accounts by.
+ * @param sort_order - The order to sort the accounts by.
  * @param page - The page number to fetch.
- * @param per_page - The number of groups to fetch per page.
+ * @param per_page - The number of accounts to fetch per page.
  */
 /**
- * @returns A list of groups.
+ * @returns A list of accounts.
  */
-export const useFetchInfiniteFilteredGroups = ({
+export const useFetchInfiniteFilteredAccounts = ({
   search,
   sort_by,
   sort_order,
   page,
   per_page,
-}: useFetchInfiniteFilteredGroupsProps = {}) => {
+}: useFetchInfiniteFilteredAccountsProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
   const {
@@ -51,7 +51,7 @@ export const useFetchInfiniteFilteredGroups = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: GROUPS_QUERY_KEY(
+    queryKey: ACCOUNTS_QUERY_KEY(
       debouncedSearch,
       sort_by,
       sort_order,
@@ -59,7 +59,7 @@ export const useFetchInfiniteFilteredGroups = ({
       per_page,
     ),
     queryFn: async ({ pageParam = 1, signal }) =>
-      fetchGroups({
+      fetchAccounts({
         queryParams: {
           search: debouncedSearch || undefined,
           sort_by: sort_by || undefined,

@@ -45,8 +45,8 @@ import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
 import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
 import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
 import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
-import { TAccountsResponse } from '@/Settings/hooks/useFetchAccounts/types';
 import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
+import { TAccountsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
 import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
@@ -2658,15 +2658,23 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/auth/accounts',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              username: 'string',
-              enabled: true,
-              groups: ['string'],
-              created_at: 'string',
-              updated_at: 'string',
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                username: 'string',
+                enabled: true,
+                groups: ['string'],
+                created_at: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 10,
+            total_pages: 1,
+            next_page: 1,
+            prev_page: 1,
+          },
         }: {
           mockedResponse?: TAccountsResponse;
         } = {}) => {

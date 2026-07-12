@@ -1,24 +1,23 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
+import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 
 export const GroupMemberSelect = (props: SelectProps) => {
   const [search, setSearch] = useState('');
-  const { data: accounts = [], isLoading, error } = useFetchAccounts();
+  const {
+    data: { items: accounts = [] },
+    isLoading,
+    error,
+  } = useFetchInfiniteFilteredAccounts({ search });
 
   const options = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return accounts
-      .filter(
-        (account) => !query || account.username.toLowerCase().includes(query),
-      )
-      .map((account) => ({
-        label: account.username,
-        value: account.username,
-      }));
-  }, [accounts, search]);
+    return accounts.map((account) => ({
+      label: account.username,
+      value: account.username,
+    }));
+  }, [accounts]);
 
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_read}>
