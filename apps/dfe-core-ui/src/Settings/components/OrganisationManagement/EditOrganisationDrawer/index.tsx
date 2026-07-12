@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { TOrganisationListSummary } from '@/core/hooks/useFetchOrganisations/types';
+import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,

@@ -14,6 +14,15 @@ import {
 import { server } from './CreateUpdateOrganisationForm.mocks';
 import { CreateUpdateOrganisationForm } from './index';
 
+class MockIntersectionObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+global.IntersectionObserver = MockIntersectionObserver as any;
+
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 beforeAll(() =>

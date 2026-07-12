@@ -15,11 +15,11 @@ import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
 import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
+import { TOrganisationListResponse } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
-import { TOrganisationListResponse } from '@/core/hooks/useFetchOrganisations/types';
 import { TLoginResponse } from '@/core/hooks/useLogin/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
@@ -2180,16 +2180,24 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/orgs',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              name: 'string',
-              display_name: 'string',
-              org_ids: ['string'],
-              enabled: true,
-              created_at: 'string',
-              updated_at: 'string',
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                display_name: 'string',
+                org_ids: ['string'],
+                enabled: true,
+                created_at: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 10,
+            total_pages: 1,
+            next_page: 1,
+            prev_page: 1,
+          },
         }: {
           mockedResponse?: TOrganisationListResponse;
         } = {}) => {

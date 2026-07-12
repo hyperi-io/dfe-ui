@@ -3,7 +3,7 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchOrganisations } from '@/core/hooks/useFetchOrganisations';
+import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -13,11 +13,13 @@ import { OrganisationCard } from './OrganisationCard';
 export const OrganisationManagement = () => {
   // const [search, setSearch] = useState('');
   const {
-    data: organisations,
+    data: { items: organisations = [] },
+    isFetchingNextPage,
+    loadMoreRef,
     isLoading,
     error,
     refetch,
-  } = useFetchOrganisations();
+  } = useFetchInfiniteFilteredOrganisations();
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
@@ -71,6 +73,9 @@ export const OrganisationManagement = () => {
                     />
                   </li>
                 ))}
+                <div ref={loadMoreRef} className="h-4 flex justify-center">
+                  {isFetchingNextPage && <Spin size="small" />}
+                </div>
               </ul>
             )}
           </RbacProtected.Unrestricted>
