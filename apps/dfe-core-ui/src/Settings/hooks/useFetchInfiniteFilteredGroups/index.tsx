@@ -2,6 +2,7 @@ import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchGroups } from './api';
+import { useFetchInfiniteFilteredGroupsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
