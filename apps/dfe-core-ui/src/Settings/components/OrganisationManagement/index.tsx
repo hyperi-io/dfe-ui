@@ -20,7 +20,7 @@ export const OrganisationManagement = () => {
     isLoading,
     error,
     refetch,
-  } = useFetchInfiniteFilteredOrganisations({ search });
+  } = useFetchInfiniteFilteredOrganisations({ search, per_page: 12 });
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
@@ -38,6 +38,8 @@ export const OrganisationManagement = () => {
             placeholder="Search organisations"
             onChange={(e) => setSearch(e.target.value)}
             value={search}
+            allowClear
+            aria-label="Search organisations"
           />
         }
       >
@@ -64,20 +66,22 @@ export const OrganisationManagement = () => {
               />
             )}
             {organisations && organisations?.length > 0 && (
-              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {organisations?.map((organisation) => (
-                  <li key={organisation.name}>
-                    <OrganisationCard
-                      key={organisation.name}
-                      organisation={organisation}
-                      refetch={refetch}
-                    />
-                  </li>
-                ))}
-                <div ref={loadMoreRef} className="h-4 flex justify-center">
-                  {isFetchingNextPage && <Spin size="small" />}
-                </div>
-              </ul>
+              <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+                <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {organisations?.map((organisation) => (
+                    <li key={organisation.name}>
+                      <OrganisationCard
+                        key={organisation.name}
+                        organisation={organisation}
+                        refetch={refetch}
+                      />
+                    </li>
+                  ))}
+                  <div ref={loadMoreRef} className="h-4 flex justify-center">
+                    {isFetchingNextPage && <Spin size="small" />}
+                  </div>
+                </ul>
+              </div>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>
