@@ -4,10 +4,15 @@ import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfinit
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 
+const SCROLL_LOAD_THRESHOLD = 4;
+
 export const AccountGroupSelect = (props: SelectProps) => {
   const [search, setSearch] = useState('');
   const {
     data: { items: groups = [] },
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     isLoading,
     error,
   } = useFetchInfiniteFilteredGroups({
@@ -20,6 +25,17 @@ export const AccountGroupSelect = (props: SelectProps) => {
       value: group.name,
     }));
   }, [groups]);
+
+  const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    const isNearBottom =
+      scrollTop + clientHeight >= scrollHeight - SCROLL_LOAD_THRESHOLD;
+
+    if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
 
   return (
     <RbacProtected action={RbacProtected.rbacActions.group_read}>
@@ -38,6 +54,7 @@ export const AccountGroupSelect = (props: SelectProps) => {
             onSelect={() => {
               setSearch('');
             }}
+            onPopupScroll={handlePopupScroll}
             {...props}
           />
           {error && <div className="text-error text-sm">{error.message}</div>}

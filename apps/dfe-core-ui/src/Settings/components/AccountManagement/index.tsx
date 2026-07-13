@@ -9,7 +9,7 @@ import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfin
 import { TAccountsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin, Table, Tag, Tooltip } from 'antd';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { RowActions } from './RowActions';
 
@@ -18,6 +18,9 @@ export const AccountManagement = () => {
   const {
     data: { items: accounts = [] },
     isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     error,
     refetch,
   } = useFetchInfiniteFilteredAccounts({ search });
@@ -71,6 +74,21 @@ export const AccountManagement = () => {
     },
   ];
 
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const el = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+
+      if (!hasNextPage || isFetchingNextPage) return;
+
+      // Fetch data when user is near the bottom
+      if (scrollHeight - scrollTop - clientHeight < 40) {
+        void fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
+
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
       {/* <SectionCard
@@ -123,6 +141,7 @@ export const AccountManagement = () => {
                 dataSource={accounts}
                 columns={columns}
                 pagination={false}
+                onScroll={handleScroll}
               />
             )}
           </RbacProtected.Unrestricted>

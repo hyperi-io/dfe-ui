@@ -8,25 +8,22 @@ import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfiniteFilteredGroups';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, Input, Spin } from 'antd';
+import { Input, Spin } from 'antd';
 import { useState } from 'react';
-
-const GROUP_LIMIT = 6;
 
 export const UserGroups = () => {
   const [search, setSearch] = useState('');
-  const [visibleCount, setVisibleCount] = useState(GROUP_LIMIT);
+
   const {
     data: { items: groups = [] },
+    isFetchingNextPage,
+    loadMoreRef,
     isLoading,
     error,
     refetch,
   } = useFetchInfiniteFilteredGroups({
     search,
   });
-
-  const visibleGroups = groups.slice(0, visibleCount);
-  const hasMore = visibleGroups.length < groups.length;
 
   return (
     <div className="h-full css-custom-scrollbar">
@@ -44,7 +41,6 @@ export const UserGroups = () => {
             placeholder="Search groups"
             onChange={(e) => {
               setSearch(e.target.value);
-              setVisibleCount(GROUP_LIMIT);
             }}
             value={search}
             allowClear
@@ -73,21 +69,15 @@ export const UserGroups = () => {
             )}
             {!isLoading && !error && groups.length > 0 && (
               <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {visibleGroups.map((group) => (
+                {groups.map((group) => (
                   <li key={group.name}>
                     <GroupCard group={group} refetch={refetch} />
                   </li>
                 ))}
+                <div ref={loadMoreRef} className="h-4 flex justify-center">
+                  {isFetchingNextPage && <Spin size="small" />}
+                </div>
               </ul>
-            )}
-            {hasMore && (
-              <Button
-                type="link"
-                className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-                onClick={() => setVisibleCount((count) => count + GROUP_LIMIT)}
-              >
-                Show more
-              </Button>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>

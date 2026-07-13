@@ -7,11 +7,12 @@ import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfi
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin } from 'antd';
+import { Input, Spin } from 'antd';
+import { useState } from 'react';
 import { OrganisationCard } from './OrganisationCard';
 
 export const OrganisationManagement = () => {
-  // const [search, setSearch] = useState('');
+  const [search, setSearch] = useState('');
   const {
     data: { items: organisations = [] },
     isFetchingNextPage,
@@ -19,7 +20,7 @@ export const OrganisationManagement = () => {
     isLoading,
     error,
     refetch,
-  } = useFetchInfiniteFilteredOrganisations();
+  } = useFetchInfiniteFilteredOrganisations({ search });
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
@@ -31,14 +32,14 @@ export const OrganisationManagement = () => {
       <SectionCard
         title="Manage existing organisations"
         description="Manage existing organisations and their configurations."
-        // rightTitleSlot={
-        //   <Input.Search
-        //     className="ml-auto w-60"
-        //     placeholder="Search organisations"
-        //     onChange={(e) => setSearch(e.target.value)}
-        //     value={search}
-        //   />
-        // }
+        rightTitleSlot={
+          <Input.Search
+            className="ml-auto w-60"
+            placeholder="Search organisations"
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+          />
+        }
       >
         <RbacProtected action={RbacProtected.rbacActions.org_read}>
           <RbacProtected.Unrestricted>

@@ -18,7 +18,6 @@ export const OrganisationSelect = ({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-
     isLoading,
     error,
   } = useFetchInfiniteFilteredOrganisations({ search });
