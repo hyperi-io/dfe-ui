@@ -46,7 +46,7 @@ export const CreateUpdateGroupForm = ({
     description: '',
     roles: [],
     members: [],
-    scope: 'org',
+    scope: 'system',
     organisation: '',
   },
   disabledFields,
@@ -60,12 +60,17 @@ export const CreateUpdateGroupForm = ({
   initialValues?: CreateUpdateGroupFormData;
   disabledFields?: {
     name?: boolean;
+    scope?: boolean;
+    organisation?: boolean;
   };
   showMembersField?: boolean;
 }) => {
   const [form] = Form.useForm<CreateUpdateGroupFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateGroupFormData>(formSchema);
+
+  const watchScope = Form.useWatch('scope', form);
+  const isScopeOrg = watchScope === 'org';
 
   return (
     <Form
@@ -92,6 +97,12 @@ export const CreateUpdateGroupForm = ({
 
       <Form.Item name="scope" label="Scope" rules={[formValidation]}>
         <Select
+          onChange={(value) => {
+            if (value === 'system') {
+              form.setFieldsValue({ organisation: '' });
+            }
+          }}
+          disabled={disabledFields?.scope}
           options={[
             { label: 'Organisation', value: 'org' },
             { label: 'System', value: 'system' },
@@ -99,13 +110,15 @@ export const CreateUpdateGroupForm = ({
         />
       </Form.Item>
 
-      <Form.Item
-        name="organisation"
-        label="Organisation"
-        rules={[formValidation]}
-      >
-        <OrganisationSelect />
-      </Form.Item>
+      {isScopeOrg && (
+        <Form.Item
+          name="organisation"
+          label="Organisation"
+          rules={[formValidation]}
+        >
+          <OrganisationSelect disabled={disabledFields?.organisation} />
+        </Form.Item>
+      )}
 
       {showMembersField && (
         <Form.Item name="members" label="Members" rules={[formValidation]}>
