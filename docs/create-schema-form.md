@@ -1,6 +1,6 @@
 # `CreateSchemaForm` (dfe-core-ui)
 
-Documentation for `apps/dfe-core-ui/src/Schemas/components/CreateSchemaForm` and how it behaves with large uploads.
+Documentation for `apps/dfe-core-ui/src/core/components/CreateSchemaForm` and how it behaves with large uploads.
 
 ## Purpose
 
