@@ -1,7 +1,9 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/useUpdateAccount';
 import { IconLock } from '@repo/dfe-icons';
-import { App, Button } from 'antd';
+import { App, Button, Modal } from 'antd';
+import { useState } from 'react';
 
 export const DeReactivateAccount = ({
   username,
@@ -12,6 +14,7 @@ export const DeReactivateAccount = ({
   isActive: boolean;
   refetch: () => void;
 }) => {
+  const [isConfirming, setIsConfirming] = useState(false);
   const { notification } = App.useApp();
   const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
 
@@ -26,6 +29,17 @@ export const DeReactivateAccount = ({
     },
   });
 
+  const { data: { user_id: currentUsername } = {} } = useAuthMe();
+  const isCurrentUser = currentUsername === username;
+
+  const handleClick = () => {
+    if (isCurrentUser) {
+      setIsConfirming(true);
+    } else {
+      mutate({ enabled: !isActive });
+    }
+  };
+
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_write}>
       <RbacProtected.Unrestricted>
@@ -35,12 +49,25 @@ export const DeReactivateAccount = ({
           icon={<IconLock />}
           loading={isPending}
           disabled={isPending}
-          onClick={() => {
-            mutate({ enabled: !isActive });
-          }}
+          onClick={handleClick}
         >
           {actionTitle}
         </Button>
+        <Modal
+          title="Confirm Action"
+          open={isConfirming}
+          destroyOnHidden
+          onCancel={() => setIsConfirming(false)}
+          onOk={() => mutate({ enabled: !isActive })}
+          okText="Deactivate"
+          okType="danger"
+        >
+          <p>
+            You are trying to deactivate your own account, you will be logged
+            out and will lose access to your account. Are you sure you want to
+            continue?
+          </p>
+        </Modal>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>
         <Button

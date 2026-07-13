@@ -26,7 +26,7 @@ export const AccountManagement = () => {
   } = useFetchInfiniteFilteredAccounts({ search });
 
   const { componentHeight } = useSetComponentHeight({
-    offset: 450,
+    offset: 350,
   });
 
   const columns = [
