@@ -1,15 +1,14 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateSchema } from './api';
 import {
   MetaSchemaUpdateParameters,
-  MetaSchemaUpdateRequestBody,
-  MetaSchemaUpdateResponse,
+  TMetaSchemaUpdateRequestBody,
+  TMetaSchemaUpdateResponse,
 } from './types';
 
 interface UseUpdateSchemaProps {
-  onSuccess?: (data: MetaSchemaUpdateResponse) => void;
+  onSuccess?: (data: TMetaSchemaUpdateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -68,10 +67,10 @@ export const useUpdateSchema = ({
       schema,
       parameters,
     }: {
-      schema: MetaSchemaUpdateRequestBody;
+      schema: TMetaSchemaUpdateRequestBody;
       parameters: MetaSchemaUpdateParameters;
     }) => {
-      return apiClient.patch(API_CONFIG.schemas.schema, {
+      return updateSchema({
         body: schema,
         pathParams: { schema_path: parameters.schema_path },
         queryParams: { version: parameters.version },

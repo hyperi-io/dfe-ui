@@ -1,5 +1,5 @@
 import { useCloneSource } from '@/Sources/hooks/useCloneSource';
-import { SourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { Form } from '@/core/components/Form';
 
@@ -32,7 +32,7 @@ interface CloneSourceModalProps {
   display_name?: string | null;
   enabled: boolean;
   versions: string[];
-  onSuccess?: (source: SourceCreateResponse) => void;
+  onSuccess?: (source: TSourceCreateResponse) => void;
   trigger?: React.ReactElement<ButtonProps>;
 }
 

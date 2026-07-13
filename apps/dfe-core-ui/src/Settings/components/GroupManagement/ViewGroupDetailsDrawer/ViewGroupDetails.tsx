@@ -46,6 +46,10 @@ export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
       <dd>{data.name}</dd>
       <dt className={dataListTermStyle}>Description:</dt>
       <dd>{data.description || <EmptyData />}</dd>
+      <dt className={dataListTermStyle}>Scope:</dt>
+      <dd className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap mr-auto">
+        {data.scope}
+      </dd>
       <dt className={dataListTermStyle}>Roles:</dt>
       <dd>
         {data.roles?.length > 0 ? (

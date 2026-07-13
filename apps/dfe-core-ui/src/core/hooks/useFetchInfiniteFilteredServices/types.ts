@@ -1,8 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchServicesPath } from './api';
 
-export type ServiceListResponse =
-  components['schemas']['PaginatedResponse_ServiceConfigSummary_'];
-export type ServiceSummary = components['schemas']['ServiceConfigSummary'];
+export type TServiceListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchServicesPath, 'get'>
+>;
+export type TServiceSummary = TServiceListResponse['items'][number];
 export interface ServiceListRequestParams {
   search?: string;
   service?: string;

@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCompileTransform } from '.';
-import { CompileTransformRequest, CompileTransformResponse } from './types';
+import { TCompileTransformRequest, TCompileTransformResponse } from './types';
 import { server } from './useCompileTransform.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCompileTransform', () => {
-  const requestBody: CompileTransformRequest = {
+  const requestBody: TCompileTransformRequest = {
     language: 'rust',
     files: {
       'main.rs': 'fn main() { println!("Hello, world!"); }',
@@ -44,7 +44,7 @@ describe('.useCompileTransform', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: CompileTransformResponse = {
+      const expectedResponse: TCompileTransformResponse = {
         wasm_base64: 'string',
         wasm_bytes: 0,
       };

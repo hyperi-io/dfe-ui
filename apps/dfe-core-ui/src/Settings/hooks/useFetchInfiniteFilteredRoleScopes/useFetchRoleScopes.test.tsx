@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredRoleScopes } from '.';
-import { RoleScopesResponse } from './types';
+import { TRoleScopeItem } from './types';
 import { server } from './useFetchRoleScopes.mocks';
 
 class MockIntersectionObserver {
@@ -72,7 +72,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: RoleScopesResponse['scopes'][number] = 'string';
+      const responseItem: TRoleScopeItem = 'string';
 
       expect(result.current.data).toBeDefined();
       expect(result.current.data.scopes).toHaveLength(10);

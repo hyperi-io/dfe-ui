@@ -12,7 +12,7 @@ import {
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '.';
 import {
-  MetaSchemaDetailColumnItem,
+  TMetaSchemaDetailColumnItem,
   UseFetchInfiniteFilteredSchemaDetailColumnsProps,
 } from './types';
 import {
@@ -76,7 +76,7 @@ describe('useFetchInfiniteFilteredSchemaDetailColumns', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: MetaSchemaDetailColumnItem = {
+      const responseItem: TMetaSchemaDetailColumnItem = {
         name: 'string',
         type: 'string',
         attribute: ['string'],

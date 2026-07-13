@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { testTransformPath } from './api';
 
-export type TestTransformRequest = components['schemas']['TestRequest'];
-export type TestTransformResponse =
-  components['schemas']['dfe_engine__api__v1__transforms__TestResponse'];
+export type TTestTransformRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof testTransformPath, 'post'>
+>;
+export type TTestTransformResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof testTransformPath, 'post'>
+>;

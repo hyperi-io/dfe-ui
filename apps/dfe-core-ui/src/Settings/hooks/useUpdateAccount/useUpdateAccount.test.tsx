@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateAccount } from '.';
-import { AccountUpdateRequestBody, AccountUpdateResponse } from './types';
+import { TAccountUpdateRequestBody, TAccountUpdateResponse } from './types';
 import { server } from './useUpdateAccount.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateAccount', () => {
-  const requestBody: AccountUpdateRequestBody = {
+  const requestBody: TAccountUpdateRequestBody = {
     groups: ['string'],
     enabled: true,
   };
@@ -47,7 +47,7 @@ describe('.useUpdateAccount', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: AccountUpdateResponse = {
+      const expectedResponse: TAccountUpdateResponse = {
         username: 'string',
         enabled: true,
         groups: ['string'],

@@ -1,4 +1,4 @@
-import { components } from '@repo/dfe-engine-types';
+import { TSchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { describe, expect, it } from 'vitest';
 import {
   getSchemaLeafName,
@@ -7,7 +7,7 @@ import {
   versionsFromMetaSchemaOutput,
 } from './schemaSelectOptions';
 
-type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
+type SchemaSummaryObject = TSchemaSummary;
 
 const schemaEntry = (
   overrides: Partial<SchemaSummaryObject> & Pick<SchemaSummaryObject, 'name'>,

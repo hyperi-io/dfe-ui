@@ -1,8 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchInfiniteRulesPath } from './api';
 
-export type RuleListResponse =
-  components['schemas']['PaginatedResponse_RuleSummary_'];
-export type RuleListItem = RuleListResponse['items'][number];
+export type TRuleListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchInfiniteRulesPath, 'get'>
+>;
+export type TRuleListItem = TRuleListResponse['items'][number];
 
 export interface RuleListRequestParams {
   search?: string;

@@ -1,13 +1,13 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 
 export const SourceDetailHighlight = ({
   source,
 }: {
-  source: SourceVersionDetail;
+  source: TSourceVersionDetail;
 }) => {
   const {
     source: sourceName,

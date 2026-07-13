@@ -1,13 +1,13 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { useFetchInfiniteFilteredAlerts } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts';
 import { Spin } from 'antd';
 import { AlertCard } from './AlertCard';
 import { CreateAlertModal } from './CreateAlertModal';
 
-export const AlertsConfigTab = ({ hunt }: { hunt: HuntDetailResponse }) => {
+export const AlertsConfigTab = ({ hunt }: { hunt: THuntDetailResponse }) => {
   const {
     data: { items: alerts },
     isLoading,

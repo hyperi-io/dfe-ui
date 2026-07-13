@@ -1,4 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { createRolePath } from './api';
 
-export type RoleCreateRequest = components['schemas']['CreateRoleRequest'];
-export type RoleCreateResponse = components['schemas']['RoleResponse'];
+export type TRoleCreateRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof createRolePath, 'post'>
+>;
+export type TRoleCreateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof createRolePath, 'post'>
+>;

@@ -1,6 +1,14 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchInfiniteFilteredRoleScopesPath } from './api';
 
-export type RoleScopesResponse = components['schemas']['CasbinScopesResponse'];
+export type TRoleScopesResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchInfiniteFilteredRoleScopesPath, 'get'>
+>;
+
+export type TRoleScopeItem = TRoleScopesResponse['scopes'][number];
 
 export interface UseFetchInfiniteFilteredRoleScopesProps {
   search?: string;

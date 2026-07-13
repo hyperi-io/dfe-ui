@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateAlert } from '.';
-import { AlertUpdateRequest, AlertUpdateResponse } from './types';
+import { TAlertUpdateRequest, TAlertUpdateResponse } from './types';
 import { server } from './useUpdateAlert.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateAlert', () => {
-  const parameters: AlertUpdateRequest = {
+  const parameters: TAlertUpdateRequest = {
     name: 'string',
     url: 'string',
     description: 'string',
@@ -49,7 +49,7 @@ describe('.useUpdateAlert', () => {
         enabled: parameters.enabled,
       });
 
-      const expectedResponse: AlertUpdateResponse = {
+      const expectedResponse: TAlertUpdateResponse = {
         name: 'string',
         url: 'string',
         description: 'string',
@@ -76,7 +76,7 @@ describe('.useUpdateAlert', () => {
   });
 
   describe('onError', () => {
-    const requestBody: AlertUpdateRequest = {
+    const requestBody: TAlertUpdateRequest = {
       name: 'string',
       url: 'string',
       description: 'string',

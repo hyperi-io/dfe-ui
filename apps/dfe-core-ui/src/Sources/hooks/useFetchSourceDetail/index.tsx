@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { sourceVersion } from './api';
 
 export const SOURCE_DETAIL_QUERY_KEY = (
   source_name: string | null,
@@ -23,7 +22,7 @@ export const useFetchSourceDetail = ({
   const { data, isLoading, error } = useQuery({
     queryKey: SOURCE_DETAIL_QUERY_KEY(source_name, source_version),
     queryFn: () =>
-      apiClient.get(API_CONFIG.sources.sourceVersion, {
+      sourceVersion({
         pathParams: { name: source_name ?? '', version: source_version ?? '' },
       }),
     enabled: !!source_name && queryEnabled,

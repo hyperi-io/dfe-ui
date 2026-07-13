@@ -1,5 +1,5 @@
 import { useListServicesContext } from '@/core/contexts/ListServicesContext';
-import { ServiceSummary } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
+import { TServiceSummary } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -45,7 +45,7 @@ export const ServicesList = ({ className }: { className?: string }) => {
       )}
     >
       <>
-        {services.map((service: ServiceSummary) => {
+        {services.map((service: TServiceSummary) => {
           const isSelected =
             selectedService?.service_name === service.service &&
             selectedService?.service_instance === service.instance;

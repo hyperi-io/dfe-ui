@@ -1,5 +1,7 @@
-import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
-import { components } from '@repo/dfe-engine-types';
+import {
+  TSchemaListResponse,
+  TSchemaSummary,
+} from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -8,7 +10,7 @@ import {
   useTransformMetaSchemaToTree,
 } from '.';
 
-type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
+type SchemaSummaryObject = TSchemaSummary;
 
 const baseSchema = (
   overrides: Partial<SchemaSummaryObject> & Pick<SchemaSummaryObject, 'name'>,
@@ -77,7 +79,7 @@ describe('useTransformMetaSchemaToTree', () => {
   it('maps nested children and schemas into TreeDataNode keys and hierarchy', () => {
     const setSelectedSchema = vi.fn();
 
-    const schema_objects: SchemaListResponse['objects'] = {
+    const schema_objects: TSchemaListResponse['objects'] = {
       items: [],
       children: {
         azure: {
@@ -183,7 +185,7 @@ describe('useTransformMetaSchemaToTree', () => {
   });
 
   it('memoises the tree when schemaObjects and setters are stable', () => {
-    const schema_objects: SchemaListResponse['objects'] = {
+    const schema_objects: TSchemaListResponse['objects'] = {
       items: [baseSchema({ name: 'a' })],
     };
     const setSelectedSchema = vi.fn();
@@ -195,7 +197,7 @@ describe('useTransformMetaSchemaToTree', () => {
         onSelect,
         onExpand,
       }: {
-        schema: SchemaListResponse['objects'];
+        schema: TSchemaListResponse['objects'];
         onSelect: typeof setSelectedSchema;
         onExpand: typeof expandTreeNode;
       }) =>
@@ -223,7 +225,7 @@ describe('useTransformMetaSchemaToTree', () => {
     });
     expect(result.current.tree).toBe(firstTree);
 
-    const nextObjects: SchemaListResponse['objects'] = {
+    const nextObjects: TSchemaListResponse['objects'] = {
       items: [baseSchema({ name: 'b' })],
     };
     rerender({

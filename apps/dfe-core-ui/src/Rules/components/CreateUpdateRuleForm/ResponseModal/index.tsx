@@ -1,12 +1,12 @@
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface ResponseModalProps {
-  response?: RuleCreateResponse | null;
+  response?: TRuleCreateResponse | null;
   onClose?: () => void;
 }
 

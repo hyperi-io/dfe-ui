@@ -6,35 +6,25 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateGroupDrawer } from '@/Settings/components/GroupManagement/CreateGroupDrawer';
 import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import { useFetchGroups } from '@/Settings/hooks/useFetchGroups';
+import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfiniteFilteredGroups';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, Input, Spin } from 'antd';
-import { useMemo, useState } from 'react';
-
-const GROUP_LIMIT = 6;
+import { Input, Spin } from 'antd';
+import { useState } from 'react';
 
 export const UserGroups = () => {
   const [search, setSearch] = useState('');
-  const [visibleCount, setVisibleCount] = useState(GROUP_LIMIT);
-  const { data: groups, isLoading, error, refetch } = useFetchGroups();
 
-  const filteredGroups = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!groups) {
-      return [];
-    }
-    if (!query) {
-      return groups;
-    }
-    return groups.filter(
-      (group) =>
-        group.name.toLowerCase().includes(query) ||
-        group.description.toLowerCase().includes(query),
-    );
-  }, [groups, search]);
-
-  const visibleGroups = filteredGroups.slice(0, visibleCount);
-  const hasMore = visibleGroups.length < filteredGroups.length;
+  const {
+    data: { items: groups = [] },
+    isFetchingNextPage,
+    loadMoreRef,
+    isLoading,
+    error,
+    refetch,
+  } = useFetchInfiniteFilteredGroups({
+    search,
+    per_page: 12,
+  });
 
   return (
     <div className="h-full css-custom-scrollbar">
@@ -52,7 +42,6 @@ export const UserGroups = () => {
             placeholder="Search groups"
             onChange={(e) => {
               setSearch(e.target.value);
-              setVisibleCount(GROUP_LIMIT);
             }}
             value={search}
             allowClear
@@ -72,30 +61,26 @@ export const UserGroups = () => {
                 description={error.message}
               />
             )}
-            {!isLoading && !error && filteredGroups.length === 0 && (
+            {!isLoading && !error && groups.length === 0 && (
               <NotificationCard
                 className="w-full"
                 description="No groups found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {!isLoading && !error && filteredGroups.length > 0 && (
-              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {visibleGroups.map((group) => (
-                  <li key={group.name}>
-                    <GroupCard group={group} refetch={refetch} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            {hasMore && (
-              <Button
-                type="link"
-                className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
-                onClick={() => setVisibleCount((count) => count + GROUP_LIMIT)}
-              >
-                Show more
-              </Button>
+            {!isLoading && !error && groups.length > 0 && (
+              <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+                <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {groups.map((group) => (
+                    <li key={group.name}>
+                      <GroupCard group={group} refetch={refetch} />
+                    </li>
+                  ))}
+                  <div ref={loadMoreRef} className="h-4 flex justify-center">
+                    {isFetchingNextPage && <Spin size="small" />}
+                  </div>
+                </ul>
+              </div>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>

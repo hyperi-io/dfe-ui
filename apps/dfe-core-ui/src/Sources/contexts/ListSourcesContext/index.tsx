@@ -2,7 +2,7 @@
 
 import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import type {
-  SourceListResponse,
+  TSourceListResponse,
   UseFetchInfiniteFilteredSourcesProps,
 } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 
@@ -64,7 +64,7 @@ const hasAnyFilters = (f: ListSourcesQueryParams) =>
   f.source_name !== undefined;
 
 export interface ListSourcesContextValue {
-  data: SourceListResponse;
+  data: TSourceListResponse;
   filters: UseFetchInfiniteFilteredSourcesProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredSourcesProps) => void;
@@ -87,8 +87,8 @@ export interface ListSourcesContextValue {
   }) => void;
 }
 
-const DEFAULT_SOURCE_LIST_RESPONSE: SourceListResponse = {
-  items: [] as SourceListResponse['items'],
+const DEFAULT_SOURCE_LIST_RESPONSE: TSourceListResponse = {
+  items: [] as TSourceListResponse['items'],
   objects: {},
   total: 0,
   page: 1,

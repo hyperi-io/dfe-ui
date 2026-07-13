@@ -11,10 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteSourceColumns } from '.';
-import {
-  UseFetchInfiniteSourceColumnsItem,
-  UseFetchInfiniteSourceColumnsProps,
-} from './types';
+import { TSourceColumnItem, UseFetchInfiniteSourceColumnsProps } from './types';
 import {
   MOCK_SOURCE_NAME,
   server,
@@ -82,7 +79,7 @@ describe('useFetchInfiniteSourceColumns', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: UseFetchInfiniteSourceColumnsItem = {
+      const responseItem: TSourceColumnItem = {
         name: 'string',
         attribute: 'string',
         use_case: 'string',

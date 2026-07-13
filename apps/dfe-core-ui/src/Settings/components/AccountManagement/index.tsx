@@ -5,33 +5,28 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCard } from '@/Settings/components/SectionCard';
-import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
-import { Account } from '@/Settings/hooks/useFetchAccounts/types';
+import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts';
+import { TAccountsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin, Table, Tag, Tooltip } from 'antd';
-import { useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { RowActions } from './RowActions';
 
 export const AccountManagement = () => {
   const [search, setSearch] = useState('');
-  const { data: accounts, isLoading, error, refetch } = useFetchAccounts();
-
-  const filteredAccounts = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!accounts) {
-      return [];
-    }
-    if (!query) {
-      return accounts;
-    }
-    return accounts.filter((account) =>
-      account.username.toLowerCase().includes(query),
-    );
-  }, [accounts, search]);
+  const {
+    data: { items: accounts = [] },
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useFetchInfiniteFilteredAccounts({ search });
 
   const { componentHeight } = useSetComponentHeight({
-    offset: 450,
+    offset: 350,
   });
 
   const columns = [
@@ -69,7 +64,7 @@ export const AccountManagement = () => {
       key: 'actions',
       width: 85,
       align: 'center' as const,
-      render: (_: unknown, record: Account) => (
+      render: (_: unknown, record: TAccountsItemSummary) => (
         <RowActions
           username={record.username}
           isActive={record.enabled}
@@ -78,6 +73,21 @@ export const AccountManagement = () => {
       ),
     },
   ];
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const el = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+
+      if (!hasNextPage || isFetchingNextPage) return;
+
+      // Fetch data when user is near the bottom
+      if (scrollHeight - scrollTop - clientHeight < 40) {
+        void fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
@@ -117,20 +127,21 @@ export const AccountManagement = () => {
                 description={error.message}
               />
             )}
-            {!isLoading && !error && filteredAccounts.length === 0 && (
+            {!isLoading && !error && accounts.length === 0 && (
               <NotificationCard
                 className="w-full"
                 description="No accounts found"
                 icon={<IconInfoCircle />}
               />
             )}
-            {!isLoading && !error && filteredAccounts.length > 0 && (
+            {!isLoading && !error && accounts.length > 0 && (
               <Table
                 rowKey="username"
                 scroll={{ y: componentHeight }}
-                dataSource={filteredAccounts}
+                dataSource={accounts}
                 columns={columns}
                 pagination={false}
+                onScroll={handleScroll}
               />
             )}
           </RbacProtected.Unrestricted>

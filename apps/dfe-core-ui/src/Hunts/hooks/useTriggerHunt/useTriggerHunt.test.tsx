@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useTriggerHunt } from '.';
-import { TriggerRequest, TriggerResponse } from './types';
+import { TTriggerRequest, TTriggerResponse } from './types';
 import { server } from './useTriggerHunt.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useTriggerHunt', () => {
-  const requestBody: TriggerRequest = {
+  const requestBody: TTriggerRequest = {
     customer: 'string',
   };
   describe('onSuccess', () => {
@@ -41,7 +41,7 @@ describe('.useTriggerHunt', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: TriggerResponse = {
+      const expectedResponse: TTriggerResponse = {
         task_id: 'string',
         hunt_name: 'string',
       };

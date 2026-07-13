@@ -1,4 +1,8 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchSchemasPath } from './api';
 
 export interface UseFetchInfiniteFilteredSchemasProps {
   search?: string;
@@ -8,7 +12,8 @@ export interface UseFetchInfiniteFilteredSchemasProps {
   per_page?: number;
 }
 
-export type SchemaListResponse =
-  components['schemas']['PaginatedSchemaSummaryResponse'];
+export type TSchemaListResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchSchemasPath, 'get'>
+>;
 
-export type SchemaSummary = components['schemas']['SchemaSummaryObject'];
+export type TSchemaSummary = TSchemaListResponse['items'][number];

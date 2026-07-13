@@ -1,18 +1,16 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { RoleCreateRequest, RoleCreateResponse } from './types';
+import { createRole } from './api';
+import { TRoleCreateRequest, TRoleCreateResponse } from './types';
 
 export const useCreateRole = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: RoleCreateResponse) => void;
+  onSuccess?: (data: TRoleCreateResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (role: RoleCreateRequest) =>
-      apiClient.post(API_CONFIG.roles.default, { body: role }),
+    mutationFn: (role: TRoleCreateRequest) => createRole({ body: role }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

@@ -1,10 +1,9 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { GroupUpdateRequestBody, GroupUpdateResponse } from './types';
+import { updateGroup } from './api';
+import { TGroupUpdateRequestBody, TGroupUpdateResponse } from './types';
 
 interface UseUpdateGroupProps {
-  onSuccess?: (data: GroupUpdateResponse) => void;
+  onSuccess?: (data: TGroupUpdateResponse) => void;
   onError?: (error: Error) => void;
   group_name: string;
 }
@@ -15,12 +14,11 @@ export const useUpdateGroup = ({
   onError,
 }: UseUpdateGroupProps) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (group: GroupUpdateRequestBody) => {
-      return apiClient.put(API_CONFIG.groups.group, {
+    mutationFn: (group: TGroupUpdateRequestBody) =>
+      updateGroup({
         body: group,
         pathParams: { name: group_name },
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

@@ -71,10 +71,6 @@ export const ViewOrganisationDetail = ({
       <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
         <dt className={dataListTermStyle}>Organisation ID:</dt>
         <dd>{org_name}</dd>
-        <dt className={dataListTermStyle}>Dedicated Database:</dt>
-        <dd className="flex items-center text-lg">
-          {organisationDetail.dedicated_database ? <IconCheck /> : <IconX />}
-        </dd>
         <dt className={dataListTermStyle}>Enabled:</dt>
         <dd className="flex items-center text-lg">
           {organisationDetail.enabled ? <IconCheck /> : <IconX />}

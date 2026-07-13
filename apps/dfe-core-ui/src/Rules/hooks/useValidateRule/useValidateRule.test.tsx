@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useValidateRule } from '.';
-import { SqlValidationResponse } from './types';
+import { TSqlValidationResponse } from './types';
 import { server } from './useValidateRule.mocks';
 
 beforeAll(() =>
@@ -41,7 +41,7 @@ describe('.useValidateRule', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SqlValidationResponse = {
+      const expectedResponse: TSqlValidationResponse = {
         valid: true,
         errors: [
           {

@@ -1,10 +1,9 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { FieldMap } from './types';
+import { createFieldMap } from './api';
+import { TCreateFieldMapRequest, TCreateFieldMapResponse } from './types';
 
 interface UseCreateFieldMapProps {
-  onSuccess?: (data: FieldMap) => void;
+  onSuccess?: (data: TCreateFieldMapResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -13,8 +12,7 @@ export const useCreateFieldMap = ({
   onError,
 }: UseCreateFieldMapProps = {}) => {
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: (fieldMap: FieldMap) =>
-      apiClient.post(API_CONFIG.fieldMaps.default, { body: fieldMap }),
+    mutationFn: (body: TCreateFieldMapRequest) => createFieldMap(body),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

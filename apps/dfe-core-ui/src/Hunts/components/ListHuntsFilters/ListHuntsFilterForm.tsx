@@ -1,8 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { SortActions } from '@/core/components/SortActions';
+import { HuntSortBy } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
-import { HuntSortBy } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
 import { Button, Input } from 'antd';
 import { useEffect, useId } from 'react';
 import z from 'zod';

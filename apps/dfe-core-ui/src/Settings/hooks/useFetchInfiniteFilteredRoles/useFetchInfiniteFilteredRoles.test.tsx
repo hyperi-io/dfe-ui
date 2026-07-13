@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredRoles } from '.';
-import { RoleListResponse } from './types';
+import { TRoleListItem } from './types';
 import { server } from './useFetchInfiniteFilteredRoles.mocks';
 
 class MockIntersectionObserver {
@@ -67,7 +67,7 @@ describe('useFetchInfiniteFilteredRoles', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: RoleListResponse['items'][number] = {
+      const responseItem: TRoleListItem = {
         name: 'string',
         description: 'string',
         permissions: ['string'],

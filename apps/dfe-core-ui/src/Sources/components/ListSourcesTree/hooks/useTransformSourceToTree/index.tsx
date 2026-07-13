@@ -1,7 +1,7 @@
 import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
-import { SourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
 import {
   IconBucket,
@@ -52,7 +52,7 @@ export const getExpandedKeysForSourceSelection = (
 };
 
 const buildVersionChildren = (
-  source: NonNullable<SourceListResponse['objects']['items']>[number],
+  source: NonNullable<TSourceSummary['items']>[number],
   setSelectedSource: ({
     source_name,
     source_version,
@@ -126,7 +126,7 @@ const sourceSummaryToTreeData = ({
   expandTreeNode,
   refetchSources,
 }: {
-  node: SourceListResponse['objects'];
+  node: TSourceSummary;
   pathSegments: string[];
   setSelectedSource: ({
     source_name,
@@ -292,7 +292,7 @@ export const useTransformSourceToTree = ({
   expandTreeNode,
   refetchSources,
 }: {
-  sourceObjects: SourceListResponse['objects'];
+  sourceObjects: TSourceSummary;
   setSelectedSource: ({
     source_name,
     source_version,

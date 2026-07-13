@@ -1,10 +1,19 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { updateRolePath } from './api';
 
-export type RoleUpdateRequest = components['schemas']['UpdateRoleRequest'];
-export type RoleUpdateResponse = components['schemas']['RoleResponse'];
+export type TRoleUpdateRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof updateRolePath, 'put'>
+>;
+export type TRoleUpdateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof updateRolePath, 'put'>
+>;
 
 export interface UseUpdateRoleProps {
   role_name: string;
-  onSuccess?: (data: RoleUpdateResponse) => void;
+  onSuccess?: (data: TRoleUpdateResponse) => void;
   onError?: (error: Error) => void;
 }

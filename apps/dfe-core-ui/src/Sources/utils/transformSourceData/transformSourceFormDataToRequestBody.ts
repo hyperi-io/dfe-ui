@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
+import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 
 /*
  * Transforms the source form data to a request body for the update source API.
@@ -12,16 +12,16 @@ import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
-): SourceUpdateRequestBody => {
+): TSourceUpdateRequestBody => {
   const { fetcher, match, ...rest } = source;
 
-  let apiMatch: SourceUpdateRequestBody['match'] | undefined;
+  let apiMatch: TSourceUpdateRequestBody['match'] | undefined;
   if (match) {
     const { operator: _operator, field, value } = match;
     apiMatch = { field, operator: _operator ?? 'equals', value: value ?? '' };
   }
 
-  const transformedSource: SourceUpdateRequestBody = {
+  const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
     ...(apiMatch
       ? { match: apiMatch }

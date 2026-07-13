@@ -1,7 +1,7 @@
 'use client';
 
 import type {
-  SchemaListResponse,
+  TSchemaListResponse,
   UseFetchInfiniteFilteredSchemasProps,
 } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 
@@ -79,7 +79,7 @@ const hasAnyFilters = (f: ListSchemasQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListSchemasContextValue {
-  data: SchemaListResponse;
+  data: TSchemaListResponse;
   filters: UseFetchInfiniteFilteredSchemasProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredSchemasProps) => void;
@@ -103,9 +103,9 @@ export interface ListSchemasContextValue {
   schemaTypesScope: string[];
 }
 
-const DEFAULT_SCHEMA_LIST_RESPONSE: SchemaListResponse = {
-  items: [] as SchemaListResponse['items'],
-  objects: {} as SchemaListResponse['objects'],
+const DEFAULT_SCHEMA_LIST_RESPONSE: TSchemaListResponse = {
+  items: [] as TSchemaListResponse['items'],
+  objects: {} as TSchemaListResponse['objects'],
   total: 0,
   page: 1,
   per_page: 10,

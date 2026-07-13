@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { deleteRole } from './api';
 
 export const useDeleteRole = ({
   onSuccess,
@@ -11,7 +10,7 @@ export const useDeleteRole = ({
 }) => {
   const { mutate, isPending, error } = useMutation({
     mutationFn: (role_name: string) =>
-      apiClient.delete(API_CONFIG.roles.role, {
+      deleteRole({
         pathParams: { name: role_name },
       }),
     onSuccess: () => {

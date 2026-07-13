@@ -1,4 +1,14 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { updateRulePath } from './api';
 
-export type RuleUpdateRequest = components['schemas']['RuleUpdateRequest'];
-export type RuleUpdateResponse = components['schemas']['RuleCreateResponse'];
+export type TRuleUpdateRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof updateRulePath, 'put'>
+>;
+
+export type TRuleUpdateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof updateRulePath, 'put'>
+>;

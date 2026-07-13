@@ -1,13 +1,13 @@
 'use client';
 
-import type { RefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
+import type { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { getCsrfToken, getSession } from 'next-auth/react';
 
 import { applyRefreshedAccessToken } from './applyRefreshedAccessToken';
 
 /** Persists new tokens to the NextAuth JWT without `useSession().update()` (avoids loading flicker). */
 export async function persistRefreshedSession(
-  tokenResponse: RefreshTokenResponse,
+  tokenResponse: TRefreshTokenResponse,
 ) {
   applyRefreshedAccessToken(tokenResponse);
 

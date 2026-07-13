@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { resetPasswordPath } from './api';
 
-export type AccountResetPasswordRequestBody =
-  components['schemas']['ResetPasswordRequest'];
-export type AccountResetPasswordResponse = Record<string, never>;
+export type TAccountResetPasswordRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof resetPasswordPath, 'post'>
+>;
+export type TAccountResetPasswordResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof resetPasswordPath, 'post'>
+>;

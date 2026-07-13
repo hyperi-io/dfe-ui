@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { AlertListResponse } from './types';
+import { TAlertListResponseItem } from './types';
 
-const ALERT_ITEM: AlertListResponse['items'][number] = {
+const ALERT_ITEM: TAlertListResponseItem = {
   name: 'string',
   description: 'string',
   enabled: true,

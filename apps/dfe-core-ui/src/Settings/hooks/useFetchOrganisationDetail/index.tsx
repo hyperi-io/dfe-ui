@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { fetchOrganisationDetail } from './api';
 
 export const ORGANISATION_DETAIL_QUERY_KEY = (org_name?: string | null) => [
   'organisation',
@@ -16,7 +15,7 @@ export const useFetchOrganisationDetail = ({
   const { data, isLoading, error } = useQuery({
     queryKey: ORGANISATION_DETAIL_QUERY_KEY(org_name),
     queryFn: () =>
-      apiClient.get(API_CONFIG.orgs.org, {
+      fetchOrganisationDetail({
         pathParams: { name: org_name ?? '' },
       }),
     enabled: isQueryEnabled,

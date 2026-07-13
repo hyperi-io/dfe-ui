@@ -1,11 +1,11 @@
-import { components } from '@repo/dfe-engine-types';
+import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
 
 export const getInitialSourceType = ({
   match,
   fetcher,
 }: {
-  match: components['schemas']['SourceMatch'] | null;
-  fetcher: components['schemas']['SourceFetcher'] | null;
+  match: TSourceCreateRequestBody['match'] | null;
+  fetcher: TSourceCreateRequestBody['fetcher'] | null;
 }) => {
   const matchKeys = Object.keys(match ?? {});
   const fetcherKeys = Object.keys(fetcher ?? {});

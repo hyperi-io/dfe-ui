@@ -1,7 +1,7 @@
 'use client';
 
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
@@ -34,7 +34,7 @@ const isSourceDetailTabKey = (
   value !== null &&
   (SOURCE_DETAIL_TAB_KEYS as readonly string[]).includes(value);
 
-type ViewSourceDetailTabsProps = SourceVersionDetail & {
+type ViewSourceDetailTabsProps = TSourceVersionDetail & {
   selectedSourceName: string;
   selectedSourceVersion: string;
 };

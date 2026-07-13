@@ -1,16 +1,17 @@
-import { SourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import {
+  TSourceListSummary,
+  TSourceSummary,
+} from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { render, renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
 
-type SourceSummaryObject = SourceListResponse['items'][number];
-
 const refetchSources = vi.fn();
 
 const baseSource = (
-  overrides: Partial<SourceSummaryObject> & Pick<SourceSummaryObject, 'name'>,
-): SourceSummaryObject => ({
+  overrides: Partial<TSourceListSummary> & Pick<TSourceListSummary, 'name'>,
+): TSourceListSummary => ({
   //@ts-expect-error - name is specified more than once, so this usage will be overwritten.
   name: 'source',
   display_name: 'Source',
@@ -84,7 +85,7 @@ describe('useTransformSourceToTree', () => {
     const setSelectedSource = vi.fn();
 
     // Version nodes only include entries matching current or deployed_version.
-    const source_objects: SourceListResponse['objects'] = {
+    const source_objects: TSourceSummary = {
       items: [],
       children: {
         azure: {
@@ -194,7 +195,7 @@ describe('useTransformSourceToTree', () => {
   });
 
   it('memoises the tree when sourceObjects and setters are stable', () => {
-    const source_objects: SourceListResponse['objects'] = {
+    const source_objects: TSourceSummary = {
       items: [baseSource({ name: 'a' })],
     };
     const setSelectedSource = vi.fn();
@@ -206,7 +207,7 @@ describe('useTransformSourceToTree', () => {
         onSelect,
         onExpand,
       }: {
-        source: SourceListResponse['objects'];
+        source: TSourceSummary;
         onSelect: typeof setSelectedSource;
         onExpand: typeof expandTreeNode;
       }) =>
@@ -235,7 +236,7 @@ describe('useTransformSourceToTree', () => {
     });
     expect(result.current.tree).toBe(firstTree);
 
-    const nextObjects: SourceListResponse['objects'] = {
+    const nextObjects: TSourceSummary = {
       items: [baseSource({ name: 'b' })],
     };
     rerender({

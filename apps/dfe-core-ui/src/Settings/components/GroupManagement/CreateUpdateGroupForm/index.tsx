@@ -4,21 +4,34 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
-import { Button, Input } from 'antd';
+import { OrganisationSelect } from '@/Settings/components/OrganisationManagement/OrganisationSelect';
+import { Button, Input, Select } from 'antd';
 import z from 'zod';
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_REGEX.test(v), {
-      message:
-        'Name must contain only letters, numbers, underscores, and hyphens',
-    }),
-  description: z.string(),
-  roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
-  members: z.array(z.string()).optional(),
-});
+const formSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: 'Name is required' })
+      .refine((v) => DB_NAME_REGEX.test(v), {
+        message:
+          'Name must contain only letters, numbers, underscores, and hyphens',
+      }),
+    description: z.string(),
+    roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
+    members: z.array(z.string()).optional(),
+    scope: z.enum(['org', 'system']),
+    organisation: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.scope === 'org' && !data.organisation?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Organisation is required',
+        path: ['organisation'],
+      });
+    }
+  });
 
 export type CreateUpdateGroupFormData = z.infer<typeof formSchema>;
 
@@ -33,6 +46,8 @@ export const CreateUpdateGroupForm = ({
     description: '',
     roles: [],
     members: [],
+    scope: 'system',
+    organisation: '',
   },
   disabledFields,
   showMembersField = false,
@@ -45,12 +60,17 @@ export const CreateUpdateGroupForm = ({
   initialValues?: CreateUpdateGroupFormData;
   disabledFields?: {
     name?: boolean;
+    scope?: boolean;
+    organisation?: boolean;
   };
   showMembersField?: boolean;
 }) => {
   const [form] = Form.useForm<CreateUpdateGroupFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateGroupFormData>(formSchema);
+
+  const watchScope = Form.useWatch('scope', form);
+  const isScopeOrg = watchScope === 'org';
 
   return (
     <Form
@@ -74,6 +94,31 @@ export const CreateUpdateGroupForm = ({
       <Form.Item name="roles" label="Roles" rules={[formValidation]}>
         <GroupRoleSelect />
       </Form.Item>
+
+      <Form.Item name="scope" label="Scope" rules={[formValidation]}>
+        <Select
+          onChange={(value) => {
+            if (value === 'system') {
+              form.setFieldsValue({ organisation: '' });
+            }
+          }}
+          disabled={disabledFields?.scope}
+          options={[
+            { label: 'Organisation', value: 'org' },
+            { label: 'System', value: 'system' },
+          ]}
+        />
+      </Form.Item>
+
+      {isScopeOrg && (
+        <Form.Item
+          name="organisation"
+          label="Organisation"
+          rules={[formValidation]}
+        >
+          <OrganisationSelect disabled={disabledFields?.organisation} />
+        </Form.Item>
+      )}
 
       {showMembersField && (
         <Form.Item name="members" label="Members" rules={[formValidation]}>

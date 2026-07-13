@@ -1,10 +1,10 @@
-import type { RefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
+import type { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 
 import { getCachedSession, setCachedSession } from './cachedSession';
 
 /** Updates the in-memory session cache before NextAuth `update()` finishes. */
 export const applyRefreshedAccessToken = (
-  tokenResponse: RefreshTokenResponse,
+  tokenResponse: TRefreshTokenResponse,
 ): void => {
   const current = getCachedSession();
   if (!current?.user) {

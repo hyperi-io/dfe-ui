@@ -1,13 +1,12 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { createOrganisation } from './api';
 import {
-  OrganisationCreateRequestBody,
-  OrganisationCreateResponse,
+  TOrganisationCreateRequestBody,
+  TOrganisationCreateResponse,
 } from './types';
 
 interface UseCreateOrganisationProps {
-  onSuccess?: (data: OrganisationCreateResponse) => void;
+  onSuccess?: (data: TOrganisationCreateResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -16,11 +15,10 @@ export const useCreateOrganisation = ({
   onError,
 }: UseCreateOrganisationProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (organisation: OrganisationCreateRequestBody) => {
-      return apiClient.post(API_CONFIG.orgs.default, {
+    mutationFn: (organisation: TOrganisationCreateRequestBody) =>
+      createOrganisation({
         body: organisation,
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

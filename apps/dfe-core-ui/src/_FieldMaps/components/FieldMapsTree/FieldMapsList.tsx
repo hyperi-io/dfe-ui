@@ -1,5 +1,5 @@
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
-import { FieldMapSummary } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
+import { TFieldMapSummary } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -44,7 +44,7 @@ export const FieldMapsList = ({ className }: { className?: string }) => {
       )}
     >
       <>
-        {fieldMaps.map((fieldMap: FieldMapSummary) => {
+        {fieldMaps.map((fieldMap: TFieldMapSummary) => {
           const isSelected =
             selectedFieldMap?.map_source === fieldMap.source &&
             selectedFieldMap?.map_standard === fieldMap.standard;

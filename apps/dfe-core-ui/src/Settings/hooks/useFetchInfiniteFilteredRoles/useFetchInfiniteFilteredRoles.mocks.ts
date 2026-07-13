@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { RoleListResponse } from './types';
+import { TRoleListItem } from './types';
 
-const ROLE_ITEM: RoleListResponse['items'][number] = {
+const ROLE_ITEM: TRoleListItem = {
   name: 'string',
   description: 'string',
   permissions: ['string'],

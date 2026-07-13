@@ -13,10 +13,7 @@ import {
   vi,
 } from 'vitest';
 import { useElasticConvert } from '.';
-import {
-  ElasticConverterRequest,
-  ElasticConverterResponse,
-} from './useElasticConvert';
+import { ElasticConverterFormData, TElasticConvertResponse } from './types';
 import { server } from './useElasticConvert.mocks';
 
 beforeAll(() =>
@@ -30,7 +27,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useElasticConvert', () => {
-  const requestBody: ElasticConverterRequest = {
+  const requestBody: ElasticConverterFormData = {
     file: new File(['{}'], 'template.json', { type: 'application/json' }),
   };
 
@@ -46,7 +43,7 @@ describe('.useElasticConvert', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: ElasticConverterResponse = [
+      const expectedResponse: TElasticConvertResponse = [
         {
           name: 'string',
           type: 'string',

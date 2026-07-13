@@ -6,7 +6,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useCreateFieldMap } from '@/core/hooks/useCreateFieldMap';
-import { FieldMap } from '@/core/hooks/useCreateFieldMap/types';
+import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { cn } from '@/core/utils/style';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -17,8 +17,8 @@ interface CreateFieldMapDrawerProps {
     trigger?: string;
   };
   title?: string;
-  onSuccess?: (data: FieldMap) => void;
-  initialValues?: FieldMap;
+  onSuccess?: (data: TCreateFieldMapResponse) => void;
+  initialValues?: TCreateFieldMapResponse;
   disabledFields?: {
     source?: boolean;
   };

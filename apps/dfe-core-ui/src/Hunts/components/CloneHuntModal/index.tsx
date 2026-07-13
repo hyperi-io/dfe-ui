@@ -5,8 +5,8 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
-import { HuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
-import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, Input, Modal } from 'antd';
 import { cloneElement, useState } from 'react';
@@ -28,8 +28,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface CloneHuntModalProps {
-  hunt: HuntDetailResponse;
-  onSuccess?: (data: HuntCreateResponse) => void;
+  hunt: THuntDetailResponse;
+  onSuccess?: (data: THuntCreateResponse) => void;
   onError?: (error: Error) => void;
   trigger?: React.ReactElement<ButtonProps>;
 }
@@ -45,7 +45,7 @@ export const CloneHuntModal = ({
 
   const { refetch: refetchHunts } = useListHuntsContext();
 
-  const onSuccess = (data: HuntCreateResponse) => {
+  const onSuccess = (data: THuntCreateResponse) => {
     refetchHunts();
     onSuccessProp?.(data);
     setOpen(false);

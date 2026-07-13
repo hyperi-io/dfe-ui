@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
 /*
  * Transforms the source request body to a form data object.
@@ -9,7 +9,7 @@ import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types'
  * @returns The transformed form data object
  */
 export const transformSourceRequestBodyToFormData = (
-  source?: SourceVersionDetail,
+  source?: TSourceVersionDetail,
 ): CreateUpdateSourceFormData => {
   const transformedSource: CreateUpdateSourceFormData = {
     ...source,

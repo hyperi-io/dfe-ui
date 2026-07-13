@@ -2,9 +2,9 @@ import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
-import { JsonPaths } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
-import { PromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { Button } from 'antd';
 import { useMemo } from 'react';
 import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
@@ -19,9 +19,9 @@ export const PromoteJsonPaths = ({
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  data: PromoteFieldResponse | null;
-  jsonPaths: JsonPaths | null;
-  onSuccess?: (response: PromoteFieldResponse) => void;
+  data: TPromoteFieldResponse | null;
+  jsonPaths: TJsonPathsResponse | null;
+  onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
 }) => {
   const { handleClearFieldsToPromote } = usePromoteRowsContext();

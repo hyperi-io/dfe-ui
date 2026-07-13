@@ -1,11 +1,10 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { AddGroupMemberRequestBody, AddGroupMemberResponse } from './types';
+import { addGroupMember } from './api';
+import { TAddGroupMemberRequestBody, TAddGroupMemberResponse } from './types';
 
 interface UseAddGroupMemberProps {
   group_name: string;
-  onSuccess?: (data: AddGroupMemberResponse) => void;
+  onSuccess?: (data: TAddGroupMemberResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -15,12 +14,11 @@ export const useAddGroupMember = ({
   onError,
 }: UseAddGroupMemberProps) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (member: AddGroupMemberRequestBody) => {
-      return apiClient.post(API_CONFIG.groups.groupMembers, {
+    mutationFn: (member: TAddGroupMemberRequestBody) =>
+      addGroupMember({
         body: member,
         pathParams: { name: group_name },
-      });
-    },
+      }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

@@ -1,11 +1,10 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { fetchEngineStatus } from './api';
 
 export const useFetchEngineStatus = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['engineStatus'],
-    queryFn: () => apiClient.get(API_CONFIG.hunts.engineStatus),
+    queryFn: () => fetchEngineStatus(),
   });
 
   return { data, isLoading, error };

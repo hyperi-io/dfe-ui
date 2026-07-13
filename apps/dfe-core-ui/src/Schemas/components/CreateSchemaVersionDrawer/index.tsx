@@ -13,7 +13,7 @@ import { cn } from '@/core/utils/style';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
-import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconLock, IconPlus } from '@repo/dfe-icons';
 import { Button, notification, Spin } from 'antd';
 import { useMemo, useState } from 'react';
@@ -29,7 +29,7 @@ interface CreateSchemaVersionDrawerProps {
     trigger?: string;
   };
   disabled?: boolean;
-  schema?: MetaSchemaDetailResponse;
+  schema?: TMetaSchemaDetailResponse;
 }
 
 export const CreateSchemaVersionDrawerBase = ({

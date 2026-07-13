@@ -1,10 +1,32 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchOrganisations } from '@/core/hooks/useFetchOrganisations';
+import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { Select, SelectProps } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+
+const SCROLL_LOAD_THRESHOLD = 4;
 
 export const OrganisationSelect = ({ ...props }: SelectProps) => {
-  const { data: organisations, isLoading, error } = useFetchOrganisations();
+  const [search, setSearch] = useState('');
+  const {
+    data: { items: organisations = [] },
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useFetchInfiniteFilteredOrganisations({ search });
+
+  const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    const isNearBottom =
+      scrollTop + clientHeight >= scrollHeight - SCROLL_LOAD_THRESHOLD;
+
+    if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
+
   const options = useMemo(() => {
     return (
       organisations?.map((organisation) => ({
@@ -22,6 +44,10 @@ export const OrganisationSelect = ({ ...props }: SelectProps) => {
           options={options}
           loading={isLoading}
           disabled={isLoading || !!error}
+          showSearch={{
+            onSearch: setSearch,
+          }}
+          onPopupScroll={handlePopupScroll}
         />
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>

@@ -3,14 +3,14 @@ import { DeleteGroupModal } from '@/Settings/components/GroupManagement/DeleteGr
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
-import { Group } from '@/Settings/hooks/useFetchGroups/types';
+import { TGroupsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
 import { TAG_LIMIT, TagList } from './TagList';
 
 export const GroupCard = ({
   group,
   refetch,
 }: {
-  group: Group;
+  group: TGroupsItemSummary;
   refetch: () => void;
 }) => {
   return (
@@ -37,7 +37,12 @@ export const GroupCard = ({
           ]}
         />
 
-        <h3 className="font-medium">{group.name}</h3>
+        <h3 className="flex items-center gap-2">
+          <span className="font-medium">{group.name}</span>{' '}
+          <p className="text-xs bg-foreground/50 dark:bg-dark-foreground/50 text-white rounded-full px-2 py-0.5 whitespace-nowrap">
+            scope: {group.scope}
+          </p>
+        </h3>
         <p className="text-sm text-foreground/50 dark:text-dark-foreground/50">
           {group.description || 'No description'}
         </p>

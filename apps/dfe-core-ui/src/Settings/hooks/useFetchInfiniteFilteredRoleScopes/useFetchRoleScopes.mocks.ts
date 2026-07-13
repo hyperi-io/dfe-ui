@@ -1,9 +1,9 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { RoleScopesResponse } from './types';
+import { TRoleScopeItem } from './types';
 
-const ROLE_SCOPE_ITEM: RoleScopesResponse['scopes'][number] = 'string';
+const ROLE_SCOPE_ITEM: TRoleScopeItem = 'string';
 
 const TOTAL_ITEMS = 25;
 const ALL_SCOPES = Array.from({ length: TOTAL_ITEMS }, () => ROLE_SCOPE_ITEM);

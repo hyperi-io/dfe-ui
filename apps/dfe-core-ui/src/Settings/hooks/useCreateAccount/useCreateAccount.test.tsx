@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateAccount } from '.';
-import { AccountCreateRequestBody, AccountCreateResponse } from './types';
+import { TAccountCreateRequestBody, TAccountCreateResponse } from './types';
 import { server } from './useCreateAccount.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateAccount', () => {
-  const requestBody: AccountCreateRequestBody = {
+  const requestBody: TAccountCreateRequestBody = {
     username: 'string',
     password: 'string',
     groups: ['string'],
@@ -43,7 +43,7 @@ describe('.useCreateAccount', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: AccountCreateResponse = {
+      const expectedResponse: TAccountCreateResponse = {
         username: 'string',
         enabled: true,
         groups: ['string'],

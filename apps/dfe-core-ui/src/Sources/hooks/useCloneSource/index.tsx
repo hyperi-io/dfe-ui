@@ -1,15 +1,15 @@
 import { CloneSourceFormData } from '@/Sources/components/CloneSourceModal';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import {
-  SourceCreateRequestBody,
-  SourceCreateResponse,
+  TSourceCreateRequestBody,
+  TSourceCreateResponse,
 } from '@/Sources/hooks/useCreateSource/types';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useState } from 'react';
 
 interface UseCloneSourceProps {
-  onSuccess?: (source: SourceCreateResponse) => void;
+  onSuccess?: (source: TSourceCreateResponse) => void;
   onError?: (error: Error) => void;
   source_name: string;
   source_version: string | null;
@@ -22,7 +22,7 @@ const cloneSourceError = ({
 }: {
   source_version: string | null;
   isFetchingSourceDetail: boolean;
-  sourceDetailData: SourceVersionDetail | undefined;
+  sourceDetailData: TSourceVersionDetail | undefined;
 }) => {
   if (isFetchingSourceDetail) return;
   if (!source_version) return;
@@ -62,7 +62,7 @@ export const useCloneSource = ({
       return;
     }
 
-    const body: SourceCreateRequestBody = {
+    const body: TSourceCreateRequestBody = {
       source: values.source,
       display_name: values.display_name,
       enabled: values.enabled,

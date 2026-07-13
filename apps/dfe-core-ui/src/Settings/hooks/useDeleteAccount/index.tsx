@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { deleteAccount } from './api';
 
 export const useDeleteAccount = ({
   onSuccess,
@@ -10,11 +9,10 @@ export const useDeleteAccount = ({
   onError?: (error: Error) => void;
 }) => {
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (username: string) => {
-      return apiClient.delete(API_CONFIG.accounts.account, {
+    mutationFn: (username: string) =>
+      deleteAccount({
         pathParams: { username },
-      });
-    },
+      }),
     onSuccess: () => {
       onSuccess?.();
     },

@@ -1,3 +1,9 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { removeGroupMemberPath } from './api';
 
-export type RemoveGroupMemberResponse = components['schemas']['GroupResponse'];
+export type TRemoveGroupMemberResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof removeGroupMemberPath, 'delete'>
+>;

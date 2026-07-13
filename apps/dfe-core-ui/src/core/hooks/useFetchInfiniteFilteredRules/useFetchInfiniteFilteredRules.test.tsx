@@ -11,8 +11,8 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredRules } from '.';
-import { RuleListItem, RuleListRequestParams } from './types';
-import { server } from './useFetchInfiniteRules.mocks';
+import { RuleListRequestParams, TRuleListItem } from './types';
+import { server } from './useFetchInfiniteFilteredRules.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -80,7 +80,7 @@ describe('useFetchInfiniteFilteredRules', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: RuleListItem = {
+      const responseItem: TRuleListItem = {
         name: 'string',
         display_name: 'string',
         severity: 'string',

@@ -1,9 +1,16 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { createSchemaVersionPath } from './api';
 
-export type SchemaCreateVersionRequest =
-  components['schemas']['MetaSchemaAddVersionRequest'];
-export type SchemaCreateVersionResponse =
-  components['schemas']['MetaSchemaVersionWriteResponse'];
+export type TSchemaCreateVersionRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof createSchemaVersionPath, 'post'>
+>;
+export type TSchemaCreateVersionResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof createSchemaVersionPath, 'post'>
+>;
 
 // TODO: API response type is not aligned, fix this
 export interface SchemaCreateVersionValidationErrorResponse {

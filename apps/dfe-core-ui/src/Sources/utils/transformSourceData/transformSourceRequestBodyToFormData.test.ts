@@ -1,10 +1,10 @@
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceRequestBodyToFormData } from './transformSourceRequestBodyToFormData';
 
 describe('transformSourceRequestBodyToFormData', () => {
   test('when fetcher.auth is null, should return fetcher.auth.type: none', () => {
-    const source: SourceVersionDetail = {
+    const source: TSourceVersionDetail = {
       source: 'source',
       display_name: 'display name',
       enabled: false,
@@ -47,7 +47,7 @@ describe('transformSourceRequestBodyToFormData', () => {
   });
 
   test('when fetcher is an empty object, should return fetcher: null', () => {
-    const source: SourceVersionDetail = {
+    const source: TSourceVersionDetail = {
       source: 'source',
       display_name: 'display name',
       enabled: false,
@@ -65,7 +65,7 @@ describe('transformSourceRequestBodyToFormData', () => {
   });
 
   test('when version has no fetcher, should return fetcher: null', () => {
-    const source: SourceVersionDetail = {
+    const source: TSourceVersionDetail = {
       source: 'source',
       display_name: 'display name',
       enabled: false,

@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { updateOrganisationPath } from './api';
 
-export type OrganisationUpdateRequestBody =
-  components['schemas']['UpdateOrgRequest'];
-export type OrganisationUpdateResponse = components['schemas']['OrgResponse'];
+export type TOrganisationUpdateRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof updateOrganisationPath, 'put'>
+>;
+export type TOrganisationUpdateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof updateOrganisationPath, 'put'>
+>;

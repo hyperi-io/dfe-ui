@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateSource } from '.';
-import { SourceCreateRequestBody, SourceCreateResponse } from './types';
+import { TSourceCreateRequestBody, TSourceCreateResponse } from './types';
 import { server } from './useCreateSource.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateSource', () => {
-  const requestBody: SourceCreateRequestBody = {
+  const requestBody: TSourceCreateRequestBody = {
     source: 'source',
     display_name: 'string',
     description: 'string',
@@ -71,7 +71,7 @@ describe('.useCreateSource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourceCreateResponse = {
+      const expectedResponse: TSourceCreateResponse = {
         source: 'string',
         message: 'ok',
         current: 'string',

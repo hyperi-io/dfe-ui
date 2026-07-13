@@ -1,11 +1,11 @@
-import { SampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
+import { TSampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
 import { Card } from 'antd';
 import { RecursiveRowRenderer } from './RecursiveRowRenderer';
 
 export const SampleRowsCard = ({
   row,
 }: {
-  row: SampleRowsResponse['rows'][number];
+  row: TSampleRowsResponse['rows'][number];
 }) => {
   return (
     <Card size="small">

@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { deleteHunt } from './api';
 
 export const useDeleteHunt = ({
   onSuccess,
@@ -10,11 +9,7 @@ export const useDeleteHunt = ({
   onError?: (error: Error) => void;
 }) => {
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (name: string) => {
-      return apiClient.delete(API_CONFIG.hunts.hunt, {
-        pathParams: { name },
-      });
-    },
+    mutationFn: (name: string) => deleteHunt({ pathParams: { name } }),
     onSuccess: () => {
       onSuccess?.();
     },

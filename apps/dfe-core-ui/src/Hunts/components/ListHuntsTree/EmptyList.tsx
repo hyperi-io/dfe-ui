@@ -1,5 +1,5 @@
 import { CreateHuntDrawer } from '@/Hunts/components/CreateHuntDrawer';
-import { UseFetchInfiniteFilteredHuntsProps } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+import { UseFetchInfiniteFilteredHuntsProps } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';

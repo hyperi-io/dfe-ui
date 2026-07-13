@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { SourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
+import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceFormDataToRequestBody } from './transformSourceFormDataToRequestBody';
 
@@ -15,7 +15,7 @@ describe('transformSourceFormDataToRequestBody', () => {
 
     const result = transformSourceFormDataToRequestBody(source);
 
-    const expectedResult: SourceUpdateRequestBody = {
+    const expectedResult: TSourceUpdateRequestBody = {
       source: 'source',
       display_name: 'display name',
       enabled: true,
@@ -42,7 +42,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     };
 
     const result = transformSourceFormDataToRequestBody(source);
-    const expectedResult: SourceUpdateRequestBody = {
+    const expectedResult: TSourceUpdateRequestBody = {
       source: 'source',
       display_name: 'display name',
       enabled: true,

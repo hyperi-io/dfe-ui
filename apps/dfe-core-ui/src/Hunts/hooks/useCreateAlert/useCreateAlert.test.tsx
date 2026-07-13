@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateAlert } from '.';
-import { AlertCreateRequest, AlertCreateResponse } from './types';
+import { TAlertCreateRequest, TAlertCreateResponse } from './types';
 import { server } from './useCreateAlert.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateAlert', () => {
-  const requestBody: AlertCreateRequest = {
+  const requestBody: TAlertCreateRequest = {
     name: 'string',
     url: 'string',
     description: 'string',
@@ -49,7 +49,7 @@ describe('.useCreateAlert', () => {
         enabled: requestBody.enabled,
       });
 
-      const expectedResponse: AlertCreateResponse = {
+      const expectedResponse: TAlertCreateResponse = {
         name: 'string',
         url: 'string',
         description: 'string',

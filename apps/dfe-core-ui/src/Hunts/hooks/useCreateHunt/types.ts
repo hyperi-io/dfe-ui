@@ -1,4 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { createHuntPath } from './api';
 
-export type HuntCreateRequest = components['schemas']['HuntCreateRequest'];
-export type HuntCreateResponse = components['schemas']['HuntDetailResponse'];
+export type THuntCreateRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof createHuntPath, 'post'>
+>;
+export type THuntCreateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof createHuntPath, 'post'>
+>;

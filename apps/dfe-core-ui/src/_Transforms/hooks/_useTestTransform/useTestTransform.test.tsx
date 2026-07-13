@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useTestTransform } from '.';
-import { TestTransformRequest, TestTransformResponse } from './types';
+import { TTestTransformRequest, TTestTransformResponse } from './types';
 import { server } from './useTestTransform.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useTestTransform', () => {
-  const requestBody: TestTransformRequest = {
+  const requestBody: TTestTransformRequest = {
     wasm_base64: 'string',
     records: [
       {
@@ -53,7 +53,7 @@ describe('.useTestTransform', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: TestTransformResponse = {
+      const expectedResponse: TTestTransformResponse = {
         emitted: [
           {
             key: 'string',

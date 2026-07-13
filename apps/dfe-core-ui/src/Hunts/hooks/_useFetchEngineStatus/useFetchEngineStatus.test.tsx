@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchEngineStatus } from '.';
-import { HuntEngineStatus } from './types';
+import { THuntEngineStatus } from './types';
 import { server } from './useFetchEngineStatus.mocks';
 
 beforeAll(() =>
@@ -20,7 +20,7 @@ describe('.useFetchEngineStatus', () => {
     test('should return account detail', async () => {
       const { result } = renderHook(() => useFetchEngineStatus(), { wrapper });
 
-      const response: HuntEngineStatus = {
+      const response: THuntEngineStatus = {
         running: true,
         hunt_count: 1,
         scheduling_mode: 'string',

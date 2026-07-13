@@ -1,5 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { AlertListResponseItem } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
+import { TAlertListResponseItem } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ const dataListTermStyle =
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
-export const AlertCard = ({ alert }: { alert: AlertListResponseItem }) => {
+export const AlertCard = ({ alert }: { alert: TAlertListResponseItem }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   return (

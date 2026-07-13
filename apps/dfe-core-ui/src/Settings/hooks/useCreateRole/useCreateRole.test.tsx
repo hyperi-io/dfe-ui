@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateRole } from '.';
-import { RoleCreateRequest, RoleCreateResponse } from './types';
+import { TRoleCreateRequest, TRoleCreateResponse } from './types';
 import { server } from './useCreateRole.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateRole', () => {
-  const requestBody: RoleCreateRequest = {
+  const requestBody: TRoleCreateRequest = {
     name: 'string',
     description: 'string',
     permissions: ['string'],
@@ -48,7 +48,7 @@ describe('.useCreateRole', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: RoleCreateResponse = {
+      const expectedResponse: TRoleCreateResponse = {
         name: 'string',
         description: 'string',
         permissions: ['string'],

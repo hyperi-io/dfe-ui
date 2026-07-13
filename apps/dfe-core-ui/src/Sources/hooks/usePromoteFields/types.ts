@@ -1,5 +1,15 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { promoteFieldsPath } from './api';
 
-export type PromoteFieldRequest = components['schemas']['PromoteFieldRequest'];
-export type PromoteFieldResponse =
-  components['schemas']['PromoteFieldResponse'];
+export type TPromoteFieldRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof promoteFieldsPath, 'post'>
+> & {
+  dry_run?: boolean;
+};
+export type TPromoteFieldResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof promoteFieldsPath, 'post'>
+>;

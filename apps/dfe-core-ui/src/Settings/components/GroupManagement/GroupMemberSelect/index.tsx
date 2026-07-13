@@ -1,24 +1,39 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchAccounts } from '@/Settings/hooks/useFetchAccounts';
+import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 
+const SCROLL_LOAD_THRESHOLD = 4;
+
 export const GroupMemberSelect = (props: SelectProps) => {
   const [search, setSearch] = useState('');
-  const { data: accounts = [], isLoading, error } = useFetchAccounts();
+  const {
+    data: { items: accounts = [] },
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isLoading,
+    error,
+  } = useFetchInfiniteFilteredAccounts({ search });
 
   const options = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return accounts
-      .filter(
-        (account) => !query || account.username.toLowerCase().includes(query),
-      )
-      .map((account) => ({
-        label: account.username,
-        value: account.username,
-      }));
-  }, [accounts, search]);
+    return accounts.map((account) => ({
+      label: account.username,
+      value: account.username,
+    }));
+  }, [accounts]);
+
+  const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    const isNearBottom =
+      scrollTop + clientHeight >= scrollHeight - SCROLL_LOAD_THRESHOLD;
+
+    if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  };
 
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_read}>
@@ -37,6 +52,7 @@ export const GroupMemberSelect = (props: SelectProps) => {
             onSelect={() => {
               setSearch('');
             }}
+            onPopupScroll={handlePopupScroll}
             {...props}
           />
           {error && <div className="text-error text-sm">{error.message}</div>}

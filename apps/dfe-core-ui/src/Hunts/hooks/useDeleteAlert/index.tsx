@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
+import { deleteAlert } from './api';
 
 export const useDeleteAlert = ({
   onSuccess,
@@ -11,7 +10,7 @@ export const useDeleteAlert = ({
 }) => {
   const { mutate, isPending, error } = useMutation({
     mutationFn: (name: string) =>
-      apiClient.delete(API_CONFIG.alerts.destination, {
+      deleteAlert({
         pathParams: { name },
       }),
     onSuccess: () => {

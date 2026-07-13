@@ -1,23 +1,19 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import {
-  ElasticConverterRequest,
-  ElasticConverterResponse,
-} from './useElasticConvert';
+import { elasticConvert } from './api';
+import { ElasticConverterFormData, TElasticConvertResponse } from './types';
 
 export const useElasticConvert = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: ElasticConverterResponse) => void;
+  onSuccess?: (data: TElasticConvertResponse) => void;
   onError?: (error: Error) => void;
 } = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: async (payload: ElasticConverterRequest) => {
+    mutationFn: async (payload: ElasticConverterFormData) => {
       const formData = new FormData();
       formData.append('file', payload.file);
-      const response = await apiClient.post(API_CONFIG.schemas.elasticConvert, {
+      const response = await elasticConvert({
         body: formData,
       });
 

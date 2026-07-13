@@ -1,13 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import { describe, expect, test } from 'vitest';
 import { getInitialSourceType } from './helpers';
 
-const MATCH: components['schemas']['SourceMatch'] = {
+const MATCH: TSourceCreateRequestBody['match'] = {
   field: 'field',
   value: 'value',
   operator: 'equals',
 };
-const FETCHER: components['schemas']['SourceFetcher'] = {
+const FETCHER: TSourceCreateRequestBody['fetcher'] = {
   source_type: 'source_type',
   base_url: 'base_url',
   auth: null,

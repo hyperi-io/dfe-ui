@@ -1,5 +1,5 @@
 import { useDeleteRule } from '@/Rules/hooks/useDeleteRule';
-import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -8,7 +8,7 @@ import { Button, ButtonProps, Modal } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteRuleModalProps {
-  rule: RuleDetail;
+  rule: TRuleDetail;
   onSuccess?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
 }

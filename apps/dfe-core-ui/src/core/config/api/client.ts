@@ -1,61 +1,10 @@
 import type { paths } from '@repo/dfe-engine-types';
-
-type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
-
-/** Extract the operation type for a path and method (when the endpoint exists). */
-type OperationFor<Path extends keyof paths, Method extends HttpMethod> =
-  paths[Path] extends Record<Method, infer Op> ? Op : never;
-
-/** Success response body: 200 or 201 application/json. */
-type SuccessResponseBody<Op> = Op extends {
-  responses: {
-    200: { content: { 'application/json': infer R } };
-  };
-}
-  ? R
-  : Op extends {
-        responses: {
-          201: { content: { 'application/json': infer R } };
-        };
-      }
-    ? R
-    : never;
-
-/** Request body when present (JSON or multipart; prefer FormData for multipart endpoints). */
-type RequestBody<Op> = Op extends {
-  requestBody: { content: { 'application/json': infer B } };
-}
-  ? B
-  : Op extends {
-        requestBody: { content: { 'multipart/form-data': infer B } };
-      }
-    ? B | FormData
-    : undefined;
-
-/** Path parameters when present. */
-type PathParams<Op> = Op extends { parameters: { path: infer P } }
-  ? P
-  : undefined;
-
-/** Query parameters when present. */
-type QueryParams<Op> = Op extends { parameters: { query?: infer Q } }
-  ? Q extends Record<string, unknown>
-    ? Q
-    : undefined
-  : undefined;
-
-/** Options for a request that has path params. */
-type RequestOptions<Path extends keyof paths, Method extends HttpMethod> =
-  OperationFor<Path, Method> extends infer Op
-    ? Op extends never
-      ? { pathParams?: undefined; queryParams?: undefined; body?: undefined }
-      : {
-          pathParams?: PathParams<Op>;
-          queryParams?: QueryParams<Op>;
-          body?: RequestBody<Op>;
-          signal?: AbortSignal;
-        }
-    : never;
+import type {
+  DfeClientHttpMethod,
+  DfeClientOperationFor,
+  DfeClientRequestOptions,
+  DfeClientSuccessResponseBody,
+} from './client.types';
 
 /** Replaces {param} segments in path with values from params. */
 function applyPathParams(
@@ -109,11 +58,16 @@ export function createApiClient(config: ApiClientConfig) {
     fetch: customFetch,
   } = config;
 
-  async function request<Path extends keyof paths, Method extends HttpMethod>(
+  async function request<
+    Path extends keyof paths,
+    Method extends DfeClientHttpMethod,
+  >(
     path: Path,
     method: Method,
-    options?: RequestOptions<Path, Method>,
-  ): Promise<SuccessResponseBody<OperationFor<Path, Method>>> {
+    options?: DfeClientRequestOptions<Path, Method>,
+  ): Promise<
+    DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
+  > {
     const { pathParams, queryParams, body, signal } = options ?? {};
     if (signal?.aborted) {
       throw new DOMException('Request was aborted', 'AbortError');
@@ -159,7 +113,7 @@ export function createApiClient(config: ApiClientConfig) {
     // 204 No Content - no body to parse
     if (res.status === 204) {
       return undefined as unknown as Promise<
-        SuccessResponseBody<OperationFor<Path, Method>>
+        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
       >;
     }
 
@@ -187,19 +141,19 @@ export function createApiClient(config: ApiClientConfig) {
     // 204 No Content has an empty body - do not attempt to parse JSON
     if (res.status === 204) {
       return undefined as unknown as Promise<
-        SuccessResponseBody<OperationFor<Path, Method>>
+        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
       >;
     }
 
     const contentType = res.headers.get('Content-Type');
     if (contentType?.includes('application/json')) {
       return res.json() as Promise<
-        SuccessResponseBody<OperationFor<Path, Method>>
+        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
       >;
     }
 
     return undefined as unknown as Promise<
-      SuccessResponseBody<OperationFor<Path, Method>>
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
     >;
   }
 
@@ -208,36 +162,46 @@ export function createApiClient(config: ApiClientConfig) {
 
     get<Path extends keyof paths>(
       path: Path,
-      options?: RequestOptions<Path, 'get'>,
-    ): Promise<SuccessResponseBody<OperationFor<Path, 'get'>>> {
+      options?: DfeClientRequestOptions<Path, 'get'>,
+    ): Promise<
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'get'>>
+    > {
       return request(path, 'get', options);
     },
 
     post<Path extends keyof paths>(
       path: Path,
-      options?: RequestOptions<Path, 'post'>,
-    ): Promise<SuccessResponseBody<OperationFor<Path, 'post'>>> {
+      options?: DfeClientRequestOptions<Path, 'post'>,
+    ): Promise<
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'post'>>
+    > {
       return request(path, 'post', options);
     },
 
     put<Path extends keyof paths>(
       path: Path,
-      options?: RequestOptions<Path, 'put'>,
-    ): Promise<SuccessResponseBody<OperationFor<Path, 'put'>>> {
+      options?: DfeClientRequestOptions<Path, 'put'>,
+    ): Promise<
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'put'>>
+    > {
       return request(path, 'put', options);
     },
 
     delete<Path extends keyof paths>(
       path: Path,
-      options?: RequestOptions<Path, 'delete'>,
-    ): Promise<SuccessResponseBody<OperationFor<Path, 'delete'>>> {
+      options?: DfeClientRequestOptions<Path, 'delete'>,
+    ): Promise<
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'delete'>>
+    > {
       return request(path, 'delete', options);
     },
 
     patch<Path extends keyof paths>(
       path: Path,
-      options?: RequestOptions<Path, 'patch'>,
-    ): Promise<SuccessResponseBody<OperationFor<Path, 'patch'>>> {
+      options?: DfeClientRequestOptions<Path, 'patch'>,
+    ): Promise<
+      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'patch'>>
+    > {
       return request(path, 'patch', options);
     },
   };

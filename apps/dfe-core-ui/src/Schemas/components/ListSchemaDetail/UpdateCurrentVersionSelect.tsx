@@ -1,12 +1,12 @@
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { useUpdateSchema } from '@/Schemas/hooks/useUpdateSchema';
-import { MetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
+import { TMetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
 
 interface UpdateCurrentVersionSelectProps {
   versions: { label: string; value: string }[];
   path: string;
   currentVersion: string;
-  onSuccess?: (values: MetaSchemaUpdateResponse) => void;
+  onSuccess?: (values: TMetaSchemaUpdateResponse) => void;
   editable?: boolean;
 }
 export const UpdateCurrentVersionSelect = ({

@@ -1,5 +1,6 @@
+import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
-import { components } from '@repo/dfe-engine-types';
+
 import z from 'zod';
 
 const AUTH_TYPES = ['none', 'oauth2', 'api_key'] as const;
@@ -10,7 +11,7 @@ export const MATCH_OPERATORS = [
   'starts_with',
   'ends_with',
   'not_equals',
-] as components['schemas']['SourceMatch']['operator'][];
+] as TSourceCreateRequestBody['match']['operator'][];
 
 const sourceDetailsTabSchema = {
   source: sourceNameValidator,

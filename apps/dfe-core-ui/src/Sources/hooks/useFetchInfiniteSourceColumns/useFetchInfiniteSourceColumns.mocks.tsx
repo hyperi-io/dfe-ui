@@ -1,11 +1,11 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { UseFetchInfiniteSourceColumnsItem } from './types';
+import { TSourceColumnItem } from './types';
 
 export const MOCK_SOURCE_NAME = 'source';
 
-const SOURCE_COLUMN_ITEM: UseFetchInfiniteSourceColumnsItem = {
+const SOURCE_COLUMN_ITEM: TSourceColumnItem = {
   name: 'string',
   type: 'string',
   use_case: 'string',

@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useRefreshToken } from '.';
-import { RefreshTokenResponse } from './types';
+import { TRefreshTokenResponse } from './types';
 import { server } from './useRefreshToken.mocks';
 
 const persistRefreshedSessionMock = vi.fn().mockResolvedValue(undefined);
@@ -49,7 +49,7 @@ describe('.useRefreshToken', () => {
 
       result.current.mutate();
 
-      const expectedResponse: RefreshTokenResponse = {
+      const expectedResponse: TRefreshTokenResponse = {
         access_token: 'refreshed-token',
         token_type: 'bearer',
         expires_in: 3600,

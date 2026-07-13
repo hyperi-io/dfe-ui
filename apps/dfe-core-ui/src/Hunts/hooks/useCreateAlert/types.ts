@@ -1,5 +1,14 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { createAlertPath } from './api';
 
-export type AlertCreateRequest = components['schemas']['AlertDestination'];
+export type TAlertCreateRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof createAlertPath, 'post'>
+>;
 
-export type AlertCreateResponse = components['schemas']['AlertDestination'];
+export type TAlertCreateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof createAlertPath, 'post'>
+>;

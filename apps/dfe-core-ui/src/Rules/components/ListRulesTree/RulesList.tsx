@@ -1,5 +1,5 @@
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { RuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -53,7 +53,7 @@ export const RulesList = ({ className }: { className?: string }) => {
         className,
       )}
     >
-      {rules.map((rule: RuleListItem) => {
+      {rules.map((rule: TRuleListItem) => {
         const isSelected = selectedRuleName === rule.name;
         return (
           <li key={rule.name} className="w-full">

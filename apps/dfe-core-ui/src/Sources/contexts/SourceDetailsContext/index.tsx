@@ -1,13 +1,13 @@
 'use client';
 
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 export interface SourceDetailsContextValue {
-  sourceDetail: SourceVersionDetail | undefined;
+  sourceDetail: TSourceVersionDetail | undefined;
   isLoadingSourceDetail: boolean;
   errorSourceDetail: Error | null | undefined;
   isMetaSchemaDefined: boolean;

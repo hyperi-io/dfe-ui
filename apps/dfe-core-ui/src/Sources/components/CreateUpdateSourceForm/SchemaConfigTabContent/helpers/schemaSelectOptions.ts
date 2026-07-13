@@ -1,12 +1,12 @@
-import { components } from '@repo/dfe-engine-types';
+import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
+import { TSchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import type { SelectProps } from 'antd';
 
-type SchemaSummaryObject = components['schemas']['SchemaSummaryObject'];
 export type SchemaSelectOption = NonNullable<SelectProps['options']>[number];
 
 type TreeBuilderNode = {
   subfolders: Map<string, TreeBuilderNode>;
-  schemas: SchemaSummaryObject[];
+  schemas: TSchemaSummary[];
 };
 
 const createBuilderNode = (): TreeBuilderNode => ({
@@ -26,10 +26,7 @@ const getOrCreateSubfolder = (
   return child;
 };
 
-const addSchemaToBuilder = (
-  root: TreeBuilderNode,
-  schema: SchemaSummaryObject,
-) => {
+const addSchemaToBuilder = (root: TreeBuilderNode, schema: TSchemaSummary) => {
   const segments = schema.name.split('/').filter(Boolean);
   if (segments.length === 0) {
     return;
@@ -42,7 +39,7 @@ const addSchemaToBuilder = (
   node.schemas.push(schema);
 };
 
-const schemaToOption = (schema: SchemaSummaryObject): SchemaSelectOption => ({
+const schemaToOption = (schema: TSchemaSummary): SchemaSelectOption => ({
   label: schema.name.split('/').pop() ?? schema.name,
   value: schema.name,
 });
@@ -101,7 +98,7 @@ const builderToGroupedSelectOptions = (
 
 /** Groups flat schema summaries into Select option groups (non-selectable labels). */
 export const schemasToGroupedSelectOptions = (
-  schemas: SchemaSummaryObject[],
+  schemas: TSchemaSummary[],
 ): SchemaSelectOption[] => {
   const root = createBuilderNode();
 
@@ -121,7 +118,7 @@ export const isSelectableSchemaOptionValue = (value: string) =>
 
 /** Version keys from a create/update meta-schema response for the version Select. */
 export const versionsFromMetaSchemaOutput = (
-  response: Pick<components['schemas']['MetaSchema'], 'current' | 'versions'>,
+  response: Pick<TCreateSchemaResponse, 'current' | 'versions'>,
 ): string[] => {
   const keys = Object.keys(response.versions ?? {});
   if (keys.length > 0) {

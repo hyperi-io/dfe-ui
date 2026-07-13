@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { usePlanSource } from '.';
-import { SourcePlanRequest, SourcePlanResponse } from './types';
+import { SourcePlanRequest, TSourcePlanResponse } from './types';
 import { server } from './usePlanSource.mocks';
 
 beforeAll(() =>
@@ -46,7 +46,7 @@ describe('.usePlanSource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourcePlanResponse = {
+      const expectedResponse: TSourcePlanResponse = {
         source_name: 'string',
         version: 'string',
         planned_at: 'string',
