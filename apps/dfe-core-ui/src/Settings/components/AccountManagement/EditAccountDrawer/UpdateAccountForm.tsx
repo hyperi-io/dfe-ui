@@ -4,7 +4,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
 import { useFetchAccountDetail } from '@/Settings/hooks/useFetchAccountDetail';
-import { AccountUpdateRequestBody } from '@/Settings/hooks/useUpdateAccount/types';
+import { TAccountUpdateRequestBody } from '@/Settings/hooks/useUpdateAccount/types';
 import { Button, Spin } from 'antd';
 import z from 'zod';
 
@@ -21,7 +21,7 @@ export const UpdateAccountForm = ({
   isPending,
 }: {
   username: string;
-  onFinish: (values: AccountUpdateRequestBody) => void;
+  onFinish: (values: TAccountUpdateRequestBody) => void;
   error: Error | null;
   isPending: boolean;
 }) => {

@@ -14,8 +14,8 @@ import {
 } from 'vitest';
 import { useCreateSchemaVersion } from '.';
 import {
-  SchemaCreateVersionRequest,
-  SchemaCreateVersionResponse,
+  TSchemaCreateVersionRequest,
+  TSchemaCreateVersionResponse,
 } from './types';
 import { server } from './useCreateSchemaVersion.mocks';
 
@@ -30,7 +30,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateSchemaVersion', () => {
-  const requestBody: SchemaCreateVersionRequest = {
+  const requestBody: TSchemaCreateVersionRequest = {
     type: 'model',
     columns: [
       {
@@ -58,7 +58,7 @@ describe('.useCreateSchemaVersion', () => {
         parameters: { schema_path: 'path' },
       });
 
-      const expectedResponse: SchemaCreateVersionResponse = {
+      const expectedResponse: TSchemaCreateVersionResponse = {
         path: 'string',
         current: 'string',
         versions: ['string'],

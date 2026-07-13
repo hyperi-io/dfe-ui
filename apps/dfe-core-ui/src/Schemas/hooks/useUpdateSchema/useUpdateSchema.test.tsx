@@ -14,8 +14,8 @@ import {
 import { useUpdateSchema } from '.';
 import {
   MetaSchemaUpdateParameters,
-  MetaSchemaUpdateRequestBody,
-  MetaSchemaUpdateResponse,
+  TMetaSchemaUpdateRequestBody,
+  TMetaSchemaUpdateResponse,
 } from './types';
 import { server } from './useUpdateSchema.mocks';
 
@@ -50,7 +50,7 @@ describe('.useUpdateSchema', () => {
         parameters,
       });
 
-      const expectedResponse: MetaSchemaUpdateResponse = {
+      const expectedResponse: TMetaSchemaUpdateResponse = {
         path: 'string',
         current: 'string',
         versions: ['string'],
@@ -91,7 +91,7 @@ describe('.useUpdateSchema', () => {
         parameters,
       });
 
-      const expectedResponse: MetaSchemaUpdateResponse = {
+      const expectedResponse: TMetaSchemaUpdateResponse = {
         path: 'string',
         current: 'string',
         versions: ['string'],
@@ -118,7 +118,7 @@ describe('.useUpdateSchema', () => {
   });
 
   describe('onError', () => {
-    const requestBody: MetaSchemaUpdateRequestBody = {
+    const requestBody: TMetaSchemaUpdateRequestBody = {
       summary: 'string',
     };
 

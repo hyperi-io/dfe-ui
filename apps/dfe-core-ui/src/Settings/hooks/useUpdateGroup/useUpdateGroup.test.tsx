@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateGroup } from '.';
-import { GroupUpdateRequestBody, GroupUpdateResponse } from './types';
+import { TGroupUpdateRequestBody, TGroupUpdateResponse } from './types';
 import { server } from './useUpdateGroup.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateGroup', () => {
-  const requestBody: GroupUpdateRequestBody = {
+  const requestBody: TGroupUpdateRequestBody = {
     description: 'string',
     roles: ['string'],
   };
@@ -47,11 +47,12 @@ describe('.useUpdateGroup', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: GroupUpdateResponse = {
+      const expectedResponse: TGroupUpdateResponse = {
         name: 'group_name',
         description: 'string',
         roles: ['string'],
         members: ['string'],
+        scope: 'string',
       };
 
       await waitFor(() => {

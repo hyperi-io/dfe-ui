@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateFieldMap } from '.';
-import { FieldMap } from './types';
+import { TCreateFieldMapRequest, TCreateFieldMapResponse } from './types';
 import { server } from './useCreateFieldMap.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateFieldMap', () => {
-  const requestBody: FieldMap = {
+  const requestBody: TCreateFieldMapRequest = {
     standard: 'string',
     source: 'string',
     version: 'string',
@@ -50,7 +50,7 @@ describe('.useCreateFieldMap', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: FieldMap = {
+      const expectedResponse: TCreateFieldMapResponse = {
         standard: 'string',
         source: 'string',
         version: 'string',

@@ -1,18 +1,18 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';
 import { UpdateRuleForm } from './UpdateRuleForm';
 
 interface UpdateRuleDrawerProps {
-  rule: RuleDetail;
+  rule: TRuleDetail;
   open?: boolean;
   onClose?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
-  onSuccess?: (rule: RuleUpdateResponse) => void;
+  onSuccess?: (rule: TRuleUpdateResponse) => void;
 }
 
 export const UpdateRuleDrawer = ({
@@ -31,7 +31,7 @@ export const UpdateRuleDrawer = ({
     onClose?.();
   };
 
-  const handleOnSuccess = (response: RuleUpdateResponse) => {
+  const handleOnSuccess = (response: TRuleUpdateResponse) => {
     setIsDrawerVisible(false);
     onClose?.();
     onSuccess?.(response);

@@ -6,7 +6,7 @@ import {
   ListSchemasProvider,
   useListSchemasContext,
 } from '@/core/contexts/ListSchemasContext';
-import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { cn } from '@/core/utils/style';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -35,7 +35,7 @@ export const SchemasToolbarBase = () => {
 
   const { setSelectedSchema } = useListSchemasContext();
 
-  const handleSuccess = (response: SchemaCreateResponse) => {
+  const handleSuccess = (response: TCreateSchemaResponse) => {
     setSelectedSchema({
       schema_path: response.path ?? '',
       schema_version: response.current,

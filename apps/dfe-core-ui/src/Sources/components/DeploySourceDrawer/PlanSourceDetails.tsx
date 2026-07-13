@@ -1,7 +1,7 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { SourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
+import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
 import { IconCircleCheck, IconCircleX, IconRocket } from '@repo/dfe-icons';
 import { Button, Spin } from 'antd';
 
@@ -13,7 +13,7 @@ export const PlanSourceDetails = ({
   version,
   onDeploy,
 }: {
-  data: SourcePlanResponse | undefined;
+  data: TSourcePlanResponse | undefined;
   isPending: boolean;
   error: Error | null;
   source_name: string;

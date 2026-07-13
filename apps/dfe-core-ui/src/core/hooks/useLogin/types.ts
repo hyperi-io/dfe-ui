@@ -1,5 +1,14 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { loginPath } from './api';
 
-export type LoginResponse = components['schemas']['TokenResponse'];
+export type TLoginResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof loginPath, 'post'>
+>;
 
-export type LoginRequest = components['schemas']['LoginRequest'];
+export type TLoginRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof loginPath, 'post'>
+>;

@@ -25,8 +25,8 @@ export const transformDataToUploadedSchemaRow = (
   source: UploadedSchemaImportSource,
 ): UploadedSchemaRow[] =>
   data.map((value) => {
-    const name = typeof value.name === 'string' ? value.name : undefined;
-    const type = typeof value.type === 'string' ? value.type : undefined;
+    const name = typeof value.name === 'string' ? value.name : '';
+    const type = typeof value.type === 'string' ? value.type : '';
     const attribute = Array.isArray(value.attribute)
       ? value.attribute
       : undefined;

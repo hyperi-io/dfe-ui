@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { usePromoteFields } from '.';
-import { PromoteFieldRequest, PromoteFieldResponse } from './types';
+import { TPromoteFieldRequest, TPromoteFieldResponse } from './types';
 import { server } from './usePromoteFields.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.usePromoteFields', () => {
-  const requestBody: PromoteFieldRequest = {
+  const requestBody: TPromoteFieldRequest = {
     json_path: ['string'],
     atomic: false,
     column_name: 'string',
@@ -51,7 +51,7 @@ describe('.usePromoteFields', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: PromoteFieldResponse = {
+      const expectedResponse: TPromoteFieldResponse = {
         source_name: 'source',
         schema_version: 'string',
         results: [

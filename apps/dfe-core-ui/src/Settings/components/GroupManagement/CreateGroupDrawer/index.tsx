@@ -4,6 +4,7 @@ import {
   CreateUpdateGroupForm,
   CreateUpdateGroupFormData,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
+import { createGroupTransformFormDataToRequest } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupFormDataToRequest';
 import { useCreateGroup } from '@/Settings/hooks/useCreateGroup';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -29,8 +30,7 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
   });
 
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
-    const { name, description, roles, members = [] } = values;
-    createGroup({ name, description, roles, members });
+    createGroup(createGroupTransformFormDataToRequest(values));
   };
 
   return (

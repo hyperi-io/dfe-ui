@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useLogin } from '.';
-import { LoginRequest } from './types';
+import { TLoginRequest } from './types';
 
 // Custom mocks needed for useLogin
 // These are mocked globally in vitest.setup.ts
@@ -39,7 +39,7 @@ describe('.useLogin', () => {
 
     await waitFor(() => {
       expect(result.current).toEqual({
-        mutate: expect.any(Function) as (data: LoginRequest) => Promise<void>,
+        mutate: expect.any(Function) as (data: TLoginRequest) => Promise<void>,
         isPending: false,
         error: null,
         reset: expect.any(Function),

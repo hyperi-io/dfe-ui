@@ -2,6 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchServiceDetail } from '.';
+import { TFetchServiceDetailResponse } from './types';
 import { server } from './useFetchServiceDetail.mocks';
 
 beforeAll(() =>
@@ -68,14 +69,14 @@ describe('.useFetchServiceDetail', () => {
         { wrapper },
       );
 
-      const response = {
+      const expectedResponse: TFetchServiceDetailResponse = {
         service: 'service',
         instance: 'instance',
-        updated_at: '2021-01-01T00:00:00Z',
+        config: {},
       };
       await waitFor(() => {
         expect(result.current).toEqual({
-          data: response,
+          data: expectedResponse,
           isLoading: false,
           error: null,
         });

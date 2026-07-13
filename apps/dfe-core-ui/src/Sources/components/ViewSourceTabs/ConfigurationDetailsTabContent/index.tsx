@@ -1,6 +1,6 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { cn } from '@/core/utils/style';
-import { SourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 
@@ -70,7 +70,7 @@ export const ConfigurationDetailsTabContent = ({
     mapping_standards,
     source_build,
   },
-}: SourceVersionDetail) => {
+}: TSourceVersionDetail) => {
   const hasSchema = schema?.meta_schema || header?.type;
   const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
   const hasMappingStandards =

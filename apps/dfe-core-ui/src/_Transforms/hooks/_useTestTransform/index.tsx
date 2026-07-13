@@ -1,18 +1,17 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { TestTransformRequest, TestTransformResponse } from './types';
+import { testTransform } from './api';
+import { TTestTransformRequest, TTestTransformResponse } from './types';
 
 export const useTestTransform = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: TestTransformResponse) => void;
+  onSuccess?: (data: TTestTransformResponse) => void;
   onError?: (error: Error) => void;
 } = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: async (transform: TestTransformRequest) =>
-      apiClient.post(API_CONFIG.transforms.test, { body: transform }),
+    mutationFn: async (transform: TTestTransformRequest) =>
+      testTransform(transform),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

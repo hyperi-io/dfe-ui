@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchRoleDetail } from '.';
-import { RoleDetail } from './types';
+import { TRoleDetail } from './types';
 import { server } from './useFetchRoleDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchRoleDetail', () => {
         { wrapper },
       );
 
-      const response: RoleDetail = {
+      const response: TRoleDetail = {
         name: 'string',
         description: 'string',
         permissions: ['string'],

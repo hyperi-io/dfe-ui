@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredFieldMaps } from '.';
-import { FieldMapSummary } from './types';
+import { TFieldMapSummary } from './types';
 import { server } from './useFetchInfiniteFilteredFieldMaps.mocks';
 
 class MockIntersectionObserver {
@@ -66,7 +66,7 @@ describe('useFetchInfiniteFilteredFieldMaps', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: FieldMapSummary = {
+      const responseItem: TFieldMapSummary = {
         standard: 'string',
         source: 'string',
         is_default: false,

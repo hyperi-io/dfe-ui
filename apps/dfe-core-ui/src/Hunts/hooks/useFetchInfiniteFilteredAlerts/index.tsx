@@ -1,8 +1,7 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
+import { fetchInfiniteFilteredAlerts } from './api';
 import { UseFetchInfiniteFilteredAlertsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -39,7 +38,7 @@ export const useFetchInfiniteFilteredAlerts = ({
   } = useInfiniteQuery({
     queryKey: ['alerts', debouncedSearch, hunt, sort_by, sort_order, per_page],
     queryFn: async ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.alerts.destinations, {
+      fetchInfiniteFilteredAlerts({
         queryParams: {
           search: debouncedSearch || undefined,
           hunt: hunt || undefined,

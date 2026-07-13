@@ -3,11 +3,13 @@ import {
   CreateUpdateGroupForm,
   CreateUpdateGroupFormData,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
+import { updateGroupTransformFormDataToRequest } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupFormDataToRequest';
+import { createUpdateGroupRequestToFormData } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupRequestToFormData';
 import { useFetchGroupDetail } from '@/Settings/hooks/useFetchGroupDetail';
-import { GroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
+import { TGroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
 import { Spin } from 'antd';
 
-export type UpdateGroupFormData = GroupUpdateRequestBody;
+export type UpdateGroupFormData = TGroupUpdateRequestBody;
 
 export const UpdateGroupForm = ({
   group_name,
@@ -27,11 +29,7 @@ export const UpdateGroupForm = ({
   } = useFetchGroupDetail({ group_name });
 
   const handleFinish = (values: CreateUpdateGroupFormData) => {
-    onFinish({
-      description: values.description,
-      roles: values.roles,
-      members: values.members ?? [],
-    });
+    onFinish(updateGroupTransformFormDataToRequest(values));
   };
 
   if (isFetchingGroupDetail) {
@@ -55,20 +53,19 @@ export const UpdateGroupForm = ({
     return null;
   }
 
+  const initialValues = createUpdateGroupRequestToFormData(groupDetailData);
+
   return (
     <CreateUpdateGroupForm
       name={`update-group-form-${group_name}`}
       onFinish={handleFinish}
       error={error}
       isPending={isPending}
-      initialValues={{
-        name: groupDetailData.name,
-        description: groupDetailData.description,
-        roles: groupDetailData.roles,
-        members: groupDetailData.members,
-      }}
+      initialValues={initialValues}
       disabledFields={{
         name: true,
+        scope: true,
+        organisation: true,
       }}
       buttonLabel="Update Group"
       showMembersField

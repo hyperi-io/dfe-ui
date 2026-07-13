@@ -1,7 +1,7 @@
 'use client';
 
 import { useFetchSampleRows } from '@/Sources/hooks/useFetchSampleRows';
-import { SampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
+import { TSampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
 import {
   createContext,
   useCallback,
@@ -17,7 +17,7 @@ export interface PromoteRowsContextValue {
   handleRemovePromoteField: (fieldPath: string) => void;
   handleClearFieldsToPromote: () => void;
   isFieldPromoted: (fieldPath: string) => boolean;
-  sampleRows: SampleRowsResponse | undefined;
+  sampleRows: TSampleRowsResponse | undefined;
   isLoadingSampleRows: boolean;
   errorSampleRows: Error | null;
   promotedOnSchemaFieldsSet: Set<string>;

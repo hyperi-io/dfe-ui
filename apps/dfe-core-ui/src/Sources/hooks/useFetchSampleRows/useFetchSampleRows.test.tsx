@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchSampleRows } from '.';
-import { SampleRowsResponse } from './types';
+import { TSampleRowsResponse } from './types';
 import { server } from './useFetchSampleRows.mocks';
 
 beforeAll(() =>
@@ -27,7 +27,7 @@ describe('.useFetchSampleRows', () => {
         { wrapper },
       );
 
-      const response: SampleRowsResponse = {
+      const response: TSampleRowsResponse = {
         source_name: 'source',
         table: 'string',
         match_field: 'string',

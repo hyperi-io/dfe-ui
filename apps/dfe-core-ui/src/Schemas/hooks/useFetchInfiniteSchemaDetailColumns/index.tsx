@@ -1,8 +1,7 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { fetchInfiniteSchemaDetailColumns } from './api';
 import {
   SchemaDetailColumnFilterField,
   UseFetchInfiniteFilteredSchemaDetailColumnsProps,
@@ -122,7 +121,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
       per_page,
     }),
     queryFn: async ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.schemas.schemaDetail, {
+      fetchInfiniteSchemaDetailColumns({
         pathParams: { schema_path: schema_path ?? '' },
         queryParams: {
           version: version ?? '',

@@ -1,8 +1,7 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
+import { fetchInfiniteFilteredSources } from './api';
 import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -59,7 +58,7 @@ export const useFetchInfiniteFilteredSources = ({
       per_page,
     ),
     queryFn: async ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.sources.default, {
+      fetchInfiniteFilteredSources({
         queryParams: {
           search: debouncedSearch || undefined,
           enabled,

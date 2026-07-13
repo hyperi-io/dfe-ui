@@ -3,21 +3,24 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchOrganisations } from '@/core/hooks/useFetchOrganisations';
+import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin } from 'antd';
+import { Input, Spin } from 'antd';
+import { useState } from 'react';
 import { OrganisationCard } from './OrganisationCard';
 
 export const OrganisationManagement = () => {
-  // const [search, setSearch] = useState('');
+  const [search, setSearch] = useState('');
   const {
-    data: organisations,
+    data: { items: organisations = [] },
+    isFetchingNextPage,
+    loadMoreRef,
     isLoading,
     error,
     refetch,
-  } = useFetchOrganisations();
+  } = useFetchInfiniteFilteredOrganisations({ search, per_page: 12 });
 
   return (
     <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
@@ -29,14 +32,16 @@ export const OrganisationManagement = () => {
       <SectionCard
         title="Manage existing organisations"
         description="Manage existing organisations and their configurations."
-        // rightTitleSlot={
-        //   <Input.Search
-        //     className="ml-auto w-60"
-        //     placeholder="Search organisations"
-        //     onChange={(e) => setSearch(e.target.value)}
-        //     value={search}
-        //   />
-        // }
+        rightTitleSlot={
+          <Input.Search
+            className="ml-auto w-60"
+            placeholder="Search organisations"
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            allowClear
+            aria-label="Search organisations"
+          />
+        }
       >
         <RbacProtected action={RbacProtected.rbacActions.org_read}>
           <RbacProtected.Unrestricted>
@@ -61,17 +66,22 @@ export const OrganisationManagement = () => {
               />
             )}
             {organisations && organisations?.length > 0 && (
-              <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {organisations?.map((organisation) => (
-                  <li key={organisation.name}>
-                    <OrganisationCard
-                      key={organisation.name}
-                      organisation={organisation}
-                      refetch={refetch}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+                <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {organisations?.map((organisation) => (
+                    <li key={organisation.name}>
+                      <OrganisationCard
+                        key={organisation.name}
+                        organisation={organisation}
+                        refetch={refetch}
+                      />
+                    </li>
+                  ))}
+                  <div ref={loadMoreRef} className="h-4 flex justify-center">
+                    {isFetchingNextPage && <Spin size="small" />}
+                  </div>
+                </ul>
+              </div>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>

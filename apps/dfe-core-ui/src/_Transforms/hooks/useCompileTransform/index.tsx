@@ -1,18 +1,18 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useMutation } from '@tanstack/react-query';
-import { CompileTransformRequest, CompileTransformResponse } from './types';
+import { compileTransform } from './api';
+import { TCompileTransformRequest, TCompileTransformResponse } from './types';
 
 export const useCompileTransform = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: CompileTransformResponse) => void;
+  onSuccess?: (data: TCompileTransformResponse) => void;
   onError?: (error: Error) => void;
 } = {}) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: async (transform: CompileTransformRequest) =>
-      apiClient.post(API_CONFIG.transforms.compile, { body: transform }),
+    mutationFn: async (transform: TCompileTransformRequest) =>
+      compileTransform(transform),
+
     onSuccess: (data) => {
       onSuccess?.(data);
     },

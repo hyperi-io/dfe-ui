@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { fetchGroupDetail } from './api';
 
 export const GROUP_DETAIL_QUERY_KEY = (group_name?: string | null) => [
   'group',
@@ -16,7 +15,7 @@ export const useFetchGroupDetail = ({
   const { data, isLoading, error } = useQuery({
     queryKey: GROUP_DETAIL_QUERY_KEY(group_name),
     queryFn: () =>
-      apiClient.get(API_CONFIG.groups.group, {
+      fetchGroupDetail({
         pathParams: { name: group_name ?? '' },
       }),
     enabled: isQueryEnabled,

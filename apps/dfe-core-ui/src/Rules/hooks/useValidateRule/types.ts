@@ -1,6 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { validateRulePath } from './api';
 
-export type SqlValidationRequest =
-  components['schemas']['SqlValidationRequest'];
-export type SqlValidationResponse =
-  components['schemas']['SqlValidationResponse'];
+export type TSqlValidationRequest = DfeClientRequestBody<
+  DfeClientOperationFor<typeof validateRulePath, 'post'>
+>;
+export type TSqlValidationResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof validateRulePath, 'post'>
+>;

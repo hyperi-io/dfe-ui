@@ -3,7 +3,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchJsonPaths } from '.';
-import { JsonPaths } from './types';
+import { TJsonPathsResponse } from './types';
 import { server } from './useFetchJsonPaths.mocks';
 
 beforeAll(() =>
@@ -27,7 +27,7 @@ describe('.useFetchSampleRows', () => {
         { wrapper },
       );
 
-      const response: JsonPaths = {
+      const response: TJsonPathsResponse = {
         source_name: 'source',
         table: 'string',
         json_column: 'string',

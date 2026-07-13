@@ -1,5 +1,5 @@
 import { useDeleteHunt } from '@/Hunts/hooks/useDeleteHunt';
-import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -8,7 +8,7 @@ import { Button, ButtonProps, Modal, Tooltip } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteHuntModalProps {
-  hunt: HuntDetailResponse;
+  hunt: THuntDetailResponse;
   onSuccess?: () => void;
   trigger?: React.ReactElement<ButtonProps>;
 }

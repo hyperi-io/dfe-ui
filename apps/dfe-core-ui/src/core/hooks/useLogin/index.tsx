@@ -1,7 +1,7 @@
-import { components } from '@repo/dfe-engine-types';
 import { useMutation } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { TLoginRequest } from './types';
 
 export const useLogin = ({
   callbackUrl: callbackUrl_,
@@ -13,7 +13,7 @@ export const useLogin = ({
   const callbackUrl = callbackUrl_ ?? searchParams.get('callbackUrl') ?? '/';
 
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: async (data: components['schemas']['LoginRequest']) => {
+    mutationFn: async (data: TLoginRequest) => {
       const result = await signIn('credentials', {
         username: data.username,
         password: data.password,

@@ -5,7 +5,7 @@ import { CloneRoleModal } from '@/Settings/components/RoleManagement/CloneRoleMo
 import { DeleteRoleModal } from '@/Settings/components/RoleManagement/DeleteRoleModal';
 import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDrawer';
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
-import { RoleListItem } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
+import { TRoleListItem } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { IconLockFilled } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 
@@ -15,7 +15,7 @@ export const RoleCard = ({
   role,
   refetch,
 }: {
-  role: RoleListItem;
+  role: TRoleListItem;
   refetch: () => void;
 }) => {
   const isCoreRole = role.resource_type === RESOURCE_TYPES.CORE;

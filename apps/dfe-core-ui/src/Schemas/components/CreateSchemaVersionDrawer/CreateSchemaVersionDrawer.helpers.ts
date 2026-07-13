@@ -1,8 +1,8 @@
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import { SchemaCreateRequest } from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
-import { MetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { v4 as uuidv4 } from 'uuid';
 
 const CREATE_SCHEMA_VERSION_TYPES = ['model', 'addition', 'revision'] as const;
@@ -20,7 +20,7 @@ const toFormType = (type: string): CreateSchemaVersionType | undefined => {
  * Maps schema detail (selected version) into create-schema-version form defaults.
  */
 export const metaSchemaDetailToCreateVersionFormInitialValues = (
-  schema: MetaSchemaDetailResponse | null | undefined,
+  schema: TMetaSchemaDetailResponse | null | undefined,
   pathSegments: { path?: string; name?: string },
 ): Partial<CreateSchemaFormData> => {
   const base = {
@@ -100,7 +100,7 @@ export const transformFormDataToRequestBody = (
  */
 export const transformFormDataToReviewRequestBody = (
   values: CreateSchemaFormData,
-): { requestBody: SchemaCreateRequest } => {
+): { requestBody: TCreateSchemaRequest } => {
   const versionPayload = transformFormDataToRequestBody(values);
   const path = values.path ? `${values.path}/${values.name}` : values.name;
 

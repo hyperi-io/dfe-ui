@@ -1,6 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { components } from '@repo/dfe-engine-types';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -12,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredSchemas } from '.';
-import { SchemaListResponse } from './types';
+import { TSchemaListResponse, TSchemaSummary } from './types';
 import { server } from './useFetchInfiniteFilteredSchemas.mocks';
 
 class MockIntersectionObserver {
@@ -44,7 +43,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       });
 
       expect(result.current.isLoading).toBe(true);
-      const expectedResponse: SchemaListResponse = {
+      const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
         total: 0,
@@ -70,7 +69,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const responseItem: components['schemas']['SchemaSummaryObject'] = {
+      const responseItem: TSchemaSummary = {
         name: 'string',
         resource_type: 'custom',
         current: 'string',
@@ -261,7 +260,7 @@ describe('useFetchInfiniteFilteredSchemas', () => {
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
 
-      const expectedResponse: SchemaListResponse = {
+      const expectedResponse: TSchemaListResponse = {
         items: [],
         objects: {},
         total: 0,

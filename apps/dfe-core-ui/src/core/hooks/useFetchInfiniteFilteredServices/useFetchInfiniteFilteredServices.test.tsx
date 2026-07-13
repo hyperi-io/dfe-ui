@@ -11,6 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredServices } from '.';
+import { TServiceListResponse } from './types';
 import { server } from './useFetchInfiniteFilteredServices.mocks';
 
 class MockIntersectionObserver {
@@ -85,7 +86,7 @@ describe('useFetchInfiniteFilteredServices', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const expectedResponse = {
+      const expectedResponse: TServiceListResponse = {
         items: expect.any(Array),
         total: 25,
         page: 1,

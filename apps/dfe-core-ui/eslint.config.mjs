@@ -24,6 +24,14 @@ const eslintConfig = defineConfig([
     },
   },
   ...importScopeOverrides,
+  {
+    // Mock generator: may import types from any scope; runs after import-scope overrides.
+    files: ['src/core/config/api/endpoints/endpoints.generator.mocks.ts'],
+    rules: {
+      'no-console': 'off',
+      'no-restricted-imports': 'off',
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

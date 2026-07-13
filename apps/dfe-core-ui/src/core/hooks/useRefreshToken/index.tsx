@@ -2,10 +2,10 @@
 
 import { executeAccessTokenRefresh } from '@/core/auth/refreshAccessToken';
 import { useMutation } from '@tanstack/react-query';
-import { RefreshTokenResponse } from './types';
+import { TRefreshTokenResponse } from './types';
 
 interface UseRefreshTokenProps {
-  onSuccess?: (data: RefreshTokenResponse) => void;
+  onSuccess?: (data: TRefreshTokenResponse) => void;
   onError?: (error: Error) => void;
 }
 

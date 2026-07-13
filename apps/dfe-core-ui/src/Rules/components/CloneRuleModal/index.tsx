@@ -5,8 +5,8 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
-import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, Input, Modal } from 'antd';
 import { cloneElement, useState } from 'react';
@@ -27,8 +27,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface CloneRuleModalProps {
-  rule: RuleDetail;
-  onSuccess?: (data: RuleCreateResponse) => void;
+  rule: TRuleDetail;
+  onSuccess?: (data: TRuleCreateResponse) => void;
   onError?: (error: Error) => void;
   trigger?: React.ReactElement<ButtonProps>;
 }
@@ -44,7 +44,7 @@ export const CloneRuleModal = ({
 
   const { refetch: refetchRules } = useListRulesContext();
 
-  const onSuccess = (data: RuleCreateResponse) => {
+  const onSuccess = (data: TRuleCreateResponse) => {
     refetchRules();
     onSuccessProp?.(data);
     setOpen(false);

@@ -3,15 +3,15 @@ import { CloneRuleModal } from '@/Rules/components/CloneRuleModal';
 import { DeleteRuleModal } from '@/Rules/components/DeleteRuleModal';
 import { UpdateRuleDrawer } from '@/Rules/components/UpdateRuleDrawer';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
-import { RuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { RuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
-import { RuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 
 interface RuleDetailActionMenuProps {
-  onEditSuccess?: (rule: RuleUpdateResponse) => void;
-  rule: RuleDetail;
+  onEditSuccess?: (rule: TRuleUpdateResponse) => void;
+  rule: TRuleDetail;
 }
 
 export const RuleDetailActionMenu = ({
@@ -21,7 +21,7 @@ export const RuleDetailActionMenu = ({
   const { notification } = App.useApp();
   const { refetch: refetchRules, setSelectedRuleName } = useListRulesContext();
 
-  const onCloneSuccess = (response: RuleCreateResponse) => {
+  const onCloneSuccess = (response: TRuleCreateResponse) => {
     setSelectedRuleName(response.rule.name);
     refetchRules();
     notification.success({

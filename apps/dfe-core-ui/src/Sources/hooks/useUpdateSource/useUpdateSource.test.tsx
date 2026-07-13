@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateSource } from '.';
-import { SourceUpdateRequestBody, SourceUpdateResponse } from './types';
+import { TSourceUpdateRequestBody, TSourceUpdateResponse } from './types';
 import { server } from './useUpdateSource.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateSource', () => {
-  const requestBody: SourceUpdateRequestBody = {
+  const requestBody: TSourceUpdateRequestBody = {
     source: 'source',
     display_name: 'string',
     description: 'string',
@@ -71,7 +71,7 @@ describe('.useUpdateSource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourceUpdateResponse = {
+      const expectedResponse: TSourceUpdateResponse = {
         source: 'string',
         message: 'ok',
         current: 'string',

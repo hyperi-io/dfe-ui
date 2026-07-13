@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { updateGroupPath } from './api';
 
-export type GroupUpdateRequestBody =
-  components['schemas']['UpdateGroupRequest'];
-export type GroupUpdateResponse = components['schemas']['GroupResponse'];
+export type TGroupUpdateRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof updateGroupPath, 'put'>
+>;
+export type TGroupUpdateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof updateGroupPath, 'put'>
+>;

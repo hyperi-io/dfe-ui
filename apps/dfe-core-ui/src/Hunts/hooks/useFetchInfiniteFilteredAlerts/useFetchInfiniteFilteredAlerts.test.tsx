@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredAlerts } from '.';
-import { AlertListResponse } from './types';
+import { TAlertListResponseItem } from './types';
 import { server } from './useFetchInfiniteFilteredAlerts.mocks';
 
 class MockIntersectionObserver {
@@ -66,7 +66,7 @@ describe('useFetchInfiniteFilteredAlerts', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: AlertListResponse['items'][number] = {
+      const responseItem: TAlertListResponseItem = {
         name: 'string',
         description: 'string',
         enabled: true,

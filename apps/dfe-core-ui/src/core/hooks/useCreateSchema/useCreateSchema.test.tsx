@@ -16,7 +16,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateSchema } from '.';
-import { SchemaCreateRequest, SchemaCreateResponse } from './types';
+import { TCreateSchemaRequest, TCreateSchemaResponse } from './types';
 import { server } from './useCreateSchema.mocks';
 
 beforeAll(() =>
@@ -30,7 +30,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateSchema', () => {
-  const requestBody: SchemaCreateRequest = {
+  const requestBody: TCreateSchemaRequest = {
     current: 'string',
     path: 'path',
     versions: {
@@ -63,7 +63,7 @@ describe('.useCreateSchema', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SchemaCreateResponse = {
+      const expectedResponse: TCreateSchemaResponse = {
         path: 'string',
         current: 'string',
         resource_type: RESOURCE_TYPES.CORE,

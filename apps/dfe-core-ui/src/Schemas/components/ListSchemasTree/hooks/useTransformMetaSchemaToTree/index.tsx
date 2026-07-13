@@ -2,7 +2,7 @@ import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
 import { resourceTypeIconSwitch } from '@/core/constants/resourceType.constants';
-import { SchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
 import { notification, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
@@ -44,7 +44,7 @@ export const getExpandedKeysForSchemaSelection = (
 };
 
 const buildVersionChildren = (
-  schema: NonNullable<SchemaListResponse['objects']['items']>[number],
+  schema: NonNullable<TSchemaListResponse['objects']['items']>[number],
   setSelectedSchema: ({
     schema_path,
     schema_version,
@@ -95,7 +95,7 @@ const schemaSummaryToTreeData = ({
   apiNotification,
   expandTreeNode,
 }: {
-  node: SchemaListResponse['objects'];
+  node: TSchemaListResponse['objects'];
   pathSegments: string[];
   setSelectedSchema: ({
     schema_path,
@@ -224,7 +224,7 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaVersion,
   expandTreeNode,
 }: {
-  schemaObjects: SchemaListResponse['objects'];
+  schemaObjects: TSchemaListResponse['objects'];
   setSelectedSchema: ({
     schema_path,
     schema_version,

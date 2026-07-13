@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { sampleRows } from './api';
 
 export const SAMPLE_ROWS_QUERY_KEY = (source_name: string, version: string) => [
   'sample-rows',
@@ -35,7 +34,7 @@ export const useFetchSampleRows = ({
   const { data, isLoading, error } = useQuery({
     queryKey: SAMPLE_ROWS_QUERY_KEY(source_name, version),
     queryFn: () =>
-      apiClient.get(API_CONFIG.schemas.sampleRows, {
+      sampleRows({
         pathParams: { source_name },
         queryParams: { version },
       }),

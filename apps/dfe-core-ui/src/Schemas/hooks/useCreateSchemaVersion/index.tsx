@@ -1,15 +1,14 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createSchemaVersion } from './api';
 import {
-  SchemaCreateVersionRequest,
-  SchemaCreateVersionResponse,
+  TSchemaCreateVersionRequest,
+  TSchemaCreateVersionResponse,
 } from './types';
 
 interface UseCreateSchemaVersionProps {
-  onSuccess?: (data: SchemaCreateVersionResponse) => void;
+  onSuccess?: (data: TSchemaCreateVersionResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -62,13 +61,13 @@ export const useCreateSchemaVersion = ({
       schema,
       parameters,
     }: {
-      schema: SchemaCreateVersionRequest;
+      schema: TSchemaCreateVersionRequest;
       parameters: { schema_path: string | null };
     }) => {
       if (!parameters.schema_path) {
         throw new Error('Schema path is required');
       }
-      return apiClient.post(API_CONFIG.schemas.schemaVersions, {
+      return createSchemaVersion({
         body: schema,
         pathParams: { schema_path: parameters.schema_path },
       });

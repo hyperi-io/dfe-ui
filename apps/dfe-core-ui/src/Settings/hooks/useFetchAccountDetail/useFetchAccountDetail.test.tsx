@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchAccountDetail } from '.';
-import { AccountDetail } from './types';
+import { TAccountDetailResponse } from './types';
 import { server } from './useFetchAccountDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchAccountDetail', () => {
         { wrapper },
       );
 
-      const response: AccountDetail = {
+      const response: TAccountDetailResponse = {
         username: 'string',
         enabled: true,
         groups: ['string'],

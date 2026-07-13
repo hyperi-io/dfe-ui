@@ -1,5 +1,5 @@
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
-import { HuntListItem } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+import { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -52,7 +52,7 @@ export const HuntList = ({ className }: { className?: string }) => {
         className,
       )}
     >
-      {hunts.map((hunt: HuntListItem) => {
+      {hunts.map((hunt: THuntListItem) => {
         const isSelected = selectedHuntName === hunt.name;
         return (
           <li key={hunt.name} className="w-full">

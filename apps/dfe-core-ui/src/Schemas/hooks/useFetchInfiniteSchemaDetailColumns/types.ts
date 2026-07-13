@@ -1,4 +1,8 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { fetchInfiniteSchemaDetailColumnsPath } from './api';
 
 export type SchemaDetailColumnFilterField =
   | 'search'
@@ -30,8 +34,9 @@ export type UseFetchInfiniteFilteredSchemaDetailColumnsProps = {
   enabled?: boolean;
 };
 
-export type MetaSchemaDetailResponse =
-  components['schemas']['MetaSchemaGetResponse'];
+export type TMetaSchemaDetailResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof fetchInfiniteSchemaDetailColumnsPath, 'get'>
+>;
 
-export type MetaSchemaDetailColumnItem =
-  components['schemas']['dfe_engine__schema__models__SchemaColumn'];
+export type TMetaSchemaDetailColumnItem =
+  TMetaSchemaDetailResponse['version']['columns']['items'][number];

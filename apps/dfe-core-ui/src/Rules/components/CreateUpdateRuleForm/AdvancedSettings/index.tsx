@@ -1,5 +1,6 @@
 import { ContentCard } from '@/core/components/ContentCard';
 import { SourceSelect } from '@/core/components/SourceSelect';
+import { HuntSelect } from '@/Rules/components/HuntSelect';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { Button, Form, FormRule, Input, Switch } from 'antd';
 import { useState } from 'react';
@@ -46,7 +47,7 @@ export const AdvancedSettings = ({
             layout="vertical"
             rules={[formValidation]}
           >
-            <Input className="w-full" />
+            <HuntSelect />
           </Form.Item>
           <Form.Item
             label="Source"

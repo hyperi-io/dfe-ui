@@ -1,5 +1,13 @@
-import { components } from '@repo/dfe-engine-types';
+import {
+  DfeClientOperationFor,
+  DfeClientRequestBody,
+  DfeClientSuccessResponseBody,
+} from '@/core/config/api/client.types';
+import { createGroupPath } from './api';
 
-export type GroupCreateRequestBody =
-  components['schemas']['CreateGroupRequest'];
-export type GroupCreateResponse = components['schemas']['GroupResponse'];
+export type TGroupCreateRequestBody = DfeClientRequestBody<
+  DfeClientOperationFor<typeof createGroupPath, 'post'>
+>;
+export type TGroupCreateResponse = DfeClientSuccessResponseBody<
+  DfeClientOperationFor<typeof createGroupPath, 'post'>
+>;

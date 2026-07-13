@@ -2,7 +2,8 @@
 
 import { useFetchInfiniteFilteredFieldMaps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps';
 import type {
-  FieldMapListResponse,
+  TFieldMapListResponse,
+  TFieldMapSummary,
   UseFetchInfiniteFilteredFieldMapsProps,
 } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 
@@ -62,7 +63,7 @@ const hasAnyFilters = (f: ListFieldMapsQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListFieldMapsContextValue {
-  data: FieldMapListResponse;
+  data: TFieldMapListResponse;
   filters: UseFetchInfiniteFilteredFieldMapsProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredFieldMapsProps) => void;
@@ -87,8 +88,8 @@ export interface ListFieldMapsContextValue {
   }) => void;
 }
 
-const DEFAULT_FIELD_MAP_LIST_RESPONSE: FieldMapListResponse = {
-  items: [] as FieldMapListResponse['items'],
+const DEFAULT_FIELD_MAP_LIST_RESPONSE: TFieldMapListResponse = {
+  items: [] as TFieldMapSummary[],
   total: 0,
   page: 1,
   per_page: 10,

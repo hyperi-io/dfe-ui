@@ -1,6 +1,6 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
-import { SchemaCreateResponse } from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
@@ -72,7 +72,7 @@ describe('.useCloneSchema', () => {
         });
       });
 
-      const response: SchemaCreateResponse = {
+      const response: TCreateSchemaResponse = {
         path: 'source',
         resource_type: 'custom',
         current: '1.0.0',

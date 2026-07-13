@@ -1,7 +1,7 @@
 'use client';
 
 import { EmptyDetail } from '@/core/components/EmptyDetail';
-import { HuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
@@ -20,7 +20,7 @@ const DEFAULT_HUNT_DETAIL_TAB: HuntDetailTabKey = 'configuration';
 const isHuntDetailTabKey = (value: string | null): value is HuntDetailTabKey =>
   value !== null && (HUNT_DETAIL_TAB_KEYS as readonly string[]).includes(value);
 
-type ViewHuntDetailTabsProps = HuntDetailResponse & {
+type ViewHuntDetailTabsProps = THuntDetailResponse & {
   selectedHuntName: string | null;
 };
 

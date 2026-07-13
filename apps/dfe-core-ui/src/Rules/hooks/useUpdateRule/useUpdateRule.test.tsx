@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateRule } from '.';
-import { RuleUpdateRequest, RuleUpdateResponse } from './types';
+import { TRuleUpdateRequest, TRuleUpdateResponse } from './types';
 import { server } from './useUpdateRule.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateRule', () => {
-  const requestBody: RuleUpdateRequest = {
+  const requestBody: TRuleUpdateRequest = {
     display_name: 'string',
     severity: 'string',
     source: 'string',
@@ -51,7 +51,7 @@ describe('.useUpdateRule', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: RuleUpdateResponse = {
+      const expectedResponse: TRuleUpdateResponse = {
         rule: {
           display_name: 'string',
           name: 'string',

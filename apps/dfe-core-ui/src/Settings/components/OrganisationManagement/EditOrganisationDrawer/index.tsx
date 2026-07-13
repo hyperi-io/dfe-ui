@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { Organisation } from '@/core/hooks/useFetchOrganisations/types';
+import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
@@ -16,7 +16,7 @@ export const EditOrganisationDrawer = ({
   organisation,
   refetch,
 }: {
-  organisation: Organisation;
+  organisation: TOrganisationListSummary;
   refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
@@ -50,8 +50,6 @@ export const EditOrganisationDrawer = ({
       display_name: values.display_name,
       org_ids: values.org_ids,
       enabled: organisation.enabled,
-      dedicated_database: values.dedicated_database,
-      confirm_merge: values.confirm_merge ?? false,
     });
   };
   return (
@@ -81,11 +79,7 @@ export const EditOrganisationDrawer = ({
         onClose={() => setOpen(false)}
       >
         <CreateUpdateOrganisationForm
-          showConfirmMergeField
-          initialValues={{
-            ...organisation,
-            confirm_merge: false,
-          }}
+          initialValues={organisation}
           onFinish={handleUpdateOrganisation}
           error={error}
           isPending={isPending}

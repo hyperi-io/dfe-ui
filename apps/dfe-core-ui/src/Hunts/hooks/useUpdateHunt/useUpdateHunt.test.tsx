@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateHunt } from '.';
-import { HuntUpdateRequest, HuntUpdateResponse } from './types';
+import { THuntUpdateRequest, THuntUpdateResponse } from './types';
 import { server } from './useUpdateHunt.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateHunt', () => {
-  const parameters: HuntUpdateRequest = {
+  const parameters: THuntUpdateRequest = {
     display_name: 'string',
     cron: 'string',
     log_buffer: 0,
@@ -69,7 +69,7 @@ describe('.useUpdateHunt', () => {
         explain_queries: parameters.explain_queries,
       });
 
-      const expectedResponse: HuntUpdateResponse = {
+      const expectedResponse: THuntUpdateResponse = {
         name: 'string',
         display_name: 'string',
         cron: 'string',
@@ -115,7 +115,7 @@ describe('.useUpdateHunt', () => {
   });
 
   describe('onError', () => {
-    const requestBody: HuntUpdateRequest = {
+    const requestBody: THuntUpdateRequest = {
       display_name: 'string',
       cron: 'string',
       log_buffer: 0,

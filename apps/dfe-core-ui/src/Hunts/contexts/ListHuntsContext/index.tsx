@@ -1,11 +1,12 @@
 'use client';
 
-import { useFetchInfiniteFilteredHunts } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts';
+import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
 import type {
-  HuntListResponse,
   HuntSortBy,
+  THuntListItem,
+  THuntListResponse,
   UseFetchInfiniteFilteredHuntsProps,
-} from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+} from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -56,7 +57,7 @@ const hasAnyFilters = (f: ListHuntsQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListHuntsContextValue {
-  data: HuntListResponse;
+  data: THuntListResponse;
   filters: UseFetchInfiniteFilteredHuntsProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredHuntsProps) => void;
@@ -72,8 +73,8 @@ export interface ListHuntsContextValue {
   setSelectedHuntName: (name: string | null) => void;
 }
 
-const DEFAULT_HUNT_LIST_RESPONSE: HuntListResponse = {
-  items: [] as HuntListResponse['items'],
+const DEFAULT_HUNT_LIST_RESPONSE: THuntListResponse = {
+  items: [] as THuntListItem[],
   total: 0,
   page: 1,
   per_page: 10,

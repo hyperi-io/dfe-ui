@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useDeploySource } from '.';
-import { SourceDeployRequest, SourceDeployResponse } from './types';
+import { SourceDeployRequest, TSourceDeployResponse } from './types';
 import { server } from './useDeploySource.mocks';
 
 beforeAll(() =>
@@ -46,14 +46,13 @@ describe('.useDeploySource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: SourceDeployResponse = {
+      const expectedResponse: TSourceDeployResponse = {
         source_name: 'string',
         version: 'string',
-        success: true,
-        deployed_version: 'string',
-        deployed_at: 'string',
-        ddl_executed: ['string'],
-        ddl_failed: [],
+        dry_run: false,
+        applied: true,
+        create_table: 'string',
+        statements_applied: 0,
       };
 
       await waitFor(() => {

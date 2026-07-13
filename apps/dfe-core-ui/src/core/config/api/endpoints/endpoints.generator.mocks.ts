@@ -1,23 +1,78 @@
-/* eslint-disable no-console */
+import {
+  TFetchStandardFieldMapResponse,
+  TSourceFieldMapResponse,
+} from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
+import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
+import { TTestTransformResponse } from '@/_Transforms/hooks/_useTestTransform/types';
+import { TCompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
 import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import { components } from '@repo/dfe-engine-types';
+import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
+import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
+import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
+import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
+import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
+import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
+import { THuntListResponse } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
+import { TOrganisationListResponse } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
+import { TRuleListResponse } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
+import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { TLoginResponse } from '@/core/hooks/useLogin/types';
+import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
+import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
+import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
+import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
+import { TAlertDetailResponse } from '@/Hunts/hooks/useFetchAlertDetail/types';
+import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
+import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
+import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
+import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
+import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
+import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
+import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
+import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
+import { TSchemaCreateVersionResponse } from '@/Schemas/hooks/useCreateSchemaVersion/types';
+import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { TMetaSchemaUpdateResponse } from '@/Schemas/hooks/useUpdateSchema/types';
+import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetPassword/types';
+import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/types';
+import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types';
+import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
+import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
+import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
+import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
+import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
+import { TAccountsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
+import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
+import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
+import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
+import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
+import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
+import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
+import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
+import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
+import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
+import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
+import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
+import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
+import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
+import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
+import { TSampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
+import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
+import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { http, HttpResponse } from 'msw';
-
-const DEFAULT_VALIDATION_ERROR = {
-  detail: [
-    {
-      loc: ['string', 0],
-      msg: 'string',
-      type: 'string',
-      input: 'string',
-      ctx: {},
-    },
-  ],
-  message: 'An unexpected error occurred',
-};
+import {
+  DEFAULT_VALIDATION_ERROR,
+  TValidationError,
+} from './endpoints.generator.mocks.types';
 
 export const API_CONFIG_MOCKS = Object.freeze({
   auth: {
@@ -33,7 +88,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             roles: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['TokenResponse'];
+          mockedResponse?: TLoginResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.auth.login.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -52,7 +107,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             roles: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['TokenResponse'];
+          mockedResponse?: TRefreshTokenResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -61,7 +116,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 401,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.auth.refresh.mockedUrl, () => {
@@ -82,7 +137,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             groups: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['UserResponse'];
+          mockedResponse?: TAuthMeResponse;
         } = {}) =>
           http.get(API_CONFIG_MOCKS.auth.me.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -91,7 +146,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.auth.me.mockedUrl, () => {
@@ -109,7 +164,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             permissions: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['PermissionsResponse'];
+          mockedResponse?: TFetchPermissionsResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.auth.permissions.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -119,7 +174,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.auth.permissions.mockedUrl, () => {
@@ -163,7 +218,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedSourceSummaryResponse'];
+          mockedResponse?: TSourceListResponse;
         } = {}) =>
           http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -172,7 +227,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
@@ -189,7 +244,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             versions: ['string'],
           },
         }: {
-          mockedResponse?: components['schemas']['SourceResponse'];
+          mockedResponse?: TSourceCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -199,7 +254,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
@@ -218,32 +273,59 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             description: 'string',
             current: 'string',
-            match: {
-              field: 'string',
-              operator: 'equals',
-              value: 'string',
-            },
-            transform: {
-              engine: 'string',
-            },
-            versions: {
-              string: {
-                date_time: 'string',
-                header: {
+            versions: ['1.0.0'],
+            selected: '1.0.0',
+            previous_deployed_versions: ['1.0.0'],
+            version: {
+              date_time: 'string',
+              header: {
+                type: 'string',
+                version: 'string',
+              },
+              schema: {
+                meta_schema: 'string',
+                meta_schema_version: 'string',
+                ttl_days: 0,
+                engine: 'string',
+              },
+              mapping_standards: ['string'],
+              sigma: {
+                taxonomy: 'string',
+                custom_mappings: {
+                  string: 'string',
+                },
+              },
+              field_mappings: ['string'],
+              fetcher: {
+                source_type: 'string',
+                base_url: 'string',
+                auth: {
                   type: 'string',
-                  version: 'string',
+                  token_url: 'string',
+                  client_id: 'string',
+                  client_secret: 'string',
+                  api_key: 'string',
                 },
-                match: {
-                  field: 'string',
-                  operator: 'equals',
-                  value: 'string',
+                poll_interval_secs: 0,
+              },
+              transform: {
+                engine: 'string',
+                config_file: 'string',
+                env: {
+                  string: 'string',
                 },
+                files: ['string'],
+              },
+              match: {
+                field: 'string',
+                operator: 'equals',
+                value: 'string',
               },
             },
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourceDetailResponse'];
+          mockedResponse?: TSourceVersionDetail;
           name?: string;
         } = {}) => {
           return http.get(
@@ -258,7 +340,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -280,7 +362,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourceResponse'];
+          mockedResponse?: TSourceUpdateResponse;
           name?: string;
         } = {}) => {
           return http.put(
@@ -295,7 +377,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -310,13 +392,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
       patch: {
         success: ({
           mockedResponse = {
-            path: 'string',
+            source: 'string',
+            message: 'ok',
             current: 'string',
             versions: ['string'],
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          mockedResponse?: TSourcePatchResponse;
           name?: string;
         } = {}) => {
           return http.patch(
@@ -331,7 +414,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -357,7 +440,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -385,7 +468,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2'];
+          mockedResponse?: TSourceColumnsResponse;
           source_name?: string;
         } = {}) => {
           return http.get(
@@ -403,7 +486,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           source_name?: string;
         } = {}) => {
@@ -438,7 +521,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__v1__sources__SchemaBuildResult'];
+          mockedResponse?: TSourceBuildResponse;
           source_name?: string;
         } = {}) => {
           return http.post(
@@ -456,7 +539,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           source_name?: string;
         } = {}) => {
@@ -535,7 +618,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           name = 'source',
           version = '1.0.0',
         }: {
-          mockedResponse?: components['schemas']['SourceVersionGetDetailResponse'];
+          mockedResponse?: TSourceVersionDetail;
           name?: string;
           version?: string;
         } = {}) => {
@@ -553,7 +636,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -608,7 +691,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourcePlanResponse'];
+          mockedResponse?: TSourcePlanResponse;
           name?: string;
         } = {}) => {
           return http.get(
@@ -640,7 +723,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourcePlanResponse'];
+          mockedResponse?: TSourcePlanResponse;
           name?: string;
         } = {}) => {
           return http.post(
@@ -655,7 +738,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -675,15 +758,14 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             source_name: 'string',
             version: 'string',
-            success: true,
-            deployed_version: 'string',
-            deployed_at: 'string',
-            ddl_executed: ['string'],
-            ddl_failed: [],
+            dry_run: false,
+            applied: true,
+            create_table: 'string',
+            statements_applied: 0,
           },
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SourceDeployResponse'];
+          mockedResponse?: TSourceDeployResponse;
           name?: string;
         } = {}) => {
           return http.post(
@@ -698,7 +780,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -733,7 +815,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_ServiceConfigSummary_'];
+          mockedResponse?: TServiceListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -743,7 +825,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.services.default.mockedUrl, () => {
@@ -759,12 +841,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {
             service: 'service',
             instance: 'instance',
-            updated_at: '2021-01-01T00:00:00Z',
+            config: {},
           },
           service = 'service',
           instance = 'instance',
         }: {
-          mockedResponse?: object;
+          mockedResponse?: TFetchServiceDetailResponse;
           service?: string;
           instance?: string;
         } = {}) => {
@@ -783,7 +865,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           service = 'string',
           instance = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           service?: string;
           instance?: string;
@@ -918,7 +1000,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_FieldMapSummary_'];
+          mockedResponse?: TFieldMapListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -928,7 +1010,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
@@ -951,7 +1033,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TCreateFieldMapResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -961,7 +1043,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.fieldMaps.default.mockedUrl, () => {
@@ -988,7 +1070,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           standard = 'standard',
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TFetchStandardFieldMapResponse;
           standard?: string;
           source?: string;
         } = {}) => {
@@ -1023,7 +1105,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           standard = 'standard',
           source = 'source',
         }: {
-          mockedResponse?: components['schemas']['FieldMap'];
+          mockedResponse?: TSourceFieldMapResponse;
           standard?: string;
           source?: string;
         } = {}) => {
@@ -1072,7 +1154,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['RuleResponse'];
+          mockedResponse?: TRuleDetail;
           name?: string;
         } = {}) => {
           return http.get(
@@ -1087,7 +1169,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1137,7 +1219,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['RuleCreateResponse'];
+          mockedResponse?: TRuleUpdateResponse;
           name?: string;
         } = {}) => {
           return http.put(
@@ -1152,7 +1234,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1178,7 +1260,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1216,7 +1298,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_RuleSummary_'];
+          mockedResponse?: TRuleListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -1226,7 +1308,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
@@ -1270,7 +1352,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['RuleCreateResponse'];
+          mockedResponse?: TRuleCreateResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -1279,7 +1361,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.default.mockedUrl, () => {
@@ -1302,7 +1384,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             ],
           },
         }: {
-          mockedResponse?: components['schemas']['SqlValidationResponse'];
+          mockedResponse?: TSqlValidationResponse;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.validate.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -1311,7 +1393,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) =>
           http.post(API_CONFIG_MOCKS.rules.validate.mockedUrl, () => {
@@ -1342,7 +1424,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_AlertDestinationSummary_'];
+          mockedResponse?: TAlertListResponse;
         } = {}) => {
           return http.get(
             API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
@@ -1355,7 +1437,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(
@@ -1375,7 +1457,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             enabled: true,
           },
         }: {
-          mockedResponse?: components['schemas']['AlertDestination'];
+          mockedResponse?: TAlertCreateResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.alerts.destinations.mockedUrl,
@@ -1388,7 +1470,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(
@@ -1412,7 +1494,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['AlertDestination'];
+          mockedResponse?: TAlertDetailResponse;
           name?: string;
         } = {}) => {
           return http.get(
@@ -1430,7 +1512,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1455,7 +1537,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'alert_name',
         }: {
-          mockedResponse?: components['schemas']['AlertDestination'];
+          mockedResponse?: TAlertUpdateResponse;
           name?: string;
         } = {}) => {
           return http.put(
@@ -1473,7 +1555,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'alert_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1508,7 +1590,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'alert_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -1553,7 +1635,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             wasm_bytes: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['CompileResponse'];
+          mockedResponse?: TCompileTransformResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.transforms.compile.mockedUrl,
@@ -1566,7 +1648,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(
@@ -1598,7 +1680,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             wasm_memory_bytes: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__api__v1__transforms__TestResponse'];
+          mockedResponse?: TTestTransformResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -1608,7 +1690,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.transforms.test.mockedUrl, () => {
@@ -1651,7 +1733,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedSchemaSummaryResponse'];
+          mockedResponse?: TSchemaListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -1661,7 +1743,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.schemas.default.mockedUrl, () => {
@@ -1681,7 +1763,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          mockedResponse?: TSchemaCreateVersionResponse;
           schema_path?: string;
         } = {}) => {
           return http.post(
@@ -1699,7 +1781,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           schema_path?: string;
         } = {}) => {
@@ -1743,7 +1825,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchema'];
+          mockedResponse?: TCreateSchemaResponse;
           schema_path?: string;
         } = {}) => {
           return http.post(
@@ -1761,7 +1843,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           schema_path?: string;
         } = {}) => {
@@ -1785,7 +1867,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaVersionWriteResponse'];
+          mockedResponse?: TMetaSchemaUpdateResponse;
           schema_path?: string;
         } = {}) => {
           return http.patch(
@@ -1803,7 +1885,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           schema_path?: string;
         } = {}) => {
@@ -1838,7 +1920,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           schema_path?: string;
         } = {}) => {
@@ -1890,7 +1972,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['MetaSchemaGetResponse'];
+          mockedResponse?: TMetaSchemaDetailResponse;
           schema_path?: string;
         } = {}) => {
           return http.get(
@@ -1908,7 +1990,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           schema_path = 'path',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           schema_path?: string;
         } = {}) => {
@@ -1939,7 +2021,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           ],
         }: {
-          mockedResponse?: components['schemas']['dfe_engine__schema__models__SchemaColumn'][];
+          mockedResponse?: TElasticConvertResponse;
         } = {}) => {
           return http.post(
             API_CONFIG_MOCKS.schemas.elasticConvert.mockedUrl,
@@ -1952,7 +2034,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(
@@ -1978,7 +2060,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['SampleRowsResponse'];
+          mockedResponse?: TSampleRowsResponse;
           source_name?: string;
         } = {}) => {
           return http.get(
@@ -2022,7 +2104,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['JsonPathsResponse'];
+          mockedResponse?: TJsonPathsResponse;
           source_name?: string;
         } = {}) => {
           return http.get(
@@ -2058,7 +2140,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['PromoteFieldResponse'];
+          mockedResponse?: TPromoteFieldResponse;
           source_name?: string;
         } = {}) => {
           return http.post(
@@ -2076,7 +2158,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           source_name = 'source',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           source_name?: string;
         } = {}) => {
@@ -2098,19 +2180,26 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/orgs',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              name: 'string',
-              display_name: 'string',
-              org_ids: ['string'],
-              enabled: true,
-              dedicated_database: true,
-              created_at: 'string',
-              updated_at: 'string',
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                display_name: 'string',
+                org_ids: ['string'],
+                enabled: true,
+                created_at: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 10,
+            total_pages: 1,
+            next_page: 1,
+            prev_page: 1,
+          },
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'][];
+          mockedResponse?: TOrganisationListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2120,7 +2209,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
@@ -2135,12 +2224,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'];
+          mockedResponse?: TOrganisationCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2150,7 +2238,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.orgs.default.mockedUrl, () => {
@@ -2168,13 +2256,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
           org_name = 'org_name',
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'];
+          mockedResponse?: TOrganisationDetail;
           org_name?: string;
         } = {}) => {
           return http.get(
@@ -2189,7 +2276,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           org_name = 'org_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           org_name?: string;
         } = {}) => {
@@ -2208,13 +2295,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
             display_name: 'string',
             org_ids: ['string'],
             enabled: true,
-            dedicated_database: true,
             created_at: 'string',
             updated_at: 'string',
           },
           org_name = 'org_name',
         }: {
-          mockedResponse?: components['schemas']['OrgResponse'];
+          mockedResponse?: TOrganisationUpdateResponse;
           org_name?: string;
         } = {}) => {
           return http.put(
@@ -2229,7 +2315,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           org_name = 'org_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           org_name?: string;
         } = {}) => {
@@ -2258,7 +2344,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           org_name = 'org_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           org_name?: string;
         } = {}) => {
@@ -2277,16 +2363,25 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/auth/groups',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              name: 'string',
-              description: 'string',
-              roles: ['string'],
-              members: ['string'],
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                description: 'string',
+                roles: ['string'],
+                members: ['string'],
+                scope: 'string',
+              },
+            ],
+            total: 25,
+            page: 1,
+            per_page: 10,
+            total_pages: 3,
+            next_page: 2,
+            prev_page: 0,
+          },
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'][];
+          mockedResponse?: TGroupsResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2296,7 +2391,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
@@ -2311,9 +2406,10 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TGroupCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2323,7 +2419,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () => {
@@ -2341,10 +2437,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TGroupDetailResponse;
           group_name?: string;
         } = {}) => {
           return http.get(
@@ -2362,7 +2459,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           group_name?: string;
         } = {}) => {
@@ -2384,10 +2481,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TGroupUpdateResponse;
           group_name?: string;
         } = {}) => {
           return http.put(
@@ -2405,7 +2503,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           group_name?: string;
         } = {}) => {
@@ -2440,7 +2538,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           group_name?: string;
         } = {}) => {
@@ -2470,10 +2568,11 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TAddGroupMemberResponse;
           group_name?: string;
         } = {}) => {
           return http.post(
@@ -2491,7 +2590,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           group_name = 'group_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           group_name?: string;
         } = {}) => {
@@ -2521,11 +2620,12 @@ export const API_CONFIG_MOCKS = Object.freeze({
             description: 'string',
             roles: ['string'],
             members: ['string'],
+            scope: 'string',
           },
           group_name = 'group_name',
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['GroupResponse'];
+          mockedResponse?: TRemoveGroupMemberResponse;
           group_name?: string;
           username?: string;
         } = {}) => {
@@ -2544,7 +2644,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           group_name = 'group_name',
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           group_name?: string;
           username?: string;
@@ -2566,17 +2666,25 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl: '/api/v1/auth/accounts',
       get: {
         success: ({
-          mockedResponse = [
-            {
-              username: 'string',
-              enabled: true,
-              groups: ['string'],
-              created_at: 'string',
-              updated_at: 'string',
-            },
-          ],
+          mockedResponse = {
+            items: [
+              {
+                username: 'string',
+                enabled: true,
+                groups: ['string'],
+                created_at: 'string',
+                updated_at: 'string',
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 10,
+            total_pages: 1,
+            next_page: 1,
+            prev_page: 1,
+          },
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'][];
+          mockedResponse?: TAccountsResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2586,7 +2694,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
@@ -2604,7 +2712,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             updated_at: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'];
+          mockedResponse?: TAccountCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2614,7 +2722,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.accounts.default.mockedUrl, () => {
@@ -2636,7 +2744,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'];
+          mockedResponse?: TAccountDetailResponse;
           username?: string;
         } = {}) => {
           return http.get(
@@ -2654,7 +2762,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           username?: string;
         } = {}) => {
@@ -2680,7 +2788,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['AccountResponse'];
+          mockedResponse?: TAccountUpdateResponse;
           username?: string;
         } = {}) => {
           return http.put(
@@ -2698,7 +2806,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           username?: string;
         } = {}) => {
@@ -2733,7 +2841,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           username?: string;
         } = {}) => {
@@ -2756,7 +2864,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = {},
           username = 'string',
         }: {
-          mockedResponse?: Record<string, never>;
+          mockedResponse?: TAccountResetPasswordResponse;
           username?: string;
         } = {}) => {
           return http.post(
@@ -2765,7 +2873,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
               username,
             ),
             () => {
-              return HttpResponse.json(mockedResponse);
+              return HttpResponse.json(JSON.stringify(mockedResponse));
             },
           );
         },
@@ -2774,7 +2882,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           username = 'string',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           username?: string;
         } = {}) => {
@@ -2814,7 +2922,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_RoleResponse_'];
+          mockedResponse?: TRoleListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2824,7 +2932,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
@@ -2842,7 +2950,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             resource_type: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['RoleResponse'];
+          mockedResponse?: TRoleCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2852,7 +2960,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.roles.default.mockedUrl, () => {
@@ -2874,7 +2982,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           role_name = 'role_name',
         }: {
-          mockedResponse?: components['schemas']['RoleResponse'];
+          mockedResponse?: TRoleDetail;
           role_name?: string;
         } = {}) => {
           return http.get(
@@ -2896,7 +3004,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           role_name = 'role_name',
         }: {
-          mockedResponse?: components['schemas']['RoleResponse'];
+          mockedResponse?: TRoleUpdateResponse;
           role_name?: string;
         } = {}) => {
           return http.put(
@@ -2911,7 +3019,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           role_name = 'role_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           role_name?: string;
         } = {}) => {
@@ -2940,7 +3048,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           role_name = 'role_name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           role_name?: string;
         } = {}) => {
@@ -2968,7 +3076,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             notes: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['CasbinScopesResponse'];
+          mockedResponse?: TRoleScopesResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -2978,7 +3086,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.roles.scopes.mockedUrl, () => {
@@ -3013,7 +3121,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             prev_page: 0,
           },
         }: {
-          mockedResponse?: components['schemas']['PaginatedResponse_HuntSummary_'];
+          mockedResponse?: THuntListResponse;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -3023,7 +3131,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
@@ -3060,7 +3168,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             explain_queries: false,
           },
         }: {
-          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          mockedResponse?: THuntCreateResponse;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -3070,7 +3178,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           mockedResponse = DEFAULT_VALIDATION_ERROR,
           status = 422,
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
         } = {}) => {
           return http.post(API_CONFIG_MOCKS.hunts.default.mockedUrl, () => {
@@ -3089,7 +3197,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             scheduling_mode: 'string',
           },
         }: {
-          mockedResponse?: components['schemas']['HuntEngineStatus'];
+          mockedResponse?: THuntEngineStatus;
         } = {}) => {
           return http.get(API_CONFIG_MOCKS.hunts.engineStatus.mockedUrl, () => {
             return HttpResponse.json(mockedResponse);
@@ -3128,7 +3236,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          mockedResponse?: THuntDetailResponse;
           name?: string;
         } = {}) => {
           return http.get(
@@ -3168,7 +3276,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HuntDetailResponse'];
+          mockedResponse?: THuntDetailResponse;
           name?: string;
         } = {}) => {
           return http.put(
@@ -3183,7 +3291,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -3212,7 +3320,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -3235,7 +3343,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           },
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['TriggerResponse'];
+          mockedResponse?: TTriggerResponse;
           name?: string;
         } = {}) => {
           return http.post(
@@ -3250,7 +3358,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
           status = 422,
           name = 'name',
         }: {
-          mockedResponse?: components['schemas']['HTTPValidationError'];
+          mockedResponse?: TValidationError;
           status?: number;
           name?: string;
         } = {}) => {
@@ -3265,4 +3373,3 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
   },
 });
-/* eslint-enable no-console */

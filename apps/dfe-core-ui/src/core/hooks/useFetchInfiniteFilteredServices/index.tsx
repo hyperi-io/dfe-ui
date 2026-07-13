@@ -1,7 +1,6 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
+import { fetchInfiniteFilteredServices } from './api';
 import { UseFetchInfiniteFilteredServicesProps } from './types';
 
 /** useFetchInfiniteFilteredServices props */
@@ -34,7 +33,7 @@ export const useFetchInfiniteFilteredServices = ({
   } = useInfiniteQuery({
     queryKey: ['services', service, search, sort_by, sort_order, per_page],
     queryFn: async ({ pageParam = 1, signal }) =>
-      apiClient.get(API_CONFIG.services.default, {
+      fetchInfiniteFilteredServices({
         queryParams: {
           search,
           service,

@@ -1,6 +1,5 @@
-import { apiClient } from '@/core/config/api';
-import { API_CONFIG } from '@/core/config/api/endpoints';
 import { useQuery } from '@tanstack/react-query';
+import { fetchRuleDetail } from './api';
 
 export const RULE_DETAIL_QUERY_KEY = (name: string | null) => [
   'rule',
@@ -15,7 +14,7 @@ export const useFetchRuleDetail = ({ name }: { name: string | null }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: RULE_DETAIL_QUERY_KEY(name),
     queryFn: ({ signal }) =>
-      apiClient.get(API_CONFIG.rules.rule, {
+      fetchRuleDetail({
         pathParams: { name: name ?? '' },
         signal,
       }),

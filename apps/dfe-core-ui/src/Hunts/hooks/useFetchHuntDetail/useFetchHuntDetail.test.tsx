@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { useFetchHuntDetail } from '.';
-import { HuntDetailResponse } from './types';
+import { THuntDetailResponse } from './types';
 import { server } from './useFetchHuntDetail.mocks';
 
 beforeAll(() =>
@@ -26,7 +26,7 @@ describe('.useFetchHuntDetail', () => {
         { wrapper },
       );
 
-      const response: HuntDetailResponse = {
+      const response: THuntDetailResponse = {
         display_name: 'string',
         name: 'string',
         cron: 'string',

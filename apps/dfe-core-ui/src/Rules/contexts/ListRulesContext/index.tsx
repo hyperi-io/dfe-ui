@@ -2,7 +2,8 @@
 
 import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRules';
 import type {
-  RuleListResponse,
+  TRuleListItem,
+  TRuleListResponse,
   UseFetchInfiniteFilteredRulesProps,
 } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 
@@ -63,7 +64,7 @@ const hasAnyFilters = (f: ListRulesQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListRulesContextValue {
-  data: RuleListResponse;
+  data: TRuleListResponse;
   filters: UseFetchInfiniteFilteredRulesProps;
   hasFilters: boolean;
   setFilters: (filters: UseFetchInfiniteFilteredRulesProps) => void;
@@ -79,8 +80,8 @@ export interface ListRulesContextValue {
   setSelectedRuleName: (name: string | null) => void;
 }
 
-const DEFAULT_RULE_LIST_RESPONSE: RuleListResponse = {
-  items: [] as RuleListResponse['items'],
+const DEFAULT_RULE_LIST_RESPONSE: TRuleListResponse = {
+  items: [] as TRuleListItem[],
   total: 0,
   page: 1,
   per_page: 10,
