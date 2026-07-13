@@ -22,24 +22,24 @@ Full environment reference: [docs/local-development.md](docs/local-development.m
 
 A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 
-| Workspace | What it is |
-|---|---|
-| `apps/dfe-core-ui` | the Next.js app - the only artifact shipped (standalone container) |
-| `packages/dfe-engine-types` | vendored engine OpenAPI spec + generated TypeScript types |
-| `packages/dfe-icons` | SVG -> React icon codegen + storybook |
-| `packages/dev-logger` | small shared logging helper |
-| `packages/typescript-config` | shared tsconfigs |
+| Workspace                    | What it is                                                         |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `apps/dfe-core-ui`           | the Next.js app - the only artifact shipped (standalone container) |
+| `packages/dfe-engine-types`  | vendored engine OpenAPI spec + generated TypeScript types          |
+| `packages/dfe-icons`         | SVG -> React icon codegen + storybook                              |
+| `packages/dev-logger`        | small shared logging helper                                        |
+| `packages/typescript-config` | shared tsconfigs                                                   |
 
 ## Documentation
 
-| Doc | Covers |
-|---|---|
-| [docs/architecture.md](docs/architecture.md) | app + package map, route groups, where dfe-ui sits in the DFE stack |
-| [docs/engine-api-client.md](docs/engine-api-client.md) | the typed engine API seam + spec re-vendor procedure |
-| [docs/authentication.md](docs/authentication.md) | credentials login vs proxy-trust mode |
-| [docs/observe-embed.md](docs/observe-embed.md) | the embedded HyperDX explore surface |
-| [docs/build-and-deploy.md](docs/build-and-deploy.md) | standalone build, container, publish |
-| [docs/local-development.md](docs/local-development.md) | toolchain, env vars, tests, storybook |
+| Doc                                                    | Covers                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)           | app + package map, route groups, where dfe-ui sits in the DFE stack |
+| [docs/engine-api-client.md](docs/engine-api-client.md) | the typed engine API seam + spec re-vendor procedure                |
+| [docs/authentication.md](docs/authentication.md)       | credentials login vs proxy-trust mode                               |
+| [docs/observe-embed.md](docs/observe-embed.md)         | the embedded HyperDX explore surface                                |
+| [docs/build-and-deploy.md](docs/build-and-deploy.md)   | standalone build, container, publish                                |
+| [docs/local-development.md](docs/local-development.md) | toolchain, env vars, tests, storybook                               |
 
 ## License
 
