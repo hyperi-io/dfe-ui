@@ -1,5 +1,5 @@
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
-import { THuntListItem } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+import { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';

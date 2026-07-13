@@ -1,12 +1,12 @@
 'use client';
 
-import { useFetchInfiniteFilteredHunts } from '@/Hunts/hooks/useFetchInfiniteFilteredHunts';
+import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
 import type {
   HuntSortBy,
   THuntListItem,
   THuntListResponse,
   UseFetchInfiniteFilteredHuntsProps,
-} from '@/Hunts/hooks/useFetchInfiniteFilteredHunts/types';
+} from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
