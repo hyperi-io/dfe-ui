@@ -32,7 +32,7 @@ export const SourceDdlPreviewTabContent = ({
   }, [source_name, source_version, resetBuildSource]);
 
   return (
-    <div className="h-[calc(100vh-225px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+    <div className="pr-4 flex flex-col gap-4">
       {!buildResult && (
         <NotificationCard
           title="Build Source"
