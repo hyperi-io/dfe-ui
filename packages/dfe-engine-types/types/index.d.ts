@@ -1655,6 +1655,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/queries/cost-leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Query Cost Leaderboard
+         * @description Top query-cost consumers from ``dfe_audit.query_log_archive``, heaviest first.
+         *
+         *     Groups by the attribution id (the hunt id for feature='hunts') and returns the
+         *     query count + summed read rows/bytes + duration + peak memory. Reads the MV the
+         *     CH wrapper's log_comment attribution feeds - returns [] until it has data.
+         */
+        get: operations["query_cost_leaderboard_api_v1_queries_cost_leaderboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{source}/sample": {
         parameters: {
             query?: never;
@@ -2337,28 +2361,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sigma/views/{source_name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Generate Sigma View
-         * @description Generate Sigma view DDL for a source.
-         *
-         *     Returns the DDL string — does NOT execute it against ClickHouse.
-         */
-        post: operations["generate_sigma_view_api_v1_sigma_views__source_name__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/sigma/views": {
         parameters: {
             query?: never;
@@ -2366,14 +2368,55 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List Sigma View Definitions
+         * @description List the sources that have a stored Sigma view definition, paginated.
+         */
+        get: operations["list_sigma_view_definitions_api_v1_sigma_views_get"];
         put?: never;
         /**
          * Generate All Sigma Views
-         * @description Generate Sigma view DDL for all sources.
+         * @description Generate Sigma view DDL for all sources (stored definitions win over field maps).
          */
         post: operations["generate_all_sigma_views_api_v1_sigma_views_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/views/{source_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Sigma View Definition
+         * @description Get a source's stored Sigma view definition.
+         */
+        get: operations["get_sigma_view_definition_api_v1_sigma_views__source_name__get"];
+        /**
+         * Put Sigma View Definition
+         * @description Create or replace a source's Sigma view definition.
+         */
+        put: operations["put_sigma_view_definition_api_v1_sigma_views__source_name__put"];
+        /**
+         * Generate Sigma View
+         * @description Generate (preview) Sigma view DDL for a source.
+         *
+         *     A stored view definition drives generation - including its JSON-derived
+         *     columns - when one exists; otherwise falls back to the static field maps via
+         *     the source mapper. Returns the DDL string; does NOT execute it against
+         *     ClickHouse.
+         */
+        post: operations["generate_sigma_view_api_v1_sigma_views__source_name__post"];
+        /**
+         * Delete Sigma View Definition
+         * @description Delete a source's Sigma view definition.
+         */
+        delete: operations["delete_sigma_view_definition_api_v1_sigma_views__source_name__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2394,6 +2437,361 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Providers
+         * @description List provider configs (the built-in SigmaHQ default is present OOTB).
+         */
+        get: operations["list_providers_api_v1_sigma_providers_get"];
+        put?: never;
+        /**
+         * Register Provider
+         * @description Register (or overwrite) a provider config.
+         */
+        post: operations["register_provider_api_v1_sigma_providers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/providers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Provider
+         * @description Get one provider config.
+         */
+        get: operations["get_provider_api_v1_sigma_providers__name__get"];
+        /**
+         * Update Provider
+         * @description Update a provider config. The path name wins over the body name.
+         */
+        put: operations["update_provider_api_v1_sigma_providers__name__put"];
+        post?: never;
+        /**
+         * Delete Provider
+         * @description Delete a stored provider config (a built-in default reverts to its default).
+         */
+        delete: operations["delete_provider_api_v1_sigma_providers__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/providers/{name}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enable Provider
+         * @description Enable a provider (polling budget applies).
+         */
+        post: operations["enable_provider_api_v1_sigma_providers__name__enable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/providers/{name}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable Provider
+         * @description Disable a provider (blocks scheduled polling; a manual sync is refused).
+         */
+        post: operations["disable_provider_api_v1_sigma_providers__name__disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/providers/{name}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync Provider Endpoint
+         * @description Trigger a provider sync into the catalogue.
+         *
+         *     Submitted to the task manager (a git-repo clone is long-running); blocks up to
+         *     ``wait`` seconds for inline completion, else returns ``pending`` - poll via
+         *     GET /sigma/syncs/{task_id}.
+         */
+        post: operations["sync_provider_endpoint_api_v1_sigma_providers__name__sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/syncs/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Sync
+         * @description Poll a provider-sync task.
+         */
+        get: operations["get_sync_api_v1_sigma_syncs__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalogue
+         * @description Paginated catalogue of stored sigma rules, marked with selection state.
+         */
+        get: operations["list_catalogue_api_v1_sigma_catalogue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/catalogue/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Catalogue Rule
+         * @description Get one stored rule (full content + provenance).
+         */
+        get: operations["get_catalogue_rule_api_v1_sigma_catalogue__rule_id__get"];
+        /**
+         * Edit Catalogue Rule
+         * @description Edit a rule's content. Marks it locally edited so a re-import preserves it.
+         */
+        put: operations["edit_catalogue_rule_api_v1_sigma_catalogue__rule_id__put"];
+        post?: never;
+        /**
+         * Delete Catalogue Rule
+         * @description Remove a rule from the catalogue.
+         */
+        delete: operations["delete_catalogue_rule_api_v1_sigma_catalogue__rule_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/catalogue/{rule_id}/adopt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adopt Catalogue Rule
+         * @description Detach a rule from upstream (pin its content; a re-import records drift only).
+         */
+        post: operations["adopt_catalogue_rule_api_v1_sigma_catalogue__rule_id__adopt_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/selected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Selected
+         * @description List the ids of rules selected to implement.
+         */
+        get: operations["list_selected_api_v1_sigma_selected_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/catalogue/{rule_id}/select": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Select Rule
+         * @description Select a catalogued rule to implement.
+         */
+        post: operations["select_rule_api_v1_sigma_catalogue__rule_id__select_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/catalogue/{rule_id}/deselect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deselect Rule
+         * @description Deselect a rule (idempotent).
+         */
+        post: operations["deselect_rule_api_v1_sigma_catalogue__rule_id__deselect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/propagate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Propagate
+         * @description Generate sigma-bound DFE rules + hunts from the current selection.
+         *
+         *     For each SELECTED sigma rule, converts its detection to a ClickHouse WHERE over
+         *     the matching source's ``{source}_sigma`` view and stores a DFE rule (with a
+         *     ``sigma_rule_id`` back-reference), then binds it into a per-source hunt. Drifted
+         *     or hand-edited bindings are reported ``skipped_drifted`` unless ``force``.
+         *     Submitted to the task manager; blocks up to ``wait`` seconds for inline
+         *     completion, else returns ``pending`` - poll via GET /sigma/propagations/{id}.
+         */
+        post: operations["propagate_api_v1_sigma_propagate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/propagations/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Propagation
+         * @description Poll a propagate task.
+         */
+        get: operations["get_propagation_api_v1_sigma_propagations__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Bindings
+         * @description Paginated list of the generated sigma-bound rules, with live drift state.
+         */
+        get: operations["list_bindings_api_v1_sigma_bindings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sigma/bindings/{rule_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Binding
+         * @description Get one generated sigma-bound rule (with live drift state).
+         */
+        get: operations["get_binding_api_v1_sigma_bindings__rule_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Binding
+         * @description Delete a generated binding (removes the rule and unlinks it from its hunt).
+         */
+        delete: operations["delete_binding_api_v1_sigma_bindings__rule_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3133,6 +3531,12 @@ export interface components {
              */
             url_scheme: string;
         };
+        /**
+         * AuthKind
+         * @description How a provider authenticates. Secrets are held via the scalo.secrets seam.
+         * @enum {string}
+         */
+        AuthKind: "none" | "api_key" | "git_token";
         /** AutoMergeRequest */
         AutoMergeRequest: {
             /** Enabled */
@@ -3148,6 +3552,63 @@ export interface components {
             allowed: boolean;
             /** Reason */
             reason: string;
+        };
+        /**
+         * BindingSummary
+         * @description A generated sigma-bound rule with its live drift state.
+         */
+        BindingSummary: {
+            /** Rule Id */
+            rule_id: string;
+            /** Sigma Rule Id */
+            sigma_rule_id: string;
+            /**
+             * Display Name
+             * @default
+             */
+            display_name: string;
+            /**
+             * Source
+             * @default
+             */
+            source: string;
+            /**
+             * Source Table
+             * @default
+             */
+            source_table: string;
+            /**
+             * Severity
+             * @default medium
+             */
+            severity: string;
+            /** Hunts */
+            hunts?: string[];
+            /**
+             * Hand Edited
+             * @default false
+             */
+            hand_edited: boolean;
+            /**
+             * Orphaned
+             * @default false
+             */
+            orphaned: boolean;
+            /**
+             * Selected
+             * @default true
+             */
+            selected: boolean;
+            /**
+             * Stale
+             * @default false
+             */
+            stale: boolean;
+            /**
+             * Drift
+             * @default false
+             */
+            drift: boolean;
         };
         /** Body_elastic_converter_api_v1_schemas_elastic_converter_post */
         Body_elastic_converter_api_v1_schemas_elastic_converter_post: {
@@ -3221,6 +3682,67 @@ export interface components {
             argo_namespace_prefix: string;
             /** Notes */
             notes: string;
+        };
+        /**
+         * CatalogRuleDetail
+         * @description A full stored rule: normalised content + provenance + selection state.
+         */
+        CatalogRuleDetail: {
+            /** Id */
+            id: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /** Rule */
+            rule?: {
+                [key: string]: unknown;
+            };
+            /** Provenance */
+            provenance?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Selected
+             * @default false
+             */
+            selected: boolean;
+        };
+        /**
+         * CatalogRuleSummary
+         * @description A catalogue row (no detection payload) for the paginated list.
+         */
+        CatalogRuleSummary: {
+            /** Id */
+            id: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Origin
+             * @default
+             */
+            origin: string;
+            /** Upstream Modified */
+            upstream_modified?: string | null;
+            /**
+             * Local Edited
+             * @default false
+             */
+            local_edited: boolean;
+            /**
+             * Drift
+             * @default false
+             */
+            drift: boolean;
+            /**
+             * Selected
+             * @default false
+             */
+            selected: boolean;
         };
         /**
          * CelCheckBatchRequest
@@ -3350,7 +3872,7 @@ export interface components {
         };
         /**
          * CloudServiceStateResponse
-         * @description CH Cloud service control-plane state (see docs/CLICKHOUSE-CLOUD.md).
+         * @description CH Cloud service control-plane state.
          */
         CloudServiceStateResponse: {
             /**
@@ -3474,6 +3996,37 @@ export interface components {
             window_minutes: number;
             /** Warnings */
             warnings?: string[];
+        };
+        /**
+         * CostLeaderboardRow
+         * @description One cost consumer in the leaderboard (grouped by attribution id).
+         */
+        CostLeaderboardRow: {
+            /**
+             * Id
+             * @description Attribution id (the hunt id for feature='hunts')
+             */
+            id: string;
+            /** Feature */
+            feature: string;
+            /**
+             * Tenant Id
+             * @default
+             */
+            tenant_id: string;
+            /**
+             * Queries
+             * @description Number of queries
+             */
+            queries: number;
+            /** Read Rows */
+            read_rows: number;
+            /** Read Bytes */
+            read_bytes: number;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Peak Memory */
+            peak_memory: number;
         };
         /** CreateAPIKeyRequest */
         CreateAPIKeyRequest: {
@@ -3934,7 +4487,7 @@ export interface components {
         };
         /**
          * FieldMapping
-         * @description A single Sigma field → column mapping.
+         * @description A single Sigma field -> column mapping.
          */
         FieldMapping: {
             /** Sigma Field */
@@ -4876,6 +5429,58 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[BindingSummary] */
+        PaginatedResponse_BindingSummary_: {
+            /** Items */
+            items: components["schemas"]["BindingSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[CatalogRuleSummary] */
+        PaginatedResponse_CatalogRuleSummary_: {
+            /** Items */
+            items: components["schemas"]["CatalogRuleSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /** PaginatedResponse[DeploymentSummary] */
         PaginatedResponse_DeploymentSummary_: {
             /** Items */
@@ -5088,6 +5693,32 @@ export interface components {
         PaginatedResponse_ServiceConfigSummary_: {
             /** Items */
             items: components["schemas"]["ServiceConfigSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[SigmaViewSummary] */
+        PaginatedResponse_SigmaViewSummary_: {
+            /** Items */
+            items: components["schemas"]["SigmaViewSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -5370,6 +6001,96 @@ export interface components {
             key: string;
         };
         /**
+         * PropagateRequest
+         * @description Options for a propagate run over the current sigma selection.
+         */
+        PropagateRequest: {
+            /**
+             * Force
+             * @description Regenerate even over drifted / hand-edited bindings (else skipped)
+             * @default false
+             */
+            force: boolean;
+            /**
+             * Create Hunts
+             * @description Also bind each generated rule into a per-source hunt
+             * @default true
+             */
+            create_hunts: boolean;
+            /**
+             * Hunt Cron
+             * @description Cron for a newly-created per-source hunt
+             * @default *\/15 * * * *
+             */
+            hunt_cron: string;
+            /**
+             * Hunt Target Table
+             * @description global_target_table_name for a new hunt
+             * @default hunt_results
+             */
+            hunt_target_table: string;
+            /**
+             * Hunt Customers
+             * @description customers for a new hunt (operator adjusts later via PUT /hunts)
+             */
+            hunt_customers?: string[];
+        };
+        /**
+         * PropagateResponse
+         * @description Submit/poll envelope for a propagate run (submit -> poll, like the sampler).
+         */
+        PropagateResponse: {
+            /**
+             * Task Id
+             * @description Task ID; poll via GET /sigma/propagations/{task_id}
+             */
+            task_id: string;
+            status: components["schemas"]["TaskStatus"];
+            /** @description Present once completed */
+            report?: components["schemas"]["PropagationReportModel"] | null;
+            /**
+             * Error
+             * @description Present on failure
+             */
+            error?: string | null;
+        };
+        /**
+         * PropagationReportModel
+         * @description Counts + ids from a propagate run.
+         */
+        PropagationReportModel: {
+            /**
+             * Total Selected
+             * @default 0
+             */
+            total_selected: number;
+            /** Created */
+            created?: string[];
+            /** Updated */
+            updated?: string[];
+            /** Skipped Drifted */
+            skipped_drifted?: {
+                [key: string]: unknown;
+            }[];
+            /** Skipped No Source */
+            skipped_no_source?: string[];
+            /** Failed */
+            failed?: {
+                [key: string]: unknown;
+            }[];
+            /** Hunts Touched */
+            hunts_touched?: string[];
+            /**
+             * Stale Bindings
+             * @description Bindings left behind by a deselect (still firing until deleted)
+             */
+            stale_bindings?: {
+                [key: string]: unknown;
+            }[];
+            /** Warnings */
+            warnings?: string[];
+        };
+        /**
          * ProtectedPolicy
          * @description Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.
          *
@@ -5387,6 +6108,63 @@ export interface components {
             /** Protected */
             protected?: string[];
         };
+        /**
+         * ProviderAuth
+         * @description Auth config for a provider - a secret PATH, resolved via DfeSecrets, never a value.
+         */
+        ProviderAuth: {
+            /** @default none */
+            kind: components["schemas"]["AuthKind"];
+            /**
+             * Secret Path
+             * @description Path in the scalo.secrets seam holding the token/key
+             * @default
+             */
+            secret_path: string;
+            /**
+             * Username
+             * @description Git username for token auth (HTTPS)
+             * @default
+             */
+            username: string;
+        };
+        /**
+         * ProviderConfig
+         * @description One external sigma provider - the config the operator CRUDs.
+         *
+         *     `options` is kind-specific: git_repo -> {url, branch, subdir}; valhalla ->
+         *     {base_url, demo}; local_files -> {directory}.
+         */
+        ProviderConfig: {
+            /**
+             * Name
+             * @description Unique provider id (the gitcrud filename key)
+             */
+            name: string;
+            kind: components["schemas"]["ProviderKind"];
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Poll Interval Seconds
+             * @description Minimum seconds between polls (rate-limit budget)
+             * @default 3600
+             */
+            poll_interval_seconds: number;
+            auth?: components["schemas"]["ProviderAuth"];
+            /** Options */
+            options?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * ProviderKind
+         * @description The adapter implementation a provider config selects.
+         * @enum {string}
+         */
+        ProviderKind: "git_repo" | "valhalla" | "local_files";
         /**
          * ProviderResponse
          * @description Provider config — env var names are shown, never actual secret values.
@@ -5661,6 +6439,18 @@ export interface components {
             /** Sql Errors */
             sql_errors?: components["schemas"]["SqlValidationError"][];
             cost_estimate?: components["schemas"]["CostEstimate"] | null;
+        };
+        /**
+         * RuleEditRequest
+         * @description Operator edit of a rule's content (marks it locally edited -> survives re-import).
+         */
+        RuleEditRequest: {
+            /** Rule */
+            rule: {
+                [key: string]: unknown;
+            };
+            /** Title */
+            title?: string | null;
         };
         /** RuleResponse */
         RuleResponse: {
@@ -6238,6 +7028,14 @@ export interface components {
             columns: components["schemas"]["dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2"];
         };
         /**
+         * SelectionResponse
+         * @description The curated selection list (rule ids).
+         */
+        SelectionResponse: {
+            /** Rules */
+            rules?: string[];
+        };
+        /**
          * ServiceConfigDetail
          * @description Full service config. Inner config is dynamic (schema-less mode).
          */
@@ -6344,6 +7142,71 @@ export interface components {
             api_cors_origins: string[];
         };
         /**
+         * SigmaViewColumn
+         * @description One column exposed by a Sigma source-view.
+         *
+         *     A column maps a standard ``sigma_field`` (the alias the view exposes) to EITHER
+         *     a real table column (``source_column``) OR a dotted path inside the source's
+         *     ``_json`` column (``json_path``) - exactly one of the two. ``type`` is an
+         *     optional ClickHouse type the extracted value is CAST to (mainly for a
+         *     JSON-derived column, whose subcolumn is otherwise a ``Dynamic``).
+         */
+        SigmaViewColumn: {
+            /**
+             * Sigma Field
+             * @description Standard Sigma field name (the view alias)
+             */
+            sigma_field: string;
+            /**
+             * Source Column
+             * @description A real column on the source table
+             */
+            source_column?: string | null;
+            /**
+             * Json Path
+             * @description A dotted path inside _json (e.g. 'EventID', 'process.command_line')
+             */
+            json_path?: string | null;
+            /**
+             * Type
+             * @description Optional ClickHouse type to CAST the value to (e.g. 'String', 'UInt32')
+             */
+            type?: string | null;
+        };
+        /**
+         * SigmaViewDefinition
+         * @description A CRUD-managed Sigma view definition for one source.
+         *
+         *     Keyed (in the store) by ``source_name``; the generated view targets table
+         *     ``source_name`` and is named ``{source_name}_sigma``. ``include_source_columns``
+         *     appends ``SELECT *`` so the base table columns remain visible alongside the
+         *     Sigma-aligned aliases (the legacy view's behaviour).
+         */
+        SigmaViewDefinition: {
+            /**
+             * Source Name
+             * @description The _source label the view is for (the store key)
+             */
+            source_name: string;
+            /**
+             * Description
+             * @description Human-readable description
+             * @default
+             */
+            description: string;
+            /**
+             * Columns
+             * @description Sigma-aligned column mappings
+             */
+            columns?: components["schemas"]["SigmaViewColumn"][];
+            /**
+             * Include Source Columns
+             * @description Also SELECT * (keep the base table columns in the view)
+             * @default true
+             */
+            include_source_columns: boolean;
+        };
+        /**
          * SigmaViewResult
          * @description Generated Sigma view DDL for a source.
          */
@@ -6355,6 +7218,56 @@ export interface components {
              * @description DDL for the view, or null if no mappings
              */
             ddl: string | null;
+        };
+        /**
+         * SigmaViewSummary
+         * @description A row in the stored-view-definition list.
+         */
+        SigmaViewSummary: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Column Count
+             * @default 0
+             */
+            column_count: number;
+            /**
+             * Json Derived Count
+             * @default 0
+             */
+            json_derived_count: number;
+        };
+        /**
+         * SigmaViewWriteRequest
+         * @description Create/replace body for a source's Sigma view definition (source_name is the path).
+         *
+         *     Each column maps a Sigma field to a real source column OR a path inside the
+         *     source's ``_json`` payload (a JSON-derived column); the ``SigmaViewColumn``
+         *     validator enforces exactly one per column.
+         */
+        SigmaViewWriteRequest: {
+            /**
+             * Description
+             * @description Human-readable description
+             * @default
+             */
+            description: string;
+            /**
+             * Columns
+             * @description Sigma-aligned column mappings
+             */
+            columns?: components["schemas"]["SigmaViewColumn"][];
+            /**
+             * Include Source Columns
+             * @description Also SELECT * (keep the base table columns in the view)
+             * @default true
+             */
+            include_source_columns: boolean;
         };
         /** SizeResponse */
         SizeResponse: {
@@ -6694,6 +7607,16 @@ export interface components {
              */
             taxonomy?: string | null;
             /**
+             * Category
+             * @description Sigma logsource category this source serves (None = any)
+             */
+            category?: string | null;
+            /**
+             * Service
+             * @description Sigma logsource service this source serves (None = any)
+             */
+            service?: string | null;
+            /**
              * Custom Mappings
              * @description Per-source field overrides (SigmaField: column_name)
              */
@@ -6991,16 +7914,29 @@ export interface components {
              */
             manifest_url: string;
         };
-        /** SyncResponse */
-        SyncResponse: {
-            /** Created */
-            created: number;
-            /** Updated */
-            updated: number;
+        /**
+         * SyncReportModel
+         * @description Counts from a provider sync into the catalogue.
+         */
+        SyncReportModel: {
+            /** Source */
+            source: string;
             /** Total */
             total: number;
-            /** Error */
-            error: string | null;
+            /** Added */
+            added: number;
+            /** Updated */
+            updated: number;
+            /** Skipped */
+            skipped: number;
+            /** Merged */
+            merged: number;
+            /** Committed */
+            committed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /** Warnings */
+            warnings?: string[];
         };
         /**
          * TableInfo
@@ -7529,6 +8465,17 @@ export interface components {
             /** Seeded */
             seeded: number;
         };
+        /** SyncResponse */
+        dfe_engine__api__v1__oidc_providers__SyncResponse: {
+            /** Created */
+            created: number;
+            /** Updated */
+            updated: number;
+            /** Total */
+            total: number;
+            /** Error */
+            error: string | null;
+        };
         /** TestResponse */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
             /** Success */
@@ -7593,6 +8540,25 @@ export interface components {
             valid: boolean;
             /** Errors */
             errors?: string[];
+        };
+        /**
+         * SyncResponse
+         * @description Submit/poll envelope for a provider sync (submit -> poll, like the sampler).
+         */
+        dfe_engine__api__v1__sigma__SyncResponse: {
+            /**
+             * Task Id
+             * @description Task ID; poll via GET /sigma/syncs/{task_id}
+             */
+            task_id: string;
+            status: components["schemas"]["TaskStatus"];
+            /** @description Present once completed */
+            report?: components["schemas"]["SyncReportModel"] | null;
+            /**
+             * Error
+             * @description Present on failure
+             */
+            error?: string | null;
         };
         /**
          * SchemaBuildResult
@@ -8796,7 +9762,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SyncResponse"];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__oidc_providers__SyncResponse"];
                 };
             };
             /** @description Validation Error */
@@ -11136,6 +12102,42 @@ export interface operations {
             };
         };
     };
+    query_cost_leaderboard_api_v1_queries_cost_leaderboard_get: {
+        parameters: {
+            query?: {
+                /** @description Attribution feature to rank (e.g. 'hunts') */
+                feature?: string;
+                /** @description Lookback window in days */
+                days?: number;
+                /** @description Max rows */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostLeaderboardRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sample_source_api_v1_sources__source__sample_post: {
         parameters: {
             query?: never;
@@ -12364,16 +13366,14 @@ export interface operations {
             };
         };
     };
-    generate_sigma_view_api_v1_sigma_views__source_name__post: {
+    list_sigma_view_definitions_api_v1_sigma_views_get: {
         parameters: {
             query?: {
-                /** @description Target database */
-                database?: string;
+                page?: number;
+                per_page?: number;
             };
             header?: never;
-            path: {
-                source_name: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -12384,7 +13384,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SigmaViewResult"];
+                    "application/json": components["schemas"]["PaginatedResponse_SigmaViewSummary_"];
                 };
             };
             /** @description Validation Error */
@@ -12432,11 +13432,143 @@ export interface operations {
             };
         };
     };
+    get_sigma_view_definition_api_v1_sigma_views__source_name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SigmaViewDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_sigma_view_definition_api_v1_sigma_views__source_name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SigmaViewWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SigmaViewDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_sigma_view_api_v1_sigma_views__source_name__post: {
+        parameters: {
+            query?: {
+                /** @description Target database */
+                database?: string;
+            };
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SigmaViewResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_sigma_view_definition_api_v1_sigma_views__source_name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     find_sources_for_logsource_api_v1_sigma_logsource_get: {
         parameters: {
             query?: {
+                /** @description Sigma logsource product (e.g. windows, aws) */
                 product?: string | null;
+                /** @description Sigma logsource category (e.g. process_creation) */
                 category?: string | null;
+                /** @description Sigma logsource service (e.g. sysmon, security) */
                 service?: string | null;
             };
             header?: never;
@@ -12453,6 +13585,690 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["LogsourceMatch"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_providers_api_v1_sigma_providers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"][];
+                };
+            };
+        };
+    };
+    register_provider_api_v1_sigma_providers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderConfig"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_provider_api_v1_sigma_providers__name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_provider_api_v1_sigma_providers__name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderConfig"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_provider_api_v1_sigma_providers__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enable_provider_api_v1_sigma_providers__name__enable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disable_provider_api_v1_sigma_providers__name__disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_provider_endpoint_api_v1_sigma_providers__name__sync_post: {
+        parameters: {
+            query?: {
+                /** @description Only import rules modified since (ISO 8601) */
+                since?: string | null;
+                /** @description Seconds to block for inline completion */
+                wait?: number;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__sigma__SyncResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sync_api_v1_sigma_syncs__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__sigma__SyncResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_catalogue_api_v1_sigma_catalogue_get: {
+        parameters: {
+            query?: {
+                /** @description Search id/title (case-insensitive) */
+                q?: string | null;
+                /** @description Filter by selection state */
+                selected?: boolean | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CatalogRuleSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_catalogue_rule_api_v1_sigma_catalogue__rule_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRuleDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_catalogue_rule_api_v1_sigma_catalogue__rule_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleEditRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRuleDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_catalogue_rule_api_v1_sigma_catalogue__rule_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    adopt_catalogue_rule_api_v1_sigma_catalogue__rule_id__adopt_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRuleDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_selected_api_v1_sigma_selected_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionResponse"];
+                };
+            };
+        };
+    };
+    select_rule_api_v1_sigma_catalogue__rule_id__select_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deselect_rule_api_v1_sigma_catalogue__rule_id__deselect_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    propagate_api_v1_sigma_propagate_post: {
+        parameters: {
+            query?: {
+                /** @description Seconds to block for inline completion */
+                wait?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PropagateRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropagateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_propagation_api_v1_sigma_propagations__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PropagateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_bindings_api_v1_sigma_bindings_get: {
+        parameters: {
+            query?: {
+                /** @description Filter by source label */
+                source?: string | null;
+                /** @description Filter by drift state */
+                drift?: boolean | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_BindingSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_binding_api_v1_sigma_bindings__rule_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BindingSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_binding_api_v1_sigma_bindings__rule_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
