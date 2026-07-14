@@ -70,7 +70,7 @@ export const SampleEventsTabContent = ({
         />
       )} */}
 
-      <ul className="flex flex-col gap-y-3 mt-2 h-[calc(100vh-290px)] css-custom-scrollbar">
+      <ul className="flex flex-col gap-y-3 mt-2">
         {sampleRows?.rows.map((row) => (
           <li key={row._uuid as string}>
             <SampleRowsCard row={row} />

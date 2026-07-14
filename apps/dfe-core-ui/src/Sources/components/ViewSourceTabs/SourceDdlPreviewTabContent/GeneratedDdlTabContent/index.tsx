@@ -13,7 +13,7 @@ export const GeneratedDdlTabContent = ({
   create_table?: string;
 }) => {
   const { componentHeight } = useSetComponentHeight({
-    offset: 280,
+    offset: 450,
   });
 
   if (!create_table)

@@ -40,8 +40,8 @@ export const ViewSourceDetail = () => {
 
   return (
     <>
-      <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+      <div className="h-[calc(100vh-125px)] pr-4 flex flex-col gap-4 overflow-hidden min-h-0">
+        <div className="flex shrink-0 items-center justify-between">
           <h4 className="flex items-center w-full gap-2 text-lg font-medium">
             <span className="text-foreground/50 dark:text-dark-foreground/50">
               Source Configuration:
@@ -55,12 +55,16 @@ export const ViewSourceDetail = () => {
           </h4>
           <SourceDetailActionMenu source={sourceDetailData} />
         </div>
-        <SourceDetailHighlight source={sourceDetailData} />
-        <ViewSourceDetailTabs
-          selectedSourceName={source_name ?? ''}
-          selectedSourceVersion={source_version ?? ''}
-          {...sourceDetailData}
-        />
+        <div className="shrink-0">
+          <SourceDetailHighlight source={sourceDetailData} />
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <ViewSourceDetailTabs
+            selectedSourceName={source_name ?? ''}
+            selectedSourceVersion={source_version ?? ''}
+            {...sourceDetailData}
+          />
+        </div>
       </div>
     </>
   );
