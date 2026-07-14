@@ -6853,7 +6853,10 @@ export interface components {
         };
         /**
          * SchemaDeployResult
-         * @description Plan / deploy result for a source's schema.
+         * @description Persisted (and API) result of planning/deploying a source version's schema.
+         *
+         *     Same object returned by ``POST /api/v1/sources/{name}/deploy`` and nested under
+         *     ``source_deployment`` on version detail.
          */
         SchemaDeployResult: {
             /** Source Name */
@@ -7284,28 +7287,6 @@ export interface components {
             service_config_overrides?: {
                 [key: string]: unknown;
             };
-        };
-        /**
-         * SourceDeployResponse
-         * @description Result of deploying a source version to ClickHouse.
-         */
-        SourceDeployResponse: {
-            /** Source Name */
-            source_name: string;
-            /** Version */
-            version: string;
-            /** Success */
-            success: boolean;
-            /** Deployed Version */
-            deployed_version?: string | null;
-            /** Deployed At */
-            deployed_at: string;
-            /** Ddl Executed */
-            ddl_executed?: string[];
-            /** Ddl Failed */
-            ddl_failed?: {
-                [key: string]: string;
-            }[];
         };
         /**
          * SourceDetailResponse
@@ -7757,7 +7738,7 @@ export interface components {
             /** @description Last schema build for this version (source-builds) */
             source_build?: components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"] | null;
             /** @description Last deploy run for this version (source-deploys) */
-            source_deployment?: components["schemas"]["SourceDeployResponse"] | null;
+            source_deployment?: components["schemas"]["SchemaDeployResult"] | null;
         };
         /**
          * SourceVersionGetDetailResponse
