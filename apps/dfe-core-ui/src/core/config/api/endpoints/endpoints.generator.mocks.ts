@@ -42,6 +42,7 @@ import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetP
 import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/types';
 import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types';
 import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
+import { TCreateOidcProviderResponse } from '@/Settings/hooks/useCreateOidcProvider/types';
 import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
 import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
 import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
@@ -3379,9 +3380,55 @@ export const API_CONFIG_MOCKS = Object.freeze({
   oidc_providers: {
     default: {
       mockedUrl: '/api/v1/auth/oidc-providers',
-      get: {
-        success: () => {
-          console.error('Not implemented');
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            display_name: 'string',
+            enabled: true,
+            type: 'generic',
+            issuer: 'string',
+            client_id_env: 'string',
+            created_at: 'string',
+            last_sync_at: 'string',
+            last_sync_status: 'string',
+            sync_error: 'string',
+            groups: {
+              mode: 'manual',
+              claim_name: 'string',
+              sync_interval: 1000,
+              service_account_json_env: 'string',
+              admin_email: 'string',
+              domain: 'string',
+              tenant_id_env: 'string',
+              client_secret_env: 'string',
+              api_token_env: 'string',
+              okta_domain: 'string',
+            },
+          },
+        }: {
+          mockedResponse?: TCreateOidcProviderResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.oidc_providers.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.oidc_providers.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
