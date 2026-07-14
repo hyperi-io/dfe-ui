@@ -49,6 +49,7 @@ import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/t
 import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
 import { TAccountsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
+import { TListOidcProvidersResponse } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
 import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
@@ -3380,6 +3381,67 @@ export const API_CONFIG_MOCKS = Object.freeze({
   oidc_providers: {
     default: {
       mockedUrl: '/api/v1/auth/oidc-providers',
+      get: {
+        success: ({
+          mockedResponse = {
+            items: [
+              {
+                name: 'string',
+                type: 'string',
+                enabled: true,
+                display_name: 'string',
+                issuer: 'string',
+                client_id_env: 'string',
+                created_at: 'string',
+                last_sync_at: 'string',
+                last_sync_status: 'string',
+                sync_error: 'string',
+                groups: {
+                  mode: 'string',
+                  claim_name: 'string',
+                  sync_interval: 1000,
+                  service_account_json_env: 'string',
+                  admin_email: 'string',
+                  domain: 'string',
+                  tenant_id_env: 'string',
+                  client_secret_env: 'string',
+                  api_token_env: 'string',
+                  okta_domain: 'string',
+                },
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 10,
+            total_pages: 1,
+            next_page: 1,
+            prev_page: 1,
+          },
+        }: {
+          mockedResponse?: TListOidcProvidersResponse;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.oidc_providers.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.oidc_providers.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
       post: {
         success: ({
           mockedResponse = {
