@@ -3358,4 +3358,56 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
+  oidc: {
+    login: {
+      mockedUrl: '/api/v1/auth/oidc/{provider}/login',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    callback: {
+      mockedUrl: '/api/v1/auth/oidc/{provider}/callback',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
+  oidc_providers: {
+    default: {
+      mockedUrl: '/api/v1/auth/oidc-providers',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    provider: {
+      mockedUrl: '/api/v1/auth/oidc-providers/{name}',
+      get: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    sync: {
+      mockedUrl: '/api/v1/auth/oidc-providers/{name}/sync',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+    test: {
+      mockedUrl: '/api/v1/auth/oidc-providers/{name}/test',
+      post: {
+        success: () => {
+          console.error('Not implemented');
+        },
+      },
+    },
+  },
 });

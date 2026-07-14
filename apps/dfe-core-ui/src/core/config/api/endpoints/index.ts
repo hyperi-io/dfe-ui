@@ -92,4 +92,14 @@ export const API_CONFIG = Object.freeze({
     hunt: '/api/v1/hunts/{name}',
     huntRun: '/api/v1/hunts/{name}/run',
   },
+  oidc: {
+    login: '/api/v1/auth/oidc/{provider}/login',
+    callback: '/api/v1/auth/oidc/{provider}/callback',
+  },
+  oidc_providers: {
+    default: '/api/v1/auth/oidc-providers',
+    provider: '/api/v1/auth/oidc-providers/{name}',
+    sync: '/api/v1/auth/oidc-providers/{name}/sync',
+    test: '/api/v1/auth/oidc-providers/{name}/test',
+  },
 } as const satisfies Record<string, Record<string, keyof paths>>);
