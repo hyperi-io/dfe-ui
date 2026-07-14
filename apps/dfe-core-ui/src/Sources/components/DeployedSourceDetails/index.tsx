@@ -2,6 +2,7 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 
@@ -10,7 +11,10 @@ export const DeployedSourceDetails = ({
   isPending,
   error,
 }: {
-  data: TSourceDeployResponse | undefined;
+  data:
+    | TSourceDeployResponse
+    | TSourceVersionDetail['version']['source_deployment']
+    | undefined;
   isPending: boolean;
   error: Error | null;
 }) => {

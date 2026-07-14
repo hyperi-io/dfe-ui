@@ -1,5 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { cn } from '@/core/utils/style';
 import { DeployedSourceDetails } from '@/Sources/components/DeployedSourceDetails';
 import { useDeploySource } from '@/Sources/hooks/useDeploySource';
 import { usePlanSource } from '@/Sources/hooks/usePlanSource';
@@ -13,11 +14,15 @@ export const DeploySourceDrawer = ({
   onClose,
   source_name,
   version,
+  classNames,
 }: {
   open?: boolean;
   onClose?: () => void;
   source_name: string;
   version: string;
+  classNames?: {
+    button?: string;
+  };
 }) => {
   const title = 'Deploy Source';
   const [isDrawerVisible, setIsDrawerVisible] = useState(open);
@@ -41,7 +46,7 @@ export const DeploySourceDrawer = ({
       <RbacProtected action={RbacProtected.rbacActions.source_deploy}>
         <RbacProtected.Unrestricted>
           <Button
-            className="flex items-center gap-2"
+            className={cn('flex items-center gap-2', classNames?.button)}
             type="primary"
             onClick={() => handleTriggerPlan()}
           >
@@ -54,7 +59,11 @@ export const DeploySourceDrawer = ({
             placement: 'bottom',
           }}
         >
-          <Button className="flex items-center gap-2" type="primary" disabled>
+          <Button
+            className={cn('flex items-center gap-2', classNames?.button)}
+            type="primary"
+            disabled
+          >
             Deploy <IconRocket />
           </Button>
         </RbacProtected.Restricted>

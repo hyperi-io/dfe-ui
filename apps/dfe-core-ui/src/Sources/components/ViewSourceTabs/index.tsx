@@ -70,9 +70,13 @@ export const ViewSourceDetailTabs = ({
   const { isMetaSchemaDefined } = useSourceDetailsContext();
   return (
     <Tabs
-      className={cn('flex-1 min-h-0 -mt-3 [&_.ant-tabs-content]:h-full')}
       classNames={{
-        content: 'h-full',
+        root: cn(
+          'flex min-h-0 flex-1 flex-col -mt-3',
+          '[&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:flex-1',
+          '[&_.ant-tabs-content]:h-full',
+        ),
+        content: 'h-full min-h-0 overflow-y-auto css-custom-scrollbar',
       }}
       activeKey={activeTab}
       onChange={handleTabChange}
