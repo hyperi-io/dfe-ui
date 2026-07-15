@@ -38,10 +38,7 @@ const normalizeAttribute = (raw: unknown): string[] => {
 };
 
 export const listItemFromPartial = (
-  column: Partial<UploadedSchemaRow> & {
-    _field_type?: string;
-    ch_override?: string;
-  },
+  column: Partial<UploadedSchemaRow>,
 ): z.infer<typeof rowSchema> => {
   const name = String(rowLookup(column, 'name', 'Name') ?? '');
   const type = String(rowLookup(column, 'type', 'Type') ?? '');

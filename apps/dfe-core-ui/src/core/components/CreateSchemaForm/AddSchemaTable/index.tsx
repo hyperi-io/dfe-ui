@@ -112,7 +112,6 @@ export const AddSchemaTable = ({
   lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
-
   ...tableProps
 }: AddSchemaTableProps) => {
   const visibleColumns = visibleColumnsProp ?? [

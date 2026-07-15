@@ -434,7 +434,7 @@ export const CreateSchemaFormProvider = ({
         if (!Array.isArray(rows)) continue;
 
         const marked = withUserDefinedFieldTypeOnEditedRows(
-          rows as { _field_type?: string }[],
+          rows,
           editedIndices,
         );
         const normalized = marked.map((column) => listItemFromPartial(column));

@@ -80,6 +80,19 @@ export const TableLayout = ({
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      render: (type: string, record: { ch_override?: string }) => {
+        if (!record.ch_override) {
+          return type;
+        }
+        return (
+          <span className="flex items-center gap-1">
+            {type}
+            <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10">
+              {record.ch_override}
+            </span>
+          </span>
+        );
+      },
     },
     {
       title: 'Attribute',
