@@ -48,110 +48,93 @@ type AdvancedColumnTypeOption = {
   label: React.ReactNode;
   value: string;
   primitive: string;
-  chOverride?: string;
 };
 
 export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
   // ── Advanced: integers (base type: integer) ──────────────────
   {
     label: <LabelWithHintTooltip label="Int8" hint="Base type: integer" />,
-    value: 'integer:Int8',
+    value: 'Int8',
     primitive: 'integer',
-    chOverride: 'Int8',
   },
   {
     label: <LabelWithHintTooltip label="Int16" hint="Base type: integer" />,
-    value: 'integer:Int16',
+    value: 'Int16',
     primitive: 'integer',
-    chOverride: 'Int16',
   },
   {
     label: <LabelWithHintTooltip label="Int32" hint="Base type: integer" />,
-    value: 'integer:Int32',
+    value: 'Int32',
     primitive: 'integer',
-    chOverride: 'Int32',
   },
   {
     label: <LabelWithHintTooltip label="Int64" hint="Base type: integer" />,
-    value: 'integer:Int64',
+    value: 'Int64',
     primitive: 'integer',
-    chOverride: 'Int64',
   },
   {
     label: <LabelWithHintTooltip label="Int128" hint="Base type: integer" />,
-    value: 'integer:Int128',
+    value: 'Int128',
     primitive: 'integer',
-    chOverride: 'Int128',
   },
   {
     label: <LabelWithHintTooltip label="Int256" hint="Base type: integer" />,
-    value: 'integer:Int256',
+    value: 'Int256',
     primitive: 'integer',
-    chOverride: 'Int256',
   },
   {
     label: <LabelWithHintTooltip label="UInt8" hint="Base type: integer" />,
-    value: 'integer:UInt8',
+    value: 'UInt8',
     primitive: 'integer',
-    chOverride: 'UInt8',
   },
   {
     label: <LabelWithHintTooltip label="UInt16" hint="Base type: integer" />,
-    value: 'integer:UInt16',
+    value: 'UInt16',
     primitive: 'integer',
-    chOverride: 'UInt16',
   },
   {
     label: <LabelWithHintTooltip label="UInt32" hint="Base type: integer" />,
-    value: 'integer:UInt32',
+    value: 'UInt32',
     primitive: 'integer',
-    chOverride: 'UInt32',
   },
   {
     label: <LabelWithHintTooltip label="UInt64" hint="Base type: integer" />,
-    value: 'integer:UInt64',
+    value: 'UInt64',
     primitive: 'integer',
-    chOverride: 'UInt64',
   },
   {
     label: <LabelWithHintTooltip label="UInt128" hint="Base type: integer" />,
-    value: 'integer:UInt128',
+    value: 'UInt128',
     primitive: 'integer',
-    chOverride: 'UInt128',
   },
   {
     label: <LabelWithHintTooltip label="UInt256" hint="Base type: integer" />,
-    value: 'integer:UInt256',
+    value: 'UInt256',
     primitive: 'integer',
-    chOverride: 'UInt256',
   },
 
   // ── Advanced: floats & decimals (base: float) ──────────────────
   {
     label: <LabelWithHintTooltip label="Float32" hint="Base type: float" />,
-    value: 'float:Float32',
+    value: 'Float32',
     primitive: 'float',
-    chOverride: 'Float32',
   },
   {
     label: <LabelWithHintTooltip label="Float64" hint="Base type: float" />,
-    value: 'float:Float64',
+    value: 'Float64',
     primitive: 'float',
-    chOverride: 'Float64',
   },
   {
     label: (
       <LabelWithHintTooltip label="Decimal (fixed)" hint="Base type: float" />
     ),
-    value: 'float:Decimal',
+    value: 'Decimal',
     primitive: 'float',
-    chOverride: 'Decimal(18, 4)',
   },
   {
     label: <LabelWithHintTooltip label="Decimal64" hint="Base type: float" />,
-    value: 'float:Decimal64',
+    value: 'Decimal64',
     primitive: 'float',
-    chOverride: 'Decimal64(8)',
   },
 
   // ── Advanced: strings (base: string) ─────────────────────────
@@ -159,9 +142,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
     label: (
       <LabelWithHintTooltip label="FixedString" hint="Base type: string" />
     ),
-    value: 'string:FixedString',
+    value: 'FixedString',
     primitive: 'string',
-    chOverride: 'FixedString(16)',
   },
 
   // ── Advanced: dates & times ───────────────────────────────────
@@ -172,9 +154,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: datetime"
       />
     ),
-    value: 'datetime:DateTime',
+    value: 'DateTime',
     primitive: 'datetime',
-    chOverride: 'DateTime',
   },
   {
     label: (
@@ -183,9 +164,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: datetime"
       />
     ),
-    value: 'datetime:DateTime64_6',
+    value: 'DateTime64_6',
     primitive: 'datetime',
-    chOverride: "DateTime64(6,'UTC')",
   },
   {
     label: (
@@ -194,45 +174,39 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: datetime"
       />
     ),
-    value: 'datetime:DateTime64_9',
+    value: 'DateTime64_9',
     primitive: 'datetime',
-    chOverride: "DateTime64(9,'UTC')",
   },
   {
     label: <LabelWithHintTooltip label="Date32" hint="Base type: date" />,
-    value: 'date:Date32',
+    value: 'Date32',
     primitive: 'date',
-    chOverride: 'Date32',
   },
 
   // ── Advanced: network ─────────────────────────────────────────
   {
     label: <LabelWithHintTooltip label="IPv4" hint="Base type: ip" />,
-    value: 'ip:IPv4',
+    value: 'IPv4',
     primitive: 'ip',
-    chOverride: 'IPv4',
   },
 
   // ── Advanced: geo (base: json — no extra geo primitive) ───────
   {
     label: <LabelWithHintTooltip label="Geo Ring" hint="Base type: json" />,
-    value: 'json:Ring',
+    value: 'Ring',
     primitive: 'json',
-    chOverride: 'Ring',
   },
   {
     label: <LabelWithHintTooltip label="Geo Polygon" hint="Base type: json" />,
-    value: 'json:Polygon',
+    value: 'Polygon',
     primitive: 'json',
-    chOverride: 'Polygon',
   },
   {
     label: (
       <LabelWithHintTooltip label="Geo MultiPolygon" hint="Base type: json" />
     ),
-    value: 'json:MultiPolygon',
+    value: 'MultiPolygon',
     primitive: 'json',
-    chOverride: 'MultiPolygon',
   },
 
   // ── Advanced: semi-structured / CH JSON column ─────────────────
@@ -243,9 +217,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: json (experimental). Semi-structured ClickHouse JSON column."
       />
     ),
-    value: 'json:Dynamic',
+    value: 'Dynamic',
     primitive: 'json',
-    chOverride: 'Dynamic',
   },
 
   // ── Advanced: compound (base: json; limited indexing) ───────────
@@ -256,9 +229,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: json. Limited indexing."
       />
     ),
-    value: 'json:ArrayString',
+    value: 'ArrayString',
     primitive: 'json',
-    chOverride: 'Array(String)',
   },
   {
     label: (
@@ -267,9 +239,8 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: json. Limited indexing."
       />
     ),
-    value: 'json:MapStringString',
+    value: 'MapStringString',
     primitive: 'json',
-    chOverride: 'Map(String,String)',
   },
   {
     label: (
@@ -278,16 +249,14 @@ export const ADVANCED_OPTIONS: AdvancedColumnTypeOption[] = [
         hint="Base type: json. Limited indexing."
       />
     ),
-    value: 'json:Tuple',
+    value: 'Tuple',
     primitive: 'json',
-    chOverride: 'Tuple(String, Int64)',
   },
   // ── Advanced: enum width (still use primitive enum + default) ─
   {
     label: <LabelWithHintTooltip label="Enum16" hint="Base type: enum" />,
-    value: 'enum:Enum16',
+    value: 'Enum16',
     primitive: 'enum',
-    chOverride: "Enum16('a'=1,'b'=2)",
   },
 ];
 

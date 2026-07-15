@@ -231,16 +231,30 @@ export const AddSchemaTable = ({
             title: 'Type',
             dataIndex: 'type',
             key: 'type',
+            width: 250,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
 
               const typeFormName = [rowIndex, 'type'];
+              const chOverrideFormName = [rowIndex, 'ch_override'];
               return (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-between w-full">
                   <Form.Item
                     {...restField}
                     name={typeFormName}
                     rules={[formValidation]}
+                    getValueFromEvent={(event) => {
+                      const nextType =
+                        event && typeof event === 'object' && 'target' in event
+                          ? (event as { target: { value: unknown } }).target
+                              .value
+                          : event;
+                      form.setFieldValue(
+                        [name, rowIndex, 'ch_override'],
+                        undefined,
+                      );
+                      return nextType;
+                    }}
                   >
                     <InlineEditSelect
                       options={PRIMITIVE_OPTIONS}
@@ -255,10 +269,14 @@ export const AddSchemaTable = ({
                     />
                   </Form.Item>
 
-                  <Form.Item name={[rowIndex, 'ch_override']}>
+                  <Form.Item {...restField} name={chOverrideFormName}>
                     <TypeOverrideSelect
                       form={form}
-                      typeDetails={{ name: [name, rowIndex, 'type'] }}
+                      className="shrink"
+                      typeDetails={{
+                        type_form_name: [name, ...typeFormName],
+                        ch_override_form_name: [name, ...chOverrideFormName],
+                      }}
                     />
                   </Form.Item>
                 </div>
