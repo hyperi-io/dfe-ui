@@ -1,3 +1,4 @@
+import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -67,6 +68,18 @@ export const SourceColumnsTabContent = ({
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      render: (value: string, record: SchemaColumnRow) => {
+        return (
+          <span className="flex items-center gap-1">
+            {value}
+            {record.ch_override && (
+              <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10 ml-auto">
+                Override: {record.ch_override}
+              </span>
+            )}
+          </span>
+        );
+      },
     },
     {
       title: 'Attribute',
@@ -86,7 +99,7 @@ export const SourceColumnsTabContent = ({
   ];
 
   return (
-    <SchemaTable
+    <SchemaTable<SchemaColumnRow>
       rowKey="name"
       title={() => (
         <div className="flex items-center justify-between w-full">

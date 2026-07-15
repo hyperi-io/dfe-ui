@@ -87,8 +87,8 @@ export const TableLayout = ({
         return (
           <span className="flex items-center gap-1">
             {type}
-            <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10">
-              {record.ch_override}
+            <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10 ml-auto">
+              Override: {record.ch_override}
             </span>
           </span>
         );

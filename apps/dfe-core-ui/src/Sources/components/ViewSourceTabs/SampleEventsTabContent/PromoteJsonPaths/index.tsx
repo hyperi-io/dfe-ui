@@ -51,7 +51,6 @@ export const PromoteJsonPaths = ({
     return (
       data?.diff?.new_columns?.map((column) => ({
         ...column,
-        attribute: column.attribute?.split(','),
         id: column.name,
         _field_type: column._field_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
       })) ?? []

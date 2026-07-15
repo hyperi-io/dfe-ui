@@ -132,15 +132,23 @@ export const ViewSchemaDetails = ({
         dataIndex: 'type',
         key: 'type',
         ...columnFilter('Type', 'type'),
-        render: (type: string) =>
-          renderSchemaDetailFilteredCell({
-            value: type,
-            filterTerms: [columnFilters.type, columnFilters.search],
-            isSearchable:
-              showSearchableColumns?.selectedSearchableColumns.includes(
-                'type',
-              ) ?? false,
-          }),
+        render: (type: string, record: SchemaColumnItem) => (
+          <span className="flex items-center gap-1">
+            {renderSchemaDetailFilteredCell({
+              value: type,
+              filterTerms: [columnFilters.type, columnFilters.search],
+              isSearchable:
+                showSearchableColumns?.selectedSearchableColumns.includes(
+                  'type',
+                ) ?? false,
+            })}
+            {record.ch_override ? (
+              <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10 ml-auto">
+                Override: {record.ch_override}
+              </span>
+            ) : null}
+          </span>
+        ),
       },
       {
         dataIndex: 'attribute',
