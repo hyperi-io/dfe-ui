@@ -714,7 +714,7 @@ export interface paths {
          *     Before the first deploy, edits update the working version in place. After deploy, a new
          *     major version is created only when ``current`` equals ``deployed_version`` and schema pins
          *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
-         *     ``field_mappings``, ``sigma``, or ``transform`` change. Draft versions (``current`` not deployed) update
+         *     ``views``, or ``transform`` change. Draft versions (``current`` not deployed) update
          *     in place.
          *
          *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
@@ -731,10 +731,11 @@ export interface paths {
         head?: never;
         /**
          * Patch Source Enabled
-         * @description Enable or disable a source without changing versioned configuration.
+         * @description Set a source's lifecycle state without changing versioned configuration.
          *
-         *     Does not create a new source version. Enabling may return ``409 match_conflict``
-         *     if another enabled source already uses the same receiver match rule.
+         *     Does not create a new source version. Activating may return ``409
+         *     match_conflict`` if another non-disabled source already uses the same
+         *     receiver match rule.
          */
         patch: operations["patch_source_enabled_api_v1_sources__name__patch"];
         trace?: never;
@@ -750,7 +751,7 @@ export interface paths {
         put?: never;
         /**
          * Bulk Action
-         * @description Perform a bulk action (enable, disable, delete) on multiple sources.
+         * @description Perform a bulk action (enable, disable, dormant, delete) on multiple sources.
          */
         post: operations["bulk_action_api_v1_sources_bulk_post"];
         delete?: never;
@@ -3622,7 +3623,7 @@ export interface components {
         BulkActionRequest: {
             /**
              * Action
-             * @description Action: enable, disable, delete
+             * @description Action: enable, disable, dormant, delete
              */
             action: string;
             /**
@@ -7152,7 +7153,8 @@ export interface components {
          *     a real table column (``source_column``) OR a dotted path inside the source's
          *     ``_json`` column (``json_path``) - exactly one of the two. ``type`` is an
          *     optional ClickHouse type the extracted value is CAST to (mainly for a
-         *     JSON-derived column, whose subcolumn is otherwise a ``Dynamic``).
+         *     JSON-derived column, whose subcolumn is otherwise a ``Dynamic``). This is the
+         *     Sigma-named shape of :class:`~dfe_engine.fieldmap.remap_view.RemapColumn`.
          */
         SigmaViewColumn: {
             /**
@@ -7309,11 +7311,12 @@ export interface components {
              */
             description?: string | null;
             /**
-             * Enabled
-             * @description Whether the source is active
-             * @default true
+             * State
+             * @description Lifecycle state: active (all on), dormant (schema pre-positioned, routing/transform off), disabled (all off, table reclaimed)
+             * @default active
+             * @enum {string}
              */
-            enabled: boolean;
+            state: "active" | "dormant" | "disabled";
             /**
              * Deployed Version
              * @description Version deployed to ClickHouse / runtime (null until first deploy)
@@ -7332,6 +7335,13 @@ export interface components {
             versions?: {
                 [key: string]: components["schemas"]["SourceVersionDetail"];
             };
+            /**
+             * Enabled
+             * @description Compat accessor over the tri-state: enabled == (state == active).
+             *
+             *     Serialized on API responses so boolean consumers keep working.
+             */
+            readonly enabled: boolean;
             /** @description Receiver match rule on the deployed version (serialized for API compat). */
             readonly match: components["schemas"]["SourceMatch"] | null;
             /** @description Transform config on the deployed version (serialized for API compat). */
@@ -7339,14 +7349,23 @@ export interface components {
         };
         /**
          * SourceEnabledPatchRequest
-         * @description Partial update for source enabled status only.
+         * @description Partial update for source lifecycle state only.
+         *
+         *     Send ``state`` for the tri-state (active | dormant | disabled), or the
+         *     compat boolean ``enabled`` (True -> active, False -> disabled). ``state``
+         *     wins when both are sent.
          */
         SourceEnabledPatchRequest: {
             /**
              * Enabled
-             * @description Whether the source is active
+             * @description Compat boolean lifecycle (True -> active, False -> disabled)
              */
-            enabled: boolean;
+            enabled?: boolean | null;
+            /**
+             * State
+             * @description Tri-state lifecycle (active | dormant | disabled); wins over enabled
+             */
+            state?: ("active" | "dormant" | "disabled") | null;
         };
         /**
          * SourceFetcher
@@ -7578,34 +7597,6 @@ export interface components {
             readonly prev_page: number | null;
         };
         /**
-         * SourceSigma
-         * @description Sigma field mapping configuration for this source.
-         */
-        SourceSigma: {
-            /**
-             * Taxonomy
-             * @description Built-in mapping set (e.g. 'windows')
-             */
-            taxonomy?: string | null;
-            /**
-             * Category
-             * @description Sigma logsource category this source serves (None = any)
-             */
-            category?: string | null;
-            /**
-             * Service
-             * @description Sigma logsource service this source serves (None = any)
-             */
-            service?: string | null;
-            /**
-             * Custom Mappings
-             * @description Per-source field overrides (SigmaField: column_name)
-             */
-            custom_mappings?: {
-                [key: string]: string;
-            };
-        };
-        /**
          * SourceSummaryObject
          * @description Summary row for paginated source list (mirrors ``SchemaSummaryObject``).
          */
@@ -7626,8 +7617,15 @@ export interface components {
              */
             description?: string | null;
             /**
+             * State
+             * @description Lifecycle state
+             * @default active
+             * @enum {string}
+             */
+            state: "active" | "dormant" | "disabled";
+            /**
              * Enabled
-             * @description Whether the source is active
+             * @description Compat accessor (state == active)
              * @default true
              */
             enabled: boolean;
@@ -7670,10 +7668,10 @@ export interface components {
              */
             has_fetcher: boolean;
             /**
-             * Mapping Standards
-             * @description Mapping standards on the deployed version
+             * Views
+             * @description Naming-standard views on the deployed version (standard names)
              */
-            mapping_standards?: string[];
+            views?: string[];
         };
         /**
          * SourceTransform
@@ -7718,17 +7716,10 @@ export interface components {
             /** @description Schema configuration (None when the version did not author one) */
             schema?: components["schemas"]["SourceSchema"] | null;
             /**
-             * Mapping Standards
-             * @description Standards to generate mapping views for (e.g. sigma, ecs, cim)
+             * Views
+             * @description Naming-standard views this version exposes (sigma, ecs, cim, ocsf)
              */
-            mapping_standards?: string[];
-            /** @description Sigma field mappings (optional) */
-            sigma?: components["schemas"]["SourceSigma"] | null;
-            /**
-             * Field Mappings
-             * @description Field map registry paths for this version (optional)
-             */
-            field_mappings?: string[] | null;
+            views?: components["schemas"]["SourceView"][];
             /** @description SaaS API fetcher (optional) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /** @description Receiver match rule (required) */
@@ -7761,8 +7752,15 @@ export interface components {
              */
             description?: string | null;
             /**
+             * State
+             * @description Lifecycle state
+             * @default active
+             * @enum {string}
+             */
+            state: "active" | "dormant" | "disabled";
+            /**
              * Enabled
-             * @description Whether the source is active
+             * @description Compat accessor (state == active)
              * @default true
              */
             enabled: boolean;
@@ -7795,6 +7793,48 @@ export interface components {
             version: components["schemas"]["SourceVersionDetail"];
         };
         /**
+         * SourceView
+         * @description A naming-standard view this source exposes (sigma, ecs, cim, ocsf).
+         *
+         *     Collapses the former ``mapping_standards`` + ``sigma`` + ``field_mappings``
+         *     trio into one generic entry per standard. Inline ``custom_mappings`` WIN
+         *     over the registry ``field_map`` when both are present.
+         */
+        SourceView: {
+            /**
+             * Standard
+             * @description Naming standard (sigma, ecs, cim, ocsf)
+             */
+            standard: string;
+            /**
+             * Field Map
+             * @description FieldMap registry path for this view (optional)
+             */
+            field_map?: string | null;
+            /**
+             * Custom Mappings
+             * @description Inline per-source field overrides (standard_field: column_name); wins over the registry field_map
+             */
+            custom_mappings?: {
+                [key: string]: string;
+            };
+            /**
+             * Taxonomy
+             * @description Sigma logsource product this source serves (sigma views only)
+             */
+            taxonomy?: string | null;
+            /**
+             * Category
+             * @description Sigma logsource category this source serves (None = any)
+             */
+            category?: string | null;
+            /**
+             * Service
+             * @description Sigma logsource service this source serves (None = any)
+             */
+            service?: string | null;
+        };
+        /**
          * SourceWriteRequest
          * @description Flat source definition for create/update API (no version tree).
          */
@@ -7816,10 +7856,15 @@ export interface components {
             description?: string | null;
             /**
              * Enabled
-             * @description Whether the source is active
+             * @description Compat boolean lifecycle (True -> active, False -> disabled); ``state`` wins when both are sent
              * @default true
              */
             enabled: boolean;
+            /**
+             * State
+             * @description Tri-state lifecycle (active | dormant | disabled); overrides ``enabled``
+             */
+            state?: ("active" | "dormant" | "disabled") | null;
             /** @description Receiver match rule (required) */
             match: components["schemas"]["SourceMatch"];
             /** @description Common schema header configuration for this revision */
@@ -7830,18 +7875,11 @@ export interface components {
             transform?: components["schemas"]["SourceTransform"] | null;
             /** @description SaaS API fetcher (optional) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
-            /** @description Sigma field mappings (optional) */
-            sigma?: components["schemas"]["SourceSigma"] | null;
             /**
-             * Mapping Standards
-             * @description Standards to generate mapping views for
+             * Views
+             * @description Naming-standard views for this revision (sigma, ecs, cim, ocsf)
              */
-            mapping_standards?: string[] | null;
-            /**
-             * Field Mappings
-             * @description Field map registry paths for this revision
-             */
-            field_mappings?: string[] | null;
+            views?: components["schemas"]["SourceView"][] | null;
         };
         /** SqlValidationError */
         SqlValidationError: {
