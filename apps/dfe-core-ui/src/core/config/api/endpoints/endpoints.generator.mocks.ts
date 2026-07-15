@@ -203,7 +203,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 header_type: 'string',
                 has_transform: false,
                 has_fetcher: false,
-                mapping_standards: ['string'],
+                state: 'active',
               },
             ],
             objects: {
@@ -276,6 +276,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             versions: ['1.0.0'],
             selected: '1.0.0',
             previous_deployed_versions: ['1.0.0'],
+            state: 'active',
             version: {
               date_time: 'string',
               header: {
@@ -288,14 +289,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 ttl_days: 0,
                 engine: 'string',
               },
-              mapping_standards: ['string'],
-              sigma: {
-                taxonomy: 'string',
-                custom_mappings: {
-                  string: 'string',
-                },
-              },
-              field_mappings: ['string'],
               fetcher: {
                 source_type: 'string',
                 base_url: 'string',
@@ -568,6 +561,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
             deployed_version: 'string',
             selected: 'string',
             versions: ['string'],
+            state: 'active',
             version: {
               date_time: 'string',
               header: {
@@ -580,14 +574,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
                 ttl_days: 0,
                 engine: 'string',
               },
-              mapping_standards: ['string'],
-              sigma: {
-                taxonomy: 'string',
-                custom_mappings: {
-                  string: 'string',
-                },
-              },
-              field_mappings: ['string'],
               fetcher: {
                 source_type: 'string',
                 base_url: 'string',

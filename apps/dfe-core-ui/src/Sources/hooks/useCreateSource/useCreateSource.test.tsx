@@ -57,7 +57,7 @@ describe('.useCreateSource', () => {
       },
       poll_interval_secs: 0,
     },
-    mapping_standards: ['string'],
+    state: 'active',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {

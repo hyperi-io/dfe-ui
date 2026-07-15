@@ -61,20 +61,11 @@ export const ConfigurationDetailsTabContent = ({
   deployed_version,
 
   selected: selected_version,
-  version: {
-    header,
-    schema,
-    transform,
-    match,
-    fetcher,
-    mapping_standards,
-    source_build,
-  },
+  version: { header, schema, transform, match, fetcher, source_build },
 }: TSourceVersionDetail) => {
   const hasSchema = schema?.meta_schema || header?.type;
   const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
-  const hasMappingStandards =
-    mapping_standards && mapping_standards?.length > 0;
+
   return (
     <div className="relative h-full min-h-0">
       <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1 mb-4">
@@ -316,7 +307,7 @@ export const ConfigurationDetailsTabContent = ({
           </dl>
         </SimpleCollapse>
       )}
-      {hasMappingStandards && (
+      {/* {hasMappingStandards && (
         <SimpleCollapse
           classNames={{
             container: 'px-0',
@@ -336,7 +327,7 @@ export const ConfigurationDetailsTabContent = ({
             </dd>
           </dl>
         </SimpleCollapse>
-      )}
+      )} */}
     </div>
   );
 };

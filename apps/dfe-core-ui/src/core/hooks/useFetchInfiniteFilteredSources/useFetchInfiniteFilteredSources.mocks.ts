@@ -13,7 +13,7 @@ const SOURCE_ITEM: TSourceListSummary = {
   updated_at: 'string',
   has_transform: false,
   has_fetcher: false,
-  mapping_standards: ['string'],
+  state: 'active',
 };
 
 const TOTAL_ITEMS = 25;

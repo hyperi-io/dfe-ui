@@ -57,7 +57,6 @@ describe('.useUpdateSource', () => {
       },
       poll_interval_secs: 0,
     },
-    mapping_standards: ['string'],
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {

@@ -78,7 +78,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         updated_at: 'string',
         has_transform: false,
         has_fetcher: false,
-        mapping_standards: ['string'],
+        state: 'active',
         deployed_version: 'string',
       };
       expect(result.current.data).toBeDefined();
