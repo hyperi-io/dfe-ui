@@ -6,10 +6,10 @@ import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
+import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
-import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';
 import { listItemFromPartial } from './AddSchemaTable.helpers';
@@ -18,6 +18,7 @@ import {
   PRIMITIVE_OPTIONS,
   USE_CASE_OPTIONS,
 } from './fieldOptions.constants';
+import { TypeOverrideSelect } from './TypeOverrideSelect';
 
 export type RowSchema = z.infer<typeof rowSchema>;
 
@@ -232,24 +233,35 @@ export const AddSchemaTable = ({
             key: 'type',
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
+
+              const typeFormName = [rowIndex, 'type'];
               return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'type']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditSelect
-                    options={PRIMITIVE_OPTIONS}
-                    classNames={{
-                      editContainer: 'w-full',
-                    }}
-                    defaultEditing={
-                      config.defaultEditFields === true ||
-                      (Array.isArray(config.defaultEditFields) &&
-                        config.defaultEditFields.includes('type'))
-                    }
-                  />
-                </Form.Item>
+                <div className="flex items-center gap-2">
+                  <Form.Item
+                    {...restField}
+                    name={typeFormName}
+                    rules={[formValidation]}
+                  >
+                    <InlineEditSelect
+                      options={PRIMITIVE_OPTIONS}
+                      classNames={{
+                        editContainer: 'w-full',
+                      }}
+                      defaultEditing={
+                        config.defaultEditFields === true ||
+                        (Array.isArray(config.defaultEditFields) &&
+                          config.defaultEditFields.includes('type'))
+                      }
+                    />
+                  </Form.Item>
+
+                  <Form.Item name={[rowIndex, 'ch_override']}>
+                    <TypeOverrideSelect
+                      form={form}
+                      typeDetails={{ name: [name, rowIndex, 'type'] }}
+                    />
+                  </Form.Item>
+                </div>
               );
             },
           },
