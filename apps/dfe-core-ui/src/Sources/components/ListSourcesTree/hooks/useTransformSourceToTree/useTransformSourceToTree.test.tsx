@@ -22,7 +22,7 @@ const baseSource = (
   updated_at: '',
   has_transform: false,
   has_fetcher: false,
-  mapping_standards: [],
+  state: 'active',
   ...overrides,
 });
 
