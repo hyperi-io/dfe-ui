@@ -6832,6 +6832,16 @@ export interface components {
              */
             use_case?: string | null;
             /**
+             * Default
+             * @description DEFAULT expression
+             */
+            default?: string | null;
+            /**
+             * Order
+             * @description Position in ORDER BY / PRIMARY KEY
+             */
+            order?: number | null;
+            /**
              * Expr
              * @description Expression for the column
              */
@@ -6846,6 +6856,16 @@ export interface components {
              * @description Column classification (e.g. base); stored as _field_type in YAML
              */
             _field_type: string;
+            /**
+             * Ch Override
+             * @description Exact ClickHouse type — bypasses primitive mapping
+             */
+            ch_override?: string | null;
+            /**
+             * Codec
+             * @description Explicit CODEC contents — required to set a codec with ch_override
+             */
+            codec?: string | null;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
@@ -8532,11 +8552,8 @@ export interface components {
              * @default
              */
             use_case: string;
-            /**
-             * Attribute
-             * @default
-             */
-            attribute: string;
+            /** Attribute */
+            attribute?: string[] | null;
             /**
              * Description
              * @default
@@ -8621,11 +8638,8 @@ export interface components {
              * @default
              */
             use_case: string;
-            /**
-             * Attribute
-             * @default
-             */
-            attribute: string;
+            /** Attribute */
+            attribute?: string[] | null;
             /**
              * Description
              * @default
@@ -8678,6 +8692,16 @@ export interface components {
              */
             use_case?: string | null;
             /**
+             * Default
+             * @description DEFAULT expression
+             */
+            default?: string | null;
+            /**
+             * Order
+             * @description Position in ORDER BY / PRIMARY KEY
+             */
+            order?: number | null;
+            /**
              * Expr
              * @description Expression for the column
              */
@@ -8692,6 +8716,16 @@ export interface components {
              * @description Column classification (e.g. base); stored as _field_type in YAML
              */
             _field_type?: string | null;
+            /**
+             * Ch Override
+             * @description Exact ClickHouse type — bypasses primitive mapping
+             */
+            ch_override?: string | null;
+            /**
+             * Codec
+             * @description Explicit CODEC contents — required to set a codec with ch_override
+             */
+            codec?: string | null;
             /**
              * Matched Searchable
              * @description Column fields that matched the search query (API only)
