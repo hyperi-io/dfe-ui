@@ -11,6 +11,7 @@ const handlers = [
       selected: 'string',
       versions: ['string'],
       deployed_version: 'string',
+      state: 'active',
       version: {
         date_time: 'string',
         header: {
@@ -43,14 +44,6 @@ const handlers = [
           },
           poll_interval_secs: 0,
         },
-        sigma: {
-          taxonomy: 'string',
-          custom_mappings: {
-            string: 'string',
-          },
-        },
-        field_mappings: ['string'],
-        mapping_standards: ['string'],
         match: {
           field: 'string',
           operator: 'equals',

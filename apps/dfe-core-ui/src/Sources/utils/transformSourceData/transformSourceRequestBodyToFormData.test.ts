@@ -11,6 +11,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       current: 'string',
       versions: ['string'],
       selected: 'string',
+      state: 'active',
       version: {
         date_time: 'string',
         fetcher: {
