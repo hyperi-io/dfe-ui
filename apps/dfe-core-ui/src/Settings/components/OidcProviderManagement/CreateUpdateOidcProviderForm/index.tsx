@@ -3,9 +3,9 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { PROVIDERS } from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
 import { Button, FormProps, Input, Select } from 'antd';
 import { GroupFormSection } from './GroupFormSection';
-import { CreateUpdateOidcSchema } from './providers.schema';
+import { CreateUpdateOidcProviderFormData } from './providers.schema';
 
-interface CreateUpdateOidcFormProps extends FormProps {
+interface CreateUpdateOidcProviderFormProps extends FormProps {
   disabledFields?: {
     type?: boolean;
   };
@@ -13,10 +13,10 @@ interface CreateUpdateOidcFormProps extends FormProps {
   buttonLabel?: string;
   isPending: boolean;
   error: Error | null;
-  onFinish: (values: CreateUpdateOidcSchema) => void;
+  onFinish: (values: CreateUpdateOidcProviderFormData) => void;
 }
 
-export const CreateUpdateOidcForm = ({
+export const CreateUpdateOidcProviderForm = ({
   disabledFields,
   onFinish,
   hasReset = false,
@@ -24,10 +24,10 @@ export const CreateUpdateOidcForm = ({
   isPending = false,
   error,
   ...props
-}: CreateUpdateOidcFormProps) => {
+}: CreateUpdateOidcProviderFormProps) => {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: CreateUpdateOidcSchema) => {
+  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     onFinish?.(values);
   };
   return (

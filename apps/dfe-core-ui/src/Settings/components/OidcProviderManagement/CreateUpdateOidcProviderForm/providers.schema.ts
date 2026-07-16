@@ -30,7 +30,7 @@ export const DEFAULT_GROUP_RESOLUTION: z.infer<
   okta_domain: '',
 };
 
-export const createUpdateOidcSchema = z.object({
+export const createUpdateOidcProviderSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
@@ -45,4 +45,6 @@ export const createUpdateOidcSchema = z.object({
   groups: groupResolutionRequestSchema.optional(),
 });
 
-export type CreateUpdateOidcSchema = z.infer<typeof createUpdateOidcSchema>;
+export type CreateUpdateOidcProviderFormData = z.infer<
+  typeof createUpdateOidcProviderSchema
+>;

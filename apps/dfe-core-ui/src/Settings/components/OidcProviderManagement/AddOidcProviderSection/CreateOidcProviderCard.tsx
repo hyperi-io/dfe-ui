@@ -1,7 +1,7 @@
 import { PROVIDERS } from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
 import { Card } from 'antd';
 
-export const OidcProviderCard = ({
+export const CreateOidcProviderCard = ({
   provider,
 }: {
   provider: (typeof PROVIDERS)[number];

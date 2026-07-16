@@ -1,5 +1,5 @@
-import { CreateUpdateOidcForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcForm';
-import { CreateUpdateOidcSchema } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcForm/providers.schema';
+import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
+import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { useCreateOidcProvider } from '@/Settings/hooks/useCreateOidcProvider';
 import { IconSettings2 } from '@repo/dfe-icons';
 import { App, Button, Drawer } from 'antd';
@@ -10,7 +10,7 @@ export const CreateOidcDrawer = ({
   initialValues,
 }: {
   title: string;
-  initialValues: CreateUpdateOidcSchema;
+  initialValues: CreateUpdateOidcProviderFormData;
 }) => {
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
@@ -30,7 +30,7 @@ export const CreateOidcDrawer = ({
     },
   });
 
-  const handleFinish = (values: CreateUpdateOidcSchema) => {
+  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     createOidcProvider(values);
   };
 
@@ -50,7 +50,7 @@ export const CreateOidcDrawer = ({
         open={open}
         onClose={onClose}
       >
-        <CreateUpdateOidcForm
+        <CreateUpdateOidcProviderForm
           initialValues={initialValues}
           isPending={isPending}
           error={error}

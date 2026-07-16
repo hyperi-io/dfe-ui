@@ -1,5 +1,5 @@
 import { CreateOidcDrawer } from '@/Settings/components/OidcProviderManagement/CreateOidcDrawer';
-import { DEFAULT_GROUP_RESOLUTION } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcForm/providers.schema';
+import { DEFAULT_GROUP_RESOLUTION } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 
 export const PROVIDERS = Object.freeze([
   {
