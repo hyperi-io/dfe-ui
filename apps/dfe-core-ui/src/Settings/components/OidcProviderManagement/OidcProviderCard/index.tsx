@@ -6,6 +6,7 @@ import { ViewOidcProviderDrawer } from '@/Settings/components/OidcProviderManage
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { TOidcProviderListItem } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
 
+const dataListTermStyle = 'text-foreground/50';
 export const OidcProviderCard = ({
   oidcProvider,
 }: {
@@ -40,8 +41,19 @@ export const OidcProviderCard = ({
         ]}
       />
 
-      <div className="flex flex-col items-center gap-2">
-        <h3 className="font-medium">{oidcProvider.display_name}</h3>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-base font-medium flex items-center">
+          {oidcProvider.display_name}
+          <span className="text-sm text-foreground/50 ml-1">
+            ({oidcProvider.name})
+          </span>
+        </h3>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dt className={dataListTermStyle}>Type:</dt>
+          <dd>{oidcProvider.type}</dd>
+          <dt className={dataListTermStyle}>Mode:</dt>
+          <dd>{oidcProvider.groups.mode}</dd>
+        </dl>
       </div>
     </div>
   );
