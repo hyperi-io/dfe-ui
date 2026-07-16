@@ -99,7 +99,7 @@ export const API_CONFIG = Object.freeze({
   oidc_providers: {
     default: '/api/v1/auth/oidc-providers',
     provider: '/api/v1/auth/oidc-providers/{name}',
-    sync: '/api/v1/auth/oidc-providers/{name}/sync',
+    syncGroups: '/api/v1/auth/oidc-providers/{name}/sync',
     test: '/api/v1/auth/oidc-providers/{name}/test',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

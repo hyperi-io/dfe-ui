@@ -56,6 +56,7 @@ import { TOidcProviderDetailResponse } from '@/Settings/hooks/useFetchOidcProvid
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
+import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/useSyncOidcProviderGroups/types';
 import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
 import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
 import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
@@ -3655,11 +3656,49 @@ export const API_CONFIG_MOCKS = Object.freeze({
         },
       },
     },
-    sync: {
+    syncGroups: {
       mockedUrl: '/api/v1/auth/oidc-providers/{name}/sync',
       post: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            created: 1,
+            updated: 1,
+            total: 1,
+            error: null,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TSyncOidcProviderGroupsResponse;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.oidc_providers.syncGroups.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.oidc_providers.syncGroups.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
