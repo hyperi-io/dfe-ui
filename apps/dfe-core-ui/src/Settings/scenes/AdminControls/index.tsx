@@ -4,6 +4,7 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { AccountManagement } from '@/Settings/components/AccountManagement';
 import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
+import { OidcProviderManagement } from '@/Settings/components/OidcProviderManagement';
 import { OrganisationManagement } from '@/Settings/components/OrganisationManagement';
 import { RoleManagement } from '@/Settings/components/RoleManagement';
 import { Tabs } from 'antd';
@@ -36,7 +37,7 @@ export const AdminControlsScene = () => {
         onChange={handleTabChange}
         classNames={{
           root: 'min-h-0',
-          header: 'w-full max-w-64 shrink-0',
+          header: 'w-full max-w-68 shrink-0',
           content: 'min-w-0 flex-1 pl-6',
         }}
         items={[
@@ -79,6 +80,16 @@ export const AdminControlsScene = () => {
               />
             ),
             children: <AccountManagement />,
+          },
+          {
+            key: 'oidc-provider-management',
+            label: (
+              <AdminTabLabel
+                label="OIDC Provider Management"
+                description="Add and remove OIDC providers, manage OIDC provider specific configurations and defaults."
+              />
+            ),
+            children: <OidcProviderManagement />,
           },
           // {
           //   key: 'audit',
