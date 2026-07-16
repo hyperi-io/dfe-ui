@@ -5,6 +5,7 @@ export const rowSchema = z.object({
   _field_type: z.string(),
   name: columnNameValidator,
   type: z.string().min(1, { message: 'Type is required' }),
+  ch_override: z.string().optional(),
   attribute: z.array(z.string()).optional(),
   use_case: z.string().optional(),
   expr: z.string().optional(),

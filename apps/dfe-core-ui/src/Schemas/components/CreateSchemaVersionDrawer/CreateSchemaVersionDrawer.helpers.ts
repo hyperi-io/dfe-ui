@@ -1,6 +1,7 @@
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
+import { mapFormColumnToRequestColumn } from '@/core/hooks/useCreateSchema/useCreateSchema.helpers';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,23 +70,12 @@ export const REVIEW_PLACEHOLDER_VERSION = '__new_version__';
 export const transformFormDataToRequestBody = (
   values: CreateSchemaFormData,
 ) => {
-  const uploadedColumns = (values.uploadedColumns ?? []).map((column) => ({
-    name: column.name,
-    type: column.type,
-    attribute: column.attribute,
-    use_case: column.use_case,
-    expr: column.expr,
-    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
-  }));
-  const schemaColumns = (values.schemaColumns ?? []).map((column) => ({
-    name: column.name,
-    type: column.type,
-    attribute: column.attribute,
-    use_case: column.use_case,
-    expr: column.expr,
-    comment: column.comment,
-    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
-  }));
+  const uploadedColumns = (values.uploadedColumns ?? []).map(
+    mapFormColumnToRequestColumn,
+  );
+  const schemaColumns = (values.schemaColumns ?? []).map(
+    mapFormColumnToRequestColumn,
+  );
 
   return {
     type: values.type,
