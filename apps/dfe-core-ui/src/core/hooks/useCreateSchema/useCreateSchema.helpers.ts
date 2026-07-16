@@ -1,9 +1,25 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import {
-  TCreateSchemaRequest,
-  TCreateSchemaRequestColumn,
-} from '@/core/hooks/useCreateSchema/types';
+import { TCreateSchemaRequestColumn } from '@/core/hooks/useCreateSchema/types';
+import { RowFormSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
+
+/** Column shape sent on create / create-version (engine may accept ch_override ahead of type sync). */
+export type TCreateSchemaRequestColumnPayload = TCreateSchemaRequestColumn;
+
+export const mapFormColumnToRequestColumn = (
+  column: RowFormSchema,
+): TCreateSchemaRequestColumnPayload => ({
+  name: column.name,
+  type: column.type,
+  _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
+  ...(column.ch_override ? { ch_override: column.ch_override } : {}),
+  ...(column.attribute && column.attribute.length > 0
+    ? { attribute: column.attribute }
+    : {}),
+  ...(column.use_case ? { use_case: column.use_case } : {}),
+  ...(column.expr ? { expr: column.expr } : {}),
+  ...(column.comment ? { comment: column.comment } : {}),
+});
 
 /*
  * Transforms the form data to a request body for the create schema API.
@@ -14,35 +30,15 @@ import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/
 export const transformFormDataToRequestBody = (
   formData: CreateSchemaFormData,
 ) => {
-  const uploadedColumns: TCreateSchemaRequestColumn[] = (
-    formData.uploadedColumns ?? []
-  ).map((column) => ({
-    name: column.name,
-    type: column.type,
-    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
-    ...(column.attribute && column.attribute.length > 0
-      ? { attribute: column.attribute }
-      : {}),
-    ...(column.use_case ? { use_case: column.use_case } : {}),
-    ...(column.expr ? { expr: column.expr } : {}),
-    ...(column.comment ? { comment: column.comment } : {}),
-  }));
+  const uploadedColumns = (formData.uploadedColumns ?? []).map(
+    mapFormColumnToRequestColumn,
+  );
 
-  const schemaColumns: TCreateSchemaRequestColumn[] = (
-    formData.schemaColumns ?? []
-  ).map((column) => ({
-    name: column.name,
-    type: column.type,
-    _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
-    ...(column.attribute && column.attribute.length > 0
-      ? { attribute: column.attribute }
-      : {}),
-    ...(column.use_case ? { use_case: column.use_case } : {}),
-    ...(column.expr ? { expr: column.expr } : {}),
-    ...(column.comment ? { comment: column.comment } : {}),
-  }));
+  const schemaColumns = (formData.schemaColumns ?? []).map(
+    mapFormColumnToRequestColumn,
+  );
 
-  const requestBody: TCreateSchemaRequest = {
+  const requestBody = {
     schema_type: formData.schema_type,
     path: formData.path ? `${formData.path}/${formData.name}` : formData.name,
     current: formData.version,
@@ -51,7 +47,7 @@ export const transformFormDataToRequestBody = (
         date: new Date().toISOString(),
         type: formData.type,
         summary: formData.description ?? '',
-        columns: [...(uploadedColumns ?? []), ...(schemaColumns ?? [])],
+        columns: [...uploadedColumns, ...schemaColumns],
       },
     },
   };

@@ -81,7 +81,7 @@ describe('useFetchInfiniteSourceColumns', () => {
       });
       const responseItem: TSourceColumnItem = {
         name: 'string',
-        attribute: 'string',
+        attribute: ['string'],
         use_case: 'string',
         description: 'string',
         type: 'string',

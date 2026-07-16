@@ -6,10 +6,10 @@ import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
+import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormRule, Input, Tooltip } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
-import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';
 import { listItemFromPartial } from './AddSchemaTable.helpers';
@@ -18,6 +18,7 @@ import {
   PRIMITIVE_OPTIONS,
   USE_CASE_OPTIONS,
 } from './fieldOptions.constants';
+import { TypeOverrideSelect } from './TypeOverrideSelect';
 
 export type RowSchema = z.infer<typeof rowSchema>;
 
@@ -111,7 +112,6 @@ export const AddSchemaTable = ({
   lockedColumns: lockedColumnsProp,
   onMount,
   onRemoveRow,
-
   ...tableProps
 }: AddSchemaTableProps) => {
   const visibleColumns = visibleColumnsProp ?? [
@@ -230,26 +230,56 @@ export const AddSchemaTable = ({
             title: 'Type',
             dataIndex: 'type',
             key: 'type',
+            width: 250,
             render: (_: unknown, record: SchemaColumnListRow) => {
               const { key: _rowKey, name: rowIndex, ...restField } = record;
+
+              const typeFormName = [rowIndex, 'type'];
+              const chOverrideFormName = [rowIndex, 'ch_override'];
               return (
-                <Form.Item
-                  {...restField}
-                  name={[rowIndex, 'type']}
-                  rules={[formValidation]}
-                >
-                  <InlineEditSelect
-                    options={PRIMITIVE_OPTIONS}
-                    classNames={{
-                      editContainer: 'w-full',
+                <div className="flex items-center gap-2 justify-between w-full">
+                  <Form.Item
+                    {...restField}
+                    name={typeFormName}
+                    rules={[formValidation]}
+                    getValueFromEvent={(event) => {
+                      const nextType =
+                        event && typeof event === 'object' && 'target' in event
+                          ? (event as { target: { value: unknown } }).target
+                              .value
+                          : event;
+                      form.setFieldValue(
+                        [name, rowIndex, 'ch_override'],
+                        undefined,
+                      );
+                      return nextType;
                     }}
-                    defaultEditing={
-                      config.defaultEditFields === true ||
-                      (Array.isArray(config.defaultEditFields) &&
-                        config.defaultEditFields.includes('type'))
-                    }
-                  />
-                </Form.Item>
+                  >
+                    <InlineEditSelect
+                      options={PRIMITIVE_OPTIONS}
+                      classNames={{
+                        editContainer: 'w-full min-w-60',
+                      }}
+                      className="grow w-full"
+                      defaultEditing={
+                        config.defaultEditFields === true ||
+                        (Array.isArray(config.defaultEditFields) &&
+                          config.defaultEditFields.includes('type'))
+                      }
+                    />
+                  </Form.Item>
+
+                  <Form.Item {...restField} name={chOverrideFormName}>
+                    <TypeOverrideSelect
+                      form={form}
+                      className="shrink"
+                      typeDetails={{
+                        type_form_name: [name, ...typeFormName],
+                        ch_override_form_name: [name, ...chOverrideFormName],
+                      }}
+                    />
+                  </Form.Item>
+                </div>
               );
             },
           },

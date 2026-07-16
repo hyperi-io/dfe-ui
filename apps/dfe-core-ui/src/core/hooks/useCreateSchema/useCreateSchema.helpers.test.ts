@@ -111,6 +111,31 @@ describe('transformFormDataToRequestBody', () => {
     ]);
   });
 
+  test('includes ch_override on the request column when set', () => {
+    const { requestBody, schemaColumns } = transformFormDataToRequestBody({
+      ...baseFormData(),
+      schemaColumns: [
+        {
+          id: '1',
+          name: 'amount',
+          type: 'integer',
+          ch_override: 'Int64',
+          _field_type: SCHEMA_FIELD_TYPES.USER_DEFINED,
+        },
+      ],
+    });
+    expect(schemaColumns[0]).toMatchObject({
+      name: 'amount',
+      type: 'integer',
+      ch_override: 'Int64',
+    });
+    expect(requestBody.versions['1.0.0'].columns[0]).toMatchObject({
+      name: 'amount',
+      type: 'integer',
+      ch_override: 'Int64',
+    });
+  });
+
   describe('outputs uploaded and schema columns', () => {
     test('outputs empty arrays when no columns are present', () => {
       const { uploadedColumns, schemaColumns } =

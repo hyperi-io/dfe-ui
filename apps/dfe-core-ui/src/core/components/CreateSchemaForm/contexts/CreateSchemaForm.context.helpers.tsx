@@ -7,6 +7,7 @@ import {
   SchemaFormValidationErrors,
 } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 // Used by antd form
+import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import { FieldError } from '@rc-component/form/es/interface';
 import { type InvalidColumns } from './CreateSchemaForm.context.d';
 
@@ -123,7 +124,7 @@ export const indicesOfUserEditedListRows = (
 };
 
 export const withUserDefinedFieldTypeOnEditedRows = <
-  T extends { _field_type?: string },
+  T extends Partial<SchemaColumnRow>,
 >(
   rows: T[],
   editedIndices: Set<number>,

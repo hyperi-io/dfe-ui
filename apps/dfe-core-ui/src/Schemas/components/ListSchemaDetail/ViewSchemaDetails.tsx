@@ -132,15 +132,48 @@ export const ViewSchemaDetails = ({
         dataIndex: 'type',
         key: 'type',
         ...columnFilter('Type', 'type'),
-        render: (type: string) =>
-          renderSchemaDetailFilteredCell({
-            value: type,
-            filterTerms: [columnFilters.type, columnFilters.search],
-            isSearchable:
-              showSearchableColumns?.selectedSearchableColumns.includes(
-                'type',
-              ) ?? false,
-          }),
+        render: (type: string, record: SchemaColumnItem) => (
+          <span className="flex items-center gap-1">
+            {renderSchemaDetailFilteredCell({
+              value: type,
+              filterTerms: [columnFilters.type, columnFilters.search],
+              isSearchable:
+                showSearchableColumns?.selectedSearchableColumns.includes(
+                  'type',
+                ) ?? false,
+            })}
+            {record.ch_override ? (
+              <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10 ml-auto">
+                Override:{' '}
+                {record.ch_override.startsWith('Enum16') ? (
+                  <Tooltip
+                    destroyOnHidden
+                    title={
+                      <div className="flex flex-col gap-2">
+                        <p className="text-sm font-medium">
+                          {record.ch_override.split('(')[0] + ' Values'}
+                        </p>
+                        <ul>
+                          {record.ch_override
+                            ?.replace(')', '')
+                            .split('(')[1]
+                            .split(',')
+                            .map((value) => (
+                              <li key={value}>{value},</li>
+                            ))}
+                        </ul>
+                      </div>
+                    }
+                  >
+                    <span>{record.ch_override.split('(')[0]}</span>
+                  </Tooltip>
+                ) : (
+                  record.ch_override
+                )}
+              </span>
+            ) : null}
+          </span>
+        ),
       },
       {
         dataIndex: 'attribute',

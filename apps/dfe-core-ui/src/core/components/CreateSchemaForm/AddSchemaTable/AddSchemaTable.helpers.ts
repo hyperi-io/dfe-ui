@@ -38,7 +38,7 @@ const normalizeAttribute = (raw: unknown): string[] => {
 };
 
 export const listItemFromPartial = (
-  column: Partial<UploadedSchemaRow> & { _field_type?: string },
+  column: Partial<UploadedSchemaRow>,
 ): z.infer<typeof rowSchema> => {
   const name = String(rowLookup(column, 'name', 'Name') ?? '');
   const type = String(rowLookup(column, 'type', 'Type') ?? '');
@@ -54,11 +54,16 @@ export const listItemFromPartial = (
     rowLookup(column, 'comment', 'Comment') ?? column.comment ?? '',
   );
 
+  const ch_override = String(
+    rowLookup(column, 'ch_override', 'chOverride') ?? column.ch_override ?? '',
+  );
+
   return {
     id: column.id ?? '',
     _field_type: column._field_type ?? SCHEMA_FIELD_TYPES.USER_DEFINED,
     name,
     type,
+    ch_override: ch_override || undefined,
     attribute: normalizeAttribute(attributeRaw),
     use_case,
     expr,

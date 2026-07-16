@@ -14,7 +14,7 @@ const fieldTypeForImportRow = (
   if (source === 'csv') {
     return SCHEMA_FIELD_TYPES.CSV_IMPORT;
   }
-  const fromApi = (value as { _field_type?: string | null })._field_type;
+  const fromApi = value._field_type;
   return typeof fromApi === 'string' && fromApi.length > 0
     ? fromApi
     : SCHEMA_FIELD_TYPES.USER_DEFINED;

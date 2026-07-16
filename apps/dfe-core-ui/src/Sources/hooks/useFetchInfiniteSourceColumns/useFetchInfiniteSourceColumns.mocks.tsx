@@ -9,7 +9,7 @@ const SOURCE_COLUMN_ITEM: TSourceColumnItem = {
   name: 'string',
   type: 'string',
   use_case: 'string',
-  attribute: 'string',
+  attribute: ['string'],
   description: 'string',
 };
 
