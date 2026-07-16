@@ -1,5 +1,6 @@
 import { DeleteOidcProviderModal } from '@/Settings/components/OidcProviderManagement/DeleteOidcProviderModal';
 import { SyncOidcProviderGroupsDrawer } from '@/Settings/components/OidcProviderManagement/SyncOidcProviderGroupsDrawer';
+import { TestOidcProviderModal } from '@/Settings/components/OidcProviderManagement/TestOidcProviderModal';
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
 import { ViewOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/ViewOidcProviderDrawer';
 import { PopoverMenu } from '@/Settings/components/PopoverMenu';
@@ -19,6 +20,10 @@ export const OidcProviderCard = ({
           <ViewOidcProviderDrawer
             key="view-oidc-provider"
             oidcProvider={oidcProvider}
+          />,
+          <TestOidcProviderModal
+            key="test-oidc-provider"
+            oidcProviderName={oidcProvider.name}
           />,
           <SyncOidcProviderGroupsDrawer
             key="sync-oidc-provider-groups"
