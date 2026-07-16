@@ -371,9 +371,20 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
       <RbacProtected
         action={[
           rbacActions.org_read,
+          rbacActions.org_write,
+          rbacActions.org_delete,
           rbacActions.account_read,
+          rbacActions.account_write,
+          rbacActions.account_delete,
           rbacActions.role_read,
+          rbacActions.role_write,
+          rbacActions.role_delete,
           rbacActions.group_read,
+          rbacActions.group_write,
+          rbacActions.group_delete,
+          rbacActions.oidc_read,
+          rbacActions.oidc_write,
+          rbacActions.oidc_delete,
         ]}
       >
         <RbacProtected.Unrestricted>
