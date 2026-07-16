@@ -38,6 +38,7 @@ export const createUpdateOidcProviderSchema = z.object({
       message:
         'Name must contain only lowercase letters, numbers, and underscores',
     }),
+  enabled: z.boolean().default(true),
   type: z.enum(['google', 'entra_id', 'okta', 'generic']),
   display_name: z.string(),
   issuer: z.string(),

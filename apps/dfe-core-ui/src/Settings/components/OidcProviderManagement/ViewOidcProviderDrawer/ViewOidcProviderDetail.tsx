@@ -1,13 +1,12 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
-import { GenericErrorCard } from '@/core/components/GenericError';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
-import { useFetchOidcProviderDetail } from '@/Settings/hooks/useFetchOidcProviderDetail';
-import { Spin, Tooltip } from 'antd';
+import { TOidcProviderListItem } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
+import { Tooltip } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -16,38 +15,14 @@ const EmptyData = () => (
 );
 
 export const ViewOidcProviderDetail = ({
-  oidcProviderName,
+  oidcProvider,
 }: {
-  oidcProviderName: string;
+  oidcProvider: TOidcProviderListItem;
 }) => {
-  const {
-    data: oidcProvider,
-    isLoading,
-    error,
-  } = useFetchOidcProviderDetail({ name: oidcProviderName });
-
-  if (isLoading) {
-    return (
-      <>
-        <Spin />{' '}
-        <p className="sr-only">Loading {oidcProvider?.display_name} detail</p>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <GenericErrorCard
-        title={`Error fetching OIDC provider detail for ${oidcProvider?.display_name}`}
-        description={error.message}
-      />
-    );
-  }
-
   if (!oidcProvider) {
     return (
       <EmptyDetail
-        title={`No OIDC provider detail found for ${oidcProviderName}`}
+        title="No OIDC provider detail found."
         description="Please try again later."
       />
     );

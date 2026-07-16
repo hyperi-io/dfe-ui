@@ -4,7 +4,7 @@ import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
-import { Button, FormProps, Input, Select } from 'antd';
+import { Button, FormProps, Input, Select, Switch } from 'antd';
 import { GroupFormSection } from './GroupFormSection';
 import { CreateUpdateOidcProviderFormData } from './providers.schema';
 
@@ -36,7 +36,7 @@ export const CreateUpdateOidcProviderForm = ({
   };
 
   const typeWatch = Form.useWatch('type', form);
-  const modeWatch = Form.useWatch('mode', form);
+  const modeWatch = Form.useWatch(['groups', 'mode'], form);
 
   return (
     <Form
@@ -44,25 +44,32 @@ export const CreateUpdateOidcProviderForm = ({
       className="gap-4"
       {...props}
       initialValues={{
+        enabled: true,
         ...PROVIDERS_MAP['google']?.initialValues,
         ...initialValues,
       }}
       onFinish={handleFinish}
     >
-      <Form.Item label="Type" name="type">
-        <Select
-          disabled={disabledFields?.type}
-          options={PROVIDERS.map((provider) => ({
-            label: provider.name,
-            value: provider.key,
-          }))}
-          onChange={(value) => {
-            form.setFieldsValue({
-              ...PROVIDERS_MAP[value]?.initialValues,
-            });
-          }}
-        />
-      </Form.Item>
+      <div className="flex gap-2">
+        <Form.Item className="grow" label="Type" name="type">
+          <Select
+            disabled={disabledFields?.type}
+            options={PROVIDERS.map((provider) => ({
+              label: provider.name,
+              value: provider.key,
+            }))}
+            onChange={(value) => {
+              form.setFieldsValue({
+                ...PROVIDERS_MAP[value]?.initialValues,
+              });
+            }}
+          />
+        </Form.Item>
+        <Form.Item className="w-20" label="Enabled" name="enabled">
+          <Switch />
+        </Form.Item>
+      </div>
+
       {typeWatch && (
         <>
           <div className="grid grid-cols-2 gap-4">

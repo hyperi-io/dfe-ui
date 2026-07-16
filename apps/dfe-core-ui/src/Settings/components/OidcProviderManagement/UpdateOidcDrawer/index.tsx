@@ -22,9 +22,14 @@ export const UpdateOidcProviderDrawer = ({
     error,
   } = useUpdateOidcProvider({
     name: oidcProvider.name,
-    onSuccess: () => {
+    onSuccess: (response) => {
       api.success({
-        title: 'OIDC Provider updated successfully',
+        title: (
+          <>
+            <span className="font-medium">{response.display_name}</span> updated
+            successfully
+          </>
+        ),
         placement: 'bottomLeft',
       });
       setOpen(false);
@@ -72,6 +77,8 @@ export const UpdateOidcProviderDrawer = ({
           disabledFields={{
             type: true,
           }}
+          hasReset={true}
+          buttonLabel="Update"
         />
       </Drawer>
     </>

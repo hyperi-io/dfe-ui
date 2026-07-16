@@ -18,7 +18,7 @@ export const OidcProviderCard = ({
         options={[
           <ViewOidcProviderDrawer
             key="view-oidc-provider"
-            oidcProviderName={oidcProvider.name}
+            oidcProvider={oidcProvider}
           />,
           <SyncOidcProviderGroupsDrawer
             key="sync-oidc-provider-groups"
