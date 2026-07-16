@@ -1,6 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { PROVIDERS } from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
+import {
+  PROVIDERS,
+  PROVIDERS_MAP,
+} from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
 import { Button, FormProps, Input, Select } from 'antd';
 import { GroupFormSection } from './GroupFormSection';
 import { CreateUpdateOidcProviderFormData } from './providers.schema';
@@ -23,6 +26,7 @@ export const CreateUpdateOidcProviderForm = ({
   buttonLabel = 'Create',
   isPending = false,
   error,
+  initialValues,
   ...props
 }: CreateUpdateOidcProviderFormProps) => {
   const [form] = Form.useForm();
@@ -30,33 +34,58 @@ export const CreateUpdateOidcProviderForm = ({
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     onFinish?.(values);
   };
-  return (
-    <Form form={form} className="gap-4" {...props} onFinish={handleFinish}>
-      <div className="grid grid-cols-2 gap-4">
-        <Form.Item label="Name" name="name">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Type" name="type">
-          <Select
-            disabled={disabledFields?.type}
-            options={PROVIDERS.map((provider) => ({
-              label: provider.name,
-              value: provider.key,
-            }))}
-          />
-        </Form.Item>
-        <Form.Item label="Display Name" name="display_name">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Issuer" name="issuer">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Client ID Environment Variable" name="client_id_env">
-          <Input />
-        </Form.Item>
-      </div>
 
-      <GroupFormSection />
+  const typeWatch = Form.useWatch('type', form);
+
+  return (
+    <Form
+      form={form}
+      className="gap-4"
+      {...props}
+      initialValues={{
+        ...PROVIDERS_MAP['google']?.initialValues,
+        ...initialValues,
+      }}
+      onFinish={handleFinish}
+    >
+      <Form.Item label="Type" name="type">
+        <Select
+          disabled={disabledFields?.type}
+          options={PROVIDERS.map((provider) => ({
+            label: provider.name,
+            value: provider.key,
+          }))}
+          onChange={(value) => {
+            form.setFieldsValue({
+              ...PROVIDERS_MAP[value]?.initialValues,
+            });
+          }}
+        />
+      </Form.Item>
+      {typeWatch && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item label="Name" name="name">
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Display Name" name="display_name">
+              <Input />
+            </Form.Item>
+            <Form.Item label="Issuer" name="issuer">
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Client ID Environment Variable"
+              name="client_id_env"
+            >
+              <Input />
+            </Form.Item>
+          </div>
+
+          <GroupFormSection />
+        </>
+      )}
 
       {error && (
         <FormNotification

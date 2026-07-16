@@ -3,17 +3,11 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { useCreateOidcProvider } from '@/Settings/hooks/useCreateOidcProvider';
-import { IconSettings2 } from '@repo/dfe-icons';
+import { IconPlus } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 
-export const CreateOidcDrawer = ({
-  title,
-  initialValues,
-}: {
-  title: string;
-  initialValues: CreateUpdateOidcProviderFormData;
-}) => {
+export const CreateOidcProviderDrawer = ({ title }: { title: string }) => {
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
   const { notification } = App.useApp();
@@ -41,15 +35,15 @@ export const CreateOidcDrawer = ({
       <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
         <RbacProtected.Unrestricted>
           <Button
-            type="text"
-            icon={<IconSettings2 />}
+            type="primary"
+            icon={<IconPlus />}
             onClick={() => setOpen(true)}
           >
             {title}
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button type="text" icon={<IconSettings2 />} disabled>
+          <Button type="primary" icon={<IconPlus />} disabled>
             {title}
           </Button>
         </RbacProtected.Restricted>
@@ -63,7 +57,6 @@ export const CreateOidcDrawer = ({
         onClose={onClose}
       >
         <CreateUpdateOidcProviderForm
-          initialValues={initialValues}
           isPending={isPending}
           error={error}
           onFinish={handleFinish}

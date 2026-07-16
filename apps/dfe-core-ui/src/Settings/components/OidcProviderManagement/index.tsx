@@ -2,7 +2,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/Settings/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { AddOidcProviderSection } from './AddOidcProviderSection';
+import { CreateOidcProviderDrawer } from './CreateOidcProviderDrawer';
 import { OidcProviderList } from './OidcProviderList';
 
 export const OidcProviderManagement = () => {
@@ -11,9 +11,10 @@ export const OidcProviderManagement = () => {
       <SectionCard
         title="Configure a new OIDC provider"
         description="Create and configure a new OIDC provider and manage OIDC provider specific configurations and defaults."
-      >
-        <AddOidcProviderSection />
-      </SectionCard>
+        rightTitleSlot={
+          <CreateOidcProviderDrawer title="Configure New OIDC Provider" />
+        }
+      />
       <SectionCard
         title="OIDC providers"
         description="Manage OIDC providers and their configurations."
