@@ -22,7 +22,7 @@ export const TypeOverrideSelect = ({
     <div className="flex items-center gap-1 w-full">
       {value && (
         <span className="flex items-center gap-1 text-xs bg-foreground/10 px-2 pr-0 py-0.5 rounded-md dark:bg-dark-foreground/10">
-          {value}
+          {value.startsWith('Enum16') ? value.split('(')[0] : value}
           <Button
             size="small"
             type="text"
@@ -38,7 +38,7 @@ export const TypeOverrideSelect = ({
         open={open}
         onOpenChange={setOpen}
         classNames={{
-          content: 'min-w-60',
+          content: 'min-w-72',
         }}
         destroyOnHidden
         title="ClickHouse Override Type"

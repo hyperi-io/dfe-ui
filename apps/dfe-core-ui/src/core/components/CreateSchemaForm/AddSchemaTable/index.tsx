@@ -258,8 +258,9 @@ export const AddSchemaTable = ({
                     <InlineEditSelect
                       options={PRIMITIVE_OPTIONS}
                       classNames={{
-                        editContainer: 'w-full',
+                        editContainer: 'w-full min-w-60',
                       }}
+                      className="grow w-full"
                       defaultEditing={
                         config.defaultEditFields === true ||
                         (Array.isArray(config.defaultEditFields) &&

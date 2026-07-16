@@ -4,7 +4,7 @@ import { SchemaTable } from '@/core/components/SchemaTable';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteSourceColumns } from '@/Sources/hooks/useFetchInfiniteSourceColumns';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin } from 'antd';
+import { Spin, Tooltip } from 'antd';
 import { useCallback } from 'react';
 
 export const SourceColumnsTabContent = ({
@@ -74,7 +74,33 @@ export const SourceColumnsTabContent = ({
             {value}
             {record.ch_override && (
               <span className="text-xs bg-foreground/10 px-1 py-0.5 rounded-md dark:bg-dark-foreground/10 ml-auto">
-                Override: {record.ch_override}
+                Override:{' '}
+                {record.ch_override.startsWith('Enum16') ? (
+                  <Tooltip
+                    destroyOnHidden
+                    title={
+                      <div className="flex flex-col gap-2">
+                        <p>
+                          {record.ch_override.split('(')[1].split(',')[0] +
+                            ' Values'}
+                        </p>
+                        <ul>
+                          {record.ch_override
+                            ?.replace(')', '')
+                            .split('(')[1]
+                            .split(',')
+                            .map((value) => (
+                              <li key={value}>{value}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    }
+                  >
+                    <span>{record.ch_override.split('(')[0]}</span>
+                  </Tooltip>
+                ) : (
+                  record.ch_override
+                )}
               </span>
             )}
           </span>
