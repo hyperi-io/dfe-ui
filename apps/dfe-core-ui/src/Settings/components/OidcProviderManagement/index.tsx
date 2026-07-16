@@ -1,4 +1,7 @@
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/Settings/components/SectionCard';
+import { IconInfoCircle } from '@repo/dfe-icons';
 import { AddOidcProviderSection } from './AddOidcProviderSection';
 import { OidcProviderList } from './OidcProviderList';
 
@@ -15,7 +18,19 @@ export const OidcProviderManagement = () => {
         title="OIDC providers"
         description="Manage OIDC providers and their configurations."
       >
-        <OidcProviderList />
+        <RbacProtected action={RbacProtected.rbacActions.oidc_read}>
+          <RbacProtected.Unrestricted>
+            <OidcProviderList />
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <NotificationCard
+              className="w-full"
+              title="You do not have sufficient permissions"
+              description="Please contact your administrator to request access."
+              icon={<IconInfoCircle />}
+            />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
     </div>
   );

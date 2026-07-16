@@ -1,3 +1,4 @@
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { useCreateOidcProvider } from '@/Settings/hooks/useCreateOidcProvider';
@@ -36,13 +37,23 @@ export const CreateOidcDrawer = ({
 
   return (
     <>
-      <Button
-        type="text"
-        icon={<IconSettings2 />}
-        onClick={() => setOpen(true)}
-      >
-        {title}
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="text"
+            icon={<IconSettings2 />}
+            onClick={() => setOpen(true)}
+          >
+            {title}
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button type="text" icon={<IconSettings2 />} disabled>
+            {title}
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         size="50%"
         destroyOnHidden
