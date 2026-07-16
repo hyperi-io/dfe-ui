@@ -26,7 +26,7 @@ export const CreateOidcDrawer = ({
     onSuccess: () => {
       onClose();
       notification.success({
-        message: 'OIDC provider created successfully',
+        title: 'OIDC provider created successfully',
         placement: 'bottomLeft',
       });
     },
