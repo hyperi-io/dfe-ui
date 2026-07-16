@@ -11,7 +11,7 @@ export const QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS = ({
   sort_order,
   page,
   per_page,
-}: UseFetchInfiniteFilteredOidcProvidersProps) => [
+}: UseFetchInfiniteFilteredOidcProvidersProps = {}) => [
   'oidc-providers',
   ...(search ? [search] : []),
   ...(sort_by ? [sort_by] : []),

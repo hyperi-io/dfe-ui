@@ -7,10 +7,8 @@ import { TOidcProviderListItem } from '@/Settings/hooks/useFetchInfiniteFiltered
 
 export const OidcProviderCard = ({
   oidcProvider,
-  refetch,
 }: {
   oidcProvider: TOidcProviderListItem;
-  refetch: () => void;
 }) => {
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative">
@@ -29,12 +27,10 @@ export const OidcProviderCard = ({
           <UpdateOidcProviderDrawer
             key="edit-oidc-provider"
             oidcProvider={oidcProvider}
-            refetch={refetch}
           />,
           <DeleteOidcProviderModal
             key="delete-oidc-provider"
             oidcProviderName={oidcProvider.name}
-            refetch={refetch}
           />,
         ]}
       />

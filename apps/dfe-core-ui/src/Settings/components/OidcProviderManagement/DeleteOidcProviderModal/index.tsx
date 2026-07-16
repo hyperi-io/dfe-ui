@@ -12,14 +12,12 @@ interface DeleteOidcProviderModalProps {
   oidcProviderName: string;
   onSuccess?: () => void;
   disabled?: boolean;
-  refetch: () => void;
 }
 
 export const DeleteOidcProviderModal = ({
   oidcProviderName,
   onSuccess,
   disabled,
-  refetch,
 }: DeleteOidcProviderModalProps) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
@@ -37,7 +35,6 @@ export const DeleteOidcProviderModal = ({
         ),
         placement: 'bottomLeft',
       });
-      refetch();
     },
   });
   const handleDeleteOidcProvider = (values: DeleteOidcProviderFormData) => {

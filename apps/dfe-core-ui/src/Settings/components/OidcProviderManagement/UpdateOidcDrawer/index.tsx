@@ -3,24 +3,18 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { TOidcProviderListItem } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
-import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/Settings/hooks/useFetchOidcProviderDetail';
 import { useUpdateOidcProvider } from '@/Settings/hooks/useUpdateOidcProvider';
 import { IconEdit } from '@repo/dfe-icons';
-import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
 export const UpdateOidcProviderDrawer = ({
   oidcProvider,
-  refetch,
 }: {
   oidcProvider: TOidcProviderListItem;
-  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
-
-  const queryClient = useQueryClient();
 
   const {
     mutate: updateOidcProvider,
@@ -29,17 +23,11 @@ export const UpdateOidcProviderDrawer = ({
   } = useUpdateOidcProvider({
     name: oidcProvider.name,
     onSuccess: () => {
-      refetch();
       api.success({
         title: 'OIDC Provider updated successfully',
         placement: 'bottomLeft',
       });
       setOpen(false);
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEY_OIDC_PROVIDER_DETAIL({
-          name: oidcProvider.name,
-        }),
-      });
     },
   });
 

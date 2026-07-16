@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/Settings/hooks/useFetchOidcProviderDetail';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProvider } from './api';
 import {
   TOidcProviderUpdateRequestBody,
@@ -16,6 +17,8 @@ export const useUpdateOidcProvider = ({
   onSuccess,
   onError,
 }: UseUpdateOidcProviderProps) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (oidcProvider: TOidcProviderUpdateRequestBody) =>
       updateOidcProvider({
@@ -23,6 +26,12 @@ export const useUpdateOidcProvider = ({
         pathParams: { name: name },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEY_OIDC_PROVIDER_DETAIL({
+          name: name,
+        }),
+      });
+
       onSuccess?.(data);
     },
     onError: (error) => {

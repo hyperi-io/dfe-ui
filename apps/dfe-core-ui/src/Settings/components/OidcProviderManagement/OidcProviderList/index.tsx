@@ -8,7 +8,6 @@ import { Spin } from 'antd';
 export const OidcProviderList = () => {
   const {
     data: { items: oidcProviders },
-    refetch,
     isFetchingNextPage,
     loadMoreRef,
     isLoading,
@@ -42,7 +41,6 @@ export const OidcProviderList = () => {
             {oidcProviders?.map((oidcProvider) => (
               <li key={oidcProvider.name}>
                 <OidcProviderCard
-                  refetch={refetch}
                   key={oidcProvider.name}
                   oidcProvider={oidcProvider}
                 />
