@@ -36,6 +36,7 @@ export const CreateUpdateOidcProviderForm = ({
   };
 
   const typeWatch = Form.useWatch('type', form);
+  const modeWatch = Form.useWatch('mode', form);
 
   return (
     <Form
@@ -83,7 +84,7 @@ export const CreateUpdateOidcProviderForm = ({
             </Form.Item>
           </div>
 
-          <GroupFormSection />
+          <GroupFormSection type={typeWatch} mode={modeWatch} />
         </>
       )}
 
