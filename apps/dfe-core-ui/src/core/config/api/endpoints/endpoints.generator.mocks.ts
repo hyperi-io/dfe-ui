@@ -52,6 +52,7 @@ import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups
 import { TListOidcProvidersResponse } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
 import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
 import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
+import { TOidcProviderDetailResponse } from '@/Settings/hooks/useFetchOidcProviderDetail/types';
 import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
@@ -3497,8 +3498,64 @@ export const API_CONFIG_MOCKS = Object.freeze({
     provider: {
       mockedUrl: '/api/v1/auth/oidc-providers/{name}',
       get: {
-        success: () => {
-          console.error('Not implemented');
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            type: 'type',
+            enabled: true,
+            display_name: 'display_name',
+            issuer: 'issuer',
+            client_id_env: 'client_id_env',
+            created_at: 'created_at',
+            last_sync_at: 'last_sync_at',
+            last_sync_status: 'last_sync_status',
+            sync_error: 'sync_error',
+            groups: {
+              mode: 'mode',
+              claim_name: 'claim_name',
+              sync_interval: 1,
+              service_account_json_env: 'service_account_json_env',
+              admin_email: 'admin_email',
+              domain: 'domain',
+              tenant_id_env: 'tenant_id_env',
+              client_secret_env: 'client_secret_env',
+              api_token_env: 'api_token_env',
+              okta_domain: 'okta_domain',
+            },
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TOidcProviderDetailResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.oidc_providers.provider.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.oidc_providers.provider.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
         },
       },
     },
