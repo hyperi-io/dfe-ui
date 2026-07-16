@@ -1,9 +1,10 @@
+import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { useCreateOidcProvider } from '@/Settings/hooks/useCreateOidcProvider';
 import { IconSettings2 } from '@repo/dfe-icons';
-import { App, Button, Drawer } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
 export const CreateOidcDrawer = ({
