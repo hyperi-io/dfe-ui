@@ -57,6 +57,7 @@ import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail
 import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/useSyncOidcProviderGroups/types';
+import { TTestOidcProviderResponse } from '@/Settings/hooks/useTestOidcProvider/types';
 import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
 import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
 import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
@@ -3704,9 +3705,26 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
     test: {
       mockedUrl: '/api/v1/auth/oidc-providers/{name}/test',
-      post: {
-        success: () => {
-          console.error('Not implemented');
+      get: {
+        success: ({
+          mockedResponse = {
+            success: true,
+            message: 'message',
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TTestOidcProviderResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.oidc_providers.test.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
         },
       },
     },
