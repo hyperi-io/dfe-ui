@@ -33,6 +33,7 @@ import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
+import { TGovernanceActionDetailResponse } from '@/Platform/hooks/useFetchGovernanceActionDetail/types';
 import { TGovernanceActionsResponse } from '@/Platform/hooks/useFetchGovernanceActions/types';
 import { THelmFilesResponse } from '@/Platform/hooks/useFetchHelmFiles/types';
 import { THelmFileVariablesResponse } from '@/Platform/hooks/useFetchHelmFileVariables/types';
@@ -3737,7 +3738,35 @@ export const API_CONFIG_MOCKS = Object.freeze({
     action: {
       mockedUrl: '/api/v1/governance/actions/{name}',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            required_action: 'required_action',
+            changes: [
+              {
+                cls: 'cls',
+                name: 'name',
+                path: 'path',
+                value: 'value',
+              },
+            ],
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TGovernanceActionDetailResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.action.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
     invokeAction: {
