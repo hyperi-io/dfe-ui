@@ -31,6 +31,7 @@ import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
+import { TClientConfigResponse } from '@/Platform/hooks/clientConfig/useFetchClientConfig/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/gitops/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/gitops/useFetchGitOpsLog/types';
 import { TCreateGovernanceActionResponse } from '@/Platform/hooks/governance/useCreateGovernanceAction/types';
@@ -4505,7 +4506,21 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/config/client',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            api_base: 'api_base',
+            hyperdx: { enabled: true, url: 'url' },
+            auth_mode: 'auth_mode',
+            features: { feature: true },
+          },
+        }: { mockedResponse?: TClientConfigResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.clientConfig.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
   },
