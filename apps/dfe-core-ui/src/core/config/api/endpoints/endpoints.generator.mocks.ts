@@ -31,6 +31,7 @@ import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
+import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -3772,8 +3773,21 @@ export const API_CONFIG_MOCKS = Object.freeze({
   gitops: {
     autoMerge: {
       mockedUrl: '/api/v1/gitops/auto-merge',
-      post: {
-        success: () => console.error('Not implemented'),
+      get: {
+        success: ({
+          mockedResponse = {
+            stored: true,
+            effective: true,
+            allowed: true,
+            reason: 'string',
+          },
+        }: {
+          mockedResponse?: TGitOpsAutoMergeResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
     log: {
