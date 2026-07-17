@@ -4383,6 +4383,70 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      put: {
+        success: ({
+          mockedResponse = {
+            scope: 'scope',
+            scope_id: 'scope_id',
+            namespace: 'namespace',
+            key: 'key',
+            content_type: 'content_type',
+            size: 100,
+            updated_by: 'updated_by',
+            updated_at: 'updated_at',
+            etag: 'etag',
+          },
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TRepositoryObjectDetailResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(
+                JSON.parse(JSON.stringify(mockedResponse)),
+              );
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
   },
   clientConfig: {
