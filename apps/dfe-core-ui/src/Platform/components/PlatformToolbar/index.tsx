@@ -10,7 +10,7 @@ export const PlatformToolbar = () => {
   const routes = [
     {
       path: '/platform',
-      label: 'Platform',
+      label: 'Platform Configuration',
       disabled: false,
     },
   ];
