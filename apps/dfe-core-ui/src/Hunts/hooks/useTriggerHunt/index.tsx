@@ -11,7 +11,7 @@ export const useTriggerHunt = ({
   onSuccess?: (data: TTriggerResponse) => void;
   onError?: (error: Error) => void;
 }) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (triggerRequest: TTriggerRequest) =>
       triggerHunt({
         pathParams: { name },
@@ -25,5 +25,5 @@ export const useTriggerHunt = ({
     },
   });
 
-  return { data, mutate, isPending, error };
+  return { data, mutate, isPending, error, reset };
 };

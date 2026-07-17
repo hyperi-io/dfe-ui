@@ -3,6 +3,7 @@
 import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
 import { CreateHuntDrawer } from '@/Hunts/components/CreateHuntDrawer';
+import { EngineStatus } from '@/Hunts/components/EngineStatus';
 import { ListHuntsProvider } from '@/Hunts/contexts/ListHuntsContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -41,8 +42,10 @@ export const HuntsToolbar = () => {
             </Link>
           ))}
         </nav>
-
-        <CreateHuntDrawer />
+        <div className="flex items-center gap-x-2">
+          <EngineStatus />
+          <CreateHuntDrawer />
+        </div>
       </Toolbar>
     </ListHuntsProvider>
   );

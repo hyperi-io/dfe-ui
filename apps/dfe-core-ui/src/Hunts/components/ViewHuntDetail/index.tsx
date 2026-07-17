@@ -5,6 +5,7 @@ import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
 import { Spin } from 'antd';
 import { HuntDetailActionMenu } from './HuntDetailActionMenu';
+import { TriggerHunt } from './TriggerHunt';
 
 export const ViewHuntDetail = () => {
   const { selectedHuntName } = useListHuntsContext();
@@ -51,7 +52,10 @@ export const ViewHuntDetail = () => {
           </span>
           {huntDetail.display_name ?? huntDetail.name}
         </h4>
-        <HuntDetailActionMenu hunt={huntDetail} />
+        <div className="flex items-center gap-x-2">
+          <TriggerHunt selectedHuntName={selectedHuntName ?? ''} />
+          <HuntDetailActionMenu hunt={huntDetail} />
+        </div>
       </div>
 
       <ViewHuntDetailTabs selectedHuntName={selectedHuntName} {...huntDetail} />
