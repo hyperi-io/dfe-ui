@@ -1598,24 +1598,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
       },
     },
   },
-  system: {
-    version: {
-      mockedUrl: '/api/v1/system/version',
-      get: {
-        success: () => {
-          console.error('Not implemented');
-        },
-      },
-    },
-    settings: {
-      mockedUrl: '/api/v1/system/settings',
-      get: {
-        success: () => {
-          console.error('Not implemented');
-        },
-      },
-    },
-  },
   transforms: {
     compile: {
       mockedUrl: '/api/v1/transforms/compile',
@@ -3726,6 +3708,153 @@ export const API_CONFIG_MOCKS = Object.freeze({
             },
           );
         },
+      },
+    },
+  },
+  governance: {
+    actions: {
+      mockedUrl: '/api/v1/governance/actions',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    action: {
+      mockedUrl: '/api/v1/governance/actions/{name}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    invokeAction: {
+      mockedUrl: '/api/v1/governance/actions/{name}/invoke',
+      post: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    adminActions: {
+      mockedUrl: '/api/v1/governance/admin/actions',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    adminAction: {
+      mockedUrl: '/api/v1/governance/admin/actions/{name}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    reconcileChRbac: {
+      mockedUrl: '/api/v1/governance/ch-rbac/reconcile',
+      post: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  helm: {
+    listFiles: {
+      mockedUrl: '/api/v1/helm/files',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    fileVariables: {
+      mockedUrl: '/api/v1/helm/files/{name}/vars',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    fileVariable: {
+      mockedUrl: '/api/v1/helm/files/{name}/vars/{path}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  gitops: {
+    autoMerge: {
+      mockedUrl: '/api/v1/gitops/auto-merge',
+      post: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    log: {
+      mockedUrl: '/api/v1/gitops/log',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  lifecycle: {
+    default: {
+      mockedUrl: '/api/v1/lifecycle',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    lifecycle: {
+      mockedUrl: '/api/v1/lifecycle/{name}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  repository: {
+    preferences: {
+      mockedUrl: '/api/v1/repository/preferences',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    objects: {
+      mockedUrl: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    object: {
+      mockedUrl:
+        '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}/{key}',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  clientConfig: {
+    default: {
+      mockedUrl: '/api/v1/config/client',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+  },
+  system: {
+    version: {
+      mockedUrl: '/api/v1/system/version',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    settings: {
+      mockedUrl: '/api/v1/system/settings',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    clickhouseCloud: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    clickhouseCloudStart: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud/start',
+      post: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    clickhouseCloudStop: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud/stop',
+      post: {
+        success: () => console.error('Not implemented'),
       },
     },
   },

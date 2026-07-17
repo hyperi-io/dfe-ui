@@ -48,10 +48,6 @@ export const API_CONFIG = Object.freeze({
     destinations: '/api/v1/alerts/destinations',
     destination: '/api/v1/alerts/destinations/{name}',
   },
-  system: {
-    version: '/api/v1/system/version',
-    settings: '/api/v1/system/settings',
-  },
   transforms: {
     compile: '/api/v1/transforms/compile',
     test: '/api/v1/transforms/test',
@@ -101,5 +97,41 @@ export const API_CONFIG = Object.freeze({
     provider: '/api/v1/auth/oidc-providers/{name}',
     syncGroups: '/api/v1/auth/oidc-providers/{name}/sync',
     test: '/api/v1/auth/oidc-providers/{name}/test',
+  },
+  governance: {
+    actions: '/api/v1/governance/actions',
+    action: '/api/v1/governance/actions/{name}',
+    invokeAction: '/api/v1/governance/actions/{name}/invoke',
+    adminActions: '/api/v1/governance/admin/actions',
+    adminAction: '/api/v1/governance/admin/actions/{name}',
+    reconcileChRbac: '/api/v1/governance/ch-rbac/reconcile',
+  },
+  helm: {
+    listFiles: '/api/v1/helm/files',
+    fileVariables: '/api/v1/helm/files/{name}/vars',
+    fileVariable: '/api/v1/helm/files/{name}/vars/{path}',
+  },
+  gitops: {
+    autoMerge: '/api/v1/gitops/auto-merge',
+    log: '/api/v1/gitops/log',
+  },
+  lifecycle: {
+    default: '/api/v1/lifecycle',
+    lifecycle: '/api/v1/lifecycle/{name}',
+  },
+  repository: {
+    preferences: '/api/v1/repository/preferences',
+    objects: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}',
+    object: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}/{key}',
+  },
+  clientConfig: {
+    default: '/api/v1/config/client',
+  },
+  system: {
+    version: '/api/v1/system/version',
+    settings: '/api/v1/system/settings',
+    clickhouseCloud: '/api/v1/system/clickhouse-cloud',
+    clickhouseCloudStart: '/api/v1/system/clickhouse-cloud/start',
+    clickhouseCloudStop: '/api/v1/system/clickhouse-cloud/stop',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);
