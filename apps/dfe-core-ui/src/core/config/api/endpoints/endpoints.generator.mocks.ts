@@ -3840,6 +3840,50 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
     adminAction: {
       mockedUrl: '/api/v1/governance/admin/actions/{name}',
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminAction.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminAction.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    adminPolicies: {
+      mockedUrl: '/api/v1/governance/admin/policies',
+      get: {
+        success: () => console.error('Not implemented'),
+      },
+    },
+    adminPolicy: {
+      mockedUrl: '/api/v1/governance/admin/policies/{name}',
       get: {
         success: () => console.error('Not implemented'),
       },
