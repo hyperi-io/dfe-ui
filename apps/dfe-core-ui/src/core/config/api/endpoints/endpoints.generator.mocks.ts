@@ -38,6 +38,7 @@ import { TGovernanceActionsResponse } from '@/Platform/hooks/useFetchGovernanceA
 import { THelmFilesResponse } from '@/Platform/hooks/useFetchHelmFiles/types';
 import { THelmFileVariablesResponse } from '@/Platform/hooks/useFetchHelmFileVariables/types';
 import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
+import { TGovernanceActionInvokeResponse } from '@/Platform/hooks/useInvokeGovernanceAction/types';
 import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/useUpdateHelmFileVariable/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/useUpdateLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -3772,7 +3773,33 @@ export const API_CONFIG_MOCKS = Object.freeze({
     invokeAction: {
       mockedUrl: '/api/v1/governance/actions/{name}/invoke',
       post: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            dry_run: true,
+            changed: true,
+            auto_merged: true,
+            review_required: true,
+            diff: [],
+          },
+        }: { mockedResponse?: TGovernanceActionInvokeResponse } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.invokeAction.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.invokeAction.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
     adminActions: {
