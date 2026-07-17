@@ -32,6 +32,7 @@ import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
+import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -3820,7 +3821,33 @@ export const API_CONFIG_MOCKS = Object.freeze({
     log: {
       mockedUrl: '/api/v1/gitops/log',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            entries: [
+              {
+                sha: 'string',
+                timestamp: 0,
+                ctype: 'string',
+                scope: 'string',
+                summary: 'string',
+                actor: 'string',
+                role: 'string',
+                action: 'string',
+                request_id: 'string',
+                files: ['string'],
+                resources: ['string'],
+                conforming: true,
+                state: 'string',
+              },
+            ],
+          },
+        }: {
+          mockedResponse?: TGitOpsLogResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.gitops.log.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
   },
