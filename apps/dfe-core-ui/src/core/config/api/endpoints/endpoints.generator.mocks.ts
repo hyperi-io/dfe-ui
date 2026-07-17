@@ -23,10 +23,10 @@ import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServi
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TLoginResponse } from '@/core/hooks/useLogin/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
-import { THuntEngineStatus } from '@/Hunts/hooks/_useFetchEngineStatus/types';
 import { TAlertCreateResponse } from '@/Hunts/hooks/useCreateAlert/types';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { TAlertDetailResponse } from '@/Hunts/hooks/useFetchAlertDetail/types';
+import { THuntEngineStatus } from '@/Hunts/hooks/useFetchEngineStatus/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
