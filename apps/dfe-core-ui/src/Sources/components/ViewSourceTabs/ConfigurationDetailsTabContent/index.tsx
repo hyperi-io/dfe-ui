@@ -3,7 +3,6 @@ import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
-import { MappingStandardsModal } from './MappingStandardsModal';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
