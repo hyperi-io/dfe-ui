@@ -3789,6 +3789,33 @@ export const API_CONFIG_MOCKS = Object.freeze({
           });
         },
       },
+      put: {
+        success: ({
+          mockedResponse = {
+            stored: true,
+            effective: true,
+            allowed: true,
+            reason: 'string',
+          },
+        }: {
+          mockedResponse?: TGitOpsAutoMergeResponse;
+        } = {}) => {
+          return http.put(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+        } = {}) => {
+          return http.put(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
     },
     log: {
       mockedUrl: '/api/v1/gitops/log',
