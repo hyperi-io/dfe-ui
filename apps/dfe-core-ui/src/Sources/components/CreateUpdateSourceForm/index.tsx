@@ -13,7 +13,6 @@ import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
-import { TransformTabContent } from './TransformTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
 
@@ -157,22 +156,23 @@ export const CreateUpdateSourceFormBase = ({
           ...(isMetaSchemaFormValueDefined
             ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
               [
-                {
-                  key: 'transform',
-                  label: (
-                    <TabLabel
-                      label="Transform"
-                      validationErrors={validationErrors?.transform}
-                    />
-                  ),
-                  forceRender: true,
-                  children: (
-                    <TransformTabContent
-                      formValidation={formValidation}
-                      form={form}
-                    />
-                  ),
-                },
+                // // TODO: Implement transform API endpoints and uncomment this tab once integrated
+                // {
+                //   key: 'transform',
+                //   label: (
+                //     <TabLabel
+                //       label="Transform"
+                //       validationErrors={validationErrors?.transform}
+                //     />
+                //   ),
+                //   forceRender: true,
+                //   children: (
+                //     <TransformTabContent
+                //       formValidation={formValidation}
+                //       form={form}
+                //     />
+                //   ),
+                // },
                 {
                   key: 'mappingStandards',
                   label: (
