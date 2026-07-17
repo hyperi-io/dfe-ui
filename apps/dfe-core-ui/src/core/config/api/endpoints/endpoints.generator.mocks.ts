@@ -1,7 +1,3 @@
-import {
-  TFetchStandardFieldMapResponse,
-  TSourceFieldMapResponse,
-} from '@/_FieldMaps/hooks/useFetchFieldMapDetail/types';
 import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
 import { TTestTransformResponse } from '@/_Transforms/hooks/_useTestTransform/types';
 import { TCompileTransformResponse } from '@/_Transforms/hooks/useCompileTransform/types';
@@ -14,6 +10,10 @@ import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TElasticConvertResponse } from '@/core/hooks/useElasticConvert/types';
+import {
+  TFetchStandardFieldMapResponse,
+  TSourceFieldMapResponse,
+} from '@/core/hooks/useFetchFieldMapDetail/types';
 import { TFieldMapListResponse } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { THuntListResponse } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
 import { TOrganisationListResponse } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
