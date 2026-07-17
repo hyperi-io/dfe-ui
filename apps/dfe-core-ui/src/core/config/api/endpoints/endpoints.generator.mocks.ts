@@ -4447,6 +4447,58 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
   },
   clientConfig: {
