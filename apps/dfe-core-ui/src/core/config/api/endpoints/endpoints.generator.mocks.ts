@@ -44,6 +44,7 @@ import { THelmFileVariablesResponse } from '@/Platform/hooks/helm/useFetchHelmFi
 import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/helm/useUpdateHelmFileVariable/types';
 import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLifecycle/types';
+import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -4260,7 +4261,23 @@ export const API_CONFIG_MOCKS = Object.freeze({
     preferences: {
       mockedUrl: '/api/v1/repository/preferences',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            preferences: {
+              key: 'value',
+            },
+            etag: 'etag',
+          },
+        }: {
+          mockedResponse?: TRepositoryPreferencesResponse;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
     objects: {
