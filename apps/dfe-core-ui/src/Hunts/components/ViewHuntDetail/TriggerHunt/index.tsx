@@ -5,7 +5,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useTriggerHunt } from '@/Hunts/hooks/useTriggerHunt';
 import { IconPlayerPlay } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
+import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
 
@@ -23,12 +23,20 @@ export const TriggerHunt = ({
   const [form] = Form.useForm<TriggerHuntFormValues>();
   const formValidation = useAntdZodResolver(triggerHuntSchema);
 
+  const { notification } = App.useApp();
+
   const {
     mutate: triggerHunt,
     isPending,
     error,
   } = useTriggerHunt({
     name: selectedHuntName,
+    onSuccess: () => {
+      setIsOpen(false);
+      notification.success({
+        title: 'On-demand triggered successfully',
+      });
+    },
   });
 
   const handleSubmit = (values: TriggerHuntFormValues) => {
