@@ -51,6 +51,7 @@ import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useF
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
+import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -4591,13 +4592,69 @@ export const API_CONFIG_MOCKS = Object.freeze({
     clickhouseCloudStart: {
       mockedUrl: '/api/v1/system/clickhouse-cloud/start',
       post: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'start',
+            state: 'state',
+            is_running: true,
+          },
+        }: {
+          mockedResponse?: TSystemStartStopClickhouseCloudResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStart.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStart.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
     clickhouseCloudStop: {
       mockedUrl: '/api/v1/system/clickhouse-cloud/stop',
       post: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'stop',
+            state: 'state',
+            is_running: true,
+          },
+        }: {
+          mockedResponse?: TSystemStartStopClickhouseCloudResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStop.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStop.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
   },
