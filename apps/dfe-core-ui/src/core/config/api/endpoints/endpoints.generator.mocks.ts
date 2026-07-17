@@ -44,6 +44,7 @@ import { THelmFileVariablesResponse } from '@/Platform/hooks/helm/useFetchHelmFi
 import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/helm/useUpdateHelmFileVariable/types';
 import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLifecycle/types';
+import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
 import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -4348,7 +4349,39 @@ export const API_CONFIG_MOCKS = Object.freeze({
       mockedUrl:
         '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}/{key}',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            key: 'key',
+            content_type: 'content_type',
+            size: 100,
+            updated_by: 'updated_by',
+            updated_at: 'updated_at',
+            etag: 'etag',
+          },
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TRepositoryObjectDetailResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(
+                JSON.parse(JSON.stringify(mockedResponse)),
+              );
+            },
+          );
+        },
       },
     },
   },
