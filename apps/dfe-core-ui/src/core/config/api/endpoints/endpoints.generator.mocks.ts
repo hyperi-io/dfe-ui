@@ -41,6 +41,7 @@ import { THelmFilesResponse } from '@/Platform/hooks/useFetchHelmFiles/types';
 import { THelmFileVariablesResponse } from '@/Platform/hooks/useFetchHelmFileVariables/types';
 import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
 import { TGovernanceActionInvokeResponse } from '@/Platform/hooks/useInvokeGovernanceAction/types';
+import { TReconcileGovernanceChRbacResponse } from '@/Platform/hooks/useReconcileGovernanceChRbac/types';
 import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/useUpdateHelmFileVariable/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/useUpdateLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -3950,7 +3951,32 @@ export const API_CONFIG_MOCKS = Object.freeze({
     reconcileChRbac: {
       mockedUrl: '/api/v1/governance/ch-rbac/reconcile',
       post: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            required_action: 'required_action',
+            changes: [
+              { cls: 'cls', name: 'name', path: 'path', value: 'value' },
+            ],
+          },
+        }: { mockedResponse?: TReconcileGovernanceChRbacResponse } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.reconcileChRbac.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.reconcileChRbac.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
   },
