@@ -1,10 +1,15 @@
-export const PLATFORM_BASE_PATH = '/platform/system';
+export const PLATFORM_BASE_PATH = '/platform';
 
 export const PLATFORM_TAB_DETAILS = Object.freeze({
   system: {
     key: 'system',
     label: 'System Settings',
     description: 'View Platform configuration data and restart cloud services',
+  },
+  gitops: {
+    key: 'gitops',
+    label: 'Git Operations',
+    description: 'View Git Operations configuration data and logs',
   },
 });
 

@@ -2,6 +2,7 @@
 
 import { MainContentCard } from '@/core/components/ContentCard';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
+import { GitOps } from '@/Platform/components/GitOps';
 import { SystemManagement } from '@/Platform/components/SystemManagement';
 import { Tabs } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
@@ -54,6 +55,16 @@ export const PlatformScene = () => {
               />
             ),
             children: <SystemManagement />,
+          },
+          {
+            key: PLATFORM_TAB_DETAILS.gitops.key,
+            label: (
+              <NavigationTabLabel
+                label={PLATFORM_TAB_DETAILS.gitops.label}
+                description={PLATFORM_TAB_DETAILS.gitops.description}
+              />
+            ),
+            children: <GitOps />,
           },
         ]}
       />
