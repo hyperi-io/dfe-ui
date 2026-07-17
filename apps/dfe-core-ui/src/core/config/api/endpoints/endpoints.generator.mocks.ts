@@ -34,6 +34,7 @@ import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
 import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
+import { TUpdateLifecycleResponse } from '@/Platform/hooks/useUpdateLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -3875,8 +3876,49 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
     lifecycle: {
       mockedUrl: '/api/v1/lifecycle/{name}',
-      get: {
-        success: () => console.error('Not implemented'),
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            state: 'string',
+            changed: true,
+            commit_sha: 'string',
+            pending_reconcile: true,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TUpdateLifecycleResponse;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.lifecycle.lifecycle.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.lifecycle.lifecycle.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
   },
