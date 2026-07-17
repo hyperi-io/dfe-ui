@@ -29,6 +29,7 @@ export const TriggerHunt = ({
     mutate: triggerHunt,
     isPending,
     error,
+    reset,
   } = useTriggerHunt({
     name: selectedHuntName,
     onSuccess: () => {
@@ -64,7 +65,11 @@ export const TriggerHunt = ({
         onCancel={() => setIsOpen(false)}
         footer={null}
       >
-        <Form form={form} onFinish={handleSubmit}>
+        <Form
+          form={form}
+          onFinish={handleSubmit}
+          onValuesChange={() => reset()}
+        >
           <Form.Item label="Customer" name="customer" rules={[formValidation]}>
             <OrganisationSelect placeholder="Select Customer" />
           </Form.Item>
