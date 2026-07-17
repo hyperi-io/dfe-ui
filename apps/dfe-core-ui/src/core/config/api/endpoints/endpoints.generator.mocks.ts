@@ -48,6 +48,7 @@ import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLi
 import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
 import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
+import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -4569,7 +4570,22 @@ export const API_CONFIG_MOCKS = Object.freeze({
     clickhouseCloud: {
       mockedUrl: '/api/v1/system/clickhouse-cloud',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'name',
+            state: 'state',
+            is_running: true,
+          },
+        }: { mockedResponse?: TSystemClickhouseStatusResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.system.clickhouseCloud.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
     clickhouseCloudStart: {
