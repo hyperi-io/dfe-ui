@@ -44,6 +44,7 @@ import { THelmFileVariablesResponse } from '@/Platform/hooks/helm/useFetchHelmFi
 import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/helm/useUpdateHelmFileVariable/types';
 import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLifecycle/types';
+import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
@@ -4311,7 +4312,36 @@ export const API_CONFIG_MOCKS = Object.freeze({
     objects: {
       mockedUrl: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = [
+            {
+              key: 'key',
+              content_type: 'content_type',
+              size: 100,
+              updated_by: 'updated_by',
+              updated_at: 'updated_at',
+              etag: 'etag',
+            },
+          ],
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+        }: {
+          mockedResponse?: TRepositoryObjectsResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.objects.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
     object: {
