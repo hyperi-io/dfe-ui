@@ -1,6 +1,6 @@
 import { cn } from '@/core/utils/style';
 
-export const AdminTabLabel = ({
+export const NavigationTabLabel = ({
   className,
   label,
   description,

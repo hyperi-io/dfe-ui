@@ -3,9 +3,9 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { SectionCard } from '@/core/components/SectionCard';
 import { CreateGroupDrawer } from '@/Settings/components/GroupManagement/CreateGroupDrawer';
 import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
-import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfiniteFilteredGroups';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';

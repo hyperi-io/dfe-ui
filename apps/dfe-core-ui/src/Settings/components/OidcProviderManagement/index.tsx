@@ -1,6 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SectionCard } from '@/Settings/components/SectionCard';
+import { SectionCard } from '@/core/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { CreateOidcProviderDrawer } from './CreateOidcProviderDrawer';
 import { OidcProviderList } from './OidcProviderList';

@@ -6,16 +6,14 @@ import {
 import { TSystemStartStopClickhouseCloudResponse } from './types';
 
 export const useSystemStopStartClickhouseCloud = ({
-  action,
   onSuccess,
   onError,
 }: {
-  action: 'stop' | 'start';
   onSuccess?: (values: TSystemStartStopClickhouseCloudResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: () => {
+    mutationFn: (action: 'stop' | 'start') => {
       if (action === 'stop') {
         return systemStopClickhouseCloudApi();
       } else {

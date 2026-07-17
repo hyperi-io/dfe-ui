@@ -27,7 +27,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useSystemStopStartClickhouseCloud', () => {
   describe('action: stop', () => {
-    const action = 'stop';
+    const requestAction = 'stop';
     describe('onSuccess', () => {
       test('should call onSuccess', async () => {
         const onSuccess = vi.fn();
@@ -36,14 +36,13 @@ describe('.useSystemStopStartClickhouseCloud', () => {
         const { result } = renderHook(
           () =>
             useSystemStopStartClickhouseCloud({
-              action,
               onSuccess,
               onError,
             }),
           { wrapper },
         );
 
-        result.current.mutate();
+        result.current.mutate(requestAction);
 
         const expectedResponse: TSystemStartStopClickhouseCloudResponse = {
           configured: true,
@@ -83,14 +82,13 @@ describe('.useSystemStopStartClickhouseCloud', () => {
         const { result } = renderHook(
           () =>
             useSystemStopStartClickhouseCloud({
-              action,
               onSuccess,
               onError,
             }),
           { wrapper },
         );
 
-        result.current.mutate();
+        result.current.mutate(requestAction);
 
         await waitFor(() => {
           expect(onError).toHaveBeenCalled();
@@ -104,7 +102,7 @@ describe('.useSystemStopStartClickhouseCloud', () => {
   });
 
   describe('action: start', () => {
-    const action = 'start';
+    const requestAction = 'start';
     describe('onSuccess', () => {
       test('should call onSuccess', async () => {
         const onSuccess = vi.fn();
@@ -113,14 +111,13 @@ describe('.useSystemStopStartClickhouseCloud', () => {
         const { result } = renderHook(
           () =>
             useSystemStopStartClickhouseCloud({
-              action,
               onSuccess,
               onError,
             }),
           { wrapper },
         );
 
-        result.current.mutate();
+        result.current.mutate(requestAction);
 
         const expectedResponse: TSystemStartStopClickhouseCloudResponse = {
           configured: true,
@@ -160,14 +157,13 @@ describe('.useSystemStopStartClickhouseCloud', () => {
         const { result } = renderHook(
           () =>
             useSystemStopStartClickhouseCloud({
-              action,
               onSuccess,
               onError,
             }),
           { wrapper },
         );
 
-        result.current.mutate();
+        result.current.mutate(requestAction);
 
         await waitFor(() => {
           expect(onError).toHaveBeenCalled();
