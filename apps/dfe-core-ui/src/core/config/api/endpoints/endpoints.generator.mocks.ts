@@ -33,6 +33,7 @@ import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
+import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -3855,7 +3856,21 @@ export const API_CONFIG_MOCKS = Object.freeze({
     default: {
       mockedUrl: '/api/v1/lifecycle',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              tier: 'string',
+              state: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: TLifecycleResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.lifecycle.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
     lifecycle: {
