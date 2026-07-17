@@ -34,6 +34,7 @@ import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
 import { THelmFilesResponse } from '@/Platform/hooks/useFetchHelmFiles/types';
+import { THelmFileVariablesResponse } from '@/Platform/hooks/useFetchHelmFileVariables/types';
 import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/useUpdateLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -3772,7 +3773,27 @@ export const API_CONFIG_MOCKS = Object.freeze({
     fileVariables: {
       mockedUrl: '/api/v1/helm/files/{name}/vars',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = [
+            {
+              test: ['test'],
+            },
+          ],
+          name = 'name',
+        }: {
+          mockedResponse?: THelmFileVariablesResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.helm.fileVariables.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
       },
     },
     fileVariable: {
