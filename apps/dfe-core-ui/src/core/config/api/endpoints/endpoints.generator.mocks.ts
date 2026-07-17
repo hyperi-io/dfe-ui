@@ -3845,6 +3845,42 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+          path = 'path',
+        }: { status?: number; name?: string; path?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+          path = 'path',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+          path?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
   },
   gitops: {
