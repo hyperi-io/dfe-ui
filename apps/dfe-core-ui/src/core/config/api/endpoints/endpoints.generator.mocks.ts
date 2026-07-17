@@ -4279,6 +4279,34 @@ export const API_CONFIG_MOCKS = Object.freeze({
           );
         },
       },
+      patch: {
+        success: ({
+          mockedResponse = {
+            preferences: {
+              key: 'value',
+            },
+            etag: 'etag',
+          },
+        }: { mockedResponse?: TRepositoryPreferencesResponse } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
     },
     objects: {
       mockedUrl: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}',
