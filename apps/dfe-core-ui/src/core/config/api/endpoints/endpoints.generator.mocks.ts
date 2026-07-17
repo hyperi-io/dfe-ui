@@ -32,6 +32,7 @@ import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TCreateGovernanceActionResponse } from '@/Platform/hooks/useCreateGovernanceAction/types';
+import { TCreateGovernancePolicyResponse } from '@/Platform/hooks/useCreateGovernancePolicy/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
 import { TGovernanceActionDetailResponse } from '@/Platform/hooks/useFetchGovernanceActionDetail/types';
@@ -3878,8 +3879,34 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
     adminPolicies: {
       mockedUrl: '/api/v1/governance/admin/policies',
-      get: {
-        success: () => console.error('Not implemented'),
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            protected: ['protected'],
+          },
+        }: {
+          mockedResponse?: TCreateGovernancePolicyResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminPolicies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminPolicies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
     adminPolicy: {
