@@ -1,10 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
 import z from 'zod';
-import { OrganisationSelect } from './OrganisationSelect';
 import { RuleSelect } from './RuleSelect';
 
 const NAME_REGEX = /^[a-z][a-z0-9_]*$/;
