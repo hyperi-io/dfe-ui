@@ -104,6 +104,8 @@ export const API_CONFIG = Object.freeze({
     invokeAction: '/api/v1/governance/actions/{name}/invoke',
     adminActions: '/api/v1/governance/admin/actions',
     adminAction: '/api/v1/governance/admin/actions/{name}',
+    adminPolicies: '/api/v1/governance/admin/policies',
+    adminPolicy: '/api/v1/governance/admin/policies/{name}',
     reconcileChRbac: '/api/v1/governance/ch-rbac/reconcile',
   },
   helm: {
