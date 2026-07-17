@@ -60,7 +60,19 @@ export const config = {
      * Match all paths under (auth) except static files and api routes.
      * (auth) group renders at / so we protect the root and its children.
      * /login is excluded, so the proxy-trust redirect above cannot loop.
+     *
+     * The health trinity and /metrics are excluded too, and that is load-bearing
+     * rather than cosmetic. kubelet probes and Prometheus scrapes carry no session,
+     * so withAuth answered them with a 307 to /login -- and k8s counts ANY 2xx/3xx as
+     * success, so the probe would have passed while the app was face down: a health
+     * check reporting on the login redirect, not on the app. Worse than no probe.
+     * Prometheus would have scraped login HTML and recorded nothing.
+     *
+     * They expose a status string and process/runtime counters -- no user data, no
+     * app state. Probes and scrapes are unauthenticated by definition; if this
+     * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
+     * not an auth redirect on a health check.
      */
-    '/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)',
+    '/((?!login|api/auth|_next/static|_next/image|favicon.ico|healthz|readyz|startupz|health/|metrics).*)',
   ],
 };
