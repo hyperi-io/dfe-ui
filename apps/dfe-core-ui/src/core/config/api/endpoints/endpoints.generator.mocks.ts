@@ -48,6 +48,7 @@ import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLi
 import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
 import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
+import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
@@ -4544,7 +4545,25 @@ export const API_CONFIG_MOCKS = Object.freeze({
     settings: {
       mockedUrl: '/api/v1/system/settings',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            clickhouse_host: 'clickhouse_host',
+            clickhouse_database: 'clickhouse_database',
+            clickhouse_data_database: 'clickhouse_data_database',
+            sources_dir: 'sources_dir',
+            services_config_dir: 'services_config_dir',
+            hunt_dir: 'hunt_dir',
+            auth_enabled: true,
+            auth_local_enabled: true,
+            api_host: 'api_host',
+            api_port: 1234,
+            api_cors_origins: ['api_cors_origin'],
+          },
+        }: { mockedResponse?: TSystemSettingsResponse } = {}) => {
+          return http.get(API_CONFIG_MOCKS.system.settings.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
     clickhouseCloud: {
