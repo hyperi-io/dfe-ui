@@ -3911,8 +3911,40 @@ export const API_CONFIG_MOCKS = Object.freeze({
     },
     adminPolicy: {
       mockedUrl: '/api/v1/governance/admin/policies/{name}',
-      get: {
-        success: () => console.error('Not implemented'),
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminPolicy.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminPolicy.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
       },
     },
     reconcileChRbac: {
