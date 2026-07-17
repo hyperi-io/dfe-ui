@@ -48,6 +48,7 @@ import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLi
 import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
 import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
+import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -4528,7 +4529,16 @@ export const API_CONFIG_MOCKS = Object.freeze({
     version: {
       mockedUrl: '/api/v1/system/version',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = {
+            version: 'version',
+            python_version: 'python_version',
+          },
+        }: { mockedResponse?: TSystemVersionResponse } = {}) => {
+          return http.get(API_CONFIG_MOCKS.system.version.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
     settings: {
