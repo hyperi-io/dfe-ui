@@ -33,6 +33,7 @@ import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
 import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/useFetchGitOpsAutoMerge/types';
 import { TGitOpsLogResponse } from '@/Platform/hooks/useFetchGitOpsLog/types';
+import { THelmFilesResponse } from '@/Platform/hooks/useFetchHelmFiles/types';
 import { TLifecycleResponse } from '@/Platform/hooks/useFetchLifecycle/types';
 import { TUpdateLifecycleResponse } from '@/Platform/hooks/useUpdateLifecycle/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -3757,7 +3758,15 @@ export const API_CONFIG_MOCKS = Object.freeze({
     listFiles: {
       mockedUrl: '/api/v1/helm/files',
       get: {
-        success: () => console.error('Not implemented'),
+        success: ({
+          mockedResponse = ['string'],
+        }: {
+          mockedResponse?: THelmFilesResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.helm.listFiles.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
       },
     },
     fileVariables: {
