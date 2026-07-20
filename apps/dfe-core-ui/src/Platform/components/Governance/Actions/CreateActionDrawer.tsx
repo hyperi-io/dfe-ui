@@ -5,7 +5,7 @@ import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useCreateGovernanceAction } from '@/Platform/hooks/governance/useCreateGovernanceAction';
 import { IconMinus, IconPlus } from '@repo/dfe-icons';
-import { Button, ButtonProps, Input } from 'antd';
+import { App, Button, ButtonProps, Input } from 'antd';
 import { cloneElement, ReactElement, useState } from 'react';
 import z from 'zod';
 
@@ -19,14 +19,16 @@ const createActionSchema = z.object({
   required_action: z
     .string()
     .min(1, { message: 'Required Action is required' }),
-  changes: z.array(
-    z.object({
-      cls: z.string().min(1, { message: 'Class is required' }),
-      name: z.string().min(1, { message: 'Name is required' }),
-      path: z.string().min(1, { message: 'Path is required' }),
-      value: z.string().min(1, { message: 'Value is required' }),
-    }),
-  ),
+  changes: z
+    .array(
+      z.object({
+        cls: z.string().min(1, { message: 'Class is required' }),
+        name: z.string().min(1, { message: 'Name is required' }),
+        path: z.string().min(1, { message: 'Path is required' }),
+        value: z.string().min(1, { message: 'Value is required' }),
+      }),
+    )
+    .default([]),
 });
 
 type CreateActionSchema = z.infer<typeof createActionSchema>;
@@ -37,11 +39,22 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
   const [form] = Form.useForm<CreateActionSchema>();
   const formValidation = useAntdZodResolver(createActionSchema);
 
+  const { notification } = App.useApp();
+
   const {
     mutate: createAction,
     isPending,
     error,
-  } = useCreateGovernanceAction();
+  } = useCreateGovernanceAction({
+    onSuccess: ({ name }) => {
+      setOpen(false);
+      form.resetFields();
+      notification.success({
+        title: `Action ${name} created successfully`,
+        placement: 'bottomLeft',
+      });
+    },
+  });
 
   const handleFinish = (values: CreateActionSchema) => {
     createAction(values);
@@ -58,7 +71,12 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
           Add Action
         </Button>
       )}
-      <Drawer title="Create Action" open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        destroyOnHidden
+        title="Create Action"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <Form
           form={form}
           onFinish={handleFinish}
@@ -66,7 +84,7 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
             name: '',
             description: '',
             required_action: '',
-            changes: [{ cls: '', name: '', path: '', value: '' }],
+            changes: [],
           }}
         >
           <Form.Item label="Name" name="name" rules={[formValidation]}>
@@ -88,15 +106,21 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
                 <div className="w-full flex justify-between items-center gap-2">
                   Changes
                   <Button
-                    type="primary"
                     icon={<IconPlus />}
-                    onClick={() => add({})}
+                    onClick={() =>
+                      add({
+                        cls: '',
+                        name: '',
+                        path: '',
+                        value: '',
+                      })
+                    }
                   >
                     Add Change
                   </Button>
                 </div>
 
-                <ul className="w-full">
+                <ul className="w-full flex flex-col gap-2">
                   {fields.map(({ key, name, ...restField }) => (
                     <li
                       key={key}
@@ -109,6 +133,7 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
                         {...restField}
                         label="Class"
                         name={[name, 'cls']}
+                        rules={[formValidation]}
                       >
                         <Input className="w-full" />
                       </Form.Item>
@@ -116,6 +141,7 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
                         {...restField}
                         label="Name"
                         name={[name, 'name']}
+                        rules={[formValidation]}
                       >
                         <Input className="w-full" />
                       </Form.Item>
@@ -123,6 +149,7 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
                         {...restField}
                         label="Path"
                         name={[name, 'path']}
+                        rules={[formValidation]}
                       >
                         <Input className="w-full" />
                       </Form.Item>
@@ -130,6 +157,7 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
                         {...restField}
                         label="Value"
                         name={[name, 'value']}
+                        rules={[formValidation]}
                       >
                         <Input className="w-full" />
                       </Form.Item>
