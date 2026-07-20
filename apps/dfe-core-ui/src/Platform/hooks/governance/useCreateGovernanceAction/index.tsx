@@ -11,7 +11,7 @@ export const useCreateGovernanceAction = ({
 }: {
   onSuccess?: (values: TCreateGovernanceActionResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: TCreateGovernanceActionRequest) =>
       createGovernanceActionApi({ body }),
