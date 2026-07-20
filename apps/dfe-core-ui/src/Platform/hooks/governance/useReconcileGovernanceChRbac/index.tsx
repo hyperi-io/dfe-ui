@@ -8,7 +8,7 @@ export const useReconcileGovernanceChRbac = ({
 }: {
   onSuccess?: (values: TReconcileGovernanceChRbacResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: () => reconcileGovernanceChRbacApi(),
     onSuccess: (values) => {

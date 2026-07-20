@@ -11,6 +11,11 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
     label: 'Git Operations',
     description: 'View Git Operations configuration data and logs',
   },
+  governance: {
+    key: 'governance',
+    label: 'Governance',
+    description: 'View and manage governance policies and actions',
+  },
 });
 
 export const PLATFORM_TAB_KEYS = Object.keys(PLATFORM_TAB_DETAILS);
