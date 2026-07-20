@@ -7,6 +7,7 @@ import { Spin } from 'antd';
 import { CreateActionDrawer } from './CreateActionDrawer';
 import { DeleteActionModal } from './DeleteActionModal';
 import { InvokeActionDrawer } from './InvokeActionDrawer';
+import { ViewActionDrawer } from './ViewActionDrawer';
 
 export const Actions = () => {
   const { data: actions, isLoading, error } = useFetchGovernanceActions();
@@ -56,8 +57,12 @@ export const Actions = () => {
               <PopoverMenu
                 className="ml-4"
                 options={[
-                  <InvokeActionDrawer key={action} name={action} />,
-                  <DeleteActionModal key={action} action_name={action} />,
+                  <ViewActionDrawer key={`view-${action}`} name={action} />,
+                  <InvokeActionDrawer key={`invoke-${action}`} name={action} />,
+                  <DeleteActionModal
+                    key={`delete-${action}`}
+                    action_name={action}
+                  />,
                 ]}
               />
             </li>

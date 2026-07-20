@@ -4,7 +4,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useInvokeGovernanceAction } from '@/Platform/hooks/governance/useInvokeGovernanceAction';
 
-import { IconArrowUpRight, IconPlus } from '@repo/dfe-icons';
+import { IconArrowUpRight } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
@@ -45,7 +45,12 @@ export const InvokeActionDrawer = ({ name }: { name: string }) => {
         <RbacProtected.Restricted
           tooltip={{ show: true, placement: 'bottomRight' }}
         >
-          <Button htmlType="button" type="primary" icon={<IconPlus />} disabled>
+          <Button
+            htmlType="button"
+            type="primary"
+            icon={<IconArrowUpRight />}
+            disabled
+          >
             Invoke Action
           </Button>
         </RbacProtected.Restricted>
