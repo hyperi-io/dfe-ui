@@ -38,6 +38,8 @@ import { TCreateGovernanceActionResponse } from '@/Platform/hooks/governance/use
 import { TCreateGovernancePolicyResponse } from '@/Platform/hooks/governance/useCreateGovernancePolicy/types';
 import { TGovernanceActionDetailResponse } from '@/Platform/hooks/governance/useFetchGovernanceActionDetail/types';
 import { TGovernanceActionsResponse } from '@/Platform/hooks/governance/useFetchGovernanceActions/types';
+import { TGovernancePoliciesResponse } from '@/Platform/hooks/governance/useFetchGovernancePolicies/types';
+import { TGovernancePolicyDetailResponse } from '@/Platform/hooks/governance/useFetchGovernancePolicyDetail/types';
 import { TGovernanceActionInvokeResponse } from '@/Platform/hooks/governance/useInvokeGovernanceAction/types';
 import { TReconcileGovernanceChRbacResponse } from '@/Platform/hooks/governance/useReconcileGovernanceChRbac/types';
 import { THelmFilesResponse } from '@/Platform/hooks/helm/useFetchHelmFiles/types';
@@ -3771,6 +3773,47 @@ export const API_CONFIG_MOCKS = Object.freeze({
         } = {}) => {
           return http.get(
             API_CONFIG_MOCKS.governance.action.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    policies: {
+      mockedUrl: '/api/v1/governance/policies',
+      get: {
+        success: ({
+          mockedResponse = ['string'],
+        }: { mockedResponse?: TGovernancePoliciesResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.policies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    policy: {
+      mockedUrl: '/api/v1/governance/policies/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            protected: ['protected'],
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TGovernancePolicyDetailResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.policy.mockedUrl.replace(
               '{name}',
               name,
             ),

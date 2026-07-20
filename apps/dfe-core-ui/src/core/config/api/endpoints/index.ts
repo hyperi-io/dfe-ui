@@ -101,6 +101,8 @@ export const API_CONFIG = Object.freeze({
   governance: {
     actions: '/api/v1/governance/actions',
     action: '/api/v1/governance/actions/{name}',
+    policies: '/api/v1/governance/policies',
+    policy: '/api/v1/governance/policies/{name}',
     invokeAction: '/api/v1/governance/actions/{name}/invoke',
     adminActions: '/api/v1/governance/admin/actions',
     adminAction: '/api/v1/governance/admin/actions/{name}',
