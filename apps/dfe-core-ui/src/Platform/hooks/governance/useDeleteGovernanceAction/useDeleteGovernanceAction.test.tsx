@@ -35,14 +35,13 @@ describe('.useDeleteGovernanceAction', () => {
       const { result } = renderHook(
         () =>
           useDeleteGovernanceAction({
-            name,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -73,14 +72,13 @@ describe('.useDeleteGovernanceAction', () => {
       const { result } = renderHook(
         () =>
           useDeleteGovernanceAction({
-            name,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate(name);
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

@@ -1,7 +1,7 @@
 import { DeleteOrganisationModal } from '@/Settings/components/OrganisationManagement/DeleteOrganisationModal';
 import { EditOrganisationDrawer } from '@/Settings/components/OrganisationManagement/EditOrganisationDrawer';
 import { ViewOrganisationDrawer } from '@/Settings/components/OrganisationManagement/ViewOrganisationDrawer';
-import { PopoverMenu } from '@/Settings/components/PopoverMenu';
+import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { IconLockFilled } from '@repo/dfe-icons';
 

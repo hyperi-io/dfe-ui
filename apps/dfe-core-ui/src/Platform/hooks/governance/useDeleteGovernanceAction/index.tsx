@@ -1,18 +1,23 @@
-import { useMutation } from '@tanstack/react-query';
+import { GOVERNANCE_ACTIONS_QUERY_KEY } from '@/Platform/hooks/governance/useFetchGovernanceActions';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteGovernanceActionApi } from './api';
 
 export const useDeleteGovernanceAction = ({
-  name,
   onSuccess,
   onError,
 }: {
-  name: string;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isPending, error } = useMutation({
-    mutationFn: () => deleteGovernanceActionApi({ pathParams: { name: name } }),
+    mutationFn: (name: string) =>
+      deleteGovernanceActionApi({ pathParams: { name: name } }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: GOVERNANCE_ACTIONS_QUERY_KEY(),
+      });
       onSuccess?.();
     },
     onError: (error) => {
