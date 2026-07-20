@@ -3,16 +3,15 @@ import { invokeGovernanceActionApi } from './api';
 import { TGovernanceActionInvokeResponse } from './types';
 
 export const useInvokeGovernanceAction = ({
-  name,
   onSuccess,
   onError,
 }: {
-  name: string;
   onSuccess?: (values: TGovernanceActionInvokeResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: () => invokeGovernanceActionApi({ pathParams: { name } }),
+    mutationFn: ({ name }: { name: string }) =>
+      invokeGovernanceActionApi({ pathParams: { name } }),
     onSuccess: (values) => {
       onSuccess?.(values);
     },

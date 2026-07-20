@@ -6,6 +6,7 @@ import { useFetchGovernanceActions } from '@/Platform/hooks/governance/useFetchG
 import { Spin } from 'antd';
 import { CreateActionDrawer } from './CreateActionDrawer';
 import { DeleteActionModal } from './DeleteActionModal';
+import { InvokeActionDrawer } from './InvokeActionDrawer';
 
 export const Actions = () => {
   const { data: actions, isLoading, error } = useFetchGovernanceActions();
@@ -55,6 +56,7 @@ export const Actions = () => {
               <PopoverMenu
                 className="ml-4"
                 options={[
+                  <InvokeActionDrawer key={action} name={action} />,
                   <DeleteActionModal key={action} action_name={action} />,
                 ]}
               />

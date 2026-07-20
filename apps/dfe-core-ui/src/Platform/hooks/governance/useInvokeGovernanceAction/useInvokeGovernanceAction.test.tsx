@@ -35,14 +35,13 @@ describe('.useInvokeGovernanceAction', () => {
       const { result } = renderHook(
         () =>
           useInvokeGovernanceAction({
-            name,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate({ name });
 
       const expectedResponse: TGovernanceActionInvokeResponse = {
         dry_run: true,
@@ -82,14 +81,13 @@ describe('.useInvokeGovernanceAction', () => {
       const { result } = renderHook(
         () =>
           useInvokeGovernanceAction({
-            name,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate({ name });
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();
