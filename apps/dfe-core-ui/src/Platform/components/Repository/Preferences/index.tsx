@@ -8,10 +8,14 @@ import { Button, Select, Spin } from 'antd';
 export const RepositoryPreferences = () => {
   const [form] = Form.useForm();
   const {
-    data: { preferences: repositoryPreferences, etag } = {},
+    data: repositoryPreferencesResponse,
     isLoading: isLoadingRepositoryPreferences,
     error: errorRepositoryPreferences,
   } = useFetchRepositoryPreferences();
+
+  const repositoryPreferences =
+    repositoryPreferencesResponse?.preferences;
+  const etag = repositoryPreferencesResponse?.etag;
   const {
     mutate: updateRepositoryPreferences,
     isPending: isUpdatingRepositoryPreferences,
@@ -39,38 +43,40 @@ export const RepositoryPreferences = () => {
           type="error"
         />
       )}
-      <Form
-        form={form}
-        initialValues={repositoryPreferences}
-        onFinish={updateRepositoryPreferences}
-      >
-        <Form.Item name="theme" label="Theme">
-          <Select
-            options={[
-              { label: 'Light', value: 'light' },
-              { label: 'Dark', value: 'dark' },
-            ]}
-            placeholder="Select a theme"
-          />
-        </Form.Item>
+      {repositoryPreferencesResponse && (
+        <Form
+          form={form}
+          initialValues={repositoryPreferences}
+          onFinish={updateRepositoryPreferences}
+        >
+          <Form.Item name="theme" label="Theme">
+            <Select
+              options={[
+                { label: 'Light', value: 'light' },
+                { label: 'Dark', value: 'dark' },
+              ]}
+              placeholder="Select a theme"
+            />
+          </Form.Item>
 
-        {errorUpdatingRepositoryPreferences && (
-          <FormNotification
-            text={errorUpdatingRepositoryPreferences.message}
-            type="error"
-          />
-        )}
+          {errorUpdatingRepositoryPreferences && (
+            <FormNotification
+              text={errorUpdatingRepositoryPreferences.message}
+              type="error"
+            />
+          )}
 
-        <Form.Item className="flex justify-end">
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={isUpdatingRepositoryPreferences}
-          >
-            Update
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item className="flex justify-end">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isUpdatingRepositoryPreferences}
+            >
+              Update
+            </Button>
+          </Form.Item>
+        </Form>
+      )}
     </SectionCard>
   );
 };
