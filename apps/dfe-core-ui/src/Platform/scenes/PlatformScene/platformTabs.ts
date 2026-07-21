@@ -16,6 +16,11 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
     label: 'Governance',
     description: 'View and manage governance policies and actions',
   },
+  lifecycle: {
+    key: 'lifecycle',
+    label: 'Lifecycle',
+    description: 'View and manage lifecycle policies and actions',
+  },
 });
 
 export const PLATFORM_TAB_KEYS = Object.keys(PLATFORM_TAB_DETAILS);

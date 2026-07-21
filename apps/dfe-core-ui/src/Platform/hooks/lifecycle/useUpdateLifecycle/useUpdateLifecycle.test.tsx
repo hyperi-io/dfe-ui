@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useUpdateLifecycle } from '.';
-import { TLifecycleRequest, TUpdateLifecycleResponse } from './types';
+import { TActionTypeRequestBody, TUpdateLifecycleResponse } from './types';
 import { server } from './useUpdateLifecycle.mocks';
 
 beforeAll(() =>
@@ -26,10 +26,10 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateLifecycle', () => {
-  const requestBody: TLifecycleRequest = {
-    state: 'running',
+  const requestBody: TActionTypeRequestBody = {
+    name: 'name',
+    action: 'start',
   };
-  const name = 'name';
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
       const onSuccess = vi.fn();
@@ -38,7 +38,6 @@ describe('.useUpdateLifecycle', () => {
       const { result } = renderHook(
         () =>
           useUpdateLifecycle({
-            name,
             onSuccess,
             onError,
           }),
@@ -85,7 +84,6 @@ describe('.useUpdateLifecycle', () => {
       const { result } = renderHook(
         () =>
           useUpdateLifecycle({
-            name,
             onSuccess,
             onError,
           }),
