@@ -19,7 +19,12 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
   lifecycle: {
     key: 'lifecycle',
     label: 'Lifecycle',
-    description: 'View and manage lifecycle policies and actions',
+    description: 'View and manage service lifecycle',
+  },
+  repository: {
+    key: 'repository',
+    label: 'Repository',
+    description: 'View and manage repository preferences',
   },
 });
 

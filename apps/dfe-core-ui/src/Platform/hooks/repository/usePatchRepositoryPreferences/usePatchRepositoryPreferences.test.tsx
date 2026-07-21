@@ -11,7 +11,7 @@ import {
   test,
   vi,
 } from 'vitest';
-import { useUpdateRepositoryPreferences } from '.';
+import { usePatchRepositoryPreferences } from '.';
 import {
   TRepositoryPreferencesRequest,
   TRepositoryPreferencesResponse,
@@ -41,7 +41,7 @@ describe('.useUpdateRepositoryPreferences', () => {
 
       const { result } = renderHook(
         () =>
-          useUpdateRepositoryPreferences({
+          usePatchRepositoryPreferences({
             onSuccess,
             onError,
           }),
@@ -86,7 +86,7 @@ describe('.useUpdateRepositoryPreferences', () => {
 
       const { result } = renderHook(
         () =>
-          useUpdateRepositoryPreferences({
+          usePatchRepositoryPreferences({
             onSuccess,
             onError,
           }),

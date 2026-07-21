@@ -5,13 +5,13 @@ import {
   TRepositoryPreferencesResponse,
 } from './types';
 
-export const useUpdateRepositoryPreferences = ({
+export const usePatchRepositoryPreferences = ({
   onSuccess,
   onError,
 }: {
   onSuccess?: (values: TRepositoryPreferencesResponse) => void;
   onError?: (error: Error) => void;
-}) => {
+} = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: TRepositoryPreferencesRequest) =>
       updateRepositoryPreferencesApi({ body }),

@@ -5,6 +5,7 @@ import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { GitOps } from '@/Platform/components/GitOps';
 import { Governance } from '@/Platform/components/Governance';
 import { Lifecycle } from '@/Platform/components/Lifecycle';
+import { Repository } from '@/Platform/components/Repository';
 import { SystemManagement } from '@/Platform/components/SystemManagement';
 import { Tabs } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
@@ -87,6 +88,16 @@ export const PlatformScene = () => {
               />
             ),
             children: <Lifecycle />,
+          },
+          {
+            key: PLATFORM_TAB_DETAILS.repository.key,
+            label: (
+              <NavigationTabLabel
+                label={PLATFORM_TAB_DETAILS.repository.label}
+                description={PLATFORM_TAB_DETAILS.repository.description}
+              />
+            ),
+            children: <Repository />,
           },
         ]}
       />
