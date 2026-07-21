@@ -85,6 +85,7 @@ export const CreatePolicyDrawer = ({ trigger }: CreatePolicyDrawerProps) => {
             rules={[formValidation]}
           >
             <Select
+              mode="multiple"
               options={[
                 { label: 'Protected', value: 'protected' },
                 { label: 'Unprotected', value: 'unprotected' },
