@@ -4,6 +4,7 @@ import { MainContentCard } from '@/core/components/ContentCard';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { GitOps } from '@/Platform/components/GitOps';
 import { Governance } from '@/Platform/components/Governance';
+import { Helm } from '@/Platform/components/Helm';
 import { Lifecycle } from '@/Platform/components/Lifecycle';
 import { Repository } from '@/Platform/components/Repository';
 import { SystemManagement } from '@/Platform/components/SystemManagement';
@@ -98,6 +99,16 @@ export const PlatformScene = () => {
               />
             ),
             children: <Repository />,
+          },
+          {
+            key: PLATFORM_TAB_DETAILS.helm.key,
+            label: (
+              <NavigationTabLabel
+                label={PLATFORM_TAB_DETAILS.helm.label}
+                description={PLATFORM_TAB_DETAILS.helm.description}
+              />
+            ),
+            children: <Helm />,
           },
         ]}
       />

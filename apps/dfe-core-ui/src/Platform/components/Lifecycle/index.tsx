@@ -177,6 +177,7 @@ export const Lifecycle = () => {
       {error && <FormNotification text={error.message} type="error" />}
       {lifecycle && (
         <Table
+          rowKey="name"
           scroll={{ y: componentHeight }}
           pagination={false}
           dataSource={lifecycle}

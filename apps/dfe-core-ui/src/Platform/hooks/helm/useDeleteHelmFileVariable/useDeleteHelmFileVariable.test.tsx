@@ -36,15 +36,13 @@ describe('.useDeleteHelmFileVariable', () => {
       const { result } = renderHook(
         () =>
           useDeleteHelmFileVariable({
-            name,
-            path,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate({ name, path });
 
       await waitFor(() => {
         expect(result.current).toEqual({
@@ -75,15 +73,13 @@ describe('.useDeleteHelmFileVariable', () => {
       const { result } = renderHook(
         () =>
           useDeleteHelmFileVariable({
-            name,
-            path,
             onSuccess,
             onError,
           }),
         { wrapper },
       );
 
-      result.current.mutate();
+      result.current.mutate({ name, path });
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

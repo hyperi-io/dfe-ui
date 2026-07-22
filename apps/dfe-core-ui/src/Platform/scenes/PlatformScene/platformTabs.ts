@@ -26,6 +26,11 @@ export const PLATFORM_TAB_DETAILS = Object.freeze({
     label: 'Repository',
     description: 'View and manage repository preferences',
   },
+  helm: {
+    key: 'helm',
+    label: 'Helm',
+    description: 'View and manage Helm charts',
+  },
 });
 
 export const PLATFORM_TAB_KEYS = Object.keys(PLATFORM_TAB_DETAILS);
