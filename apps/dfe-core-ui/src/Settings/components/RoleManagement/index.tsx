@@ -2,8 +2,8 @@ import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.con
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { SectionCard } from '@/core/components/SectionCard';
 import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
-import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
 import { Button, Input, Spin } from 'antd';

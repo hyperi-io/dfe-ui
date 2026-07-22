@@ -3,9 +3,9 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
-import { SectionCard } from '@/Settings/components/SectionCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
 import { useState } from 'react';

@@ -1,8 +1,8 @@
+import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { DeleteAccountDrawer } from '@/Settings/components/AccountManagement/DeleteAccountDrawer';
 import { DeReactivateAccount } from '@/Settings/components/AccountManagement/DeReactivateAccount';
 import { EditAccountDrawer } from '@/Settings/components/AccountManagement/EditAccountDrawer';
 import { ViewAccountDrawer } from '@/Settings/components/AccountManagement/ViewAccountDrawer';
-import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 
 export const RowActions = ({
   username,

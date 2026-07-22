@@ -41,6 +41,7 @@ describe('SidebarMenu', () => {
         // 'Transforms',
         // 'Services',
         'Settings',
+        'Platform',
       ]);
     });
 

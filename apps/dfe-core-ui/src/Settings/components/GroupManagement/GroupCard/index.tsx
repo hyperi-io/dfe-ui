@@ -1,8 +1,8 @@
+import { PopoverMenu } from '@/core/components/PopoverMenu';
 import { cn } from '@/core/utils/style';
 import { DeleteGroupModal } from '@/Settings/components/GroupManagement/DeleteGroupModal';
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
-import { PopoverMenu } from '@/Settings/components/PopoverMenu';
 import { TGroupsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
 import { TAG_LIMIT, TagList } from './TagList';
 
