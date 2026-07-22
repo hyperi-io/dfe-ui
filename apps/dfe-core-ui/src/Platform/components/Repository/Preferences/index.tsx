@@ -13,8 +13,7 @@ export const RepositoryPreferences = () => {
     error: errorRepositoryPreferences,
   } = useFetchRepositoryPreferences();
 
-  const repositoryPreferences =
-    repositoryPreferencesResponse?.preferences;
+  const repositoryPreferences = repositoryPreferencesResponse?.preferences;
   const etag = repositoryPreferencesResponse?.etag;
   const {
     mutate: updateRepositoryPreferences,
