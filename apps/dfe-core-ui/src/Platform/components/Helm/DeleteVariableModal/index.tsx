@@ -54,31 +54,37 @@ export const DeleteVariableModal = ({
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.governance_write}>
-        <RbacProtected.Unrestricted>
-          <Tooltip destroyOnHidden title={`Delete ${name}/${path} variable`}>
+      <span className={cn('inline-flex', className)}>
+        <RbacProtected action={RbacProtected.rbacActions.helmvars_write}>
+          <RbacProtected.Unrestricted>
+            <Tooltip destroyOnHidden title={`Delete ${name}/${path} variable`}>
+              <span className="inline-flex">
+                <Button
+                  type="text"
+                  className="hover:text-error hover:bg-error/5"
+                  aria-label={`Delete ${name}/${path}`}
+                  icon={<IconTrash />}
+                  onClick={() => setOpen(true)}
+                  disabled={disabled}
+                  size="small"
+                />
+              </span>
+            </Tooltip>
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted
+            tooltip={{ show: true, placement: 'bottomRight', trigger: 'hover' }}
+          >
             <Button
               type="text"
-              className={cn('hover:text-error hover:bg-error/5', className)}
+              className="hover:text-error hover:bg-error/5"
               aria-label={`Delete ${name}/${path}`}
               icon={<IconTrash />}
-              onClick={() => setOpen(true)}
-              disabled={disabled}
+              disabled
               size="small"
             />
-          </Tooltip>
-        </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button
-            type="text"
-            className={cn('hover:text-error hover:bg-error/5', className)}
-            aria-label={`Delete ${name}/${path}`}
-            icon={<IconTrash />}
-            disabled
-            size="small"
-          />
-        </RbacProtected.Restricted>
-      </RbacProtected>
+          </RbacProtected.Restricted>
+        </RbacProtected>
+      </span>
 
       <Modal
         title="Delete Variable"
