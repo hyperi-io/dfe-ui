@@ -11,7 +11,7 @@ export const ViewHelmFileDrawer = ({ name }: { name: string }) => {
 
   return (
     <>
-      <RbacProtected action={RbacProtected.rbacActions.governance_write}>
+      <RbacProtected action={RbacProtected.rbacActions.helmvars_read}>
         <RbacProtected.Unrestricted>
           <Button
             type="text"
@@ -24,7 +24,7 @@ export const ViewHelmFileDrawer = ({ name }: { name: string }) => {
         <RbacProtected.Restricted
           tooltip={{ show: true, placement: 'bottomRight' }}
         >
-          <Button htmlType="button" type="primary" icon={<IconEye />} disabled>
+          <Button type="text" disabled icon={<IconEye />}>
             View Helm File
           </Button>
         </RbacProtected.Restricted>

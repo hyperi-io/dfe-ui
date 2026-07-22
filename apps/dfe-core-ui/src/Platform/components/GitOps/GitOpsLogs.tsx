@@ -15,7 +15,7 @@ export const GitOpsLogs = () => {
   return (
     <SectionCard
       title="Git Operations: Log"
-      className="max-h-[calc(100vh-250px)] css-custom-scrollbar overflow-x-hidden"
+      className="border-none max-h-[calc(100vh-250px)] css-custom-scrollbar overflow-x-hidden"
     >
       {isGitOpsLogLoading && (
         <>

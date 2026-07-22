@@ -45,12 +45,7 @@ export const InvokeActionDrawer = ({ name }: { name: string }) => {
         <RbacProtected.Restricted
           tooltip={{ show: true, placement: 'bottomRight' }}
         >
-          <Button
-            htmlType="button"
-            type="primary"
-            icon={<IconArrowUpRight />}
-            disabled
-          >
+          <Button type="text" disabled icon={<IconArrowUpRight />}>
             Invoke Action
           </Button>
         </RbacProtected.Restricted>

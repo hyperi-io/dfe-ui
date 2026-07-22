@@ -1,4 +1,5 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchLifecycle } from '@/Platform/hooks/lifecycle/useFetchLifecycle';
 import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
@@ -169,21 +170,28 @@ export const Lifecycle = () => {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="font-semibold text-lg">Service Lifecycle</h1>
-      {isLoading && (
-        <>
-          <Spin /> <span className="sr-only">Loading...</span>
-        </>
-      )}
-      {error && <FormNotification text={error.message} type="error" />}
-      {lifecycle && (
-        <Table
-          rowKey="name"
-          scroll={{ y: componentHeight }}
-          pagination={false}
-          dataSource={lifecycle}
-          columns={columns}
-        />
-      )}
+      <RbacProtected action={RbacProtected.rbacActions.lifecycle_read}>
+        <RbacProtected.Unrestricted>
+          {isLoading && (
+            <>
+              <Spin /> <span className="sr-only">Loading...</span>
+            </>
+          )}
+          {error && <FormNotification text={error.message} type="error" />}
+          {lifecycle && (
+            <Table
+              rowKey="name"
+              scroll={{ y: componentHeight }}
+              pagination={false}
+              dataSource={lifecycle}
+              columns={columns}
+            />
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted>
+          <RbacProtected.RestrictedRoute />
+        </RbacProtected.Restricted>
+      </RbacProtected>
     </div>
   );
 };

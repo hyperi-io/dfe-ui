@@ -64,17 +64,18 @@ export const DeleteVariableModal = ({
               icon={<IconTrash />}
               onClick={() => setOpen(true)}
               disabled={disabled}
+              size="small"
             />
           </Tooltip>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button
             type="text"
-            htmlType="button"
             className={cn('hover:text-error hover:bg-error/5', className)}
             aria-label={`Delete ${name}/${path}`}
             icon={<IconTrash />}
             disabled
+            size="small"
           />
         </RbacProtected.Restricted>
       </RbacProtected>

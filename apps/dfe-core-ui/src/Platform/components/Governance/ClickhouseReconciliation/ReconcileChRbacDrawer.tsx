@@ -1,6 +1,7 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useReconcileGovernanceChRbac } from '@/Platform/hooks/governance/useReconcileGovernanceChRbac';
 import { Button, Spin } from 'antd';
 import { useState } from 'react';
@@ -20,13 +21,23 @@ export const ReconcileChRbacDrawer = () => {
   };
   return (
     <>
-      <Button
-        type="primary"
-        onClick={handleReconcileChRbac}
-        loading={isPending}
-      >
-        Reconcile
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.governance_write}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="primary"
+            onClick={handleReconcileChRbac}
+            loading={isPending}
+          >
+            Reconcile
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button type="primary" disabled>
+            Reconcile
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         title="Reconcile Clickhouse RBAC"
         open={open}

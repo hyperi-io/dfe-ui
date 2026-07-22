@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useCreateGovernanceAction } from '@/Platform/hooks/governance/useCreateGovernanceAction';
@@ -62,15 +63,28 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
 
   return (
     <>
-      {(trigger && cloneElement(trigger, { onClick: () => setOpen(true) })) || (
-        <Button
-          type="primary"
-          onClick={() => setOpen(true)}
-          icon={<IconPlus />}
-        >
-          Add Action
-        </Button>
-      )}
+      <RbacProtected action={RbacProtected.rbacActions.governance_write}>
+        <RbacProtected.Unrestricted>
+          {(trigger &&
+            cloneElement(trigger, { onClick: () => setOpen(true) })) || (
+            <Button
+              type="primary"
+              onClick={() => setOpen(true)}
+              icon={<IconPlus />}
+            >
+              Add Action
+            </Button>
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          {(trigger && cloneElement(trigger, { disabled: true })) || (
+            <Button type="primary" disabled icon={<IconPlus />}>
+              Add Action
+            </Button>
+          )}
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         destroyOnHidden
         title="Create Action"

@@ -37,7 +37,7 @@ export const ViewHelmFileDetail = ({ name }: { name: string }) => {
                 key={`object-${index}`}
               >
                 <DeleteVariableModal
-                  className="absolute top-2 right-2"
+                  className="absolute top-1 right-1"
                   name={name}
                   path={object.path as string}
                 />

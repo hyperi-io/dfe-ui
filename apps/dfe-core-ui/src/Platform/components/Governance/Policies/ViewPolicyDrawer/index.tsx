@@ -24,7 +24,7 @@ export const ViewPolicyDrawer = ({ name }: { name: string }) => {
         <RbacProtected.Restricted
           tooltip={{ show: true, placement: 'bottomRight' }}
         >
-          <Button htmlType="button" type="primary" icon={<IconEye />} disabled>
+          <Button type="text" disabled icon={<IconEye />}>
             View Policy
           </Button>
         </RbacProtected.Restricted>

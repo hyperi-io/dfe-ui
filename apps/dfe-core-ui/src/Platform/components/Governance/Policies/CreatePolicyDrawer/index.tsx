@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useCreateGovernancePolicy } from '@/Platform/hooks/governance/useCreateGovernancePolicy';
 import { IconPlus } from '@repo/dfe-icons';
@@ -49,15 +50,28 @@ export const CreatePolicyDrawer = ({ trigger }: CreatePolicyDrawerProps) => {
 
   return (
     <>
-      {(trigger && cloneElement(trigger, { onClick: () => setOpen(true) })) || (
-        <Button
-          type="primary"
-          onClick={() => setOpen(true)}
-          icon={<IconPlus />}
-        >
-          Add Policy
-        </Button>
-      )}
+      <RbacProtected action={RbacProtected.rbacActions.governance_write}>
+        <RbacProtected.Unrestricted>
+          {(trigger &&
+            cloneElement(trigger, { onClick: () => setOpen(true) })) || (
+            <Button
+              type="primary"
+              onClick={() => setOpen(true)}
+              icon={<IconPlus />}
+            >
+              Add Policy
+            </Button>
+          )}
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          {(trigger && cloneElement(trigger, { disabled: true })) || (
+            <Button type="primary" disabled icon={<IconPlus />}>
+              Add Policy
+            </Button>
+          )}
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Drawer
         destroyOnHidden
         title="Create Policy"
