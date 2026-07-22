@@ -3,8 +3,8 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { SectionCard } from '@/core/components/SectionCard';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { SectionCard } from '@/Settings/components/SectionCard';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts';
 import { TAccountsItemSummary } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle } from '@repo/dfe-icons';

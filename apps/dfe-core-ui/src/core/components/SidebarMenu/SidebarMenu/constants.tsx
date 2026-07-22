@@ -9,6 +9,7 @@ import {
   IconLayoutGrid,
   IconSettings2,
   IconShieldCheck,
+  IconStack2,
   IconTable,
   IconTargetArrow,
 } from '@repo/dfe-icons';
@@ -408,6 +409,38 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
               key: '/settings',
               icon: <IconWrapper icon={<IconSettings2 />} />,
               label: 'Settings',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
+    ),
+  },
+  {
+    key: '/platform',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected action={rbacActions.lifecycle_read}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/platform',
+              icon: <IconWrapper icon={<IconStack2 />} />,
+              label: 'Platform',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/platform',
+              icon: <IconWrapper icon={<IconStack2 />} />,
+              label: 'Platform',
               external: false,
             }}
           />

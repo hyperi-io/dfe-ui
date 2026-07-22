@@ -31,6 +31,29 @@ import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { TAlertListResponse } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { TTriggerResponse } from '@/Hunts/hooks/useTriggerHunt/types';
 import { TAlertUpdateResponse } from '@/Hunts/hooks/useUpdateAlert/types';
+import { TClientConfigResponse } from '@/Platform/hooks/clientConfig/useFetchClientConfig/types';
+import { TGitOpsAutoMergeResponse } from '@/Platform/hooks/gitops/useFetchGitOpsAutoMerge/types';
+import { TGitOpsLogResponse } from '@/Platform/hooks/gitops/useFetchGitOpsLog/types';
+import { TCreateGovernanceActionResponse } from '@/Platform/hooks/governance/useCreateGovernanceAction/types';
+import { TCreateGovernancePolicyResponse } from '@/Platform/hooks/governance/useCreateGovernancePolicy/types';
+import { TGovernanceActionDetailResponse } from '@/Platform/hooks/governance/useFetchGovernanceActionDetail/types';
+import { TGovernanceActionsResponse } from '@/Platform/hooks/governance/useFetchGovernanceActions/types';
+import { TGovernancePoliciesResponse } from '@/Platform/hooks/governance/useFetchGovernancePolicies/types';
+import { TGovernancePolicyDetailResponse } from '@/Platform/hooks/governance/useFetchGovernancePolicyDetail/types';
+import { TGovernanceActionInvokeResponse } from '@/Platform/hooks/governance/useInvokeGovernanceAction/types';
+import { TReconcileGovernanceChRbacResponse } from '@/Platform/hooks/governance/useReconcileGovernanceChRbac/types';
+import { THelmFilesResponse } from '@/Platform/hooks/helm/useFetchHelmFiles/types';
+import { THelmFileVariablesResponse } from '@/Platform/hooks/helm/useFetchHelmFileVariables/types';
+import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/helm/useUpdateHelmFileVariable/types';
+import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
+import { TUpdateLifecycleResponse } from '@/Platform/hooks/lifecycle/useUpdateLifecycle/types';
+import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
+import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
+import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
+import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
+import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
+import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
+import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -1594,24 +1617,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
               return HttpResponse.json(mockedResponse, { status });
             },
           );
-        },
-      },
-    },
-  },
-  system: {
-    version: {
-      mockedUrl: '/api/v1/system/version',
-      get: {
-        success: () => {
-          console.error('Not implemented');
-        },
-      },
-    },
-    settings: {
-      mockedUrl: '/api/v1/system/settings',
-      get: {
-        success: () => {
-          console.error('Not implemented');
         },
       },
     },
@@ -3723,6 +3728,973 @@ export const API_CONFIG_MOCKS = Object.freeze({
             ),
             () => {
               return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+  },
+  governance: {
+    actions: {
+      mockedUrl: '/api/v1/governance/actions',
+      get: {
+        success: ({
+          mockedResponse = ['string'],
+        }: {
+          mockedResponse?: TGovernanceActionsResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.governance.actions.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    action: {
+      mockedUrl: '/api/v1/governance/actions/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            required_action: 'required_action',
+            changes: [
+              {
+                cls: 'cls',
+                name: 'name',
+                path: 'path',
+                value: 'value',
+              },
+            ],
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TGovernanceActionDetailResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.action.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    policies: {
+      mockedUrl: '/api/v1/governance/policies',
+      get: {
+        success: ({
+          mockedResponse = ['string'],
+        }: { mockedResponse?: TGovernancePoliciesResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.policies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    policy: {
+      mockedUrl: '/api/v1/governance/policies/{name}',
+      get: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            protected: ['protected'],
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TGovernancePolicyDetailResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.governance.policy.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    invokeAction: {
+      mockedUrl: '/api/v1/governance/actions/{name}/invoke',
+      post: {
+        success: ({
+          mockedResponse = {
+            dry_run: true,
+            changed: true,
+            auto_merged: true,
+            review_required: true,
+            diff: [],
+          },
+        }: { mockedResponse?: TGovernanceActionInvokeResponse } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.invokeAction.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.invokeAction.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    adminActions: {
+      mockedUrl: '/api/v1/governance/admin/actions',
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            required_action: 'required_action',
+            changes: [
+              { cls: 'cls', name: 'name', path: 'path', value: 'value' },
+            ],
+          },
+        }: {
+          mockedResponse?: TCreateGovernanceActionResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminActions.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminActions.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    adminAction: {
+      mockedUrl: '/api/v1/governance/admin/actions/{name}',
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminAction.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminAction.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    adminPolicies: {
+      mockedUrl: '/api/v1/governance/admin/policies',
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'name',
+            description: 'description',
+            protected: ['protected'],
+          },
+        }: {
+          mockedResponse?: TCreateGovernancePolicyResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminPolicies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.adminPolicies.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    adminPolicy: {
+      mockedUrl: '/api/v1/governance/admin/policies/{name}',
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+        }: { status?: number; name?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminPolicy.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.governance.adminPolicy.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    reconcileChRbac: {
+      mockedUrl: '/api/v1/governance/ch-rbac/reconcile',
+      post: {
+        success: ({
+          mockedResponse = {
+            required_action: 'required_action',
+            changes: [
+              { cls: 'cls', name: 'name', path: 'path', value: 'value' },
+            ],
+          },
+        }: { mockedResponse?: TReconcileGovernanceChRbacResponse } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.reconcileChRbac.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.governance.reconcileChRbac.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  helm: {
+    listFiles: {
+      mockedUrl: '/api/v1/helm/files',
+      get: {
+        success: ({
+          mockedResponse = ['string'],
+        }: {
+          mockedResponse?: THelmFilesResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.helm.listFiles.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    fileVariables: {
+      mockedUrl: '/api/v1/helm/files/{name}/vars',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              test: ['test'],
+            },
+          ],
+          name = 'name',
+        }: {
+          mockedResponse?: THelmFileVariablesResponse;
+          name?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.helm.fileVariables.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    fileVariable: {
+      mockedUrl: '/api/v1/helm/files/{name}/vars/{path}',
+      put: {
+        success: ({
+          mockedResponse = {
+            changed: true,
+            commit_sha: 'string',
+            auto_merged: true,
+            review_required: true,
+            pr_url: 'string',
+          },
+          name = 'name',
+          path = 'path',
+        }: {
+          mockedResponse?: TUpdateHelmFileVariableResponse;
+          name?: string;
+          path?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+          path = 'path',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+          path?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          name = 'name',
+          path = 'path',
+        }: { status?: number; name?: string; path?: string } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+          path = 'path',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+          path?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.helm.fileVariable.mockedUrl
+              .replace('{name}', name)
+              .replace('{path}', path),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  gitops: {
+    autoMerge: {
+      mockedUrl: '/api/v1/gitops/auto-merge',
+      get: {
+        success: ({
+          mockedResponse = {
+            stored: true,
+            effective: true,
+            allowed: true,
+            reason: 'string',
+          },
+        }: {
+          mockedResponse?: TGitOpsAutoMergeResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            stored: true,
+            effective: true,
+            allowed: true,
+            reason: 'string',
+          },
+        }: {
+          mockedResponse?: TGitOpsAutoMergeResponse;
+        } = {}) => {
+          return http.put(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+        } = {}) => {
+          return http.put(API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse, { status });
+          });
+        },
+      },
+    },
+    log: {
+      mockedUrl: '/api/v1/gitops/log',
+      get: {
+        success: ({
+          mockedResponse = {
+            entries: [
+              {
+                sha: 'string',
+                timestamp: 0,
+                ctype: 'string',
+                scope: 'string',
+                summary: 'string',
+                actor: 'string',
+                role: 'string',
+                action: 'string',
+                request_id: 'string',
+                files: ['string'],
+                resources: ['string'],
+                conforming: true,
+                state: 'string',
+              },
+            ],
+          },
+        }: {
+          mockedResponse?: TGitOpsLogResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.gitops.log.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+  },
+  lifecycle: {
+    default: {
+      mockedUrl: '/api/v1/lifecycle',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              name: 'string',
+              tier: 'string',
+              state: 'string',
+            },
+          ],
+        }: {
+          mockedResponse?: TLifecycleResponse;
+        } = {}) => {
+          return http.get(API_CONFIG_MOCKS.lifecycle.default.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    lifecycle: {
+      mockedUrl: '/api/v1/lifecycle/{name}',
+      post: {
+        success: ({
+          mockedResponse = {
+            name: 'string',
+            state: 'string',
+            changed: true,
+            commit_sha: 'string',
+            pending_reconcile: true,
+          },
+          name = 'name',
+        }: {
+          mockedResponse?: TUpdateLifecycleResponse;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.lifecycle.lifecycle.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          name = 'name',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          name?: string;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.lifecycle.lifecycle.mockedUrl.replace(
+              '{name}',
+              name,
+            ),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  repository: {
+    preferences: {
+      mockedUrl: '/api/v1/repository/preferences',
+      get: {
+        success: ({
+          mockedResponse = {
+            preferences: {
+              key: 'value',
+            },
+            etag: 'etag',
+          },
+        }: {
+          mockedResponse?: TRepositoryPreferencesResponse;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+      patch: {
+        success: ({
+          mockedResponse = {
+            preferences: {
+              key: 'value',
+            },
+            etag: 'etag',
+          },
+        }: { mockedResponse?: TRepositoryPreferencesResponse } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.patch(
+            API_CONFIG_MOCKS.repository.preferences.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    objects: {
+      mockedUrl: '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}',
+      get: {
+        success: ({
+          mockedResponse = [
+            {
+              key: 'key',
+              content_type: 'content_type',
+              size: 100,
+              updated_by: 'updated_by',
+              updated_at: 'updated_at',
+              etag: 'etag',
+            },
+          ],
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+        }: {
+          mockedResponse?: TRepositoryObjectsResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.objects.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace),
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    object: {
+      mockedUrl:
+        '/api/v1/repository/objects/{scope}/{scope_id}/{namespace}/{key}',
+      get: {
+        success: ({
+          mockedResponse = {
+            key: 'key',
+            content_type: 'content_type',
+            size: 100,
+            updated_by: 'updated_by',
+            updated_at: 'updated_at',
+            etag: 'etag',
+          },
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TRepositoryObjectDetailResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(
+                JSON.parse(JSON.stringify(mockedResponse)),
+              );
+            },
+          );
+        },
+      },
+      put: {
+        success: ({
+          mockedResponse = {
+            scope: 'scope',
+            scope_id: 'scope_id',
+            namespace: 'namespace',
+            key: 'key',
+            content_type: 'content_type',
+            size: 100,
+            updated_by: 'updated_by',
+            updated_at: 'updated_at',
+            etag: 'etag',
+          },
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TRepositoryObjectDetailResponse;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(
+                JSON.parse(JSON.stringify(mockedResponse)),
+              );
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.put(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+      delete: {
+        success: ({
+          status = 204,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json({}, { status });
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+          scope = 'scope',
+          scope_id = 'scope_id',
+          namespace = 'namespace',
+          key = 'key',
+        }: {
+          mockedResponse?: TValidationError;
+          status?: number;
+          scope?: string;
+          scope_id?: string;
+          namespace?: string;
+          key?: string;
+        } = {}) => {
+          return http.delete(
+            API_CONFIG_MOCKS.repository.object.mockedUrl
+              .replace('{scope}', scope)
+              .replace('{scope_id}', scope_id)
+              .replace('{namespace}', namespace)
+              .replace('{key}', key),
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+  },
+  clientConfig: {
+    default: {
+      mockedUrl: '/api/v1/config/client',
+      get: {
+        success: ({
+          mockedResponse = {
+            api_base: 'api_base',
+            hyperdx: { enabled: true, url: 'url' },
+            auth_mode: 'auth_mode',
+            features: { feature: true },
+          },
+        }: { mockedResponse?: TClientConfigResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.clientConfig.default.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+  },
+  system: {
+    version: {
+      mockedUrl: '/api/v1/system/version',
+      get: {
+        success: ({
+          mockedResponse = {
+            version: 'version',
+            python_version: 'python_version',
+          },
+        }: { mockedResponse?: TSystemVersionResponse } = {}) => {
+          return http.get(API_CONFIG_MOCKS.system.version.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    settings: {
+      mockedUrl: '/api/v1/system/settings',
+      get: {
+        success: ({
+          mockedResponse = {
+            clickhouse_host: 'clickhouse_host',
+            clickhouse_database: 'clickhouse_database',
+            clickhouse_data_database: 'clickhouse_data_database',
+            sources_dir: 'sources_dir',
+            services_config_dir: 'services_config_dir',
+            hunt_dir: 'hunt_dir',
+            auth_enabled: true,
+            auth_local_enabled: true,
+            api_host: 'api_host',
+            api_port: 1234,
+            api_cors_origins: ['api_cors_origin'],
+          },
+        }: { mockedResponse?: TSystemSettingsResponse } = {}) => {
+          return http.get(API_CONFIG_MOCKS.system.settings.mockedUrl, () => {
+            return HttpResponse.json(mockedResponse);
+          });
+        },
+      },
+    },
+    clickhouseCloud: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud',
+      get: {
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'name',
+            state: 'state',
+            is_running: true,
+          },
+        }: { mockedResponse?: TSystemClickhouseStatusResponse } = {}) => {
+          return http.get(
+            API_CONFIG_MOCKS.system.clickhouseCloud.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+      },
+    },
+    clickhouseCloudStart: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud/start',
+      post: {
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'start',
+            state: 'state',
+            is_running: true,
+          },
+        }: {
+          mockedResponse?: TSystemStartStopClickhouseCloudResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStart.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStart.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
+            },
+          );
+        },
+      },
+    },
+    clickhouseCloudStop: {
+      mockedUrl: '/api/v1/system/clickhouse-cloud/stop',
+      post: {
+        success: ({
+          mockedResponse = {
+            configured: true,
+            id: 'id',
+            name: 'stop',
+            state: 'state',
+            is_running: true,
+          },
+        }: {
+          mockedResponse?: TSystemStartStopClickhouseCloudResponse;
+        } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStop.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse);
+            },
+          );
+        },
+        error: ({
+          mockedResponse = DEFAULT_VALIDATION_ERROR,
+          status = 422,
+        }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+          return http.post(
+            API_CONFIG_MOCKS.system.clickhouseCloudStop.mockedUrl,
+            () => {
+              return HttpResponse.json(mockedResponse, { status });
             },
           );
         },

@@ -1,8 +1,8 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
+import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { AccountManagement } from '@/Settings/components/AccountManagement';
-import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
 import { OidcProviderManagement } from '@/Settings/components/OidcProviderManagement';
 import { OrganisationManagement } from '@/Settings/components/OrganisationManagement';
@@ -44,7 +44,7 @@ export const AdminControlsScene = () => {
           {
             key: 'organization-management',
             label: (
-              <AdminTabLabel
+              <NavigationTabLabel
                 label="Organisation Management"
                 description="Add and remove organisations, manage organisation specific configurations and defaults."
               />
@@ -54,7 +54,7 @@ export const AdminControlsScene = () => {
           {
             key: 'role-management',
             label: (
-              <AdminTabLabel
+              <NavigationTabLabel
                 label="Role Management"
                 description="Manage roles and their permissions, configure custom roles and permissions."
               />
@@ -64,7 +64,7 @@ export const AdminControlsScene = () => {
           {
             key: 'group-management',
             label: (
-              <AdminTabLabel
+              <NavigationTabLabel
                 label="Group Management"
                 description="Manage groups and their members, configure custom groups and members."
               />
@@ -74,7 +74,7 @@ export const AdminControlsScene = () => {
           {
             key: 'account-management',
             label: (
-              <AdminTabLabel
+              <NavigationTabLabel
                 label="Account Management"
                 description="Manage accounts, link LDAP accounts and configure account default settings."
               />
@@ -84,7 +84,7 @@ export const AdminControlsScene = () => {
           {
             key: 'oidc-provider-management',
             label: (
-              <AdminTabLabel
+              <NavigationTabLabel
                 label="OIDC Provider Management"
                 description="Add and remove OIDC providers, manage OIDC provider specific configurations and defaults."
               />

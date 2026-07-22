@@ -1,6 +1,6 @@
 'use client';
 
-import { AdminTabLabel } from '@/Settings/components/AdminTabLabel';
+import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { Tabs } from 'antd';
 import { AuditLogs } from './AuditLogs';
 import { SecurityEvents } from './SecurityEvents';
@@ -14,7 +14,7 @@ export const AuditDashboard = () => {
         {
           key: 'audit-logs',
           label: (
-            <AdminTabLabel
+            <NavigationTabLabel
               className="max-w-full"
               label="Audit Logs"
               description="View audit logs and their details."
@@ -25,7 +25,7 @@ export const AuditDashboard = () => {
         {
           key: 'security-events',
           label: (
-            <AdminTabLabel
+            <NavigationTabLabel
               className="max-w-full"
               label="Security Events"
               description="View security events and their details."
@@ -36,7 +36,7 @@ export const AuditDashboard = () => {
         {
           key: 'usage-metrics',
           label: (
-            <AdminTabLabel
+            <NavigationTabLabel
               className="max-w-full"
               label="Usage Metrics"
               description="View user and organisation usage trends."
