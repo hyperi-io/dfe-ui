@@ -2984,10 +2984,36 @@ export interface paths {
          * Invoke Action
          * @description Invoke a defined action - gated on the action's OWN required_action.
          *
-         *     Direct commit in dev/solo; a production+team invoke is routed to a review PR
-         *     (or 409 ``review_required`` when no forge is configured).
+         *     ``body.params`` supplies values for the action's declared params (422 on a
+         *     constraint violation; omitted params take their defaults). Direct commit in
+         *     dev/solo; a production+team invoke is routed to a review PR (or 409
+         *     ``review_required`` when no forge is configured).
          */
         post: operations["invoke_action_api_v1_governance_actions__name__invoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/governance/admin/actions/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Action
+         * @description Dry-check an action definition: every violation + the would-be diff.
+         *
+         *     Nothing is committed - this is the authoring hand-hold, run before the
+         *     define endpoint so a wizard can show the full diff and every problem in
+         *     one round trip.
+         */
+        post: operations["validate_action_api_v1_governance_admin_actions_validate_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3101,6 +3127,71 @@ export interface paths {
          * @description Toggle auto-merge. Enabling requires the deployment gate; disabling always works.
          */
         put: operations["put_auto_merge_api_v1_gitops_auto_merge_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gitops/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Classes
+         * @description The resource-class registry - what VarChange.cls may legally name.
+         *
+         *     Registry metadata only (no resource content), so any authenticated caller
+         *     may read it; the per-class listings below are gated by each class's grant.
+         */
+        get: operations["list_classes_api_v1_gitops_classes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gitops/classes/{cls}/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Class Resources
+         * @description Resource names in a class - what VarChange.name may legally name.
+         */
+        get: operations["list_class_resources_api_v1_gitops_classes__cls__resources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gitops/classes/{cls}/resources/{name}/vars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Class Resource Vars
+         * @description Flattened dot-path vars of one resource - what VarChange.path may name.
+         *
+         *     Values ride along so a select can show the current value beside each path.
+         */
+        get: operations["list_class_resource_vars_api_v1_gitops_classes__cls__resources__name__vars_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -3493,7 +3584,10 @@ export interface components {
          * @description A curated, RBAC-gated bundle of var changes (a "big dial").
          *
          *     Invoking the action applies ALL ``changes`` in ONE commit, gated on
-         *     ``required_action`` (an RBAC string checked at invoke time).
+         *     ``required_action`` (an RBAC string checked at invoke time). Left empty,
+         *     ``required_action`` defaults to ``action:invoke:<name>`` - the convention
+         *     the shipped roles grant on - so it only ever needs hand-writing for a
+         *     deliberately shared or non-standard handle.
          */
         ActionDef: {
             /** Name */
@@ -3503,8 +3597,16 @@ export interface components {
              * @default
              */
             description: string;
-            /** Required Action */
+            /**
+             * Required Action
+             * @description RBAC string checked at invoke time; empty derives action:invoke:<name>
+             * @default
+             */
             required_action: string;
+            /** Params */
+            params?: {
+                [key: string]: components["schemas"]["ParamSpec"];
+            };
             /** Changes */
             changes?: components["schemas"]["VarChange"][];
         };
@@ -3877,6 +3979,26 @@ export interface components {
              * @description Config key that must be enabled for this expression's tier (Tier 2/3)
              */
             opt_in_required?: string | null;
+        };
+        /**
+         * ClassInfo
+         * @description One registered resource class - the closed set behind VarChange.cls.
+         *
+         *     action_writable exports the escalation guard: a defined action may never
+         *     change a governance-prefixed class, so a UI can filter its class select
+         *     to the legal targets instead of discovering the ban at 403-time.
+         */
+        ClassInfo: {
+            /** Name */
+            name: string;
+            /** Rbac Prefix */
+            rbac_prefix: string;
+            /** Directory */
+            directory: string;
+            /** Versioned */
+            versioned: boolean;
+            /** Action Writable */
+            action_writable: boolean;
         };
         /** ClientConfig */
         ClientConfig: {
@@ -4881,6 +5003,19 @@ export interface components {
              */
             url: string;
         };
+        /**
+         * InvokeRequest
+         * @description Optional invoke body: values for the action's declared params.
+         */
+        InvokeRequest: {
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: unknown;
+            };
+        };
         /** InvokeResponse */
         InvokeResponse: {
             /** Dry Run */
@@ -5837,6 +5972,34 @@ export interface components {
             readonly next_page: number | null;
             /** Prev Page */
             readonly prev_page: number | null;
+        };
+        /**
+         * ParamSpec
+         * @description A constrained invoke-time parameter.
+         *
+         *     Every param carries a CLOSED constraint - an enum carries its full value
+         *     list, a numeric carries both bounds. There is deliberately NO free-string
+         *     type: an unconstrained param would reopen the hole curation closed.
+         */
+        ParamSpec: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "enum" | "int" | "float";
+            /** Values */
+            values?: string[] | null;
+            /** Min */
+            min?: number | null;
+            /** Max */
+            max?: number | null;
+            /** Default */
+            default?: string | number | null;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
         };
         /** PathTree[SchemaSummaryObject] */
         PathTree_SchemaSummaryObject_: {
@@ -8264,6 +8427,20 @@ export interface components {
             /** Groups */
             groups?: string[];
         };
+        /**
+         * ValidateResponse
+         * @description Outcome of checking an action definition without saving or invoking it.
+         */
+        ValidateResponse: {
+            /** Valid */
+            valid: boolean;
+            /** Errors */
+            errors: string[];
+            /** Diff */
+            diff: {
+                [key: string]: unknown;
+            }[];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -8290,6 +8467,18 @@ export interface components {
             path: string;
             /** Value */
             value: unknown;
+        };
+        /**
+         * VarEntry
+         * @description One flattened dot-path var in a resource doc.
+         */
+        VarEntry: {
+            /** Path */
+            path: string;
+            /** Value */
+            value?: unknown;
+            /** Protected */
+            protected: boolean;
         };
         /** VersionResponse */
         VersionResponse: {
@@ -14670,7 +14859,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["InvokeRequest"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -14679,6 +14872,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvokeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_action_api_v1_governance_admin_actions_validate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionDef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidateResponse"];
                 };
             };
             /** @description Validation Error */
@@ -14878,6 +15104,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AutoMergeStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_classes_api_v1_gitops_classes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassInfo"][];
+                };
+            };
+        };
+    };
+    list_class_resources_api_v1_gitops_classes__cls__resources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cls: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_class_resource_vars_api_v1_gitops_classes__cls__resources__name__vars_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cls: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VarEntry"][];
                 };
             };
             /** @description Validation Error */
