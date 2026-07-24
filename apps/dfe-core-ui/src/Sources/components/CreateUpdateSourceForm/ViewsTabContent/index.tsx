@@ -65,7 +65,7 @@ export const ViewsTabContent = ({
               </Button>
             )}
           </div>
-          <ul className="max-h-[calc(100vh-265px)] css-custom-scrollbar flex flex-col gap-2">
+          <ul className="max-h-[calc(100vh-280px)] css-custom-scrollbar flex flex-col gap-2">
             {fields.map(({ key, name, ...restField }) => (
               <li
                 className={cn(
