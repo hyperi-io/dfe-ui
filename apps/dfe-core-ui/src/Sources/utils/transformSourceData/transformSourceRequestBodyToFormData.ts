@@ -1,6 +1,8 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
+import { customMappingsRecordToEntries } from './customMappingsTransform';
+
 /*
  * Transforms the source request body to a form data object.
  * If the fetcher auth type is none, it will be set to null.
@@ -58,6 +60,14 @@ export const transformSourceRequestBodyToFormData = (
     match: source?.version?.match
       ? { ...source.version.match }
       : { field: '', value: '' },
+    views: source?.version?.views?.map((view) => {
+      const { custom_mappings, ...viewRest } = view;
+      const formCustomMappings = customMappingsRecordToEntries(custom_mappings);
+      return {
+        ...viewRest,
+        ...(formCustomMappings ? { custom_mappings: formCustomMappings } : {}),
+      };
+    }),
   };
   return transformedSource;
 };

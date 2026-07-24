@@ -1,6 +1,8 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 
+import { customMappingsEntriesToRecord } from './customMappingsTransform';
+
 /*
  * Transforms the source form data to a request body for the update source API.
  * If the fetcher is an empty object or not present, it will be set to null.
@@ -13,7 +15,7 @@ import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types'
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): TSourceUpdateRequestBody => {
-  const { fetcher, match, ...rest } = source;
+  const { fetcher, match, views, ...rest } = source;
 
   let apiMatch: TSourceUpdateRequestBody['match'] | undefined;
   if (match) {
@@ -23,6 +25,21 @@ export const transformSourceFormDataToRequestBody = (
 
   const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
+    ...(views != null
+      ? {
+          views: views.map((view) => {
+            const { custom_mappings, ...viewRest } = view;
+            const apiCustomMappings =
+              customMappingsEntriesToRecord(custom_mappings);
+            return {
+              ...viewRest,
+              ...(apiCustomMappings
+                ? { custom_mappings: apiCustomMappings }
+                : {}),
+            };
+          }),
+        }
+      : {}),
     ...(apiMatch
       ? { match: apiMatch }
       : { match: { field: '', operator: 'equals', value: '' } }),

@@ -56,4 +56,33 @@ describe('transformSourceFormDataToRequestBody', () => {
     };
     expect(result).toEqual(expectedResult);
   });
+
+  test('maps view custom_mappings from form tuples to API record', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      match: { field: 'field', operator: 'equals', value: 'value' },
+      views: [
+        {
+          standard: 'sigma',
+          custom_mappings: [
+            { key: 'EventID', value: 'event_id' },
+            { key: 'UserName', value: 'user_name' },
+          ],
+        },
+      ],
+    };
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.views).toEqual([
+      {
+        standard: 'sigma',
+        custom_mappings: {
+          EventID: 'event_id',
+          UserName: 'user_name',
+        },
+      },
+    ]);
+  });
 });

@@ -86,6 +86,7 @@ export const CreateFieldMapDrawer = ({
           <Button
             type="default"
             disabled
+            htmlType="button"
             className={cn('border border-tertiary text-tertiary', trigger)}
             icon={<IconPlus className="text-tertiary" />}
             onClick={() => setIsDrawerVisible(true)}
