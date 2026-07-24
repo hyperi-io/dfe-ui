@@ -1,3 +1,4 @@
+import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
 import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 
@@ -163,6 +164,9 @@ const viewsTabSchema = {
         service: z.string().optional().nullable(),
       }),
     )
+    .max(MAX_VIEWS, {
+      message: `Maximum of ${MAX_VIEWS} views can be added (one per standard)`,
+    })
     .optional()
     .nullable(),
 };
