@@ -46,6 +46,7 @@ const expectedResponse: FormValidationErrors = {
     'Engine is required',
   ],
   transform: [],
+  views: [],
 };
 
 const ALL_FIELDS = [

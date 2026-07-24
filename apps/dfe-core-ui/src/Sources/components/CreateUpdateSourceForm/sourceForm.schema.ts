@@ -146,12 +146,39 @@ const transformTabSchema = {
     .nullable(),
 };
 
+/** Form.List-friendly pairs; convert to API record in transformSourceFormDataToRequestBody */
+export const customMappingsFormSchema = z
+  .array(
+    z.tuple([
+      z.string().min(1, { message: 'Key is required' }),
+      z.string().min(1, { message: 'Value is required' }),
+    ]),
+  )
+  .optional();
+
+const viewsTabSchema = {
+  views: z
+    .array(
+      z.object({
+        standard: z.string().min(1, { message: 'Standard is required' }),
+        field_map: z.string().optional().nullable(),
+        custom_mappings: customMappingsFormSchema,
+        taxonomy: z.string().optional().nullable(),
+        category: z.string().optional().nullable(),
+        service: z.string().optional().nullable(),
+      }),
+    )
+    .optional()
+    .nullable(),
+};
+
 export const formSchema = z.object({
   ...sourceDetailsTabSchema,
   ...mappingStandardsTabSchema,
   ...originTabSchema,
   ...schemaConfigTabSchema,
   ...transformTabSchema,
+  ...viewsTabSchema,
 });
 
 export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
@@ -161,6 +188,7 @@ const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
 const originTabFormKeys = Object.keys(originTabSchema);
 const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
 const transformTabFormKeys = Object.keys(transformTabSchema);
+const viewsTabFormKeys = Object.keys(viewsTabSchema);
 
 export const TAB_FORM_VALIDATION_KEY_MAP = {
   sourceDetails: sourceDetailsTabFormKeys,
@@ -168,4 +196,5 @@ export const TAB_FORM_VALIDATION_KEY_MAP = {
   origin: originTabFormKeys,
   schemaConfig: schemaConfigTabFormKeys,
   transform: transformTabFormKeys,
+  views: viewsTabFormKeys,
 };

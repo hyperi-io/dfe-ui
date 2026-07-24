@@ -13,6 +13,7 @@ import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
+import { ViewsTabContent } from './ViewsTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
 
@@ -38,6 +39,7 @@ const TAB_LABEL_MAP = {
   origin: 'Origin',
   schemaConfig: 'Meta Schema',
   transform: 'Transform',
+  views: 'Views',
 };
 
 export const CreateUpdateSourceFormBase = ({
@@ -60,6 +62,7 @@ export const CreateUpdateSourceFormBase = ({
       origin: [],
       schemaConfig: [],
       transform: [],
+      views: [],
     });
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
@@ -192,6 +195,19 @@ export const CreateUpdateSourceFormBase = ({
                 },
               ]
             : []),
+          {
+            key: 'views',
+            label: (
+              <TabLabel
+                label="Views"
+                validationErrors={validationErrors?.views}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <ViewsTabContent formValidation={formValidation} form={form} />
+            ),
+          },
         ]}
       />
 
