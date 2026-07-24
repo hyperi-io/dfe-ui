@@ -6,13 +6,13 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { getValidationErrors, type FormValidationErrors } from './helpers';
-import { MappingStandardsTabContent } from './MappingStandardsTabContent';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
+import { ViewsTabContent } from './ViewsTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
 
@@ -34,10 +34,10 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
 
 const TAB_LABEL_MAP = {
   sourceDetails: 'Configuration',
-  mappingStandards: 'Mapping',
   origin: 'Origin',
   schemaConfig: 'Meta Schema',
   transform: 'Transform',
+  views: 'Views',
 };
 
 export const CreateUpdateSourceFormBase = ({
@@ -56,10 +56,10 @@ export const CreateUpdateSourceFormBase = ({
   const [validationErrors, setValidationErrors] =
     useState<FormValidationErrors>({
       sourceDetails: [],
-      mappingStandards: [],
       origin: [],
       schemaConfig: [],
       transform: [],
+      views: [],
     });
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
@@ -174,18 +174,17 @@ export const CreateUpdateSourceFormBase = ({
                 //   ),
                 // },
                 {
-                  key: 'mappingStandards',
+                  key: 'views',
                   label: (
                     <TabLabel
-                      label="Mapping"
-                      validationErrors={validationErrors?.mappingStandards}
+                      label="Views"
+                      validationErrors={validationErrors?.views}
                     />
                   ),
                   forceRender: true,
                   children: (
-                    <MappingStandardsTabContent
+                    <ViewsTabContent
                       formValidation={formValidation}
-                      initialValues={initialValues}
                       form={form}
                     />
                   ),

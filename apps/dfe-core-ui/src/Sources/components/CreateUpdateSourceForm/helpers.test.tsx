@@ -36,7 +36,6 @@ const ERROR_FIELDS = [
 
 const expectedResponse: FormValidationErrors = {
   sourceDetails: ['Source is required'],
-  mappingStandards: [],
   origin: [],
   schemaConfig: [
     'Header type is required',
@@ -46,6 +45,7 @@ const expectedResponse: FormValidationErrors = {
     'Engine is required',
   ],
   transform: [],
+  views: [],
 };
 
 const ALL_FIELDS = [

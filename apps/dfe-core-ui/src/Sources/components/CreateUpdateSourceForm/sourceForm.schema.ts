@@ -1,3 +1,4 @@
+import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
 import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 
@@ -18,10 +19,6 @@ const sourceDetailsTabSchema = {
   display_name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   enabled: z.boolean({ message: 'Enabled is required' }),
-};
-
-const mappingStandardsTabSchema = {
-  mapping_standards: z.array(z.string()).optional(),
 };
 
 const originTabSchema = {
@@ -146,26 +143,54 @@ const transformTabSchema = {
     .nullable(),
 };
 
+export const customMappingsFormSchema = z
+  .array(
+    z.object({
+      key: z.string().min(1, { message: 'Key is required' }),
+      value: z.string().min(1, { message: 'Value is required' }),
+    }),
+  )
+  .optional();
+
+const viewsTabSchema = {
+  views: z
+    .array(
+      z.object({
+        standard: z.string().min(1, { message: 'Standard is required' }),
+        field_map: z.string().optional().nullable(),
+        custom_mappings: customMappingsFormSchema,
+        taxonomy: z.string().optional().nullable(),
+        category: z.string().optional().nullable(),
+        service: z.string().optional().nullable(),
+      }),
+    )
+    .max(MAX_VIEWS, {
+      message: `Maximum of ${MAX_VIEWS} views can be added (one per standard)`,
+    })
+    .optional()
+    .nullable(),
+};
+
 export const formSchema = z.object({
   ...sourceDetailsTabSchema,
-  ...mappingStandardsTabSchema,
   ...originTabSchema,
   ...schemaConfigTabSchema,
   ...transformTabSchema,
+  ...viewsTabSchema,
 });
 
 export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
 
 const sourceDetailsTabFormKeys = Object.keys(sourceDetailsTabSchema);
-const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
 const originTabFormKeys = Object.keys(originTabSchema);
 const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
 const transformTabFormKeys = Object.keys(transformTabSchema);
+const viewsTabFormKeys = Object.keys(viewsTabSchema);
 
 export const TAB_FORM_VALIDATION_KEY_MAP = {
   sourceDetails: sourceDetailsTabFormKeys,
-  mappingStandards: mappingStandardsTabFormKeys,
   origin: originTabFormKeys,
   schemaConfig: schemaConfigTabFormKeys,
   transform: transformTabFormKeys,
+  views: viewsTabFormKeys,
 };
