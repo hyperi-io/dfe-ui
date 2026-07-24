@@ -9,8 +9,8 @@ describe('customMappingsTransform', () => {
   test('customMappingsEntriesToRecord converts form pairs to API record', () => {
     expect(
       customMappingsEntriesToRecord([
-        ['EventID', 'event_id'],
-        ['UserName', 'user_name'],
+        { key: 'EventID', value: 'event_id' },
+        { key: 'UserName', value: 'user_name' },
       ]),
     ).toEqual({
       EventID: 'event_id',
@@ -30,8 +30,8 @@ describe('customMappingsTransform', () => {
         UserName: 'user_name',
       }),
     ).toEqual([
-      ['EventID', 'event_id'],
-      ['UserName', 'user_name'],
+      { key: 'EventID', value: 'event_id' },
+      { key: 'UserName', value: 'user_name' },
     ]);
   });
 

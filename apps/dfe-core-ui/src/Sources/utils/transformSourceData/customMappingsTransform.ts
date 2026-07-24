@@ -1,4 +1,6 @@
-export type CustomMappingsFormEntries = [string, string][] | undefined;
+export type CustomMappingsFormEntries =
+  | { key: string; value: string }[]
+  | undefined;
 
 export const customMappingsEntriesToRecord = (
   entries: CustomMappingsFormEntries,
@@ -6,7 +8,13 @@ export const customMappingsEntriesToRecord = (
   if (!entries?.length) {
     return undefined;
   }
-  return Object.fromEntries(entries);
+  return entries.reduce(
+    (acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 export const customMappingsRecordToEntries = (
@@ -15,5 +23,5 @@ export const customMappingsRecordToEntries = (
   if (!record || Object.keys(record).length === 0) {
     return undefined;
   }
-  return Object.entries(record);
+  return Object.entries(record).map(([key, value]) => ({ key, value }));
 };

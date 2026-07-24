@@ -193,21 +193,24 @@ export const CreateUpdateSourceFormBase = ({
                     />
                   ),
                 },
+                {
+                  key: 'views',
+                  label: (
+                    <TabLabel
+                      label="Views"
+                      validationErrors={validationErrors?.views}
+                    />
+                  ),
+                  forceRender: true,
+                  children: (
+                    <ViewsTabContent
+                      formValidation={formValidation}
+                      form={form}
+                    />
+                  ),
+                },
               ]
             : []),
-          {
-            key: 'views',
-            label: (
-              <TabLabel
-                label="Views"
-                validationErrors={validationErrors?.views}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <ViewsTabContent formValidation={formValidation} form={form} />
-            ),
-          },
         ]}
       />
 

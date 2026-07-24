@@ -146,13 +146,12 @@ const transformTabSchema = {
     .nullable(),
 };
 
-/** Form.List-friendly pairs; convert to API record in transformSourceFormDataToRequestBody */
 export const customMappingsFormSchema = z
   .array(
-    z.tuple([
-      z.string().min(1, { message: 'Key is required' }),
-      z.string().min(1, { message: 'Value is required' }),
-    ]),
+    z.object({
+      key: z.string().min(1, { message: 'Key is required' }),
+      value: z.string().min(1, { message: 'Value is required' }),
+    }),
   )
   .optional();
 

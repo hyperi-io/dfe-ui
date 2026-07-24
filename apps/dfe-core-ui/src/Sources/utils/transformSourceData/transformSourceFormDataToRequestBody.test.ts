@@ -66,8 +66,8 @@ describe('transformSourceFormDataToRequestBody', () => {
         {
           standard: 'sigma',
           custom_mappings: [
-            ['EventID', 'event_id'],
-            ['UserName', 'user_name'],
+            { key: 'EventID', value: 'event_id' },
+            { key: 'UserName', value: 'user_name' },
           ],
         },
       ],
