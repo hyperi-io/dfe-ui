@@ -1,9 +1,9 @@
-export type CustomMappingsFormEntries =
+export type ObjectArrayFormEntries =
   | { key: string; value: string }[]
   | undefined;
 
-export const customMappingsEntriesToRecord = (
-  entries: CustomMappingsFormEntries,
+export const objectArrayToObject = (
+  entries: ObjectArrayFormEntries,
 ): Record<string, string> | undefined => {
   if (!entries?.length) {
     return undefined;
@@ -17,9 +17,9 @@ export const customMappingsEntriesToRecord = (
   );
 };
 
-export const customMappingsRecordToEntries = (
+export const objectToObjectArray = (
   record: Record<string, string> | null | undefined,
-): CustomMappingsFormEntries => {
+): ObjectArrayFormEntries => {
   if (!record || Object.keys(record).length === 0) {
     return undefined;
   }

@@ -3,6 +3,7 @@ import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
+import { ViewDetailsModal } from './ViewDetailsModal';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -61,10 +62,11 @@ export const ConfigurationDetailsTabContent = ({
   deployed_version,
 
   selected: selected_version,
-  version: { header, schema, transform, match, fetcher, source_build },
+  version: { header, schema, transform, match, fetcher, source_build, views },
 }: TSourceVersionDetail) => {
   const hasSchema = schema?.meta_schema || header?.type;
   const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
+  const hasViews = views && views.length > 0;
 
   return (
     <div className="relative h-full min-h-0">
@@ -307,32 +309,29 @@ export const ConfigurationDetailsTabContent = ({
           </dl>
         </SimpleCollapse>
       )}
-      {/* {hasMappingStandards && (
+      {hasViews && (
         <SimpleCollapse
           classNames={{
             container: 'px-0',
             title: formCollapseTitleStyle,
           }}
-          title="Mapping"
-          defaultOpen={true}
+          title="Views"
         >
-          <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1">
-            <dt className={dataListTermStyle}>Mapping Standards:</dt>
-            <dd className="flex gap-3 flex-wrap">
-              {mapping_standards?.length > 0 ? (
-                mapping_standards?.map((standard) => (
-                  <MappingStandardsModal
-                    key={standard}
-                    mappingStandard={standard}
-                  />
-                ))
-              ) : (
-                <EmptyData />
-              )}
-            </dd>
-          </dl>
+          <ul className="flex gap-2">
+            {views?.map((view) => (
+              <li
+                key={view.standard}
+                className={cn(
+                  'flex items-center gap-2 grow-0',
+                  'bg-foreground/10 dark:bg-dark-foreground/10 rounded-md pl-4 pr-2 py-1',
+                )}
+              >
+                {view.standard} <ViewDetailsModal view={view} />
+              </li>
+            ))}
+          </ul>
         </SimpleCollapse>
-      )} */}
+      )}
     </div>
   );
 };
