@@ -145,6 +145,7 @@ export const ViewsTabContent = ({
                           name={[name, 'key']}
                           label="Key"
                           layout="horizontal"
+                          rules={[formValidation]}
                         >
                           <Input placeholder="Enter key" />
                         </Form.Item>
@@ -153,6 +154,7 @@ export const ViewsTabContent = ({
                           name={[name, 'value']}
                           label="Value"
                           layout="horizontal"
+                          rules={[formValidation]}
                         >
                           <Input placeholder="Enter value" />
                         </Form.Item>

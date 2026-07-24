@@ -34,7 +34,6 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
 
 const TAB_LABEL_MAP = {
   sourceDetails: 'Configuration',
-  mappingStandards: 'Mapping',
   origin: 'Origin',
   schemaConfig: 'Meta Schema',
   transform: 'Transform',
@@ -57,7 +56,6 @@ export const CreateUpdateSourceFormBase = ({
   const [validationErrors, setValidationErrors] =
     useState<FormValidationErrors>({
       sourceDetails: [],
-      mappingStandards: [],
       origin: [],
       schemaConfig: [],
       transform: [],

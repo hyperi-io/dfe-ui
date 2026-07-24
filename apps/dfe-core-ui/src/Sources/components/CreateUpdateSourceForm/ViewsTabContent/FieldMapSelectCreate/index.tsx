@@ -23,7 +23,7 @@ export const FieldMapSelectCreate = ({
         <div className="flex gap-x-2">
           <FieldMapSelect
             {...props}
-            placeholder="Select mapping standards"
+            placeholder="Select field map"
             onChange={handleChange}
             allowClear
           />

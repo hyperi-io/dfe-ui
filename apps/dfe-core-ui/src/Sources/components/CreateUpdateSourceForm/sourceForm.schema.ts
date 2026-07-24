@@ -20,10 +20,6 @@ const sourceDetailsTabSchema = {
   enabled: z.boolean({ message: 'Enabled is required' }),
 };
 
-const mappingStandardsTabSchema = {
-  mapping_standards: z.array(z.string()).optional(),
-};
-
 const originTabSchema = {
   match: z
     .object({
@@ -173,7 +169,6 @@ const viewsTabSchema = {
 
 export const formSchema = z.object({
   ...sourceDetailsTabSchema,
-  ...mappingStandardsTabSchema,
   ...originTabSchema,
   ...schemaConfigTabSchema,
   ...transformTabSchema,
@@ -183,7 +178,6 @@ export const formSchema = z.object({
 export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
 
 const sourceDetailsTabFormKeys = Object.keys(sourceDetailsTabSchema);
-const mappingStandardsTabFormKeys = Object.keys(mappingStandardsTabSchema);
 const originTabFormKeys = Object.keys(originTabSchema);
 const schemaConfigTabFormKeys = Object.keys(schemaConfigTabSchema);
 const transformTabFormKeys = Object.keys(transformTabSchema);
@@ -191,7 +185,6 @@ const viewsTabFormKeys = Object.keys(viewsTabSchema);
 
 export const TAB_FORM_VALIDATION_KEY_MAP = {
   sourceDetails: sourceDetailsTabFormKeys,
-  mappingStandards: mappingStandardsTabFormKeys,
   origin: originTabFormKeys,
   schemaConfig: schemaConfigTabFormKeys,
   transform: transformTabFormKeys,
