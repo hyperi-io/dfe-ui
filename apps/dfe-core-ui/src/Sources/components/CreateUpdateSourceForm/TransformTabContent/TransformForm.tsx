@@ -1,4 +1,5 @@
-import { Form, FormRule, Input, Select } from 'antd';
+import { Form } from '@/core/components/Form';
+import { FormRule, Input, Select } from 'antd';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
 
 export const TransformForm = ({

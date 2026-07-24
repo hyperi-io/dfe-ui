@@ -87,6 +87,7 @@ export const CreateSourceDrawer = ({
         open={isDrawerVisible}
         size="60%"
         onClose={handleClose}
+        classNames={{ body: 'pt-0' }}
       >
         <CreateUpdateSourceForm
           onFinish={handleCreateSource}

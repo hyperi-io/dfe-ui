@@ -1,7 +1,7 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
-import { customMappingsRecordToEntries } from './customMappingsTransform';
+import { objectToObjectArray } from './helpers';
 
 /*
  * Transforms the source request body to a form data object.
@@ -38,6 +38,7 @@ export const transformSourceRequestBodyToFormData = (
     transform: source?.version?.transform
       ? {
           ...source?.version?.transform,
+          env: objectToObjectArray(source?.version?.transform?.env),
           config_file: source?.version?.transform?.config_file ?? null,
         }
       : undefined,
@@ -62,7 +63,7 @@ export const transformSourceRequestBodyToFormData = (
       : { field: '', value: '' },
     views: source?.version?.views?.map((view) => {
       const { custom_mappings, ...viewRest } = view;
-      const formCustomMappings = customMappingsRecordToEntries(custom_mappings);
+      const formCustomMappings = objectToObjectArray(custom_mappings);
       return {
         ...viewRest,
         ...(formCustomMappings ? { custom_mappings: formCustomMappings } : {}),
