@@ -94,6 +94,7 @@ export const EditSourceDrawer = ({
         open={isDrawerVisible}
         size="60%"
         onClose={handleClose}
+        classNames={{ body: 'pt-0' }}
       >
         <EditSourceForm onSuccess={handleOnSuccess} />
       </Drawer>

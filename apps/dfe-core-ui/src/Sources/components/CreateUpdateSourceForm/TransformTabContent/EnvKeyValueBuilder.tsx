@@ -9,35 +9,37 @@ export const EnvKeyValueBuilder = ({
 }) => {
   return (
     <>
-      <div className="flex justify-between">
-        <label>Environment Variables</label>
-      </div>
-      <Form.List name="env">
+      <Form.List name={['transform', 'env']}>
         {(fields, { add, remove }) => (
           <div className="flex flex-col gap-y-2">
-            <div className="flex justify-end -mt-8">
+            <div className="flex justify-between items-center">
+              <p>Environment Variables</p>
               <Button
-                size="small"
                 aria-label="Add environment variable"
-                shape="circle"
                 icon={<IconPlus />}
                 type="default"
-                onClick={() => add(['', ''])}
-              />
+                onClick={() => add({ key: '', value: '' })}
+              >
+                Add Environment Variable
+              </Button>
             </div>
             {fields.map(({ key, name, ...restField }) => (
               <div key={key} className="flex gap-2 justify-start">
                 <Form.Item
                   {...restField}
-                  name={[name, 0]}
+                  name={[name, 'key']}
                   className="w-full"
+                  label="Key"
+                  layout="horizontal"
                   rules={[formValidation]}
                 >
                   <Input placeholder="Enter environment variable key" />
                 </Form.Item>
                 <Form.Item
                   {...restField}
-                  name={[name, 1]}
+                  name={[name, 'value']}
+                  label="Value"
+                  layout="horizontal"
                   className="w-full"
                   rules={[formValidation]}
                 >

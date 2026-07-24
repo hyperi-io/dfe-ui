@@ -40,8 +40,8 @@ export const ViewsTabContent = ({
         <div className="flex flex-col gap-2">
           <div className="flex gap-2 items-center">
             <p className="text-sm text-foreground-muted dark:text-foreground-muted-dark">
-              Configure the standards that will be used to create the views.
-              Multiple standards can be selected but no duplicates are allowed.
+              Configure the standards that will be used to create the views -
+              Multiple standards can be selected but no duplicates are allowed
             </p>
             {fields.length >= MAX_VIEWS ? (
               <Tooltip
@@ -132,7 +132,7 @@ export const ViewsTabContent = ({
                     <div className="col-span-2 flex flex-col gap-2">
                       <div className="flex items-center gap-2 justify-between">
                         <p className="text-sm text-foreground-muted dark:text-foreground-muted-dark w-full">
-                          Add custom mappings to the view.
+                          Add custom mappings to the view
                         </p>
                         <Button
                           htmlType="button"
