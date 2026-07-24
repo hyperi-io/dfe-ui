@@ -6,7 +6,6 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { getValidationErrors, type FormValidationErrors } from './helpers';
-import { MappingStandardsTabContent } from './MappingStandardsTabContent';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
@@ -176,23 +175,6 @@ export const CreateUpdateSourceFormBase = ({
                 //     />
                 //   ),
                 // },
-                {
-                  key: 'mappingStandards',
-                  label: (
-                    <TabLabel
-                      label="Mapping"
-                      validationErrors={validationErrors?.mappingStandards}
-                    />
-                  ),
-                  forceRender: true,
-                  children: (
-                    <MappingStandardsTabContent
-                      formValidation={formValidation}
-                      initialValues={initialValues}
-                      form={form}
-                    />
-                  ),
-                },
                 {
                   key: 'views',
                   label: (

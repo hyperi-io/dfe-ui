@@ -3,6 +3,7 @@ import { cn } from '@/core/utils/style';
 import { type CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormInstance, FormRule, Input, Select, Tooltip } from 'antd';
+import { FieldMapSelectCreate } from './FieldMapSelectCreate';
 
 const STANDARD_OPTIONS = [
   { label: 'Sigma', value: 'sigma' },
@@ -92,7 +93,9 @@ export const ViewsTabContent = ({
                 label="Field Map"
                 rules={[formValidation]}
               >
-                <Input placeholder="Enter field map" />
+                <FieldMapSelectCreate
+                  source_name={form.getFieldValue('source')}
+                />
               </Form.Item>
               <Form.Item
                 {...restField}
