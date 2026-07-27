@@ -1,11 +1,12 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/PromoteJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { App, Button, Tabs } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { DiscoverJsonPathsDetails } from './DiscoverJsonPathsDetails';
 
 type ActiveTab = 'discover' | 'review';
@@ -24,7 +25,7 @@ export const DiscoverJsonPathsDrawer = ({
   const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
     null,
   );
-  const { notification, modal } = App.useApp();
+  const { notification } = App.useApp();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('discover');
   const [canPromote, setCanPromote] = useState(false);
@@ -33,6 +34,18 @@ export const DiscoverJsonPathsDrawer = ({
   const [jsonPaths, setJsonPaths] = useState<TJsonPathsResponse | null>(null);
 
   const hasUncommittedChanges = isDrawerVisible && promoteTestResponse != null;
+
+  const { confirmLeave } = usePreventNavigate({
+    enabled: hasUncommittedChanges,
+    modal: {
+      title: (
+        <span className="flex items-center gap-x-2">
+          <IconAlertCircle /> Uncommitted changes
+        </span>
+      ),
+      message: UNCOMMITTED_CLOSE_MESSAGE,
+    },
+  });
 
   const closeDrawer = useCallback(() => {
     setIsDrawerVisible(false);
@@ -43,36 +56,8 @@ export const DiscoverJsonPathsDrawer = ({
   }, []);
 
   const requestCloseDrawer = useCallback(() => {
-    if (!hasUncommittedChanges) {
-      closeDrawer();
-      return;
-    }
-    modal.confirm({
-      title: (
-        <span className="flex items-center gap-x-2">
-          <IconAlertCircle /> Uncommitted changes
-        </span>
-      ),
-      content: UNCOMMITTED_CLOSE_MESSAGE,
-      okText: 'Discard',
-      okButtonProps: { danger: true },
-      cancelText: 'Keep editing',
-      icon: null,
-      onOk: closeDrawer,
-    });
-  }, [closeDrawer, hasUncommittedChanges, modal]);
-
-  useEffect(() => {
-    if (!hasUncommittedChanges) {
-      return;
-    }
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [hasUncommittedChanges]);
+    confirmLeave(closeDrawer);
+  }, [closeDrawer, confirmLeave]);
 
   return (
     <>

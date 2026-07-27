@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchGroupDetail';
-import { useUpdateGroup } from '@/Settings/hooks/useUpdateGroup';
+import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/groups/useFetchGroupDetail';
+import { useUpdateGroup } from '@/Settings/hooks/groups/useUpdateGroup';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';

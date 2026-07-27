@@ -92,7 +92,7 @@ export const API_CONFIG = Object.freeze({
     login: '/api/v1/auth/oidc/{provider}/login',
     callback: '/api/v1/auth/oidc/{provider}/callback',
   },
-  oidc_providers: {
+  oidcProviders: {
     default: '/api/v1/auth/oidc-providers',
     provider: '/api/v1/auth/oidc-providers/{name}',
     syncGroups: '/api/v1/auth/oidc-providers/{name}/sync',
@@ -137,5 +137,9 @@ export const API_CONFIG = Object.freeze({
     clickhouseCloud: '/api/v1/system/clickhouse-cloud',
     clickhouseCloudStart: '/api/v1/system/clickhouse-cloud/start',
     clickhouseCloudStop: '/api/v1/system/clickhouse-cloud/stop',
+  },
+  apiKeys: {
+    default: '/api/v1/auth/api-keys',
+    apiKey: '/api/v1/auth/api-keys/{short_token}',
   },
 } as const satisfies Record<string, Record<string, keyof paths>>);

@@ -4,7 +4,7 @@ import {
   CreateUpdateRoleForm,
   CreateUpdateRoleFormData,
 } from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
-import { useCreateRole } from '@/Settings/hooks/useCreateRole';
+import { useCreateRole } from '@/Settings/hooks/roles/useCreateRole';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';

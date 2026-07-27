@@ -1,7 +1,7 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { OidcProviderCard } from '@/Settings/components/OidcProviderManagement/OidcProviderCard';
-import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders';
+import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 

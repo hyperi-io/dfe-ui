@@ -4,7 +4,7 @@ import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
-import { useFetchAccountDetail } from '@/Settings/hooks/useFetchAccountDetail';
+import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Spin, Tooltip } from 'antd';
 

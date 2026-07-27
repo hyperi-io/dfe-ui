@@ -1,6 +1,6 @@
 import { CreateUpdateGroupFormData } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
-import { TGroupCreateRequestBody } from '@/Settings/hooks/useCreateGroup/types';
-import { TGroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
+import { TGroupCreateRequestBody } from '@/Settings/hooks/groups/useCreateGroup/types';
+import { TGroupUpdateRequestBody } from '@/Settings/hooks/groups/useUpdateGroup/types';
 import { describe, expect, test } from 'vitest';
 import {
   createGroupTransformFormDataToRequest,

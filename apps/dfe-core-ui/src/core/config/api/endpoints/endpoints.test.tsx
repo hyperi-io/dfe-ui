@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { API_CONFIG } from '.';
-import { API_CONFIG_MOCKS } from './endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from './generator';
 
 const functionToStringUrl = (func: (...args: string[]) => string) => {
   return func(...Array<string>(func.length).fill('string'));
