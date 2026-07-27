@@ -11,7 +11,7 @@ export const useCreateApiKey = ({
   onSuccess,
   onError,
 }: UseCreateApiKeyProps = {}) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (body: TApiKeyCreateRequestBody) =>
       createApiKey({
         body,
@@ -29,5 +29,6 @@ export const useCreateApiKey = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

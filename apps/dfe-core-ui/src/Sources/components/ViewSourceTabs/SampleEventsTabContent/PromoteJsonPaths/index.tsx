@@ -56,6 +56,7 @@ export const PromoteJsonPaths = ({
       })) ?? []
     );
   }, [data?.diff?.new_columns]);
+
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex flex-col gap-y-4 max-h-[calc(100vh-230px)] css-custom-scrollbar">

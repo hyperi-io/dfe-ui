@@ -59,6 +59,7 @@ describe('.useCreateApiKey', () => {
           error: null,
           mutate: expect.any(Function),
           data: expectedResponse,
+          reset: expect.any(Function),
         });
       });
 
