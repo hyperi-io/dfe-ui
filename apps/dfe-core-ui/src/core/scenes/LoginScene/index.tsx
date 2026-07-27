@@ -9,6 +9,7 @@ import { IconPrimaryLogoFull } from '@repo/dfe-icons';
 import { Button, Input } from 'antd';
 import z from 'zod';
 import './Login.css';
+import { SsoButtons } from './SsoButtons';
 
 const formSchema = z.object({
   username: z.string().min(1, { message: 'Username is required' }),
@@ -77,6 +78,7 @@ const Login = ({ callbackUrl }: { callbackUrl: string }) => {
             Login
           </Button>
         </Form>
+        <SsoButtons />
       </div>
     </main>
   );
