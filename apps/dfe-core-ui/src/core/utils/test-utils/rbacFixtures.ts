@@ -120,12 +120,22 @@ export const RBAC_FIXTURES = {
   },
   'dfe-test-org-viewer': {
     roles: ['customer_viewer'],
-    permissions: ['query:execute', 'source:read', 'sampler:read', 'dashboard:read'],
+    permissions: [
+      'query:execute',
+      'source:read',
+      'sampler:read',
+      'dashboard:read',
+    ],
     org_ids: [TEST_ORG],
   },
   'dfe-multi-viewer': {
     roles: ['customer_viewer'],
-    permissions: ['query:execute', 'source:read', 'sampler:read', 'dashboard:read'],
+    permissions: [
+      'query:execute',
+      'source:read',
+      'sampler:read',
+      'dashboard:read',
+    ],
     org_ids: [TEST_ORG, TEST_ORG_2],
   },
   // Default deny - the identity people forget. No roles, no permissions.

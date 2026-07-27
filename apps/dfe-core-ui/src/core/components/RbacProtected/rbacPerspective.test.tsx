@@ -6,14 +6,7 @@ import {
   type FixtureIdentity,
 } from '@/core/utils/test-utils/rbacFixtures';
 import { render, screen } from '@testing-library/react';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  it,
-} from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { RbacProtected } from '.';
 import { UI_DISPLAY_ACTIONS } from './hooks/rbac.constants';
 import { server } from './rbacPerspective.mocks';
@@ -100,21 +93,27 @@ const Panel = () => (
 describe('RBAC perspective - what each role sees', () => {
   const identities = Object.keys(EXPECTED_VISIBLE) as FixtureIdentity[];
 
-  it.each(identities)('%s sees exactly its authorised surfaces', async (identity) => {
-    server.use(authMeHandlerForRole(identity));
-    render(<Panel />, { wrapper });
+  it.each(identities)(
+    '%s sees exactly its authorised surfaces',
+    async (identity) => {
+      server.use(authMeHandlerForRole(identity));
+      render(<Panel />, { wrapper });
 
-    // Wait for /auth/me to resolve before asserting hidden surfaces.
-    await screen.findByTestId('me-loaded');
+      // Wait for /auth/me to resolve before asserting hidden surfaces.
+      await screen.findByTestId('me-loaded');
 
-    const visible = new Set(EXPECTED_VISIBLE[identity]);
-    for (const probe of PROBES) {
-      const el = screen.queryByTestId(`allow-${probe.id}`);
-      if (visible.has(probe.id)) {
-        expect(el, `${identity} should see ${probe.id}`).toBeInTheDocument();
-      } else {
-        expect(el, `${identity} must NOT see ${probe.id}`).not.toBeInTheDocument();
+      const visible = new Set(EXPECTED_VISIBLE[identity]);
+      for (const probe of PROBES) {
+        const el = screen.queryByTestId(`allow-${probe.id}`);
+        if (visible.has(probe.id)) {
+          expect(el, `${identity} should see ${probe.id}`).toBeInTheDocument();
+        } else {
+          expect(
+            el,
+            `${identity} must NOT see ${probe.id}`,
+          ).not.toBeInTheDocument();
+        }
       }
-    }
-  });
+    },
+  );
 });
