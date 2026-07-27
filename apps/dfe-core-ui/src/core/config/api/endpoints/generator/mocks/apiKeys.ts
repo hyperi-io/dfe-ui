@@ -72,9 +72,22 @@ export const apiKeys = {
   },
   apiKey: {
     mockedUrl: '/api/v1/auth/api-keys/{short_token}',
-    get: {
+    delete: {
       success: () => {
-        return console.error('Not implemented');
+        return http.delete(apiKeys.apiKey.mockedUrl, () => {
+          return HttpResponse.json({});
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.delete(apiKeys.apiKey.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },
