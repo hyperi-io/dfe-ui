@@ -3,6 +3,7 @@
 import { MainContentCard } from '@/core/components/ContentCard';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { AccountManagement } from '@/Settings/components/AccountManagement';
+import { ApiKeyManagement } from '@/Settings/components/ApiKeyManagement';
 import { GroupManagement } from '@/Settings/components/GroupManagement';
 import { OidcProviderManagement } from '@/Settings/components/OidcProviderManagement';
 import { OrganisationManagement } from '@/Settings/components/OrganisationManagement';
@@ -10,7 +11,12 @@ import { RoleManagement } from '@/Settings/components/RoleManagement';
 import { Tabs } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
-import { adminTabFromPathname, adminTabPath, isAdminTabKey } from './adminTabs';
+import {
+  ADMIN_TAB_DETAILS,
+  adminTabFromPathname,
+  adminTabPath,
+  isAdminTabKey,
+} from './adminTabs';
 
 export const AdminControlsScene = () => {
   const router = useRouter();
@@ -42,54 +48,72 @@ export const AdminControlsScene = () => {
         }}
         items={[
           {
-            key: 'organization-management',
+            key: ADMIN_TAB_DETAILS['organisation-management'].key,
             label: (
               <NavigationTabLabel
-                label="Organisation Management"
-                description="Add and remove organisations, manage organisation specific configurations and defaults."
+                label={ADMIN_TAB_DETAILS['organisation-management'].label}
+                description={
+                  ADMIN_TAB_DETAILS['organisation-management'].description
+                }
               />
             ),
             children: <OrganisationManagement />,
           },
           {
-            key: 'role-management',
+            key: ADMIN_TAB_DETAILS['role-management'].key,
             label: (
               <NavigationTabLabel
-                label="Role Management"
-                description="Manage roles and their permissions, configure custom roles and permissions."
+                label={ADMIN_TAB_DETAILS['role-management'].label}
+                description={ADMIN_TAB_DETAILS['role-management'].description}
               />
             ),
             children: <RoleManagement />,
           },
           {
-            key: 'group-management',
+            key: ADMIN_TAB_DETAILS['group-management'].key,
             label: (
               <NavigationTabLabel
-                label="Group Management"
-                description="Manage groups and their members, configure custom groups and members."
+                label={ADMIN_TAB_DETAILS['group-management'].label}
+                description={ADMIN_TAB_DETAILS['group-management'].description}
               />
             ),
             children: <GroupManagement />,
           },
           {
-            key: 'account-management',
+            key: ADMIN_TAB_DETAILS['account-management'].key,
             label: (
               <NavigationTabLabel
-                label="Account Management"
-                description="Manage accounts, link LDAP accounts and configure account default settings."
+                label={ADMIN_TAB_DETAILS['account-management'].label}
+                description={
+                  ADMIN_TAB_DETAILS['account-management'].description
+                }
               />
             ),
             children: <AccountManagement />,
           },
           {
-            key: 'oidc-provider-management',
+            key: ADMIN_TAB_DETAILS['oidc-provider-management'].key,
             label: (
               <NavigationTabLabel
-                label="OIDC Provider Management"
-                description="Add and remove OIDC providers, manage OIDC provider specific configurations and defaults."
+                label={ADMIN_TAB_DETAILS['oidc-provider-management'].label}
+                description={
+                  ADMIN_TAB_DETAILS['oidc-provider-management'].description
+                }
               />
             ),
             children: <OidcProviderManagement />,
+          },
+          {
+            key: ADMIN_TAB_DETAILS['api-key-management'].key,
+            label: (
+              <NavigationTabLabel
+                label={ADMIN_TAB_DETAILS['api-key-management'].label}
+                description={
+                  ADMIN_TAB_DETAILS['api-key-management'].description
+                }
+              />
+            ),
+            children: <ApiKeyManagement />,
           },
           // {
           //   key: 'audit',
