@@ -1,6 +1,6 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { useFetchGroupDetail } from '@/Settings/hooks/useFetchGroupDetail';
+import { useFetchGroupDetail } from '@/Settings/hooks/groups/useFetchGroupDetail';
 import { Spin } from 'antd';
 
 const dataListTermStyle =

@@ -62,13 +62,6 @@ export const SampleEventsTabContent = ({
           }
         />
       )}
-      {/* {!canViewSampleRows && (
-        <NotificationCard
-          type="warning"
-          icon={<IconAlertCircle />}
-          description="You can only view sample rows for source versions that are sent to _default_land or are deployed."
-        />
-      )} */}
 
       <ul className="flex flex-col gap-y-3 mt-2">
         {sampleRows?.rows.map((row) => (

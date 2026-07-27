@@ -5,7 +5,7 @@ import {
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
-import { useFetchOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail';
+import { useFetchOrganisationDetail } from '@/Settings/hooks/organisations/useFetchOrganisationDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Spin, Tooltip } from 'antd';
 

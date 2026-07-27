@@ -1,4 +1,4 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { SESSION_AUTH_REFRESH_INTERVAL_MS } from '@/core/config/authSession';
 import { server } from '@/core/hooks/useAuthMe/useAuthMe.mocks';
 import { useAuthStore } from '@/core/stores/authStore';

@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/useFetchRoleDetail';
-import { useUpdateRole } from '@/Settings/hooks/useUpdateRole';
+import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/roles/useFetchRoleDetail';
+import { useUpdateRole } from '@/Settings/hooks/roles/useUpdateRole';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, notification } from 'antd';

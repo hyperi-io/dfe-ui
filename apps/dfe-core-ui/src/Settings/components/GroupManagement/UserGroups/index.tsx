@@ -6,7 +6,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { CreateGroupDrawer } from '@/Settings/components/GroupManagement/CreateGroupDrawer';
 import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
-import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/useFetchInfiniteFilteredGroups';
+import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/groups/useFetchInfiniteFilteredGroups';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
 import { useState } from 'react';

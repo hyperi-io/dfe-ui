@@ -1,6 +1,6 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { useFetchRoleDetail } from '@/Settings/hooks/useFetchRoleDetail';
+import { useFetchRoleDetail } from '@/Settings/hooks/roles/useFetchRoleDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 

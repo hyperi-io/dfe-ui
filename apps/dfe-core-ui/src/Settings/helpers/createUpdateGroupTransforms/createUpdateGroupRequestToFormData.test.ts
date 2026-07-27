@@ -1,8 +1,8 @@
 import { CreateUpdateGroupFormData } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
-import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
+import { TGroupDetailResponse } from '@/Settings/hooks/groups/useFetchGroupDetail/types';
 import { describe, expect, test } from 'vitest';
-import { createUpdateGroupRequestToFormData } from './createUpdateGroupRequestToFormData';
 import { createGroupTransformFormDataToRequest } from './createUpdateGroupFormDataToRequest';
+import { createUpdateGroupRequestToFormData } from './createUpdateGroupRequestToFormData';
 
 describe('createUpdateGroupRequestToFormData', () => {
   test('parses system scope', () => {

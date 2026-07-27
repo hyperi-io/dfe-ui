@@ -5,7 +5,7 @@ import { CloneRoleModal } from '@/Settings/components/RoleManagement/CloneRoleMo
 import { DeleteRoleModal } from '@/Settings/components/RoleManagement/DeleteRoleModal';
 import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDrawer';
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
-import { TRoleListItem } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
+import { TRoleListItem } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
 import { IconLockFilled } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 

@@ -1,5 +1,5 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useDeleteOidcProvider } from '@/Settings/hooks/useDeleteOidcProvider';
+import { useDeleteOidcProvider } from '@/Settings/hooks/oidcProviders/useDeleteOidcProvider';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';

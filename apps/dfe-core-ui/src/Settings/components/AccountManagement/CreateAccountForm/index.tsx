@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
-import { TAccountCreateRequestBody } from '@/Settings/hooks/useCreateAccount/types';
+import { TAccountCreateRequestBody } from '@/Settings/hooks/accounts/useCreateAccount/types';
 import { Button, Input } from 'antd';
 import z from 'zod';
 

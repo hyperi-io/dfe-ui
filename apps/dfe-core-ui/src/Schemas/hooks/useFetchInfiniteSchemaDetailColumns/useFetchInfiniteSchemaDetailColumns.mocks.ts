@@ -1,4 +1,4 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {

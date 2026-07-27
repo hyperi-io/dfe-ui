@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
 import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
-import { useCreateOidcProvider } from '@/Settings/hooks/useCreateOidcProvider';
+import { useCreateOidcProvider } from '@/Settings/hooks/oidcProviders/useCreateOidcProvider';
 import { IconPlus } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';

@@ -1,5 +1,5 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { useTestOidcProvider } from '@/Settings/hooks/useTestOidcProvider';
+import { useTestOidcProvider } from '@/Settings/hooks/oidcProviders/useTestOidcProvider';
 import { IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 

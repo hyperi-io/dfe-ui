@@ -5,7 +5,7 @@ import {
   CreateUpdateGroupFormData,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
 import { createGroupTransformFormDataToRequest } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupFormDataToRequest';
-import { useCreateGroup } from '@/Settings/hooks/useCreateGroup';
+import { useCreateGroup } from '@/Settings/hooks/groups/useCreateGroup';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';

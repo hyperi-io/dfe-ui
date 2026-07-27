@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { useAccountResetPassword } from '@/Settings/hooks/useAccountResetPassword';
+import { useAccountResetPassword } from '@/Settings/hooks/accounts/useAccountResetPassword';
 import { App, Button, Input } from 'antd';
 import z from 'zod';
 

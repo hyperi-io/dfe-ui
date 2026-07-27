@@ -4,7 +4,7 @@ import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
 } from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
-import { useCreateOrganisation } from '@/Settings/hooks/useCreateOrganisation';
+import { useCreateOrganisation } from '@/Settings/hooks/organisations/useCreateOrganisation';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
