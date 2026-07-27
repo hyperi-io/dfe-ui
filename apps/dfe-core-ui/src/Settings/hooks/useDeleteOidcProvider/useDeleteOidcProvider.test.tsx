@@ -1,4 +1,4 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
@@ -62,7 +62,7 @@ describe('.useDeleteOidcProvider', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.oidc_providers.provider.delete.error());
+      server.use(API_CONFIG_MOCKS.oidcProviders.provider.delete.error());
     });
     test('should call onError', async () => {
       const onSuccess = vi.fn();

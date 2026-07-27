@@ -1,4 +1,4 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { TOidcProviderListItem } from './types';
@@ -35,7 +35,7 @@ const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
 
 function createPaginatedOidcProvidersHandler() {
   return http.get(
-    API_CONFIG_MOCKS.oidc_providers.default.mockedUrl,
+    API_CONFIG_MOCKS.oidcProviders.default.mockedUrl,
     ({ request }) => {
       const url = new URL(request.url);
       const page = Math.max(

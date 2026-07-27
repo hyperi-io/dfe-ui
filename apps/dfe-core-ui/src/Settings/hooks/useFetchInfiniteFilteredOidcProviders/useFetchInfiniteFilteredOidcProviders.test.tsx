@@ -1,4 +1,4 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
@@ -274,7 +274,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
 
   describe('error handling', () => {
     it('should handle error state correctly', async () => {
-      server.use(API_CONFIG_MOCKS.oidc_providers.default.get.error());
+      server.use(API_CONFIG_MOCKS.oidcProviders.default.get.error());
 
       const { result } = renderHook(
         () => useFetchInfiniteFilteredOidcProviders(),
@@ -457,7 +457,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
   describe('empty results', () => {
     it('should handle empty searches array', async () => {
       server.use(
-        API_CONFIG_MOCKS.oidc_providers.default.get.success({
+        API_CONFIG_MOCKS.oidcProviders.default.get.success({
           mockedResponse: {
             items: [],
             total: 0,

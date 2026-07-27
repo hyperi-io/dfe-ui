@@ -1,6 +1,6 @@
 import { setupServer } from 'msw/node';
 
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 
 export const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {

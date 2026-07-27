@@ -1,5 +1,5 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/endpoints.generator.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { setupServer } from 'msw/node';
 
 export const CLONE_SOURCE_SCHEMA_PATH = 'source';
