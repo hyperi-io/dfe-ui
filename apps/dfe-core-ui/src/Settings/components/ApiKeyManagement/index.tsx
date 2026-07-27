@@ -3,10 +3,12 @@ import { SectionCard } from '@/core/components/SectionCard';
 import { formatDateToString } from '@/core/helpers/date.helpers';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteFilteredApiKeys } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys';
-import { IconCheck, IconTrash, IconX } from '@repo/dfe-icons';
-import { Button, Input, Table } from 'antd';
+import { TApiKeysItemSummary } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys/types';
+import { IconCheck, IconX } from '@repo/dfe-icons';
+import { Input, Table } from 'antd';
 import { useCallback, useState } from 'react';
 import { CreateApiKeyDrawer } from './CreateApiKeyDrawer';
+import { RevokeApiKeyModal } from './RevokeApiKeyModal';
 
 const API_KEYS_LIMIT = 10;
 
@@ -75,15 +77,8 @@ export const ApiKeyManagement = () => {
       key: 'actions',
       width: 85,
       align: 'center' as const,
-      render: () => (
-        <Button
-          type="default"
-          size="small"
-          shape="circle"
-          icon={<IconTrash />}
-          onClick={() => {}}
-          danger
-        />
+      render: (_: unknown, record: TApiKeysItemSummary) => (
+        <RevokeApiKeyModal shortToken={record.short_token} name={record.name} />
       ),
     },
   ];

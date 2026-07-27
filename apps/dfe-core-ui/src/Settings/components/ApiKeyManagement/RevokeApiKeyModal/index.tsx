@@ -1,0 +1,70 @@
+import { FormNotification } from '@/core/components/FormNotification';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { useRevokeApiKey } from '@/Settings/hooks/apiKeys/useRevokeApiKey';
+import { IconInfoCircle, IconTrash } from '@repo/dfe-icons';
+import { Button, Modal } from 'antd';
+import { useState } from 'react';
+
+export const RevokeApiKeyModal = ({
+  shortToken,
+  name,
+}: {
+  shortToken: string;
+  name: string;
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const {
+    mutate: revokeApiKey,
+    isPending,
+    error,
+  } = useRevokeApiKey({
+    onSuccess: () => {
+      setOpen(false);
+    },
+  });
+
+  const handleRevokeApiKey = () => {
+    revokeApiKey(shortToken);
+  };
+  return (
+    <>
+      <Button
+        type="default"
+        size="small"
+        shape="circle"
+        icon={<IconTrash />}
+        onClick={() => setOpen(true)}
+        danger
+      />
+      <Modal
+        classNames={{ body: 'flex flex-col gap-2' }}
+        destroyOnHidden
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+      >
+        <p>
+          Are you sure you want to revoke this API key:{' '}
+          <span className="font-bold">{name}</span>?
+        </p>
+        <NotificationCard
+          icon={<IconInfoCircle />}
+          title="This action cannot be undone."
+          type="warning"
+        />
+
+        {error && <FormNotification type="error" text={error.message} />}
+
+        <Button
+          type="primary"
+          danger
+          onClick={handleRevokeApiKey}
+          loading={isPending}
+        >
+          Revoke API Key
+        </Button>
+      </Modal>
+    </>
+  );
+};
