@@ -1,5 +1,6 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { useRevokeApiKey } from '@/Settings/hooks/apiKeys/useRevokeApiKey';
 import { IconInfoCircle, IconTrash } from '@repo/dfe-icons';
 import { Button, Modal } from 'antd';
@@ -29,14 +30,31 @@ export const RevokeApiKeyModal = ({
   };
   return (
     <>
-      <Button
-        type="default"
-        size="small"
-        shape="circle"
-        icon={<IconTrash />}
-        onClick={() => setOpen(true)}
-        danger
-      />
+      <RbacProtected action={RbacProtected.rbacActions.api_key_delete}>
+        <RbacProtected.Unrestricted>
+          <Button
+            type="default"
+            size="small"
+            shape="circle"
+            aria-label="Revoke API Key"
+            icon={<IconTrash />}
+            onClick={() => setOpen(true)}
+            danger
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button
+            type="default"
+            size="small"
+            shape="circle"
+            aria-label="Revoke API Key"
+            icon={<IconTrash />}
+            disabled
+            danger
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
+
       <Modal
         classNames={{ body: 'flex flex-col gap-2' }}
         destroyOnHidden

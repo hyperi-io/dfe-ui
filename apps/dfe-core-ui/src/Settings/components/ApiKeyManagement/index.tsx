@@ -1,4 +1,5 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { formatDateToString } from '@/core/helpers/date.helpers';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -120,16 +121,23 @@ export const ApiKeyManagement = () => {
           />
         }
       >
-        {error && <NotificationCard type="error" title={error.message} />}
-        <Table
-          rowKey="short_token"
-          dataSource={apiKeys}
-          loading={isLoading}
-          columns={columns}
-          scroll={{ y: componentHeight }}
-          pagination={false}
-          onScroll={handleScroll}
-        />
+        <RbacProtected action={RbacProtected.rbacActions.api_key_read}>
+          <RbacProtected.Unrestricted>
+            {error && <NotificationCard type="error" title={error.message} />}
+            <Table
+              rowKey="short_token"
+              dataSource={apiKeys}
+              loading={isLoading}
+              columns={columns}
+              scroll={{ y: componentHeight }}
+              pagination={false}
+              onScroll={handleScroll}
+            />
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted>
+            <RbacProtected.RestrictedRoute />
+          </RbacProtected.Restricted>
+        </RbacProtected>
       </SectionCard>
     </>
   );

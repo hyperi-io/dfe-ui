@@ -2,6 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
@@ -64,9 +65,18 @@ export const CreateApiKeyDrawer = () => {
 
   return (
     <>
-      <Button type="primary" onClick={() => setOpen(true)}>
-        Generate API Key
-      </Button>
+      <RbacProtected action={RbacProtected.rbacActions.api_key_write}>
+        <RbacProtected.Unrestricted>
+          <Button type="primary" onClick={() => setOpen(true)}>
+            Generate API Key
+          </Button>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted tooltip={{ show: true }}>
+          <Button type="primary" disabled>
+            Generate API Key
+          </Button>
+        </RbacProtected.Restricted>
+      </RbacProtected>
 
       <Drawer
         title={data ? 'API Key Generated' : 'Generate API Key'}
