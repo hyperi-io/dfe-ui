@@ -2,11 +2,12 @@ import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { useCreateApiKey } from '@/Settings/hooks/apiKeys/useCreateApiKey';
 import { Button, Card, Input, Tag } from 'antd';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import z from 'zod';
 import { ApiKeyHiddenCopy } from './ApiKeyHiddenCopy';
 
@@ -33,15 +34,33 @@ export const CreateApiKeyDrawer = () => {
 
   const [form] = Form.useForm<CreateApiKeyFormSchema>();
 
+  const mustAcknowledgeCopy = open && data != null;
+
+  const handleAccept = useCallback(() => {
+    setOpen(false);
+    form.resetFields();
+    reset();
+  }, [form, reset]);
+
+  const { confirmLeave } = usePreventNavigate({
+    enabled: mustAcknowledgeCopy,
+    blockBrowserBack: true,
+    modal: {
+      title: 'Have you copied the API key?',
+      message: 'You will not be able to retrieve it later.',
+      okText: 'I have copied the API key',
+      cancelText: 'Cancel',
+      okButtonProps: { danger: false },
+    },
+  });
+
   const handleOnFinish = (values: CreateApiKeyFormSchema) => {
     generateApiKey(values);
   };
 
-  const handleAccept = () => {
-    setOpen(false);
-    form.resetFields();
-    reset();
-  };
+  const handleClose = useCallback(() => {
+    confirmLeave(handleAccept);
+  }, [confirmLeave, handleAccept]);
 
   return (
     <>
@@ -52,7 +71,8 @@ export const CreateApiKeyDrawer = () => {
       <Drawer
         title={data ? 'API Key Generated' : 'Generate API Key'}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
+        keyboard={!mustAcknowledgeCopy}
       >
         {data && (
           <div className="flex flex-col gap-2">
