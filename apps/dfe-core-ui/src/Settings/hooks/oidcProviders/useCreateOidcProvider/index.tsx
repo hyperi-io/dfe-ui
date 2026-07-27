@@ -1,4 +1,4 @@
-import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders';
+import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOidcProviderApi } from './api';
 import {

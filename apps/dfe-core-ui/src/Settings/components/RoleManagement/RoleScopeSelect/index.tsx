@@ -1,6 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchInfiniteFilteredRoleScopes } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes';
+import { useFetchInfiniteFilteredRoleScopes } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoleScopes';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 

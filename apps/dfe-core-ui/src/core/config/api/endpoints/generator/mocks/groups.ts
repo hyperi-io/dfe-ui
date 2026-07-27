@@ -1,9 +1,9 @@
-import { TAddGroupMemberResponse } from '@/Settings/hooks/useAddGroupMember/types';
-import { TGroupCreateResponse } from '@/Settings/hooks/useCreateGroup/types';
-import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
-import { TGroupsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredGroups/types';
-import { TRemoveGroupMemberResponse } from '@/Settings/hooks/useRemoveGroupMember/types';
-import { TGroupUpdateResponse } from '@/Settings/hooks/useUpdateGroup/types';
+import { TAddGroupMemberResponse } from '@/Settings/hooks/groups/useAddGroupMember/types';
+import { TGroupCreateResponse } from '@/Settings/hooks/groups/useCreateGroup/types';
+import { TGroupDetailResponse } from '@/Settings/hooks/groups/useFetchGroupDetail/types';
+import { TGroupsResponse } from '@/Settings/hooks/groups/useFetchInfiniteFilteredGroups/types';
+import { TRemoveGroupMemberResponse } from '@/Settings/hooks/groups/useRemoveGroupMember/types';
+import { TGroupUpdateResponse } from '@/Settings/hooks/groups/useUpdateGroup/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

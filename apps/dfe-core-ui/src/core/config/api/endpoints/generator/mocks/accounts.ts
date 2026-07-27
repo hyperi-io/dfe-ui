@@ -1,8 +1,8 @@
-import { TAccountResetPasswordResponse } from '@/Settings/hooks/useAccountResetPassword/types';
-import { TAccountCreateResponse } from '@/Settings/hooks/useCreateAccount/types';
-import { TAccountDetailResponse } from '@/Settings/hooks/useFetchAccountDetail/types';
-import { TAccountsResponse } from '@/Settings/hooks/useFetchInfiniteFilteredAccounts/types';
-import { TAccountUpdateResponse } from '@/Settings/hooks/useUpdateAccount/types';
+import { TAccountResetPasswordResponse } from '@/Settings/hooks/accounts/useAccountResetPassword/types';
+import { TAccountCreateResponse } from '@/Settings/hooks/accounts/useCreateAccount/types';
+import { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
+import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
+import { TAccountUpdateResponse } from '@/Settings/hooks/accounts/useUpdateAccount/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

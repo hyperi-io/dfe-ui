@@ -1,4 +1,4 @@
-import { useDeleteOrganisation } from '@/Settings/hooks/useDeleteOrganisation';
+import { useDeleteOrganisation } from '@/Settings/hooks/organisations/useDeleteOrganisation';
 
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';

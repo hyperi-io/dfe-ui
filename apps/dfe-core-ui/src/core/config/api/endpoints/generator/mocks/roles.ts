@@ -1,8 +1,8 @@
-import { TRoleCreateResponse } from '@/Settings/hooks/useCreateRole/types';
-import { TRoleListResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoles/types';
-import { TRoleScopesResponse } from '@/Settings/hooks/useFetchInfiniteFilteredRoleScopes/types';
-import { TRoleDetail } from '@/Settings/hooks/useFetchRoleDetail/types';
-import { TRoleUpdateResponse } from '@/Settings/hooks/useUpdateRole/types';
+import { TRoleCreateResponse } from '@/Settings/hooks/roles/useCreateRole/types';
+import { TRoleListResponse } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
+import { TRoleScopesResponse } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoleScopes/types';
+import { TRoleDetail } from '@/Settings/hooks/roles/useFetchRoleDetail/types';
+import { TRoleUpdateResponse } from '@/Settings/hooks/roles/useUpdateRole/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

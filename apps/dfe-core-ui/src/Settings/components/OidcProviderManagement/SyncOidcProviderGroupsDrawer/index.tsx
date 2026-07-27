@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useSyncOidcProviderGroups } from '@/Settings/hooks/useSyncOidcProviderGroups';
+import { useSyncOidcProviderGroups } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups';
 import { IconArrowMergeAltRight } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';

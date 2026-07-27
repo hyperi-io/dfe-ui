@@ -1,5 +1,5 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useDeleteGroup } from '@/Settings/hooks/useDeleteGroup';
+import { useDeleteGroup } from '@/Settings/hooks/groups/useDeleteGroup';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';

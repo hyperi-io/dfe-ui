@@ -4,7 +4,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
-import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/useFetchInfiniteFilteredRoles';
+import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
 import { Button, Input, Spin } from 'antd';
 import { useState } from 'react';

@@ -1,5 +1,5 @@
 import { CreateUpdateGroupFormData } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
-import { TGroupDetailResponse } from '@/Settings/hooks/useFetchGroupDetail/types';
+import { TGroupDetailResponse } from '@/Settings/hooks/groups/useFetchGroupDetail/types';
 
 export const createUpdateGroupRequestToFormData = (
   request: TGroupDetailResponse,

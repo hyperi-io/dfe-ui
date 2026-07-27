@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateAccountForm } from '@/Settings/components/AccountManagement/CreateAccountForm';
-import { useCreateAccount } from '@/Settings/hooks/useCreateAccount';
+import { useCreateAccount } from '@/Settings/hooks/accounts/useCreateAccount';
 import { IconSend } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';

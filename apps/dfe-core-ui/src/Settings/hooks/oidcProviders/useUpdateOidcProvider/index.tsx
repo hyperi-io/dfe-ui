@@ -1,5 +1,5 @@
-import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders';
-import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/Settings/hooks/useFetchOidcProviderDetail';
+import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
+import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/Settings/hooks/oidcProviders/useFetchOidcProviderDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProvider } from './api';
 import {

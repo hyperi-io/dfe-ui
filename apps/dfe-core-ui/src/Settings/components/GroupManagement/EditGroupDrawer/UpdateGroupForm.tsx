@@ -5,8 +5,8 @@ import {
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
 import { updateGroupTransformFormDataToRequest } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupFormDataToRequest';
 import { createUpdateGroupRequestToFormData } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupRequestToFormData';
-import { useFetchGroupDetail } from '@/Settings/hooks/useFetchGroupDetail';
-import { TGroupUpdateRequestBody } from '@/Settings/hooks/useUpdateGroup/types';
+import { useFetchGroupDetail } from '@/Settings/hooks/groups/useFetchGroupDetail';
+import { TGroupUpdateRequestBody } from '@/Settings/hooks/groups/useUpdateGroup/types';
 import { Spin } from 'antd';
 
 export type UpdateGroupFormData = TGroupUpdateRequestBody;

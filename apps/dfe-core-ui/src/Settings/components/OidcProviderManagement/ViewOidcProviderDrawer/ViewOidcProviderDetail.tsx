@@ -5,7 +5,7 @@ import {
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
-import { TOidcProviderListItem } from '@/Settings/hooks/useFetchInfiniteFilteredOidcProviders/types';
+import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { Tooltip } from 'antd';
 
 const dataListTermStyle =

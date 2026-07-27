@@ -3,7 +3,7 @@ import {
   CreateUpdateRoleForm,
   CreateUpdateRoleFormData,
 } from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
-import { useFetchRoleDetail } from '@/Settings/hooks/useFetchRoleDetail';
+import { useFetchRoleDetail } from '@/Settings/hooks/roles/useFetchRoleDetail';
 import { Spin } from 'antd';
 
 export const CloneRoleForm = ({

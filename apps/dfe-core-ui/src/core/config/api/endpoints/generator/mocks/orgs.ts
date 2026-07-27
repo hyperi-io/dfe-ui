@@ -1,7 +1,7 @@
 import { TOrganisationListResponse } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
-import { TOrganisationCreateResponse } from '@/Settings/hooks/useCreateOrganisation/types';
-import { TOrganisationDetail } from '@/Settings/hooks/useFetchOrganisationDetail/types';
-import { TOrganisationUpdateResponse } from '@/Settings/hooks/useUpdateOrganisation/types';
+import { TOrganisationCreateResponse } from '@/Settings/hooks/organisations/useCreateOrganisation/types';
+import { TOrganisationDetail } from '@/Settings/hooks/organisations/useFetchOrganisationDetail/types';
+import { TOrganisationUpdateResponse } from '@/Settings/hooks/organisations/useUpdateOrganisation/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
