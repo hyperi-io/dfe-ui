@@ -1966,6 +1966,54 @@
         ]
       }
     },
+    "/api/v1/auth/oidc-providers/{name}/verify-login": {
+      "get": {
+        "tags": [
+          "OIDC Providers"
+        ],
+        "summary": "Verify Login Config",
+        "description": "Verify a provider's OIDC LOGIN config (admin only).\n\nAnswers \"are the login creds real and is the IdP reachable\" WITHOUT\nattempting an interactive login - the gap ``/{name}/test`` leaves for\ngeneric providers. Checks: the client_id env var resolves, the\nclient_secret env var resolves, and the issuer's discovery document is\nreachable and well-formed.",
+        "operationId": "verify_login_config_api_v1_auth_oidc_providers__name__verify_login_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/orgs": {
       "post": {
         "tags": [
@@ -10490,7 +10538,7 @@
           "Governed Ops: Actions"
         ],
         "summary": "Invoke Action",
-        "description": "Invoke a defined action - gated on the action's OWN required_action.\n\nDirect commit in dev/solo; a production+team invoke is routed to a review PR\n(or 409 ``review_required`` when no forge is configured).",
+        "description": "Invoke a defined action - gated on the action's OWN required_action.\n\n``body.params`` supplies values for the action's declared params (422 on a\nconstraint violation; omitted params take their defaults). Direct commit in\ndev/solo; a production+team invoke is routed to a review PR (or 409\n``review_required`` when no forge is configured).",
         "operationId": "invoke_action_api_v1_governance_actions__name__invoke_post",
         "parameters": [
           {
@@ -10513,6 +10561,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/InvokeRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -10520,6 +10585,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/InvokeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/governance/admin/actions/validate": {
+      "post": {
+        "tags": [
+          "Governed Ops: Actions"
+        ],
+        "summary": "Validate Action",
+        "description": "Dry-check an action definition: every violation + the would-be diff.\n\nNothing is committed - this is the authoring hand-hold, run before the\ndefine endpoint so a wizard can show the full diff and every problem in\none round trip.",
+        "operationId": "validate_action_api_v1_governance_admin_actions_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionDef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
                 }
               }
             }
@@ -10793,6 +10905,150 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AutoMergeStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gitops/classes": {
+      "get": {
+        "tags": [
+          "Governed Ops: Gitops"
+        ],
+        "summary": "List Classes",
+        "description": "The resource-class registry - what VarChange.cls may legally name.\n\nRegistry metadata only (no resource content), so any authenticated caller\nmay read it; the per-class listings below are gated by each class's grant.",
+        "operationId": "list_classes_api_v1_gitops_classes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClassInfo"
+                  },
+                  "type": "array",
+                  "title": "Response List Classes Api V1 Gitops Classes Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gitops/classes/{cls}/resources": {
+      "get": {
+        "tags": [
+          "Governed Ops: Gitops"
+        ],
+        "summary": "List Class Resources",
+        "description": "Resource names in a class - what VarChange.name may legally name.",
+        "operationId": "list_class_resources_api_v1_gitops_classes__cls__resources_get",
+        "parameters": [
+          {
+            "name": "cls",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cls"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response List Class Resources Api V1 Gitops Classes  Cls  Resources Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gitops/classes/{cls}/resources/{name}/vars": {
+      "get": {
+        "tags": [
+          "Governed Ops: Gitops"
+        ],
+        "summary": "List Class Resource Vars",
+        "description": "Flattened dot-path vars of one resource - what VarChange.path may name.\n\nValues ride along so a select can show the current value beside each path.",
+        "operationId": "list_class_resource_vars_api_v1_gitops_classes__cls__resources__name__vars_get",
+        "parameters": [
+          {
+            "name": "cls",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cls"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VarEntry"
+                  },
+                  "title": "Response List Class Resource Vars Api V1 Gitops Classes  Cls  Resources  Name  Vars Get"
                 }
               }
             }
@@ -11958,7 +12214,16 @@
           },
           "required_action": {
             "type": "string",
-            "title": "Required Action"
+            "title": "Required Action",
+            "description": "RBAC string checked at invoke time; empty derives action:invoke:<name>",
+            "default": ""
+          },
+          "params": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParamSpec"
+            },
+            "type": "object",
+            "title": "Params"
           },
           "changes": {
             "items": {
@@ -11970,11 +12235,10 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "required_action"
+          "name"
         ],
         "title": "ActionDef",
-        "description": "A curated, RBAC-gated bundle of var changes (a \"big dial\").\n\nInvoking the action applies ALL ``changes`` in ONE commit, gated on\n``required_action`` (an RBAC string checked at invoke time)."
+        "description": "A curated, RBAC-gated bundle of var changes (a \"big dial\").\n\nInvoking the action applies ALL ``changes`` in ONE commit, gated on\n``required_action`` (an RBAC string checked at invoke time). Left empty,\n``required_action`` defaults to ``action:invoke:<name>`` - the convention\nthe shipped roles grant on - so it only ever needs hand-writing for a\ndeliberately shared or non-standard handle."
       },
       "AddMemberRequest": {
         "properties": {
@@ -12596,6 +12860,40 @@
         "title": "CelCheckResponse",
         "description": "Result of a single CEL expression check."
       },
+      "ClassInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "rbac_prefix": {
+            "type": "string",
+            "title": "Rbac Prefix"
+          },
+          "directory": {
+            "type": "string",
+            "title": "Directory"
+          },
+          "versioned": {
+            "type": "boolean",
+            "title": "Versioned"
+          },
+          "action_writable": {
+            "type": "boolean",
+            "title": "Action Writable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "rbac_prefix",
+          "directory",
+          "versioned",
+          "action_writable"
+        ],
+        "title": "ClassInfo",
+        "description": "One registered resource class - the closed set behind VarChange.cls.\n\naction_writable exports the escalation guard: a defined action may never\nchange a governance-prefixed class, so a UI can filter its class select\nto the legal targets instead of discovering the ban at 403-time."
+      },
       "ClientConfig": {
         "properties": {
           "api_base": {
@@ -13056,6 +13354,12 @@
             "type": "string",
             "title": "Client Id Env",
             "description": "Env var name for OIDC client ID",
+            "default": ""
+          },
+          "client_secret_env": {
+            "type": "string",
+            "title": "Client Secret Env",
+            "description": "Env var name for the RP client secret used in the auth-code exchange",
             "default": ""
           },
           "groups": {
@@ -13752,6 +14056,12 @@
             "description": "Seconds between API sync cycles",
             "default": 3600
           },
+          "enrich_on_login": {
+            "type": "boolean",
+            "title": "Enrich On Login",
+            "description": "Fetch the user's groups from the directory API at each login (needed by providers with no groups claim, e.g. Google Workspace)",
+            "default": false
+          },
           "service_account_json_env": {
             "type": "string",
             "title": "Service Account Json Env",
@@ -13812,6 +14122,10 @@
             "type": "integer",
             "title": "Sync Interval"
           },
+          "enrich_on_login": {
+            "type": "boolean",
+            "title": "Enrich On Login"
+          },
           "service_account_json_env": {
             "type": "string",
             "title": "Service Account Json Env"
@@ -13846,6 +14160,7 @@
           "mode",
           "claim_name",
           "sync_interval",
+          "enrich_on_login",
           "service_account_json_env",
           "admin_email",
           "domain",
@@ -14487,6 +14802,19 @@
         "type": "object",
         "title": "HyperDXConfig"
       },
+      "InvokeRequest": {
+        "properties": {
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "InvokeRequest",
+        "description": "Optional invoke body: values for the action's declared params."
+      },
       "InvokeResponse": {
         "properties": {
           "dry_run": {
@@ -14856,6 +15184,52 @@
           "entries"
         ],
         "title": "LogResponse"
+      },
+      "LoginConfigCheck": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "title": "LoginConfigCheck",
+        "description": "One check in the login-config verification."
+      },
+      "LoginConfigResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/LoginConfigCheck"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "checks"
+        ],
+        "title": "LoginConfigResponse",
+        "description": "Result of verifying a provider's OIDC LOGIN configuration.\n\nDistinct from ``/{name}/test``, which verifies the group-DIRECTORY\ncredentials (Graph / Okta / Google) and is a no-op for a generic provider.\nThis verifies the login half: discovery reachable, and the RP client\ncredentials present - the things that make ``/auth/oidc/{name}/login``\nactually work."
       },
       "LoginRequest": {
         "properties": {
@@ -16595,6 +16969,83 @@
         "title": "PaginatedSourceSummaryResponse",
         "description": "Source list: path tree in ``objects`` plus paginated ``items``."
       },
+      "ParamSpec": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "enum",
+              "int",
+              "float"
+            ],
+            "title": "Type"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Values"
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min"
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "ParamSpec",
+        "description": "A constrained invoke-time parameter.\n\nEvery param carries a CLOSED constraint - an enum carries its full value\nlist, a numeric carries both bounds. There is deliberately NO free-string\ntype: an unconstrained param would reopen the hole curation closed."
+      },
       "PathTree_SchemaSummaryObject_": {
         "properties": {
           "items": {
@@ -17271,6 +17722,10 @@
             "type": "string",
             "title": "Client Id Env"
           },
+          "client_secret_env": {
+            "type": "string",
+            "title": "Client Secret Env"
+          },
           "groups": {
             "$ref": "#/components/schemas/GroupResolutionResponse"
           },
@@ -17299,6 +17754,7 @@
           "display_name",
           "issuer",
           "client_id_env",
+          "client_secret_env",
           "groups",
           "created_at",
           "last_sync_at",
@@ -21020,6 +21476,18 @@
             "title": "Display Name",
             "description": "Human-readable label"
           },
+          "client_secret_env": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret Env",
+            "description": "Env var name for the RP client secret"
+          },
           "groups": {
             "anyOf": [
               {
@@ -21111,6 +21579,14 @@
             },
             "type": "array",
             "title": "Groups"
+          },
+          "org_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Org Ids",
+            "description": "Orgs this user can browse in the data plane (HyperDX). Empty means no org-scoped data access."
           }
         },
         "type": "object",
@@ -21120,6 +21596,37 @@
           "roles"
         ],
         "title": "UserResponse"
+      },
+      "ValidateResponse": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "diff": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Diff"
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid",
+          "errors",
+          "diff"
+        ],
+        "title": "ValidateResponse",
+        "description": "Outcome of checking an action definition without saving or invoking it."
       },
       "ValidationError": {
         "properties": {
@@ -21165,15 +21672,33 @@
         "properties": {
           "cls": {
             "type": "string",
-            "title": "Cls"
+            "title": "Cls",
+            "x-dfe-enum-source": {
+              "endpoint": "/api/v1/gitops/classes",
+              "value_key": "name"
+            }
           },
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "x-dfe-enum-source": {
+              "endpoint": "/api/v1/gitops/classes/{cls}/resources",
+              "params": {
+                "cls": "cls"
+              }
+            }
           },
           "path": {
             "type": "string",
-            "title": "Path"
+            "title": "Path",
+            "x-dfe-enum-source": {
+              "endpoint": "/api/v1/gitops/classes/{cls}/resources/{name}/vars",
+              "params": {
+                "cls": "cls",
+                "name": "name"
+              },
+              "value_key": "path"
+            }
           },
           "value": {
             "title": "Value"
@@ -21188,6 +21713,28 @@
         ],
         "title": "VarChange",
         "description": "One var mutation in an action: set ``cls/name`` dot-``path`` to ``value``."
+      },
+      "VarEntry": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "protected": {
+            "type": "boolean",
+            "title": "Protected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "protected"
+        ],
+        "title": "VarEntry",
+        "description": "One flattened dot-path var in a resource doc."
       },
       "VersionResponse": {
         "properties": {
