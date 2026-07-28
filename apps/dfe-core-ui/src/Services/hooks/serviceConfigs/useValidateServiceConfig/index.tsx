@@ -16,10 +16,11 @@ export const useValidateServiceConfig = ({
 }: UseValidateServiceConfigProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (payload: TValidateServiceConfigRequestBody) => {
-      const { service, instance, ...body } = payload as TValidateServiceConfigRequestBody & {
-        service: string;
-        instance: string;
-      };
+      const { service, instance, ...body } =
+        payload as TValidateServiceConfigRequestBody & {
+          service: string;
+          instance: string;
+        };
 
       return validateServiceConfig({
         pathParams: { service, instance },

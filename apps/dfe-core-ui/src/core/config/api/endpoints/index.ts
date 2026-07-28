@@ -28,6 +28,7 @@ export const API_CONFIG = Object.freeze({
   serviceSurfaces: {
     default: '/api/v1/service-surfaces',
     surface: '/api/v1/service-surfaces/{name}',
+    refreshMetrics: '/api/v1/service-surfaces/{name}/metrics/refresh',
   },
   deployments: {
     default: '/api/v1/deployments',
