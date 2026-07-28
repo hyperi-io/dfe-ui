@@ -57,10 +57,12 @@ describe('.useUpdateOidcProvider', () => {
         type: 'type',
         issuer: 'issuer',
         client_id_env: 'client_id_env',
+        client_secret_env: 'client_secret_env',
         groups: {
           mode: 'mode',
           claim_name: 'claim_name',
           sync_interval: 1,
+          enrich_on_login: true,
           service_account_json_env: 'service_account_json_env',
           admin_email: 'admin_email',
           domain: 'domain',
