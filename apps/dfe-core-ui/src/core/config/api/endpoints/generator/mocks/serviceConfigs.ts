@@ -1,6 +1,7 @@
 import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/useFetchServiceConfigDetail/types';
 import { TFetchServiceConfigHistoryResponse } from '@/Services/hooks/useFetchServiceConfigHistory/types';
+import { TSeedServiceConfigsResponse } from '@/Services/hooks/useSeedServiceConfigs/types';
 import { TServiceConfigUpdateResponse } from '@/Services/hooks/useUpdateServiceConfig/types';
 import { TValidateServiceConfigResponse } from '@/Services/hooks/useValidateServiceConfig/types';
 import { http, HttpResponse } from 'msw';
@@ -257,8 +258,27 @@ export const serviceConfigs = {
   seed: {
     mockedUrl: '/api/v1/services/seed',
     post: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          seeded: 0,
+        },
+      }: {
+        mockedResponse?: TSeedServiceConfigsResponse;
+      } = {}) => {
+        return http.post(serviceConfigs.seed.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(serviceConfigs.seed.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },
