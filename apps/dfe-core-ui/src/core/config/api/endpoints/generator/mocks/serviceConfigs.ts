@@ -1,9 +1,9 @@
-import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
-import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/useFetchServiceConfigDetail/types';
-import { TFetchServiceConfigHistoryResponse } from '@/Services/hooks/useFetchServiceConfigHistory/types';
-import { TSeedServiceConfigsResponse } from '@/Services/hooks/useSeedServiceConfigs/types';
-import { TServiceConfigUpdateResponse } from '@/Services/hooks/useUpdateServiceConfig/types';
-import { TValidateServiceConfigResponse } from '@/Services/hooks/useValidateServiceConfig/types';
+import { TServiceConfigListResponse } from '@/Services/hooks/serviceConfigs/useFetchInfiniteFilteredServiceConfigs/types';
+import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail/types';
+import { TFetchServiceConfigHistoryResponse } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigHistory/types';
+import { TSeedServiceConfigsResponse } from '@/Services/hooks/serviceConfigs/useSeedServiceConfigs/types';
+import { TServiceConfigUpdateResponse } from '@/Services/hooks/serviceConfigs/useUpdateServiceConfig/types';
+import { TValidateServiceConfigResponse } from '@/Services/hooks/serviceConfigs/useValidateServiceConfig/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,

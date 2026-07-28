@@ -1,10 +1,10 @@
 'use client';
 
-import { useFetchInfiniteFilteredServiceConfigs } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs';
+import { useFetchInfiniteFilteredServiceConfigs } from '@/Services/hooks/serviceConfigs/useFetchInfiniteFilteredServiceConfigs';
 import type {
   TServiceConfigListResponse,
   UseFetchInfiniteFilteredServiceConfigsProps,
-} from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
+} from '@/Services/hooks/serviceConfigs/useFetchInfiniteFilteredServiceConfigs/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';

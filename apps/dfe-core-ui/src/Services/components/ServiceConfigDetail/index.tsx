@@ -2,7 +2,7 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
-import { useFetchServiceConfigDetail } from '@/Services/hooks/useFetchServiceConfigDetail';
+import { useFetchServiceConfigDetail } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail';
 import { Spin } from 'antd';
 
 export const ServiceConfigDetail = () => {

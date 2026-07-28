@@ -1,6 +1,6 @@
 import { cn } from '@/core/utils/style';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
-import { TServiceConfigSummary } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
+import { TServiceConfigSummary } from '@/Services/hooks/serviceConfigs/useFetchInfiniteFilteredServiceConfigs/types';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
