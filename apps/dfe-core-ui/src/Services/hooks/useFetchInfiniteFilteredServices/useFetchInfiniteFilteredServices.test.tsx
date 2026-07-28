@@ -239,7 +239,7 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('error handling', () => {
     it('should handle error state correctly', async () => {
-      server.use(API_CONFIG_MOCKS.services.default.get.error());
+      server.use(API_CONFIG_MOCKS.serviceConfigs.default.get.error());
 
       const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
         wrapper,
@@ -438,7 +438,7 @@ describe('useFetchInfiniteFilteredServices', () => {
   describe('empty results', () => {
     it('should handle empty searches array', async () => {
       server.use(
-        API_CONFIG_MOCKS.services.default.get.success({
+        API_CONFIG_MOCKS.serviceConfigs.default.get.success({
           mockedResponse: {
             items: [],
             total: 0,

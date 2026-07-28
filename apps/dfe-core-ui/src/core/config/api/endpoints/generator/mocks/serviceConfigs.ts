@@ -6,7 +6,7 @@ import {
   TValidationError,
 } from './endpoints.generator.mocks.types';
 
-export const services = {
+export const serviceConfigs = {
   default: {
     mockedUrl: '/api/v1/services',
     get: {
@@ -29,7 +29,7 @@ export const services = {
       }: {
         mockedResponse?: TServiceListResponse;
       } = {}) => {
-        return http.get(services.default.mockedUrl, () => {
+        return http.get(serviceConfigs.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
         });
       },
@@ -40,7 +40,7 @@ export const services = {
         mockedResponse?: TValidationError;
         status?: number;
       } = {}) => {
-        return http.get(services.default.mockedUrl, () => {
+        return http.get(serviceConfigs.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
       },
@@ -63,7 +63,7 @@ export const services = {
         instance?: string;
       } = {}) => {
         return http.get(
-          services.instance.mockedUrl
+          serviceConfigs.instance.mockedUrl
             .replace('{service}', service)
             .replace('{instance}', instance),
           () => {
@@ -83,7 +83,7 @@ export const services = {
         instance?: string;
       } = {}) => {
         return http.get(
-          services.instance.mockedUrl
+          serviceConfigs.instance.mockedUrl
             .replace('{service}', service)
             .replace('{instance}', instance),
           () => {

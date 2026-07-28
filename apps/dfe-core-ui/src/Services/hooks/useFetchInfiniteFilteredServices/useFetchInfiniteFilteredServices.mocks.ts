@@ -15,7 +15,7 @@ const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
 
 function createPaginatedServicesHandler() {
   return http.get(
-    API_CONFIG_MOCKS.services.default.mockedUrl,
+    API_CONFIG_MOCKS.serviceConfigs.default.mockedUrl,
     ({ request }) => {
       const url = new URL(request.url);
       const page = Math.max(
