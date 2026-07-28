@@ -5,6 +5,7 @@ import {
   IconArrowBounce,
   IconBookmark,
   IconChartDots,
+  IconCode,
   IconDatabase,
   IconLayoutGrid,
   IconSettings2,
@@ -334,38 +335,38 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   //     />
   //   ),
   // },
-  // {
-  //   key: '/services',
-  //   Component: ({ collapsed }: SidebarMenuProps) => (
-  //     <RbacProtected action={rbacActions.service_read}>
-  //       <RbacProtected.Unrestricted>
-  //         <SidebarLink
-  //           collapsed={collapsed}
-  //           item={{
-  //             key: '/services',
-  //             icon: <IconWrapper icon={<IconCode />} />,
-  //             label: 'Services',
-  //             external: false,
-  //           }}
-  //         />
-  //       </RbacProtected.Unrestricted>
-  //       <RbacProtected.Restricted
-  //         tooltip={{ show: true, placement: 'right', showIcon: true }}
-  //       >
-  //         <SidebarLink
-  //           collapsed={collapsed}
-  //           disabled
-  //           item={{
-  //             key: '/services',
-  //             icon: <IconWrapper icon={<IconCode />} />,
-  //             label: 'Services',
-  //             external: false,
-  //           }}
-  //         />
-  //       </RbacProtected.Restricted>
-  //     </RbacProtected>
-  //   ),
-  // },
+  {
+    key: '/services',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected action={rbacActions.service_read}>
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/services',
+              icon: <IconWrapper icon={<IconCode />} />,
+              label: 'Services',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted
+          tooltip={{ show: true, placement: 'right', showIcon: true }}
+        >
+          <SidebarLink
+            collapsed={collapsed}
+            disabled
+            item={{
+              key: '/services',
+              icon: <IconWrapper icon={<IconCode />} />,
+              label: 'Services',
+              external: false,
+            }}
+          />
+        </RbacProtected.Restricted>
+      </RbacProtected>
+    ),
+  },
   {
     key: '/settings',
     Component: ({ collapsed }: SidebarMenuProps) => (

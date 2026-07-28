@@ -1,4 +1,4 @@
-import { TFetchServiceDetailResponse } from '@/_Services/hooks/useFetchServiceDetail/types';
+import { TFetchServiceDetailResponse } from '@/Services/hooks/useFetchServiceDetail/types';
 import { TServiceListResponse } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
 import { http, HttpResponse } from 'msw';
 import {

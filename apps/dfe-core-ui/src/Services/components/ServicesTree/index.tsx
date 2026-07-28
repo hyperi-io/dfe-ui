@@ -1,4 +1,4 @@
-import { ListServicesFilters } from '@/_Services/components/ListServicesFilters';
+import { ListServicesFilters } from '@/Services/components/ListServicesFilters';
 import { ServicesList } from './ServicesList';
 
 export const ServicesTree = () => {
