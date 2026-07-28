@@ -1,6 +1,7 @@
 import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/useFetchServiceConfigDetail/types';
 import { TServiceConfigUpdateResponse } from '@/Services/hooks/useUpdateServiceConfig/types';
+import { TValidateServiceConfigResponse } from '@/Services/hooks/useValidateServiceConfig/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -179,8 +180,46 @@ export const serviceConfigs = {
   validate: {
     mockedUrl: '/api/v1/services/{service}/{instance}/validate',
     post: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          valid: true,
+          errors: [],
+        },
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidateServiceConfigResponse;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.post(
+          serviceConfigs.validate.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.post(
+          serviceConfigs.validate.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
