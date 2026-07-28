@@ -7,6 +7,7 @@ export const groupResolutionRequestSchema = z.object({
   claim_name: z.string(),
   sync_interval: z.number(),
   service_account_json_env: z.string(),
+  enrich_on_login: z.boolean(),
   admin_email: z.string(),
   domain: z.string(),
   tenant_id_env: z.string(),
@@ -19,9 +20,10 @@ export const DEFAULT_GROUP_RESOLUTION: z.infer<
   typeof groupResolutionRequestSchema
 > = {
   mode: 'manual',
-  claim_name: 'groups',
+  claim_name: '',
   sync_interval: 3600,
   service_account_json_env: '',
+  enrich_on_login: true,
   admin_email: '',
   domain: '',
   tenant_id_env: '',
@@ -43,6 +45,7 @@ export const createUpdateOidcProviderSchema = z.object({
   display_name: z.string(),
   issuer: z.string(),
   client_id_env: z.string(),
+  client_secret_env: z.string(),
   groups: groupResolutionRequestSchema.optional(),
 });
 

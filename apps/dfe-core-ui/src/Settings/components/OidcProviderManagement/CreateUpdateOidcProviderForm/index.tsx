@@ -45,6 +45,7 @@ export const CreateUpdateOidcProviderForm = ({
       {...props}
       initialValues={{
         enabled: true,
+        client_secret_env: '',
         ...PROVIDERS_MAP['google']?.initialValues,
         ...initialValues,
       }}
@@ -88,6 +89,12 @@ export const CreateUpdateOidcProviderForm = ({
               name="client_id_env"
             >
               <Input />
+            </Form.Item>
+            <Form.Item
+              label="Client Secret Environment Variable"
+              name="client_secret_env"
+            >
+              <Input.Password />
             </Form.Item>
           </div>
 

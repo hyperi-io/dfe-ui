@@ -5,6 +5,7 @@ import { TestOidcProviderModal } from '@/Settings/components/OidcProviderManagem
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
 import { ViewOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/ViewOidcProviderDrawer';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
+import { IconCheck, IconX } from '@repo/dfe-icons';
 
 const dataListTermStyle = 'text-foreground/50';
 export const OidcProviderCard = ({
@@ -53,6 +54,20 @@ export const OidcProviderCard = ({
           <dd>{oidcProvider.type}</dd>
           <dt className={dataListTermStyle}>Mode:</dt>
           <dd>{oidcProvider.groups.mode}</dd>
+          <dt className={dataListTermStyle}>Enrich on Login:</dt>
+          <dd className="flex items-center gap-2">
+            {oidcProvider.groups.enrich_on_login ? (
+              <>
+                <IconCheck />
+                Yes
+              </>
+            ) : (
+              <>
+                <IconX />
+                No
+              </>
+            )}
+          </dd>
         </dl>
       </div>
     </div>

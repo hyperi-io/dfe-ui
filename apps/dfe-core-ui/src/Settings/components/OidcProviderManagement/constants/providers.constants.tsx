@@ -1,6 +1,14 @@
-import { DEFAULT_GROUP_RESOLUTION } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
+import {
+  CreateUpdateOidcProviderFormData,
+  DEFAULT_GROUP_RESOLUTION,
+} from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 
-export const PROVIDERS = Object.freeze([
+export const PROVIDERS: readonly {
+  key: string;
+  name: string;
+  description: React.ReactNode;
+  initialValues: Partial<CreateUpdateOidcProviderFormData>;
+}[] = Object.freeze([
   {
     key: 'google',
     name: 'Google',
