@@ -1,6 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { Input, InputNumber, Select } from 'antd';
+import { Input, InputNumber, Select, Switch } from 'antd';
 
 const GROUP_MODE_OPTIONS = [
   { label: 'Manual', value: 'manual' },
@@ -27,6 +27,13 @@ export const GroupFormSection = ({
     >
       <Form.Item label="Mode" name={[GROUPS_FORM_NAME, 'mode']}>
         <Select options={GROUP_MODE_OPTIONS} />
+      </Form.Item>
+
+      <Form.Item
+        label="Enrich on Login"
+        name={[GROUPS_FORM_NAME, 'enrich_on_login']}
+      >
+        <Switch />
       </Form.Item>
 
       {type === 'okta' && (

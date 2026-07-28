@@ -1,4 +1,5 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
+import { HiddenField } from '@/core/components/HiddenField';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import {
   formatDateToString,
@@ -6,6 +7,7 @@ import {
 } from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
+import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Tooltip } from 'antd';
 
 const dataListTermStyle =
@@ -57,7 +59,7 @@ export const ViewOidcProviderDetail = ({
           </p>
         </Tooltip>
       </div>
-      <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
+      <dl className="grid grid-cols-[180px_1fr] gap-x-6 gap-y-1">
         <dt className={dataListTermStyle}>Name:</dt>
         <dd>{oidcProvider?.name}</dd>
         <dt className={dataListTermStyle}>Display Name:</dt>
@@ -73,6 +75,10 @@ export const ViewOidcProviderDetail = ({
           ) : (
             <EmptyData />
           )}
+        </dd>
+        <dt className={dataListTermStyle}>Client Secret Environment:</dt>
+        <dd>
+          <HiddenField value={oidcProvider?.client_secret_env} />
         </dd>
       </dl>
 
@@ -94,6 +100,24 @@ export const ViewOidcProviderDetail = ({
             <>
               <dt className={dataListTermStyle}>Sync Interval:</dt>
               <dd>{oidcProvider?.groups?.sync_interval} seconds</dd>
+            </>
+          )}
+          {oidcProvider?.groups?.enrich_on_login && (
+            <>
+              <dt className={dataListTermStyle}>Enrich on Login:</dt>
+              <dd className="flex items-center gap-2">
+                {oidcProvider?.groups?.enrich_on_login ? (
+                  <>
+                    <IconCheck />
+                    Yes
+                  </>
+                ) : (
+                  <>
+                    <IconX />
+                    No
+                  </>
+                )}
+              </dd>
             </>
           )}
           {oidcProvider?.groups?.service_account_json_env && (
