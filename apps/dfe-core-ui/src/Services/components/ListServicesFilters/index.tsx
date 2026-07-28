@@ -1,5 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { useListServicesContext } from '@/core/contexts/ListServicesContext';
+import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
 import { ListServicesFilterForm } from './ListServicesFilterForm';
 
 export const ListServicesFilters = () => {

@@ -1,10 +1,10 @@
 'use client';
 
-import { ServicesDetail } from '@/Services/components/ServicesDetail';
-import { ServicesTree } from '@/Services/components/ServicesTree';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
-import { ListServicesProvider } from '@/core/contexts/ListServicesContext';
+import { ServicesDetail } from '@/Services/components/ServicesDetail';
+import { ServicesTree } from '@/Services/components/ServicesTree';
+import { ListServicesProvider } from '@/Services/contexts/ListServicesContext';
 
 export const ServicesListScene = () => {
   return (

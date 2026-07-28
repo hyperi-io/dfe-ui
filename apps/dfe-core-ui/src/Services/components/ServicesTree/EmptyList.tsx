@@ -1,4 +1,4 @@
-import { UseFetchInfiniteFilteredServicesProps } from '@/core/hooks/useFetchInfiniteFilteredServices/types';
+import { UseFetchInfiniteFilteredServicesProps } from '@/Services/hooks/useFetchInfiniteFilteredServices/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
