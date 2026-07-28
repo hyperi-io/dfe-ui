@@ -1,9 +1,9 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
-import { useFetchServiceDetail } from '.';
-import { TFetchServiceDetailResponse } from './types';
-import { server } from './useFetchServiceDetail.mocks';
+import { useFetchServiceConfigDetail } from '.';
+import { TFetchServiceConfigDetailResponse } from './types';
+import { server } from './useFetchServiceConfigDetail.mocks';
 
 beforeAll(() =>
   server.listen({
@@ -15,12 +15,12 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-describe('.useFetchServiceDetail', () => {
+describe('.useFetchServiceConfigDetail', () => {
   describe('only service_name is provided', () => {
     test('should not return data', async () => {
       const { result } = renderHook(
         () =>
-          useFetchServiceDetail({
+          useFetchServiceConfigDetail({
             service_name: 'service',
             service_instance: null,
           }),
@@ -41,7 +41,7 @@ describe('.useFetchServiceDetail', () => {
     test('should not return data', async () => {
       const { result } = renderHook(
         () =>
-          useFetchServiceDetail({
+          useFetchServiceConfigDetail({
             service_name: null,
             service_instance: 'instance',
           }),
@@ -62,14 +62,14 @@ describe('.useFetchServiceDetail', () => {
     test('should return data', async () => {
       const { result } = renderHook(
         () =>
-          useFetchServiceDetail({
+          useFetchServiceConfigDetail({
             service_name: 'service',
             service_instance: 'instance',
           }),
         { wrapper },
       );
 
-      const expectedResponse: TFetchServiceDetailResponse = {
+      const expectedResponse: TFetchServiceConfigDetailResponse = {
         service: 'service',
         instance: 'instance',
         config: {},

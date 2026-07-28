@@ -2,16 +2,16 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
-import { useFetchServiceDetail } from '@/Services/hooks/useFetchServiceDetail';
+import { useFetchServiceConfigDetail } from '@/Services/hooks/useFetchServiceConfigDetail';
 import { Spin } from 'antd';
 
-export const ServicesDetail = () => {
+export const ServiceConfigDetail = () => {
   const { selectedService } = useListServicesContext();
   const {
     data: serviceDetailData,
     isLoading: isFetchingServiceDetail,
     error: fetchServiceDetailError,
-  } = useFetchServiceDetail({
+  } = useFetchServiceConfigDetail({
     service_name: selectedService?.service_name ?? null,
     service_instance: selectedService?.service_instance ?? null,
   });

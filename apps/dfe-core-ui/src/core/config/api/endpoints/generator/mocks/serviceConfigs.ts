@@ -1,5 +1,5 @@
 import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
-import { TFetchServiceDetailResponse } from '@/Services/hooks/useFetchServiceDetail/types';
+import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/useFetchServiceConfigDetail/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -58,7 +58,7 @@ export const serviceConfigs = {
         service = 'service',
         instance = 'instance',
       }: {
-        mockedResponse?: TFetchServiceDetailResponse;
+        mockedResponse?: TFetchServiceConfigDetailResponse;
         service?: string;
         instance?: string;
       } = {}) => {
