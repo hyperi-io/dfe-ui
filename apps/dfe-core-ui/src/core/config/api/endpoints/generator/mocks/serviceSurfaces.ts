@@ -1,3 +1,4 @@
+import { TServiceSurfaceDetailResponse } from '@/Services/hooks/serviceSurfaces/useFetchServiceSurfaceDetail/types';
 import { TServiceSurfaceListResponse } from '@/Services/hooks/serviceSurfaces/useFetchServiceSurfaces/types';
 import { http, HttpResponse } from 'msw';
 
@@ -27,8 +28,36 @@ export const serviceSurfaces = {
   surface: {
     mockedUrl: '/api/v1/service-surfaces/{name}',
     get: {
-      success: () => {
-        return console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          service: 'string',
+          description: 'string',
+          manifest_url: 'string',
+          discovered_at: 'string',
+          config_surface: {
+            string: {
+              type: 'string',
+              description: 'string',
+              default: 'string',
+            },
+          },
+          metrics_surface: [
+            {
+              name: 'string',
+              type: 'string',
+              description: 'string',
+              unit: 'string',
+              labels: ['string'],
+              group: 'string',
+            },
+          ],
+        },
+      }: {
+        mockedResponse?: TServiceSurfaceDetailResponse;
+      } = {}) => {
+        return http.get(serviceSurfaces.surface.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
       },
     },
   },
