@@ -25,6 +25,10 @@ export const API_CONFIG = Object.freeze({
     history: '/api/v1/services/{service}/{instance}/history',
     seed: '/api/v1/services/seed',
   },
+  serviceSurfaces: {
+    default: '/api/v1/service-surfaces',
+    surface: '/api/v1/service-surfaces/{name}',
+  },
   deployments: {
     default: '/api/v1/deployments',
     deployment: '/api/v1/deployments/{service}/{instance}',

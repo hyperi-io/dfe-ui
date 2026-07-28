@@ -19,6 +19,7 @@ import { roles } from './mocks/roles';
 import { rules } from './mocks/rules';
 import { schemas } from './mocks/schemas';
 import { serviceConfigs } from './mocks/serviceConfigs';
+import { serviceSurfaces } from './mocks/serviceSurfaces';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
 import { transforms } from './mocks/transforms';
@@ -45,6 +46,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   rules,
   schemas,
   serviceConfigs,
+  serviceSurfaces,
   sources,
   system,
   transforms,
