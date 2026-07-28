@@ -10,9 +10,9 @@ import {
   it,
   vi,
 } from 'vitest';
-import { useFetchInfiniteFilteredServices } from '.';
-import { TServiceListResponse } from './types';
-import { server } from './useFetchInfiniteFilteredServices.mocks';
+import { useFetchInfiniteFilteredServiceConfigs } from '.';
+import { TServiceConfigListResponse } from './types';
+import { server } from './useFetchInfiniteFilteredServiceConfigs.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -35,12 +35,15 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-describe('useFetchInfiniteFilteredServices', () => {
+describe('useFetchInfiniteFilteredServiceConfigs', () => {
   describe('initial loading state', () => {
     it('should start with loading state and empty data', () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
@@ -59,9 +62,12 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('successful data fetch', () => {
     it('should fetch and return first page of filtered services', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -78,15 +84,18 @@ describe('useFetchInfiniteFilteredServices', () => {
     });
 
     it('should return all expected properties', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const expectedResponse: TServiceListResponse = {
+      const expectedResponse: TServiceConfigListResponse = {
         items: expect.any(Array),
         total: 25,
         page: 1,
@@ -113,9 +122,12 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('pagination', () => {
     it('should fetch next page when fetchNextPage is called', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       // Wait for first page to load
       await waitFor(() => {
@@ -142,9 +154,12 @@ describe('useFetchInfiniteFilteredServices', () => {
     });
 
     it('should flatten multiple pages correctly', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -171,7 +186,7 @@ describe('useFetchInfiniteFilteredServices', () => {
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ per_page: 10 }),
+        () => useFetchInfiniteFilteredServiceConfigs({ per_page: 10 }),
         {
           wrapper,
         },
@@ -207,7 +222,7 @@ describe('useFetchInfiniteFilteredServices', () => {
   describe('custom page size', () => {
     it('should respect per_page parameter', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ per_page: 5 }),
+        () => useFetchInfiniteFilteredServiceConfigs({ per_page: 5 }),
         {
           wrapper,
         },
@@ -222,7 +237,7 @@ describe('useFetchInfiniteFilteredServices', () => {
 
     it('should handle per_page larger than available data', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ per_page: 100 }),
+        () => useFetchInfiniteFilteredServiceConfigs({ per_page: 100 }),
         {
           wrapper,
         },
@@ -241,9 +256,12 @@ describe('useFetchInfiniteFilteredServices', () => {
     it('should handle error state correctly', async () => {
       server.use(API_CONFIG_MOCKS.serviceConfigs.default.get.error());
 
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -267,7 +285,7 @@ describe('useFetchInfiniteFilteredServices', () => {
   describe('search parameters', () => {
     it('should include search in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ search: 'test' }),
+        () => useFetchInfiniteFilteredServiceConfigs({ search: 'test' }),
         {
           wrapper,
         },
@@ -282,7 +300,7 @@ describe('useFetchInfiniteFilteredServices', () => {
 
     it('should include service filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ service: 'test' }),
+        () => useFetchInfiniteFilteredServiceConfigs({ service: 'test' }),
         {
           wrapper,
         },
@@ -297,7 +315,7 @@ describe('useFetchInfiniteFilteredServices', () => {
 
     it('should include sort_by filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredServices({ sort_by: 'service' }),
+        () => useFetchInfiniteFilteredServiceConfigs({ sort_by: 'service' }),
         {
           wrapper,
         },
@@ -313,7 +331,7 @@ describe('useFetchInfiniteFilteredServices', () => {
     it('should include sort_order filter in query', async () => {
       const { result } = renderHook(
         () =>
-          useFetchInfiniteFilteredServices({
+          useFetchInfiniteFilteredServiceConfigs({
             sort_order: 'asc',
           }),
         {
@@ -331,7 +349,7 @@ describe('useFetchInfiniteFilteredServices', () => {
     it('should handle multiple filters simultaneously', async () => {
       const { result } = renderHook(
         () =>
-          useFetchInfiniteFilteredServices({
+          useFetchInfiniteFilteredServiceConfigs({
             search: 'test',
             service: 'test',
             sort_by: 'service',
@@ -354,9 +372,12 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('refetch functionality', () => {
     it('should refetch data when refetch is called', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -379,9 +400,12 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('loadMoreRef', () => {
     it('should provide a ref object for infinite scroll', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -394,9 +418,12 @@ describe('useFetchInfiniteFilteredServices', () => {
 
   describe('isFetchingNextPage state', () => {
     it('should handle fetchNextPage and complete successfully', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -423,9 +450,12 @@ describe('useFetchInfiniteFilteredServices', () => {
     });
 
     it('should keep isFetchingNextPage false when not fetching', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -451,9 +481,12 @@ describe('useFetchInfiniteFilteredServices', () => {
         }),
       );
 
-      const { result } = renderHook(() => useFetchInfiniteFilteredServices(), {
-        wrapper,
-      });
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredServiceConfigs(),
+        {
+          wrapper,
+        },
+      );
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -467,7 +500,7 @@ describe('useFetchInfiniteFilteredServices', () => {
   describe('debounced parameters', () => {
     it('should debounce keyword parameter', async () => {
       const { result, rerender } = renderHook(
-        ({ search }) => useFetchInfiniteFilteredServices({ search }),
+        ({ search }) => useFetchInfiniteFilteredServiceConfigs({ search }),
         {
           wrapper,
           initialProps: { search: '' },

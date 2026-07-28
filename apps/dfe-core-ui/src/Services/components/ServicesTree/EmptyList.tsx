@@ -1,4 +1,4 @@
-import { UseFetchInfiniteFilteredServicesProps } from '@/Services/hooks/useFetchInfiniteFilteredServices/types';
+import { UseFetchInfiniteFilteredServiceConfigsProps } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
@@ -10,8 +10,8 @@ export const EmptyList = ({
   className,
 }: {
   hasFilters: boolean;
-  setFilters: (filters: UseFetchInfiniteFilteredServicesProps) => void;
-  defaultFilters: UseFetchInfiniteFilteredServicesProps;
+  setFilters: (filters: UseFetchInfiniteFilteredServiceConfigsProps) => void;
+  defaultFilters: UseFetchInfiniteFilteredServiceConfigsProps;
   className?: string;
 }) => {
   return (

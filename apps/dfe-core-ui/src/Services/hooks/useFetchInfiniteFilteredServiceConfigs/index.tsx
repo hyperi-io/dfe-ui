@@ -1,9 +1,29 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { fetchInfiniteFilteredServices } from './api';
-import { UseFetchInfiniteFilteredServicesProps } from './types';
+import { fetchInfiniteFilteredServiceConfigs } from './api';
+import { UseFetchInfiniteFilteredServiceConfigsProps } from './types';
 
-/** useFetchInfiniteFilteredServices props */
+export const QUERY_KEY_SERVICE_CONFIGS = ({
+  service,
+  search,
+  sort_by,
+  sort_order,
+  per_page,
+}: {
+  service?: string;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+  per_page?: number;
+} = {}) => [
+  'service-configs',
+  ...(service ? [service] : []),
+  ...(search ? [search] : []),
+  ...(sort_by ? [sort_by] : []),
+  ...(sort_order ? [sort_order] : []),
+  ...(per_page ? [per_page] : []),
+];
+/** useFetchInfiniteFilteredServiceConfigs props */
 /**
  * @param service_name - The name of the service to filter the services by.
  * @param search - The search query to filter the services by name and description.
@@ -14,13 +34,13 @@ import { UseFetchInfiniteFilteredServicesProps } from './types';
 /**
  * @returns A list of services.
  */
-export const useFetchInfiniteFilteredServices = ({
+export const useFetchInfiniteFilteredServiceConfigs = ({
   service,
   search,
   sort_by,
   sort_order,
   per_page,
-}: UseFetchInfiniteFilteredServicesProps = {}) => {
+}: UseFetchInfiniteFilteredServiceConfigsProps = {}) => {
   const {
     data,
     isLoading,
@@ -31,9 +51,15 @@ export const useFetchInfiniteFilteredServices = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['services', service, search, sort_by, sort_order, per_page],
+    queryKey: QUERY_KEY_SERVICE_CONFIGS({
+      service,
+      search,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
-      fetchInfiniteFilteredServices({
+      fetchInfiniteFilteredServiceConfigs({
         queryParams: {
           search,
           service,

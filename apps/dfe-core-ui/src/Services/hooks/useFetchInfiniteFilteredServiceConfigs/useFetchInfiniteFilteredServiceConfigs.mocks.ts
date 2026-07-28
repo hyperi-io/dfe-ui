@@ -2,7 +2,7 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
-const SERVICE_ITEM = {
+const SERVICE_CONFIG_ITEM = {
   service: 'string',
   instance: 'string',
   updated_at: 'string',
@@ -10,10 +10,10 @@ const SERVICE_ITEM = {
 
 const TOTAL_ITEMS = 25;
 const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
-  ...SERVICE_ITEM,
+  ...SERVICE_CONFIG_ITEM,
 }));
 
-function createPaginatedServicesHandler() {
+function createPaginatedServiceConfigsHandler() {
   return http.get(
     API_CONFIG_MOCKS.serviceConfigs.default.mockedUrl,
     ({ request }) => {
@@ -42,6 +42,6 @@ function createPaginatedServicesHandler() {
   );
 }
 
-const handlers = [createPaginatedServicesHandler()];
+const handlers = [createPaginatedServiceConfigsHandler()];
 
 export const server = setupServer(...handlers);

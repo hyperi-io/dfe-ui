@@ -1,4 +1,4 @@
-import { TServiceListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServices/types';
+import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 import { TFetchServiceDetailResponse } from '@/Services/hooks/useFetchServiceDetail/types';
 import { http, HttpResponse } from 'msw';
 import {
@@ -27,7 +27,7 @@ export const serviceConfigs = {
           prev_page: 0,
         },
       }: {
-        mockedResponse?: TServiceListResponse;
+        mockedResponse?: TServiceConfigListResponse;
       } = {}) => {
         return http.get(serviceConfigs.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);

@@ -1,10 +1,10 @@
 'use client';
 
-import { useFetchInfiniteFilteredServices } from '@/Services/hooks/useFetchInfiniteFilteredServices';
+import { useFetchInfiniteFilteredServiceConfigs } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs';
 import type {
-  TServiceListResponse,
-  UseFetchInfiniteFilteredServicesProps,
-} from '@/Services/hooks/useFetchInfiniteFilteredServices/types';
+  TServiceConfigListResponse,
+  UseFetchInfiniteFilteredServiceConfigsProps,
+} from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -20,7 +20,7 @@ import {
 } from 'react';
 
 interface ListServicesQueryParams extends Omit<
-  UseFetchInfiniteFilteredServicesProps,
+  UseFetchInfiniteFilteredServiceConfigsProps,
   'page'
 > {
   service_name?: string;
@@ -29,7 +29,7 @@ interface ListServicesQueryParams extends Omit<
 
 const parseFiltersFromParams = (
   params: URLSearchParams,
-): UseFetchInfiniteFilteredServicesProps => {
+): UseFetchInfiniteFilteredServiceConfigsProps => {
   const searchParam = params.get('search');
   const search =
     searchParam === null || searchParam === '' ? undefined : searchParam;
@@ -61,10 +61,10 @@ const hasAnyFilters = (f: ListServicesQueryParams) =>
   f.sort_order !== undefined;
 
 export interface ListServicesContextValue {
-  data: TServiceListResponse;
-  filters: UseFetchInfiniteFilteredServicesProps;
+  data: TServiceConfigListResponse;
+  filters: UseFetchInfiniteFilteredServiceConfigsProps;
   hasFilters: boolean;
-  setFilters: (filters: UseFetchInfiniteFilteredServicesProps) => void;
+  setFilters: (filters: UseFetchInfiniteFilteredServiceConfigsProps) => void;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -86,8 +86,8 @@ export interface ListServicesContextValue {
   }) => void;
 }
 
-const DEFAULT_SERVICE_LIST_RESPONSE: TServiceListResponse = {
-  items: [] as TServiceListResponse['items'],
+const DEFAULT_SERVICE_LIST_RESPONSE: TServiceConfigListResponse = {
+  items: [] as TServiceConfigListResponse['items'],
   total: 0,
   page: 1,
   per_page: 10,
@@ -102,7 +102,7 @@ const ListServicesContext = createContext<ListServicesContextValue | null>(
 
 export interface ListServicesProviderProps {
   children: ReactNode;
-  defaultFilters?: UseFetchInfiniteFilteredServicesProps;
+  defaultFilters?: UseFetchInfiniteFilteredServiceConfigsProps;
 }
 
 export const ListServicesProvider = ({
@@ -118,7 +118,7 @@ export const ListServicesProvider = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  const filters = useMemo<UseFetchInfiniteFilteredServicesProps>(() => {
+  const filters = useMemo<UseFetchInfiniteFilteredServiceConfigsProps>(() => {
     const urlFilters = parseFiltersFromParams(searchParams);
     return hasAnyFilters(urlFilters) ? urlFilters : defaultFilters;
   }, [searchParams, defaultFilters]);
@@ -147,7 +147,7 @@ export const ListServicesProvider = ({
     hasNextPage,
     loadMoreRef,
     isFetchingNextPage,
-  } = useFetchInfiniteFilteredServices({
+  } = useFetchInfiniteFilteredServiceConfigs({
     service: filters.service,
     search: filters.search,
     sort_by: filters.sort_by,
@@ -155,7 +155,7 @@ export const ListServicesProvider = ({
   });
 
   const handleSetFilters = useCallback(
-    (newFilters: UseFetchInfiniteFilteredServicesProps) => {
+    (newFilters: UseFetchInfiniteFilteredServiceConfigsProps) => {
       void queryClient.cancelQueries({ queryKey: ['services'] });
 
       const updated: ListServicesQueryParams = {
