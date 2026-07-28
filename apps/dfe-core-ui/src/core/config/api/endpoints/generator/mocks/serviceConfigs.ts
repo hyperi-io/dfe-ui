@@ -1,5 +1,6 @@
 import { TServiceConfigListResponse } from '@/Services/hooks/useFetchInfiniteFilteredServiceConfigs/types';
 import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/useFetchServiceConfigDetail/types';
+import { TFetchServiceConfigHistoryResponse } from '@/Services/hooks/useFetchServiceConfigHistory/types';
 import { TServiceConfigUpdateResponse } from '@/Services/hooks/useUpdateServiceConfig/types';
 import { TValidateServiceConfigResponse } from '@/Services/hooks/useValidateServiceConfig/types';
 import { http, HttpResponse } from 'msw';
@@ -226,8 +227,30 @@ export const serviceConfigs = {
   history: {
     mockedUrl: '/api/v1/services/{service}/{instance}/history',
     get: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = [
+          {
+            commit: 'string',
+            message: 'string',
+            author: 'string',
+            date: 'string',
+          },
+        ],
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TFetchServiceConfigHistoryResponse;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.get(
+          serviceConfigs.history.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
       },
     },
   },
