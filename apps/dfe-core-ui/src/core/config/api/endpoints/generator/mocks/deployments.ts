@@ -120,8 +120,39 @@ export const deployments = {
       },
     },
     delete: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        status = 204,
+        service = 'string',
+        instance = 'string',
+      }: { status?: number; service?: string; instance?: string } = {}) => {
+        return http.delete(
+          deployments.deployment.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json({}, { status });
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.delete(
+          deployments.deployment.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
