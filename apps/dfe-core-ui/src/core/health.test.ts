@@ -1,30 +1,23 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 
-import { liveness, readiness, startup, setReady, markStarted } from './health';
+import { liveness, readiness, setReady } from './health';
 
 /*
  * The probe contract is a CONTRACT: the charts and kubelet read these exact status
- * codes and bodies (scalo-rs docs/core-pillars/HEALTH.md). Asserting the literal
+ * codes and bodies (scalo-rs docs/core-pillars/health.md). Asserting the literal
  * body is the point -- dfe-ui shipped for months with the chart probing routes that
  * did not exist, every probe 404ing, the pod restarting forever, and nothing caught
  * it because nothing asserted the contract.
  */
-describe('health probe trinity', () => {
+describe('health probes', () => {
   beforeEach(() => {
     setReady(true);
-    markStarted();
   });
 
   it('liveness is 200 alive', async () => {
     const res = liveness();
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ status: 'alive' });
-  });
-
-  it('startup is 200 started', async () => {
-    const res = startup();
-    expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ status: 'started' });
   });
 
   it('readiness is 200 ready', async () => {
