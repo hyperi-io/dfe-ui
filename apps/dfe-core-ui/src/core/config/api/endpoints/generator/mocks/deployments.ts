@@ -1,5 +1,6 @@
 import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
 import { TDeploymentsResponse } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments/types';
+import { TValidateDeploymentResponse } from '@/Services/hooks/deployments/useValidateDeployment/types';
 import { http, HttpResponse } from 'msw';
 import { API_CONFIG_MOCKS } from '..';
 import {
@@ -159,8 +160,46 @@ export const deployments = {
   validate: {
     mockedUrl: '/api/v1/deployments/{service}/{instance}/validate',
     post: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          valid: true,
+          errors: [],
+        },
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidateDeploymentResponse;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.post(
+          deployments.validate.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.post(
+          deployments.validate.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
