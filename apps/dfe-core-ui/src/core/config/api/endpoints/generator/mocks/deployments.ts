@@ -1,3 +1,4 @@
+import { TApplyDeploymentSizeResponse } from '@/Services/hooks/deployments/useApplyDeploymentSize/types';
 import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
 import { TFetchDeploymentHistoryResponse } from '@/Services/hooks/deployments/useFetchDeploymentHistory/types';
 import { TDeploymentsResponse } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments/types';
@@ -258,8 +259,54 @@ export const deployments = {
   applySize: {
     mockedUrl: '/api/v1/deployments/{service}/{instance}/size/{size}',
     post: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          service: 'service',
+          instance: 'instance',
+          size: 'small',
+          service_config_overrides: {},
+        },
+        service = 'string',
+        instance = 'string',
+        size = 'small',
+      }: {
+        mockedResponse?: TApplyDeploymentSizeResponse;
+        service?: string;
+        instance?: string;
+        size?: string;
+      } = {}) => {
+        return http.post(
+          deployments.applySize.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance)
+            .replace('{size}', size),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        service = 'string',
+        instance = 'string',
+        size = 'small',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+        size?: string;
+      } = {}) => {
+        return http.post(
+          deployments.applySize.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance)
+            .replace('{size}', size),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
