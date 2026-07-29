@@ -1,3 +1,4 @@
+import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
 import { TDeploymentsResponse } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments/types';
 import { http, HttpResponse } from 'msw';
 import { API_CONFIG_MOCKS } from '..';
@@ -43,8 +44,31 @@ export const deployments = {
   deployment: {
     mockedUrl: '/api/v1/deployments/{service}/{instance}',
     get: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          service: 'service',
+          instance: 'instance',
+          config: {
+            size: 'small',
+            replicas: 1,
+            keda_enabled: true,
+          },
+        },
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TDeploymentDetailResponse;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.get(
+          API_CONFIG_MOCKS.deployments.deployment.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
       },
     },
     put: {
