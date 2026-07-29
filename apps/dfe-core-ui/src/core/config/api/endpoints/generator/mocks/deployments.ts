@@ -1,4 +1,5 @@
 import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
+import { TFetchDeploymentHistoryResponse } from '@/Services/hooks/deployments/useFetchDeploymentHistory/types';
 import { TDeploymentsResponse } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments/types';
 import { TValidateDeploymentResponse } from '@/Services/hooks/deployments/useValidateDeployment/types';
 import { http, HttpResponse } from 'msw';
@@ -206,8 +207,50 @@ export const deployments = {
   history: {
     mockedUrl: '/api/v1/deployments/{service}/{instance}/history',
     get: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = [
+          {
+            commit: 'string',
+            message: 'string',
+            author: 'string',
+            date: 'string',
+          },
+        ],
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TFetchDeploymentHistoryResponse;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.get(
+          deployments.history.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        service = 'string',
+        instance = 'string',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+      } = {}) => {
+        return http.get(
+          deployments.history.mockedUrl
+            .replace('{service}', service)
+            .replace('{instance}', instance),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
