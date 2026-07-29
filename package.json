@@ -24,7 +24,8 @@
     "next/postcss": "^8.5.10",
     "@redocly/openapi-core/js-yaml": "^4.3.0",
     "next-auth/uuid": "^11.1.1",
-    "brace-expansion@npm:^5.0.2": "5.0.7"
+    "brace-expansion@npm:^5.0.2": "5.0.7",
+    "next/sharp": "^0.35.0"
   },
   "engines": {
     "node": ">=24"

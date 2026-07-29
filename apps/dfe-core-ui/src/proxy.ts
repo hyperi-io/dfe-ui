@@ -73,6 +73,6 @@ export const config = {
      * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
      * not an auth redirect on a health check.
      */
-    '/((?!login|api/auth|_next/static|_next/image|favicon.ico|healthz|readyz|startupz|health/|metrics).*)',
+    '/((?!login|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
   ],
 };
