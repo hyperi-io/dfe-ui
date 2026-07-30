@@ -55,10 +55,7 @@ export const ListServiceConfigDetail = () => {
             </span>
             {serviceConfigName}/{serviceConfigInstanceName}
           </h4>
-          <ServiceConfigActionMenu
-            serviceConfigName={serviceConfigName}
-            serviceConfigInstanceName={serviceConfigInstanceName}
-          />
+          <ServiceConfigActionMenu serviceConfig={serviceConfigDetailData} />
         </div>
         <ViewServiceConfigDetail {...serviceConfigDetailData} />
       </div>

@@ -1,17 +1,17 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
 import { DeleteServiceConfigModal } from '@/Services/components/serviceConfigs/DeleteServiceConfigModal';
+import { UpdateServiceConfigDrawer } from '@/Services/components/serviceConfigs/UpdateServiceConfigDrawer';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
-import { IconTrash } from '@repo/dfe-icons';
+import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail/types';
+import { IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
 interface ServiceConfigActionMenuProps {
-  serviceConfigName: string;
-  serviceConfigInstanceName: string;
+  serviceConfig: TFetchServiceConfigDetailResponse;
 }
 
 export const ServiceConfigActionMenu = ({
-  serviceConfigName,
-  serviceConfigInstanceName,
+  serviceConfig: { config, service, instance },
 }: ServiceConfigActionMenuProps) => {
   const { setSelectedService } = useListServicesContext();
   return (
@@ -21,10 +21,25 @@ export const ServiceConfigActionMenu = ({
         menu: 'w-48 p-0',
       }}
     >
+      <UpdateServiceConfigDrawer
+        key="edit-service-config"
+        serviceConfig={{ config, service, instance }}
+        trigger={
+          <Button
+            className="flex items-center justify-start"
+            type="text"
+            icon={<IconEdit />}
+            aria-label="Edit Service Config"
+          >
+            Edit Service Config
+          </Button>
+        }
+      />
+
       <DeleteServiceConfigModal
         key="delete-service-config"
-        serviceConfigName={serviceConfigName}
-        serviceConfigInstanceName={serviceConfigInstanceName}
+        serviceConfigName={service}
+        serviceConfigInstanceName={instance}
         trigger={
           <Button
             className="flex items-center justify-start"

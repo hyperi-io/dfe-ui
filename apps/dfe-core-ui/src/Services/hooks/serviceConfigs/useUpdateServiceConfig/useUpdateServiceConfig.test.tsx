@@ -30,8 +30,9 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateServiceConfig', () => {
   const requestBody: TServiceConfigUpdateRequestBody = {
-    groups: ['string'],
-    enabled: true,
+    service: 'string',
+    instance: 'string',
+    serviceConfig: {},
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -41,8 +42,6 @@ describe('.useUpdateServiceConfig', () => {
       const { result } = renderHook(
         () =>
           useUpdateServiceConfig({
-            service_name: 'string',
-            service_instance: 'string',
             onSuccess,
             onError,
           }),
@@ -87,8 +86,6 @@ describe('.useUpdateServiceConfig', () => {
       const { result } = renderHook(
         () =>
           useUpdateServiceConfig({
-            service_name: 'string',
-            service_instance: 'string',
             onSuccess,
             onError,
           }),

@@ -7,7 +7,10 @@ import { updateServiceConfigPath } from './api';
 
 export type TServiceConfigUpdateRequestBody = DfeClientRequestBody<
   DfeClientOperationFor<typeof updateServiceConfigPath, 'put'>
->;
+> & {
+  service: string;
+  instance: string;
+};
 export type TServiceConfigUpdateResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof updateServiceConfigPath, 'put'>
 >;

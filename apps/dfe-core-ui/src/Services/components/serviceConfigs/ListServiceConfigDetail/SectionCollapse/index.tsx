@@ -56,11 +56,14 @@ const arrayRender = (value: unknown[]) => {
 };
 
 const handleValueRender = (value: unknown) => {
+  if (!value) return <EmptyData />;
   if (typeof value === 'boolean') return booleanRender(value);
-  if (typeof value === 'string') return value ? value : <EmptyData />;
+  if (typeof value === 'string') return value || <EmptyData />;
   if (isArray(value)) return arrayRender(value as unknown[]);
   if (typeof value === 'object') return objectRender(value);
-  return <EmptyData />;
+  if (typeof value === 'number') return value.toString() || <EmptyData />;
+
+  return JSON.stringify(value);
 };
 
 const handleKeyRender = (key: string) => {

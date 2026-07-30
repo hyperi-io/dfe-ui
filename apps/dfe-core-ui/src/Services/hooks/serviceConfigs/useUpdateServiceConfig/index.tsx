@@ -8,21 +8,24 @@ import {
 interface UseUpdateServiceConfigProps {
   onSuccess?: (data: TServiceConfigUpdateResponse) => void;
   onError?: (error: Error) => void;
-  service_name: string;
-  service_instance: string;
 }
 
 export const useUpdateServiceConfig = ({
-  service_name: service,
-  service_instance: instance,
   onSuccess,
   onError,
-}: UseUpdateServiceConfigProps) => {
+}: UseUpdateServiceConfigProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (serviceConfig: TServiceConfigUpdateRequestBody) =>
+    mutationFn: ({
+      service,
+      instance,
+      config,
+    }: TServiceConfigUpdateRequestBody) =>
       updateServiceConfig({
-        body: serviceConfig,
-        pathParams: { service, instance },
+        body: { config },
+        pathParams: {
+          service,
+          instance,
+        },
       }),
     onSuccess: (data) => {
       onSuccess?.(data);
