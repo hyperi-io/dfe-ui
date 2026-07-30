@@ -15,7 +15,7 @@ export const ViewServiceConfigDetail = ({
     compression,
   } = config;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-[calc(100vh-215px)] css-custom-scrollbar">
       <SectionCollapse
         title="Metrics"
         data={metrics as Record<string, unknown>}

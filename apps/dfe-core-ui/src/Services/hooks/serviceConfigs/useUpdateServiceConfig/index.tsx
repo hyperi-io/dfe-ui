@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEY_SERVICE_CONFIG_DETAIL } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateServiceConfig } from './api';
 import {
   TServiceConfigUpdateRequestBody,
@@ -14,6 +15,8 @@ export const useUpdateServiceConfig = ({
   onSuccess,
   onError,
 }: UseUpdateServiceConfigProps = {}) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({
       service,
@@ -28,6 +31,9 @@ export const useUpdateServiceConfig = ({
         },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEY_SERVICE_CONFIG_DETAIL(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

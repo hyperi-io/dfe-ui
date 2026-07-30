@@ -2,9 +2,10 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { ServiceConfigActionMenu } from '@/Services/components/serviceConfigs/ServiceConfigActionMenu';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
 import { useFetchServiceConfigDetail } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail';
-import { Spin } from 'antd';
+import { Spin, Tabs } from 'antd';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewServiceConfigDetail } from './ViewServiceConfigDetail';
+import { ViewServiceConfigHistory } from './ViewServiceConfigHistory';
 
 export const ListServiceConfigDetail = () => {
   const {
@@ -57,7 +58,27 @@ export const ListServiceConfigDetail = () => {
           </h4>
           <ServiceConfigActionMenu serviceConfig={serviceConfigDetailData} />
         </div>
-        <ViewServiceConfigDetail {...serviceConfigDetailData} />
+        <Tabs
+          items={[
+            {
+              key: 'detail',
+              label: 'Detail',
+              children: (
+                <ViewServiceConfigDetail {...serviceConfigDetailData} />
+              ),
+            },
+            {
+              key: 'history',
+              label: 'History',
+              children: (
+                <ViewServiceConfigHistory
+                  service={serviceConfigName}
+                  instance={serviceConfigInstanceName}
+                />
+              ),
+            },
+          ]}
+        />
       </div>
     </>
   );
