@@ -1,5 +1,5 @@
-import { ServicesListScene } from '@/Services/scenes/Services';
+import { redirect } from 'next/navigation';
 
 export default async function ServicesPage() {
-  return <ServicesListScene />;
+  return redirect('/services/configurations');
 }

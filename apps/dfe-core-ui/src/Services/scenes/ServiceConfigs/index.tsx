@@ -2,11 +2,11 @@
 
 import { MainContentCard } from '@/core/components/ContentCard';
 import { Splitter } from '@/core/components/Splitter';
-import { ServiceConfigDetail } from '@/Services/components/ServiceConfigDetail';
-import { ServicesTree } from '@/Services/components/ServicesTree';
+import { ServiceConfigDetail } from '@/Services/components/serviceConfigs/ServiceConfigDetail';
+import { ServicesTree } from '@/Services/components/serviceConfigs/ServicesTree';
 import { ListServicesProvider } from '@/Services/contexts/ListServicesContext';
 
-export const ServicesListScene = () => {
+export const ServiceConfigsScene = () => {
   return (
     <MainContentCard>
       <ListServicesProvider>

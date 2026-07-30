@@ -9,8 +9,13 @@ export const ServicesToolbar = () => {
   const pathname = usePathname();
   const routes = [
     {
-      path: '/services',
-      label: 'Services',
+      path: '/services/configurations',
+      label: 'Service Configurations',
+      disabled: false,
+    },
+    {
+      path: '/services/deployments',
+      label: 'Deployments',
       disabled: false,
     },
   ];
