@@ -2,25 +2,29 @@
 
 import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
+import { SeedServiceConfigs } from '@/Services/components/serviceConfigs/SeedServiceConfigs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const routes = [
+  {
+    path: '/services/configurations',
+    label: 'Service Configurations',
+    disabled: false,
+  },
+  {
+    path: '/services/deployments',
+    label: 'Deployments',
+    disabled: false,
+  },
+];
+
 export const ServicesToolbar = () => {
   const pathname = usePathname();
-  const routes = [
-    {
-      path: '/services/configurations',
-      label: 'Service Configurations',
-      disabled: false,
-    },
-    {
-      path: '/services/deployments',
-      label: 'Deployments',
-      disabled: false,
-    },
-  ];
 
   const isSelected = (path: string) => pathname === path;
+
+  const isServiceConfigPage = pathname === '/services/configurations';
 
   return (
     <Toolbar>
@@ -42,6 +46,7 @@ export const ServicesToolbar = () => {
           </Link>
         ))}
       </nav>
+      {isServiceConfigPage && <SeedServiceConfigs />}
     </Toolbar>
   );
 };
