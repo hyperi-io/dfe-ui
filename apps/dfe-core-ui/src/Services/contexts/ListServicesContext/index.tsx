@@ -76,7 +76,7 @@ export interface ListServicesContextValue {
   selectedService: {
     service_name: string | null;
     service_instance: string | null;
-  } | null;
+  };
   setSelectedService: ({
     service_name,
     service_instance,
@@ -113,7 +113,10 @@ export const ListServicesProvider = ({
   const [selectedService, setSelectedService] = useState<{
     service_name: string | null;
     service_instance: string | null;
-  } | null>(null);
+  }>({
+    service_name: null,
+    service_instance: null,
+  });
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();

@@ -3,7 +3,7 @@
 import { MainContentCard } from '@/core/components/ContentCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Splitter } from '@/core/components/Splitter';
-import { ServiceConfigDetail } from '@/Services/components/serviceConfigs/ServiceConfigDetail';
+import { ListServiceConfigDetail } from '@/Services/components/serviceConfigs/ListServiceConfigDetail';
 import { ServicesTree } from '@/Services/components/serviceConfigs/ServicesTree';
 import { ListServicesProvider } from '@/Services/contexts/ListServicesContext';
 
@@ -15,7 +15,7 @@ export const ServiceConfigsScene = () => {
           <ListServicesProvider>
             <Splitter
               leftPanelContent={<ServicesTree />}
-              rightPanelContent={<ServiceConfigDetail />}
+              rightPanelContent={<ListServiceConfigDetail />}
             />
           </ListServicesProvider>
         </RbacProtected.Unrestricted>
