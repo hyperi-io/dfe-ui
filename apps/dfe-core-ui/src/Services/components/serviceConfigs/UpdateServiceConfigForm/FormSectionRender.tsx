@@ -3,6 +3,7 @@ import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { IconMinus, IconPlus } from '@repo/dfe-icons';
 import { Button, Input, InputNumber, Switch } from 'antd';
 import isArray from 'lodash/isArray';
+import { Fragment } from 'react';
 
 const getName = (formKey: string | string[], key: string) => {
   return isArray(formKey) ? [...formKey, key] : [formKey, key];
@@ -65,13 +66,15 @@ const objectFormItemRender = ({
     <div className="col-span-2 flex flex-col gap-2 bg-red-500">
       <p>{label}</p>
       <div className="grid grid-cols-2 gap-2">
-        {Object.entries(parentValue ?? {}).map(([childKey, childValue]) => {
-          return handleFormItemRender({
-            key: childKey,
-            value: childValue,
-            formKey: getName(formKey, parentKey),
-          });
-        })}
+        {Object.entries(parentValue ?? {}).map(([childKey, childValue]) => (
+          <Fragment key={childKey}>
+            {handleFormItemRender({
+              key: childKey,
+              value: childValue,
+              formKey: getName(formKey, parentKey),
+            })}
+          </Fragment>
+        ))}
       </div>
     </div>
   );
@@ -211,9 +214,11 @@ export const FormSectionRender = ({
       title={<span className="font-medium">{title}</span>}
     >
       <div className="grid grid-cols-2 gap-2">
-        {Object.entries(data).map(([key, value]) =>
-          handleFormItemRender({ key, value, formKey }),
-        )}
+        {Object.entries(data).map(([key, value]) => (
+          <Fragment key={key}>
+            {handleFormItemRender({ key, value, formKey })}
+          </Fragment>
+        ))}
       </div>
     </SimpleCollapse>
   );
