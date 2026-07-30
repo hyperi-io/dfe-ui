@@ -1,4 +1,5 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { ServiceConfigActionMenu } from '@/Services/components/serviceConfigs/ServiceConfigActionMenu';
 import { useListServicesContext } from '@/Services/contexts/ListServicesContext';
 import { useFetchServiceConfigDetail } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail';
 import { Spin } from 'antd';
@@ -47,12 +48,18 @@ export const ListServiceConfigDetail = () => {
   return (
     <>
       <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
-        <h4 className="text-lg font-medium flex items-center gap-2">
-          <span className="text-foreground/50 dark:text-dark-foreground/50">
-            Service Configuration:
-          </span>
-          {serviceConfigName}/{serviceConfigInstanceName}
-        </h4>
+        <div className="flex shrink-0 items-center justify-between">
+          <h4 className="flex items-center w-full gap-2 text-lg font-medium">
+            <span className="text-foreground/50 dark:text-dark-foreground/50">
+              Service Configuration:
+            </span>
+            {serviceConfigName}/{serviceConfigInstanceName}
+          </h4>
+          <ServiceConfigActionMenu
+            serviceConfigName={serviceConfigName}
+            serviceConfigInstanceName={serviceConfigInstanceName}
+          />
+        </div>
         <ViewServiceConfigDetail {...serviceConfigDetailData} />
       </div>
     </>

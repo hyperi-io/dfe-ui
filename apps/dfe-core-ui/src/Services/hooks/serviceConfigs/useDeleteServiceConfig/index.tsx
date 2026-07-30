@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEY_SERVICE_CONFIGS } from '@/Services/hooks/serviceConfigs/useFetchInfiniteFilteredServiceConfigs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteServiceConfig } from './api';
 
 export const useDeleteServiceConfig = ({
@@ -8,6 +9,8 @@ export const useDeleteServiceConfig = ({
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isPending, error } = useMutation({
     mutationFn: ({
       service_name: service,
@@ -20,6 +23,9 @@ export const useDeleteServiceConfig = ({
         pathParams: { service, instance },
       }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEY_SERVICE_CONFIGS(),
+      });
       onSuccess?.();
     },
     onError: (error) => {
