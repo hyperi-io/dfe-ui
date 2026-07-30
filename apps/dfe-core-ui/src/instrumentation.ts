@@ -6,7 +6,6 @@ import { registerOTel } from '@vercel/otel';
 // destination from telemetry.mode (dfe-common.otelEndpoint) and hands it to every
 // container as OTEL_EXPORTER_OTLP_ENDPOINT -- HyperDX by default (the otel collector
 // dfe-infra deploys), or the receiver pipeline, or a deployer's own OTLP backend.
-// Until now dfe-ui was handed that env and ignored it.
 //
 // OPT-IN, on purpose: telemetry.mode=prometheus resolves the endpoint to "" and the
 // chart then omits the env entirely. No endpoint means no exporter -- we do NOT fall
