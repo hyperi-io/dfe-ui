@@ -2,7 +2,7 @@ import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchDeployments } from './api';
-import { useFetchInfiniteFilteredDeploymentsProps } from './types';
+import { UseFetchInfiniteFilteredDeploymentsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -16,11 +16,11 @@ export const DEPLOYMENTS_QUERY_KEY = ({
 }: {
   service?: string;
   search?: string;
-  sort_by?: 'created_at' | 'updated_at';
+  sort_by?: 'updated_at' | 'service' | 'instance';
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
-}) => [
+} = {}) => [
   'deployments',
   ...(service ? [service] : []),
   ...(search ? [search] : []),
@@ -49,7 +49,7 @@ export const useFetchInfiniteFilteredDeployments = ({
   sort_order,
   page,
   per_page,
-}: useFetchInfiniteFilteredDeploymentsProps = {}) => {
+}: UseFetchInfiniteFilteredDeploymentsProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
   const {

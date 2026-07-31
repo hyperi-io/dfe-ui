@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { DEPLOYMENT_DETAIL_QUERY_KEY } from '@/Services/hooks/deployments/useFetchDeploymentDetail';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateDeployment } from './api';
 import {
   TDeploymentUpdateRequestBody,
@@ -14,16 +15,25 @@ export const useUpdateDeployment = ({
   onSuccess,
   onError,
 }: UseUpdateDeploymentProps) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (deployment: TDeploymentUpdateRequestBody) =>
+    mutationFn: ({
+      serviceName,
+      instanceName,
+      ...body
+    }: TDeploymentUpdateRequestBody) =>
       updateDeployment({
-        body: deployment,
+        body,
         pathParams: {
-          service: deployment.service,
-          instance: deployment.instance,
+          service: serviceName,
+          instance: instanceName,
         },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: DEPLOYMENT_DETAIL_QUERY_KEY(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

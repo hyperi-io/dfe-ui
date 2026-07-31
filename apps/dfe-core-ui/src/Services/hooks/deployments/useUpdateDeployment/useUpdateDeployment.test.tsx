@@ -30,8 +30,8 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateDeployment', () => {
   const requestBody: TDeploymentUpdateRequestBody = {
-    service: 'string',
-    instance: 'string',
+    serviceName: 'string',
+    instanceName: 'string',
     config: {
       size: 'small',
       replicas: 1,

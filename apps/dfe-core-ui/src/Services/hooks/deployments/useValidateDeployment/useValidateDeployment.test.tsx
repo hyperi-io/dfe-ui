@@ -30,8 +30,8 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useValidateDeployment', () => {
   const requestBody: TValidateDeploymentRequestBody = {
-    service: 'string',
-    instance: 'string',
+    serviceName: 'string',
+    instanceName: 'string',
     config: {},
   };
   describe('onSuccess', () => {

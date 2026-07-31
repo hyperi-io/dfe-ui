@@ -8,8 +8,8 @@ import { updateDeploymentPath } from './api';
 export type TDeploymentUpdateRequestBody = DfeClientRequestBody<
   DfeClientOperationFor<typeof updateDeploymentPath, 'put'>
 > & {
-  service: string;
-  instance: string;
+  serviceName: string;
+  instanceName: string;
 };
 export type TDeploymentUpdateResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof updateDeploymentPath, 'put'>

@@ -19,15 +19,15 @@ export const useUpdateServiceConfig = ({
 
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({
-      service,
-      instance,
+      serviceName,
+      instanceName,
       config,
     }: TServiceConfigUpdateRequestBody) =>
       updateServiceConfig({
         body: { config },
         pathParams: {
-          service,
-          instance,
+          service: serviceName,
+          instance: instanceName,
         },
       }),
     onSuccess: (data) => {

@@ -5,7 +5,14 @@ import { Button, Input, InputNumber, Switch } from 'antd';
 import isArray from 'lodash/isArray';
 import { Fragment } from 'react';
 
-const getName = (formKey: string | string[], key: string) => {
+const getName = ({
+  formKey,
+  key,
+}: {
+  formKey?: string | string[];
+  key: string;
+}) => {
+  if (!formKey) return key;
   return isArray(formKey) ? [...formKey, key] : [formKey, key];
 };
 const booleanFormItemRender = ({
@@ -17,10 +24,10 @@ const booleanFormItemRender = ({
   key: string;
   label: string;
   value: boolean;
-  formKey: string | string[];
+  formKey?: string | string[];
 }) => {
   return (
-    <Form.Item name={getName(formKey, key)} label={label}>
+    <Form.Item name={getName({ formKey, key })} label={label}>
       <Switch checked={value} />
     </Form.Item>
   );
@@ -34,10 +41,10 @@ const stringFormItemRender = ({
   key: string;
   label: string;
   value?: string;
-  formKey: string | string[];
+  formKey?: string | string[];
 }) => {
   return (
-    <Form.Item name={getName(formKey, key)} label={label}>
+    <Form.Item name={getName({ formKey, key })} label={label}>
       <Input />
     </Form.Item>
   );
@@ -52,7 +59,7 @@ const objectFormItemRender = ({
   key: string;
   label: string;
   value: object | null;
-  formKey: string | string[];
+  formKey?: string | string[];
 }) => {
   if (parentValue === null) {
     return stringFormItemRender({
@@ -71,7 +78,7 @@ const objectFormItemRender = ({
             {handleFormItemRender({
               key: childKey,
               value: childValue,
-              formKey: getName(formKey, parentKey),
+              formKey: getName({ formKey, key: parentKey }),
             })}
           </Fragment>
         ))}
@@ -88,10 +95,10 @@ const arrayFormItemRender = ({
   key: string;
   label: string;
   value?: string[];
-  formKey: string | string[];
+  formKey?: string | string[];
 }) => {
   return (
-    <Form.List name={getName(formKey, key)}>
+    <Form.List name={getName({ formKey, key })}>
       {(fields, { add, remove }) => (
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
@@ -130,10 +137,10 @@ const numberFormItemRender = ({
   key: string;
   label: string;
   value?: number;
-  formKey: string | string[];
+  formKey?: string | string[];
 }) => {
   return (
-    <Form.Item name={getName(formKey, key)} label={label}>
+    <Form.Item name={getName({ formKey, key })} label={label}>
       <InputNumber className="w-full" />
     </Form.Item>
   );
@@ -146,7 +153,7 @@ const handleFormItemRender = ({
 }: {
   key: string;
   value: unknown;
-  formKey: string | string[];
+  formKey?: string | string[];
 }): React.ReactNode => {
   if (value === null)
     return stringFormItemRender({
@@ -205,7 +212,7 @@ export const FormSectionRender = ({
   data,
 }: {
   title: string;
-  formKey: string | string[];
+  formKey?: string | string[];
   data: Record<string, unknown>;
 }) => {
   return (

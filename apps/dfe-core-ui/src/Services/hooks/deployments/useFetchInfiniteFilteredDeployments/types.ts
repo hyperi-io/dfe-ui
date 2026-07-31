@@ -10,10 +10,10 @@ export type TDeploymentsResponse = DfeClientSuccessResponseBody<
 
 export type TDeploymentsItemSummary = TDeploymentsResponse['items'][number];
 
-export interface useFetchInfiniteFilteredDeploymentsProps {
+export interface UseFetchInfiniteFilteredDeploymentsProps {
   service?: string;
   search?: string;
-  sort_by?: 'created_at' | 'updated_at';
+  sort_by?: 'service' | 'instance' | 'updated_at';
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;

@@ -18,7 +18,7 @@ export const ErrorList = ({
       <IconAlertCircle className="w-6 h-6 text-error" />
       <div className="flex flex-col">
         <h2 className="text-lg font-medium">
-          There was an unexpected error loading the service configs
+          There was an unexpected error loading the deployments
         </h2>
         <p>{message}</p>
       </div>

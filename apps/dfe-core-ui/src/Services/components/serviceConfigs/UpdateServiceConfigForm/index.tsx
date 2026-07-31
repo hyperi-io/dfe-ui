@@ -47,9 +47,9 @@ export const UpdateServiceConfigForm = ({
 
   const handleFinish = (values: TServiceConfigUpdateRequestBody) => {
     updateServiceConfig({
-      service,
-      instance,
-      serviceConfig: values,
+      ...values,
+      serviceName: service,
+      instanceName: instance,
     });
   };
   return (

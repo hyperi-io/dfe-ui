@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { DEPLOYMENTS_QUERY_KEY } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { seedDeployments } from './api';
 import { TSeedDeploymentsResponse } from './types';
 
@@ -11,11 +12,16 @@ export const useSeedDeployments = ({
   onSuccess,
   onError,
 }: UseSeedDeploymentsProps = {}) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: () => {
       return seedDeployments();
     },
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: DEPLOYMENTS_QUERY_KEY(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

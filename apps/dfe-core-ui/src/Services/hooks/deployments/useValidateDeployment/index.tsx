@@ -15,15 +15,13 @@ export const useValidateDeployment = ({
   onError,
 }: UseValidateDeploymentProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (payload: TValidateDeploymentRequestBody) => {
-      const { service, instance, ...body } =
-        payload as TValidateDeploymentRequestBody & {
-          service: string;
-          instance: string;
-        };
-
+    mutationFn: ({
+      serviceName,
+      instanceName,
+      ...body
+    }: TValidateDeploymentRequestBody) => {
       return validateDeployment({
-        pathParams: { service, instance },
+        pathParams: { service: serviceName, instance: instanceName },
         body,
       });
     },

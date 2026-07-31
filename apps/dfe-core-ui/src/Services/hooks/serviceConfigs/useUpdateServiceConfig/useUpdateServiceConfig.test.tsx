@@ -30,8 +30,8 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateServiceConfig', () => {
   const requestBody: TServiceConfigUpdateRequestBody = {
-    service: 'string',
-    instance: 'string',
+    serviceName: 'string',
+    instanceName: 'string',
     serviceConfig: {},
   };
   describe('onSuccess', () => {
