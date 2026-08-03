@@ -39,7 +39,7 @@ describe('SidebarMenu', () => {
         'Hunts',
         // 'Field Maps',
         // 'Transforms',
-        // 'Services',
+        'Services',
         'Settings',
         'Platform',
       ]);
