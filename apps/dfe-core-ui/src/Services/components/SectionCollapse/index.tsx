@@ -11,7 +11,7 @@ const EmptyData = () => (
 const booleanRender = (value: boolean) => {
   return (
     <span className="flex items-center gap-1">
-      {value ? (
+      {!!value ? (
         <>
           <IconCheck /> Yes
         </>
@@ -56,12 +56,12 @@ const arrayRender = (value: unknown[]) => {
 };
 
 const handleValueRender = (value: unknown) => {
-  if (!value) return <EmptyData />;
   if (typeof value === 'boolean') return booleanRender(value);
   if (typeof value === 'string') return value || <EmptyData />;
   if (isArray(value)) return arrayRender(value as unknown[]);
   if (typeof value === 'object') return objectRender(value);
   if (typeof value === 'number') return value.toString() || <EmptyData />;
+  if (!value) return <EmptyData />;
 
   return JSON.stringify(value);
 };

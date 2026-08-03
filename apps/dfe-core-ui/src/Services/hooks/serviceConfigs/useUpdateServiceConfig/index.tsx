@@ -21,10 +21,10 @@ export const useUpdateServiceConfig = ({
     mutationFn: ({
       serviceName,
       instanceName,
-      config,
+      ...body
     }: TServiceConfigUpdateRequestBody) =>
       updateServiceConfig({
-        body: { config },
+        body,
         pathParams: {
           service: serviceName,
           instance: instanceName,

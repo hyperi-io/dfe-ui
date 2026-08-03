@@ -11,17 +11,19 @@ const getName = (formKey: string | string[], key: string) => {
 const booleanFormItemRender = ({
   key,
   label,
-  value,
   formKey,
 }: {
   key: string;
   label: string;
-  value: boolean;
   formKey: string | string[];
 }) => {
   return (
-    <Form.Item name={getName(formKey, key)} label={label}>
-      <Switch checked={value} />
+    <Form.Item
+      name={getName(formKey, key)}
+      label={label}
+      valuePropName={'checked'}
+    >
+      <Switch />
     </Form.Item>
   );
 };
@@ -33,7 +35,6 @@ const stringFormItemRender = ({
 }: {
   key: string;
   label: string;
-  value?: string;
   formKey: string | string[];
 }) => {
   return (
@@ -87,7 +88,6 @@ const arrayFormItemRender = ({
 }: {
   key: string;
   label: string;
-  value?: string[];
   formKey: string | string[];
 }) => {
   return (
@@ -129,7 +129,6 @@ const numberFormItemRender = ({
 }: {
   key: string;
   label: string;
-  value?: number;
   formKey: string | string[];
 }) => {
   return (
@@ -159,14 +158,12 @@ const handleFormItemRender = ({
     return booleanFormItemRender({
       key,
       label: handleKeyRender(key),
-      value,
       formKey,
     });
   if (typeof value === 'string')
     return stringFormItemRender({
       key,
       label: handleKeyRender(key),
-      value,
       formKey,
     });
   if (isArray(value))
@@ -186,7 +183,6 @@ const handleFormItemRender = ({
     return numberFormItemRender({
       key,
       label: handleKeyRender(key),
-      value,
       formKey,
     });
   return <></>;

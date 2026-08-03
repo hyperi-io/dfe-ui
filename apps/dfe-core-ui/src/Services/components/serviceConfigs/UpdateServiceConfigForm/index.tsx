@@ -54,6 +54,7 @@ export const UpdateServiceConfigForm = ({
   };
   return (
     <Form
+      key={`${service}-${instance}`}
       form={form}
       onFinish={handleFinish}
       initialValues={{

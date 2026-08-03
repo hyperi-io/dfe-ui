@@ -32,7 +32,6 @@ describe('.useUpdateServiceConfig', () => {
   const requestBody: TServiceConfigUpdateRequestBody = {
     serviceName: 'string',
     instanceName: 'string',
-    serviceConfig: {},
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {

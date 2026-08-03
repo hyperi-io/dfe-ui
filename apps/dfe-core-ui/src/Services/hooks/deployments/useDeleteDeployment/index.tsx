@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { DEPLOYMENTS_QUERY_KEY } from '@/Services/hooks/deployments/useFetchInfiniteFilteredDeployments';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteDeployment } from './api';
 
 export const useDeleteDeployment = ({
@@ -8,6 +9,8 @@ export const useDeleteDeployment = ({
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isPending, error } = useMutation({
     mutationFn: ({
       service,
@@ -20,6 +23,7 @@ export const useDeleteDeployment = ({
         pathParams: { service, instance },
       }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: DEPLOYMENTS_QUERY_KEY() });
       onSuccess?.();
     },
     onError: (error) => {
