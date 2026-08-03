@@ -1,6 +1,6 @@
+import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
 import { Tag } from 'antd';
-import { SectionCollapse } from './SectionCollapse';
 
 export const ViewDeploymentDetail = ({ config }: TDeploymentDetailResponse) => {
   const {

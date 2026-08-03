@@ -7,3 +7,4 @@ import { fetchServiceSurfacesPath } from './api';
 export type TServiceSurfaceListResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof fetchServiceSurfacesPath, 'get'>
 >;
+export type TServiceSurfaceSummaryItem = TServiceSurfaceListResponse[number];

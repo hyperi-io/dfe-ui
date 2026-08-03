@@ -1,5 +1,5 @@
+import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail/types';
-import { SectionCollapse } from './SectionCollapse';
 
 export const ViewServiceConfigDetail = ({
   config,

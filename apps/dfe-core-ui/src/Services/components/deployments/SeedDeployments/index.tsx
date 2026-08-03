@@ -2,7 +2,7 @@
 
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useSeedDeployments } from '@/Services/hooks/deployments/useSeedDeployments';
-import { IconRefresh } from '@repo/dfe-icons';
+import { IconUpload } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 
 export const SeedDeployments = () => {
@@ -35,7 +35,7 @@ export const SeedDeployments = () => {
         <Button
           type="default"
           className="border border-tertiary text-tertiary"
-          icon={<IconRefresh className="text-tertiary" />}
+          icon={<IconUpload className="text-tertiary" />}
           onClick={handleSeedDeployments}
           loading={isPending}
         >
@@ -46,7 +46,7 @@ export const SeedDeployments = () => {
         <Button
           type="default"
           className="border border-tertiary text-tertiary"
-          icon={<IconRefresh className="text-tertiary" />}
+          icon={<IconUpload className="text-tertiary" />}
           disabled
         >
           Seed Deployments

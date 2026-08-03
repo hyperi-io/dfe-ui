@@ -18,13 +18,17 @@ const routes = [
     label: 'Deployments',
     disabled: false,
   },
+  {
+    path: '/services/surfaces',
+    label: 'Surfaces',
+    disabled: false,
+  },
 ];
 
 export const ServicesToolbar = () => {
   const pathname = usePathname();
 
   const isSelected = (path: string) => pathname === path;
-
   const isServiceConfigPage = pathname === '/services/configurations';
   const isDeploymentPage = pathname === '/services/deployments';
 
