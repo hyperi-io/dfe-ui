@@ -18,12 +18,17 @@ export const API_CONFIG = Object.freeze({
     plan: '/api/v1/sources/{name}/plan',
     deploy: '/api/v1/sources/{name}/deploy',
   },
-  services: {
+  serviceConfigs: {
     default: '/api/v1/services',
     instance: '/api/v1/services/{service}/{instance}',
     validate: '/api/v1/services/{service}/{instance}/validate',
     history: '/api/v1/services/{service}/{instance}/history',
     seed: '/api/v1/services/seed',
+  },
+  serviceSurfaces: {
+    default: '/api/v1/service-surfaces',
+    surface: '/api/v1/service-surfaces/{name}',
+    refreshMetrics: '/api/v1/service-surfaces/{name}/metrics/refresh',
   },
   deployments: {
     default: '/api/v1/deployments',
