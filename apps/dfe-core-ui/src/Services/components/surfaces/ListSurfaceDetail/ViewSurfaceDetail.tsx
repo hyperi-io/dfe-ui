@@ -1,3 +1,4 @@
+import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { formatDateToString } from '@/core/helpers/date.helpers';
 import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TServiceSurfaceDetailResponse } from '@/Services/hooks/serviceSurfaces/useFetchServiceSurfaceDetail/types';
@@ -33,23 +34,27 @@ export const ViewSurfaceDetail = (surface: TServiceSurfaceDetailResponse) => {
         <dt className={dataListTermStyle}>Manifest URL:</dt>
         <dd className="col-span-3">{manifest_url || <EmptyData />}</dd>
       </dl>
-      <p className="font-medium">Metrics Surface</p>
-      {metrics_surface?.map((metric, index) => (
-        <SectionCollapse
-          key={index}
-          title={metric.name}
-          data={metric as Record<string, unknown>}
-        />
-      ))}
+      <SimpleCollapse title={<p className="font-medium">Metrics Surface</p>}>
+        {metrics_surface?.map((metric, index) => (
+          <SectionCollapse
+            key={index}
+            title={metric.name}
+            data={metric as Record<string, unknown>}
+          />
+        ))}
+      </SimpleCollapse>
 
-      <p className="font-medium">Configuration Surface</p>
-      {Object.entries(config_surface ?? {}).map(([key, value]) => (
-        <SectionCollapse
-          key={key}
-          title={key}
-          data={value as Record<string, unknown>}
-        />
-      ))}
+      <SimpleCollapse
+        title={<p className="font-medium">Configuration Surface</p>}
+      >
+        {Object.entries(config_surface ?? {}).map(([key, value]) => (
+          <SectionCollapse
+            key={key}
+            title={key}
+            data={value as Record<string, unknown>}
+          />
+        ))}
+      </SimpleCollapse>
     </div>
   );
 };
