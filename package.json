@@ -1,6 +1,7 @@
 {
   "name": "dfe-ui",
   "private": true,
+  "description": "Web console for the HyperI Data Fusion Engine. Talks only to the dfe-engine API, with HyperDX embedded for data exploration.",
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "audit": "node scripts/audit.mjs",
