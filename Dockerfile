@@ -2,7 +2,7 @@
 # File:      Dockerfile
 # Purpose:   production container image for dfe-core-ui (Next.js standalone)
 #
-# License:   FSL-1.1-ALv2
+# License:   BUSL-1.1
 # Copyright: (c) 2026 HYPERI PTY LIMITED
 #
 # Auto-built + published to ghcr.io/hyperi-io/dfe-ui by hyperi-ci (container
