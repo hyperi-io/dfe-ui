@@ -684,7 +684,7 @@ All deprecation warnings MUST be addressed in the current PR. Do not defer, supp
 #  Purpose:      <One-sentence description>
 #  Language:     <Python|Bash|Go|Rust|TypeScript|etc.>
 #
-#  License:      FSL-1.1-ALv2
+#  License:      BUSL-1.1
 #  Copyright:    (c) <YEAR> HYPERI PTY LIMITED
 ```
 
@@ -694,7 +694,7 @@ All deprecation warnings MUST be addressed in the current PR. Do not defer, supp
 
 ## Licensing
 
-- **License:** FSL-1.1-ALv2 for all projects
+- **License:** BUSL-1.1 for all projects
 - **Copyright:** `(c) YYYY HYPERI PTY LIMITED`
 - **AI/ML Training:** Not permitted without written consent
 - Setup: `ci/attach.sh --init licensing`
