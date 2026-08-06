@@ -59,6 +59,24 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/setup');
   });
 
+  test('redirects to /setup when initial setup is required and user is not authenticated', async () => {
+    getSetupStatus.mockResolvedValue({
+      setup_complete: false,
+      initial_setup_required: true,
+      pending_steps: ['organisations'],
+      completed_steps: [],
+    });
+    getServerSession.mockResolvedValue(null);
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/setup');
+  });
+
   test('redirects to /login when user is not authenticated', async () => {
     getServerSession.mockResolvedValue(null);
 
