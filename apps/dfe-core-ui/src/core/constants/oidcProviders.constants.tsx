@@ -1,7 +1,7 @@
 import {
   CreateUpdateOidcProviderFormData,
   DEFAULT_GROUP_RESOLUTION,
-} from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
+} from '@/core/validationSchemas/oidcProviders.schema';
 
 export const PROVIDERS: readonly {
   key: string;
@@ -72,3 +72,11 @@ export const PROVIDERS_MAP = Object.freeze(
     {} as Record<(typeof PROVIDERS)[number]['key'], (typeof PROVIDERS)[number]>,
   ),
 );
+
+export const GROUP_MODE_OPTIONS = [
+  { label: 'Manual', value: 'manual' },
+  { label: 'Token Claim', value: 'token_claim' },
+  { label: 'API', value: 'api' },
+];
+
+export const GROUPS_FORM_NAME = 'groups';

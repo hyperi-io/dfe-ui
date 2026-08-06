@@ -1,5 +1,6 @@
 'use client';
 
+import { SetupWizard } from '@/core/components/SetupWizard';
 import { cn } from '@/core/utils/style';
 import './Setup.css';
 
@@ -14,9 +15,7 @@ export const SetupScene = () => {
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground min-w-96 flex flex-col items-center gap-4">
-        Setup
-      </div>
+      <SetupWizard />
     </main>
   );
 };

@@ -1,7 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
-import { CreateUpdateOidcProviderFormData } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/providers.schema';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { useUpdateOidcProvider } from '@/Settings/hooks/oidcProviders/useUpdateOidcProvider';
 import { IconEdit } from '@repo/dfe-icons';
