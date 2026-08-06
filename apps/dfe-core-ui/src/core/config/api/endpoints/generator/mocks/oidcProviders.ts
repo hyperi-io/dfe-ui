@@ -1,5 +1,6 @@
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { TTestOidcProviderResponse } from '@/core/hooks/useTestOidcProvider/types';
+import { TVerifyOidcLoginResponse } from '@/core/hooks/useVerifyOidcLogin/types';
 import { TListOidcProvidersResponse } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { TOidcProviderDetailResponse } from '@/Settings/hooks/oidcProviders/useFetchOidcProviderDetail/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
@@ -320,6 +321,50 @@ export const oidcProviders = {
           oidcProviders.test.mockedUrl.replace('{name}', name),
           () => {
             return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+    },
+  },
+  verifyLogin: {
+    mockedUrl: '/api/v1/auth/oidc-providers/{name}/verify-login',
+    get: {
+      success: ({
+        mockedResponse = {
+          ok: true,
+          checks: [
+            {
+              name: 'name',
+              ok: true,
+              detail: 'detail',
+            },
+          ],
+        },
+        name = 'name',
+      }: {
+        mockedResponse?: TVerifyOidcLoginResponse;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          oidcProviders.verifyLogin.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        name = 'name',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          oidcProviders.verifyLogin.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
           },
         );
       },

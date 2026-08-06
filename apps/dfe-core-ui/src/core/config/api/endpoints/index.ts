@@ -103,6 +103,7 @@ export const API_CONFIG = Object.freeze({
     provider: '/api/v1/auth/oidc-providers/{name}',
     syncGroups: '/api/v1/auth/oidc-providers/{name}/sync',
     test: '/api/v1/auth/oidc-providers/{name}/test',
+    verifyLogin: '/api/v1/auth/oidc-providers/{name}/verify-login',
   },
   governance: {
     actions: '/api/v1/governance/actions',
