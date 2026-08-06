@@ -1,4 +1,4 @@
-import { TCreateOidcProviderResponse } from '@/Settings/hooks/oidcProviders/useCreateOidcProvider/types';
+import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { TListOidcProvidersResponse } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { TOidcProviderDetailResponse } from '@/Settings/hooks/oidcProviders/useFetchOidcProviderDetail/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
