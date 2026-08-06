@@ -1,5 +1,6 @@
 import { TFetchPermissionsResponse } from '@/core/hooks/_useFetchPermissions/types';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
+import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 import { TLoginResponse } from '@/core/hooks/useLogin/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { http, HttpResponse } from 'msw';
@@ -112,6 +113,24 @@ export const auth = {
       } = {}) => {
         return http.get(auth.permissions.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  setupStatus: {
+    mockedUrl: '/api/v1/auth/setup-status',
+    get: {
+      success: ({
+        mockedResponse = {
+          initial_setup_required: false,
+          setup_complete: false,
+          pending_steps: [],
+        },
+      }: {
+        mockedResponse?: TFetchSetupStatusResponse;
+      } = {}) => {
+        return http.get(auth.setupStatus.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
         });
       },
     },
