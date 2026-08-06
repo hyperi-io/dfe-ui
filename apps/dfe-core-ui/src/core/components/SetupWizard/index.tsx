@@ -1,16 +1,10 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { WelcomeStep } from './1WelcomeStep';
 import { ConfigureOidcStep } from './2ConfigureOidcStep';
 import { ConfigureUserStep } from './3ConfigureUserStep';
 import { ConfigureOrganisationStep } from './4ConfigureOrganisation';
 import { CompleteStep } from './CompleteStep';
-
-export type TSetupWizardStep =
-  | 'welcome'
-  | 'configureLogin'
-  | 'configureUser'
-  | 'configureOrganisation'
-  | 'complete';
+import { TSetupWizardStep, useNavigateToStep, useSetParams } from './helpers';
 
 const STEP_CONFIG: TSetupWizardStep[] = [
   'welcome',
@@ -21,13 +15,20 @@ const STEP_CONFIG: TSetupWizardStep[] = [
 ];
 
 export const SetupWizard = () => {
-  const [currentStep, setCurrentStep] = useState<TSetupWizardStep>('welcome');
+  const { params } = useSetParams();
+  const { currentStep, navigateToStep } = useNavigateToStep();
+
+  useEffect(() => {
+    if (params.step) {
+      navigateToStep(params.step as TSetupWizardStep);
+    }
+  }, [params.step, navigateToStep]);
   return (
     <>
       {currentStep === 'welcome' && (
         <WelcomeStep
           goNext={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) + 1
               ],
@@ -38,7 +39,7 @@ export const SetupWizard = () => {
       {currentStep === 'configureLogin' && (
         <ConfigureOidcStep
           goNext={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) + 1
               ],
@@ -49,14 +50,14 @@ export const SetupWizard = () => {
       {currentStep === 'configureUser' && (
         <ConfigureUserStep
           goNext={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) + 1
               ],
             )
           }
           goPrevious={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) - 1
               ],
@@ -67,14 +68,14 @@ export const SetupWizard = () => {
       {currentStep === 'configureOrganisation' && (
         <ConfigureOrganisationStep
           goNext={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) + 1
               ],
             )
           }
           goPrevious={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) - 1
               ],
@@ -85,7 +86,7 @@ export const SetupWizard = () => {
       {currentStep === 'complete' && (
         <CompleteStep
           goPrevious={() =>
-            setCurrentStep(
+            navigateToStep(
               STEP_CONFIG[
                 STEP_CONFIG.findIndex((step) => step === currentStep) - 1
               ],

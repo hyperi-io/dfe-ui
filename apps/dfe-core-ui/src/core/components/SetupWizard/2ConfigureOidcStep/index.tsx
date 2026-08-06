@@ -1,16 +1,51 @@
+import { useSetParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
+import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
+import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { IconArrowRight } from '@repo/dfe-icons';
-import { Button, Card } from 'antd';
+import { Button, Card, Form } from 'antd';
+import { useState } from 'react';
 import { ConfigureOIDCForm } from './ConfigureOIDCForm';
+import { TestOIDCConnection } from './TestOIDCConnection';
 
 export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
+  const {
+    params: { oidc_provider_name },
+    setParams,
+  } = useSetParams();
+  const [isOidcTested, setIsOidcTested] = useState(false);
+  const [form] = Form.useForm();
+  const {
+    mutate: createOidcProvider,
+    isPending,
+    error,
+  } = useCreateOidcProvider({
+    onSuccess: ({ name }) => {
+      setParams({ oidc_provider_name: name });
+    },
+  });
+
+  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
+    createOidcProvider(values);
+  };
   return (
-    <Card className="flex flex-col w-2/5">
+    <Card
+      classNames={{
+        root: 'w-2/5',
+        body: 'flex flex-col gap-2',
+      }}
+    >
       <h1 className="text-2xl font-light">Configure OIDC</h1>
 
-      <ConfigureOIDCForm error={null} onFinish={() => {}} />
+      <ConfigureOIDCForm error={error} form={form} onFinish={handleFinish} />
 
-      <div className="flex flex-row justify-between mt-10">
+      {oidc_provider_name && (
+        <TestOIDCConnection
+          oidcProviderName={oidc_provider_name}
+          setIsOidcTested={setIsOidcTested}
+        />
+      )}
+      <div className="flex flex-row justify-between mt-2">
         <div className="flex flex-row gap-6 ml-auto">
           <SkipForNow
             goNext={goNext}
@@ -29,9 +64,16 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
             }
           />
 
-          <Button type="text" className="text-light p-0" onClick={goNext}>
-            Next <IconArrowRight />
-          </Button>
+          {isOidcTested && (
+            <Button
+              loading={isPending}
+              type="text"
+              className="text-light p-0"
+              onClick={goNext}
+            >
+              Next <IconArrowRight />
+            </Button>
+          )}
         </div>
       </div>
     </Card>

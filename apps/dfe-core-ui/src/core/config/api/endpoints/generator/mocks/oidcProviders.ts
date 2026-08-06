@@ -1,8 +1,8 @@
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
+import { TTestOidcProviderResponse } from '@/core/hooks/useTestOidcProvider/types';
 import { TListOidcProvidersResponse } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { TOidcProviderDetailResponse } from '@/Settings/hooks/oidcProviders/useFetchOidcProviderDetail/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
-import { TTestOidcProviderResponse } from '@/Settings/hooks/oidcProviders/useTestOidcProvider/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
