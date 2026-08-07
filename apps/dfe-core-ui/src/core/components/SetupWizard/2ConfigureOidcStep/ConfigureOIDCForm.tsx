@@ -29,6 +29,7 @@ interface ConfigureOidcProviderFormProps extends FormProps {
 export const ConfigureOIDCForm = ({
   form,
   error,
+  initialValues,
   ...props
 }: ConfigureOidcProviderFormProps) => {
   const formValidation = useAntdZodResolver(createUpdateOidcProviderSchema);
@@ -38,45 +39,47 @@ export const ConfigureOIDCForm = ({
   return (
     <Form
       form={form}
-      className="gap-4 mt-6"
+      classNames={{ root: 'mt-6', content: 'flex flex-row gap-4' }}
       {...props}
       initialValues={{
         enabled: true,
         client_secret_env: '',
         ...PROVIDERS_MAP['google']?.initialValues,
+        ...initialValues,
       }}
     >
-      <div className="flex gap-2">
-        <Form.Item
-          className="grow"
-          label="Type"
-          name="type"
-          rules={[formValidation]}
-        >
-          <Select
-            options={PROVIDERS.map((provider) => ({
-              label: provider.name,
-              value: provider.key,
-            }))}
-            onChange={(value) => {
-              form.setFieldsValue({
-                ...PROVIDERS_MAP[value]?.initialValues,
-              });
-            }}
-          />
-        </Form.Item>
-        <Form.Item
-          className="w-20"
-          label="Enabled"
-          name="enabled"
-          rules={[formValidation]}
-        >
-          <Switch />
-        </Form.Item>
-      </div>
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col gap-2 w-[47%]">
+          <p className="font-medium">OIDC Provider</p>
+          <div className="flex gap-2">
+            <Form.Item
+              className="grow"
+              label="Type"
+              name="type"
+              rules={[formValidation]}
+            >
+              <Select
+                options={PROVIDERS.map((provider) => ({
+                  label: provider.name,
+                  value: provider.key,
+                }))}
+                onChange={(value) => {
+                  form.setFieldsValue({
+                    ...PROVIDERS_MAP[value]?.initialValues,
+                  });
+                }}
+              />
+            </Form.Item>
+            <Form.Item
+              className="w-20"
+              label="Enabled"
+              name="enabled"
+              rules={[formValidation]}
+            >
+              <Switch />
+            </Form.Item>
+          </div>
 
-      {typeWatch && (
-        <>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Name" name="name" rules={[formValidation]}>
               <Input />
@@ -107,114 +110,120 @@ export const ConfigureOIDCForm = ({
               <Input.Password />
             </Form.Item>
           </div>
+        </div>
 
-          <p className="font-medium mt-4">Groups</p>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              label="Mode"
-              name={[GROUPS_FORM_NAME, 'mode']}
-              rules={[formValidation]}
-            >
-              <Select options={GROUP_MODE_OPTIONS} />
-            </Form.Item>
+        <div className="grow max-w-px bg-gray-200" />
 
-            <Form.Item
-              label="Enrich on Login"
-              name={[GROUPS_FORM_NAME, 'enrich_on_login']}
-              rules={[formValidation]}
-            >
-              <Switch />
-            </Form.Item>
+        {typeWatch && (
+          <div className="flex flex-col gap-2 w-[47%]">
+            <p className="font-medium">Groups</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                label="Mode"
+                name={[GROUPS_FORM_NAME, 'mode']}
+                rules={[formValidation]}
+              >
+                <Select options={GROUP_MODE_OPTIONS} />
+              </Form.Item>
 
-            {typeWatch === 'okta' && (
-              <>
-                <Form.Item
-                  label="Okta Domain"
-                  name={[GROUPS_FORM_NAME, 'okta_domain']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="API Token"
-                  name={[GROUPS_FORM_NAME, 'api_token_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-              </>
-            )}
+              <Form.Item
+                label="Enrich on Login"
+                name={[GROUPS_FORM_NAME, 'enrich_on_login']}
+                rules={[formValidation]}
+              >
+                <Switch />
+              </Form.Item>
 
-            {typeWatch === 'google' && (
-              <>
-                <Form.Item
-                  label="Admin Email"
-                  name={[GROUPS_FORM_NAME, 'admin_email']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Domain"
-                  name={[GROUPS_FORM_NAME, 'domain']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Service Account JSON ENV"
-                  name={[GROUPS_FORM_NAME, 'service_account_json_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-              </>
-            )}
+              {typeWatch === 'okta' && (
+                <>
+                  <Form.Item
+                    label="Okta Domain"
+                    name={[GROUPS_FORM_NAME, 'okta_domain']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="API Token"
+                    name={[GROUPS_FORM_NAME, 'api_token_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
 
-            {typeWatch === 'entra_id' && (
-              <>
-                <Form.Item
-                  label="Tenant ID"
-                  name={[GROUPS_FORM_NAME, 'tenant_id_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Client Secret"
-                  name={[GROUPS_FORM_NAME, 'client_secret_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-              </>
-            )}
+              {typeWatch === 'google' && (
+                <>
+                  <Form.Item
+                    label="Admin Email"
+                    name={[GROUPS_FORM_NAME, 'admin_email']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Domain"
+                    name={[GROUPS_FORM_NAME, 'domain']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Service Account JSON ENV"
+                    name={[GROUPS_FORM_NAME, 'service_account_json_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
 
-            {modeWatch === 'token_claim' && (
-              <>
-                <Form.Item
-                  label="Claim Name"
-                  name={[GROUPS_FORM_NAME, 'claim_name']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-              </>
-            )}
-            {modeWatch === 'api' && (
-              <>
-                <Form.Item
-                  label="Sync Interval"
-                  name={[GROUPS_FORM_NAME, 'sync_interval']}
-                  rules={[formValidation]}
-                >
-                  <InputNumber className="w-full" />
-                </Form.Item>
-              </>
-            )}
+              {typeWatch === 'entra_id' && (
+                <>
+                  <Form.Item
+                    label="Tenant ID"
+                    name={[GROUPS_FORM_NAME, 'tenant_id_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Client Secret"
+                    name={[GROUPS_FORM_NAME, 'client_secret_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
+
+              {modeWatch === 'token_claim' && (
+                <>
+                  <Form.Item
+                    label="Claim Name"
+                    name={[GROUPS_FORM_NAME, 'claim_name']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
+              {modeWatch === 'api' && (
+                <>
+                  <Form.Item
+                    label="Sync Interval"
+                    name={[GROUPS_FORM_NAME, 'sync_interval']}
+                    rules={[formValidation]}
+                  >
+                    <InputNumber className="w-full" />
+                  </Form.Item>
+                </>
+              )}
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
 
       {error && (
         <FormNotification

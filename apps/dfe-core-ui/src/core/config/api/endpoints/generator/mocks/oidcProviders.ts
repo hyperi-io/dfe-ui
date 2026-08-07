@@ -1,8 +1,8 @@
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
+import { TOidcProviderDetailResponse } from '@/core/hooks/useFetchOidcProviderDetail/types';
 import { TTestOidcProviderResponse } from '@/core/hooks/useTestOidcProvider/types';
 import { TVerifyOidcLoginResponse } from '@/core/hooks/useVerifyOidcLogin/types';
 import { TListOidcProvidersResponse } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
-import { TOidcProviderDetailResponse } from '@/Settings/hooks/oidcProviders/useFetchOidcProviderDetail/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
 import { http, HttpResponse } from 'msw';
 import {

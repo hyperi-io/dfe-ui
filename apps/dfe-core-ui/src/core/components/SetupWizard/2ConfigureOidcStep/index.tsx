@@ -1,9 +1,11 @@
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { useSetParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
+import { useFetchOidcProviderDetail } from '@/core/hooks/useFetchOidcProviderDetail';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { IconArrowRight } from '@repo/dfe-icons';
-import { Button, Card, Form } from 'antd';
+import { Button, Card, Form, Spin } from 'antd';
 import { useState } from 'react';
 import { ConfigureOIDCForm } from './ConfigureOIDCForm';
 import { TestOIDCConnection } from './TestOIDCConnection';
@@ -25,25 +27,52 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
     },
   });
 
+  const {
+    data: oidcProvider,
+    isLoading: isOidcProviderLoading,
+    error: oidcProviderError,
+  } = useFetchOidcProviderDetail({ name: oidc_provider_name });
+
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     createOidcProvider(values);
   };
   return (
     <Card
       classNames={{
-        root: 'w-2/5',
+        root: 'w-2/3',
         body: 'flex flex-col gap-2',
       }}
     >
       <h1 className="text-2xl font-light">Configure OIDC</h1>
-
-      <ConfigureOIDCForm error={error} form={form} onFinish={handleFinish} />
-
-      {oidc_provider_name && (
-        <TestOIDCConnection
-          oidcProviderName={oidc_provider_name}
-          setIsOidcTested={setIsOidcTested}
+      {oidcProviderError && (
+        <NotificationCard
+          title="An unexpected error occurred fetching OIDC provider"
+          description={oidcProviderError?.message}
+          type="error"
         />
+      )}
+
+      {isOidcProviderLoading && (
+        <>
+          <Spin /> <span className="sr-only">Loading OIDC provider...</span>
+        </>
+      )}
+      {!isOidcProviderLoading && (
+        <>
+          <ConfigureOIDCForm
+            error={error}
+            form={form}
+            onFinish={handleFinish}
+            initialValues={oidcProvider}
+          />
+
+          {oidc_provider_name && (
+            <TestOIDCConnection
+              oidcProviderName={oidc_provider_name}
+              setIsOidcTested={setIsOidcTested}
+            />
+          )}
+        </>
       )}
       <div className="flex flex-row justify-between mt-2">
         <div className="flex flex-row gap-6 ml-auto">
