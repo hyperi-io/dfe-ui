@@ -1,6 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useFetchInfiniteFilteredGroups } from '@/Settings/hooks/groups/useFetchInfiniteFilteredGroups';
+import { useFetchInfiniteFilteredGroups } from '@/core/hooks/useFetchInfiniteFilteredGroups';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
 

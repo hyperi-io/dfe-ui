@@ -1,9 +1,9 @@
 import { PopoverMenu } from '@/core/components/PopoverMenu';
+import { TGroupsItemSummary } from '@/core/hooks/useFetchInfiniteFilteredGroups/types';
 import { cn } from '@/core/utils/style';
 import { DeleteGroupModal } from '@/Settings/components/GroupManagement/DeleteGroupModal';
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
-import { TGroupsItemSummary } from '@/Settings/hooks/groups/useFetchInfiniteFilteredGroups/types';
 import { TAG_LIMIT, TagList } from './TagList';
 
 export const GroupCard = ({

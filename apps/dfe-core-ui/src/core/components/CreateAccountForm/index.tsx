@@ -1,8 +1,8 @@
+import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { TAccountCreateRequestBody } from '@/core/hooks/useCreateAccount/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
-import { TAccountCreateRequestBody } from '@/Settings/hooks/accounts/useCreateAccount/types';
 import { Button, Input } from 'antd';
 import z from 'zod';
 
@@ -19,11 +19,13 @@ export const CreateAccountForm = ({
   error,
   isPending,
   buttonLabel = 'Create Account',
+  initialValues = { username: '', password: '', groups: [] },
 }: {
   onFinish: (values: TAccountCreateRequestBody) => void;
   error: Error | null;
   isPending: boolean;
   buttonLabel?: string;
+  initialValues?: CreateAccountFormData;
 }) => {
   const [form] = Form.useForm<CreateAccountFormData>();
   const formValidation = useAntdZodResolver<CreateAccountFormData>(formSchema);
@@ -41,7 +43,7 @@ export const CreateAccountForm = ({
       name="create-account-form"
       form={form}
       onFinish={handleFinish}
-      initialValues={{ username: '', password: '', groups: [] }}
+      initialValues={initialValues}
     >
       <Form.Item name="username" label="Username" rules={[formValidation]}>
         <Input placeholder="Enter username" />

@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
 import { WelcomeStep } from './1WelcomeStep';
 import { ConfigureOidcStep } from './2ConfigureOidcStep';
 import { ConfigureUserStep } from './3ConfigureUserStep';
 import { ConfigureOrganisationStep } from './4ConfigureOrganisation';
 import { CompleteStep } from './CompleteStep';
-import { TSetupWizardStep, useNavigateToStep, useSetParams } from './helpers';
+import { TSetupWizardStep, useNavigateToStep } from './helpers';
 
 const STEP_CONFIG: TSetupWizardStep[] = [
   'welcome',
@@ -15,14 +14,8 @@ const STEP_CONFIG: TSetupWizardStep[] = [
 ];
 
 export const SetupWizard = () => {
-  const { params } = useSetParams();
   const { currentStep, navigateToStep } = useNavigateToStep();
 
-  useEffect(() => {
-    if (params.step) {
-      navigateToStep(params.step as TSetupWizardStep);
-    }
-  }, [params.step, navigateToStep]);
   return (
     <>
       {currentStep === 'welcome' && (

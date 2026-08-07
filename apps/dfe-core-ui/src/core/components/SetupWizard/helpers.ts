@@ -38,6 +38,8 @@ export const useSetParams = () => {
   const step = searchParams.get('step');
   const oidc_provider_name =
     convertNullUndefinedString(searchParams.get('oidc_provider_name')) ?? null;
+  const username =
+    convertNullUndefinedString(searchParams.get('username')) ?? null;
 
   const params = Object.fromEntries(searchParams.entries());
 
@@ -49,16 +51,22 @@ export const useSetParams = () => {
           ? newParams.oidc_provider_name
           : oidc_provider_name;
 
+      const newUsername =
+        'username' in newParams ? newParams.username : username;
+      console.log('newParams', JSON.stringify(newParams, null, 2));
+      console.log('username', username);
+
       router.replace(
         `${pathname}?${new URLSearchParams({
           ...(newStep ? { step: newStep } : {}),
           ...(newOidcProviderName
             ? { oidc_provider_name: newOidcProviderName }
             : {}),
+          ...(newUsername ? { username: newUsername } : {}),
         }).toString()}`,
       );
     },
-    [router, pathname, step, oidc_provider_name],
+    [router, pathname, step, oidc_provider_name, username],
   );
 
   return { params, setParams };
