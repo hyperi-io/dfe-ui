@@ -62,6 +62,20 @@ describe('useSetParams', () => {
     );
   });
 
+  it('clears oidc_provider_name when set to null', () => {
+    searchParamsRef.current = new URLSearchParams(
+      'step=configureLogin&oidc_provider_name=google',
+    );
+
+    const { result } = renderHook(() => useSetParams());
+
+    act(() => {
+      result.current.setParams({ oidc_provider_name: null });
+    });
+
+    expect(mockReplace).toHaveBeenCalledWith('/setup?step=configureLogin');
+  });
+
   it('lets new params override existing step and oidc_provider_name', () => {
     searchParamsRef.current = new URLSearchParams(
       'step=welcome&oidc_provider_name=old',

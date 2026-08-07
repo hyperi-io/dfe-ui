@@ -40,7 +40,16 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
     data: oidcProvider,
     isLoading: isOidcProviderLoading,
     error: oidcProviderError,
-  } = useFetchOidcProviderDetail({ name: oidc_provider_name });
+  } = useFetchOidcProviderDetail({
+    name: oidc_provider_name,
+    onError: (error) => {
+      if (error.status === 404) {
+        setIsOidcTested(false);
+        setParams({ oidc_provider_name: null });
+      }
+    },
+    retry: false,
+  });
 
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     if (oidc_provider_name) {

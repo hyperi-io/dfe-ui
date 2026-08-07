@@ -8,6 +8,10 @@ export type TSetupWizardStep =
   | 'configureOrganisation'
   | 'complete';
 
+export const convertNullUndefinedString = (value: string | null) => {
+  return value === 'null' || value === 'undefined' ? undefined : value;
+};
+
 export const useNavigateToStep = () => {
   const { setParams } = useSetParams();
   const [currentStep, setCurrentStep] = useState<TSetupWizardStep>('welcome');
@@ -32,17 +36,25 @@ export const useSetParams = () => {
   const searchParams = useSearchParams();
 
   const step = searchParams.get('step');
-  const oidc_provider_name = searchParams.get('oidc_provider_name');
+  const oidc_provider_name =
+    convertNullUndefinedString(searchParams.get('oidc_provider_name')) ?? null;
 
   const params = Object.fromEntries(searchParams.entries());
 
   const setParams = useCallback(
-    (newParams: Record<string, string>) => {
+    (newParams: Record<string, string | null | undefined>) => {
+      const newStep = 'step' in newParams ? newParams.step : step;
+      const newOidcProviderName =
+        'oidc_provider_name' in newParams
+          ? newParams.oidc_provider_name
+          : oidc_provider_name;
+
       router.replace(
         `${pathname}?${new URLSearchParams({
-          ...(step ? { step } : {}),
-          ...(oidc_provider_name ? { oidc_provider_name } : {}),
-          ...newParams,
+          ...(newStep ? { step: newStep } : {}),
+          ...(newOidcProviderName
+            ? { oidc_provider_name: newOidcProviderName }
+            : {}),
         }).toString()}`,
       );
     },
