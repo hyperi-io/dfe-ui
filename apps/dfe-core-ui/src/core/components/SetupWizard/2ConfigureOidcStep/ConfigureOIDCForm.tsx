@@ -24,12 +24,22 @@ import {
 interface ConfigureOidcProviderFormProps extends FormProps {
   error: Error | null;
   form: FormInstance<CreateUpdateOidcProviderFormData>;
+  isSubmitting: boolean;
+  submitButtonLabel?: string;
+  hasReset?: boolean;
+  disabledFields?: {
+    name?: boolean;
+  };
 }
 
 export const ConfigureOIDCForm = ({
   form,
   error,
   initialValues,
+  isSubmitting,
+  submitButtonLabel = 'Add OIDC Provider',
+  hasReset = false,
+  disabledFields = {},
   ...props
 }: ConfigureOidcProviderFormProps) => {
   const formValidation = useAntdZodResolver(createUpdateOidcProviderSchema);
@@ -39,7 +49,7 @@ export const ConfigureOIDCForm = ({
   return (
     <Form
       form={form}
-      classNames={{ root: 'mt-6', content: 'flex flex-row gap-4' }}
+      classNames={{ root: 'mt-2', content: 'flex flex-row gap-4' }}
       {...props}
       initialValues={{
         enabled: true,
@@ -82,7 +92,7 @@ export const ConfigureOIDCForm = ({
 
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Name" name="name" rules={[formValidation]}>
-              <Input />
+              <Input disabled={disabledFields.name} />
             </Form.Item>
 
             <Form.Item
@@ -233,8 +243,13 @@ export const ConfigureOIDCForm = ({
       )}
 
       <Form.Item className="flex justify-end">
-        <Button type="primary" htmlType="submit">
-          Add OIDC Provider
+        {hasReset && (
+          <Button type="default" htmlType="reset">
+            Reset Form
+          </Button>
+        )}
+        <Button type="primary" htmlType="submit" loading={isSubmitting}>
+          {submitButtonLabel}
         </Button>
       </Form.Item>
     </Form>

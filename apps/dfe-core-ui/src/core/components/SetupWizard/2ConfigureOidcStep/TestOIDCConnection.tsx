@@ -33,6 +33,15 @@ export const TestOIDCConnection = ({
     }
   }, [testOidcProviderData?.success, verifyOidcLoginData?.ok, setIsOidcTested]);
 
+  if (isTestOidcProviderLoading || isVerifyOidcLoginDataLoading) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="bg-foreground/10 h-8 w-full rounded-md" />
+        <div className="bg-foreground/10 h-16 w-full rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {testOidcProviderError && (

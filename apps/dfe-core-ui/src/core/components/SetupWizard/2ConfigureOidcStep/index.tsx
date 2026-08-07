@@ -3,6 +3,7 @@ import { useSetParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { useFetchOidcProviderDetail } from '@/core/hooks/useFetchOidcProviderDetail';
+import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card, Form, Spin } from 'antd';
@@ -19,12 +20,20 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
   const [form] = Form.useForm();
   const {
     mutate: createOidcProvider,
-    isPending,
-    error,
+    isPending: isCreateOidcProviderPending,
+    error: createOidcProviderError,
   } = useCreateOidcProvider({
     onSuccess: ({ name }) => {
       setParams({ oidc_provider_name: name });
     },
+  });
+
+  const {
+    mutate: updateOidcProvider,
+    isPending: isUpdateOidcProviderPending,
+    error: updateOidcProviderError,
+  } = useUpdateOidcProvider({
+    name: oidc_provider_name,
   });
 
   const {
@@ -34,6 +43,10 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
   } = useFetchOidcProviderDetail({ name: oidc_provider_name });
 
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
+    if (oidc_provider_name) {
+      updateOidcProvider(values);
+    }
+
     createOidcProvider(values);
   };
   return (
@@ -60,10 +73,20 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
       {!isOidcProviderLoading && (
         <>
           <ConfigureOIDCForm
-            error={error}
+            error={createOidcProviderError || updateOidcProviderError}
+            isSubmitting={
+              isCreateOidcProviderPending || isUpdateOidcProviderPending
+            }
             form={form}
             onFinish={handleFinish}
             initialValues={oidcProvider}
+            submitButtonLabel={
+              oidc_provider_name ? 'Update OIDC Provider' : 'Add OIDC Provider'
+            }
+            hasReset={!!oidc_provider_name}
+            disabledFields={{
+              name: !!oidc_provider_name,
+            }}
           />
 
           {oidc_provider_name && (
@@ -94,12 +117,7 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
           />
 
           {isOidcTested && (
-            <Button
-              loading={isPending}
-              type="text"
-              className="text-light p-0"
-              onClick={goNext}
-            >
+            <Button type="text" className="text-light p-0" onClick={goNext}>
               Next <IconArrowRight />
             </Button>
           )}
