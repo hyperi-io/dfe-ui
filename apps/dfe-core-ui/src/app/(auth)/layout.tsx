@@ -12,7 +12,7 @@ export default async function RootLayout({
 }) {
   const { initial_setup_required } = await getSetupStatus();
   if (initial_setup_required) {
-    // redirect('/setup');
+    redirect('/setup');
   }
 
   const session = await getServerSession(authOptions);
