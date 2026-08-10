@@ -1,9 +1,9 @@
-import { WelcomeStep } from './1WelcomeStep';
-import { ConfigureOidcStep } from './2ConfigureOidcStep';
-import { ConfigureUserStep } from './3ConfigureUserStep';
-import { ConfigureOrganisationStep } from './4ConfigureOrganisation';
 import { CompleteStep } from './CompleteStep';
+import { ConfigureOidcStep } from './ConfigureOidcStep';
+import { ConfigureOrganisationStep } from './ConfigureOrganisation';
+import { ConfigureUserStep } from './ConfigureUserStep';
 import { TSetupWizardStep, useNavigateToStep } from './helpers';
+import { WelcomeStep } from './WelcomeStep';
 
 const STEP_CONFIG: TSetupWizardStep[] = [
   'welcome',
