@@ -14,6 +14,8 @@ export const OidcLoginPopup = ({ closePopup }: { closePopup: () => void }) => {
   });
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (data?.authorization_url) {
       window.location.assign(data.authorization_url);
     }
@@ -21,7 +23,7 @@ export const OidcLoginPopup = ({ closePopup }: { closePopup: () => void }) => {
     return () => {
       queueMicrotask(() => closePopup());
     };
-  }, [data?.authorization_url, closePopup]);
+  }, [data?.authorization_url, closePopup, isLoading]);
 
   if (isLoading) {
     return (
