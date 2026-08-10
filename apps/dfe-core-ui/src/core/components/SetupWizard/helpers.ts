@@ -50,11 +50,8 @@ export const useSetParams = () => {
         'oidc_provider_name' in newParams
           ? newParams.oidc_provider_name
           : oidc_provider_name;
-
       const newUsername =
         'username' in newParams ? newParams.username : username;
-      console.log('newParams', JSON.stringify(newParams, null, 2));
-      console.log('username', username);
 
       router.replace(
         `${pathname}?${new URLSearchParams({

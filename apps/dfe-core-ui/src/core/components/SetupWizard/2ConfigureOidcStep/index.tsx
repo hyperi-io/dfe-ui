@@ -106,8 +106,9 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
           )}
         </>
       )}
+
       <div className="flex flex-row justify-between mt-2">
-        <div className="flex flex-row gap-6 ml-auto">
+        <div className="flex flex-row gap-4 ml-auto">
           <SkipForNow
             goNext={goNext}
             title={
@@ -126,7 +127,11 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
           />
 
           {isOidcTested && (
-            <Button type="text" className="text-light p-0" onClick={goNext}>
+            <Button
+              type="text"
+              className="text-light p-0 pl-2"
+              onClick={goNext}
+            >
               Next <IconArrowRight />
             </Button>
           )}

@@ -10,13 +10,15 @@ export const WelcomeStep = ({ goNext }: { goNext: () => void }) => {
         Let&apos;s get you set up.
       </p>
       <div className="flex flex-row justify-between mt-10">
-        <Button
-          type="text"
-          className="text-white text-light p-0 ml-auto"
-          onClick={goNext}
-        >
-          Next <IconArrowRight />
-        </Button>
+        <div className="flex flex-row gap-6 ml-auto">
+          <Button
+            type="text"
+            className="text-light p-0 pl-2 text-white"
+            onClick={goNext}
+          >
+            Next <IconArrowRight />
+          </Button>
+        </div>
       </div>
     </div>
   );

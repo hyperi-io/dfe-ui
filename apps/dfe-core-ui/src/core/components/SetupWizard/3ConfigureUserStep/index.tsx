@@ -52,11 +52,15 @@ export const ConfigureUserStep = ({
       />
 
       <div className="flex flex-row justify-between mt-10">
-        <Button type="text" className="text-light p-0" onClick={goPrevious}>
+        <Button
+          type="text"
+          className="text-light p-0 pr-2"
+          onClick={goPrevious}
+        >
           <IconArrowLeft /> Back
         </Button>
         <div className="flex flex-row gap-6">
-          <Button type="text" className="text-light p-0" onClick={goNext}>
+          <Button type="text" className="text-light p-0 pl-2" onClick={goNext}>
             Next <IconArrowRight />
           </Button>
         </div>

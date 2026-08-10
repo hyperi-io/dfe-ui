@@ -8,8 +8,8 @@ import { TSetupWizardStep, useNavigateToStep } from './helpers';
 const STEP_CONFIG: TSetupWizardStep[] = [
   'welcome',
   'configureLogin',
-  'configureUser',
   'configureOrganisation',
+  'configureUser',
   'complete',
 ];
 

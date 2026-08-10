@@ -1,7 +1,7 @@
 export const oidc = {
   login: {
     mockedUrl: '/api/v1/auth/oidc/{provider}/login',
-    post: {
+    get: {
       success: () => {
         console.error('Not implemented');
       },
