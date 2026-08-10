@@ -21,6 +21,7 @@ const buildSetupPath = (
   step: string,
   oidc_provider_name: string | null | undefined,
   username: string | null | undefined,
+  organisation_name: string | null | undefined,
 ) => {
   const search = new URLSearchParams();
   if (oidc_provider_name) {
@@ -28,6 +29,9 @@ const buildSetupPath = (
   }
   if (username) {
     search.set('username', username);
+  }
+  if (organisation_name) {
+    search.set('organisation_name', organisation_name);
   }
   const qs = search.toString();
   return qs ? `/setup/${step}?${qs}` : `/setup/${step}`;
@@ -62,6 +66,8 @@ export const useSetupWizardParams = () => {
     convertNullUndefinedString(searchParams.get('oidc_provider_name')) ?? null;
   const username =
     convertNullUndefinedString(searchParams.get('username')) ?? null;
+  const organisation_name =
+    convertNullUndefinedString(searchParams.get('organisation_name')) ?? null;
 
   const setParams = useCallback(
     (newParams: Record<string, string | null | undefined>) => {
@@ -75,12 +81,21 @@ export const useSetupWizardParams = () => {
           : oidc_provider_name;
       const newUsername =
         'username' in newParams ? newParams.username : username;
+      const newOrganisationName =
+        'organisation_name' in newParams
+          ? newParams.organisation_name
+          : organisation_name;
 
       router.replace(
-        buildSetupPath(newStep, newOidcProviderName, newUsername),
+        buildSetupPath(
+          newStep,
+          newOidcProviderName,
+          newUsername,
+          newOrganisationName,
+        ),
       );
     },
-    [router, step, oidc_provider_name, username],
+    [router, step, oidc_provider_name, username, organisation_name],
   );
 
   const navigateToStep = useCallback(
@@ -95,6 +110,7 @@ export const useSetupWizardParams = () => {
       step,
       oidc_provider_name,
       username,
+      organisation_name,
     },
     setParams,
     navigateToStep,
