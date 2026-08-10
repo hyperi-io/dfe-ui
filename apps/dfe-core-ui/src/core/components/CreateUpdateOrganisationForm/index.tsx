@@ -1,8 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
-import { OrganisationSelect } from '@/Settings/components/OrganisationManagement/OrganisationSelect';
 import { Button, Input } from 'antd';
 import z from 'zod';
 
@@ -28,6 +28,7 @@ export const CreateUpdateOrganisationForm = ({
   isPending = false,
   error,
   disabledFields,
+  hiddenFields,
 }: {
   initialValues?: Partial<CreateUpdateOrganisationFormData>;
   onFinish: (values: CreateUpdateOrganisationFormData) => void;
@@ -37,6 +38,9 @@ export const CreateUpdateOrganisationForm = ({
   error?: Error | null;
   disabledFields?: {
     name?: boolean;
+  };
+  hiddenFields?: {
+    org_ids?: boolean;
   };
 }) => {
   const [form] = Form.useForm<CreateUpdateOrganisationFormData>();
@@ -70,17 +74,19 @@ export const CreateUpdateOrganisationForm = ({
       >
         <Input placeholder="Enter display name" />
       </Form.Item>
-      <Form.Item
-        name="org_ids"
-        label="Organisation IDs"
-        rules={[formValidation]}
-      >
-        <OrganisationSelect
-          mode="multiple"
-          placeholder="Select organisation IDs"
-          currentOrganisation={initialValues?.name}
-        />
-      </Form.Item>
+      {!hiddenFields?.org_ids && (
+        <Form.Item
+          name="org_ids"
+          label="Organisation IDs"
+          rules={[formValidation]}
+        >
+          <OrganisationSelect
+            mode="multiple"
+            placeholder="Select organisation IDs"
+            currentOrganisation={initialValues?.name}
+          />
+        </Form.Item>
+      )}
 
       {error && (
         <FormNotification

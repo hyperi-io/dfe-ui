@@ -1,10 +1,10 @@
-import { Drawer } from '@/core/components/Drawer';
-import { RbacProtected } from '@/core/components/RbacProtected';
-import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import {
   CreateUpdateOrganisationForm,
   CreateUpdateOrganisationFormData,
-} from '@/Settings/components/OrganisationManagement/CreateUpdateOrganisationForm';
+} from '@/core/components/CreateUpdateOrganisationForm';
+import { Drawer } from '@/core/components/Drawer';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { ORGANISATION_DETAIL_QUERY_KEY } from '@/Settings/hooks/organisations/useFetchOrganisationDetail';
 import { useUpdateOrganisation } from '@/Settings/hooks/organisations/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';

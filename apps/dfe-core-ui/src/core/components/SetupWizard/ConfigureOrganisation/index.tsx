@@ -1,3 +1,5 @@
+import { CreateUpdateOrganisationForm } from '@/core/components/CreateUpdateOrganisationForm';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card } from 'antd';
 
@@ -9,8 +11,29 @@ export const ConfigureOrganisationStep = ({
   goPrevious: () => void;
 }) => {
   return (
-    <Card className="flex flex-col w-2/5">
-      <h1 className="text-2xl font-light">Configure Organisation</h1>
+    <Card
+      classNames={{
+        root: 'w-2/3',
+        body: 'flex flex-col gap-2',
+      }}
+    >
+      <h1 className="text-2xl font-light">Configure Primary Organisation</h1>
+
+      <NotificationCard
+        title="Configure the primary organisation for your account"
+        description="The primary organisation is the organisation that will be used by default for your account. You can configure additional organisations later."
+      />
+
+      <CreateUpdateOrganisationForm
+        onFinish={goNext}
+        initialValues={{
+          name: '',
+          display_name: '',
+          org_ids: [],
+        }}
+        error={null}
+        isPending={false}
+      />
 
       <div className="flex flex-row justify-between mt-10">
         <Button

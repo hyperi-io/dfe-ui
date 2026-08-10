@@ -65,7 +65,7 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
         body: 'flex flex-col gap-2',
       }}
     >
-      <h1 className="text-2xl font-light">Configure OIDC</h1>
+      <h1 className="text-2xl font-light">Configure OIDC Provider</h1>
       {oidcProviderError && (
         <NotificationCard
           title="An unexpected error occurred fetching OIDC provider"
