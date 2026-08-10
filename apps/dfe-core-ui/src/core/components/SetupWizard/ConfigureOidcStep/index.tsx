@@ -1,5 +1,5 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useSetParams } from '@/core/components/SetupWizard/helpers';
+import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { useFetchOidcProviderDetail } from '@/core/hooks/useFetchOidcProviderDetail';
@@ -15,7 +15,7 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
   const {
     params: { oidc_provider_name },
     setParams,
-  } = useSetParams();
+  } = useSetupWizardParams();
   const [isOidcTested, setIsOidcTested] = useState(false);
   const [form] = Form.useForm();
   const {
@@ -33,7 +33,7 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
     isPending: isUpdateOidcProviderPending,
     error: updateOidcProviderError,
   } = useUpdateOidcProvider({
-    name: oidc_provider_name,
+    name: oidc_provider_name ?? '',
   });
 
   const {

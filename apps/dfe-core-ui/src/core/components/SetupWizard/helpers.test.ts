@@ -1,87 +1,86 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useNavigateToStep, useSetParams } from './helpers';
+import { useNavigateToStep, useSetupWizardParams } from './helpers';
 
-const { mockReplace, searchParamsRef, pathnameRef } = vi.hoisted(() => ({
+const { mockReplace, searchParamsRef, stepParamRef } = vi.hoisted(() => ({
   mockReplace: vi.fn(),
   searchParamsRef: { current: new URLSearchParams() },
-  pathnameRef: { current: '/setup' },
+  stepParamRef: { current: 'welcome' as string },
 }));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: mockReplace }),
   useSearchParams: () => searchParamsRef.current,
-  usePathname: () => pathnameRef.current,
+  useParams: () => ({ step: stepParamRef.current }),
 }));
 
-describe('useSetParams', () => {
+describe('useSetupWizardParams', () => {
   afterEach(() => {
     mockReplace.mockClear();
     searchParamsRef.current = new URLSearchParams();
-    pathnameRef.current = '/setup';
+    stepParamRef.current = 'welcome';
   });
 
-  it('exposes current search params as a plain object', () => {
-    searchParamsRef.current = new URLSearchParams(
-      'step=welcome&oidc_provider_name=google',
-    );
+  it('reads step from path and oidc_provider_name from search params', () => {
+    stepParamRef.current = 'welcome';
+    searchParamsRef.current = new URLSearchParams('oidc_provider_name=google');
 
-    const { result } = renderHook(() => useSetParams());
+    const { result } = renderHook(() => useSetupWizardParams());
 
     expect(result.current.params).toEqual({
       step: 'welcome',
       oidc_provider_name: 'google',
+      username: null,
     });
   });
 
-  it('replaces the URL with merged query params', () => {
-    pathnameRef.current = '/setup';
-
-    const { result } = renderHook(() => useSetParams());
+  it('navigates to the step path segment', () => {
+    const { result } = renderHook(() => useSetupWizardParams());
 
     act(() => {
       result.current.setParams({ step: 'configureLogin' });
     });
 
-    expect(mockReplace).toHaveBeenCalledWith('/setup?step=configureLogin');
+    expect(mockReplace).toHaveBeenCalledWith('/setup/configureLogin');
   });
 
-  it('preserves oidc_provider_name when updating step', () => {
+  it('preserves oidc_provider_name in the query when updating step', () => {
     searchParamsRef.current = new URLSearchParams(
-      'step=welcome&oidc_provider_name=entra',
+      'oidc_provider_name=entra',
     );
 
-    const { result } = renderHook(() => useSetParams());
+    const { result } = renderHook(() => useSetupWizardParams());
 
     act(() => {
       result.current.setParams({ step: 'configureUser' });
     });
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/setup?step=configureUser&oidc_provider_name=entra',
+      '/setup/configureUser?oidc_provider_name=entra',
     );
   });
 
   it('clears oidc_provider_name when set to null', () => {
     searchParamsRef.current = new URLSearchParams(
-      'step=configureLogin&oidc_provider_name=google',
+      'oidc_provider_name=google',
     );
+    stepParamRef.current = 'configureLogin';
 
-    const { result } = renderHook(() => useSetParams());
+    const { result } = renderHook(() => useSetupWizardParams());
 
     act(() => {
       result.current.setParams({ oidc_provider_name: null });
     });
 
-    expect(mockReplace).toHaveBeenCalledWith('/setup?step=configureLogin');
+    expect(mockReplace).toHaveBeenCalledWith('/setup/configureLogin');
   });
 
-  it('lets new params override existing step and oidc_provider_name', () => {
+  it('updates step path and query params together', () => {
     searchParamsRef.current = new URLSearchParams(
-      'step=welcome&oidc_provider_name=old',
+      'oidc_provider_name=old',
     );
 
-    const { result } = renderHook(() => useSetParams());
+    const { result } = renderHook(() => useSetupWizardParams());
 
     act(() => {
       result.current.setParams({
@@ -91,7 +90,7 @@ describe('useSetParams', () => {
     });
 
     expect(mockReplace).toHaveBeenCalledWith(
-      '/setup?step=complete&oidc_provider_name=new',
+      '/setup/complete?oidc_provider_name=new',
     );
   });
 });
@@ -100,23 +99,32 @@ describe('useNavigateToStep', () => {
   afterEach(() => {
     mockReplace.mockClear();
     searchParamsRef.current = new URLSearchParams();
-    pathnameRef.current = '/setup';
+    stepParamRef.current = 'welcome';
   });
 
-  it('starts on the welcome step', () => {
+  it('derives current step from path params', () => {
+    stepParamRef.current = 'welcome';
+
     const { result } = renderHook(() => useNavigateToStep());
 
     expect(result.current.currentStep).toBe('welcome');
   });
 
-  it('updates current step and syncs the step query param', () => {
+  it('navigates to the step path segment', () => {
     const { result } = renderHook(() => useNavigateToStep());
 
     act(() => {
       result.current.navigateToStep('configureLogin');
     });
 
-    expect(result.current.currentStep).toBe('configureLogin');
-    expect(mockReplace).toHaveBeenCalledWith('/setup?step=configureLogin');
+    expect(mockReplace).toHaveBeenCalledWith('/setup/configureLogin');
+  });
+});
+
+describe('isSetupWizardStep', () => {
+  it('accepts known step slugs', async () => {
+    const { isSetupWizardStep } = await import('./server.helpers');
+    expect(isSetupWizardStep('configureLogin')).toBe(true);
+    expect(isSetupWizardStep('not-a-step')).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { useSetParams } from '@/core/components/SetupWizard/helpers';
+import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card, Tabs } from 'antd';
 import { useState } from 'react';
@@ -15,7 +15,7 @@ export const ConfigureUserStep = ({
 }) => {
   const {
     params: { oidc_provider_name },
-  } = useSetParams();
+  } = useSetupWizardParams();
 
   const [activeKey, setActiveKey] = useState<ActiveKey>(
     !!oidc_provider_name ? 'configure-oidc-user' : 'configure-local-user',

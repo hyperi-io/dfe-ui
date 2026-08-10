@@ -1,4 +1,3 @@
-import { SetupScene } from '@/core/scenes/SetupScene';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { redirect } from 'next/navigation';
 
@@ -8,5 +7,5 @@ export default async function Setup() {
     redirect('/login');
   }
 
-  return <SetupScene />;
+  redirect('/setup/welcome');
 }
