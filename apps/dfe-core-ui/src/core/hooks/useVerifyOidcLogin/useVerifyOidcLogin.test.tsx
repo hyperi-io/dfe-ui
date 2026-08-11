@@ -42,6 +42,8 @@ describe('.useVerifyOidcLogin', () => {
           data: response,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });
@@ -59,6 +61,8 @@ describe('.useVerifyOidcLogin', () => {
           data: undefined,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });
@@ -73,6 +77,8 @@ describe('.useVerifyOidcLogin', () => {
           data: undefined,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });

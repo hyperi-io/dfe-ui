@@ -36,6 +36,8 @@ describe('.useTestOidcProvider', () => {
           data: response,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });
@@ -53,6 +55,8 @@ describe('.useTestOidcProvider', () => {
           data: undefined,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });
@@ -67,6 +71,8 @@ describe('.useTestOidcProvider', () => {
           data: undefined,
           isLoading: false,
           error: null,
+          isRefetching: false,
+          refetch: expect.any(Function),
         });
       });
     });
