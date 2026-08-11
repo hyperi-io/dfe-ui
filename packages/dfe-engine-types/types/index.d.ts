@@ -84,6 +84,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/setup-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Setup Status
+         * @description Report first-run setup state and what is configured (no auth — pre-login UI).
+         *
+         *     Driven by the setup state machine (``state_machines/setup.py``). The
+         *     registries the wizard renders — OIDC providers and organisations — are
+         *     returned while setup is outstanding and dropped once it completes, so a
+         *     configured deployment does not serve its inventory to anonymous callers.
+         *     Accounts are never returned; the ``first_user`` step reports whether a
+         *     real (non break-glass) user exists.
+         */
+        get: operations["get_setup_status_api_v1_auth_setup_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/oidc/{provider}/login": {
         parameters: {
             query?: never;
@@ -93,7 +120,7 @@ export interface paths {
         };
         /**
          * Oidc Login
-         * @description Redirect the user agent to the IdP to begin the OIDC auth-code flow.
+         * @description Begin OIDC auth-code flow: 302 to the IdP, or JSON authorize URL for SPAs.
          */
         get: operations["oidc_login_api_v1_auth_oidc__provider__login_get"];
         put?: never;
@@ -4697,6 +4724,83 @@ export interface components {
             /** Time Fields */
             time_fields?: string[] | null;
         };
+        /**
+         * GroupResolutionConfig
+         * @description Configuration for how group membership is resolved from a provider.
+         *
+         *     Fields that are provider-specific are only relevant when the matching
+         *     provider type is active.  They are stored in the same model for
+         *     simplicity — unused fields default to empty strings.
+         */
+        GroupResolutionConfig: {
+            /**
+             * Mode
+             * @default manual
+             * @enum {string}
+             */
+            mode: "manual" | "token_claim" | "api";
+            /**
+             * Claim Name
+             * @default groups
+             */
+            claim_name: string;
+            /**
+             * Sync Interval
+             * @default 3600
+             */
+            sync_interval: number;
+            /**
+             * Enrich On Login
+             * @default false
+             */
+            enrich_on_login: boolean;
+            /**
+             * Directory Backend
+             * @default live
+             * @enum {string}
+             */
+            directory_backend: "live" | "mock";
+            /**
+             * Mock Directory Env
+             * @default DFE_OIDC_MOCK_DIRECTORY
+             */
+            mock_directory_env: string;
+            /**
+             * Service Account Json Env
+             * @default
+             */
+            service_account_json_env: string;
+            /**
+             * Admin Email
+             * @default
+             */
+            admin_email: string;
+            /**
+             * Domain
+             * @default
+             */
+            domain: string;
+            /**
+             * Tenant Id Env
+             * @default
+             */
+            tenant_id_env: string;
+            /**
+             * Client Secret Env
+             * @default
+             */
+            client_secret_env: string;
+            /**
+             * Api Token Env
+             * @default
+             */
+            api_token_env: string;
+            /**
+             * Okta Domain
+             * @default
+             */
+            okta_domain: string;
+        };
         /** GroupResolutionRequest */
         GroupResolutionRequest: {
             /**
@@ -5042,6 +5146,42 @@ export interface components {
              * @default
              */
             url: string;
+        };
+        /**
+         * InitialSetupState
+         * @description The machine's verdict on where first-run setup stands.
+         */
+        InitialSetupState: {
+            /**
+             * Complete
+             * @description True when every required step is satisfied.
+             */
+            complete: boolean;
+            /**
+             * Current Step
+             * @description First unsatisfied required step id — the screen to land on. None once setup is complete.
+             */
+            current_step?: string | null;
+            /**
+             * Steps
+             * @description All applicable step ids in wizard order (required and optional).
+             */
+            steps?: string[];
+            /**
+             * Pending Steps
+             * @description Required step ids still outstanding, in wizard order.
+             */
+            pending_steps?: string[];
+            /**
+             * Completed Steps
+             * @description Satisfied step ids (required and optional), in wizard order.
+             */
+            completed_steps?: string[];
+            /**
+             * Step Details
+             * @description Per-step title, description, required and complete flags.
+             */
+            step_details?: components["schemas"]["SetupStep"][];
         };
         /**
          * InvokeRequest
@@ -5516,6 +5656,77 @@ export interface components {
         NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
         /**
+         * OIDCProviderSummary
+         * @description A registry OIDC provider, with its registry name folded in.
+         *
+         *     ``OIDCProvider`` holds env var *names* rather than secret values, so the
+         *     whole model is safe to return.
+         */
+        OIDCProviderSummary: {
+            /**
+             * Type
+             * @default generic
+             * @enum {string}
+             */
+            type: "generic" | "google" | "entra_id" | "okta";
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Display Name
+             * @default
+             */
+            display_name: string;
+            /**
+             * Issuer
+             * @default
+             */
+            issuer: string;
+            /**
+             * Client Id Env
+             * @default
+             */
+            client_id_env: string;
+            /**
+             * Client Secret Env
+             * @default
+             */
+            client_secret_env: string;
+            /**
+             * Scopes
+             * @default openid email profile groups
+             */
+            scopes: string;
+            groups?: components["schemas"]["GroupResolutionConfig"];
+            /**
+             * Created At
+             * @default
+             */
+            created_at: string;
+            /**
+             * Last Sync At
+             * @default
+             */
+            last_sync_at: string;
+            /**
+             * Last Sync Status
+             * @default
+             */
+            last_sync_status: string;
+            /**
+             * Sync Error
+             * @default
+             */
+            sync_error: string;
+            /**
+             * Name
+             * @description Registry name (the provider YAML filename stem).
+             */
+            name: string;
+        };
+        /**
          * ObjectEntry
          * @description Metadata for one key in a namespace listing.
          */
@@ -5562,6 +5773,106 @@ export interface components {
             updated_at: string;
             /** Etag */
             etag: string;
+        };
+        /**
+         * OidcCallbackResponse
+         * @description Engine token minted after a successful IdP callback.
+         */
+        OidcCallbackResponse: {
+            /**
+             * Access Token
+             * @description Engine JWT Bearer token
+             */
+            access_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             * @constant
+             */
+            token_type: "bearer";
+            /**
+             * Subject
+             * @description IdP subject (sub)
+             */
+            subject: string;
+            /**
+             * Email
+             * @description Email from the IdP, if asserted
+             * @default
+             */
+            email: string;
+            /**
+             * Groups
+             * @description Resolved group identifiers
+             */
+            groups?: string[];
+        };
+        /**
+         * OidcLoginResponse
+         * @description JSON body for GET .../login when ``redirect=false``.
+         */
+        OidcLoginResponse: {
+            /**
+             * Authorization Url
+             * @description IdP authorize URL for SPA clients (redirect=false). Omitted when redirect=true (302 to the IdP instead).
+             */
+            authorization_url?: string | null;
+        };
+        /**
+         * Org
+         * @description A customer organisation.
+         *
+         *     Attributes:
+         *         name: Primary identifier (filename stem).
+         *         display_name: Human-readable label for UI display.
+         *         org_ids: Tenant IDs used for ClickHouse row-level security filters.
+         *         enabled: Whether this org is active.
+         *         hyperdx_team_id: HyperDX team ID for this org's connection sync.
+         *         hyperdx_team_api_key_env: Environment variable name holding the org's HyperDX team API key.
+         *         ch_password_env: Environment variable name holding the ClickHouse password.
+         *         created_at: ISO 8601 timestamp of creation.
+         *         updated_at: ISO 8601 timestamp of last update.
+         */
+        Org: {
+            /** Name */
+            name: string;
+            /**
+             * Display Name
+             * @default
+             */
+            display_name: string;
+            /** Org Ids */
+            org_ids?: string[];
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /**
+             * Hyperdx Team Id
+             * @default
+             */
+            hyperdx_team_id: string;
+            /**
+             * Hyperdx Team Api Key Env
+             * @default
+             */
+            hyperdx_team_api_key_env: string;
+            /**
+             * Ch Password Env
+             * @default
+             */
+            ch_password_env: string;
+            /**
+             * Created At
+             * @default
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * @default
+             */
+            updated_at: string;
         };
         /** OrgResponse */
         OrgResponse: {
@@ -7433,6 +7744,59 @@ export interface components {
             api_cors_origins: string[];
         };
         /**
+         * SetupStatus
+         * @description Pre-login setup snapshot: the wizard state plus what is configured.
+         *
+         *     Accounts are deliberately absent. Whether a real user exists is reported
+         *     through the ``first_user`` step; the account list itself is never served
+         *     to an unauthenticated caller.
+         */
+        SetupStatus: {
+            /** @description Wizard state — completion, current step and per-step detail. */
+            initial_setup: components["schemas"]["InitialSetupState"];
+            /**
+             * Oidc Providers
+             * @description The OIDC provider registry. Empty once setup is complete.
+             */
+            oidc_providers?: components["schemas"]["OIDCProviderSummary"][];
+            /**
+             * Organisations
+             * @description The organisation registry. Empty once setup is complete.
+             */
+            organisations?: components["schemas"]["Org"][];
+        };
+        /**
+         * SetupStep
+         * @description One step of the first-run wizard.
+         */
+        SetupStep: {
+            /**
+             * Id
+             * @description Stable step id (see STEP_* constants).
+             */
+            id: string;
+            /**
+             * Title
+             * @description Short label for the wizard screen.
+             */
+            title: string;
+            /**
+             * Description
+             * @description What the operator has to do in this step.
+             */
+            description: string;
+            /**
+             * Required
+             * @description False for steps the operator may skip.
+             */
+            required: boolean;
+            /**
+             * Complete
+             * @description True when this step is already satisfied.
+             */
+            complete: boolean;
+        };
+        /**
          * SigmaViewColumn
          * @description One column exposed by a Sigma source-view.
          *
@@ -9137,9 +9501,32 @@ export interface operations {
             };
         };
     };
-    oidc_login_api_v1_auth_oidc__provider__login_get: {
+    get_setup_status_api_v1_auth_setup_status_get: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupStatus"];
+                };
+            };
+        };
+    };
+    oidc_login_api_v1_auth_oidc__provider__login_get: {
+        parameters: {
+            query?: {
+                /** @description When false, return JSON with authorization_url for SPA clients (use credentials: include, then window.location.assign the URL). */
+                redirect?: boolean;
+            };
             header?: never;
             path: {
                 provider: string;
@@ -9154,8 +9541,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OidcLoginResponse"];
                 };
+            };
+            /** @description Redirect to the IdP authorize URL (redirect=true, default). */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -9185,7 +9579,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OidcCallbackResponse"];
                 };
             };
             /** @description Validation Error */
