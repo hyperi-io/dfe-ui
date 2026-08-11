@@ -9,7 +9,7 @@ export const CompleteStep = ({ goPrevious }: { goPrevious: () => void }) => {
   return (
     <div className="text-white flex flex-col w-2/5">
       <h1 className="text-4xl font-light">Complete</h1>
-      <p className={cn('text-lg font-extralight mr-auto', 'css-typing')}>
+      <p className={cn('text-lg font-extralight mr-auto')}>
         Congratulations! You have successfully configured the system.
       </p>
       <div className="flex flex-row justify-between mt-10">
