@@ -68,7 +68,7 @@ export const ConfigureOrganisationStep = ({
         />
       )}
 
-      <div className="flex flex-row justify-between mt-10">
+      <div className="flex flex-row justify-between mt-2">
         <Button
           type="text"
           className="text-light p-0 pr-2"

@@ -3,8 +3,9 @@ import { CompleteStep } from './CompleteStep';
 import { ConfigureOidcStep } from './ConfigureOidcStep';
 import { ConfigureOrganisationStep } from './ConfigureOrganisation';
 import { ConfigureUserStep } from './ConfigureUserStep';
-import { SETUP_WIZARD_STEPS, useSetupWizardNavigateToStep } from './helpers';
+import { useSetupWizardNavigateToStep } from './helpers';
 import { ResetBreakGlassAccount } from './ResetBreakGlassAccount';
+import { SETUP_WIZARD_STEPS } from './server.helpers';
 import { WelcomeStep } from './WelcomeStep';
 
 export const SetupWizard = ({
@@ -31,6 +32,13 @@ export const SetupWizard = ({
       {currentStep === 'configureLogin' && (
         <ConfigureOidcStep
           oidcProvider={oidcProvider}
+          goPrevious={() =>
+            navigateToStep(
+              SETUP_WIZARD_STEPS[
+                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) - 1
+              ],
+            )
+          }
           goNext={() =>
             navigateToStep(
               SETUP_WIZARD_STEPS[

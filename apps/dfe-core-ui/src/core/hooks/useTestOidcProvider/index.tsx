@@ -7,7 +7,7 @@ export const TEST_OIDC_PROVIDER_QUERY_KEY = (name?: string | null) => [
 ];
 export const useTestOidcProvider = ({ name }: { name?: string | null }) => {
   const isQueryEnabled = !!name;
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: TEST_OIDC_PROVIDER_QUERY_KEY(name),
     queryFn: () =>
       testOidcProvider({
@@ -16,5 +16,5 @@ export const useTestOidcProvider = ({ name }: { name?: string | null }) => {
     enabled: isQueryEnabled,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch, isRefetching };
 };

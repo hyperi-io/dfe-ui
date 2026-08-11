@@ -47,6 +47,7 @@ export const createUpdateOidcProviderSchema = z.object({
   client_id_env: z.string(),
   client_secret_env: z.string(),
   groups: groupResolutionRequestSchema.optional(),
+  scopes: z.string().optional(),
 });
 
 export type CreateUpdateOidcProviderFormData = z.infer<

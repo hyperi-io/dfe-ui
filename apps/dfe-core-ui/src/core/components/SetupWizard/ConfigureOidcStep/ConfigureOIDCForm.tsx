@@ -105,6 +105,9 @@ export const ConfigureOIDCForm = ({
             <Form.Item label="Issuer" name="issuer" rules={[formValidation]}>
               <Input />
             </Form.Item>
+            <Form.Item label="Scopes" name="scopes" rules={[formValidation]}>
+              <Input />
+            </Form.Item>
             <Form.Item
               label="Client ID Environment Variable"
               name="client_id_env"
@@ -208,17 +211,14 @@ export const ConfigureOIDCForm = ({
                 </>
               )}
 
-              {modeWatch === 'token_claim' && (
-                <>
-                  <Form.Item
-                    label="Claim Name"
-                    name={[GROUPS_FORM_NAME, 'claim_name']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </>
-              )}
+              <Form.Item
+                label="Claim Name"
+                name={[GROUPS_FORM_NAME, 'claim_name']}
+                rules={[formValidation]}
+              >
+                <Input />
+              </Form.Item>
+
               {modeWatch === 'api' && (
                 <>
                   <Form.Item

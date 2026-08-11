@@ -5,15 +5,6 @@ import { useCallback } from 'react';
 import { isSetupWizardStep } from './server.helpers';
 import { TSetupWizardStep } from './types';
 
-export const SETUP_WIZARD_STEPS: TSetupWizardStep[] = [
-  'welcome',
-  'configureLogin',
-  'configureOrganisation',
-  'configureUser',
-  'resetBreakGlassAccount',
-  'complete',
-];
-
 export const useSetupWizardNavigateToStep = () => {
   const router = useRouter();
   const params = useParams<{ step: string }>();

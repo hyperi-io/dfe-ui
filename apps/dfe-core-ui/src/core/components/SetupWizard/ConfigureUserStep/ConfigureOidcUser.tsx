@@ -43,16 +43,15 @@ export const ConfigureOidcUser = ({
                 here
               </Button>
             </p>
-
-            {showOidcLoginPopup && (
-              <OidcLoginPopup
-                closePopup={() => setShowOidcLoginPopup(false)}
-                oidcProviderName={oidcProviderName}
-              />
-            )}
           </div>
         }
       />
+      {showOidcLoginPopup && (
+        <OidcLoginPopup
+          closePopup={() => setShowOidcLoginPopup(false)}
+          oidcProviderName={oidcProviderName}
+        />
+      )}
     </div>
   );
 };

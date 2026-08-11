@@ -3,8 +3,8 @@ import { TSetupWizardStep } from './types';
 
 export const SETUP_WIZARD_STEPS: TSetupWizardStep[] = [
   'welcome',
-  'configureLogin',
   'configureOrganisation',
+  'configureLogin',
   'configureUser',
   'resetBreakGlassAccount',
   'complete',

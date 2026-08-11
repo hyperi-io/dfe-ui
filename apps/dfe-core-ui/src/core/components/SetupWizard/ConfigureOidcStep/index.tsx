@@ -1,40 +1,55 @@
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
+import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
 import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
-import { IconArrowRight } from '@repo/dfe-icons';
+import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card, Form } from 'antd';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ConfigureOIDCForm } from './ConfigureOIDCForm';
 import { TestOIDCConnection } from './TestOIDCConnection';
 
 export const ConfigureOidcStep = ({
+  goPrevious,
   goNext,
   oidcProvider,
 }: {
+  goPrevious: () => void;
   goNext: () => void;
   oidcProvider: TOidcProvider;
 }) => {
+  const router = useRouter();
+  const [createdOidcProvider, setCreatedOidcProvider] = useState<
+    TOidcProvider | TCreateOidcProviderResponse
+  >(null);
+  const effectiveOidcProvider = oidcProvider ?? createdOidcProvider;
   const [isOidcTested, setIsOidcTested] = useState(false);
   const [form] = Form.useForm();
   const {
     mutate: createOidcProvider,
     isPending: isCreateOidcProviderPending,
     error: createOidcProviderError,
-  } = useCreateOidcProvider();
+  } = useCreateOidcProvider({
+    onSuccess: (data) => {
+      setCreatedOidcProvider(data);
+      router.refresh();
+    },
+  });
 
   const {
     mutate: updateOidcProvider,
     isPending: isUpdateOidcProviderPending,
     error: updateOidcProviderError,
   } = useUpdateOidcProvider({
-    name: oidcProvider?.name ?? '',
+    name: effectiveOidcProvider?.name ?? '',
   });
 
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
-    if (oidcProvider?.name) {
+    if (effectiveOidcProvider?.name) {
       updateOidcProvider(values);
+      return;
     }
 
     createOidcProvider(values);
@@ -42,7 +57,7 @@ export const ConfigureOidcStep = ({
   return (
     <Card
       classNames={{
-        root: 'w-2/3',
+        root: 'w-3/4',
         body: 'flex flex-col gap-2',
       }}
     >
@@ -57,26 +72,36 @@ export const ConfigureOidcStep = ({
           form={form}
           onFinish={handleFinish}
           initialValues={{
-            ...oidcProvider,
+            ...effectiveOidcProvider,
           }}
           submitButtonLabel={
-            oidcProvider?.name ? 'Update OIDC Provider' : 'Add OIDC Provider'
+            effectiveOidcProvider?.name
+              ? 'Update OIDC Provider'
+              : 'Add OIDC Provider'
           }
-          hasReset={!!oidcProvider?.name}
+          hasReset={!!effectiveOidcProvider?.name}
           disabledFields={{
-            name: !!oidcProvider?.name,
+            name: !!effectiveOidcProvider?.name,
           }}
         />
 
-        {oidcProvider?.name && (
+        {effectiveOidcProvider?.name && (
           <TestOIDCConnection
-            oidcProviderName={oidcProvider?.name}
+            oidcProviderName={effectiveOidcProvider.name}
             setIsOidcTested={setIsOidcTested}
           />
         )}
       </>
 
       <div className="flex flex-row justify-between mt-2">
+        <Button
+          type="text"
+          className="text-light p-0 pr-2"
+          onClick={goPrevious}
+        >
+          <IconArrowLeft /> Back
+        </Button>
+
         <div className="flex flex-row gap-4 ml-auto">
           <SkipForNow
             goNext={goNext}

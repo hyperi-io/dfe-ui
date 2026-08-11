@@ -1,7 +1,8 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useTestOidcProvider } from '@/core/hooks/useTestOidcProvider';
 import { useVerifyOidcLogin } from '@/core/hooks/useVerifyOidcLogin';
-import { IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
+import { IconCircleCheck, IconCircleX, IconRefresh } from '@repo/dfe-icons';
+import { Button } from 'antd';
 import { Fragment, useEffect } from 'react';
 
 export const TestOIDCConnection = ({
@@ -15,6 +16,8 @@ export const TestOIDCConnection = ({
     data: testOidcProviderData,
     isLoading: isTestOidcProviderLoading,
     error: testOidcProviderError,
+    isRefetching: isTestOidcProviderRefetching,
+    refetch: refetchTestOidcProvider,
   } = useTestOidcProvider({
     name: oidcProviderName,
   });
@@ -23,6 +26,8 @@ export const TestOIDCConnection = ({
     data: verifyOidcLoginData,
     isLoading: isVerifyOidcLoginDataLoading,
     error: verifyOidcLoginError,
+    isRefetching: isVerifyOidcLoginRefetching,
+    refetch: refetchVerifyOidcLogin,
   } = useVerifyOidcLogin({
     name: oidcProviderName,
   });
@@ -77,6 +82,16 @@ export const TestOIDCConnection = ({
         description={testOidcProviderData?.message}
         type={testOidcProviderData?.success ? 'success' : 'default'}
         variant={testOidcProviderData?.success ? 'default' : 'ghost'}
+        action={
+          <Button
+            icon={<IconRefresh />}
+            type="default"
+            loading={isTestOidcProviderRefetching}
+            onClick={() => refetchTestOidcProvider()}
+          >
+            Retry
+          </Button>
+        }
       />
 
       {verifyOidcLoginError && (
@@ -131,6 +146,16 @@ export const TestOIDCConnection = ({
         }
         type={verifyOidcLoginData?.ok ? 'success' : 'default'}
         variant={verifyOidcLoginData?.ok ? 'default' : 'ghost'}
+        action={
+          <Button
+            icon={<IconRefresh />}
+            type="default"
+            loading={isVerifyOidcLoginRefetching}
+            onClick={() => refetchVerifyOidcLogin()}
+          >
+            Retry
+          </Button>
+        }
       />
     </div>
   );

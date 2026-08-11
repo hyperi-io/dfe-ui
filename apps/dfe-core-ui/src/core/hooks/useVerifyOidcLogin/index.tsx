@@ -7,7 +7,7 @@ export const VERIFY_OIDC_LOGIN_QUERY_KEY = (name?: string | null) => [
 ];
 export const useVerifyOidcLogin = ({ name }: { name?: string | null }) => {
   const isQueryEnabled = !!name;
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: VERIFY_OIDC_LOGIN_QUERY_KEY(name),
     queryFn: () =>
       verifyOidcLogin({
@@ -16,5 +16,5 @@ export const useVerifyOidcLogin = ({ name }: { name?: string | null }) => {
     enabled: isQueryEnabled,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch, isRefetching };
 };
