@@ -1,16 +1,17 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { useOidcLogin } from '@/core/hooks/useOidcLogin';
 import { Spin } from 'antd';
 import { useEffect } from 'react';
 
-export const OidcLoginPopup = ({ closePopup }: { closePopup: () => void }) => {
-  const {
-    params: { oidc_provider_name },
-  } = useSetupWizardParams();
-
+export const OidcLoginPopup = ({
+  closePopup,
+  oidcProviderName,
+}: {
+  closePopup: () => void;
+  oidcProviderName: string;
+}) => {
   const { data, isLoading, error } = useOidcLogin({
-    provider: oidc_provider_name ?? '',
+    provider: oidcProviderName,
   });
 
   useEffect(() => {

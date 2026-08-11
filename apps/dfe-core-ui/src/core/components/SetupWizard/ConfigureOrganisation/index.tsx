@@ -3,7 +3,6 @@ import {
   CreateUpdateOrganisationFormData,
 } from '@/core/components/CreateUpdateOrganisationForm';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { useCreateOrganisation } from '@/core/hooks/useCreateOrganisation';
 import { TOrganisation } from '@/core/hooks/useFetchSetupStatus/types';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
@@ -19,19 +18,11 @@ export const ConfigureOrganisationStep = ({
   organisation: TOrganisation;
 }) => {
   const {
-    params: { organisation_name },
-    setParams,
-  } = useSetupWizardParams();
-
-  const {
     mutate: createOrganisation,
     isPending: isCreateOrganisationPending,
     error: createOrganisationError,
   } = useCreateOrganisation({
-    onSuccess: ({ name }) => {
-      setParams({
-        organisation_name: name,
-      });
+    onSuccess: () => {
       goNext();
     },
   });
@@ -48,7 +39,7 @@ export const ConfigureOrganisationStep = ({
     >
       <h1 className="text-2xl font-light">Configure Primary Organisation</h1>
 
-      {!organisation_name ? (
+      {!organisation ? (
         <>
           <NotificationCard
             title="Configure the primary organisation for your account"
@@ -64,8 +55,8 @@ export const ConfigureOrganisationStep = ({
             error={createOrganisationError}
             isPending={isCreateOrganisationPending}
             initialValues={{
-              name: organisation?.name ?? '',
-              display_name: organisation?.display_name ?? '',
+              name: '',
+              display_name: '',
             }}
           />
         </>

@@ -1,37 +1,67 @@
-import { CreateAccountForm } from '@/core/components/CreateAccountForm';
+import {
+  CreateAccountForm,
+  CreateAccountFormData,
+} from '@/core/components/CreateAccountForm';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { useCreateAccount } from '@/core/hooks/useCreateAccount';
+import { useLogin } from '@/core/hooks/useLogin';
+import { Spin } from 'antd';
+import { useState } from 'react';
 
-export const ConfigureLocalUser = () => {
+export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
+  const [loginValues, setLoginValues] = useState<{
+    username: string;
+    password: string;
+  }>({ username: '', password: '' });
   const {
-    params: { username },
-    setParams,
-  } = useSetupWizardParams();
-
-  const {
-    mutate: createAccount,
-    isPending,
-    error,
-  } = useCreateAccount({
-    onSuccess: ({ username }) => {
-      setParams({ username });
+    mutate: login,
+    isPending: isLoginPending,
+    error: loginError,
+  } = useLogin({
+    callbackUrl: '/',
+    onSuccess: () => {
+      return goNext();
     },
   });
 
-  return username ? (
-    <NotificationCard
-      title="Account Created"
-      description="Your account has been created successfully."
-      type="success"
-    />
-  ) : (
-    <CreateAccountForm
-      onFinish={createAccount}
-      error={error}
-      isPending={isPending}
-      initialValues={{ username: '', password: '', groups: ['dfe-admins'] }}
-      disabledFields={{ groups: true }}
-    />
+  const {
+    mutate: createAccount,
+    isPending: isCreateAccountPending,
+    error: createAccountError,
+  } = useCreateAccount({
+    onSuccess: () => {
+      login(loginValues);
+    },
+  });
+
+  const handleFinish = (values: CreateAccountFormData) => {
+    setLoginValues({ username: values.username, password: values.password });
+    createAccount(values);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <CreateAccountForm
+        onFinish={handleFinish}
+        error={createAccountError}
+        isPending={isCreateAccountPending}
+        initialValues={{ username: '', password: '', groups: ['dfe-admins'] }}
+        disabledFields={{ groups: true }}
+      />
+
+      {isLoginPending && (
+        <span className="flex justify-center items-center gap-2">
+          <Spin /> We&apos;re busy logging you in...
+        </span>
+      )}
+
+      {loginError && (
+        <NotificationCard
+          title="Unexpected Error Occurred"
+          description="We were unable to log you in."
+          type="error"
+        />
+      )}
+    </div>
   );
 };

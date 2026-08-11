@@ -1,4 +1,3 @@
-import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
@@ -17,32 +16,24 @@ export const ConfigureOidcStep = ({
   goNext: () => void;
   oidcProvider: TOidcProvider;
 }) => {
-  const {
-    params: { oidc_provider_name },
-    setParams,
-  } = useSetupWizardParams();
   const [isOidcTested, setIsOidcTested] = useState(false);
   const [form] = Form.useForm();
   const {
     mutate: createOidcProvider,
     isPending: isCreateOidcProviderPending,
     error: createOidcProviderError,
-  } = useCreateOidcProvider({
-    onSuccess: ({ name }) => {
-      setParams({ oidc_provider_name: name });
-    },
-  });
+  } = useCreateOidcProvider();
 
   const {
     mutate: updateOidcProvider,
     isPending: isUpdateOidcProviderPending,
     error: updateOidcProviderError,
   } = useUpdateOidcProvider({
-    name: oidc_provider_name ?? '',
+    name: oidcProvider?.name ?? '',
   });
 
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
-    if (oidc_provider_name) {
+    if (oidcProvider?.name) {
       updateOidcProvider(values);
     }
 
@@ -69,17 +60,17 @@ export const ConfigureOidcStep = ({
             ...oidcProvider,
           }}
           submitButtonLabel={
-            oidc_provider_name ? 'Update OIDC Provider' : 'Add OIDC Provider'
+            oidcProvider?.name ? 'Update OIDC Provider' : 'Add OIDC Provider'
           }
-          hasReset={!!oidc_provider_name}
+          hasReset={!!oidcProvider?.name}
           disabledFields={{
-            name: !!oidc_provider_name,
+            name: !!oidcProvider?.name,
           }}
         />
 
-        {oidc_provider_name && (
+        {oidcProvider?.name && (
           <TestOIDCConnection
-            oidcProviderName={oidc_provider_name}
+            oidcProviderName={oidcProvider?.name}
             setIsOidcTested={setIsOidcTested}
           />
         )}

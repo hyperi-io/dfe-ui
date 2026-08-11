@@ -5,8 +5,10 @@ import { TLoginRequest } from './types';
 
 export const useLogin = ({
   callbackUrl: callbackUrl_,
+  onSuccess,
 }: {
   callbackUrl?: string;
+  onSuccess?: () => void;
 } = {}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,6 +28,7 @@ export const useLogin = ({
       return result;
     },
     onSuccess: (result) => {
+      onSuccess?.();
       const url = result?.url ?? callbackUrl;
       // Extract pathname for client-side navigation (router.push with full URLs can cause full reload)
       const path =

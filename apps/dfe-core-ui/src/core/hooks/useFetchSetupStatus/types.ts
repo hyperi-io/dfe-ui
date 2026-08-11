@@ -18,4 +18,6 @@ export type TOrganisation =
 export type TSetupWizardProps = {
   oidcProvider: TOidcProvider;
   organisation: TOrganisation;
+  userCreated: boolean;
+  isAdminReset: boolean;
 };

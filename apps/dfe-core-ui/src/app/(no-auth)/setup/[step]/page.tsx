@@ -23,10 +23,17 @@ export default async function SetupStepPage({
     redirect('/login');
   }
 
+  const userCreated =
+    initial_setup?.completed_steps?.includes('first_user') ?? false;
+  const isAdminReset =
+    initial_setup?.completed_steps?.includes('admin_password') ?? false;
+
   return (
     <SetupScene
       oidcProvider={oidc_providers?.[0] || null}
       organisation={organisations?.[0] || null}
+      userCreated={userCreated}
+      isAdminReset={isAdminReset}
     />
   );
 }

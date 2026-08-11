@@ -5,8 +5,10 @@ import { OidcLoginPopup } from './OidcLoginPopup';
 
 export const ConfigureOidcUser = ({
   setActiveKey,
+  oidcProviderName,
 }: {
   setActiveKey: (key: 'configure-local-user') => void;
+  oidcProviderName: string;
 }) => {
   const [showOidcLoginPopup, setShowOidcLoginPopup] = useState(false);
   return (
@@ -43,7 +45,10 @@ export const ConfigureOidcUser = ({
             </p>
 
             {showOidcLoginPopup && (
-              <OidcLoginPopup closePopup={() => setShowOidcLoginPopup(false)} />
+              <OidcLoginPopup
+                closePopup={() => setShowOidcLoginPopup(false)}
+                oidcProviderName={oidcProviderName}
+              />
             )}
           </div>
         }

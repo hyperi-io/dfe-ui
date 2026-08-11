@@ -5,6 +5,7 @@ export const SETUP_WIZARD_STEPS: TSetupWizardStep[] = [
   'configureLogin',
   'configureOrganisation',
   'configureUser',
+  'resetBreakGlassAccount',
   'complete',
 ];
 

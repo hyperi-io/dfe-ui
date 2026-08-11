@@ -1,4 +1,4 @@
-import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card, Tabs } from 'antd';
 import { useState } from 'react';
@@ -7,18 +7,18 @@ import { ConfigureOidcUser } from './ConfigureOidcUser';
 
 type ActiveKey = 'configure-oidc-user' | 'configure-local-user';
 export const ConfigureUserStep = ({
+  oidcProviderName,
+  userCreated,
   goNext,
   goPrevious,
 }: {
+  oidcProviderName: string | null | undefined;
+  userCreated: boolean;
   goNext: () => void;
   goPrevious: () => void;
 }) => {
-  const {
-    params: { oidc_provider_name },
-  } = useSetupWizardParams();
-
   const [activeKey, setActiveKey] = useState<ActiveKey>(
-    !!oidc_provider_name ? 'configure-oidc-user' : 'configure-local-user',
+    !!oidcProviderName ? 'configure-oidc-user' : 'configure-local-user',
   );
 
   return (
@@ -30,26 +30,39 @@ export const ConfigureUserStep = ({
     >
       <h1 className="text-2xl font-light">Configure User</h1>
 
-      <Tabs
-        activeKey={activeKey}
-        onChange={(key: string) => setActiveKey(key as ActiveKey)}
-        items={[
-          ...(!!oidc_provider_name
-            ? [
-                {
-                  key: 'configure-oidc-user',
-                  label: 'Configure OIDC User',
-                  children: <ConfigureOidcUser setActiveKey={setActiveKey} />,
-                },
-              ]
-            : []),
-          {
-            key: 'configure-local-user',
-            label: 'Configure Local User',
-            children: <ConfigureLocalUser />,
-          },
-        ]}
-      />
+      {userCreated ? (
+        <NotificationCard
+          title="Account Created"
+          description="Your account has been created successfully."
+          type="success"
+        />
+      ) : (
+        <Tabs
+          activeKey={activeKey}
+          onChange={(key: string) => setActiveKey(key as ActiveKey)}
+          items={[
+            ...(!!oidcProviderName
+              ? [
+                  {
+                    key: 'configure-oidc-user',
+                    label: 'Configure OIDC User',
+                    children: (
+                      <ConfigureOidcUser
+                        setActiveKey={setActiveKey}
+                        oidcProviderName={oidcProviderName}
+                      />
+                    ),
+                  },
+                ]
+              : []),
+            {
+              key: 'configure-local-user',
+              label: 'Configure Local User',
+              children: <ConfigureLocalUser goNext={goNext} />,
+            },
+          ]}
+        />
+      )}
 
       <div className="flex flex-row justify-between mt-10">
         <Button
@@ -59,10 +72,17 @@ export const ConfigureUserStep = ({
         >
           <IconArrowLeft /> Back
         </Button>
+
         <div className="flex flex-row gap-6">
-          <Button type="text" className="text-light p-0 pl-2" onClick={goNext}>
-            Next <IconArrowRight />
-          </Button>
+          {userCreated && (
+            <Button
+              type="text"
+              className="text-light p-0 pl-2"
+              onClick={goNext}
+            >
+              Next <IconArrowRight />
+            </Button>
+          )}
         </div>
       </div>
     </Card>
