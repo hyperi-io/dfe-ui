@@ -20,9 +20,16 @@ describe('.useFetchSetupStatus', () => {
     const { result } = renderHook(() => useFetchSetupStatus(), { wrapper });
 
     const response: TFetchSetupStatusResponse = {
-      initial_setup_required: false,
-      setup_complete: false,
-      pending_steps: [],
+      initial_setup: {
+        complete: false,
+        current_step: null,
+        steps: [],
+        pending_steps: [],
+        completed_steps: [],
+        step_details: [],
+      },
+      oidc_providers: [],
+      organisations: [],
     };
 
     await waitFor(() => {

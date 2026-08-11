@@ -1,10 +1,11 @@
 'use client';
 
 import { SetupWizard } from '@/core/components/SetupWizard';
+import { TSetupWizardProps } from '@/core/hooks/useFetchSetupStatus/types';
 import { cn } from '@/core/utils/style';
 import './Setup.css';
 
-export const SetupScene = () => {
+export const SetupScene = (props: TSetupWizardProps) => {
   return (
     <main
       className={cn(
@@ -15,7 +16,7 @@ export const SetupScene = () => {
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <SetupWizard />
+      <SetupWizard {...props} />
     </main>
   );
 };

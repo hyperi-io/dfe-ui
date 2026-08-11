@@ -1,17 +1,22 @@
-import { NotificationCard } from '@/core/components/NotificationCard';
 import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
-import { useFetchOidcProviderDetail } from '@/core/hooks/useFetchOidcProviderDetail';
+import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
 import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { IconArrowRight } from '@repo/dfe-icons';
-import { Button, Card, Form, Spin } from 'antd';
+import { Button, Card, Form } from 'antd';
 import { useState } from 'react';
 import { ConfigureOIDCForm } from './ConfigureOIDCForm';
 import { TestOIDCConnection } from './TestOIDCConnection';
 
-export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
+export const ConfigureOidcStep = ({
+  goNext,
+  oidcProvider,
+}: {
+  goNext: () => void;
+  oidcProvider: TOidcProvider;
+}) => {
   const {
     params: { oidc_provider_name },
     setParams,
@@ -36,21 +41,6 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
     name: oidc_provider_name ?? '',
   });
 
-  const {
-    data: oidcProvider,
-    isLoading: isOidcProviderLoading,
-    error: oidcProviderError,
-  } = useFetchOidcProviderDetail({
-    name: oidc_provider_name,
-    onError: (error) => {
-      if (error.status === 404) {
-        setIsOidcTested(false);
-        setParams({ oidc_provider_name: null });
-      }
-    },
-    retry: false,
-  });
-
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     if (oidc_provider_name) {
       updateOidcProvider(values);
@@ -66,46 +56,34 @@ export const ConfigureOidcStep = ({ goNext }: { goNext: () => void }) => {
       }}
     >
       <h1 className="text-2xl font-light">Configure OIDC Provider</h1>
-      {oidcProviderError && (
-        <NotificationCard
-          title="An unexpected error occurred fetching OIDC provider"
-          description={oidcProviderError?.message}
-          type="error"
+
+      <>
+        <ConfigureOIDCForm
+          error={createOidcProviderError || updateOidcProviderError}
+          isSubmitting={
+            isCreateOidcProviderPending || isUpdateOidcProviderPending
+          }
+          form={form}
+          onFinish={handleFinish}
+          initialValues={{
+            ...oidcProvider,
+          }}
+          submitButtonLabel={
+            oidc_provider_name ? 'Update OIDC Provider' : 'Add OIDC Provider'
+          }
+          hasReset={!!oidc_provider_name}
+          disabledFields={{
+            name: !!oidc_provider_name,
+          }}
         />
-      )}
 
-      {isOidcProviderLoading && (
-        <>
-          <Spin /> <span className="sr-only">Loading OIDC provider...</span>
-        </>
-      )}
-      {!isOidcProviderLoading && (
-        <>
-          <ConfigureOIDCForm
-            error={createOidcProviderError || updateOidcProviderError}
-            isSubmitting={
-              isCreateOidcProviderPending || isUpdateOidcProviderPending
-            }
-            form={form}
-            onFinish={handleFinish}
-            initialValues={oidcProvider}
-            submitButtonLabel={
-              oidc_provider_name ? 'Update OIDC Provider' : 'Add OIDC Provider'
-            }
-            hasReset={!!oidc_provider_name}
-            disabledFields={{
-              name: !!oidc_provider_name,
-            }}
+        {oidc_provider_name && (
+          <TestOIDCConnection
+            oidcProviderName={oidc_provider_name}
+            setIsOidcTested={setIsOidcTested}
           />
-
-          {oidc_provider_name && (
-            <TestOIDCConnection
-              oidcProviderName={oidc_provider_name}
-              setIsOidcTested={setIsOidcTested}
-            />
-          )}
-        </>
-      )}
+        )}
+      </>
 
       <div className="flex flex-row justify-between mt-2">
         <div className="flex flex-row gap-4 ml-auto">

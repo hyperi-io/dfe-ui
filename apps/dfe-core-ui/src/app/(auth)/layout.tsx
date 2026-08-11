@@ -10,8 +10,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { initial_setup_required } = await getSetupStatus();
-  if (initial_setup_required) {
+  const { initial_setup } = await getSetupStatus();
+  if (!initial_setup.complete) {
     redirect('/setup');
   }
 

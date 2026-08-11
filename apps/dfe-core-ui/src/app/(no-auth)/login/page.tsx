@@ -11,8 +11,8 @@ export default async function Login({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const { initial_setup_required } = await getSetupStatus();
-  if (initial_setup_required) {
+  const { initial_setup } = await getSetupStatus();
+  if (!initial_setup.complete) {
     redirect('/setup');
   }
 

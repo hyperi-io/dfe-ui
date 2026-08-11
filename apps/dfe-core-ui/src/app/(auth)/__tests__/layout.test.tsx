@@ -22,10 +22,16 @@ const getSetupStatus = vi.mocked(
 );
 
 const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
-  setup_complete: true,
-  initial_setup_required: false,
-  pending_steps: [],
-  completed_steps: ['organisations', 'admin_password'],
+  initial_setup: {
+    complete: true,
+    current_step: null,
+    steps: [],
+    pending_steps: [],
+    completed_steps: [],
+    step_details: [],
+  },
+  oidc_providers: [],
+  organisations: [],
 };
 
 describe('Layout (auth)', () => {
@@ -36,10 +42,16 @@ describe('Layout (auth)', () => {
 
   test('redirects to /setup when initial setup is required', async () => {
     getSetupStatus.mockResolvedValue({
-      setup_complete: false,
-      initial_setup_required: true,
-      pending_steps: ['organisations'],
-      completed_steps: [],
+      initial_setup: {
+        complete: false,
+        current_step: null,
+        steps: [],
+        pending_steps: [],
+        completed_steps: [],
+        step_details: [],
+      },
+      oidc_providers: [],
+      organisations: [],
     });
     getServerSession.mockResolvedValue({
       user: {
@@ -61,10 +73,16 @@ describe('Layout (auth)', () => {
 
   test('redirects to /setup when initial setup is required and user is not authenticated', async () => {
     getSetupStatus.mockResolvedValue({
-      setup_complete: false,
-      initial_setup_required: true,
-      pending_steps: ['organisations'],
-      completed_steps: [],
+      initial_setup: {
+        complete: false,
+        current_step: null,
+        steps: [],
+        pending_steps: [],
+        completed_steps: [],
+        step_details: [],
+      },
+      oidc_providers: [],
+      organisations: [],
     });
     getServerSession.mockResolvedValue(null);
 

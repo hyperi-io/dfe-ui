@@ -16,6 +16,7 @@ export type CreateAccountFormData = z.infer<typeof formSchema>;
 
 export const CreateAccountForm = ({
   onFinish,
+  disabledFields,
   error,
   isPending,
   buttonLabel = 'Create Account',
@@ -26,6 +27,9 @@ export const CreateAccountForm = ({
   isPending: boolean;
   buttonLabel?: string;
   initialValues?: CreateAccountFormData;
+  disabledFields?: {
+    groups?: boolean;
+  };
 }) => {
   const [form] = Form.useForm<CreateAccountFormData>();
   const formValidation = useAntdZodResolver<CreateAccountFormData>(formSchema);
@@ -54,7 +58,7 @@ export const CreateAccountForm = ({
       </Form.Item>
 
       <Form.Item name="groups" label="Groups" rules={[formValidation]}>
-        <AccountGroupSelect />
+        <AccountGroupSelect disabled={disabledFields?.groups} />
       </Form.Item>
 
       {error && (

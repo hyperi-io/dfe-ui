@@ -5,15 +5,18 @@ import {
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useSetupWizardParams } from '@/core/components/SetupWizard/helpers';
 import { useCreateOrganisation } from '@/core/hooks/useCreateOrganisation';
+import { TOrganisation } from '@/core/hooks/useFetchSetupStatus/types';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Button, Card } from 'antd';
 
 export const ConfigureOrganisationStep = ({
   goNext,
   goPrevious,
+  organisation,
 }: {
   goNext: () => void;
   goPrevious: () => void;
+  organisation: TOrganisation;
 }) => {
   const {
     params: { organisation_name },
@@ -54,15 +57,16 @@ export const ConfigureOrganisationStep = ({
 
           <CreateUpdateOrganisationForm
             onFinish={handleFinish}
-            initialValues={{
-              name: '',
-              display_name: '',
-            }}
             hiddenFields={{
               org_ids: true,
             }}
+            disabledFields={!!organisation ? { name: true } : undefined}
             error={createOrganisationError}
             isPending={isCreateOrganisationPending}
+            initialValues={{
+              name: organisation?.name ?? '',
+              display_name: organisation?.display_name ?? '',
+            }}
           />
         </>
       ) : (
@@ -82,7 +86,7 @@ export const ConfigureOrganisationStep = ({
           <IconArrowLeft /> Back
         </Button>
         <div className="flex flex-row gap-6">
-          {!!organisation_name && (
+          {!!organisation && (
             <Button
               type="text"
               className="text-light p-0 pl-2"

@@ -17,10 +17,16 @@ export default async function SetupStepPage({
     notFound();
   }
 
-  const { initial_setup_required } = await getSetupStatus();
-  if (!initial_setup_required) {
+  const { initial_setup, oidc_providers, organisations } =
+    await getSetupStatus();
+  if (initial_setup.complete) {
     redirect('/login');
   }
 
-  return <SetupScene />;
+  return (
+    <SetupScene
+      oidcProvider={oidc_providers?.[0] || null}
+      organisation={organisations?.[0] || null}
+    />
+  );
 }

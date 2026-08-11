@@ -31,6 +31,7 @@ export const ConfigureLocalUser = () => {
       error={error}
       isPending={isPending}
       initialValues={{ username: '', password: '', groups: ['dfe-admins'] }}
+      disabledFields={{ groups: true }}
     />
   );
 };

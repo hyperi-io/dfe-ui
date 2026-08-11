@@ -1,13 +1,7 @@
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 
-export type InitialSetupStatus = {
-  setup_complete: boolean;
-  initial_setup_required: boolean;
-  pending_steps: string[];
-  completed_steps: string[];
-};
-
-export const getSetupStatus = async (): Promise<InitialSetupStatus> => {
+export const getSetupStatus = async (): Promise<TFetchSetupStatusResponse> => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not configured');
@@ -23,5 +17,5 @@ export const getSetupStatus = async (): Promise<InitialSetupStatus> => {
     );
   }
 
-  return response.json() as Promise<InitialSetupStatus>;
+  return response.json() as Promise<TFetchSetupStatusResponse>;
 };
