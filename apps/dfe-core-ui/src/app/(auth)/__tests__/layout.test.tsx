@@ -1,7 +1,12 @@
-import Layout from '@/app/(auth)/layout';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+vi.mock('@/core/server/actions/getSetupStatus', () => ({
+  getSetupStatus: vi.fn(),
+}));
+
+const Layout = (await import('@/app/(auth)/layout')).default;
 
 const { wrapper: ThemeWrapper } = buildTestWrapper()
   .withTheme()
@@ -12,9 +17,82 @@ const getServerSession = vi.mocked(
 );
 const redirect = vi.mocked((await import('next/navigation')).redirect);
 
+const getSetupStatus = vi.mocked(
+  (await import('@/core/server/actions/getSetupStatus')).getSetupStatus,
+);
+
+const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
+  initial_setup: {
+    complete: true,
+    current_step: null,
+    steps: [],
+    pending_steps: [],
+    completed_steps: [],
+    step_details: [],
+  },
+  oidc_providers: [],
+  organisations: [],
+};
+
 describe('Layout (auth)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getSetupStatus.mockResolvedValue(setupComplete);
+  });
+
+  test('redirects to /setup when initial setup is required', async () => {
+    getSetupStatus.mockResolvedValue({
+      initial_setup: {
+        complete: false,
+        current_step: null,
+        steps: [],
+        pending_steps: [],
+        completed_steps: [],
+        step_details: [],
+      },
+      oidc_providers: [],
+      organisations: [],
+    });
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'test',
+        email: 'test@example.com',
+        accessToken: 'valid-token',
+      },
+      expires: '2025-12-31',
+    });
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/setup');
+  });
+
+  test('redirects to /setup when initial setup is required and user is not authenticated', async () => {
+    getSetupStatus.mockResolvedValue({
+      initial_setup: {
+        complete: false,
+        current_step: null,
+        steps: [],
+        pending_steps: [],
+        completed_steps: [],
+        step_details: [],
+      },
+      oidc_providers: [],
+      organisations: [],
+    });
+    getServerSession.mockResolvedValue(null);
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/setup');
   });
 
   test('redirects to /login when user is not authenticated', async () => {

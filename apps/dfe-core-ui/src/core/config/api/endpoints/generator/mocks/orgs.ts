@@ -1,5 +1,5 @@
+import { TOrganisationCreateResponse } from '@/core/hooks/useCreateOrganisation/types';
 import { TOrganisationListResponse } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
-import { TOrganisationCreateResponse } from '@/Settings/hooks/organisations/useCreateOrganisation/types';
 import { TOrganisationDetail } from '@/Settings/hooks/organisations/useFetchOrganisationDetail/types';
 import { TOrganisationUpdateResponse } from '@/Settings/hooks/organisations/useUpdateOrganisation/types';
 import { http, HttpResponse } from 'msw';

@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -6,20 +7,7 @@ import { useFetchInfiniteFilteredAccountsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const ACCOUNTS_QUERY_KEY = (
-  search?: string,
-  sort_by?: 'created_at' | 'updated_at',
-  sort_order?: 'asc' | 'desc',
-  page?: number,
-  per_page?: number,
-) => [
-  'accounts',
-  ...(search ? [search] : []),
-  ...(sort_by ? [sort_by] : []),
-  ...(sort_order ? [sort_order] : []),
-  ...(page ? [page] : []),
-  ...(per_page ? [per_page] : []),
-];
+export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.infiniteFiltered;
 
 /** useFetchInfiniteFilteredAccounts props */
 /**
@@ -51,13 +39,13 @@ export const useFetchInfiniteFilteredAccounts = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ACCOUNTS_QUERY_KEY(
-      debouncedSearch,
+    queryKey: ACCOUNTS_QUERY_KEY({
+      search: debouncedSearch,
       sort_by,
       sort_order,
       page,
       per_page,
-    ),
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchAccounts({
         queryParams: {

@@ -8,6 +8,8 @@ type DisplayType =
   | 'action'
   | 'success';
 
+type DisplayVariant = 'default' | 'subtle' | 'ghost';
+
 export const NotificationCard = ({
   icon,
   description,
@@ -16,6 +18,7 @@ export const NotificationCard = ({
   title,
   action,
   classNames,
+  variant = 'default',
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
@@ -30,6 +33,7 @@ export const NotificationCard = ({
     description?: string;
     action?: string;
   };
+  variant?: DisplayVariant;
 }) => {
   const displayType = {
     default: cn(
@@ -57,6 +61,16 @@ export const NotificationCard = ({
       'border-success/50 bg-success/10 dark:border-dark-success/50 dark:bg-dark-success/10',
     ),
   };
+
+  const displayVariant = {
+    default: cn(''),
+    subtle: cn('opacity-60'),
+    ghost: cn(
+      // Card Border & Background
+      'bg-unset dark:bg-unset',
+    ),
+  };
+
   return (
     <div
       className={cn(
@@ -67,6 +81,7 @@ export const NotificationCard = ({
         // Card Shared Styles
         'rounded-lg px-3 py-2',
         displayType[type],
+        displayVariant[variant],
         className,
         classNames?.root,
       )}

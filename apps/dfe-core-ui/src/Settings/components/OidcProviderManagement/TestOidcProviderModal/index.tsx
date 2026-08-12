@@ -35,6 +35,7 @@ export const TestOidcProviderModal = ({
         destroyOnHidden
         onCancel={() => setOpen(false)}
         footer={null}
+        width={800}
       >
         <TestOidcProviderResponse oidcProviderName={oidcProviderName} />
       </Modal>

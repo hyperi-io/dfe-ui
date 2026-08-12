@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Next.js 16 middleware (renamed middleware -> proxy; nodejs runtime).
  *
  * Default behaviour is unchanged: withAuth guards the (auth) route group and
- * redirects unauthenticated users to /login (the credentials/password flow).
+ * redirects unauthenticated users to /setup (first-run / engine readiness).
  *
  * Proxy-trust addition (DFE_AUTH_MODE=proxy, single origin behind Envoy): when
  * the engine has forwarded its ES384 token (dfe_token cookie) but NextAuth has
@@ -59,7 +59,7 @@ export const config = {
     /*
      * Match all paths under (auth) except static files and api routes.
      * (auth) group renders at / so we protect the root and its children.
-     * /login is excluded, so the proxy-trust redirect above cannot loop.
+     * /login and /setup are excluded so auth redirects cannot loop.
      *
      * The health trinity and /metrics are excluded too, and that is load-bearing
      * rather than cosmetic. kubelet probes and Prometheus scrapes carry no session,
@@ -73,6 +73,6 @@ export const config = {
      * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
      * not an auth redirect on a health check.
      */
-    '/((?!login|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
+    '/((?!login|setup|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
   ],
 };

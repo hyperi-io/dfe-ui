@@ -3,10 +3,10 @@ import { FormNotification } from '@/core/components/FormNotification';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
-} from '@/Settings/components/OidcProviderManagement/constants/providers.constants';
+} from '@/core/constants/oidcProviders.constants';
+import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { Button, FormProps, Input, Select, Switch } from 'antd';
 import { GroupFormSection } from './GroupFormSection';
-import { CreateUpdateOidcProviderFormData } from './providers.schema';
 
 interface CreateUpdateOidcProviderFormProps extends FormProps {
   disabledFields?: {
