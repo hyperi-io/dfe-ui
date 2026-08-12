@@ -1,10 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
-import { OrganisationSelect } from '@/Settings/components/OrganisationManagement/OrganisationSelect';
 import { Button, Input, Select } from 'antd';
 import z from 'zod';
 

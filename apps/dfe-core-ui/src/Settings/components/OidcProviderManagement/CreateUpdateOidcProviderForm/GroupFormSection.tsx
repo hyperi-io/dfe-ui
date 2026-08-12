@@ -1,14 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import {
+  GROUP_MODE_OPTIONS,
+  GROUPS_FORM_NAME,
+} from '@/core/constants/oidcProviders.constants';
 import { Input, InputNumber, Select, Switch } from 'antd';
-
-const GROUP_MODE_OPTIONS = [
-  { label: 'Manual', value: 'manual' },
-  { label: 'Token Claim', value: 'token_claim' },
-  { label: 'API', value: 'api' },
-];
-
-const GROUPS_FORM_NAME = 'groups';
 
 export const GroupFormSection = ({
   type,

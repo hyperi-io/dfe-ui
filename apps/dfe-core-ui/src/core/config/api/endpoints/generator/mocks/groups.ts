@@ -1,7 +1,7 @@
+import { TGroupsResponse } from '@/core/hooks/useFetchInfiniteFilteredGroups/types';
 import { TAddGroupMemberResponse } from '@/Settings/hooks/groups/useAddGroupMember/types';
 import { TGroupCreateResponse } from '@/Settings/hooks/groups/useCreateGroup/types';
 import { TGroupDetailResponse } from '@/Settings/hooks/groups/useFetchGroupDetail/types';
-import { TGroupsResponse } from '@/Settings/hooks/groups/useFetchInfiniteFilteredGroups/types';
 import { TRemoveGroupMemberResponse } from '@/Settings/hooks/groups/useRemoveGroupMember/types';
 import { TGroupUpdateResponse } from '@/Settings/hooks/groups/useUpdateGroup/types';
 import { http, HttpResponse } from 'msw';

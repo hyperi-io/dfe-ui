@@ -3,6 +3,7 @@ import type { paths } from '@repo/dfe-engine-types';
 export const API_CONFIG = Object.freeze({
   auth: {
     login: '/api/v1/auth/login',
+    setupStatus: '/api/v1/auth/setup-status',
     refresh: '/api/v1/auth/refresh',
     me: '/api/v1/auth/me',
     permissions: '/api/v1/auth/permissions',
@@ -102,6 +103,7 @@ export const API_CONFIG = Object.freeze({
     provider: '/api/v1/auth/oidc-providers/{name}',
     syncGroups: '/api/v1/auth/oidc-providers/{name}/sync',
     test: '/api/v1/auth/oidc-providers/{name}/test',
+    verifyLogin: '/api/v1/auth/oidc-providers/{name}/verify-login',
   },
   governance: {
     actions: '/api/v1/governance/actions',

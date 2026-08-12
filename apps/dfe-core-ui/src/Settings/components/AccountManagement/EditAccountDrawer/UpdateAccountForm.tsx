@@ -1,8 +1,8 @@
+import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { AccountGroupSelect } from '@/Settings/components/AccountManagement/AccountGroupSelect';
 import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { TAccountUpdateRequestBody } from '@/Settings/hooks/accounts/useUpdateAccount/types';
 import { Button, Spin } from 'antd';
