@@ -13,8 +13,15 @@ export const SidebarMenu = ({ collapsed }: SidebarMenuProps) => {
   const pathname = usePathname();
   const hyperdxUrl = useHyperdxUrl();
   const menuItems = buildFeatureFlagSidebarMenuItems(hyperdxUrl);
+  // Segment-prefix match, longest key wins: '/observe/search/list' lights
+  // Saved Searches alone, not Search as well.
+  const matchesPath = (key: string) =>
+    pathname === key || !!pathname?.startsWith(`${key}/`);
   const isSelected = (key: string) =>
-    key.replace('/', '') === pathname?.split('/')[1];
+    matchesPath(key) &&
+    !menuItems.some(
+      (other) => other.key.length > key.length && matchesPath(other.key),
+    );
 
   return (
     <ul className={cn(collapsed ? 'max-w-24' : 'max-w-96')}>
