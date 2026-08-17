@@ -3,6 +3,10 @@ import { SetupScene } from '@/core/scenes/SetupScene';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { notFound, redirect } from 'next/navigation';
 
+// Consults deployment state (getSetupStatus): never static -- build-time
+// prerender has no env and fails the build.
+export const dynamic = 'force-dynamic';
+
 export default async function SetupStepPage({
   params,
 }: {
