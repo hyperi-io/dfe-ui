@@ -2,7 +2,12 @@
 
 import { createContext, useContext, useSyncExternalStore } from 'react';
 
-const HyperdxPortContext = createContext<string | undefined>(undefined);
+interface HyperdxLocation {
+  url?: string;
+  port?: string;
+}
+
+const HyperdxLocationContext = createContext<HyperdxLocation>({});
 
 const subscribeToLocation = (): (() => void) => {
   return () => {};
@@ -17,15 +22,17 @@ const getServerLocationOrigin = (): undefined => undefined;
 
 export const HyperdxPortProvider = ({
   children,
+  url,
   port,
 }: {
   children: React.ReactNode;
+  url?: string;
   port?: string;
 }) => {
   return (
-    <HyperdxPortContext.Provider value={port}>
+    <HyperdxLocationContext.Provider value={{ url, port }}>
       {children}
-    </HyperdxPortContext.Provider>
+    </HyperdxLocationContext.Provider>
   );
 };
 
@@ -33,25 +40,33 @@ export const HyperdxPortProvider = ({
  * The browser-reachable HyperDX base URL for this deployment, or undefined when
  * HyperDX is not configured.
  *
- * Built client-side from the current window location's protocol + host and the
- * configured HyperDX port (HYPERDX_PORT, injected via context from the (auth)
- * layout). Deriving the host from window.location means the link resolves to
- * whatever host the user reached the UI on - correct for localhost and
- * remote/LAN access alike - with nothing baked into the client bundle.
+ * Two deployment shapes, in precedence order:
+ * - HYPERDX_URL: a full base URL for deployments where HyperDX lives on its
+ *   own hostname (k8s gateway: https://hyperdx.{domain}).
+ * - HYPERDX_PORT: same-host-different-port (docker compose). The host comes
+ *   from window.location so the link resolves to whatever host the user
+ *   reached the UI on - correct for localhost and remote/LAN access alike -
+ *   with nothing baked into the client bundle.
  *
  * Returns undefined during SSR and the first client render (window is not
- * available then), then the derived URL after mount, to avoid a hydration
+ * available then), then the resolved URL after mount, to avoid a hydration
  * mismatch.
  */
 export const useHyperdxUrl = (): string | undefined => {
-  const port = useContext(HyperdxPortContext);
+  const { url, port } = useContext(HyperdxLocationContext);
   const origin = useSyncExternalStore(
     subscribeToLocation,
     getLocationOrigin,
     getServerLocationOrigin,
   );
 
-  if (!port || !origin) {
+  if (!origin) {
+    return undefined;
+  }
+  if (url) {
+    return url;
+  }
+  if (!port) {
     return undefined;
   }
   return `${origin}:${port}`;

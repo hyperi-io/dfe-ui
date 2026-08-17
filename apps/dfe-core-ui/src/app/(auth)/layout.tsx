@@ -25,14 +25,16 @@ export default async function RootLayout({
     redirect('/login');
   }
 
-  // Read at request time (this layout is dynamic via getServerSession) so the
-  // HyperDX port is a runtime/deployment value, not baked into the client
-  // bundle. The browser-facing URL is derived from window.location + this port
-  // client-side (see useHyperdxUrl), so it is correct for any access host.
+  // Read at request time (this layout is dynamic via getServerSession) so both
+  // are runtime/deployment values, never baked into the client bundle.
+  // HYPERDX_URL wins (own-hostname deployments, e.g. the k8s gateway);
+  // HYPERDX_PORT derives same-host-different-port client-side from
+  // window.location (docker), so it is correct for any access host.
+  const hyperdxUrl = process.env.HYPERDX_URL || undefined;
   const hyperdxPort = process.env.HYPERDX_PORT || undefined;
 
   return (
-    <HyperdxPortProvider port={hyperdxPort}>
+    <HyperdxPortProvider url={hyperdxUrl} port={hyperdxPort}>
       <AppLayout>{children}</AppLayout>
     </HyperdxPortProvider>
   );
