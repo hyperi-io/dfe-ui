@@ -5,6 +5,10 @@ import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
+// Authenticated pages are never static: prerendering them at build time runs
+// getSetupStatus with no deployment env and fails the build.
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: {
