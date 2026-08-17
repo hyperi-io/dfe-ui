@@ -1,6 +1,14 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { SidebarMenu } from './index';
 import { server } from './SidebarMenu.mocks';
 
