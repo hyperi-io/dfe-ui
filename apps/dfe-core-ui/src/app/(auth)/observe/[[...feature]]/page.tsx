@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
+import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
 
 /**
  * DFE Observe - embeds the HyperDX fork as a seamless sibling inside the dfe-ui
@@ -13,12 +14,15 @@ import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
  *
  * Theme sync: dfe-ui owns light/dark; we postMessage the current colorMode to the
  * iframe on load and on every toggle so the embedded hyperdx matches (seamless).
+ *
+ * The embed target comes from useHyperdxUrl (runtime, deployment-provided) --
+ * a build-inlined NEXT_PUBLIC_ read here would bake the container's empty
+ * value into the bundle.
  */
-const HYPERDX_URL = process.env.NEXT_PUBLIC_HYPERDX_URL;
-
 export default function ObservePage() {
   const params = useParams<{ feature?: string[] }>();
   const { colorMode } = useTheme();
+  const hyperdxUrl = useHyperdxUrl();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const feature =
@@ -27,30 +31,31 @@ export default function ObservePage() {
       : 'search';
 
   const sendTheme = useCallback(() => {
-    if (!HYPERDX_URL) return;
+    if (!hyperdxUrl) return;
     iframeRef.current?.contentWindow?.postMessage(
       { type: 'DFE_SET_THEME', theme: colorMode },
-      HYPERDX_URL,
+      hyperdxUrl,
     );
-  }, [colorMode]);
+  }, [colorMode, hyperdxUrl]);
 
   // Re-sync on every dfe-ui theme toggle (no iframe reload).
   useEffect(() => {
     sendTheme();
   }, [sendTheme]);
 
-  if (!HYPERDX_URL) {
+  // undefined covers both "not mounted yet" and "deployment has no HyperDX";
+  // the message only matters in the second case and the first lasts one frame.
+  if (!hyperdxUrl) {
     return (
       <div className="p-6 text-md">
-        HyperDX is not configured for this deployment (NEXT_PUBLIC_HYPERDX_URL
-        is unset).
+        HyperDX is not configured for this deployment.
       </div>
     );
   }
 
   // Initial theme in the URL so the first paint already matches (avoids a flash);
   // subsequent toggles go via postMessage above.
-  const src = `${HYPERDX_URL}/${feature}?embed=1&theme=${colorMode}`;
+  const src = `${hyperdxUrl}/${feature}?embed=1&theme=${colorMode}`;
 
   return (
     <iframe
