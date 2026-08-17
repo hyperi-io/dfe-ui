@@ -15,15 +15,14 @@ export default async function Login({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const { initial_setup } = await getSetupStatus();
-  if (!initial_setup.complete) {
-    redirect('/setup');
-  }
-
+  // The wizard needs an authenticated session, so the form must stay
+  // reachable while setup is incomplete -- only signed-in users are
+  // herded into the wizard.
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect('/');
+    const { initial_setup } = await getSetupStatus();
+    redirect(initial_setup.complete ? '/' : '/setup');
   }
   const params = await searchParams;
   const callbackUrl =
