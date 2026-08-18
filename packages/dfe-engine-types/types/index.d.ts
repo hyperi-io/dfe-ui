@@ -99,8 +99,10 @@ export interface paths {
          *     registries the wizard renders — OIDC providers and organisations — are
          *     returned while setup is outstanding and dropped once it completes, so a
          *     configured deployment does not serve its inventory to anonymous callers.
-         *     Accounts are never returned; the ``first_user`` step reports whether a
-         *     real (non break-glass) user exists.
+         *     The exception is the name and display name of each enabled OIDC provider,
+         *     which stay (no configuration) because the login screen needs to know which
+         *     IdPs to offer and what to call them. Accounts are never returned; the
+         *     ``first_user`` step reports whether a real (non break-glass) user exists.
          */
         get: operations["get_setup_status_api_v1_auth_setup_status_get"];
         put?: never;
@@ -1813,6 +1815,133 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/synthetic-data/packs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Packs
+         * @description List schema packs the generator can drive.
+         */
+        get: operations["list_packs_api_v1_synthetic_data_packs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Generate a bounded batch of synthetic events inline.
+         *
+         *     Sync handler by design: a ceiling-sized batch is pure CPU, so FastAPI's
+         *     threadpool keeps the event loop responsive while it renders.
+         */
+        post: operations["generate_api_v1_synthetic_data_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/lookalike": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lookalike
+         * @description Generate a lookalike batch from a supplied sample (identities scrubbed).
+         */
+        post: operations["lookalike_api_v1_synthetic_data_lookalike_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Stream
+         * @description Start a stream task that posts generated events to an ingest URL.
+         */
+        post: operations["start_stream_api_v1_synthetic_data_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/streams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Streams
+         * @description List stream tasks (most recent first).
+         */
+        get: operations["list_streams_api_v1_synthetic_data_streams_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/synthetic-data/streams/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stream
+         * @description Poll a stream task's status and summary.
+         */
+        get: operations["get_stream_api_v1_synthetic_data_streams__task_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Cancel Stream
+         * @description Cancel a running stream task.
+         */
+        delete: operations["cancel_stream_api_v1_synthetic_data_streams__task_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pipeline/templates": {
         parameters: {
             query?: never;
@@ -3444,6 +3573,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hyperdx/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hyperdx Connection
+         * @description Return the caller's OWN org connection - never another org's.
+         *
+         *     Unrestricted callers (any role beyond ``org_viewer``) get the platform reader;
+         *     a single-org caller gets its pinned ``dfe_org_<org>`` user; a caller that
+         *     resolves to zero or several separate orgs is refused (403) so isolation fails
+         *     closed rather than guessing.
+         */
+        get: operations["hyperdx_connection_api_v1_hyperdx_connection_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/repository/preferences": {
         parameters: {
             query?: never;
@@ -3834,6 +3988,19 @@ export interface components {
             failed?: {
                 [key: string]: string;
             }[];
+        };
+        /**
+         * CancelResponse
+         * @description Result of a cancel request.
+         */
+        CancelResponse: {
+            /** Task Id */
+            task_id: string;
+            /**
+             * Cancelled
+             * @description True when cancellation was requested
+             */
+            cancelled: boolean;
         };
         /**
          * CasbinScopesResponse
@@ -4725,6 +4892,72 @@ export interface components {
             time_fields?: string[] | null;
         };
         /**
+         * GenerateRequest
+         * @description Inline generation request (bounded batch, timestamps read as a live tail).
+         */
+        GenerateRequest: {
+            /**
+             * Schema
+             * @description Schema ref (e.g. meta/syslog) or path under the schemas root
+             */
+            schema: string;
+            /**
+             * Version
+             * @description Schema version (default: current)
+             */
+            version?: string | null;
+            /**
+             * Count
+             * @description Events to generate (capped by settings)
+             * @default 100
+             */
+            count: number;
+            /**
+             * Seed
+             * @description Determinism seed
+             */
+            seed?: number | null;
+            /**
+             * Rate Eps
+             * @description Timestamp spacing rate (events/second)
+             */
+            rate_eps?: number | null;
+            /**
+             * Tags
+             * @description Extra tags merged into events
+             */
+            tags?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Mark Synthetic
+             * @description Emit tags.synthetic=true
+             * @default true
+             */
+            mark_synthetic: boolean;
+        };
+        /**
+         * GenerateResult
+         * @description Inline generation result.
+         */
+        GenerateResult: {
+            /** Schema */
+            schema: string;
+            /** Version */
+            version?: string | null;
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /** Seed */
+            seed?: number | null;
+            /** Events */
+            events?: {
+                [key: string]: unknown;
+            }[];
+        };
+        /**
          * GroupResolutionConfig
          * @description Configuration for how group membership is resolved from a provider.
          *
@@ -5148,6 +5381,20 @@ export interface components {
             url: string;
         };
         /**
+         * HyperDXConnection
+         * @description Connection material in the fork's shape (name, host URL, username, password).
+         */
+        HyperDXConnection: {
+            /** Name */
+            name: string;
+            /** Host */
+            host: string;
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+        };
+        /**
          * InitialSetupState
          * @description The machine's verdict on where first-run setup stands.
          */
@@ -5415,6 +5662,57 @@ export interface components {
             display_name: string;
         };
         /**
+         * LookalikeRequest
+         * @description Inline lookalike generation from a sample (the sampler's rows/lines).
+         *
+         *     Identity values in the sample (IPs, users, hosts, emails, ...) are never
+         *     replayed - they are synthesised from the entity pool. Enum vocabularies
+         *     and message structure are kept.
+         */
+        LookalikeRequest: {
+            /**
+             * Rows
+             * @description Parsed sample events (preferred input)
+             */
+            rows?: {
+                [key: string]: unknown;
+            }[] | null;
+            /**
+             * Lines
+             * @description Raw sample lines (used when rows is empty)
+             */
+            lines?: string[] | null;
+            /**
+             * Count
+             * @description Events to generate (capped by settings)
+             * @default 100
+             */
+            count: number;
+            /**
+             * Seed
+             * @description Determinism seed
+             */
+            seed?: number | null;
+            /**
+             * Rate Eps
+             * @description Timestamp spacing rate (events/second)
+             */
+            rate_eps?: number | null;
+            /**
+             * Tags
+             * @description Extra tags merged into events
+             */
+            tags?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Mark Synthetic
+             * @description Emit tags.synthetic=true
+             * @default true
+             */
+            mark_synthetic: boolean;
+        };
+        /**
          * ManifestRefreshResponse
          * @description Result of a manifest refresh attempt.
          */
@@ -5655,6 +5953,26 @@ export interface components {
         NonEmptyList_SchemaColumnWrite_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+        /**
+         * OIDCProviderLoginOption
+         * @description An OIDC provider reduced to what a login button needs.
+         *
+         *     What a completed deployment serves: enough for the login screen to offer
+         *     the provider, and nothing about how it is configured.
+         */
+        OIDCProviderLoginOption: {
+            /**
+             * Name
+             * @description Registry name (the provider YAML filename stem).
+             */
+            name: string;
+            /**
+             * Display Name
+             * @description Human-readable label for the login button. Empty when the provider does not set one — fall back to ``name``.
+             * @default
+             */
+            display_name: string;
+        };
         /**
          * OIDCProviderSummary
          * @description A registry OIDC provider, with its registry name folded in.
@@ -5899,6 +6217,39 @@ export interface components {
             roles: string[];
             /** Member Count */
             member_count: number;
+        };
+        /**
+         * PackInfo
+         * @description A generatable schema pack (a meta schema under the schemas root).
+         */
+        PackInfo: {
+            /**
+             * Ref
+             * @description Schema ref relative to the schemas root, e.g. meta/syslog
+             */
+            ref: string;
+            /**
+             * Provider
+             * @description Cloud vocabulary hint inferred from the path
+             */
+            provider: string;
+            /**
+             * Columns
+             * @description @source columns the generator will fill
+             */
+            columns: number;
+            /**
+             * Scenarios
+             * @description Coherent synthetic data scenarios declared
+             * @default 0
+             */
+            scenarios: number;
+            /**
+             * Hinted Columns
+             * @description Columns carrying synthetic data hints
+             * @default 0
+             */
+            hinted_columns: number;
         };
         /** PaginatedResponse[APIKeyResponse] */
         PaginatedResponse_APIKeyResponse_: {
@@ -6603,7 +6954,7 @@ export interface components {
             /**
              * Hunt Target Table
              * @description global_target_table_name for a new hunt
-             * @default hunt_results
+             * @default detection
              */
             hunt_target_table: string;
             /**
@@ -7756,9 +8107,9 @@ export interface components {
             initial_setup: components["schemas"]["InitialSetupState"];
             /**
              * Oidc Providers
-             * @description The OIDC provider registry. Empty once setup is complete.
+             * @description The OIDC provider registry: full entries while setup is outstanding, then name and display name only for the enabled providers once it is complete, so the login screen can still offer them.
              */
-            oidc_providers?: components["schemas"]["OIDCProviderSummary"][];
+            oidc_providers?: (components["schemas"]["OIDCProviderSummary"] | components["schemas"]["OIDCProviderLoginOption"])[];
             /**
              * Organisations
              * @description The organisation registry. Empty once setup is complete.
@@ -8555,6 +8906,109 @@ export interface components {
             valid: boolean;
             /** Errors */
             errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * StreamRequest
+         * @description Background stream request - posts generated events to an HTTP ingest URL.
+         */
+        StreamRequest: {
+            /**
+             * Schema
+             * @description Schema ref (e.g. meta/syslog) or path under the schemas root
+             */
+            schema: string;
+            /**
+             * Version
+             * @description Schema version (default: current)
+             */
+            version?: string | null;
+            /**
+             * Seed
+             * @description Determinism seed
+             */
+            seed?: number | null;
+            /**
+             * Rate Eps
+             * @description Events/second (Poisson; capped by settings)
+             */
+            rate_eps?: number | null;
+            /**
+             * Count
+             * @description Stop after this many events
+             */
+            count?: number | null;
+            /**
+             * Duration S
+             * @description Stop after this many seconds (capped by settings)
+             */
+            duration_s?: number | null;
+            /**
+             * Receiver Url
+             * @description Ingest URL to POST events to (dfe-receiver)
+             */
+            receiver_url: string;
+            /**
+             * Headers
+             * @description Extra request headers (e.g. receiver auth)
+             */
+            headers?: {
+                [key: string]: string;
+            } | null;
+            /**
+             * Ndjson
+             * @description POST batches as NDJSON instead of JSON
+             * @default false
+             */
+            ndjson: boolean;
+            /**
+             * Batch Max
+             * @description Events per POST
+             * @default 10
+             */
+            batch_max: number;
+            /**
+             * Tags
+             * @description Extra tags merged into events
+             */
+            tags?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Mark Synthetic
+             * @description Emit tags.synthetic=true
+             * @default true
+             */
+            mark_synthetic: boolean;
+            /**
+             * Wait
+             * @description Seconds to block for inline completion before returning
+             */
+            wait?: number | null;
+        };
+        /**
+         * StreamSubmitResponse
+         * @description Envelope returned by a stream submit and by the poll endpoint.
+         */
+        StreamSubmitResponse: {
+            /**
+             * Task Id
+             * @description Task ID; poll via GET /synthetic-data/streams/{task_id}
+             */
+            task_id: string;
+            /** @description pending | running | completed | failed | cancelled */
+            status: components["schemas"]["TaskStatus"];
+            /**
+             * Result
+             * @description Stream summary once terminal
+             */
+            result?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Error
+             * @description Present on failure
+             */
+            error?: string | null;
         };
         /**
          * SurfaceSummary
@@ -13038,6 +13492,207 @@ export interface operations {
             };
         };
     };
+    list_packs_api_v1_synthetic_data_packs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackInfo"][];
+                };
+            };
+        };
+    };
+    generate_api_v1_synthetic_data_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lookalike_api_v1_synthetic_data_lookalike_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookalikeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_stream_api_v1_synthetic_data_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StreamRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamSubmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_streams_api_v1_synthetic_data_streams_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskInfo"][];
+                };
+            };
+        };
+    };
+    get_stream_api_v1_synthetic_data_streams__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamSubmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_stream_api_v1_synthetic_data_streams__task_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancelResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_templates_api_v1_pipeline_templates_get: {
         parameters: {
             query?: never;
@@ -16012,6 +16667,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+        };
+    };
+    hyperdx_connection_api_v1_hyperdx_connection_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HyperDXConnection"];
                 };
             };
         };
