@@ -26,7 +26,7 @@ export const ResetBreakGlassAccount = ({
     isPending,
     error,
   } = useAccountResetPassword({
-    username: 'admin',
+    username: process.env.NEXT_PUBLIC_DFE_INITIAL_ADMIN_NAME ?? '',
     onSuccess: () => {
       goNext();
     },
