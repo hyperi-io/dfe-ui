@@ -111,7 +111,8 @@ export default async function proxy(
   // NextResponse, or nothing (both proceed). Plant on whichever response goes
   // back: a redirect to /login has no session so plantEngineTokenCookie is a
   // no-op there, and a proceeding request gets its dfe_token mirrored.
-  const response = result instanceof NextResponse ? result : NextResponse.next();
+  const response =
+    result instanceof NextResponse ? result : NextResponse.next();
   await plantEngineTokenCookie(req, response);
   return response;
 }
