@@ -29,6 +29,16 @@ export default async function RootLayout({
     redirect('/login');
   }
 
+  // A returning user can hold a live session cookie but an engine token that
+  // expired while the tab was closed, and that token cannot be refreshed (the
+  // engine's /auth/refresh needs a still-valid one). The jwt callback flags that
+  // as AccessTokenExpired; redirect to /login rather than let the client fire a
+  // 401 storm then sign out. An active user never reaches this because the
+  // client refreshes before expiry.
+  if (session.error === 'AccessTokenExpired') {
+    redirect('/login');
+  }
+
   // Read at request time (this layout is dynamic via getServerSession) so both
   // are runtime/deployment values, never baked into the client bundle.
   // HYPERDX_URL wins (own-hostname deployments, e.g. the k8s gateway);
