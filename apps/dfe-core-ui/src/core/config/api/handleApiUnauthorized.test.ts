@@ -50,8 +50,16 @@ describe('handleApiUnauthorized', () => {
   });
 
   test('signs out when refresh is not in flight and recovery fails', async () => {
+    window.history.replaceState({}, '', '/settings');
     await handleApiUnauthorized();
     expect(executeAccessTokenRefreshMock).toHaveBeenCalled();
     expect(signOutMock).toHaveBeenCalled();
+  });
+
+  test('does not sign out on setup wizard routes', async () => {
+    window.history.replaceState({}, '', '/setup/welcome');
+    await handleApiUnauthorized();
+    expect(executeAccessTokenRefreshMock).toHaveBeenCalled();
+    expect(signOutMock).not.toHaveBeenCalled();
   });
 });
