@@ -1,3 +1,4 @@
+import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -12,6 +13,14 @@ import { NextResponse, type NextRequest } from 'next/server';
  * no session yet, bounce to /login where the proxy-trust auto-trigger runs the
  * CSRF-safe NextAuth callback (which re-verifies the token against the engine
  * JWKS) and then returns the browser to where it was headed. No password form.
+ *
+ * Embedded-HyperDX addition: HyperDX runs on its own subdomain and is embedded
+ * as an iframe. The fork verifies the engine's ES384 token from a `dfe_token`
+ * cookie, so we mirror the session's access token into that cookie scoped to the
+ * shared parent domain (DFE_COOKIE_DOMAIN). The iframe subdomain is same-site
+ * with the UI, so the cookie rides the iframe request and the fork authenticates
+ * the user - no second login. This is auth-method agnostic: it works the same
+ * whether the session came from local login or (later) dex.
  */
 
 // Cookie the single-origin proxy sets carrying the engine ES384 JWT. Kept
@@ -31,11 +40,54 @@ function isProxyAuthMode(): boolean {
   return mode === 'proxy';
 }
 
+// Parent domain the dfe_token cookie is scoped to so it reaches the HyperDX
+// iframe subdomain. A deployment parameter: empty leaves the cookie host-only
+// (single-origin / docker), which is correct when HyperDX shares the UI host.
+function cookieDomain(): string | undefined {
+  const domain = process.env.DFE_COOKIE_DOMAIN;
+  return domain && domain.trim() !== '' ? domain.trim() : undefined;
+}
+
+// Mirror the session's engine access token into the dfe_token cookie so the
+// embedded HyperDX iframe authenticates as the same user. No-op when the request
+// carries no session token (e.g. the /login bounce).
+async function plantEngineTokenCookie(
+  req: NextRequest,
+  res: NextResponse,
+): Promise<void> {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  const accessToken = token?.accessToken;
+  if (typeof accessToken !== 'string' || accessToken === '') {
+    return;
+  }
+
+  const expiresAt =
+    typeof token?.accessTokenExpiresAt === 'number'
+      ? token.accessTokenExpiresAt
+      : undefined;
+  const maxAge =
+    expiresAt !== undefined
+      ? Math.max(0, Math.floor((expiresAt - Date.now()) / 1000))
+      : undefined;
+
+  res.cookies.set(DFE_TOKEN_COOKIE, accessToken, {
+    domain: cookieDomain(),
+    path: '/',
+    httpOnly: true,
+    secure: req.nextUrl.protocol === 'https:',
+    sameSite: 'lax',
+    maxAge,
+  });
+}
+
 const authMiddleware = withAuth({
   pages: { signIn: '/login' },
 });
 
-export default function proxy(
+export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
@@ -51,7 +103,17 @@ export default function proxy(
     }
   }
 
-  return authMiddleware(req as Parameters<typeof authMiddleware>[0], event);
+  const result = await authMiddleware(
+    req as Parameters<typeof authMiddleware>[0],
+    event,
+  );
+  // withAuth returns a redirect NextResponse (unauthenticated), a next()
+  // NextResponse, or nothing (both proceed). Plant on whichever response goes
+  // back: a redirect to /login has no session so plantEngineTokenCookie is a
+  // no-op there, and a proceeding request gets its dfe_token mirrored.
+  const response = result instanceof NextResponse ? result : NextResponse.next();
+  await plantEngineTokenCookie(req, response);
+  return response;
 }
 
 export const config = {
