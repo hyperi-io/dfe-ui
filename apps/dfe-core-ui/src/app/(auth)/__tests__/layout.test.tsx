@@ -123,7 +123,10 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/login');
   });
 
-  test('renders children when access token expired but refresh may run on client', async () => {
+  test('redirects to /login when the access token has expired (cannot be refreshed)', async () => {
+    // An expired engine token cannot be refreshed (the engine's /auth/refresh
+    // needs a still-valid one), so the layout must redirect rather than render a
+    // page whose every API call 401s.
     getServerSession.mockResolvedValue({
       user: {
         name: 'test',
@@ -135,13 +138,13 @@ describe('Layout (auth)', () => {
       accessTokenExpiresAt: Date.now() - 1000,
     });
 
-    const element = await Layout({
-      children: <div>Dashboard content</div>,
-    });
-    render(<ThemeWrapper>{element}</ThemeWrapper>);
+    try {
+      await Layout({ children: <div>Dashboard content</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
 
-    expect(screen.getByText('Dashboard content')).toBeTruthy();
-    expect(redirect).not.toHaveBeenCalled();
+    expect(redirect).toHaveBeenCalledWith('/login');
   });
 
   test('renders children when user is authenticated', async () => {
