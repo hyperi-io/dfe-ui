@@ -2,6 +2,7 @@
 
 import { getAccessTokenRefreshInFlight } from '@/core/auth/accessTokenRefreshFlight';
 import { executeAccessTokenRefresh } from '@/core/auth/refreshAccessToken';
+import { isNoAuthRoute } from '@/core/config/isNoAuthRoute';
 import { signOut } from 'next-auth/react';
 
 let signingOut = false;
@@ -29,7 +30,7 @@ export async function handleApiUnauthorized() {
   }
 
   const { pathname, search } = window.location;
-  if (pathname.startsWith('/login')) {
+  if (isNoAuthRoute(pathname)) {
     return;
   }
 

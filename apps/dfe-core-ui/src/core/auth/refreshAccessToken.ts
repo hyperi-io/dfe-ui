@@ -1,14 +1,14 @@
 'use client';
 
-import {
-  getAccessTokenRefreshInFlight,
-  trackAccessTokenRefresh,
-} from '@/core/auth/accessTokenRefreshFlight';
-import { loadSession } from '@/core/auth/cachedSession';
-import { persistRefreshedSession } from '@/core/auth/persistRefreshedSession';
 import { refreshToken } from '@/core/hooks/useRefreshToken/api';
 import type { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { useAuthStore } from '@/core/stores/authStore';
+import {
+  getAccessTokenRefreshInFlight,
+  trackAccessTokenRefresh,
+} from './accessTokenRefreshFlight';
+import { loadSession } from './cachedSession';
+import { persistRefreshedSession } from './persistRefreshedSession';
 
 /** Single deduped refresh: engine token → NextAuth JWT → client caches. */
 export function executeAccessTokenRefresh(): Promise<TRefreshTokenResponse> {

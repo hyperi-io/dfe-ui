@@ -1,12 +1,13 @@
 'use client';
 
 import {
-  shouldRefreshAccessToken,
   SESSION_CHECK_INTERVAL_MS,
+  shouldRefreshAccessToken,
 } from '@/core/config/authSession';
+import { isNoAuthRoute } from '@/core/config/isNoAuthRoute';
 import { useRefreshToken } from '@/core/hooks/useRefreshToken';
-import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 /** Keeps the API access token fresh and signs out only when refresh fails. */
@@ -27,7 +28,7 @@ export const AuthSessionMonitor = () => {
   const [scheduledCheck, setScheduledCheck] = useState(0);
 
   useEffect(() => {
-    if (status !== 'authenticated') {
+    if (status !== 'authenticated' || isNoAuthRoute(pathname)) {
       return;
     }
 
@@ -38,10 +39,10 @@ export const AuthSessionMonitor = () => {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [status]);
+  }, [status, pathname]);
 
   useEffect(() => {
-    if (status !== 'authenticated' || pathname.startsWith('/login')) {
+    if (status !== 'authenticated' || isNoAuthRoute(pathname)) {
       return;
     }
 

@@ -1,7 +1,7 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { OidcLoginPopup } from '@/core/components/OidcLoginPopup';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { OidcLoginPopup } from './OidcLoginPopup';
 
 export const ConfigureOidcUser = ({
   setActiveKey,

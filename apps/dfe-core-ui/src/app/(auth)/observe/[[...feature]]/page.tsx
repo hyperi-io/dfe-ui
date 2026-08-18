@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
 
@@ -47,8 +48,15 @@ export default function ObservePage() {
   // the message only matters in the second case and the first lasts one frame.
   if (!hyperdxUrl) {
     return (
-      <div className="p-6 text-md">
-        HyperDX is not configured for this deployment.
+      <div className="w-full h-full p-4 bg-background dark:bg-dark-background">
+        <NotificationCard
+          classNames={{
+            title: 'dark:text-dark-background',
+            description: 'dark:text-dark-background',
+          }}
+          title="HyperDX is not configured for this deployment."
+          type="warning"
+        />
       </div>
     );
   }

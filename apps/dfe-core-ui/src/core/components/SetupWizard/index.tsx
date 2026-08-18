@@ -1,4 +1,7 @@
 import { TSetupWizardProps } from '@/core/hooks/useFetchSetupStatus/types';
+import { useLogin } from '@/core/hooks/useLogin';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { CompleteStep } from './CompleteStep';
 import { ConfigureOidcStep } from './ConfigureOidcStep';
 import { ConfigureOrganisationStep } from './ConfigureOrganisation';
@@ -15,6 +18,17 @@ export const SetupWizard = ({
   isAdminReset,
 }: TSetupWizardProps) => {
   const { currentStep, navigateToStep } = useSetupWizardNavigateToStep();
+
+  const { status } = useSession();
+  const { mutate: loginInitialAdmin } = useLogin();
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      loginInitialAdmin({
+        username: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_NAME ?? '',
+        password: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_PASSWORD ?? '',
+      });
+    }
+  }, [status, loginInitialAdmin]);
 
   return (
     <>

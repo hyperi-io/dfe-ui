@@ -38,19 +38,19 @@ export const NotificationCard = ({
   const displayType = {
     default: cn(
       // Card Border & Background
-      'border-foreground/30 bg-foreground/10 dark:border-dark-foreground/50 dark:bg-dark-foreground/10',
+      'border-foreground/30 bg-foreground/10 dark:border-dark-foreground dark:bg-dark-foreground',
     ),
     warning: cn(
       // Card Border & Background
-      'border-warning/30 bg-warning/10 dark:border-dark-warning/50 dark:bg-dark-warning/10',
+      'border-warning/30 bg-warning/10 dark:border-dark-warning dark:bg-dark-warning',
     ),
     error: cn(
       // Card Border & Background
-      'border-error/30 bg-error/10 dark:border-dark-error/50 dark:bg-dark-error/10',
+      'border-error/30 bg-error/10 dark:border-dark-error dark:bg-dark-error',
     ),
     info: cn(
       // Card Border & Background
-      'border-info/30 bg-info/10 dark:border-dark-info/50 dark:bg-dark-info/10',
+      'border-info/30 bg-info/10 dark:border-dark-info dark:bg-dark-info',
     ),
     action: cn(
       // Card Border & Background
@@ -58,7 +58,7 @@ export const NotificationCard = ({
     ),
     success: cn(
       // Card Border & Background
-      'border-success/50 bg-success/10 dark:border-dark-success/50 dark:bg-dark-success/10',
+      'border-success/50 bg-success/10 dark:border-dark-success dark:bg-dark-success',
     ),
   };
 
@@ -77,7 +77,7 @@ export const NotificationCard = ({
         // Layout
         'flex items-center gap-2',
         // Text
-        'text-foreground/70 dark:text-dark-foreground/70 border',
+        'text-foreground/70 dark:text-dark-foreground border',
         // Card Shared Styles
         'rounded-lg px-3 py-2',
         displayType[type],
