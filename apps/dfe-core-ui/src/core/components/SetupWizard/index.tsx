@@ -24,8 +24,8 @@ export const SetupWizard = ({
   useEffect(() => {
     if (status === 'unauthenticated') {
       loginInitialAdmin({
-        username: process.env.NEXT_PUBLIC_DFE_INITIAL_ADMIN_NAME ?? '',
-        password: process.env.NEXT_PUBLIC_DFE_INITIAL_ADMIN_PASSWORD ?? '',
+        username: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_NAME ?? '',
+        password: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_PASSWORD ?? '',
       });
     }
   }, [status, loginInitialAdmin]);
