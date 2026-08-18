@@ -31,6 +31,9 @@ export const LoginWithOidcForm = ({
     >
       <Form.Item name="provider" label="Provider" rules={[formValidation]}>
         <Select
+          onChange={() => {
+            setShowOidcLoginPopup(false);
+          }}
           options={oidc_providers?.map((provider) => ({
             label: provider.display_name,
             value: provider.name,
