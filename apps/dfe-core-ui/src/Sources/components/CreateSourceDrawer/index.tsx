@@ -64,22 +64,6 @@ export const CreateSourceDrawer = ({
             {title}
           </Button>
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{
-            show: true,
-            placement: 'bottom',
-          }}
-        >
-          <Button
-            type="default"
-            disabled
-            className="border border-tertiary text-tertiary"
-            icon={<IconPlus className="text-tertiary" />}
-            onClick={() => setIsDrawerVisible(true)}
-          >
-            {title}
-          </Button>
-        </RbacProtected.Restricted>
       </RbacProtected>
 
       <Drawer
