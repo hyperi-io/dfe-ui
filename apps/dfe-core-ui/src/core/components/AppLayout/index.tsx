@@ -3,7 +3,9 @@
 import { Layout } from 'antd';
 import React from 'react';
 
+import { useHasAppAccess } from '@/core/components/RbacProtected/hooks/useHasAppAccess';
 import { Sidebar } from '@/core/components/SidebarMenu';
+import { NoAccessScene } from '@/core/scenes/NoAccessScene';
 import { cn } from '@/core/utils/style';
 
 interface AppLayoutProps {
@@ -12,6 +14,14 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = ({ className, children }: AppLayoutProps) => {
+  const { hasAccess } = useHasAppAccess();
+
+  // A user whose roles grant no usable surface meets the branded no-access page
+  // instead of an empty shell with a bare sidebar.
+  if (!hasAccess) {
+    return <NoAccessScene />;
+  }
+
   return (
     <Layout className={cn('min-h-screen', className)}>
       <Sidebar />

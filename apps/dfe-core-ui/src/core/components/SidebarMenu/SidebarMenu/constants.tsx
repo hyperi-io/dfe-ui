@@ -22,6 +22,9 @@ interface SidebarMenuProps {
   isNewViewEnabled?: boolean;
 }
 
+// Unpermitted nav items are hidden, not greyed: each renders only inside
+// RbacProtected.Unrestricted, with no Restricted fallback. AppLayout's
+// no-access guard covers a user for whom none would render.
 export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   // HyperDX features embedded as seamless siblings via /observe/* (an iframe of
   // the chromeless fork -- dfe-ui owns the nav). These route INTERNALLY
@@ -45,20 +48,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   }}
                 />
               </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: '/observe/search',
-                    icon: <IconWrapper icon={<IconTable />} />,
-                    label: 'Search',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Restricted>
             </RbacProtected>
           ),
         },
@@ -77,20 +66,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   }}
                 />
               </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: '/observe/search/list',
-                    icon: <IconWrapper icon={<IconBookmark />} />,
-                    label: 'Saved Searches',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Restricted>
             </RbacProtected>
           ),
         },
@@ -109,20 +84,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   }}
                 />
               </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: '/observe/chart',
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Restricted>
             </RbacProtected>
           ),
         },
@@ -141,20 +102,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                   }}
                 />
               </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted
-                tooltip={{ show: true, placement: 'right', showIcon: true }}
-              >
-                <SidebarLink
-                  collapsed={collapsed}
-                  disabled
-                  item={{
-                    key: '/observe/dashboards',
-                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                    label: 'Dashboards',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Restricted>
             </RbacProtected>
           ),
         },
@@ -175,20 +122,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/sources',
-              icon: <IconWrapper icon={<IconArrowBounce />} />,
-              label: 'Sources',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -207,20 +140,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/schemas',
-              icon: <IconWrapper icon={<IconDatabase />} />,
-              label: 'Schemas',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -240,20 +159,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/rules',
-              icon: <IconWrapper icon={<IconShieldCheck />} />,
-              label: 'Rules',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -272,20 +177,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/hunts',
-              icon: <IconWrapper icon={<IconTargetArrow />} />,
-              label: 'Hunts',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -304,20 +195,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   //           }}
   //         />
   //       </RbacProtected.Unrestricted>
-  //       <RbacProtected.Restricted
-  //         tooltip={{ show: true, placement: 'right', showIcon: true }}
-  //       >
-  //         <SidebarLink
-  //           collapsed={collapsed}
-  //           disabled
-  //           item={{
-  //             key: '/field-maps',
-  //             icon: <IconWrapper icon={<IconRotate2 />} />,
-  //             label: 'Field Maps',
-  //             external: false,
-  //           }}
-  //         />
-  //       </RbacProtected.Restricted>
   //     </RbacProtected>
   //   ),
   // },
@@ -350,20 +227,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/services',
-              icon: <IconWrapper icon={<IconCode />} />,
-              label: 'Services',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -400,20 +263,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/settings',
-              icon: <IconWrapper icon={<IconSettings2 />} />,
-              label: 'Settings',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
@@ -432,20 +281,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             }}
           />
         </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted
-          tooltip={{ show: true, placement: 'right', showIcon: true }}
-        >
-          <SidebarLink
-            collapsed={collapsed}
-            disabled
-            item={{
-              key: '/platform',
-              icon: <IconWrapper icon={<IconStack2 />} />,
-              label: 'Platform',
-              external: false,
-            }}
-          />
-        </RbacProtected.Restricted>
       </RbacProtected>
     ),
   },
