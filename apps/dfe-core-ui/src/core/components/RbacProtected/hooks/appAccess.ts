@@ -1,4 +1,7 @@
-import { UI_DISPLAY_ACTIONS, type UI_DISPLAY_ACTIONS_TYPE } from './rbac.constants';
+import {
+  UI_DISPLAY_ACTIONS,
+  type UI_DISPLAY_ACTIONS_TYPE,
+} from './rbac.constants';
 
 // The baseline permissions that unlock any usable area of dfe-ui: the gating
 // action of every top-level nav destination plus the HyperDX query capability
