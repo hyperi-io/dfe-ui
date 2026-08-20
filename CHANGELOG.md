@@ -3,6 +3,15 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.3.7](https://github.com/hyperi-io/dfe-ui/compare/v1.3.6...v1.3.7) (2026-08-20)
+
+### Bug Fixes
+
+* **orgs:** the Organisation IDs field takes tenant IDs, not other orgs ([#152](https://github.com/hyperi-io/dfe-ui/issues/152)) ([9625044](https://github.com/hyperi-io/dfe-ui/commit/9625044fcdac9bb637868626b640270d0ac61330)), closes [dfe-engine#155](https://github.com/hyperi-io/dfe-engine/issues/155)
+* **ui:** break-glass reset uses a valid username (405) + skippable step ([#161](https://github.com/hyperi-io/dfe-ui/issues/161)) ([d790d8a](https://github.com/hyperi-io/dfe-ui/commit/d790d8ac6238c3b4e7bb995c6861db059848b013))
+* **ui:** drop the stale bundled-dex reference in the proxy comment ([#162](https://github.com/hyperi-io/dfe-ui/issues/162)) ([31e8ad9](https://github.com/hyperi-io/dfe-ui/commit/31e8ad99029779bb6f053798b319ed04974e070d))
+* **ui:** label the schemas nav item 'Meta Schemas' ([#163](https://github.com/hyperi-io/dfe-ui/issues/163)) ([eedbf1b](https://github.com/hyperi-io/dfe-ui/commit/eedbf1b26509b09b9710b54a017a8aa3efae744d))
+
 ## [1.3.6](https://github.com/hyperi-io/dfe-ui/compare/v1.3.5...v1.3.6) (2026-08-19)
 
 ### Bug Fixes
