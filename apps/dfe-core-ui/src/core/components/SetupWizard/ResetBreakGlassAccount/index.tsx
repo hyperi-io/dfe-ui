@@ -1,5 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { BREAK_GLASS_ADMIN_USERNAME } from '@/core/components/SetupWizard/constants';
+import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
@@ -26,7 +28,7 @@ export const ResetBreakGlassAccount = ({
     isPending,
     error,
   } = useAccountResetPassword({
-    username: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_NAME ?? '',
+    username: BREAK_GLASS_ADMIN_USERNAME,
     onSuccess: () => {
       goNext();
     },
@@ -97,8 +99,8 @@ export const ResetBreakGlassAccount = ({
           <IconArrowLeft /> Back
         </Button>
 
-        <div className="flex flex-row gap-6">
-          {isAdminReset && (
+        <div className="flex flex-row items-center gap-6">
+          {isAdminReset ? (
             <Button
               type="text"
               className="text-light p-0 pl-2"
@@ -106,6 +108,17 @@ export const ResetBreakGlassAccount = ({
             >
               Next <IconArrowRight />
             </Button>
+          ) : (
+            <>
+              <span className="text-xs text-dark-foreground-muted self-center max-w-xs">
+                Skipping leaves the emergency account on its default password
+                until you rotate it.
+              </span>
+              <SkipForNow
+                goNext={goNext}
+                title="The emergency account keeps its default password until you rotate it. You can reset it later in the app."
+              />
+            </>
           )}
         </div>
       </div>
