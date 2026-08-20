@@ -34,7 +34,7 @@ describe('SidebarMenu', () => {
         'Chart Explorer',
         'Dashboards',
         'Sources',
-        'Schemas',
+        'Meta Schemas',
         'Rules',
         'Hunts',
         // 'Field Maps',
