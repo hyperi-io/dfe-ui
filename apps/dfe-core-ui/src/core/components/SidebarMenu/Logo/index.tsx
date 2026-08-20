@@ -34,7 +34,9 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
         // as-is via <img>, not tinted through the currentColor icon components.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={darkMode ? '/brand/dfe-logo-dark.svg' : '/brand/dfe-logo-light.svg'}
+          src={
+            darkMode ? '/brand/dfe-logo-dark.svg' : '/brand/dfe-logo-light.svg'
+          }
           alt="DFE"
           className="ml-auto h-[44px] w-auto"
         />
