@@ -17,6 +17,7 @@ export const SetupWizard = ({
   organisation,
   userCreated,
   isAdminReset,
+  breakGlass,
 }: TSetupWizardProps) => {
   const { currentStep, navigateToStep } = useSetupWizardNavigateToStep();
 
@@ -119,6 +120,7 @@ export const SetupWizard = ({
               ],
             )
           }
+          breakGlass={breakGlass}
         />
       )}
 
