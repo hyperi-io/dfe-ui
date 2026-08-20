@@ -230,6 +230,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/accounts/{username}/git-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Account Git Status
+         * @description Poll whether an account's password has merged to the deploy repo's main.
+         *
+         *     Step 2 of the review-PR path for the break-glass admin: the UI polls this after
+         *     the operator merges the PR; it fetches remote main and flips ``merged`` true.
+         *     Durable immediately in the auto-merge and file-share modes. A regular user is
+         *     never git-persisted, so it reports not-git-backed (durable in its own store).
+         */
+        get: operations["account_git_status_api_v1_auth_accounts__username__git_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/groups": {
         parameters: {
             query?: never;
@@ -3828,7 +3853,7 @@ export interface components {
         AccountGitState: {
             /**
              * Enabled
-             * @description Deploy-repo persistence is wired (gitops enabled).
+             * @description This account is git-persisted (the break-glass admin on a gitops deploy). False for a regular user -- durable in its own store, no git flow.
              */
             enabled: boolean;
             /**
@@ -3837,8 +3862,13 @@ export interface components {
              */
             auto_merge: boolean;
             /**
+             * Committed
+             * @description The change is committed into git -- a review branch/PR, or main. True as soon as the write lands, so a pending PR reads as saved (safe), not failed.
+             */
+            committed: boolean;
+            /**
              * Merged
-             * @description The durable copy matches the live account -- survives a rebuild.
+             * @description The durable copy matches the live account -- on main, survives a rebuild. False while a review PR is committed but unmerged (committed stays true).
              */
             merged: boolean;
             /** @description Present when merged is false: the action to make it durable. */
@@ -8258,7 +8288,7 @@ export interface components {
              * @description The organisation registry. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
-            /** @description Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/merged. Lets the wizard show whether a rotation is persisted (survives rebuild) or still a pending review PR. */
+            /** @description Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/committed/merged, plus pending.pr_url/command/branch when a review PR or CLI merge is still outstanding. */
             break_glass?: components["schemas"]["AccountGitState"] | null;
         };
         /**
@@ -10380,6 +10410,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ResetPasswordResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    account_git_status_api_v1_auth_accounts__username__git_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountGitState"];
                 };
             };
             /** @description Validation Error */
