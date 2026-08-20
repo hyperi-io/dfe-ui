@@ -135,7 +135,7 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
             item={{
               key: '/schemas',
               icon: <IconWrapper icon={<IconDatabase />} />,
-              label: 'Schemas',
+              label: 'Meta Schemas',
               external: false,
             }}
           />
