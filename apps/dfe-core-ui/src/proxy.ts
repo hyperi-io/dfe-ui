@@ -20,7 +20,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * shared parent domain (DFE_COOKIE_DOMAIN). The iframe subdomain is same-site
  * with the UI, so the cookie rides the iframe request and the fork authenticates
  * the user - no second login. This is auth-method agnostic: it works the same
- * whether the session came from local login or (later) dex.
+ * whether the session came from local login or an external OIDC provider.
  */
 
 // Cookie the single-origin proxy sets carrying the engine ES384 JWT. Kept
