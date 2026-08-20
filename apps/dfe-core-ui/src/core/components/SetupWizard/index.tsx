@@ -6,6 +6,7 @@ import { CompleteStep } from './CompleteStep';
 import { ConfigureOidcStep } from './ConfigureOidcStep';
 import { ConfigureOrganisationStep } from './ConfigureOrganisation';
 import { ConfigureUserStep } from './ConfigureUserStep';
+import { BREAK_GLASS_ADMIN_USERNAME } from './constants';
 import { useSetupWizardNavigateToStep } from './helpers';
 import { ResetBreakGlassAccount } from './ResetBreakGlassAccount';
 import { SETUP_WIZARD_STEPS } from './server.helpers';
@@ -24,7 +25,7 @@ export const SetupWizard = ({
   useEffect(() => {
     if (status === 'unauthenticated') {
       loginInitialAdmin({
-        username: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_NAME ?? '',
+        username: BREAK_GLASS_ADMIN_USERNAME,
         password: process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_PASSWORD ?? '',
       });
     }
