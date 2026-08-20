@@ -217,6 +217,11 @@ export interface paths {
         /**
          * Reset Password
          * @description Reset an account's password (admin only).
+         *
+         *     The live store takes the new password immediately (next login), and the change
+         *     is mirrored into the durable deploy repo so it survives a rebuild. The ``git``
+         *     block reports whether that mirror merged straight away (dev/solo) or is a
+         *     pending review PR / CLI merge (production+team), or is a no-op file share.
          */
         post: operations["reset_password_api_v1_auth_accounts__username__reset_password_post"];
         delete?: never;
@@ -1185,6 +1190,31 @@ export interface paths {
          *     validates column references, and optionally estimates query cost.
          */
         post: operations["create_rule_api_v1_rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rules/from-hyperdx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Rule From Hyperdx
+         * @description Create a hunt rule from a HyperDX view's expanded query.
+         *
+         *     Wraps the create pipeline with ``source_type='hyperdx'`` and auto-derives a
+         *     unique rule id from the saved-search name, so the caller need not supply one.
+         *     RBAC: ``rule:write`` (data_analyst) -- ``org_viewer`` has neither this grant nor
+         *     the UI button.
+         */
+        post: operations["create_rule_from_hyperdx_api_v1_rules_from_hyperdx_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3769,6 +3799,50 @@ export interface components {
             description: string;
             /** Created At */
             created_at: string;
+        };
+        /**
+         * AccountGitPending
+         * @description What the operator must do to make a not-yet-merged change durable.
+         */
+        AccountGitPending: {
+            /**
+             * Pr Url
+             * @description Review PR to merge (production+team with a forge).
+             */
+            pr_url?: string | null;
+            /**
+             * Command
+             * @description Git command to merge the review branch, when no forge is configured.
+             */
+            command?: string | null;
+            /**
+             * Branch
+             * @description The review branch the change is on.
+             */
+            branch?: string | null;
+        };
+        /**
+         * AccountGitState
+         * @description Durability state of an account change, for the API + the setup wizard.
+         */
+        AccountGitState: {
+            /**
+             * Enabled
+             * @description Deploy-repo persistence is wired (gitops enabled).
+             */
+            enabled: boolean;
+            /**
+             * Auto Merge
+             * @description Effective auto-merge: changes commit straight to main.
+             */
+            auto_merge: boolean;
+            /**
+             * Merged
+             * @description The durable copy matches the live account -- survives a rebuild.
+             */
+            merged: boolean;
+            /** @description Present when merged is false: the action to make it durable. */
+            pending?: components["schemas"]["AccountGitPending"] | null;
         };
         /**
          * AccountResponse
@@ -7273,6 +7347,19 @@ export interface components {
              */
             new_password: string;
         };
+        /**
+         * ResetPasswordResponse
+         * @description Reset outcome plus where the change stands in the durable deploy repo.
+         */
+        ResetPasswordResponse: {
+            /**
+             * Message
+             * @default password reset
+             */
+            message: string;
+            /** @description Durability state: merged straight away, or a pending PR/command. */
+            git: components["schemas"]["AccountGitState"];
+        };
         /** ReviewRequest */
         ReviewRequest: {
             /** Sql */
@@ -7381,6 +7468,62 @@ export interface components {
             };
             /** Title */
             title?: string | null;
+        };
+        /**
+         * RuleFromHyperdxRequest
+         * @description Create a hunt rule from a live HyperDX view.
+         *
+         *     HyperDX posts the expanded ClickHouse SELECT; the create pipeline strips the UI
+         *     meta (time bounds, LIMIT, ``__hdx_time_bucket``, SETTINGS) via the HyperDX
+         *     sanitizer, and the engine derives a unique rule id from the saved-search name.
+         *     The caller gets that id back and opens ``/rules/{id}`` -- no id to invent, no
+         *     IndexedDB round-trip.
+         */
+        RuleFromHyperdxRequest: {
+            /**
+             * Raw Sql
+             * @description Expanded HyperDX ClickHouse SELECT to turn into a rule
+             */
+            raw_sql: string;
+            /**
+             * Saved Search Name
+             * @description HyperDX saved-search name; seeds the rule id and label
+             */
+            saved_search_name?: string | null;
+            /**
+             * Severity
+             * @description low|medium|high|critical
+             * @default medium
+             */
+            severity: string;
+            /**
+             * Hunt Name
+             * @description Parent hunt name
+             */
+            hunt_name?: string | null;
+            /**
+             * Source
+             * @description Source label (e.g. windows_audit)
+             */
+            source?: string | null;
+        };
+        /** RuleFromHyperdxResponse */
+        RuleFromHyperdxResponse: {
+            /**
+             * Id
+             * @description Created rule id (YAML stem); open at /rules/{id}
+             */
+            id: string;
+            /** Display Name */
+            display_name: string;
+            /** Sanitize Summary */
+            sanitize_summary?: {
+                [key: string]: unknown;
+            };
+            /** Warnings */
+            warnings?: string[];
+            /** Sql Errors */
+            sql_errors?: components["schemas"]["SqlValidationError"][];
         };
         /** RuleResponse */
         RuleResponse: {
@@ -8115,6 +8258,8 @@ export interface components {
              * @description The organisation registry. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
+            /** @description Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/merged. Lets the wizard show whether a rotation is persisted (survives rebuild) or still a pending review PR. */
+            break_glass?: components["schemas"]["AccountGitState"] | null;
         };
         /**
          * SetupStep
@@ -10234,7 +10379,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ResetPasswordResponse"];
                 };
             };
             /** @description Validation Error */
@@ -12408,6 +12553,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RuleCreateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_rule_from_hyperdx_api_v1_rules_from_hyperdx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleFromHyperdxRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleFromHyperdxResponse"];
                 };
             };
             /** @description Validation Error */

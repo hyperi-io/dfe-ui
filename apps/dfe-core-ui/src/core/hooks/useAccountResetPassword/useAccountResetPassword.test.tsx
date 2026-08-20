@@ -51,12 +51,26 @@ describe('.useAccountResetPassword', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
-          data: '{}',
+          data: {
+            message: 'password reset',
+            git: {
+              enabled: false,
+              auto_merge: false,
+              merged: false,
+            },
+          },
         });
       });
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith('{}');
+        expect(onSuccess).toHaveBeenCalledWith({
+          message: 'password reset',
+          git: {
+            enabled: false,
+            auto_merge: false,
+            merged: false,
+          },
+        });
       });
 
       await waitFor(() => {

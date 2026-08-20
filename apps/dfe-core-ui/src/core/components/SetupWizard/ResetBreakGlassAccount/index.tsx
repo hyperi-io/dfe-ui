@@ -1,11 +1,18 @@
+import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { BREAK_GLASS_ADMIN_USERNAME } from '@/core/components/SetupWizard/constants';
-import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
+import {
+  QUERY_KEY_SETUP_STATUS,
+  useFetchSetupStatus,
+} from '@/core/hooks/useFetchSetupStatus';
+import { TBreakGlass } from '@/core/hooks/useFetchSetupStatus/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
-import { Button, Card, Input } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
+import { Button, Card, Input, Spin } from 'antd';
+import { useEffect, useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -16,23 +23,68 @@ export const ResetBreakGlassAccount = ({
   isAdminReset,
   goNext,
   goPrevious,
+  breakGlass: breakGlassServerResponse,
 }: {
   isAdminReset: boolean;
   goNext: () => void;
   goPrevious: () => void;
+  breakGlass: TBreakGlass | null;
 }) => {
-  const [form] = Form.useForm<FormData>();
-  const formValidation = useAntdZodResolver<FormData>(formSchema);
+  const queryClient = useQueryClient();
+  const [fetchingSetupStatus, setFetchingSetupStatus] = useState(false);
+
+  const { data: { break_glass: breakGlassState } = {} } = useFetchSetupStatus({
+    queryEnabled: fetchingSetupStatus,
+    refetchInterval: 5 * 60 * 1000, //  5 minutes
+  });
+
   const {
+    data: { git } = {},
     mutate: resetBreakGlassAccount,
     isPending,
     error,
   } = useAccountResetPassword({
     username: BREAK_GLASS_ADMIN_USERNAME,
     onSuccess: () => {
-      goNext();
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEY_SETUP_STATUS(),
+      });
+      setFetchingSetupStatus(true);
     },
   });
+
+  const gitBackedEnabled =
+    breakGlassState?.enabled ?? breakGlassServerResponse?.enabled;
+  const autoMergeEnabled =
+    breakGlassState?.auto_merge ?? breakGlassServerResponse?.auto_merge;
+  const isMerged = breakGlassState?.merged;
+  const pendingMerge =
+    !!git?.pending ||
+    !!breakGlassState?.pending ||
+    !!breakGlassServerResponse?.pending;
+
+  const pendingMergePrUrl =
+    git?.pending?.pr_url ??
+    breakGlassState?.pending?.pr_url ??
+    breakGlassServerResponse?.pending?.pr_url;
+  const pendingMergeCommand =
+    git?.pending?.command ??
+    breakGlassState?.pending?.command ??
+    breakGlassServerResponse?.pending?.command;
+  const pendingMergeBranch =
+    git?.pending?.branch ??
+    breakGlassState?.pending?.branch ??
+    breakGlassServerResponse?.pending?.branch;
+
+  const [form] = Form.useForm<FormData>();
+  const formValidation = useAntdZodResolver<FormData>(formSchema);
+
+  useEffect(() => {
+    if (isMerged) {
+      goNext();
+    }
+  }, [isMerged, goNext]);
+
   return (
     <Card
       classNames={{
@@ -64,6 +116,71 @@ export const ResetBreakGlassAccount = ({
               </>
             }
           />
+
+          {!autoMergeEnabled && gitBackedEnabled && (
+            <NotificationCard
+              title="Auto Merge is not enabled"
+              description="You will need to manually merge the emergency account in the configuration repository."
+              type="warning"
+            />
+          )}
+
+          {isMerged && (
+            <NotificationCard
+              title="Emergency account has been merged"
+              type="success"
+            />
+          )}
+
+          {pendingMerge && (
+            <NotificationCard
+              classNames={{
+                container: 'w-full',
+              }}
+              title={
+                <span className="flex gap-2 items-center font-semibold">
+                  <Spin size="small" />
+                  Emergency account is pending merge
+                </span>
+              }
+              description={
+                <div className="flex flex-col gap-2">
+                  <p>
+                    Actions are required on branch:{' '}
+                    <span className="font-medium">{pendingMergeBranch}</span>
+                  </p>
+                  {pendingMergePrUrl && (
+                    <p className="text-sm text-gray-500">
+                      Please review the pending merge request and commit it.
+                      <a
+                        className="hover:underline"
+                        href={pendingMergePrUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {pendingMergePrUrl}
+                      </a>
+                    </p>
+                  )}
+
+                  {breakGlassState?.pending?.command && (
+                    <>
+                      <p className="text-sm text-gray-500">
+                        Please run the following command to merge the emergency
+                        account.
+                      </p>
+                      <CopyCodeBlock
+                        className="w-full"
+                        code={pendingMergeCommand ?? ''}
+                      />
+                    </>
+                  )}
+                </div>
+              }
+              type="info"
+            />
+          )}
+
           <Form form={form} onFinish={resetBreakGlassAccount}>
             <Form.Item
               name="new_password"
@@ -100,7 +217,7 @@ export const ResetBreakGlassAccount = ({
         </Button>
 
         <div className="flex flex-row items-center gap-6">
-          {isAdminReset ? (
+          {isAdminReset && (
             <Button
               type="text"
               className="text-light p-0 pl-2"
@@ -108,17 +225,6 @@ export const ResetBreakGlassAccount = ({
             >
               Next <IconArrowRight />
             </Button>
-          ) : (
-            <>
-              <span className="text-xs text-dark-foreground-muted self-center max-w-xs">
-                Skipping leaves the emergency account on its default password
-                until you rotate it.
-              </span>
-              <SkipForNow
-                goNext={goNext}
-                title="The emergency account keeps its default password until you rotate it. You can reset it later in the app."
-              />
-            </>
           )}
         </div>
       </div>

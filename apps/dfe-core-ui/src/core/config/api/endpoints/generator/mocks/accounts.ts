@@ -191,7 +191,14 @@ export const accounts = {
     mockedUrl: '/api/v1/auth/accounts/{username}/reset-password',
     post: {
       success: ({
-        mockedResponse = {},
+        mockedResponse = {
+          message: 'password reset',
+          git: {
+            enabled: false,
+            auto_merge: false,
+            merged: false,
+          },
+        },
         username = 'string',
       }: {
         mockedResponse?: TAccountResetPasswordResponse;
@@ -200,7 +207,7 @@ export const accounts = {
         return http.post(
           accounts.resetPassword.mockedUrl.replace('{username}', username),
           () => {
-            return HttpResponse.json(JSON.stringify(mockedResponse));
+            return HttpResponse.json(mockedResponse);
           },
         );
       },
