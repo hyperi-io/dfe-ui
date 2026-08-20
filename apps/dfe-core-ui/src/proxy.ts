@@ -1,3 +1,4 @@
+import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -5,8 +6,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 /*
  * Next.js 16 middleware (renamed middleware -> proxy; nodejs runtime).
  *
- * Default behaviour is unchanged: withAuth guards the (auth) route group and
- * redirects unauthenticated users to /setup (first-run / engine readiness).
+ * withAuth guards the (auth) route group and would send unauthenticated
+ * users to /login before the (auth) layout can send first-run traffic to
+ * /setup. Consult setup status here: incomplete → /setup, otherwise
+ * unauthenticated → /login.
  *
  * Proxy-trust addition (DFE_AUTH_MODE=proxy, single origin behind Envoy): when
  * the engine has forwarded its ES384 token (dfe_token cookie) but NextAuth has
@@ -87,10 +90,28 @@ const authMiddleware = withAuth({
   pages: { signIn: '/login' },
 });
 
+async function isInitialSetupIncomplete(): Promise<boolean> {
+  try {
+    const { initial_setup } = await getSetupStatus();
+    return !initial_setup.complete;
+  } catch {
+    return false;
+  }
+}
+
 export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
+  if (await isInitialSetupIncomplete()) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/setup';
+    url.search = '';
+    const response = NextResponse.redirect(url);
+    await plantEngineTokenCookie(req, response);
+    return response;
+  }
+
   if (isProxyAuthMode()) {
     const hasSession = SESSION_COOKIES.some((name) => req.cookies.has(name));
     const hasEngineToken = req.cookies.has(DFE_TOKEN_COOKIE);
