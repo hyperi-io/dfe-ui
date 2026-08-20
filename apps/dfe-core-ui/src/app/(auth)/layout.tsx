@@ -35,7 +35,7 @@ export default async function RootLayout({
   // as AccessTokenExpired; redirect to /login rather than let the client fire a
   // 401 storm then sign out. An active user never reaches this because the
   // client refreshes before expiry.
-  if (session.error === 'AccessTokenExpired') {
+  if (initial_setup.complete && session.error === 'AccessTokenExpired') {
     redirect('/login');
   }
 
