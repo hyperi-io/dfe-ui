@@ -1,9 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
-import { Button, Input } from 'antd';
+import { Button, Input, Select } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -80,10 +79,14 @@ export const CreateUpdateOrganisationForm = ({
           label="Organisation IDs"
           rules={[formValidation]}
         >
-          <OrganisationSelect
-            mode="multiple"
-            placeholder="Select organisation IDs"
-            currentOrganisation={initialValues?.name}
+          {/* Tenant IDs matched against the data's _org_id values - free
+              entry, NOT a pick-an-organisation control. */}
+          <Select
+            mode="tags"
+            placeholder="Enter organisation IDs (matches _org_id in data)"
+            tokenSeparators={[',', ' ']}
+            open={false}
+            suffixIcon={null}
           />
         </Form.Item>
       )}
