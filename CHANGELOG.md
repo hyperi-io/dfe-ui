@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.3.8](https://github.com/hyperi-io/dfe-ui/compare/v1.3.7...v1.3.8) (2026-08-21)
+
+### Bug Fixes
+
+* break glass account auto merge ([#165](https://github.com/hyperi-io/dfe-ui/issues/165)) ([0a08507](https://github.com/hyperi-io/dfe-ui/commit/0a0850765db2629b50245269c29dc397a1ec5e44))
+* **ui:** DFE-branded colour logo in the sidebar, right-justified ([#168](https://github.com/hyperi-io/dfe-ui/issues/168)) ([f2b1a52](https://github.com/hyperi-io/dfe-ui/commit/f2b1a52469c36a5b1d37e593f51b61354c5f6189))
+
 ## [1.3.7](https://github.com/hyperi-io/dfe-ui/compare/v1.3.6...v1.3.7) (2026-08-20)
 
 ### Bug Fixes
