@@ -74,15 +74,14 @@ export const ConfigureUserStep = ({
         </Button>
 
         <div className="flex flex-row gap-6">
-          {userCreated && (
-            <Button
-              type="text"
-              className="text-light p-0 pl-2"
-              onClick={goNext}
-            >
-              Next <IconArrowRight />
-            </Button>
-          )}
+          <Button
+            type="text"
+            className="text-light p-0 pl-2"
+            onClick={goNext}
+            disabled={!userCreated}
+          >
+            Next <IconArrowRight />
+          </Button>
         </div>
       </div>
     </Card>
