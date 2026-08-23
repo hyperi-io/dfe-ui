@@ -3,6 +3,9 @@
 We welcome contributions to this project. By contributing, you agree to the
 terms outlined below.
 
+To run the console locally against a local dfe-engine, see
+[docs/local-development.md](docs/local-development.md).
+
 ## Commit Message Format
 
 HyperI projects use [Conventional Commits](https://www.conventionalcommits.org/)
