@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.3.9](https://github.com/hyperi-io/dfe-ui/compare/v1.3.8...v1.3.9) (2026-08-23)
+
+### Bug Fixes
+
+* **setup-wizard:** advance break-glass step on completed_steps, not merged ([c8e654e](https://github.com/hyperi-io/dfe-ui/commit/c8e654ec3757dbf2743a7299ca81e27efbae198b)), closes [#170](https://github.com/hyperi-io/dfe-ui/issues/170)
+
 ## [1.3.8](https://github.com/hyperi-io/dfe-ui/compare/v1.3.7...v1.3.8) (2026-08-21)
 
 ### Bug Fixes
