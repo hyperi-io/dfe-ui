@@ -33,7 +33,12 @@ export const ResetBreakGlassAccount = ({
   const queryClient = useQueryClient();
   const [fetchingSetupStatus, setFetchingSetupStatus] = useState(false);
 
-  const { data: { break_glass: breakGlassState } = {} } = useFetchSetupStatus({
+  const {
+    data: {
+      break_glass: breakGlassState,
+      initial_setup: initialSetupState,
+    } = {},
+  } = useFetchSetupStatus({
     queryEnabled: fetchingSetupStatus,
     refetchInterval: 5 * 60 * 1000, //  5 minutes
   });
@@ -79,11 +84,17 @@ export const ResetBreakGlassAccount = ({
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
+  // Advance on the engine's completed_steps, not break_glass.merged: account
+  // durability merges the seeded account to deploy-repo main before any
+  // rotation, so merged=true can precede the rotation this step requires.
+  const isAdminPasswordComplete =
+    initialSetupState?.completed_steps?.includes('admin_password') ?? false;
+
   useEffect(() => {
-    if (isMerged) {
+    if (isAdminPasswordComplete) {
       goNext();
     }
-  }, [isMerged, goNext]);
+  }, [isAdminPasswordComplete, goNext]);
 
   return (
     <Card
