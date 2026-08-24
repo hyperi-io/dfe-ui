@@ -67,7 +67,13 @@ export const EditOrganisationDrawer = ({
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button type="text" htmlType="button" icon={<IconEdit />} disabled>
+          <Button
+            type="text"
+            htmlType="button"
+            icon={<IconEdit />}
+            disabled
+            aria-label={`Edit ${organisation.display_name}`}
+          >
             Edit Organisation
           </Button>
         </RbacProtected.Restricted>
