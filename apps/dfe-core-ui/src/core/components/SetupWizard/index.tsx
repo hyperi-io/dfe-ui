@@ -22,7 +22,7 @@ export const SetupWizard = ({
   const { currentStep, navigateToStep } = useSetupWizardNavigateToStep();
 
   const { status } = useSession();
-  const { mutate: loginInitialAdmin } = useLogin();
+  const { mutate: loginInitialAdmin } = useLogin({ redirectOnSuccess: false });
   useEffect(() => {
     if (status === 'unauthenticated') {
       loginInitialAdmin({

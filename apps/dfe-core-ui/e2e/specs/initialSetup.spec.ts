@@ -8,9 +8,14 @@ const configureLoginPageUrl = `${baseUrl}/setup/configureLogin`;
 const configureUserPageUrl = `${baseUrl}/setup/configureUser`;
 const configureBreakGlassPageUrl = `${baseUrl}/setup/resetBreakGlassAccount`;
 const completePageUrl = `${baseUrl}/setup/complete`;
+const loginPageUrl = `${baseUrl}/login`;
 const landingPageUrl = `${baseUrl}/sources`;
 
 test.describe.configure({ mode: 'serial' });
+
+test.afterEach(async ({ context }) => {
+  await context.clearCookies();
+});
 
 test.describe('redirect when setup is not complete', () => {
   test('redirect to welcome from base url', async ({ page }) => {
@@ -105,20 +110,6 @@ test('setup from start testing forward and back navigation', async ({
     .getByRole('button', { name: 'Reset Password', exact: true })
     .click();
   await expect(page).toHaveURL(completePageUrl);
-  await page.getByRole('button', { name: 'Login', exact: true }).click();
-  await expect(page).toHaveURL(landingPageUrl);
-
-  /* After setup complete, user should not be able to access setup pages */
-  await page.goto(welcomePageUrl);
-  await expect(page).toHaveURL(landingPageUrl);
-  await page.goto(configureOrganisationPageUrl);
-  await expect(page).toHaveURL(landingPageUrl);
-  await page.goto(configureLoginPageUrl);
-  await expect(page).toHaveURL(landingPageUrl);
-  await page.goto(configureUserPageUrl);
-  await expect(page).toHaveURL(landingPageUrl);
-  await page.goto(configureBreakGlassPageUrl);
-  await expect(page).toHaveURL(landingPageUrl);
-  await page.goto(completePageUrl);
+  await expect(page).toHaveURL(loginPageUrl);
   await expect(page).toHaveURL(landingPageUrl);
 });

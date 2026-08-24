@@ -6,9 +6,12 @@ import { TLoginRequest } from './types';
 export const useLogin = ({
   callbackUrl: callbackUrl_,
   onSuccess,
+  redirectOnSuccess = true,
 }: {
   callbackUrl?: string;
   onSuccess?: () => void;
+  /** When false, only refreshes the session (no client navigation). */
+  redirectOnSuccess?: boolean;
 } = {}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,13 +32,17 @@ export const useLogin = ({
     },
     onSuccess: (result) => {
       onSuccess?.();
+      router.refresh();
+      if (!redirectOnSuccess) {
+        return;
+      }
+
       const url = result?.url ?? callbackUrl;
       // Extract pathname for client-side navigation (router.push with full URLs can cause full reload)
       const path =
         typeof url === 'string' && url.startsWith('http')
           ? new URL(url).pathname
           : url;
-      router.refresh();
       router.push(path);
     },
   });
