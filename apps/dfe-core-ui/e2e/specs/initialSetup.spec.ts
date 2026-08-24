@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { e2eClient } from '../config/e2e.client';
 
-const baseUrl =
-  process.env.BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+import { BASE_URL } from '../config/e2e.client';
+
+const baseUrl = BASE_URL;
 const welcomePageUrl = `${baseUrl}/setup/welcome`;
 const configureOrganisationPageUrl = `${baseUrl}/setup/configureOrganisation`;
 const configureLoginPageUrl = `${baseUrl}/setup/configureLogin`;
@@ -13,6 +14,7 @@ const loginPageUrl = `${baseUrl}/login`;
 const landingPageUrl = `${baseUrl}/sources`;
 
 test.describe.configure({ mode: 'serial' });
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.afterEach(async ({ context }) => {
   await context.clearCookies();

@@ -1,6 +1,15 @@
 import { expect } from '@playwright/test';
 import { SeedRequest } from './e2e.client.types';
 
+export const BASE_URL =
+  process.env.BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+/** dfe-engine base URL (e2e helpers are not under /api/v1). */
+export const ENGINE_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.INTERNAL_API_URL ||
+  'http://localhost:8003';
+
 export const e2eClient = async ({
   playwright,
   requestType = 'post',
@@ -11,7 +20,7 @@ export const e2eClient = async ({
   seedScript?: SeedRequest['script'];
 }) => {
   const apiContext = await playwright.request.newContext({
-    baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003'}`,
+    baseURL: ENGINE_API_URL,
     extraHTTPHeaders: {
       'Content-Type': 'application/json',
     },
