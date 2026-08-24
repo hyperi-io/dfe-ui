@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { e2eClient } from '../config/e2e.client';
 
 const baseUrl =
   process.env.BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -15,6 +16,10 @@ test.describe.configure({ mode: 'serial' });
 
 test.afterEach(async ({ context }) => {
   await context.clearCookies();
+});
+
+test.beforeEach(async ({ playwright }) => {
+  await e2eClient({ playwright, seedScript: 'reset_all' });
 });
 
 test.describe('redirect when setup is not complete', () => {

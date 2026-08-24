@@ -7,3 +7,6 @@
 // (not `??`) so an empty string also falls through to the 'admin' default.
 export const BREAK_GLASS_ADMIN_USERNAME =
   process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_NAME || 'admin';
+
+export const BREAK_GLASS_ADMIN_PASSWORD =
+  process.env.NEXT_PUBLIC_DFE_AUTH_LOCAL_ADMIN_PASSWORD || 'changeme';

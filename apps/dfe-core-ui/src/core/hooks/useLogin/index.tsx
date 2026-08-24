@@ -33,6 +33,7 @@ export const useLogin = ({
     onSuccess: (result) => {
       onSuccess?.();
       router.refresh();
+
       if (!redirectOnSuccess) {
         return;
       }
