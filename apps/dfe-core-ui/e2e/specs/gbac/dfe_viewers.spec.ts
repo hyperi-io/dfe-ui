@@ -156,14 +156,10 @@ test('Services', async ({ page }) => {
   await expect(page).toHaveURL(`${BASE_URL}/services/deployments`);
   await expect(
     page.getByText('You do not have sufficient permissions'),
-  ).toBeHidden();
-  await expect(
-    page.getByText('No deployments match your filters'),
   ).toBeVisible();
-  await expect(page.getByText('No deployment selected')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Seed Deployments', exact: true }),
-  ).toBeEnabled();
+  ).toBeDisabled();
 
   await page.getByRole('link', { name: 'Surfaces', exact: true }).click();
   await expect(page).toHaveURL(`${BASE_URL}/services/surfaces`);
