@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { NotificationCard } from '@/core/components/NotificationCard';
@@ -13,6 +13,10 @@ import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
  * there is a single nav (dfe-ui's). The optional catch-all maps the dfe-ui path to
  * the HyperDX route: /observe -> /search, /observe/search/list -> /search/list, etc.
  *
+ * Our own query params are forwarded to that route, and OBSERVE_ALIASES adds
+ * dfe-ui paths that map to a HyperDX route plus params. embed and theme are set
+ * last and win, so a caller cannot spoof the chrome or the palette.
+ *
  * Theme sync: dfe-ui owns light/dark; we postMessage the current colorMode to the
  * iframe on load and on every toggle so the embedded hyperdx matches (seamless).
  *
@@ -20,16 +24,35 @@ import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
  * a build-inlined NEXT_PUBLIC_ read here would bake the container's empty
  * value into the bundle.
  */
+/**
+ * dfe-ui paths that are a HyperDX route plus fixed params.
+ *
+ * Hunt Results gets its own path rather than a query string on /observe/search
+ * so the sidebar's pathname matching can tell the two entries apart, and so it
+ * always opens on the detections rather than resuming the user's last source.
+ * `source` is matched by NAME -- ids are per-deployment, and the fork seeds this
+ * table as `hunts` (api/src/dfe/controllers/org-connection.ts).
+ */
+const OBSERVE_ALIASES: Record<
+  string,
+  { feature: string; params: Record<string, string> }
+> = {
+  'hunt-results': { feature: 'search', params: { source: 'hunts' } },
+};
+
 export default function ObservePage() {
   const params = useParams<{ feature?: string[] }>();
+  const searchParams = useSearchParams();
   const { colorMode } = useTheme();
   const hyperdxUrl = useHyperdxUrl();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const feature =
+  const path =
     params?.feature && params.feature.length > 0
       ? params.feature.join('/')
       : 'search';
+  const alias = OBSERVE_ALIASES[path];
+  const feature = alias?.feature ?? path;
 
   const sendTheme = useCallback(() => {
     if (!hyperdxUrl) return;
@@ -63,7 +86,13 @@ export default function ObservePage() {
 
   // Initial theme in the URL so the first paint already matches (avoids a flash);
   // subsequent toggles go via postMessage above.
-  const src = `${hyperdxUrl}/${feature}?embed=1&theme=${colorMode}`;
+  const query = new URLSearchParams(searchParams?.toString() ?? '');
+  for (const [key, value] of Object.entries(alias?.params ?? {})) {
+    query.set(key, value);
+  }
+  query.set('embed', '1');
+  query.set('theme', colorMode);
+  const src = `${hyperdxUrl}/${feature}?${query.toString()}`;
 
   return (
     <iframe
