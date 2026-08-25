@@ -626,6 +626,254 @@
         ]
       }
     },
+    "/api/v1/auth/accounts/{username}/git-status": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Account Git Status",
+        "description": "Poll whether an account's password has merged to the deploy repo's main.\n\nStep 2 of the review-PR path for the break-glass admin: the UI polls this after\nthe operator merges the PR; it fetches remote main and flips ``merged`` true.\nDurable immediately in the auto-merge and file-share modes. A regular user is\nnever git-persisted, so it reports not-git-backed (durable in its own store).",
+        "operationId": "account_git_status_api_v1_auth_accounts__username__git_status_get",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountGitState"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/accounts/{username}/attributes": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Account Attributes",
+        "description": "Read an account's non-sensitive attribute blob (404 if the account is missing).",
+        "operationId": "get_account_attributes_api_v1_auth_accounts__username__attributes_get",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Put Account Attributes",
+        "description": "Full-replace an account's non-sensitive attribute blob (404 if missing).",
+        "operationId": "put_account_attributes_api_v1_auth_accounts__username__attributes_put",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dfe_engine__api__v1__accounts__AttributesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/accounts/{username}/sensitive-attributes": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Account Sensitive Attributes",
+        "description": "Read an account's SENSITIVE attribute blob from the separate keyed store.\n\nThe account must exist first (404 otherwise), so a sensitive read cannot be\nused to probe for accounts that are not there.",
+        "operationId": "get_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_get",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Put Account Sensitive Attributes",
+        "description": "Full-replace an account's SENSITIVE attribute blob (404 if the account is missing).",
+        "operationId": "put_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_put",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dfe_engine__api__v1__accounts__AttributesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/auth/groups": {
       "post": {
         "tags": [
@@ -1016,6 +1264,206 @@
                 "schema": {
                   "$ref": "#/components/schemas/GroupResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/groups/{name}/attributes": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Get Group Attributes",
+        "description": "Read a group's non-sensitive attribute blob (404 if the group is missing).",
+        "operationId": "get_group_attributes_api_v1_auth_groups__name__attributes_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Put Group Attributes",
+        "description": "Full-replace a group's non-sensitive attribute blob (404 if missing).",
+        "operationId": "put_group_attributes_api_v1_auth_groups__name__attributes_put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dfe_engine__api__v1__account_groups__AttributesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/groups/{name}/sensitive-attributes": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Get Group Sensitive Attributes",
+        "description": "Read a group's SENSITIVE attribute blob from the separate keyed store.\n\nThe group must exist first (404 otherwise), so a sensitive read cannot probe\nfor groups that are not there.",
+        "operationId": "get_group_sensitive_attributes_api_v1_auth_groups__name__sensitive_attributes_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Put Group Sensitive Attributes",
+        "description": "Full-replace a group's SENSITIVE attribute blob (404 if the group is missing).",
+        "operationId": "put_group_sensitive_attributes_api_v1_auth_groups__name__sensitive_attributes_put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dfe_engine__api__v1__account_groups__AttributesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -12631,17 +13079,22 @@
           "enabled": {
             "type": "boolean",
             "title": "Enabled",
-            "description": "Deploy-repo persistence is wired (gitops enabled)."
+            "description": "This account is git-persisted (the break-glass admin on a gitops deploy). False for a regular user -- durable in its own store, no git flow."
           },
           "auto_merge": {
             "type": "boolean",
             "title": "Auto Merge",
             "description": "Effective auto-merge: changes commit straight to main."
           },
+          "committed": {
+            "type": "boolean",
+            "title": "Committed",
+            "description": "The change is committed into git -- a review branch/PR, or main. True as soon as the write lands, so a pending PR reads as saved (safe), not failed."
+          },
           "merged": {
             "type": "boolean",
             "title": "Merged",
-            "description": "The durable copy matches the live account -- survives a rebuild."
+            "description": "The durable copy matches the live account -- on main, survives a rebuild. False while a review PR is committed but unmerged (committed stays true)."
           },
           "pending": {
             "anyOf": [
@@ -12659,6 +13112,7 @@
         "required": [
           "enabled",
           "auto_merge",
+          "committed",
           "merged"
         ],
         "title": "AccountGitState",
@@ -20876,7 +21330,7 @@
                 "type": "null"
               }
             ],
-            "description": "Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/merged. Lets the wizard show whether a rotation is persisted (survives rebuild) or still a pending review PR."
+            "description": "Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/committed/merged, plus pending.pr_url/command/branch when a review PR or CLI merge is still outstanding."
           }
         },
         "type": "object",
@@ -23710,6 +24164,30 @@
           "prev_page"
         ],
         "title": "PaginatedResponse[SchemaColumn]"
+      },
+      "dfe_engine__api__v1__account_groups__AttributesRequest": {
+        "properties": {
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "title": "AttributesRequest",
+        "description": "Full-replace body for a group's attribute blob (non-sensitive or sensitive)."
+      },
+      "dfe_engine__api__v1__accounts__AttributesRequest": {
+        "properties": {
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "title": "AttributesRequest",
+        "description": "Full-replace body for an account's attribute blob (non-sensitive or sensitive)."
       },
       "dfe_engine__api__v1__deployments__SeedResponse": {
         "properties": {
