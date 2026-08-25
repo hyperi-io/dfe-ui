@@ -196,6 +196,7 @@ export const accounts = {
           git: {
             enabled: false,
             auto_merge: false,
+            committed: false,
             merged: false,
           },
         },

@@ -27,6 +27,7 @@ beforeEach(() => {
 const mergedBreakGlass: TBreakGlass = {
   enabled: true,
   auto_merge: false,
+  committed: false,
   merged: true,
   pending: null,
 };
