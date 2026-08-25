@@ -228,15 +228,14 @@ export const ResetBreakGlassAccount = ({
         </Button>
 
         <div className="flex flex-row items-center gap-6">
-          {isAdminReset && (
-            <Button
-              type="text"
-              className="text-light p-0 pl-2"
-              onClick={goNext}
-            >
-              Next <IconArrowRight />
-            </Button>
-          )}
+          <Button
+            type="text"
+            className="text-light p-0 pl-2"
+            onClick={goNext}
+            disabled={!isAdminReset}
+          >
+            Next <IconArrowRight />
+          </Button>
         </div>
       </div>
     </Card>

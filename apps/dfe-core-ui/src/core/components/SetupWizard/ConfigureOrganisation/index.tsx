@@ -77,15 +77,14 @@ export const ConfigureOrganisationStep = ({
           <IconArrowLeft /> Back
         </Button>
         <div className="flex flex-row gap-6">
-          {!!organisation && (
-            <Button
-              type="text"
-              className="text-light p-0 pl-2"
-              onClick={goNext}
-            >
-              Next <IconArrowRight />
-            </Button>
-          )}
+          <Button
+            type="text"
+            className="text-light p-0 pl-2"
+            onClick={goNext}
+            disabled={!organisation}
+          >
+            Next <IconArrowRight />
+          </Button>
         </div>
       </div>
     </Card>

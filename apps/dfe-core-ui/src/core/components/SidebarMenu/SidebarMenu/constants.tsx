@@ -110,7 +110,13 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/sources',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.source_read}>
+      <RbacProtected
+        action={[
+          rbacActions.source_read,
+          rbacActions.source_write,
+          rbacActions.source_delete,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -128,7 +134,13 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/schemas',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.schema_read}>
+      <RbacProtected
+        action={[
+          rbacActions.schema_read,
+          rbacActions.schema_write,
+          rbacActions.schema_delete,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -147,7 +159,13 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/rules',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.rule_read}>
+      <RbacProtected
+        action={[
+          rbacActions.rule_read,
+          rbacActions.rule_write,
+          rbacActions.rule_delete,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -165,7 +183,13 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/hunts',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.hunt_read}>
+      <RbacProtected
+        action={[
+          rbacActions.hunt_read,
+          rbacActions.hunt_write,
+          rbacActions.hunt_delete,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -215,7 +239,18 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.service_read}>
+      <RbacProtected
+        action={[
+          rbacActions.service_read,
+          rbacActions.service_write,
+          rbacActions.service_delete,
+          rbacActions.deployment_read,
+          rbacActions.deployment_write,
+          rbacActions.deployment_delete,
+          rbacActions.service_surface_read,
+          rbacActions.service_surface_write,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}
@@ -250,6 +285,9 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
           rbacActions.oidc_read,
           rbacActions.oidc_write,
           rbacActions.oidc_delete,
+          rbacActions.api_key_read,
+          rbacActions.api_key_write,
+          rbacActions.api_key_delete,
         ]}
       >
         <RbacProtected.Unrestricted>
@@ -269,7 +307,16 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   {
     key: '/platform',
     Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected action={rbacActions.lifecycle_read}>
+      <RbacProtected
+        action={[
+          rbacActions.lifecycle_read,
+          rbacActions.config_write,
+          rbacActions.helmvars_read,
+          rbacActions.helmvars_write,
+          rbacActions.governance_read,
+          rbacActions.governance_write,
+        ]}
+      >
         <RbacProtected.Unrestricted>
           <SidebarLink
             collapsed={collapsed}

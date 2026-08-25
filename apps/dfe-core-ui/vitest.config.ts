@@ -19,6 +19,7 @@ export default defineConfig({
     },
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     env: {
       NEXT_PUBLIC_API_URL: 'http://localhost',
       NODE_ENV: 'test',
@@ -35,6 +36,7 @@ export default defineConfig({
         '**/types.ts',
         '**/*.config.{ts,tsx}',
         '**/*.mocks.{ts,tsx}',
+        'e2e/**',
       ],
     },
   },

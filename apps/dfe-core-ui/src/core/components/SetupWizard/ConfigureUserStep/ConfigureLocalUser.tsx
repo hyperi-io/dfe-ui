@@ -18,9 +18,9 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     isPending: isLoginPending,
     error: loginError,
   } = useLogin({
-    callbackUrl: '/',
+    redirectOnSuccess: false,
     onSuccess: () => {
-      return goNext();
+      goNext();
     },
   });
 
