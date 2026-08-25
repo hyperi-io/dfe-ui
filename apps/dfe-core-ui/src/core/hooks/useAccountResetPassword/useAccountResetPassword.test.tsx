@@ -12,7 +12,10 @@ import {
   vi,
 } from 'vitest';
 import { useAccountResetPassword } from '.';
-import { TAccountResetPasswordRequestBody } from './types';
+import {
+  TAccountResetPasswordRequestBody,
+  TAccountResetPasswordResponse,
+} from './types';
 import { server } from './useAccountResetPassword.mocks';
 
 beforeAll(() =>
@@ -46,31 +49,27 @@ describe('.useAccountResetPassword', () => {
 
       result.current.mutate(requestBody);
 
+      const expectedResponse: TAccountResetPasswordResponse = {
+        message: 'password reset',
+        git: {
+          enabled: false,
+          committed: false,
+          auto_merge: false,
+          merged: false,
+        },
+      };
+
       await waitFor(() => {
         expect(result.current).toEqual({
           isPending: false,
           error: null,
           mutate: expect.any(Function),
-          data: {
-            message: 'password reset',
-            git: {
-              enabled: false,
-              auto_merge: false,
-              merged: false,
-            },
-          },
+          data: expectedResponse,
         });
       });
 
       await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledWith({
-          message: 'password reset',
-          git: {
-            enabled: false,
-            auto_merge: false,
-            merged: false,
-          },
-        });
+        expect(onSuccess).toHaveBeenCalledWith(expectedResponse);
       });
 
       await waitFor(() => {
