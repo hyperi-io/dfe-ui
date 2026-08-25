@@ -38,7 +38,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
             darkMode ? '/brand/dfe-logo-dark.svg' : '/brand/dfe-logo-light.svg'
           }
           alt="DFE"
-          className="ml-auto h-[44px] w-auto"
+          className="m-auto h-8 w-auto"
         />
       )}
     </Link>

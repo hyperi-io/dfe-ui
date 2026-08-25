@@ -26,6 +26,7 @@ vi.mock('next-auth/react', () => ({
 
 afterEach(() => {
   mockPush.mockClear();
+  mockRefresh.mockClear();
   mockSignIn.mockReset();
 });
 
@@ -80,5 +81,22 @@ describe('.useLogin', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/other-dashboard');
     });
+  });
+
+  test('when redirectOnSuccess is false, it refreshes without navigating', async () => {
+    mockSignIn.mockResolvedValueOnce({ url: '/dashboard', error: null });
+
+    const { result } = renderHook(
+      () => useLogin({ redirectOnSuccess: false }),
+      { wrapper },
+    );
+
+    result.current.mutate({ username: 'admin', password: 'password' });
+
+    await waitFor(() => {
+      expect(mockRefresh).toHaveBeenCalled();
+    });
+
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });
