@@ -17,6 +17,8 @@ import { SidebarMenu } from './SidebarMenu';
 
 const { Sider } = Layout;
 
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION;
+
 export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
@@ -58,10 +60,10 @@ export const Sidebar = () => {
           <SidebarMenu collapsed={collapsed} />
         </div>
 
-        <div className="flex gap-x-1 gap-y-2 flex-wrap px-7 content-end mb-4 w-full items-center">
-          {!collapsed && (
+        <div className="flex gap-x-1 gap-y-2 flex-wrap px-7 content-end mb-4 w-full items-center justify-end">
+          {!collapsed && APP_VERSION && (
             <p className="text-sm text-gray-400 dark:text-gray-500 mr-auto">
-              v1.0.0
+              v{APP_VERSION}
             </p>
           )}
           <ThemeToggle className="mr-2" collapsed={collapsed} />
