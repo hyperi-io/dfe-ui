@@ -1,9 +1,14 @@
-import path from 'path';
 import type { NextConfig } from 'next';
+import path from 'path';
+
+import { appVersionEnv } from './src/core/appVersion/resolveAppVersion';
 
 const monorepoRoot = path.resolve(process.cwd(), '..', '..');
 
 const nextConfig: NextConfig = {
+  // Bakes the stamped VERSION (or env fallback) in at build time, so the
+  // sidebar and the metrics info gauge match the image tag.
+  env: appVersionEnv({ root: monorepoRoot }),
   turbopack: {
     root: monorepoRoot,
   },
