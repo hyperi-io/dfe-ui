@@ -4,6 +4,7 @@ import * as React from 'react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
+  error: Error | null;
 }
 
 interface ErrorBoundaryProps {
@@ -17,12 +18,12 @@ export const ErrorBoundary = class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(_error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
@@ -40,7 +41,8 @@ export const ErrorBoundary = class ErrorBoundary extends React.Component<
       return (
         this.props.fallback ?? (
           <GenericErrorPage
-            title="An unexpected error occurred"
+            className="h-screen w-screen"
+            title={this.state.error?.message ?? 'An unexpected error occurred'}
             description="Please try again later or contact support if the problem persists."
           />
         )
