@@ -27,6 +27,9 @@ out/
 build
 dist
 
+# Stamped by hyperi-ci at release; never committed.
+VERSION
+
 
 # Debug
 npm-debug.log*

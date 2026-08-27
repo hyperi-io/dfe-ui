@@ -30,6 +30,10 @@ COPY packages/ packages/
 
 RUN yarn install --immutable
 ENV NEXT_PUBLIC_API_URL=""
+# hyperi-ci stamp-version writes VERSION before a publish image build.
+# COPY of a missing file fails, so bind-mount the context and copy only when present.
+RUN --mount=type=bind,source=.,target=/src \
+    if [ -f /src/VERSION ]; then cp /src/VERSION /app/VERSION; fi
 # turbo builds the workspace packages (@repo/*) then the Next app.
 RUN yarn build
 
