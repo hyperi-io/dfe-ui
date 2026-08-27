@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const DB_NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
+export const DB_NAME_REGEX = /^[a-zA-Z0-9_]+$/;
 const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
 const VERSION_REGEX = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 

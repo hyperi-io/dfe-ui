@@ -1,9 +1,8 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
-import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
+import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
@@ -41,12 +40,10 @@ export const SourceDetailActionMenu = ({
         }
         onSuccess={onEditSuccess}
       />
-      <CloneSourceModal
+      <CloneSourceDrawer
         key="clone-source"
-        name={source.source}
-        display_name={source.display_name}
-        enabled={source.enabled}
-        versions={source.versions ?? []}
+        sourceName={source.source}
+        sourceVersion={source.current}
         trigger={
           <Button
             className="flex items-center justify-start"
@@ -57,13 +54,6 @@ export const SourceDetailActionMenu = ({
             Clone Source
           </Button>
         }
-        onSuccess={(newSource: TSourceCreateResponse) => {
-          setSelectedSource({
-            source_name: newSource.source,
-            source_version: newSource.current,
-          });
-          refetchSources();
-        }}
       />
       <DeleteSourceModal
         key="delete-source"

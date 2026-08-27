@@ -7,6 +7,11 @@ import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
 
+// CloneSourceDrawer transitively loads AceEditor, which needs a global `ace` ClientContext sets.
+vi.mock('@/Sources/components/CloneSourceDrawer', () => ({
+  CloneSourceDrawer: () => null,
+}));
+
 const refetchSources = vi.fn();
 
 const baseSource = (
