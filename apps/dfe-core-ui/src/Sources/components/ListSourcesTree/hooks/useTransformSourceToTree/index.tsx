@@ -1,4 +1,4 @@
-import { CloneSourceModal } from '@/Sources/components/CloneSourceModal';
+import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
 import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
@@ -212,19 +212,9 @@ const sourceSummaryToTreeData = ({
             }
             hoverActions={
               <>
-                <CloneSourceModal
-                  name={source.name}
-                  display_name={source.display_name}
-                  enabled={source.enabled}
-                  versions={source.versions ?? []}
-                  onSuccess={(source) => {
-                    void refetchSources();
-                    apiNotification.success({
-                      title: 'Source cloned successfully',
-                      description: `${source.source} has been cloned successfully`,
-                      placement: 'bottomLeft',
-                    });
-                  }}
+                <CloneSourceDrawer
+                  sourceName={source.name}
+                  sourceVersion={source.current}
                 />
                 <DeleteSourceModal
                   source={`${source.name}`}
