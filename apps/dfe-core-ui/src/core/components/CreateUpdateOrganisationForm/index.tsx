@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
+import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input, Select } from 'antd';
 import z from 'zod';
 
@@ -9,9 +9,8 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_REGEX.test(v), {
-      message:
-        'Name must contain only letters, numbers, underscores, and hyphens',
+    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
+      message: DB_NAME_VALIDATOR.message('Name'),
     }),
   display_name: z.string().min(1, { message: 'Display name is required' }),
   org_ids: z.array(z.string()).optional(),
