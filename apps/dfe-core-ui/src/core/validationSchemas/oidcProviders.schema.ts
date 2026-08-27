@@ -1,6 +1,5 @@
 import z from 'zod';
-
-export const NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
+import { DB_NAME_VALIDATOR } from './utils';
 
 export const groupResolutionRequestSchema = z.object({
   mode: z.enum(['manual', 'token_claim', 'api']),
@@ -36,9 +35,8 @@ export const createUpdateOidcProviderSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((value) => NAME_REGEX.test(value), {
-      message:
-        'Name must contain only lowercase letters, numbers, and underscores',
+    .refine((value) => DB_NAME_VALIDATOR.regex.test(value), {
+      message: DB_NAME_VALIDATOR.message('Name'),
     }),
   enabled: z.boolean().default(true),
   type: z.enum(['google', 'entra_id', 'okta', 'generic']),

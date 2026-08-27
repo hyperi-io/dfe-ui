@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_REGEX } from '@/core/validationSchemas/CreateSchemaForm/utils';
+import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { Button, Input, Select } from 'antd';
@@ -13,9 +13,8 @@ const formSchema = z
     name: z
       .string()
       .min(1, { message: 'Name is required' })
-      .refine((v) => DB_NAME_REGEX.test(v), {
-        message:
-          'Name must contain only letters, numbers, underscores, and hyphens',
+      .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
+        message: DB_NAME_VALIDATOR.message('Name'),
       }),
     description: z.string(),
     roles: z.array(z.string()).min(1, { message: 'Roles are required' }),

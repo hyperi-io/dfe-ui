@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -12,15 +13,12 @@ import { Button, ButtonProps, Input, Modal } from 'antd';
 import { cloneElement, useState } from 'react';
 import z from 'zod';
 
-export const DB_NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-
 const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_REGEX.test(v), {
-      message:
-        'Name must contain only letters, numbers, underscores, and hyphens',
+    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
+      message: DB_NAME_VALIDATOR.message('Name'),
     }),
 });
 
