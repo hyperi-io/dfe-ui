@@ -30,7 +30,8 @@ function buildRegistry(): Registry {
     registers: [registry],
   }).set(
     {
-      version: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
+      // next.config bakes '' when nothing is stamped, so || not ??.
+      version: process.env.NEXT_PUBLIC_APP_VERSION || 'unknown',
       commit: process.env.GIT_COMMIT ?? 'unknown',
     },
     1,

@@ -17,11 +17,10 @@ import { SidebarMenu } from './SidebarMenu';
 
 const { Sider } = Layout;
 
-const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION;
-
 export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
   return (
     <Sider
       className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
@@ -61,9 +60,9 @@ export const Sidebar = () => {
         </div>
 
         <div className="flex gap-x-1 gap-y-2 flex-wrap px-7 content-end mb-4 w-full items-center justify-end">
-          {!collapsed && APP_VERSION && (
+          {!collapsed && appVersion && (
             <p className="text-sm text-gray-400 dark:text-gray-500 mr-auto">
-              v{APP_VERSION}
+              v{appVersion}
             </p>
           )}
           <ThemeToggle className="mr-2" collapsed={collapsed} />
