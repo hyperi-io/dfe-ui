@@ -166,7 +166,7 @@ export const CloneSourceDrawer = ({
             error={error}
             buttonLabel={title}
             initialValues={{
-              source: `${sourceName}-copy`,
+              source: `${sourceName}_copy`,
               enabled: sourceDetail.enabled,
               state: sourceDetail.state,
               description: sourceDetail.description,
