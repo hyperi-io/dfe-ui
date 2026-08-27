@@ -1,15 +1,14 @@
+import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import z from 'zod';
 
-export const DB_NAME_REGEX = /^[a-zA-Z0-9_]+$/;
 const GROUP_REGEX = /^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/;
 const VERSION_REGEX = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 
 export const schemaNameValidator = z
   .string()
   .min(1, { message: 'Name is required' })
-  .refine((v) => DB_NAME_REGEX.test(v), {
-    message:
-      'Name must contain only letters, numbers, underscores, and hyphens',
+  .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
+    message: DB_NAME_VALIDATOR.message('Name'),
   });
 
 export const schemaGroupValidator = z
@@ -29,7 +28,6 @@ export const schemaVersionValidator = z
 export const columnNameValidator = z
   .string()
   .min(1, { message: 'Name is required' })
-  .refine((v) => DB_NAME_REGEX.test(v), {
-    message:
-      'Name must contain only letters, numbers, underscores, and hyphens',
+  .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
+    message: DB_NAME_VALIDATOR.message('Name'),
   });
