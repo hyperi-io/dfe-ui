@@ -1,5 +1,6 @@
 'use client';
 
+import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -16,6 +17,7 @@ import { PromoteRowsProvider } from './contexts/PromoteRows.context';
 const SOURCE_DETAIL_TAB_KEY_MAP = {
   configuration: 'Configuration Details',
   'sample-events': 'Sample Events',
+  processing: 'Processing',
   'table-stats': 'Table Statistics',
   columns: 'Columns',
   'ddl-preview': 'DDL Preview',
@@ -111,6 +113,21 @@ export const ViewSourceDetailTabs = ({
                     version={selectedSourceVersion}
                   />
                 </PromoteRowsProvider>
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="h-full">
+                <RbacProtected.RestrictedRoute />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+
+        {
+          key: 'processing',
+          label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
+          children: (
+            <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
+              <RbacProtected.Unrestricted>
+                <SourceProcessingTabContent source={selectedSourceName} />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="h-full">
                 <RbacProtected.RestrictedRoute />
