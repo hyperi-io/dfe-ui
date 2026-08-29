@@ -1,6 +1,7 @@
 import { accounts } from './mocks/accounts';
 import { alerts } from './mocks/alerts';
 import { apiKeys } from './mocks/apiKeys';
+import { apps } from './mocks/apps';
 import { auth } from './mocks/auth';
 import { clientConfig } from './mocks/clientConfig';
 import { deployments } from './mocks/deployments';
@@ -10,6 +11,7 @@ import { governance } from './mocks/governance';
 import { groups } from './mocks/groups';
 import { helm } from './mocks/helm';
 import { hunts } from './mocks/hunts';
+import { library } from './mocks/library';
 import { lifecycle } from './mocks/lifecycle';
 import { oidc } from './mocks/oidc';
 import { oidcProviders } from './mocks/oidcProviders';
@@ -28,6 +30,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   accounts,
   alerts,
   apiKeys,
+  apps,
   auth,
   clientConfig,
   deployments,
@@ -37,6 +40,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   groups,
   helm,
   hunts,
+  library,
   lifecycle,
   oidc,
   oidcProviders,

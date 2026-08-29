@@ -1877,7 +1877,7 @@ export interface paths {
         };
         /**
          * Query Cost Leaderboard
-         * @description Top query-cost consumers from ``dfe_audit.query_log_archive``, heaviest first.
+         * @description Top query-cost consumers from ``dfe.query_log_archive``, heaviest first.
          *
          *     Groups by the attribution id (the hunt id for feature='hunts') and returns the
          *     query count + summed read rows/bytes + duration + peak memory. Reads the MV the
@@ -3242,6 +3242,624 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/apps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Apps
+         * @description Every manageable app, with the instances currently deployed.
+         */
+        get: operations["list_apps_api_v1_apps_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/instances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Instance
+         * @description Deploy an instance by creating its values overlay.
+         *
+         *     The overlay's presence is what the layer2-apps ApplicationSet turns into an Argo
+         *     Application, so this is the whole deployment step.
+         */
+        post: operations["create_instance_api_v1_apps__service__instances_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get App
+         * @description One instance's identity and shape.
+         */
+        get: operations["get_app_api_v1_apps__service___instance__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Instance
+         * @description Undeploy an instance by removing its values overlay.
+         */
+        delete: operations["delete_instance_api_v1_apps__service___instance__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get History
+         * @description Every change to this instance, newest first.
+         *
+         *     Supply the revision Argo has synced as ``applied_revision`` to see which
+         *     commits have reached the cluster and which are still pending.
+         */
+        get: operations["get_history_api_v1_apps__service___instance__history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Values
+         * @description The instance's overlay document as stored.
+         */
+        get: operations["get_values_api_v1_apps__service___instance__values_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/scaling": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Scaling
+         * @description The scaling dials, or why they do not apply here.
+         */
+        get: operations["get_scaling_api_v1_apps__service___instance__scaling_get"];
+        /**
+         * Set Scaling
+         * @description Set the scaling dials. Refused when the deploy target has no such dials.
+         */
+        put: operations["set_scaling_api_v1_apps__service___instance__scaling_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List App Files
+         * @description Every file in the set, without their contents.
+         */
+        get: operations["list_app_files_api_v1_apps__service___instance__files__set_name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List App Links
+         * @description Where each linked file came from, and whether it still matches.
+         *
+         *     ``drift`` means the content beside the link is no longer what the linked
+         *     version holds - a local edit over a linked file. ``outdated`` means the link
+         *     resolved cleanly but its target has moved since.
+         */
+        get: operations["list_app_links_api_v1_apps__service___instance__files__set_name__links_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Link App File
+         * @description Link a file in the set to a library artefact.
+         *
+         *     The artefact's content is resolved into the file set, because a chart can only
+         *     render what is already in the values, and the provenance is recorded beside it
+         *     so the link is recoverable.
+         */
+        post: operations["link_app_file_api_v1_apps__service___instance__files__set_name__link_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/relink": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Relink App Files
+         * @description Re-resolve every link in the set to what its target now names.
+         *
+         *     A tag link follows its tag; a version-pinned link advances to the artefact's
+         *     current version. This is the fix-once-roll-everywhere half of the library.
+         */
+        post: operations["relink_app_files_api_v1_apps__service___instance__files__set_name__relink_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Copy App Files
+         * @description Copy this instance's authored files onto another instance of the same app.
+         *
+         *     A transform is written against one source; reusing it on another should not mean
+         *     retyping it. Only the files move - the target keeps its own source binding,
+         *     scaling and identity.
+         */
+        post: operations["copy_app_files_api_v1_apps__service___instance__files__set_name__copy_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/{filename}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read App File
+         * @description One file's content.
+         */
+        get: operations["read_app_file_api_v1_apps__service___instance__files__set_name___filename__get"];
+        /**
+         * Write App File
+         * @description Add or replace a file the app consumes.
+         */
+        put: operations["write_app_file_api_v1_apps__service___instance__files__set_name___filename__put"];
+        post?: never;
+        /**
+         * Delete App File
+         * @description Remove a file the app consumes, and any link that produced it.
+         */
+        delete: operations["delete_app_file_api_v1_apps__service___instance__files__set_name___filename__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/routing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get App Routing
+         * @description What the sources compile to, against what the overlay actually carries.
+         *
+         *     An absent block is called out separately from drift: it means the app is
+         *     running on its built-in defaults, which is how a receiver silently ignores
+         *     every source rule ever defined.
+         */
+        get: operations["get_app_routing_api_v1_apps__service___instance__routing_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/routing/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync App Routing
+         * @description Rewrite the overlay's routing to what the sources currently compile to.
+         */
+        post: operations["sync_app_routing_api_v1_apps__service___instance__routing_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/files/{set_name}/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dry Run App File
+         * @description Run an authored file over real events from the source, and report each one.
+         *
+         *     Nothing is written: no topic, no table, no commit. ``content`` runs unsaved
+         *     content, which is what makes this useful in an editor; omitted, the file
+         *     already in the overlay runs instead.
+         */
+        post: operations["dry_run_app_file_api_v1_apps__service___instance__files__set_name__dry_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Status
+         * @description Whether the instance is reporting telemetry, and since when.
+         */
+        get: operations["get_status_api_v1_apps__service___instance__status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Metrics
+         * @description Throughput, CPU, memory and saturation for the instance.
+         */
+        get: operations["get_metrics_api_v1_apps__service___instance__metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/apps/{service}/{instance}/metrics/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Resource Series
+         * @description CPU and memory over time as min, max, average and p95 per bucket.
+         *
+         *     Each bucket aggregates across every pod reporting for this instance. A
+         *     per-config app deploys each config under its own service name, so one instance
+         *     is already one config.
+         */
+        get: operations["get_resource_series_api_v1_apps__service___instance__metrics_series_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/kinds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Kinds
+         * @description Every artefact kind the manifest declares.
+         */
+        get: operations["list_kinds_api_v1_library_kinds_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Artifacts
+         * @description Every artefact, filtered. Different filters AND together.
+         */
+        get: operations["list_artifacts_api_v1_library_get"];
+        put?: never;
+        /**
+         * Create Artifact
+         * @description Create an artefact, with or without its first version.
+         *
+         *     Creating one empty is what lets its kind, group and labels be settled before
+         *     any content can enter.
+         */
+        post: operations["create_artifact_api_v1_library_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Artifact
+         * @description One artefact's metadata and pointers.
+         */
+        get: operations["get_artifact_api_v1_library__artifact__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Artifact
+         * @description Remove an artefact. Refused while any instance links to it.
+         *
+         *     Retiring an artefact that is still in use is a state change, not a delete, so
+         *     the history behind a deployed file is never destroyed.
+         */
+        delete: operations["delete_artifact_api_v1_library__artifact__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Patch Artifact
+         * @description Edit the classification metadata. Never produces a version.
+         */
+        patch: operations["patch_artifact_api_v1_library__artifact__patch"];
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set State
+         * @description Set the lifecycle state.
+         */
+        put: operations["set_state_api_v1_library__artifact__state_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Versions
+         * @description Every version, oldest first, without their content.
+         */
+        get: operations["list_versions_api_v1_library__artifact__versions_get"];
+        put?: never;
+        /**
+         * Publish Version
+         * @description Publish content as a version.
+         *
+         *     Re-sending identical content is a no-op naming the version that already holds
+         *     it; sending different content at an existing version number is refused.
+         */
+        post: operations["publish_version_api_v1_library__artifact__versions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Version
+         * @description One immutable version, with its digest as a strong ETag.
+         */
+        get: operations["get_version_api_v1_library__artifact__versions__version__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rollback
+         * @description Point ``current`` back at an earlier version, keeping the newer ones.
+         */
+        post: operations["rollback_api_v1_library__artifact__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/tags/{tag}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Tag
+         * @description Point a tag at a version. Repointing is explicit, never a side effect.
+         */
+        put: operations["set_tag_api_v1_library__artifact__tags__tag__put"];
+        post?: never;
+        /**
+         * Delete Tag
+         * @description Remove a tag. The versions it named are untouched.
+         */
+        delete: operations["delete_tag_api_v1_library__artifact__tags__tag__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/library/{artifact}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Usage
+         * @description Every instance file that links to this artefact.
+         */
+        get: operations["get_usage_api_v1_library__artifact__usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/governance/actions": {
         parameters: {
             query?: never;
@@ -4081,6 +4699,61 @@ export interface components {
              */
             url_scheme: string;
         };
+        /** AppSummary */
+        AppSummary: {
+            /** Service */
+            service: string;
+            /** Instance */
+            instance: string;
+            /** Telemetry Name */
+            telemetry_name: string;
+            /** Scale Deployed */
+            scale_deployed: boolean;
+            /** Multiplicity */
+            multiplicity: string;
+            /** File Sets */
+            file_sets: components["schemas"]["FileSetSummary"][];
+        };
+        /** ArtifactModel */
+        ArtifactModel: {
+            /** Name */
+            name: string;
+            /** Kind */
+            kind: string;
+            /** State */
+            state: string;
+            /**
+             * Group
+             * @default
+             */
+            group: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Labels */
+            labels?: {
+                [key: string]: string;
+            };
+            /** Current */
+            current?: number | null;
+            /** Versions */
+            versions?: number[];
+            /**
+             * Tags
+             * @description Mutable names pointing at a version.
+             */
+            tags?: {
+                [key: string]: number;
+            };
+            /**
+             * Digest
+             * @description Digest of the current version.
+             * @default
+             */
+            digest: string;
+        };
         /**
          * AuthKind
          * @description How a provider authenticates. Secrets are held via the scalo.secrets seam.
@@ -4306,6 +4979,19 @@ export interface components {
              * @default false
              */
             selected: boolean;
+        };
+        /** CatalogueEntry */
+        CatalogueEntry: {
+            /** Service */
+            service: string;
+            /** Scale Deployed */
+            scale_deployed: boolean;
+            /** Multiplicity */
+            multiplicity: string;
+            /** File Sets */
+            file_sets: components["schemas"]["FileSetSummary"][];
+            /** Instances */
+            instances: string[];
         };
         /**
          * CelCheckBatchRequest
@@ -4564,6 +5250,49 @@ export interface components {
             /** Default */
             default?: unknown;
         };
+        /** CopyFilesRequest */
+        CopyFilesRequest: {
+            /**
+             * Target Instance
+             * @description Instance to copy into. For a source-bound app this is the source.
+             */
+            target_instance: string;
+            /**
+             * Overwrite
+             * @description Replace files of the same name in the target instead of refusing.
+             * @default false
+             */
+            overwrite: boolean;
+        };
+        /** CopyFilesResult */
+        CopyFilesResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
+            /**
+             * Reload
+             * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
+             */
+            reload?: string | null;
+            /** Copied */
+            copied?: string[];
+            /** Skipped */
+            skipped?: string[];
+        };
         /** CostEstimate */
         CostEstimate: {
             /** Estimated Rows */
@@ -4648,6 +5377,41 @@ export interface components {
              */
             groups?: string[];
         };
+        /** CreateArtifactRequest */
+        CreateArtifactRequest: {
+            /** Name */
+            name: string;
+            /**
+             * Kind
+             * @description A kind declared in the app manifest.
+             */
+            kind: string;
+            /**
+             * Group
+             * @description Optional namespace, e.g. 'network'.
+             * @default
+             */
+            group: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Labels */
+            labels?: {
+                [key: string]: string;
+            };
+            /**
+             * Content
+             * @description Publish this as version 1. Omit to create the artefact empty.
+             */
+            content?: string | null;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+        };
         /** CreateGroupRequest */
         CreateGroupRequest: {
             /**
@@ -4677,6 +5441,18 @@ export interface components {
              * @description Account usernames in this group (local login resolves roles from this list)
              */
             members?: string[];
+        };
+        /** CreateInstanceRequest */
+        CreateInstanceRequest: {
+            /** Instance */
+            instance: string;
+            /**
+             * Values
+             * @description Initial helm values as dot-path keys, merged over the defaults.
+             */
+            values?: {
+                [key: string]: unknown;
+            };
         };
         /** CreateOrgRequest */
         CreateOrgRequest: {
@@ -4908,6 +5684,118 @@ export interface components {
              */
             _field_type: string;
         };
+        /**
+         * DryRunEventModel
+         * @description What the program did to one event.
+         */
+        DryRunEventModel: {
+            /** Index */
+            index: number;
+            /** Before */
+            before: string;
+            /**
+             * After
+             * @default
+             */
+            after: string;
+            /**
+             * Error
+             * @default
+             */
+            error: string;
+            /**
+             * Dropped
+             * @default false
+             */
+            dropped: boolean;
+            /**
+             * Changed
+             * @default false
+             */
+            changed: boolean;
+        };
+        /**
+         * DryRunRequest
+         * @description Run a file over sampled events without saving or deploying anything.
+         */
+        DryRunRequest: {
+            /**
+             * Name
+             * @description File in the set to run
+             */
+            name: string;
+            /**
+             * Content
+             * @description Unsaved content to run instead of what is committed. Nothing is written.
+             */
+            content?: string | null;
+            /**
+             * Source
+             * @description Source to sample from. Defaults to the instance, which for a source-bound app IS the source.
+             * @default
+             */
+            source: string;
+            /**
+             * Limit
+             * @description Events to sample and run over
+             * @default 10
+             */
+            limit: number;
+        };
+        /**
+         * DryRunResponse
+         * @description A dry run's per-event outcomes and totals.
+         */
+        DryRunResponse: {
+            /**
+             * Status
+             * @description completed | unavailable | disabled | unsupported | failed
+             */
+            status: string;
+            /**
+             * Backend
+             * @default
+             */
+            backend: string;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /**
+             * Source
+             * @default
+             */
+            source: string;
+            /**
+             * Sampled
+             * @default 0
+             */
+            sampled: number;
+            /**
+             * Succeeded
+             * @default 0
+             */
+            succeeded: number;
+            /**
+             * Failed
+             * @default 0
+             */
+            failed: number;
+            /**
+             * Dropped
+             * @default 0
+             */
+            dropped: number;
+            /**
+             * Truncated
+             * @description Events were cut by the count or output-size ceiling
+             * @default false
+             */
+            truncated: boolean;
+            /** Events */
+            events?: components["schemas"]["DryRunEventModel"][];
+        };
         /** EmittedRecord */
         EmittedRecord: {
             /** Key */
@@ -5083,6 +5971,44 @@ export interface components {
             sigma_field: string;
             /** Column Name */
             column_name: string;
+        };
+        /** FileDetail */
+        FileDetail: {
+            /** Name */
+            name: string;
+            /** Language */
+            language: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Content */
+            content: string;
+        };
+        /** FileSetSummary */
+        FileSetSummary: {
+            /** Name */
+            name: string;
+            /** Language */
+            language: string;
+            /** Suffixes */
+            suffixes: string[];
+            /** Reload */
+            reload: string;
+            /** Directory Setting */
+            directory_setting: string;
+        };
+        /** FileSummary */
+        FileSummary: {
+            /** Name */
+            name: string;
+            /** Language */
+            language: string;
+            /** Size Bytes */
+            size_bytes: number;
+        };
+        /** FileWriteRequest */
+        FileWriteRequest: {
+            /** Content */
+            content: string;
         };
         /**
          * FilterTier
@@ -5357,6 +6283,28 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HistoryEntry */
+        HistoryEntry: {
+            /** Sha */
+            sha: string;
+            /** Timestamp */
+            timestamp: number;
+            /**
+             * Actor
+             * @default
+             */
+            actor: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * State
+             * @description 'committed' when no Argo revision was supplied, otherwise 'applied' if the cluster has synced this commit or 'pending' if it has not yet.
+             */
+            state: string;
         };
         /** HuntCreateRequest */
         HuntCreateRequest: {
@@ -5743,6 +6691,17 @@ export interface components {
              */
             paths: components["schemas"]["JsonPathInfo"][];
         };
+        /** KindModel */
+        KindModel: {
+            /** Name */
+            name: string;
+            /** Language */
+            language: string;
+            /** Suffixes */
+            suffixes: string[];
+            /** Encoding */
+            encoding: string;
+        };
         /** LifecycleRequest */
         LifecycleRequest: {
             state: components["schemas"]["LifecycleState"];
@@ -5769,6 +6728,110 @@ export interface components {
          * @enum {string}
          */
         LifecycleState: "running" | "paused" | "stopped";
+        /** LinkModel */
+        LinkModel: {
+            /** Name */
+            name: string;
+            /** Artifact */
+            artifact: string;
+            /** Version */
+            version: number;
+            /** Digest */
+            digest: string;
+            /**
+             * Tag
+             * @default
+             */
+            tag: string;
+        };
+        /** LinkRequest */
+        LinkRequest: {
+            /**
+             * Name
+             * @description Filename the artefact's content resolves into.
+             */
+            name: string;
+            /** Artifact */
+            artifact: string;
+            /**
+             * Version
+             * @description Pin this version. Omit for the artefact's current one.
+             */
+            version?: number | null;
+            /**
+             * Tag
+             * @description Follow this tag instead of a version; the resolved version is recorded.
+             * @default
+             */
+            tag: string;
+        };
+        /** LinkResult */
+        LinkResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
+            /**
+             * Reload
+             * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
+             */
+            reload?: string | null;
+            link?: components["schemas"]["LinkModel"] | null;
+        };
+        /** LinkStatusModel */
+        LinkStatusModel: {
+            /** Name */
+            name: string;
+            /** Artifact */
+            artifact: string;
+            /** Version */
+            version: number;
+            /** Digest */
+            digest: string;
+            /**
+             * Tag
+             * @default
+             */
+            tag: string;
+            /**
+             * Resolved Digest
+             * @description Digest of the content sitting in the file set.
+             */
+            resolved_digest: string;
+            /**
+             * Available Version
+             * @description The version re-resolving would move this link to.
+             */
+            available_version?: number | null;
+            /**
+             * Missing
+             * @description The artefact or its linked version is gone.
+             */
+            missing: boolean;
+            /**
+             * Drift
+             * @description The content here is not what the linked version holds.
+             */
+            drift: boolean;
+            /**
+             * Outdated
+             * @description The link's target has moved on since it resolved.
+             */
+            outdated: boolean;
+        };
         /** LogEntryModel */
         LogEntryModel: {
             /** Sha */
@@ -6148,6 +7211,21 @@ export interface components {
              * @default
              */
             group: string;
+        };
+        /** MetricsResponse */
+        MetricsResponse: {
+            /** Telemetry Name */
+            telemetry_name: string;
+            /** Window Seconds */
+            window_seconds: number;
+            /** Gauges */
+            gauges: {
+                [key: string]: number;
+            };
+            /** Rates */
+            rates: {
+                [key: string]: number;
+            };
         };
         NonEmptyDict_str_SchemaVersionCreate_: {
             [key: string]: components["schemas"]["SchemaVersionCreate"];
@@ -6937,6 +8015,17 @@ export interface components {
              */
             description: string;
         };
+        /** PatchArtifactRequest */
+        PatchArtifactRequest: {
+            /** Description */
+            description?: string | null;
+            /** Labels */
+            labels?: {
+                [key: string]: string;
+            } | null;
+            /** Group */
+            group?: string | null;
+        };
         /** PathTree[SchemaSummaryObject] */
         PathTree_SchemaSummaryObject_: {
             /**
@@ -7328,6 +8417,27 @@ export interface components {
             /** Sync Error */
             sync_error: string;
         };
+        /** PublishVersionRequest */
+        PublishVersionRequest: {
+            /** Content */
+            content: string;
+            /**
+             * Description
+             * @description Fixed to this version at publish.
+             * @default
+             */
+            description: string;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /**
+             * Version
+             * @description Publish at this exact version. Omit for the next in the series.
+             */
+            version?: number | null;
+        };
         /**
          * QueryOptions
          * @description Query execution options.
@@ -7471,6 +8581,33 @@ export interface components {
             /** @description Execution options (limit, timeout, etc.) */
             options?: components["schemas"]["QueryOptions"] | null;
         };
+        /** RelinkResult */
+        RelinkResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
+            /**
+             * Reload
+             * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
+             */
+            reload?: string | null;
+            /** Relinked */
+            relinked?: components["schemas"]["LinkModel"][];
+        };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
             /**
@@ -7491,6 +8628,37 @@ export interface components {
             message: string;
             /** @description Durability state: merged straight away, or a pending PR/command. */
             git: components["schemas"]["AccountGitState"];
+        };
+        /** ResourceBucketModel */
+        ResourceBucketModel: {
+            /** Metric */
+            metric: string;
+            /** Bucket Epoch */
+            bucket_epoch: number;
+            /** Minimum */
+            minimum: number;
+            /** Maximum */
+            maximum: number;
+            /** Average */
+            average: number;
+            /** P95 */
+            p95: number;
+            /** Samples */
+            samples: number;
+        };
+        /** ResourceSeriesResponse */
+        ResourceSeriesResponse: {
+            /** Telemetry Name */
+            telemetry_name: string;
+            /** Window Seconds */
+            window_seconds: number;
+            /** Bucket Seconds */
+            bucket_seconds: number;
+            /**
+             * Buckets
+             * @description One entry per metric per time bucket, aggregated across every pod reporting for this instance.
+             */
+            buckets: components["schemas"]["ResourceBucketModel"][];
         };
         /** ReviewRequest */
         ReviewRequest: {
@@ -7516,6 +8684,45 @@ export interface components {
              * @description core for system roles, custom for user-created roles
              */
             resource_type: string;
+        };
+        /** RollbackRequest */
+        RollbackRequest: {
+            /** Version */
+            version: number;
+        };
+        /**
+         * RoutingResponse
+         * @description Source-derived routing: what it should be, and what the overlay carries.
+         */
+        RoutingResponse: {
+            /**
+             * Compiler
+             * @description Manifest-declared compiler that derives this block
+             */
+            compiler: string;
+            /**
+             * Values Path
+             * @description Overlay dot-path the block is written to
+             */
+            values_path: string;
+            /**
+             * Drift
+             * @description The overlay disagrees with the current sources
+             */
+            drift: boolean;
+            /**
+             * Absent
+             * @description The overlay carries no routing, so the app runs on built-in defaults
+             */
+            absent: boolean;
+            /** Compiled */
+            compiled?: {
+                [key: string]: unknown;
+            };
+            /** Deployed */
+            deployed?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * RuleCreateRequest
@@ -7605,18 +8812,27 @@ export interface components {
          * RuleFromHyperdxRequest
          * @description Create a hunt rule from a live HyperDX view.
          *
-         *     HyperDX posts the expanded ClickHouse SELECT; the create pipeline strips the UI
-         *     meta (time bounds, LIMIT, ``__hdx_time_bucket``, SETTINGS) via the HyperDX
-         *     sanitizer, and the engine derives a unique rule id from the saved-search name.
-         *     The caller gets that id back and opens ``/rules/{id}`` -- no id to invent, no
-         *     IndexedDB round-trip.
+         *     Supply ``saved_search_id`` and the engine asks HyperDX what SQL that view
+         *     actually runs. Supply ``raw_sql`` and the caller's string is taken on trust,
+         *     which on a SQL-mode search is whatever sits in the editor rather than the
+         *     query the view executes.
+         *
+         *     Either way the create pipeline strips the UI meta (time bounds, LIMIT,
+         *     ``__hdx_time_bucket``, SETTINGS) via the HyperDX sanitizer, and the engine
+         *     derives a unique rule id from the saved-search name. The caller gets that id
+         *     back and opens ``/rules/{id}`` -- no id to invent, no IndexedDB round-trip.
          */
         RuleFromHyperdxRequest: {
             /**
-             * Raw Sql
-             * @description Expanded HyperDX ClickHouse SELECT to turn into a rule
+             * Saved Search Id
+             * @description HyperDX saved-search id; the engine resolves the SQL that view runs
              */
-            raw_sql: string;
+            saved_search_id?: string | null;
+            /**
+             * Raw Sql
+             * @description Pre-rendered ClickHouse SELECT, trusted as given
+             */
+            raw_sql?: string | null;
             /**
              * Saved Search Name
              * @description HyperDX saved-search name; seeds the rule id and label
@@ -7648,6 +8864,13 @@ export interface components {
             id: string;
             /** Display Name */
             display_name: string;
+            /**
+             * Resolved From
+             * @description Which SQL source the rule was built from
+             * @default raw_sql
+             * @enum {string}
+             */
+            resolved_from: "saved_search" | "raw_sql";
             /** Sanitize Summary */
             sanitize_summary?: {
                 [key: string]: unknown;
@@ -8009,6 +9232,51 @@ export interface components {
              * @default 100
              */
             limit: number;
+        };
+        /** ScalingRequest */
+        ScalingRequest: {
+            /** Min Replicas */
+            min_replicas?: number | null;
+            /** Max Replicas */
+            max_replicas?: number | null;
+            /** Keda Enabled */
+            keda_enabled?: boolean | null;
+            /** Cpu Request */
+            cpu_request?: string | null;
+            /** Memory Request */
+            memory_request?: string | null;
+            /** Cpu Limit */
+            cpu_limit?: string | null;
+            /** Memory Limit */
+            memory_limit?: string | null;
+        };
+        /** ScalingResponse */
+        ScalingResponse: {
+            /** Supported */
+            supported: boolean;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+            /** Deploy Target */
+            deploy_target: string;
+            /** Replica Count */
+            replica_count?: number | null;
+            /** Min Replicas */
+            min_replicas?: number | null;
+            /** Max Replicas */
+            max_replicas?: number | null;
+            /** Keda Enabled */
+            keda_enabled?: boolean | null;
+            /** Cpu Request */
+            cpu_request?: string | null;
+            /** Memory Request */
+            memory_request?: string | null;
+            /** Cpu Limit */
+            cpu_limit?: string | null;
+            /** Memory Limit */
+            memory_limit?: string | null;
         };
         /**
          * SchemaColumnWrite
@@ -9184,6 +10452,27 @@ export interface components {
             /** Errors */
             errors?: components["schemas"]["SqlValidationError"][];
         };
+        /** StateRequest */
+        StateRequest: {
+            /**
+             * State
+             * @description enabled | disabled | deprecated
+             */
+            state: string;
+        };
+        /** StatusResponse */
+        StatusResponse: {
+            /** Telemetry Name */
+            telemetry_name: string;
+            /** Reporting */
+            reporting: boolean;
+            /** Last Seen Epoch */
+            last_seen_epoch?: number | null;
+            /** Started Epoch */
+            started_epoch?: number | null;
+            /** Uptime Seconds */
+            uptime_seconds?: number | null;
+        };
         /**
          * StreamRequest
          * @description Background stream request - posts generated events to an HTTP ingest URL.
@@ -9362,6 +10651,11 @@ export interface components {
              * @default
              */
             comment: string;
+        };
+        /** TagRequest */
+        TagRequest: {
+            /** Version */
+            version: number;
         };
         /**
          * TaskInfo
@@ -9584,6 +10878,24 @@ export interface components {
              */
             scoped?: boolean | null;
         };
+        /** UsageModel */
+        UsageModel: {
+            /** Service */
+            service: string;
+            /** Instance */
+            instance: string;
+            /** File Set */
+            file_set: string;
+            /** Name */
+            name: string;
+            /** Version */
+            version: number;
+            /**
+             * Tag
+             * @default
+             */
+            tag: string;
+        };
         /** UserResponse */
         UserResponse: {
             /** Org Id */
@@ -9629,6 +10941,26 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /** ValidationModel */
+        ValidationModel: {
+            /**
+             * Status
+             * @description 'valid' or 'invalid' when a backend answered, 'unavailable' when none could, 'disabled' when validation is off for this deployment.
+             */
+            status: string;
+            /**
+             * Backend
+             * @default
+             */
+            backend: string;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /** Errors */
+            errors?: string[];
+        };
         /**
          * VarChange
          * @description One var mutation in an action: set ``cls/name`` dot-``path`` to ``value``.
@@ -9655,6 +10987,41 @@ export interface components {
             /** Protected */
             protected: boolean;
         };
+        /** VersionDetail */
+        VersionDetail: {
+            /** Version */
+            version: number;
+            /** Digest */
+            digest: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Published By
+             * @default
+             */
+            published_by: string;
+            /**
+             * Published At
+             * @default 0
+             */
+            published_at: number;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /** Kind */
+            kind: string;
+            /** Encoding */
+            encoding: string;
+            /** Content */
+            content: string;
+        };
         /** VersionResponse */
         VersionResponse: {
             /**
@@ -9667,6 +11034,35 @@ export interface components {
              * @description Python interpreter version
              */
             python_version: string;
+        };
+        /** VersionSummary */
+        VersionSummary: {
+            /** Version */
+            version: number;
+            /** Digest */
+            digest: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Published By
+             * @default
+             */
+            published_by: string;
+            /**
+             * Published At
+             * @default 0
+             */
+            published_at: number;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
         };
         /**
          * ViewDefinition
@@ -9812,25 +11208,6 @@ export interface components {
             /** Source Hint */
             source_hint?: string | null;
         };
-        /** WriteResult */
-        WriteResult: {
-            /** Changed */
-            changed: boolean;
-            /** Commit Sha */
-            commit_sha?: string | null;
-            /**
-             * Auto Merged
-             * @default false
-             */
-            auto_merged: boolean;
-            /**
-             * Review Required
-             * @default false
-             */
-            review_required: boolean;
-            /** Pr Url */
-            pr_url?: string | null;
-        };
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1: {
             /** Items */
@@ -9903,6 +11280,31 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** WriteResult */
+        dfe_engine__api__v1__apps__WriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
+            /**
+             * Reload
+             * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
+             */
+            reload?: string | null;
+        };
         /** SeedResponse */
         dfe_engine__api__v1__deployments__SeedResponse: {
             /** Seeded */
@@ -9921,6 +11323,50 @@ export interface components {
         dfe_engine__api__v1__fieldmaps__SeedResponse: {
             /** Seeded */
             seeded: number;
+        };
+        /** WriteResult */
+        dfe_engine__api__v1__helm__WriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+        };
+        /** WriteResult */
+        dfe_engine__api__v1__library__WriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            /**
+             * Version
+             * @description The version this write published or repointed to.
+             */
+            version?: number | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
         };
         /** SyncResponse */
         dfe_engine__api__v1__oidc_providers__SyncResponse: {
@@ -16485,7 +17931,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["WriteResult"];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
                 };
             };
             /** @description Validation Error */
@@ -16517,7 +17963,1208 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["WriteResult"];
+                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_apps_api_v1_apps_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueEntry"][];
+                };
+            };
+        };
+    };
+    create_instance_api_v1_apps__service__instances_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInstanceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_app_api_v1_apps__service___instance__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_instance_api_v1_apps__service___instance__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_history_api_v1_apps__service___instance__history_get: {
+        parameters: {
+            query?: {
+                applied_revision?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryEntry"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_values_api_v1_apps__service___instance__values_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_scaling_api_v1_apps__service___instance__scaling_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScalingResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_scaling_api_v1_apps__service___instance__scaling_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScalingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_app_files_api_v1_apps__service___instance__files__set_name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_app_links_api_v1_apps__service___instance__files__set_name__links_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkStatusModel"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_app_file_api_v1_apps__service___instance__files__set_name__link_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    relink_app_files_api_v1_apps__service___instance__files__set_name__relink_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelinkResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    copy_app_files_api_v1_apps__service___instance__files__set_name__copy_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyFilesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CopyFilesResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_app_file_api_v1_apps__service___instance__files__set_name___filename__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    write_app_file_api_v1_apps__service___instance__files__set_name___filename__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FileWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_app_file_api_v1_apps__service___instance__files__set_name___filename__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_app_routing_api_v1_apps__service___instance__routing_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutingResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_app_routing_api_v1_apps__service___instance__routing_sync_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dry_run_app_file_api_v1_apps__service___instance__files__set_name__dry_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+                set_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DryRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DryRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_status_api_v1_apps__service___instance__status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_metrics_api_v1_apps__service___instance__metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_series_api_v1_apps__service___instance__metrics_series_get: {
+        parameters: {
+            query?: {
+                window_seconds?: number;
+                bucket_seconds?: number;
+            };
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceSeriesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_kinds_api_v1_library_kinds_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KindModel"][];
+                };
+            };
+        };
+    };
+    list_artifacts_api_v1_library_get: {
+        parameters: {
+            query?: {
+                kind?: string;
+                group?: string;
+                state?: string;
+                /** @description Repeatable 'key' or 'key=value' selector; all must match. */
+                label?: string[];
+                /** @description Substring of the name or the description. */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtifactModel"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_artifact_api_v1_library_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateArtifactRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_artifact_api_v1_library__artifact__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtifactModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_artifact_api_v1_library__artifact__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    patch_artifact_api_v1_library__artifact__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatchArtifactRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_state_api_v1_library__artifact__state_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_versions_api_v1_library__artifact__versions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_version_api_v1_library__artifact__versions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishVersionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_version_api_v1_library__artifact__versions__version__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rollback_api_v1_library__artifact__rollback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RollbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_tag_api_v1_library__artifact__tags__tag__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+                tag: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_tag_api_v1_library__artifact__tags__tag__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+                tag: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__library__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_usage_api_v1_library__artifact__usage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                artifact: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageModel"][];
                 };
             };
             /** @description Validation Error */
