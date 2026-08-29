@@ -2,7 +2,7 @@ import { TCreateLibraryArtifactResponse } from '@/Library/hooks/useCreateLibrary
 import { TDeleteLibraryArtifactResponse } from '@/Library/hooks/useDeleteLibraryArtifact/types';
 import { TDeleteLibraryTagResponse } from '@/Library/hooks/useDeleteLibraryTag/types';
 import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
-import { TLibraryArtifactsResponse } from '@/Library/hooks/useFetchLibraryArtifacts/types';
+import { TLibraryArtifactsResponse } from '@/core/hooks/library/useFetchLibraryArtifacts/types';
 import { TLibraryKindsResponse } from '@/Library/hooks/useFetchLibraryKinds/types';
 import { TLibraryUsageResponse } from '@/Library/hooks/useFetchLibraryUsage/types';
 import { TLibraryVersionDetail } from '@/Library/hooks/useFetchLibraryVersionDetail/types';
