@@ -33,6 +33,9 @@ test('Sidebar Navigation', async ({ page }) => {
 
   /* Does not show other sidebar navigation links */
   await expect(
+    page.getByRole('link', { name: 'Hunt Results', exact: true }),
+  ).toBeHidden();
+  await expect(
     page.getByRole('link', { name: 'Search', exact: true }),
   ).toBeHidden();
   await expect(
