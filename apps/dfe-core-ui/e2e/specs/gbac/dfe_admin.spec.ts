@@ -16,6 +16,9 @@ test('Sidebar Navigation', async ({ page }) => {
 
   /* Shows the correct sidebar navigation links */
   await expect(
+    page.getByRole('link', { name: 'Hunt Results', exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole('link', { name: 'Search', exact: true }),
   ).toBeVisible();
   await expect(

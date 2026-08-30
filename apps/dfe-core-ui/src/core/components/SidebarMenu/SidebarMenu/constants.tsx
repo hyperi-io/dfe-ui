@@ -8,6 +8,7 @@ import {
   IconCode,
   IconDatabase,
   IconLayoutGrid,
+  IconRadar,
   IconSettings2,
   IconShieldCheck,
   IconStack2,
@@ -33,6 +34,24 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   // the dashboard_read RBAC action.
   ...(hyperdxUrl
     ? [
+        {
+          key: '/observe/hunt-results',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/hunt-results',
+                    icon: <IconWrapper icon={<IconRadar />} />,
+                    label: 'Hunt Results',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+            </RbacProtected>
+          ),
+        },
         {
           key: '/observe/search',
           Component: ({ collapsed }: SidebarMenuProps) => (
