@@ -141,6 +141,10 @@ export const API_CONFIG = Object.freeze({
     fileLinks: '/api/v1/apps/{service}/{instance}/files/{set_name}/links',
     fileRelink: '/api/v1/apps/{service}/{instance}/files/{set_name}/relink',
   },
+  backingServices: {
+    default: '/api/v1/backing-services',
+    overlayVar: '/api/v1/backing-services/overlays/{name}/vars/{path}',
+  },
   library: {
     default: '/api/v1/library',
     kinds: '/api/v1/library/kinds',

@@ -54,4 +54,21 @@ describe('ComponentsScene', () => {
       await screen.findByText('No components are deployed'),
     ).toBeInTheDocument();
   });
+
+  it('carries the data layer as its own section, apart from the pools', async () => {
+    render(<ComponentsScene />, { wrapper });
+
+    expect(await screen.findByText('Backing services')).toBeInTheDocument();
+    expect(await screen.findByText('clickhouse')).toBeInTheDocument();
+  });
+
+  it('keeps the data layer visible when no DFE component is deployed', async () => {
+    server.use(
+      API_CONFIG_MOCKS.apps.default.get.success({ mockedResponse: [] }),
+    );
+
+    render(<ComponentsScene />, { wrapper });
+
+    expect(await screen.findByText('Backing services')).toBeInTheDocument();
+  });
 });

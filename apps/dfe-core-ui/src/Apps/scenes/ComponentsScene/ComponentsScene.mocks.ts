@@ -22,4 +22,5 @@ export const server = setupServer(
   API_CONFIG_MOCKS.apps.metricsSeries.get.success(receiver),
   API_CONFIG_MOCKS.apps.scaling.get.success(receiver),
   API_CONFIG_MOCKS.apps.history.get.success(receiver),
+  API_CONFIG_MOCKS.backingServices.default.get.success(),
 );

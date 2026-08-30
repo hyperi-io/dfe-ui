@@ -3,6 +3,7 @@ import { alerts } from './mocks/alerts';
 import { apiKeys } from './mocks/apiKeys';
 import { apps } from './mocks/apps';
 import { auth } from './mocks/auth';
+import { backingServices } from './mocks/backingServices';
 import { clientConfig } from './mocks/clientConfig';
 import { deployments } from './mocks/deployments';
 import { fieldMaps } from './mocks/fieldMaps';
@@ -32,6 +33,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   apiKeys,
   apps,
   auth,
+  backingServices,
   clientConfig,
   deployments,
   fieldMaps,
