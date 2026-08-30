@@ -29,6 +29,7 @@ describe('SidebarMenu', () => {
         .filter((item) => !!item);
 
       expect(menuItemList).toEqual([
+        'Hunt Results',
         'Search',
         'Saved Searches',
         'Chart Explorer',
@@ -50,14 +51,15 @@ describe('SidebarMenu', () => {
     it('should navigate to the correct page when a menu item is clicked', async () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
       const menuItems = await screen.findAllByRole('link');
-      expect(menuItems[0]).toHaveAttribute('href', '/observe/search');
+      expect(menuItems[0]).toHaveAttribute('href', '/observe/hunt-results');
+      expect(menuItems[1]).toHaveAttribute('href', '/observe/search');
     });
 
     it('should not show tooltip on hover', async () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
       const menuItems = await screen.findAllByRole('link');
 
-      expect(menuItems[0]).toHaveAttribute('href', '/observe/search');
+      expect(menuItems[0]).toHaveAttribute('href', '/observe/hunt-results');
     });
   });
 
@@ -70,7 +72,7 @@ describe('SidebarMenu', () => {
       await user.hover(menuItems[0]);
 
       await waitFor(() => {
-        const searchElements = screen.getAllByText('Search');
+        const searchElements = screen.getAllByText('Hunt Results');
         expect(searchElements.length).toBeGreaterThan(0);
       });
     });
@@ -96,7 +98,7 @@ describe('SidebarMenu', () => {
       render(<SidebarMenu collapsed={true} />, { wrapper });
       const menuItemList = await screen.findAllByRole('link');
 
-      expect(menuItemList[0]).toHaveAttribute('href', '/observe/search');
+      expect(menuItemList[0]).toHaveAttribute('href', '/observe/hunt-results');
     });
   });
 });
