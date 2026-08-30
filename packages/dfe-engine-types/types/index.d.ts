@@ -3234,9 +3234,120 @@ export interface paths {
         post?: never;
         /**
          * Delete Var
-         * @description Revert a helm var to its chart default. Routed like set_var (PR in prod+team).
+         * @description Revert a helm var to its chart default. Routed like set_var (PR in prod+team);
+         *     403 if protected, since reverting a locked var changes it as surely as setting it.
          */
         delete: operations["delete_var_api_v1_helm_files__name__vars__path__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backing-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Backing Services
+         * @description Every backing service's DECLARED deploy configuration.
+         *
+         *     Declared, not observed: these are the values the deploy repo asks for, read
+         *     from git. The engine runs no Kubernetes client, so a figure here can differ
+         *     from the cluster whenever Argo has not synced the declaration yet.
+         */
+        get: operations["list_backing_services_api_v1_backing_services_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backing-services/overlays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Overlays
+         * @description List substrate/platform overlay resources in the deploy repo's infra/ dir.
+         */
+        get: operations["list_overlays_api_v1_backing_services_overlays_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backing-services/overlays/{name}/vars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Overlay Vars
+         * @description Flattened dot-path vars for one overlay, each marked protected or not.
+         */
+        get: operations["list_overlay_vars_api_v1_backing_services_overlays__name__vars_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backing-services/{service}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Backing Service
+         * @description One backing service's DECLARED deploy configuration (see the list route).
+         */
+        get: operations["get_backing_service_api_v1_backing_services__service__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/backing-services/overlays/{name}/vars/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Overlay Var
+         * @description Set a substrate/platform value. 403 with the policy that blocked it when the
+         *     var is protected - the storage model and the data-layer modes are decided at
+         *     deploy, and moving one on a live deployment is a data migration.
+         */
+        put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
+        post?: never;
+        /**
+         * Delete Overlay Var
+         * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
+         */
+        delete: operations["delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4777,6 +4888,27 @@ export interface components {
             reason: string;
         };
         /**
+         * BackingServiceConfig
+         * @description A backing service's deploy configuration AS DECLARED, not as observed.
+         */
+        BackingServiceConfig: {
+            /** Service */
+            service: string;
+            /** Chart */
+            chart: string;
+            /** Overlay */
+            overlay: string;
+            mode: components["schemas"]["DeclaredValue"];
+            storage_model: components["schemas"]["DeclaredValue"];
+            replicas: components["schemas"]["DeclaredValue"];
+            storage_size: components["schemas"]["DeclaredValue"];
+            storage_class: components["schemas"]["DeclaredValue"];
+            /** Resources */
+            resources?: {
+                [key: string]: components["schemas"]["DeclaredValue"];
+            };
+        };
+        /**
          * BindingSummary
          * @description A generated sigma-bound rule with its live drift state.
          */
@@ -5580,6 +5712,26 @@ export interface components {
              * @default
              */
             engine: string;
+        };
+        /**
+         * DeclaredValue
+         * @description One value as the deploy repo declares it.
+         *
+         *     ``source`` names the overlay file it came from; a null source means the
+         *     deployment declared nothing and the chart or profile default applies. Those
+         *     defaults live in dfe-infra, which the engine does not read, so the API says
+         *     "not declared" rather than guessing a number.
+         */
+        DeclaredValue: {
+            /** Value */
+            value?: unknown | null;
+            /** Source */
+            source?: string | null;
+            /**
+             * Protected
+             * @default false
+             */
+            protected: boolean;
         };
         /**
          * DeploymentConfigDetail
@@ -17946,6 +18098,180 @@ export interface operations {
         };
     };
     delete_var_api_v1_helm_files__name__vars__path__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_backing_services_api_v1_backing_services_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackingServiceConfig"][];
+                };
+            };
+        };
+    };
+    list_overlays_api_v1_backing_services_overlays_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    list_overlay_vars_api_v1_backing_services_overlays__name__vars_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_backing_service_api_v1_backing_services__service__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackingServiceConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                name: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetVarRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete: {
         parameters: {
             query?: never;
             header?: never;

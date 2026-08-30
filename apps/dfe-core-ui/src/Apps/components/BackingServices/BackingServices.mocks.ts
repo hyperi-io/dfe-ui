@@ -10,17 +10,9 @@ const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   groups: ['group'],
 };
 
-const receiver = { service: 'dfe-receiver', instance: 'default' };
-
 export const server = setupServer(
   API_CONFIG_MOCKS.auth.me.get.success({
     mockedResponse: ADMIN_MOCKED_RESPONSE,
   }),
-  API_CONFIG_MOCKS.apps.default.get.success(),
-  API_CONFIG_MOCKS.apps.status.get.success(receiver),
-  API_CONFIG_MOCKS.apps.metrics.get.success(receiver),
-  API_CONFIG_MOCKS.apps.metricsSeries.get.success(receiver),
-  API_CONFIG_MOCKS.apps.scaling.get.success(receiver),
-  API_CONFIG_MOCKS.apps.history.get.success(receiver),
   API_CONFIG_MOCKS.backingServices.default.get.success(),
 );

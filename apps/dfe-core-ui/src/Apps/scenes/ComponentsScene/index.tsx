@@ -1,5 +1,6 @@
 'use client';
 
+import { BackingServices } from '@/Apps/components/BackingServices';
 import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
@@ -54,6 +55,8 @@ export const ComponentsScene = () => {
       })),
     );
 
+  // The data layer is declared separately from the DFE pools and does not
+  // depend on any being deployed, so it renders either way.
   if (pools.length === 0) {
     return (
       <MainContentCard>
@@ -62,6 +65,9 @@ export const ComponentsScene = () => {
           title="No components are deployed"
           description="A component appears here once its values overlay exists in the deploy repo."
         />
+        <div className="mt-6">
+          <BackingServices />
+        </div>
       </MainContentCard>
     );
   }
@@ -111,6 +117,10 @@ export const ComponentsScene = () => {
           <RbacProtected.RestrictedRoute />
         </RbacProtected.Restricted>
       </RbacProtected>
+
+      <div className="mt-8 pl-6">
+        <BackingServices />
+      </div>
     </MainContentCard>
   );
 };
