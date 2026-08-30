@@ -41,6 +41,16 @@ describe('useFetchApps', () => {
     expect(result.current.data?.[2].file_sets).toEqual([]);
   });
 
+  it('flags which apps have routing compiled from the sources', async () => {
+    const { result } = renderHook(() => useFetchApps(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data?.[0].has_compiled_routing).toBe(true);
+    expect(result.current.data?.[1].has_compiled_routing).toBe(false);
+    expect(result.current.data?.[2].has_compiled_routing).toBe(false);
+  });
+
   it('does not fetch while disabled', async () => {
     const { result } = renderHook(() => useFetchApps({ queryEnabled: false }), {
       wrapper,

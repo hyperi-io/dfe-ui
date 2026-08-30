@@ -11,12 +11,28 @@ import { Tag } from 'antd';
  * How a change reaches the running process. The engine sends this on every
  * write because a saved file is not the same as a live one - vector polls and
  * reloads, vrl compiles at startup and needs the pod to roll.
+ *
+ * The app surface and the backing-service surface use different words for
+ * different costs, so both sets live here rather than being flattened into one
+ * vocabulary that would blur a pod roll into a StatefulSet recreation.
  */
-const RELOAD_LABEL: Record<string, string> = {
+export const RELOAD_LABEL: Record<string, string> = {
+  // App file and dial writes.
   hot: 'Applied without a restart',
   roll: 'Takes effect when the pod rolls',
   restart: 'Needs a manual restart',
+  // Backing-service writes.
+  apply: 'Reconciles in place, with no restart',
+  recreate: 'The StatefulSet has to be recreated by hand before this applies',
+  redeploy: 'Changes which objects exist, so the store is redeployed',
 };
+
+/**
+ * Reload outcomes that are not routine. `recreate` needs hands on the cluster
+ * and `redeploy` adds or removes the store's objects, so neither may read as an
+ * ordinary success.
+ */
+const DISRUPTIVE_RELOAD = new Set(['recreate', 'redeploy']);
 
 export type TWriteResult = {
   changed: boolean;
@@ -71,12 +87,14 @@ export const WriteResultFeedback = ({
     );
   }
 
+  const disruptive = !!result.reload && DISRUPTIVE_RELOAD.has(result.reload);
+
   return (
     <NotificationCard
       className={className}
-      type="success"
-      icon={<IconCheck />}
-      title="Committed"
+      type={disruptive ? 'warning' : 'success'}
+      icon={disruptive ? <IconAlertTriangle /> : <IconCheck />}
+      title={disruptive ? 'Committed, but not applied on sync' : 'Committed'}
       description={
         <div className="flex flex-wrap items-center gap-2">
           {result.commit_sha && (

@@ -6,7 +6,6 @@ import { useSyncAppRouting } from '@/core/hooks/apps/routing/useSyncAppRouting';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
-import { ApiError } from '@/core/config/api/client';
 import { IconAlertTriangle, IconRefresh } from '@repo/dfe-icons';
 import { Button, Spin, Tag } from 'antd';
 import {
@@ -37,10 +36,13 @@ export const SourceRoutingCard = ({
   service,
   instance,
   source,
+  hasCompiledRouting,
 }: {
   service: string;
   instance: string;
   source: string;
+  /** From the app manifest. False means the routing routes answer 400. */
+  hasCompiledRouting: boolean;
 }) => {
   const {
     data: routing,
@@ -49,12 +51,17 @@ export const SourceRoutingCard = ({
   } = useFetchAppRouting({
     service,
     instance,
+    queryEnabled: hasCompiledRouting,
   });
   const {
     data: syncResult,
     mutate: syncRouting,
     isPending,
   } = useSyncAppRouting({ service, instance });
+
+  // The manifest says whether this app has routing at all, so an app without it
+  // is never asked.
+  if (!hasCompiledRouting) return null;
 
   if (isLoading) {
     return (
@@ -63,10 +70,6 @@ export const SourceRoutingCard = ({
       </SectionCard>
     );
   }
-
-  // A 400 means this app's routing is not derived from the source definitions,
-  // so the card does not apply.
-  if (error instanceof ApiError && error.status === 400) return null;
 
   if (error || !routing) {
     return (

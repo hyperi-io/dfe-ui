@@ -11,12 +11,13 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-const renderCard = (source = 'syslog') =>
+const renderCard = (source = 'syslog', hasCompiledRouting = true) =>
   render(
     <SourceRoutingCard
       service="dfe-receiver"
       instance="default"
       source={source}
+      hasCompiledRouting={hasCompiledRouting}
     />,
     { wrapper },
   );
@@ -96,6 +97,16 @@ describe('SourceRoutingCard', () => {
     expect(
       await screen.findByText('The receiver carries no routing at all'),
     ).toBeInTheDocument();
+  });
+
+  it('renders nothing, and asks nothing, for an app with no compiled routing', async () => {
+    // No handler is registered for a second call, so an unasked-for request
+    // would fail the suite under onUnhandledRequest: 'error'.
+    const { container } = renderCard('syslog', false);
+
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 
   it('renders nothing for a compiler that emits no per-source rules', async () => {

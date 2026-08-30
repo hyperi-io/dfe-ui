@@ -22,6 +22,7 @@ const DeployTarget = ({ target }: { target: string }) => (
 
 type ScalingFormData = {
   keda_enabled?: boolean;
+  replica_count?: number | null;
   min_replicas?: number | null;
   max_replicas?: number | null;
   cpu_request?: string | null;
@@ -63,6 +64,7 @@ export const ScalingCard = ({
     if (!scaling?.supported) return;
     form.setFieldsValue({
       keda_enabled: scaling.keda_enabled ?? undefined,
+      replica_count: scaling.replica_count,
       min_replicas: scaling.min_replicas,
       max_replicas: scaling.max_replicas,
       cpu_request: scaling.cpu_request,
@@ -118,6 +120,11 @@ export const ScalingCard = ({
         ([, value]) => value !== undefined && value !== null && value !== '',
       ),
     );
+    // A fixed count needs KEDA explicitly off in the same write. An unset flag
+    // reads as the chart default, which both engine guards refuse.
+    if (body.replica_count != null && values.keda_enabled !== true) {
+      body.keda_enabled = false;
+    }
     updateScaling(body);
   };
 
@@ -162,14 +169,20 @@ export const ScalingCard = ({
               </Form.Item>
             </div>
 
-            {kedaEnabled === false && (
-              <NotificationCard
-                type="info"
-                variant="subtle"
-                title={`Fixed at ${scaling.replica_count ?? 'the chart default'} replicas`}
-                description="With KEDA off the replica count is a plain helm value, and this surface does not set it. Change it under Platform / Helm."
+            {/* The engine refuses a count while KEDA is on, so the switch and
+                the count go in one submission. */}
+            <Form.Item
+              name="replica_count"
+              label="Fixed replica count"
+              help="Applies with KEDA off, and is submitted together with the switch. The ScaledObject owns the count while KEDA is on."
+            >
+              <InputNumber
+                min={0}
+                max={1000}
+                className="w-full"
+                disabled={kedaEnabled === true}
               />
-            )}
+            </Form.Item>
 
             <h2 className="mt-2 text-sm font-semibold">Vertical</h2>
 

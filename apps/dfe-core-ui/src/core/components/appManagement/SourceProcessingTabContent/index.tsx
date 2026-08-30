@@ -43,6 +43,7 @@ export const SourceProcessingTabContent = ({ source }: { source: string }) => {
             service={app.service}
             instance={instance}
             source={source}
+            hasCompiledRouting={app.has_compiled_routing}
           />
         )),
       )}

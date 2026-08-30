@@ -35,6 +35,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-receiver',
     scale_deployed: true,
     multiplicity: 'single',
+    has_compiled_routing: true,
     file_sets: [],
     instances: ['default'],
   },
@@ -42,6 +43,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-vrl',
     scale_deployed: true,
     multiplicity: 'per_config',
+    has_compiled_routing: false,
     file_sets: [
       {
         name: 'transforms',
@@ -57,6 +59,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-elastic',
     scale_deployed: true,
     multiplicity: 'per_config',
+    has_compiled_routing: false,
     file_sets: [],
     instances: [],
   },
@@ -138,6 +141,7 @@ export const apps = {
           telemetry_name: 'dfe-transform-vrl-syslog',
           scale_deployed: true,
           multiplicity: 'per_config',
+          has_compiled_routing: false,
           file_sets: [],
         },
         service = 'service',
@@ -192,6 +196,30 @@ export const apps = {
       } = {}) =>
         http.get(withInstance(apps.scaling.mockedUrl, service, instance), () =>
           HttpResponse.json(mockedResponse),
+        ),
+      kedaOff: ({
+        replicaCount = 3,
+        service = 'service',
+        instance = 'instance',
+      }: {
+        replicaCount?: number | null;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.get(withInstance(apps.scaling.mockedUrl, service, instance), () =>
+          HttpResponse.json({
+            supported: true,
+            reason: '',
+            deploy_target: 'kubernetes',
+            replica_count: replicaCount,
+            min_replicas: null,
+            max_replicas: null,
+            keda_enabled: false,
+            cpu_request: '100m',
+            memory_request: '256Mi',
+            cpu_limit: '500m',
+            memory_limit: '512Mi',
+          } satisfies TAppScalingResponse),
         ),
       unsupported: ({
         reason = 'deploy target is docker: Compose has no KEDA, and CPU and memory are set stack-wide rather than per component',
