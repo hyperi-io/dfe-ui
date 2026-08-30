@@ -6,8 +6,8 @@ import { Button, Input, Select } from 'antd';
 import z from 'zod';
 import { ResponseModal } from './ResponseModal';
 
+import { AnnotatedAceEditor } from '@/core/components/AceEditor/AnnotatedAceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
-import { TransformAceEditor } from './TransformAceEditor';
 
 const transformCompileSchema = z.object({
   name: z
@@ -107,7 +107,7 @@ export const CreateTransform = () => {
           }
           rules={[transformCompileValidation]}
         >
-          <TransformAceEditor
+          <AnnotatedAceEditor
             downloadFileName={`${fileName}.${fileExtensionMap[fileLanguage as keyof typeof fileExtensionMap]}`}
             mode={aceMode(fileLanguage)}
             height={`${componentHeight}px`}
