@@ -54,9 +54,13 @@ describe('LibraryScene', () => {
     render(<LibraryScene />, { wrapper });
 
     expect(
-      await screen.findByText('Could not read the library', {}, {
-        timeout: 15_000,
-      }),
+      await screen.findByText(
+        'Could not read the library',
+        {},
+        {
+          timeout: 15_000,
+        },
+      ),
     ).toBeInTheDocument();
   });
 });
