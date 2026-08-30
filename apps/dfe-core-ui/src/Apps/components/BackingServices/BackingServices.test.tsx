@@ -1,7 +1,8 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { BackingServices } from '.';
 import { server } from './BackingServices.mocks';
@@ -31,6 +32,7 @@ describe('BackingServices', () => {
             service: 'valkey',
             chart: 'valkey',
             overlay: 'valkey.yaml',
+            prefix: 'valkey',
             mode: { value: null, source: null, protected: false },
             storage_model: { value: null, source: null, protected: false },
             replicas: { value: 2, source: 'valkey', protected: false },
@@ -163,6 +165,95 @@ describe('BackingServices', () => {
     expect(
       screen.queryByText(CLICKHOUSE_MEMORY_DOWN_WARNING),
     ).not.toBeInTheDocument();
+  });
+
+  // The write path is built from the reported prefix, which is not the service
+  // name for every service.
+  it('writes to the prefix the API reports, not the service name', async () => {
+    const user = userEvent.setup();
+    let seenPath: string | null = null;
+    server.use(
+      http.put(
+        '/api/v1/backing-services/overlays/:name/vars/:path',
+        ({ params }) => {
+          seenPath = String(params.path);
+          return HttpResponse.json({
+            changed: true,
+            commit_sha: 'abc1234',
+            auto_merged: true,
+            review_required: false,
+            pr_url: null,
+            reload: 'roll',
+          });
+        },
+      ),
+    );
+
+    renderSection();
+
+    const cpu = await screen.findByLabelText('kafka CPU request');
+    await user.type(cpu, '500m');
+    await user.click(
+      within(cpu.closest('div')?.parentElement as HTMLElement).getByRole(
+        'button',
+        { name: 'Commit' },
+      ),
+    );
+
+    await waitFor(() =>
+      expect(seenPath).toBe('kafkaCluster.resources.requests.cpu'),
+    );
+  });
+
+  // The reload hint says what syncing the write does to the running store.
+  it('reports a roll without claiming the change is already live', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    const cpu = await screen.findByLabelText('kafka CPU request');
+    await user.type(cpu, '500m');
+    await user.click(
+      within(cpu.closest('div')?.parentElement as HTMLElement).getByRole(
+        'button',
+        { name: 'Commit' },
+      ),
+    );
+
+    expect(await screen.findByText('Committed')).toBeInTheDocument();
+    expect(
+      screen.getByText('Takes effect when the pod rolls'),
+    ).toBeInTheDocument();
+  });
+
+  // A decrease the client guard cannot see - the server is the authority.
+  it('renders the engine scale-down refusal as sent', async () => {
+    const user = userEvent.setup();
+    const message =
+      'kafkaCluster.replicas is up-only: 3 -> 2 would remove a member. Every partition has to be moved off a broker first.';
+    server.use(
+      API_CONFIG_MOCKS.backingServices.overlayVar.put.scaleDownRefused({
+        message,
+        name: 'kafka',
+        path: 'kafkaCluster.replicas',
+      }),
+    );
+
+    renderSection();
+
+    // Kafka declares no count, so the client guard allows this write through.
+    const input = await screen.findByLabelText('kafka replicas');
+    await user.type(input, '2');
+    await user.click(
+      within(input.closest('div')?.parentElement as HTMLElement).getByRole(
+        'button',
+        { name: 'Raise count' },
+      ),
+    );
+
+    expect(
+      await screen.findByText('Refused by the engine'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(message)).toBeInTheDocument();
   });
 
   it('reports a failure to read rather than showing an empty data layer', async () => {

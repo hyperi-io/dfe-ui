@@ -7,17 +7,23 @@ import { useUpdateBackingServiceVar } from '@/Apps/hooks/backingServices/useUpda
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { ApiError, getApiErrorResponseBody } from '@/core/config/api/client';
 import { IconAlertTriangle } from '@repo/dfe-icons';
 import { Button, InputNumber } from 'antd';
 import { useState } from 'react';
 
+/** The engine's own refusal when a write would remove a member. */
+export const SCALE_DOWN_REFUSED = 'scale_down_refused';
+
 /**
  * The node or broker count: raise it here, never lower it.
  *
- * The refusal is enforced in this client and nowhere else today - the engine
- * has no up-only rule on this path, so removing this check removes the control
- * rather than falling through to a server-side one.
+ * The engine is the authority now, and it compares the RESOLVED overlay stack -
+ * so a decrease written into a file that some other file overrides is accepted
+ * there. This control compares the value on screen, which IS the resolved one,
+ * so the two agree on what the operator is looking at. The client check stays
+ * because it explains the refusal before the round trip, not because the server
+ * needs the help.
  */
 export const ReplicaField = ({
   service,
@@ -46,6 +52,11 @@ export const ReplicaField = ({
       : checkReplicaChange(service, current, draft);
 
   const message = getApiErrorResponseBody(error)?.message ?? error?.message;
+  // The engine's scale-down message names the before, the after and the cost,
+  // so it is shown as sent rather than replaced with our own wording.
+  const serverRefused =
+    error instanceof ApiError &&
+    (error.detail as { code?: string } | null)?.code === SCALE_DOWN_REFUSED;
 
   return (
     <div className="flex flex-col gap-2">
@@ -92,7 +103,17 @@ export const ReplicaField = ({
               description={check.caution}
             />
           )}
-          {message && <NotificationCard type="error" title={message} />}
+          {message &&
+            (serverRefused ? (
+              <NotificationCard
+                type="error"
+                icon={<IconAlertTriangle />}
+                title="Refused by the engine"
+                description={message}
+              />
+            ) : (
+              <NotificationCard type="error" title={message} />
+            ))}
           {writeResult && <WriteResultFeedback result={writeResult} />}
         </RbacProtected.Unrestricted>
       </RbacProtected>

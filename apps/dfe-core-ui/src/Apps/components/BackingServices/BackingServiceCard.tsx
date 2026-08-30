@@ -29,16 +29,15 @@ export const resourceLabel = (path: string): string => {
  * still move.
  *
  * The write path addresses the overlay by CHART and takes the full dot-path the
- * overlay stores. The API does not report the value prefix, so it is taken from
- * the service name - true for every catalogue entry today, and the one place a
- * third service could need engine support.
+ * overlay stores, built from the service's own `prefix`. Neither `service` nor
+ * `chart` is guaranteed to match that prefix, so it is read rather than derived.
  */
 export const BackingServiceCard = ({
   service,
 }: {
   service: TBackingService;
 }) => {
-  const prefix = service.service;
+  const { prefix } = service;
   const overlayName = service.chart;
   const resources = service.resources ?? {};
 

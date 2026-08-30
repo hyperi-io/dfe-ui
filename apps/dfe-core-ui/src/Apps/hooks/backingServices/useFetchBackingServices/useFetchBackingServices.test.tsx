@@ -24,6 +24,16 @@ describe('useFetchBackingServices', () => {
     expect(result.current.data?.[0].overlay).toBe('clickhouse-cluster.yaml');
   });
 
+  it('reports a values prefix that need not match the service or the chart', async () => {
+    const { result } = renderHook(() => useFetchBackingServices(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data?.[0].prefix).toBe('clickhouse');
+    expect(result.current.data?.[1].prefix).toBe('kafkaCluster');
+    expect(result.current.data?.[1].service).toBe('kafka');
+  });
+
   it('keeps an undeclared value null with a null source', async () => {
     const { result } = renderHook(() => useFetchBackingServices(), { wrapper });
 

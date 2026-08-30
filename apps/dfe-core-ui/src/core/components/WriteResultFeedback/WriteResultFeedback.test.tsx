@@ -29,6 +29,47 @@ describe('WriteResultFeedback', () => {
     expect(screen.getByText('Applied without a restart')).toBeInTheDocument();
   });
 
+  // The backing-service vocabulary: apply reconciles, recreate and redeploy do
+  // not happen on a sync.
+  it('does not imply a restart when the change reconciles in place', () => {
+    render(<WriteResultFeedback result={{ changed: true, reload: 'apply' }} />);
+
+    expect(screen.getByText('Committed')).toBeInTheDocument();
+    expect(
+      screen.getByText('Reconciles in place, with no restart'),
+    ).toBeInTheDocument();
+  });
+
+  it('warns when the StatefulSet has to be recreated by hand', () => {
+    render(
+      <WriteResultFeedback result={{ changed: true, reload: 'recreate' }} />,
+    );
+
+    expect(
+      screen.getByText('Committed, but not applied on sync'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'The StatefulSet has to be recreated by hand before this applies',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('warns when the write changes which objects exist', () => {
+    render(
+      <WriteResultFeedback result={{ changed: true, reload: 'redeploy' }} />,
+    );
+
+    expect(
+      screen.getByText('Committed, but not applied on sync'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Changes which objects exist, so the store is redeployed',
+      ),
+    ).toBeInTheDocument();
+  });
+
   it('reports a review PR instead of claiming the change is live', () => {
     render(
       <WriteResultFeedback

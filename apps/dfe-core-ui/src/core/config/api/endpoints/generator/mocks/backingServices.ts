@@ -24,6 +24,7 @@ const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
     service: 'clickhouse',
     chart: 'clickhouse-cluster',
     overlay: 'clickhouse-cluster.yaml',
+    prefix: 'clickhouse',
     mode: declared('cluster', true),
     storage_model: declared('s3backed', true),
     replicas: declared(3),
@@ -40,6 +41,9 @@ const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
     service: 'kafka',
     chart: 'kafka',
     overlay: 'kafka.yaml',
+    // Deliberately not equal to `service`: a card that derives the write prefix
+    // from the service name builds the wrong path against this entry.
+    prefix: 'kafkaCluster',
     mode: undeclared,
     storage_model: undeclared,
     replicas: undeclared,
@@ -60,6 +64,7 @@ const DEFAULT_WRITE_RESULT = {
   auto_merged: true,
   review_required: false,
   pr_url: null,
+  reload: 'roll',
 };
 
 export const backingServices = {
@@ -115,6 +120,23 @@ export const backingServices = {
             .replace('{name}', name)
             .replace('{path}', path),
           () => HttpResponse.json(mockedResponse, { status }),
+        ),
+      // The engine's up-only refusal: a 400 with its own code, distinct from
+      // the 403 a protected var raises.
+      scaleDownRefused: ({
+        message = 'clickhouse.replicas is up-only: 3 -> 2 would remove a member. Removing a node drops a copy of the data.',
+        name = 'name',
+        path = 'path',
+      }: { message?: string; name?: string; path?: string } = {}) =>
+        http.put(
+          backingServices.overlayVar.mockedUrl
+            .replace('{name}', name)
+            .replace('{path}', path),
+          () =>
+            HttpResponse.json(
+              { code: 'scale_down_refused', message, errors: [] },
+              { status: 400 },
+            ),
         ),
     },
   },

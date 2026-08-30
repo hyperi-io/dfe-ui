@@ -3337,15 +3337,21 @@ export interface paths {
         get?: never;
         /**
          * Set Overlay Var
-         * @description Set a substrate/platform value. 403 with the policy that blocked it when the
-         *     var is protected - the storage model and the data-layer modes are decided at
-         *     deploy, and moving one on a live deployment is a data migration.
+         * @description Set a substrate/platform value.
+         *
+         *     403 with the policy that blocked it when the var is protected - the storage
+         *     model, the data-layer modes and the disk size are decided at deploy, and moving
+         *     one on a live deployment is a data migration. 400 when the value would lower a
+         *     declared node or broker count, which loses data rather than capacity.
          */
         put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
         post?: never;
         /**
          * Delete Overlay Var
          * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
+         *
+         *     Not guarded up-only: reverting a count hands it back to the chart or profile
+         *     default, which the engine cannot read, so there is no after-value to compare.
          */
         delete: operations["delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete"];
         options?: never;
@@ -4822,6 +4828,11 @@ export interface components {
             scale_deployed: boolean;
             /** Multiplicity */
             multiplicity: string;
+            /**
+             * Has Compiled Routing
+             * @description Whether this app's routing is compiled from the source definitions. False means the /routing routes answer 400 for every instance of it.
+             */
+            has_compiled_routing: boolean;
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
         };
@@ -4898,6 +4909,11 @@ export interface components {
             chart: string;
             /** Overlay */
             overlay: string;
+            /**
+             * Prefix
+             * @description Values-key prefix every path below sits under. Read it rather than deriving one from `service` or `chart` - neither is guaranteed to match.
+             */
+            prefix: string;
             mode: components["schemas"]["DeclaredValue"];
             storage_model: components["schemas"]["DeclaredValue"];
             replicas: components["schemas"]["DeclaredValue"];
@@ -4907,6 +4923,33 @@ export interface components {
             resources?: {
                 [key: string]: components["schemas"]["DeclaredValue"];
             };
+        };
+        /**
+         * BackingWriteResult
+         * @description A governed write plus what syncing it does to the running store.
+         */
+        BackingWriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            /**
+             * Reload
+             * @description 'apply' reconciles in place, 'roll' restarts pods, 'recreate' needs the StatefulSet recreated by hand, 'redeploy' changes which objects exist.
+             */
+            reload: string;
         };
         /**
          * BindingSummary
@@ -5120,6 +5163,11 @@ export interface components {
             scale_deployed: boolean;
             /** Multiplicity */
             multiplicity: string;
+            /**
+             * Has Compiled Routing
+             * @description Whether this app's routing is compiled from the source definitions. False means the /routing routes answer 400 for every instance of it.
+             */
+            has_compiled_routing: boolean;
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
@@ -9387,6 +9435,11 @@ export interface components {
         };
         /** ScalingRequest */
         ScalingRequest: {
+            /**
+             * Replica Count
+             * @description Fixed pod count, for a deployment with KEDA off. Refused while KEDA is explicitly enabled, because the chart omits `replicas` and the ScaledObject owns the count.
+             */
+            replica_count?: number | null;
             /** Min Replicas */
             min_replicas?: number | null;
             /** Max Replicas */
@@ -18257,7 +18310,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
+                    "application/json": components["schemas"]["BackingWriteResult"];
                 };
             };
             /** @description Validation Error */
@@ -18289,7 +18342,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__helm__WriteResult"];
+                    "application/json": components["schemas"]["BackingWriteResult"];
                 };
             };
             /** @description Validation Error */
