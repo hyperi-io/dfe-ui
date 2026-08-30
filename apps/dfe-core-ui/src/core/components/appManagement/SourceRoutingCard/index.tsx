@@ -21,9 +21,7 @@ const RuleSummary = ({ rule }: { rule: TSourceRule | null }) => {
     <span className="flex flex-wrap items-center gap-1">
       <Tag className="font-mono">{rule.field}</Tag>
       <Tag>{rule.mode}</Tag>
-      {rule.match_value && (
-        <Tag className="font-mono">{rule.match_value}</Tag>
-      )}
+      {rule.match_value && <Tag className="font-mono">{rule.match_value}</Tag>}
     </span>
   );
 };
@@ -44,7 +42,11 @@ export const SourceRoutingCard = ({
   instance: string;
   source: string;
 }) => {
-  const { data: routing, isLoading, error } = useFetchAppRouting({
+  const {
+    data: routing,
+    isLoading,
+    error,
+  } = useFetchAppRouting({
     service,
     instance,
   });
@@ -88,7 +90,6 @@ export const SourceRoutingCard = ({
   return (
     <SectionCard
       title="Receiver routing"
-      description={`Compiled by the ${routing.compiler} compiler into ${routing.values_path}`}
       rightTitleSlot={
         state.drift ? (
           <RbacProtected action={RbacProtected.rbacActions.helmvars_write}>
@@ -106,6 +107,10 @@ export const SourceRoutingCard = ({
         ) : undefined
       }
     >
+      <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+        {`Compiled by the ${routing.compiler} compiler into ${routing.values_path}`}
+      </p>
+
       {routing.absent && (
         <NotificationCard
           type="warning"

@@ -28,8 +28,7 @@ export const useFetchAppFile = ({
       fetchAppFileApi({
         pathParams: { service, instance, set_name: setName, filename },
       }),
-    enabled:
-      !!service && !!instance && !!setName && !!filename && queryEnabled,
+    enabled: !!service && !!instance && !!setName && !!filename && queryEnabled,
     retry: false,
   });
 

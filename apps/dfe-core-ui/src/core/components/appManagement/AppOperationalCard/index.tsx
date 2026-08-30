@@ -110,26 +110,28 @@ export const AppOperationalCard = ({
 
   return (
     <>
-      <SectionCard
-        title="Status"
-        description={`Telemetry name: ${status?.telemetry_name ?? '-'}`}
-      >
+      <SectionCard title="Status">
+        <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+          {`Telemetry name: ${status?.telemetry_name ?? '-'}`}
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           {status?.reporting ? (
             <Tag color="green">reporting</Tag>
           ) : (
             <Tag color="red">not reporting</Tag>
           )}
-          <span className="text-sm">Uptime {formatUptime(status?.uptime_seconds)}</span>
+          <span className="text-sm">
+            Uptime {formatUptime(status?.uptime_seconds)}
+          </span>
         </div>
       </SectionCard>
 
-      <SectionCard
-        title="Metrics"
-        description={
-          metrics ? `Over the last ${metrics.window_seconds}s` : undefined
-        }
-      >
+      <SectionCard title="Metrics">
+        {metrics && (
+          <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+            {`Over the last ${metrics.window_seconds}s`}
+          </p>
+        )}
         {metricsError && (
           <NotificationCard
             type="info"
@@ -141,7 +143,9 @@ export const AppOperationalCard = ({
 
         {rates.length > 0 && (
           <div>
-            <h3 className="mb-1 text-sm font-semibold">Throughput (per second)</h3>
+            <h3 className="mb-1 text-sm font-semibold">
+              Throughput (per second)
+            </h3>
             <ul className="flex flex-wrap gap-2">
               {rates.map(([name, value]) => (
                 <li key={name}>

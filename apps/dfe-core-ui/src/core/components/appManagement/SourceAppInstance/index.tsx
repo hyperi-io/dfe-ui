@@ -53,7 +53,6 @@ export const SourceAppInstance = ({
     return (
       <SectionCard
         title={app.service}
-        description="Not deployed for this source."
         rightTitleSlot={
           <RbacProtected action={RbacProtected.rbacActions.deployment_write}>
             <RbacProtected.Unrestricted>
@@ -61,9 +60,7 @@ export const SourceAppInstance = ({
                 size="small"
                 icon={<IconPlus />}
                 loading={isCreating}
-                onClick={() =>
-                  createInstance({ instance: source, values: {} })
-                }
+                onClick={() => createInstance({ instance: source, values: {} })}
               >
                 Deploy
               </Button>
@@ -71,6 +68,9 @@ export const SourceAppInstance = ({
           </RbacProtected>
         }
       >
+        <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+          Not deployed for this source.
+        </p>
         {createMessage && (
           <NotificationCard type="error" title={createMessage} />
         )}
@@ -82,7 +82,6 @@ export const SourceAppInstance = ({
   return (
     <SectionCard
       title={app.service}
-      description={`Instance ${source}`}
       rightTitleSlot={
         <RbacProtected action={RbacProtected.rbacActions.deployment_delete}>
           <RbacProtected.Unrestricted>
@@ -99,6 +98,9 @@ export const SourceAppInstance = ({
         </RbacProtected>
       }
     >
+      <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+        {`Instance ${source}`}
+      </p>
       {deleteMessage && <NotificationCard type="error" title={deleteMessage} />}
       {deleteResult && <WriteResultFeedback result={deleteResult} />}
 

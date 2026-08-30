@@ -33,9 +33,7 @@ const COLUMNS = [
     title: 'State',
     dataIndex: 'state',
     key: 'state',
-    render: (value: string) => (
-      <Tag color={STATE_COLOUR[value]}>{value}</Tag>
-    ),
+    render: (value: string) => <Tag color={STATE_COLOUR[value]}>{value}</Tag>,
   },
 ];
 

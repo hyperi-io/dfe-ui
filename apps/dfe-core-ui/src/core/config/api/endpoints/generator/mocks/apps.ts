@@ -111,9 +111,8 @@ export const apps = {
         mockedResponse?: TCreateAppInstanceResponse;
         service?: string;
       } = {}) =>
-        http.post(
-          apps.instances.mockedUrl.replace('{service}', service),
-          () => HttpResponse.json(mockedResponse),
+        http.post(apps.instances.mockedUrl.replace('{service}', service), () =>
+          HttpResponse.json(mockedResponse),
         ),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
@@ -124,9 +123,8 @@ export const apps = {
         status?: number;
         service?: string;
       } = {}) =>
-        http.post(
-          apps.instances.mockedUrl.replace('{service}', service),
-          () => HttpResponse.json(mockedResponse, { status }),
+        http.post(apps.instances.mockedUrl.replace('{service}', service), () =>
+          HttpResponse.json(mockedResponse, { status }),
         ),
     },
   },

@@ -16,8 +16,7 @@ export const useFetchLibraryArtifactDetail = ({
 }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: LIBRARY_ARTIFACT_QUERY_KEY(artifact),
-    queryFn: () =>
-      fetchLibraryArtifactDetailApi({ pathParams: { artifact } }),
+    queryFn: () => fetchLibraryArtifactDetailApi({ pathParams: { artifact } }),
     enabled: !!artifact && queryEnabled,
     retry: false,
   });

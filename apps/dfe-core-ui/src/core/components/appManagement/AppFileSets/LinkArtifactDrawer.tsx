@@ -82,11 +82,7 @@ export const LinkArtifactDrawer = ({
 
   return (
     <>
-      <Button
-        size="small"
-        icon={<IconLink />}
-        onClick={() => setIsOpen(true)}
-      >
+      <Button size="small" icon={<IconLink />} onClick={() => setIsOpen(true)}>
         Link from library
       </Button>
       <Drawer

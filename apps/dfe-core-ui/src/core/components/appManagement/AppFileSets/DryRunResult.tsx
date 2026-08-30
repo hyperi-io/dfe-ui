@@ -18,7 +18,8 @@ const EVENT_COLUMNS = [
     dataIndex: 'after',
     key: 'after',
     render: (value: string, row: { error?: string; dropped?: boolean }) => {
-      if (row.error) return <span className="text-error text-xs">{row.error}</span>;
+      if (row.error)
+        return <span className="text-error text-xs">{row.error}</span>;
       if (row.dropped) return <Tag>dropped</Tag>;
       return <pre className="max-w-100 overflow-x-auto text-xs">{value}</pre>;
     },
@@ -54,7 +55,9 @@ export const DryRunResult = ({
         <Tag>{`source ${result.source}`}</Tag>
         <Tag>{`sampled ${result.sampled}`}</Tag>
         <Tag color="green">{`succeeded ${result.succeeded}`}</Tag>
-        {result.failed > 0 && <Tag color="red">{`failed ${result.failed}`}</Tag>}
+        {result.failed > 0 && (
+          <Tag color="red">{`failed ${result.failed}`}</Tag>
+        )}
         {result.dropped > 0 && <Tag>{`dropped ${result.dropped}`}</Tag>}
         {result.truncated && <Tag color="orange">truncated</Tag>}
       </div>
