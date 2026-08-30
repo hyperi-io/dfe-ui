@@ -56,7 +56,11 @@ export const FileSetPanel = ({
   // null means nothing unsaved, so the committed content shows through.
   const [draft, setDraft] = useState<string | null>(null);
 
-  const { data: files, isLoading, error } = useFetchAppFiles({
+  const {
+    data: files,
+    isLoading,
+    error,
+  } = useFetchAppFiles({
     service,
     instance,
     setName,

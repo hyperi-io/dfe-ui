@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createAppInstanceApi } from './api';
-import {
-  TCreateAppInstanceRequest,
-  TCreateAppInstanceResponse,
-} from './types';
+import { TCreateAppInstanceRequest, TCreateAppInstanceResponse } from './types';
 
 import { APPS_QUERY_KEY } from '@/core/hooks/apps/instances/useFetchApps';
 

@@ -13,7 +13,9 @@ const COLUMNS = [
     title: 'File',
     dataIndex: 'name',
     key: 'name',
-    render: (value: string) => <span className="font-mono text-xs">{value}</span>,
+    render: (value: string) => (
+      <span className="font-mono text-xs">{value}</span>
+    ),
   },
   {
     title: 'Linked to',
@@ -50,7 +52,9 @@ export const ArtifactUsage = ({ artifact }: { artifact: string }) => {
 
   return (
     <Table
-      rowKey={(row) => `${row.service}/${row.instance}/${row.file_set}/${row.name}`}
+      rowKey={(row) =>
+        `${row.service}/${row.instance}/${row.file_set}/${row.name}`
+      }
       columns={COLUMNS}
       dataSource={data ?? []}
     />

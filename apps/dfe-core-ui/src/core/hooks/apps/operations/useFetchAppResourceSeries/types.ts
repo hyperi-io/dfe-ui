@@ -9,5 +9,4 @@ export type TAppResourceSeriesResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof appMetricsSeriesPath, 'get'>
 >;
 
-export type TAppResourceBucket =
-  TAppResourceSeriesResponse['buckets'][number];
+export type TAppResourceBucket = TAppResourceSeriesResponse['buckets'][number];

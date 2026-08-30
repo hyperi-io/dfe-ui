@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAppScalingApi } from './api';
-import {
-  TUpdateAppScalingRequest,
-  TUpdateAppScalingResponse,
-} from './types';
+import { TUpdateAppScalingRequest, TUpdateAppScalingResponse } from './types';
 
 import { APP_SCALING_QUERY_KEY } from '@/core/hooks/apps/scaling/useFetchAppScaling';
 

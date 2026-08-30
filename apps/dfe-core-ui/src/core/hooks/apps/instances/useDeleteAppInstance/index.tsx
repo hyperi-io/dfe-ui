@@ -18,7 +18,8 @@ export const useDeleteAppInstance = ({
 }) => {
   const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: () => deleteAppInstanceApi({ pathParams: { service, instance } }),
+    mutationFn: () =>
+      deleteAppInstanceApi({ pathParams: { service, instance } }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
       onSuccess?.(values);

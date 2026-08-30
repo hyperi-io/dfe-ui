@@ -13,6 +13,13 @@ import { IconAlertTriangle } from '@repo/dfe-icons';
 import { Button, InputNumber, Input, Spin, Switch } from 'antd';
 import { useEffect } from 'react';
 
+/** Where these dials land, which is what decides whether they apply at all. */
+const DeployTarget = ({ target }: { target: string }) => (
+  <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
+    {`Deploy target: ${target}`}
+  </p>
+);
+
 type ScalingFormData = {
   keda_enabled?: boolean;
   min_replicas?: number | null;
@@ -89,10 +96,8 @@ export const ScalingCard = ({
 
   if (!scaling.supported) {
     return (
-      <SectionCard
-        title="Scaling"
-        description={`Deploy target: ${scaling.deploy_target}`}
-      >
+      <SectionCard title="Scaling">
+        <DeployTarget target={scaling.deploy_target} />
         <NotificationCard
           type="info"
           icon={<IconAlertTriangle />}
@@ -120,10 +125,8 @@ export const ScalingCard = ({
     getApiErrorResponseBody(updateError)?.message ?? updateError?.message;
 
   return (
-    <SectionCard
-      title="Scaling"
-      description={`Deploy target: ${scaling.deploy_target}`}
-    >
+    <SectionCard title="Scaling">
+      <DeployTarget target={scaling.deploy_target} />
       <RbacProtected action={RbacProtected.rbacActions.helmvars_write}>
         <RbacProtected.Unrestricted>
           <Form form={form} onFinish={handleFinish}>
