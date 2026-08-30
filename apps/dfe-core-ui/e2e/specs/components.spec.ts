@@ -1,17 +1,16 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { GITOPS_REQUIRED, trySeed } from '../config/appManagement.helpers';
+import { seedAppManagement } from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
-  const seeded = await trySeed({
+  await seedAppManagement({
     playwright,
     seedScript: 'seed_app_scaling_state',
   });
-  test.skip(!seeded, GITOPS_REQUIRED);
   await loginAs(page, 'initial_user');
 });
 
@@ -40,12 +39,23 @@ test('Seeded scaling dials', async ({ page }) => {
   await expect(page.getByText('Scaling')).toBeVisible();
   await expect(page.getByText('Deploy target: kubernetes')).toBeVisible();
 
-  await expect(page.getByLabel('Minimum replicas')).toHaveValue('2');
-  await expect(page.getByLabel('Maximum replicas')).toHaveValue('12');
-  await expect(page.getByLabel('CPU request')).toHaveValue('250m');
-  await expect(page.getByLabel('Memory request')).toHaveValue('512Mi');
-  await expect(page.getByLabel('CPU limit')).toHaveValue('1');
-  await expect(page.getByLabel('Memory limit')).toHaveValue('1Gi');
+  /* Exact: the backing-service cards below carry '<service> CPU request' too */
+  await expect(
+    page.getByLabel('Minimum replicas', { exact: true }),
+  ).toHaveValue('2');
+  await expect(
+    page.getByLabel('Maximum replicas', { exact: true }),
+  ).toHaveValue('12');
+  await expect(page.getByLabel('CPU request', { exact: true })).toHaveValue(
+    '250m',
+  );
+  await expect(page.getByLabel('Memory request', { exact: true })).toHaveValue(
+    '512Mi',
+  );
+  await expect(page.getByLabel('CPU limit', { exact: true })).toHaveValue('1');
+  await expect(page.getByLabel('Memory limit', { exact: true })).toHaveValue(
+    '1Gi',
+  );
 });
 
 test('Backing services', async ({ page }) => {
@@ -73,14 +83,17 @@ test('A node count may be raised and not lowered', async ({ page }) => {
     .getByRole('button', { name: 'Raise count', exact: true })
     .first();
 
-  /* Undeclared: the tier default is invisible, so a decrease cannot be caught */
-  await replicas.fill('3');
-  await expect(page.getByText('Tier default not visible')).toBeVisible();
-  await raise.click();
-  await expect(page.getByText('Committed')).toBeVisible();
+  /* reset_all does not clear the substrate overlay, so work off what is there */
+  const declared = Number(await replicas.inputValue()) || 0;
+  const raised = declared + 1;
 
-  /* Declared now, so lowering it is refused with the reason it costs data */
-  await replicas.fill('2');
+  await replicas.fill(String(raised));
+  await raise.click();
+  /* Exact: the history table below tags every commit 'committed' */
+  await expect(page.getByText('Committed', { exact: true })).toBeVisible();
+
+  /* Declared at the raised count now, so lowering it is refused */
+  await replicas.fill(String(raised - 1));
   await expect(page.getByText('Cannot be lowered here')).toBeVisible();
   await expect(
     page.getByText('Removing a node drops a copy of the data', {

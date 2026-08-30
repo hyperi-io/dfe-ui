@@ -1,6 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { GITOPS_REQUIRED, trySeed } from '../config/appManagement.helpers';
+import { seedAppManagement } from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
 
@@ -9,11 +9,10 @@ const SEED_ARTEFACT = 'seed-artefact';
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
-  const seeded = await trySeed({
+  await seedAppManagement({
     playwright,
     seedScript: 'seed_library_artefact',
   });
-  test.skip(!seeded, GITOPS_REQUIRED);
   await loginAs(page, 'initial_user');
 });
 
@@ -70,10 +69,13 @@ test('Labels', async ({ page }) => {
   await page.getByRole('button', { name: SEED_ARTEFACT, exact: true }).click();
   await page.getByRole('tab', { name: 'Labels' }).click();
 
-  await expect(page.getByLabel('Labels')).toHaveValue(
+  /* By role: the tab panel carries the same accessible name as the field */
+  await expect(page.getByRole('textbox', { name: 'Labels' })).toHaveValue(
     'team=platform\ntier=gold',
   );
-  await expect(page.getByLabel('Group')).toHaveValue('seed');
+  await expect(page.getByRole('textbox', { name: 'Group' })).toHaveValue(
+    'seed',
+  );
 });
 
 test('Usage', async ({ page }) => {
