@@ -22,6 +22,12 @@ test('Sidebar Navigation', async ({ page }) => {
 
   /* Shows the correct sidebar navigation links */
   await expect(
+    page.getByRole('link', { name: 'Components', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Library', exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole('link', { name: 'Services', exact: true }),
   ).toBeVisible();
   await expect(

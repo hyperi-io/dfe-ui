@@ -45,6 +45,12 @@ test('Sidebar Navigation', async ({ page }) => {
     page.getByRole('link', { name: 'Hunts', exact: true }),
   ).toBeHidden();
   await expect(
+    page.getByRole('link', { name: 'Components', exact: true }),
+  ).toBeHidden();
+  await expect(
+    page.getByRole('link', { name: 'Library', exact: true }),
+  ).toBeHidden();
+  await expect(
     page.getByRole('link', { name: 'Services', exact: true }),
   ).toBeHidden();
   await expect(
