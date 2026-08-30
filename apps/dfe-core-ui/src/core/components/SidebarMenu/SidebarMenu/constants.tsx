@@ -4,11 +4,13 @@ import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
 import {
   IconArrowBounce,
   IconBookmark,
+  IconBooks,
   IconChartDots,
   IconCode,
   IconDatabase,
   IconLayoutGrid,
   IconRadar,
+  IconServer2,
   IconSettings2,
   IconShieldCheck,
   IconStack2,
@@ -255,6 +257,50 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   //     />
   //   ),
   // },
+  {
+    key: '/components',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected
+        action={[
+          rbacActions.deployment_read,
+          rbacActions.helmvars_read,
+          rbacActions.helmvars_write,
+        ]}
+      >
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/components',
+              icon: <IconWrapper icon={<IconServer2 />} />,
+              label: 'Components',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+      </RbacProtected>
+    ),
+  },
+  {
+    key: '/library',
+    Component: ({ collapsed }: SidebarMenuProps) => (
+      <RbacProtected
+        action={[rbacActions.library_read, rbacActions.library_write]}
+      >
+        <RbacProtected.Unrestricted>
+          <SidebarLink
+            collapsed={collapsed}
+            item={{
+              key: '/library',
+              icon: <IconWrapper icon={<IconBooks />} />,
+              label: 'Library',
+              external: false,
+            }}
+          />
+        </RbacProtected.Unrestricted>
+      </RbacProtected>
+    ),
+  },
   {
     key: '/services',
     Component: ({ collapsed }: SidebarMenuProps) => (

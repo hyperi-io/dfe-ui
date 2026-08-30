@@ -64,7 +64,7 @@ export interface components {
              * Script
              * @enum {string}
              */
-            script: "seed_setup_complete" | "seed_organisation" | "seed_dfe_admin_user" | "seed_dfe_analyst_user" | "seed_dfe_infra_user" | "seed_dfe_viewers_user" | "delete_all" | "reset_all";
+            script: "seed_setup_complete" | "seed_organisation" | "seed_dfe_admin_user" | "seed_dfe_analyst_user" | "seed_dfe_infra_user" | "seed_dfe_viewers_user" | "seed_source_with_transform" | "seed_library_artefact" | "seed_app_scaling_state" | "reset_all";
         };
         /** SeedResponse */
         SeedResponse: {

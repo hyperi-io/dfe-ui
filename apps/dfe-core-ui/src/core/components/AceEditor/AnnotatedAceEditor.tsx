@@ -20,17 +20,22 @@ import { Splitter as AntdSplitter, Button, Popover } from 'antd';
 
 type Annotation = Ace.Annotation;
 
-interface TransformAceEditorProps extends React.ComponentProps<
+interface AnnotatedAceEditorProps extends React.ComponentProps<
   typeof AceEditor
 > {
   downloadFileName?: string;
 }
 
-export const TransformAceEditor = ({
+/**
+ * An Ace editor with a collapsible annotation panel and a save-to-desktop
+ * action. Shared by every authoring surface - the WASM transform compiler and
+ * the per-instance file editors.
+ */
+export const AnnotatedAceEditor = ({
   downloadFileName,
   mode,
   ...props
-}: TransformAceEditorProps) => {
+}: AnnotatedAceEditorProps) => {
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const hasErrors = annotations.some(
