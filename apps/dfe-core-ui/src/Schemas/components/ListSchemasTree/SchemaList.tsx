@@ -13,6 +13,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
   const {
     data: { items: metaSchemas, objects: schemaObjectsResponse },
     error,
+    isLoading,
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSchema,
@@ -59,6 +60,17 @@ export const SchemaList = ({ className }: { className?: string }) => {
     () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
     [userExpandedKeys, expandedKeysForSelection],
   );
+
+  // An empty list is only empty once it has loaded. Without this the first
+  // paint shows "No schemas found" and its Add Schema button, which is a second
+  // one alongside the toolbar's for as long as the fetch is in flight.
+  if (isLoading) {
+    return (
+      <div className={cn('flex justify-center p-4', className)}>
+        <Spin size="small" />
+      </div>
+    );
+  }
 
   if (metaSchemas.length === 0) {
     return (
