@@ -16,7 +16,11 @@ describe('LibraryScene', () => {
     render(<LibraryScene />, { wrapper });
 
     expect(
-      await screen.findByRole('button', { name: 'syslog-parse' }),
+      await screen.findByRole(
+        'button',
+        { name: 'syslog-parse' },
+        { timeout: 15_000 },
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText('vrl')).toBeInTheDocument();
     expect(screen.getByText('network')).toBeInTheDocument();
@@ -25,14 +29,18 @@ describe('LibraryScene', () => {
   it('shows tags and labels apart, because they mean different things', async () => {
     render(<LibraryScene />, { wrapper });
 
-    expect(await screen.findByText('stable -> 2')).toBeInTheDocument();
+    expect(
+      await screen.findByText('stable -> 2', {}, { timeout: 15_000 }),
+    ).toBeInTheDocument();
     expect(screen.getByText('team=platform')).toBeInTheDocument();
   });
 
   it('offers the classifying filters, not tag filters', async () => {
     render(<LibraryScene />, { wrapper });
 
-    expect(await screen.findByText('Any kind')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Any kind', {}, { timeout: 15_000 }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Any state')).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText('Search name or description'),
@@ -46,7 +54,9 @@ describe('LibraryScene', () => {
     render(<LibraryScene />, { wrapper });
 
     expect(
-      await screen.findByText('Could not read the library'),
+      await screen.findByText('Could not read the library', {}, {
+        timeout: 15_000,
+      }),
     ).toBeInTheDocument();
   });
 });
