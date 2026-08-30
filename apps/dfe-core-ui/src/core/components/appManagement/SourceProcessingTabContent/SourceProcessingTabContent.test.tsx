@@ -27,7 +27,9 @@ describe('SourceProcessingTabContent', () => {
   it('puts the receiver routing rule on the source page', async () => {
     render(<SourceProcessingTabContent source="syslog" />, { wrapper });
 
-    expect(await screen.findByText('Receiver routing')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'dfe-receiver routing' }),
+    ).toBeInTheDocument();
     // The compiled rule and the deployed one, side by side.
     expect(await screen.findAllByText('event.dataset')).toHaveLength(2);
   });

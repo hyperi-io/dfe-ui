@@ -40,7 +40,9 @@ describe('ComponentsScene', () => {
     render(<ComponentsScene />, { wrapper });
 
     await screen.findByText('Status');
-    expect(screen.queryByText('Receiver routing')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: /routing/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('says so plainly when nothing is deployed yet', async () => {

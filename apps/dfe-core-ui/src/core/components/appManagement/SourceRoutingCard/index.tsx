@@ -14,6 +14,18 @@ import {
   TSourceRule,
 } from './sourceRoutingRule';
 
+/**
+ * Names the app whose routing this is.
+ *
+ * More than one app can compile per-source routing, so the heading says which
+ * one rather than assuming the receiver.
+ */
+const RoutingHeading = ({ service }: { service: string }) => (
+  <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
+    {`${service} routing`}
+  </h2>
+);
+
 const RuleSummary = ({ rule }: { rule: TSourceRule | null }) => {
   if (!rule) return <span className="text-sm">no rule</span>;
   return (
@@ -65,7 +77,7 @@ export const SourceRoutingCard = ({
 
   if (isLoading) {
     return (
-      <SectionCard title="Receiver routing">
+      <SectionCard title={<RoutingHeading service={service} />}>
         <Spin size="small" />
       </SectionCard>
     );
@@ -73,7 +85,7 @@ export const SourceRoutingCard = ({
 
   if (error || !routing) {
     return (
-      <SectionCard title="Receiver routing">
+      <SectionCard title={<RoutingHeading service={service} />}>
         <NotificationCard
           type="info"
           variant="subtle"
@@ -92,7 +104,7 @@ export const SourceRoutingCard = ({
 
   return (
     <SectionCard
-      title="Receiver routing"
+      title={<RoutingHeading service={service} />}
       rightTitleSlot={
         state.drift ? (
           <RbacProtected action={RbacProtected.rbacActions.helmvars_write}>

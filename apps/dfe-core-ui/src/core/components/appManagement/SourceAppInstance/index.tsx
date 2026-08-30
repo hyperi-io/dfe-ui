@@ -15,6 +15,18 @@ import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, Collapse } from 'antd';
 
 /**
+ * Names the app, as a heading rather than loose text.
+ *
+ * The card header also holds the deploy or undeploy action, so without this the
+ * app's name has no accessible name of its own to address it by.
+ */
+const AppHeading = ({ service }: { service: string }) => (
+  <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
+    {service}
+  </h2>
+);
+
+/**
  * One per-source app as it stands for this source.
  *
  * A per-config app's instance name IS the source name, so "is there a
@@ -52,7 +64,7 @@ export const SourceAppInstance = ({
   if (!isDeployed) {
     return (
       <SectionCard
-        title={app.service}
+        title={<AppHeading service={app.service} />}
         rightTitleSlot={
           <RbacProtected action={RbacProtected.rbacActions.deployment_write}>
             <RbacProtected.Unrestricted>
@@ -81,7 +93,7 @@ export const SourceAppInstance = ({
 
   return (
     <SectionCard
-      title={app.service}
+      title={<AppHeading service={app.service} />}
       rightTitleSlot={
         <RbacProtected action={RbacProtected.rbacActions.deployment_delete}>
           <RbacProtected.Unrestricted>

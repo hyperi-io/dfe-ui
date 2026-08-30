@@ -2,7 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
-import { GITOPS_REQUIRED, trySeed } from '../config/appManagement.helpers';
+import { seedAppManagement } from '../config/appManagement.helpers';
 
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
@@ -10,32 +10,42 @@ const SEED_SOURCE = 'seedsource';
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
-  const seeded = await trySeed({
+  await seedAppManagement({
     playwright,
     seedScript: 'seed_source_with_transform',
   });
-  test.skip(!seeded, GITOPS_REQUIRED);
-  await e2eClient({ playwright, seedScript: 'seed_library_artefact' });
+  await seedAppManagement({
+    playwright,
+    seedScript: 'seed_library_artefact',
+  });
   await loginAs(page, 'initial_user');
 });
 
 const openProcessingTab = async (page: Page) => {
   await page.goto(`${BASE_URL}/sources`);
-  await page.getByText(SEED_SOURCE, { exact: true }).first().click();
+  // The row's hover actions sit over its right-hand side, so the click lands on
+  // the label's leading edge rather than the row centre.
+  await page
+    .getByText(SEED_SOURCE, { exact: true })
+    .first()
+    .click({ position: { x: 2, y: 2 } });
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
 test('Receiver routing', async ({ page }) => {
   await openProcessingTab(page);
 
-  await expect(page.getByText('Receiver routing')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'dfe-receiver routing', exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText('Compiled by the receiver compiler into config.routing'),
   ).toBeVisible();
 
-  /* The compiled rule and the deployed one, side by side */
-  await expect(page.getByText('_json.tags.collector.type')).toHaveCount(2);
-  await expect(page.getByText('key_value_set')).toHaveCount(2);
+  /* Scoped: the source's own match rule is shown above the tabs as well */
+  const rule = page.locator('dl').filter({ hasText: 'From the sources' });
+  await expect(rule.getByText('_json.tags.collector.type')).toHaveCount(2);
+  await expect(rule.getByText('key_value_set')).toHaveCount(2);
 
   /* The seeded routing is synced, so no sync action is offered */
   await expect(page.getByText('synced', { exact: true })).toBeVisible();
@@ -48,7 +58,9 @@ test('Receiver routing', async ({ page }) => {
 test('Transform instance', async ({ page }) => {
   await openProcessingTab(page);
 
-  await expect(page.getByText('dfe-transform-vrl')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'dfe-transform-vrl', exact: true }),
+  ).toBeVisible();
   await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toHaveCount(2);
 
   /* The file set the manifest declares for this app */
@@ -87,9 +99,15 @@ test('An app that declares no file set gets no editor', async ({ page }) => {
   await openProcessingTab(page);
 
   /* Every per-source app in the catalogue is listed */
-  await expect(page.getByText('dfe-transform-elastic')).toBeVisible();
-  await expect(page.getByText('dfe-transform-vector')).toBeVisible();
-  await expect(page.getByText('dfe-fetcher')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'dfe-transform-elastic', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'dfe-transform-vector', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
+  ).toBeVisible();
 
   /* Only a deployed app whose manifest declares a file set carries a Files panel */
   await expect(page.getByText('Files', { exact: true })).toHaveCount(1);
