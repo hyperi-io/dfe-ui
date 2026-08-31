@@ -67,7 +67,7 @@ export const ActionsMenu = ({
         type="default"
         icon={isMenuOpen ? <IconX /> : <IconMenu2 />}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        classNames={classNames?.trigger}
+        className={classNames?.trigger}
       />
       {(isMenuOpen || !destroyOnHidden) && (
         <div

@@ -11,7 +11,7 @@
     "build": "echo 'No build required - exports TS source directly'"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
+    "@repo/typescript-config": "*",
     "typescript": "5.9.2"
   }
 }

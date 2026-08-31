@@ -1,5 +1,5 @@
 import { IconSettings, IconUser } from '@repo/dfe-icons';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { IconWrapper } from './index';
 
 const meta: Meta<typeof IconWrapper> = {

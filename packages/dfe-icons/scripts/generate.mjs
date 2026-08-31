@@ -114,7 +114,7 @@ async function processDirectory(dir, suffix = '', { isLogo = false } = {}) {
 
 function generateStory() {
   return `import React, { useState, useMemo } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as Icons from "../src";
 import "./AllIcons.css";
 

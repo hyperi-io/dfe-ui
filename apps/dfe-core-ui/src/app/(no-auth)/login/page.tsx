@@ -1,4 +1,5 @@
 import { authOptions } from '@/core/config/auth';
+import { isAppShellSession } from '@/core/config/authSession';
 import { isProxyAuthMode } from '@/core/config/proxyTrust';
 import { LoginScene } from '@/core/scenes/LoginScene';
 import { ProxyTrustGate } from '@/core/scenes/LoginScene/ProxyTrustGate';
@@ -19,10 +20,13 @@ export default async function Login({
   // reachable while setup is incomplete -- only signed-in users are
   // herded into the wizard.
   const session = await getServerSession(authOptions);
+  const { initial_setup } = await getSetupStatus();
 
-  if (session) {
-    const { initial_setup } = await getSetupStatus();
-    redirect(initial_setup.complete ? '/' : '/setup');
+  if (session && !initial_setup.complete) {
+    redirect('/setup');
+  }
+  if (isAppShellSession(session)) {
+    redirect('/');
   }
   const params = await searchParams;
   const callbackUrl =

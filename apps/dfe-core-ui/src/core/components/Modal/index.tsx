@@ -19,11 +19,15 @@ export const Modal = ({
 }: ModalProps) => {
   const [open, setOpen] = useState(openInitial);
 
+  const closeModal = () => {
+    setOpen(false);
+    onClose?.();
+  };
+
   const handleClose: AntdModalProps['onCancel'] = (e) => {
     e?.preventDefault();
     e?.stopPropagation();
-    setOpen(false);
-    onClose?.();
+    closeModal();
   };
 
   return (
@@ -31,7 +35,7 @@ export const Modal = ({
       open={open}
       onCancel={handleClose}
       footer={
-        <Button key="close" onClick={handleClose}>
+        <Button key="close" onClick={closeModal}>
           Close
         </Button>
       }
