@@ -221,10 +221,12 @@ export const CreateSchemaFormProvider = ({
       form.setFieldsValue(formFields);
     }
     if (initialSchemaColumns?.length) {
-      handleSetSchemaColumns(initialSchemaColumns);
+      queueMicrotask(() => handleSetSchemaColumns(initialSchemaColumns));
     }
     if (initialUploadedColumns?.length) {
-      handleSetUploadedSchemaColumns(initialUploadedColumns);
+      queueMicrotask(() =>
+        handleSetUploadedSchemaColumns(initialUploadedColumns),
+      );
       const invalidInitial = invalidUploadedFromColumns(initialUploadedColumns);
       form.setFieldsValue({
         uploadedColumns: initialUploadedColumns.map((c) =>

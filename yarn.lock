@@ -3160,7 +3160,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/nextjs-vite@npm:10.5.10":
+"@storybook/nextjs-vite@npm:^10.5.10":
   version: 10.5.10
   resolution: "@storybook/nextjs-vite@npm:10.5.10"
   dependencies:
@@ -5788,7 +5788,7 @@ __metadata:
     "@repo/dfe-engine-types": "npm:*"
     "@repo/dfe-icons": "npm:*"
     "@repo/typescript-config": "npm:*"
-    "@storybook/nextjs-vite": "npm:10.5.10"
+    "@storybook/nextjs-vite": "npm:^10.5.10"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.90.21"
     "@testing-library/dom": "npm:^10.4.1"

@@ -60,7 +60,7 @@
   "devDependencies": {
     "@ant-design/cssinjs": "^2.1.2",
     "@playwright/test": "^1.62.1",
-    "@storybook/nextjs-vite": "10.5.10",
+    "@storybook/nextjs-vite": "^10.5.10",
     "@tailwindcss/postcss": "^4",
     "@testing-library/user-event": "^14.6.1",
     "@types/jsdom": "^28",
