@@ -18,6 +18,9 @@ export default defineConfig({
       jsdom: { url: 'http://localhost' },
     },
     globals: true,
+    // The suites use 15s findBy backstops (timing-flake doctrine); the vitest
+    // default of 5s kills the test before a backstop can fire.
+    testTimeout: 20_000,
     setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     env: {

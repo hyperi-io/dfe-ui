@@ -16,12 +16,14 @@ export const useLinkAppFile = ({
   service,
   instance,
   setName,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
   instance: string;
   setName: string;
+  etag?: string | null;
   onSuccess?: (values: TLinkAppFileResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -31,6 +33,7 @@ export const useLinkAppFile = ({
       linkAppFileApi({
         body,
         pathParams: { service, instance, set_name: setName },
+        headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({

@@ -178,6 +178,7 @@ export const apps = {
           supported: true,
           reason: '',
           deploy_target: 'kubernetes',
+          etag: 'aaaaaaa1111',
           replica_count: null,
           min_replicas: 1,
           max_replicas: 10,
@@ -268,6 +269,32 @@ export const apps = {
       } = {}) =>
         http.put(withInstance(apps.scaling.mockedUrl, service, instance), () =>
           HttpResponse.json(mockedResponse, { status }),
+        ),
+      // The engine's stale-If-Match refusal: a 409 whose context carries the
+      // revision to re-read against. Distinct from the review_required 409.
+      staleRevision: ({
+        message = 'base revision aaaaaaa1111 is stale',
+        head = 'bbbbbbb2222',
+        current = 'aaaaaaa1111',
+        service = 'service',
+        instance = 'instance',
+      }: {
+        message?: string;
+        head?: string;
+        current?: string;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.put(withInstance(apps.scaling.mockedUrl, service, instance), () =>
+          HttpResponse.json(
+            {
+              code: 'conflict',
+              message,
+              errors: [],
+              context: { current, head },
+            },
+            { status: 409 },
+          ),
         ),
     },
   },

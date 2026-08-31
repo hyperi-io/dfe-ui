@@ -9,12 +9,14 @@ export const useDeleteAppFile = ({
   service,
   instance,
   setName,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
   instance: string;
   setName: string;
+  etag?: string | null;
   onSuccess?: (values: TDeleteAppFileResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -23,6 +25,7 @@ export const useDeleteAppFile = ({
     mutationFn: (filename: string) =>
       deleteAppFileApi({
         pathParams: { service, instance, set_name: setName, filename },
+        headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({

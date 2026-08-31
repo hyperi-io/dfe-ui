@@ -13,6 +13,7 @@ import {
   ApiError,
   createApiClient,
   getApiErrorResponseBody,
+  getApiWriteConflict,
   getErrorMessage,
 } from './client';
 
@@ -387,5 +388,119 @@ describe('getErrorMessage', () => {
 
   test('returns String(detail) when message is not a string', () => {
     expect(getErrorMessage({ message: 123 })).toBe('[object Object]');
+  });
+});
+
+const SCALING_PATH = '/api/v1/apps/{service}/{instance}/scaling' as const;
+const SCALING_URL = `${BASE_URL}/api/v1/apps/dfe-receiver/default/scaling`;
+
+/** An ApiError as the client would raise it, without a round trip. */
+const apiError = (status: number, detail: unknown) =>
+  new ApiError(status, 'Conflict', detail);
+
+describe('If-Match on a guarded write', () => {
+  test('sends the revision the caller holds', async () => {
+    let capturedHeaders: Headers | undefined;
+    server.use(
+      http.put(SCALING_URL, ({ request }) => {
+        capturedHeaders = request.headers;
+        return HttpResponse.json({ changed: true });
+      }),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    await client.put(SCALING_PATH, {
+      pathParams: { service: 'dfe-receiver', instance: 'default' },
+      headerParams: { 'If-Match': 'abc1234' },
+      body: { min_replicas: 2 },
+    });
+
+    expect(capturedHeaders?.get('If-Match')).toBe('abc1234');
+  });
+
+  // A deploy repo with no commits yet has no revision to be stale against, so
+  // the write has to go unguarded rather than carry a header matching nothing.
+  test('omits the header when there is no revision yet', async () => {
+    let capturedHeaders: Headers | undefined;
+    server.use(
+      http.put(SCALING_URL, ({ request }) => {
+        capturedHeaders = request.headers;
+        return HttpResponse.json({ changed: true });
+      }),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    await client.put(SCALING_PATH, {
+      pathParams: { service: 'dfe-receiver', instance: 'default' },
+      headerParams: { 'If-Match': null },
+      body: { min_replicas: 2 },
+    });
+
+    expect(capturedHeaders?.has('If-Match')).toBe(false);
+  });
+
+  test('a non-JSON refusal still arrives as an ApiError with its status', async () => {
+    server.use(
+      http.put(
+        SCALING_URL,
+        () =>
+          new HttpResponse('<html>Precondition Failed</html>', { status: 412 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const write = client.put(SCALING_PATH, {
+      pathParams: { service: 'dfe-receiver', instance: 'default' },
+      body: { min_replicas: 2 },
+    });
+
+    await expect(write).rejects.toThrow(ApiError);
+    await expect(write).rejects.toMatchObject({ status: 412 });
+  });
+});
+
+describe('getApiWriteConflict', () => {
+  test('reads the revision to retry against', () => {
+    const conflict = getApiWriteConflict(
+      apiError(409, {
+        code: 'conflict',
+        message: 'base revision is stale',
+        context: { current: 'aaaaaaa1111', head: 'bbbbbbb2222' },
+      }),
+    );
+
+    expect(conflict).toEqual({
+      message: 'base revision is stale',
+      head: 'bbbbbbb2222',
+      current: 'aaaaaaa1111',
+    });
+  });
+
+  // The app surface answers 409 for refusals a re-read will never fix, so the
+  // status on its own must not light up the reload affordance.
+  test('ignores the other 409s the app surface raises', () => {
+    for (const code of [
+      'review_required',
+      'single_instance_app',
+      'scaling_unsupported',
+    ]) {
+      expect(
+        getApiWriteConflict(apiError(409, { code, message: 'refused' })),
+      ).toBeNull();
+    }
+  });
+
+  // A duplicate source name is `conflict` too, but no revision recovers it.
+  test('ignores a conflict that carries no head', () => {
+    expect(
+      getApiWriteConflict(
+        apiError(409, { code: 'conflict', message: 'name already exists' }),
+      ),
+    ).toBeNull();
+  });
+
+  test('ignores anything that is not an ApiError', () => {
+    expect(getApiWriteConflict(new Error('offline'))).toBeNull();
+    expect(getApiWriteConflict(null)).toBeNull();
   });
 });
