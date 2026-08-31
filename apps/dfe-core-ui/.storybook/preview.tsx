@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/nextjs-vite';
 import React from 'react';
 import '../src/app/globals.css';
 import { CompatibleStyleWrapper } from '../src/core/contexts/ClientContext/CompatibleStyleWrapper';
