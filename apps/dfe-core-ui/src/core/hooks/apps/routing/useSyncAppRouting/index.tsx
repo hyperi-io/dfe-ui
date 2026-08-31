@@ -8,17 +8,23 @@ import { APP_ROUTING_QUERY_KEY } from '@/core/hooks/apps/routing/useFetchAppRout
 export const useSyncAppRouting = ({
   service,
   instance,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
   instance: string;
+  etag?: string | null;
   onSuccess?: (values: TSyncAppRoutingResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: () => syncAppRoutingApi({ pathParams: { service, instance } }),
+    mutationFn: () =>
+      syncAppRoutingApi({
+        pathParams: { service, instance },
+        headerParams: { 'If-Match': etag },
+      }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
         queryKey: APP_ROUTING_QUERY_KEY(service, instance),

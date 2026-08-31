@@ -39,6 +39,24 @@ function buildUrl(
   return url.toString();
 }
 
+/**
+ * Header params as string headers, dropping the ones that are not set.
+ *
+ * A header the caller has no value for must be absent rather than sent as the
+ * literal "null" - an optimistic-concurrency write with no revision in hand is
+ * an unguarded write, which the engine accepts, whereas `If-Match: null` is a
+ * revision that matches nothing.
+ */
+function definedHeaders(
+  headerParams?: Record<string, unknown>,
+): Record<string, string> {
+  if (!headerParams) return {};
+  const entries = Object.entries(headerParams).filter(
+    ([, value]) => value !== undefined && value !== null && value !== '',
+  );
+  return Object.fromEntries(entries.map(([k, v]) => [k, String(v)]));
+}
+
 export type ApiClientConfig = {
   baseUrl: string;
   getAuthHeaders?: () => HeadersInit | Promise<HeadersInit>;
@@ -68,7 +86,8 @@ export function createApiClient(config: ApiClientConfig) {
   ): Promise<
     DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
   > {
-    const { pathParams, queryParams, body, signal } = options ?? {};
+    const { pathParams, queryParams, headerParams, body, signal } =
+      options ?? {};
     if (signal?.aborted) {
       throw new DOMException('Request was aborted', 'AbortError');
     }
@@ -96,6 +115,10 @@ export function createApiClient(config: ApiClientConfig) {
       ...(hasJsonBody &&
         formDataBody === undefined && { 'Content-Type': 'application/json' }),
       ...(await getAuthHeaders?.()),
+      // Last, so an operation's own declared header wins. Only headers the spec
+      // declares on that operation are expressible, so this cannot shadow
+      // Authorization by accident.
+      ...definedHeaders(headerParams as Record<string, unknown> | undefined),
     };
 
     const init: RequestInit = {
@@ -122,10 +145,10 @@ export function createApiClient(config: ApiClientConfig) {
       let detail: unknown = text;
       try {
         detail = JSON.parse(text);
-      } catch (error) {
-        throw new Error(`Response body is not valid JSON: ${text}`, {
-          cause: error,
-        });
+      } catch {
+        // A proxy can answer a guarded write with a bare 412 and no JSON body,
+        // and the status still has to reach the caller.
+        detail = text;
       }
 
       if (res.status === 401) {
@@ -241,10 +264,18 @@ export class ApiError extends Error {
   }
 }
 
+/** The engine's ErrorResponse: a machine-readable code beside the prose. */
+export type ApiErrorResponseBody = {
+  code?: string;
+  message: string;
+  errors?: { message: string }[];
+  context?: Record<string, unknown> | null;
+};
+
 /** Parsed error JSON body from a failed request (`ApiError.detail`). */
 export function getApiErrorResponseBody(
   error: unknown,
-): { message: string; errors?: { message: string }[] } | null {
+): ApiErrorResponseBody | null {
   if (!(error instanceof ApiError)) return null;
   const { detail } = error;
   if (detail == null || typeof detail !== 'object') return null;
@@ -254,7 +285,40 @@ export function getApiErrorResponseBody(
   ) {
     return null;
   }
-  return detail as { message: string; errors?: { message: string }[] };
+  return detail as ApiErrorResponseBody;
+}
+
+/** A write refused because the resource moved since it was read. */
+export type ApiWriteConflict = {
+  message: string;
+  /** The revision to re-read against, so recovering costs no extra round trip. */
+  head: string;
+  /** The stale revision that was sent, when the engine reports it. */
+  current?: string;
+};
+
+/**
+ * A stale-revision refusal, or null for every other failure.
+ *
+ * The status alone will not do: the app surface also answers 409 for
+ * `review_required`, `single_instance_app` and `scaling_unsupported`, none of
+ * which a re-read fixes. The code alone will not do either, because a duplicate
+ * source name is `conflict` too. A revision to retry against is what separates
+ * them, so the head is required rather than optional.
+ */
+export function getApiWriteConflict(error: unknown): ApiWriteConflict | null {
+  if (!(error instanceof ApiError)) return null;
+  if (error.status !== 409 && error.status !== 412) return null;
+  const body = getApiErrorResponseBody(error);
+  if (body?.code !== 'conflict') return null;
+  const head = body.context?.head;
+  if (typeof head !== 'string' || head === '') return null;
+  const current = body.context?.current;
+  return {
+    message: body.message,
+    head,
+    ...(typeof current === 'string' && current !== '' && { current }),
+  };
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;

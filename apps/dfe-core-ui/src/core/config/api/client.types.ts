@@ -52,6 +52,20 @@ type DfeClientQueryParams<Op> = Op extends { parameters: { query?: infer Q } }
     : undefined
   : undefined;
 
+/**
+ * Header parameters when the operation declares them.
+ *
+ * Only headers the spec puts on that one operation are expressible, so this is
+ * not a general escape hatch for setting arbitrary headers - today it is
+ * `If-Match` on the writes the engine guards. A header typed `string | null`
+ * is omitted entirely when null, which is what an unguarded first write needs.
+ */
+type DfeClientHeaderParams<Op> = Op extends { parameters: { header?: infer H } }
+  ? H extends Record<string, unknown>
+    ? H
+    : undefined
+  : undefined;
+
 /** Options for a request that has path params. */
 export type DfeClientRequestOptions<
   Path extends keyof paths,
@@ -63,6 +77,7 @@ export type DfeClientRequestOptions<
       : {
           pathParams?: DfeClientPathParams<Op>;
           queryParams?: DfeClientQueryParams<Op>;
+          headerParams?: DfeClientHeaderParams<Op>;
           body?: DfeClientRequestBody<Op>;
           signal?: AbortSignal;
         }

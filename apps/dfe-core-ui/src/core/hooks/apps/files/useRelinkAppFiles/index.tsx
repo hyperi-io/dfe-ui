@@ -15,12 +15,14 @@ export const useRelinkAppFiles = ({
   service,
   instance,
   setName,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
   instance: string;
   setName: string;
+  etag?: string | null;
   onSuccess?: (values: TRelinkAppFilesResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -29,6 +31,7 @@ export const useRelinkAppFiles = ({
     mutationFn: () =>
       relinkAppFilesApi({
         pathParams: { service, instance, set_name: setName },
+        headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({

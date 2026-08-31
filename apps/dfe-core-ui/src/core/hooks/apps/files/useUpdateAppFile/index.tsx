@@ -17,6 +17,7 @@ export const useUpdateAppFile = ({
   instance,
   setName,
   filename,
+  etag,
   onSuccess,
   onError,
 }: {
@@ -24,6 +25,7 @@ export const useUpdateAppFile = ({
   instance: string;
   setName: string;
   filename: string;
+  etag?: string | null;
   onSuccess?: (values: TUpdateAppFileResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -33,6 +35,7 @@ export const useUpdateAppFile = ({
       updateAppFileApi({
         body,
         pathParams: { service, instance, set_name: setName, filename },
+        headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({

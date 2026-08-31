@@ -15,7 +15,11 @@ import { TAppFileSet } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { AnnotatedAceEditor } from '@/core/components/AceEditor/AnnotatedAceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { WriteConflictNotice } from '@/core/components/WriteConflictNotice';
+import {
+  getApiErrorResponseBody,
+  getApiWriteConflict,
+} from '@/core/config/api/client';
 import {
   IconAlertTriangle,
   IconPlayerPlay,
@@ -74,12 +78,20 @@ export const FileSetPanel = ({
   const isNewFile = selected === NEW_FILE;
   const selectedName = isNewFile ? draftName : (selected ?? '');
 
-  const { data: file } = useFetchAppFile({
+  const {
+    data: file,
+    isFetching: isRereading,
+    refetch: rereadFile,
+  } = useFetchAppFile({
     service,
     instance,
     setName,
     filename: isNewFile ? '' : (selected ?? ''),
   });
+
+  // Repo-wide, so any loaded file guards any write here. A new file has none
+  // loaded, which leaves that first write unguarded - the engine allows it.
+  const etag = file?.etag;
 
   const {
     data: writeResult,
@@ -92,15 +104,21 @@ export const FileSetPanel = ({
     instance,
     setName,
     filename: selectedName,
+    etag,
     onSuccess: () => {
       if (isNewFile) setSelected(draftName);
       setDraft(null);
     },
   });
-  const { mutate: deleteFile, isPending: isDeleting } = useDeleteAppFile({
+  const {
+    mutate: deleteFile,
+    isPending: isDeleting,
+    error: deleteError,
+  } = useDeleteAppFile({
     service,
     instance,
     setName,
+    etag,
     onSuccess: () => setSelected(null),
   });
   const {
@@ -114,6 +132,7 @@ export const FileSetPanel = ({
     service,
     instance,
     setName,
+    etag,
   });
 
   const content = draft ?? file?.content ?? '';
@@ -134,8 +153,13 @@ export const FileSetPanel = ({
   };
 
   const linkFor = (name: string) => links?.find((link) => link.name === name);
-  const writeMessage =
-    getApiErrorResponseBody(writeError)?.message ?? writeError?.message;
+  // Either write can be refused for a stale revision, and both recover the same
+  // way, so they share one notice.
+  const conflict =
+    getApiWriteConflict(writeError) ?? getApiWriteConflict(deleteError);
+  const writeMessage = conflict
+    ? undefined
+    : (getApiErrorResponseBody(writeError)?.message ?? writeError?.message);
   const dryRunMessage =
     getApiErrorResponseBody(dryRunError)?.message ?? dryRunError?.message;
 
@@ -250,6 +274,19 @@ export const FileSetPanel = ({
                 onChange={setDraft}
                 downloadFileName={selectedName || undefined}
               />
+
+              {conflict && (
+                <WriteConflictNotice
+                  conflict={conflict}
+                  // The draft is deliberately left in the editor - the operator
+                  // decides whether it still applies to what landed.
+                  onReload={() => {
+                    resetWrite();
+                    void rereadFile();
+                  }}
+                  isReloading={isRereading}
+                />
+              )}
 
               {writeMessage && (
                 <NotificationCard

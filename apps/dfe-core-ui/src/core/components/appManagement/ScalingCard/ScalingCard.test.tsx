@@ -181,6 +181,128 @@ describe('ScalingCard', () => {
     expect(body).toMatchObject({ keda_enabled: false, replica_count: 4 });
   });
 
+  it('guards the write with the revision it read', async () => {
+    const user = userEvent.setup();
+    let ifMatch: string | null = null;
+    server.use(
+      http.put('/api/v1/apps/dfe-receiver/default/scaling', ({ request }) => {
+        ifMatch = request.headers.get('If-Match');
+        return HttpResponse.json({ changed: true, commit_sha: 'ccc' });
+      }),
+    );
+
+    renderCard();
+
+    await user.click(
+      await screen.findByRole(
+        'button',
+        { name: 'Commit dials' },
+        { timeout: 15000 },
+      ),
+    );
+
+    await waitFor(() => expect(ifMatch).not.toBeNull(), { timeout: 15000 });
+    expect(ifMatch).toBe('aaaaaaa1111');
+    // Test timeout above the 15s backstop, or the test dies before it fires.
+  }, 20000);
+
+  // A stale revision is recoverable, so it must not read as a plain failure.
+  it('offers the re-read when the write is refused for a stale revision', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.scaling.put.staleRevision({
+        service: 'dfe-receiver',
+        instance: 'default',
+      }),
+    );
+
+    renderCard();
+
+    await user.click(
+      await screen.findByRole(
+        'button',
+        { name: 'Commit dials' },
+        { timeout: 15000 },
+      ),
+    );
+
+    expect(
+      await screen.findByText(
+        'Someone else changed this first',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+    // The revision to retry against, so the operator is not told to guess.
+    expect(
+      screen.getByText(/moved on to bbbbbbb/, { exact: false }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Reload latest' }),
+    ).toBeInTheDocument();
+  }, 20000);
+
+  it('re-reads on demand so the retry carries the current revision', async () => {
+    const user = userEvent.setup();
+    let reads = 0;
+    const sent: (string | null)[] = [];
+    server.use(
+      http.get('/api/v1/apps/dfe-receiver/default/scaling', () => {
+        reads += 1;
+        return HttpResponse.json({
+          supported: true,
+          reason: '',
+          deploy_target: 'kubernetes',
+          etag: reads === 1 ? 'aaaaaaa1111' : 'bbbbbbb2222',
+          replica_count: null,
+          min_replicas: 1,
+          max_replicas: 10,
+          keda_enabled: true,
+          cpu_request: null,
+          memory_request: null,
+          cpu_limit: null,
+          memory_limit: null,
+        });
+      }),
+      http.put('/api/v1/apps/dfe-receiver/default/scaling', ({ request }) => {
+        sent.push(request.headers.get('If-Match'));
+        return HttpResponse.json(
+          {
+            code: 'conflict',
+            message: 'base revision is stale',
+            errors: [],
+            context: { current: 'aaaaaaa1111', head: 'bbbbbbb2222' },
+          },
+          { status: 409 },
+        );
+      }),
+    );
+
+    renderCard();
+
+    await user.click(
+      await screen.findByRole(
+        'button',
+        { name: 'Commit dials' },
+        { timeout: 15000 },
+      ),
+    );
+    await screen.findByText(
+      'Someone else changed this first',
+      {},
+      { timeout: 15000 },
+    );
+    expect(sent).toEqual(['aaaaaaa1111']);
+
+    await user.click(screen.getByRole('button', { name: 'Reload latest' }));
+    await waitFor(() => expect(reads).toBe(2), { timeout: 15000 });
+
+    await user.click(screen.getByRole('button', { name: 'Commit dials' }));
+
+    await waitFor(() => expect(sent).toHaveLength(2), { timeout: 15000 });
+    expect(sent[1]).toBe('bbbbbbb2222');
+  }, 20000);
+
   it('shows the reason instead of dials when the deploy target refuses', async () => {
     server.use(
       API_CONFIG_MOCKS.apps.scaling.get.unsupported({
