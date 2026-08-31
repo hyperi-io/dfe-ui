@@ -12,17 +12,23 @@ import { APPS_QUERY_KEY } from '@/core/hooks/apps/instances/useFetchApps';
  */
 export const useCreateAppInstance = ({
   service,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
+  etag?: string | null;
   onSuccess?: (values: TCreateAppInstanceResponse) => void;
   onError?: (error: Error) => void;
 }) => {
   const queryClient = useQueryClient();
   const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (body: TCreateAppInstanceRequest) =>
-      createAppInstanceApi({ body, pathParams: { service } }),
+      createAppInstanceApi({
+        body,
+        pathParams: { service },
+        headerParams: { 'If-Match': etag },
+      }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
       onSuccess?.(values);

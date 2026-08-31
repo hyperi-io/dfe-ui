@@ -8,7 +8,11 @@ import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { WriteConflictNotice } from '@/core/components/WriteConflictNotice';
+import {
+  getApiErrorResponseBody,
+  getApiWriteConflict,
+} from '@/core/config/api/client';
 import { IconAlertTriangle } from '@repo/dfe-icons';
 import { Button, InputNumber, Input, Spin, Switch } from 'antd';
 import { useEffect } from 'react';
@@ -50,7 +54,9 @@ export const ScalingCard = ({
   const {
     data: scaling,
     isLoading,
+    isFetching,
     error,
+    refetch,
   } = useFetchAppScaling({ service, instance });
   const {
     data: writeResult,
@@ -58,7 +64,7 @@ export const ScalingCard = ({
     isPending,
     error: updateError,
     reset: resetWriteResult,
-  } = useUpdateAppScaling({ service, instance });
+  } = useUpdateAppScaling({ service, instance, etag: scaling?.etag });
 
   useEffect(() => {
     if (!scaling?.supported) return;
@@ -128,8 +134,17 @@ export const ScalingCard = ({
     updateScaling(body);
   };
 
-  const updateMessage =
-    getApiErrorResponseBody(updateError)?.message ?? updateError?.message;
+  // A stale revision is recoverable by re-reading, so it gets the reload
+  // affordance rather than the generic refusal message.
+  const conflict = getApiWriteConflict(updateError);
+  const updateMessage = conflict
+    ? undefined
+    : (getApiErrorResponseBody(updateError)?.message ?? updateError?.message);
+
+  const reloadAfterConflict = () => {
+    resetWriteResult();
+    void refetch();
+  };
 
   return (
     <SectionCard title="Scaling">
@@ -208,6 +223,14 @@ export const ScalingCard = ({
                 <Input placeholder="unset - chart default applies" />
               </Form.Item>
             </div>
+
+            {conflict && (
+              <WriteConflictNotice
+                conflict={conflict}
+                onReload={reloadAfterConflict}
+                isReloading={isFetching}
+              />
+            )}
 
             {updateMessage && (
               <NotificationCard type="error" title={updateMessage} />
