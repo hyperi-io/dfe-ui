@@ -22,7 +22,7 @@ export const useFetchAppFile = ({
   filename: string;
   queryEnabled?: boolean;
 }) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: APP_FILE_QUERY_KEY(service, instance, setName, filename),
     queryFn: () =>
       fetchAppFileApi({
@@ -32,5 +32,7 @@ export const useFetchAppFile = ({
     retry: false,
   });
 
-  return { data, isLoading, error };
+  // `data.etag` is the deploy repo revision to send back as If-Match on a write
+  // to this file. `refetch` is how a refused write recovers.
+  return { data, isLoading, isFetching, error, refetch };
 };

@@ -14,12 +14,14 @@ export const useCopyAppFiles = ({
   service,
   instance,
   setName,
+  etag,
   onSuccess,
   onError,
 }: {
   service: string;
   instance: string;
   setName: string;
+  etag?: string | null;
   onSuccess?: (values: TCopyAppFilesResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -29,6 +31,7 @@ export const useCopyAppFiles = ({
       copyAppFilesApi({
         body,
         pathParams: { service, instance, set_name: setName },
+        headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
