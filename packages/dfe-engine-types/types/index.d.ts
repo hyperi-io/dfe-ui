@@ -3458,7 +3458,7 @@ export interface paths {
         };
         /**
          * Get Values
-         * @description The instance's overlay document as stored.
+         * @description The instance's overlay document as stored, with the revision to write against.
          */
         get: operations["get_values_api_v1_apps__service___instance__values_get"];
         put?: never;
@@ -3617,7 +3617,7 @@ export interface paths {
         };
         /**
          * Read App File
-         * @description One file's content.
+         * @description One file's content, with the revision to write it back against.
          */
         get: operations["read_app_file_api_v1_apps__service___instance__files__set_name___filename__get"];
         /**
@@ -6182,6 +6182,11 @@ export interface components {
             size_bytes: number;
             /** Content */
             content: string;
+            /**
+             * Etag
+             * @description The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource.
+             */
+            etag?: string | null;
         };
         /** FileSetSummary */
         FileSetSummary: {
@@ -8923,6 +8928,11 @@ export interface components {
             deployed?: {
                 [key: string]: unknown;
             };
+            /**
+             * Etag
+             * @description The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource.
+             */
+            etag?: string | null;
         };
         /**
          * RuleCreateRequest
@@ -9466,6 +9476,11 @@ export interface components {
             reason: string;
             /** Deploy Target */
             deploy_target: string;
+            /**
+             * Etag
+             * @description The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource.
+             */
+            etag?: string | null;
             /** Replica Count */
             replica_count?: number | null;
             /** Min Replicas */
@@ -11165,6 +11180,25 @@ export interface components {
             message: string;
             /** Errors */
             errors?: string[];
+        };
+        /**
+         * ValuesResponse
+         * @description The overlay document, wrapped so the revision has somewhere to live.
+         *
+         *     The document is nested rather than returned bare: its keys are the chart's,
+         *     so a top-level ``etag`` beside them would collide with any chart that ever
+         *     names a value that.
+         */
+        ValuesResponse: {
+            /** Values */
+            values: {
+                [key: string]: unknown;
+            };
+            /**
+             * Etag
+             * @description The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource.
+             */
+            etag?: string | null;
         };
         /**
          * VarChange
@@ -18379,7 +18413,9 @@ export interface operations {
     create_instance_api_v1_apps__service__instances_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
             path: {
                 service: string;
             };
@@ -18446,7 +18482,9 @@ export interface operations {
     delete_instance_api_v1_apps__service___instance__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
             path: {
                 service: string;
                 instance: string;
@@ -18528,9 +18566,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["ValuesResponse"];
                 };
             };
             /** @description Validation Error */
@@ -18722,7 +18758,9 @@ export interface operations {
     relink_app_files_api_v1_apps__service___instance__files__set_name__relink_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
             path: {
                 service: string;
                 instance: string;
@@ -18755,7 +18793,9 @@ export interface operations {
     copy_app_files_api_v1_apps__service___instance__files__set_name__copy_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
             path: {
                 service: string;
                 instance: string;
@@ -18866,7 +18906,9 @@ export interface operations {
     delete_app_file_api_v1_apps__service___instance__files__set_name___filename__delete: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
             path: {
                 service: string;
                 instance: string;
