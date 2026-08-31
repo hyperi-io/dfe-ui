@@ -3631,7 +3631,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/dev-logger@workspace:packages/dev-logger"
   dependencies:
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "npm:*"
     typescript: "npm:5.9.2"
   languageName: unknown
   linkType: soft
@@ -3649,7 +3649,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/dfe-icons@workspace:packages/dfe-icons"
   dependencies:
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "npm:*"
     "@storybook/react": "npm:^10.2.15"
     "@storybook/react-vite": "npm:^10.2.15"
     "@svgr/cli": "npm:^8.1.0"
@@ -3663,7 +3663,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@repo/typescript-config@npm:*, @repo/typescript-config@workspace:*, @repo/typescript-config@workspace:packages/typescript-config":
+"@repo/typescript-config@npm:*, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
   languageName: unknown

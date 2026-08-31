@@ -24,7 +24,7 @@
     "react": "^19.2.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
+    "@repo/typescript-config": "*",
     "@storybook/react": "^10.2.15",
     "@storybook/react-vite": "^10.2.15",
     "@svgr/cli": "^8.1.0",
