@@ -50,7 +50,7 @@ debug-storybook.log
 # Local working files (not committed)
 docs/superpowers/
 .claude/
-hyperi-ai/
+.hyperi-ai/
 .mcp.json
 STATE.md
 CLAUDE.md
