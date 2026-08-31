@@ -24,7 +24,7 @@ describe('LibraryScene', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('vrl')).toBeInTheDocument();
     expect(screen.getByText('network')).toBeInTheDocument();
-  }, 20_000);
+  });
 
   it('shows tags and labels apart, because they mean different things', async () => {
     render(<LibraryScene />, { wrapper });
@@ -33,7 +33,7 @@ describe('LibraryScene', () => {
       await screen.findByText('stable -> 2', {}, { timeout: 15_000 }),
     ).toBeInTheDocument();
     expect(screen.getByText('team=platform')).toBeInTheDocument();
-  }, 20_000);
+  });
 
   it('offers the classifying filters, not tag filters', async () => {
     render(<LibraryScene />, { wrapper });
@@ -46,7 +46,7 @@ describe('LibraryScene', () => {
       screen.getByPlaceholderText('Search name or description'),
     ).toBeInTheDocument();
     expect(screen.queryByText('Any tag')).not.toBeInTheDocument();
-  }, 20_000);
+  });
 
   it('reports a failure to read the library rather than showing it empty', async () => {
     server.use(API_CONFIG_MOCKS.library.default.get.error());
@@ -62,5 +62,5 @@ describe('LibraryScene', () => {
         },
       ),
     ).toBeInTheDocument();
-  }, 20_000);
+  });
 });
