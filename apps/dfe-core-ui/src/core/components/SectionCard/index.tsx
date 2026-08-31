@@ -21,21 +21,19 @@ export const SectionCard = ({
       )}
     >
       <div className="flex justify-between items-center">
-        {title ||
-          (description && (
-            <div className="flex flex-col gap-1">
-              {title && (
-                <h1 className="text-base font-semibold text-foreground-muted dark:text-dark-foreground-muted">
-                  {title}
-                </h1>
-              )}
-              {description && (
-                <p className="text-foreground/50 dark:text-dark-foreground/50 text-sm">
-                  {description}
-                </p>
-              )}
-            </div>
-          ))}
+        {/* Both, not either: `title || description` short-circuited on the title
+            and dropped every description a titled section carried. Callers own
+            their own heading element, so the title renders as supplied. */}
+        {(title || description) && (
+          <div className="flex flex-col gap-1">
+            {title}
+            {description && (
+              <p className="text-foreground/50 dark:text-dark-foreground/50 text-sm">
+                {description}
+              </p>
+            )}
+          </div>
+        )}
 
         {rightTitleSlot}
       </div>
