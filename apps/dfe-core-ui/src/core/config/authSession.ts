@@ -1,3 +1,5 @@
+import type { Session } from 'next-auth';
+
 const DEFAULT_ACCESS_TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 const DEFAULT_MIN_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 const DEFAULT_SESSION_CHECK_INTERVAL_MS = 60 * 1000;
@@ -44,6 +46,21 @@ export const SESSION_REFETCH_INTERVAL_SECONDS = parsePositiveInt(
 /** Shared interval for auth store session + `/auth/me` refresh (milliseconds). */
 export const SESSION_AUTH_REFRESH_INTERVAL_MS =
   SESSION_REFETCH_INTERVAL_SECONDS * 1000;
+
+/** Matches (auth)/layout: session is present but not usable for the app shell. */
+export function isAppShellSession(session: Session | null): session is Session {
+  if (!session) {
+    return false;
+  }
+  const accessToken = session.user?.accessToken;
+  if (typeof accessToken !== 'string' || accessToken === '') {
+    return false;
+  }
+  if (session.error === 'AccessTokenExpired') {
+    return false;
+  }
+  return true;
+}
 
 export const shouldRefreshAccessToken = ({
   accessTokenExpiresAt,
