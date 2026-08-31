@@ -2,8 +2,40 @@ import { describe, expect, test, vi } from 'vitest';
 import {
   ACCESS_TOKEN_REFRESH_BUFFER_MS,
   MIN_ACCESS_TOKEN_REFRESH_INTERVAL_MS,
+  isAppShellSession,
   shouldRefreshAccessToken,
 } from './authSession';
+
+describe('isAppShellSession', () => {
+  test('returns false for null or missing access token', () => {
+    expect(isAppShellSession(null)).toBe(false);
+    expect(
+      isAppShellSession({
+        user: { name: 'u' },
+        expires: '2026-01-01',
+      }),
+    ).toBe(false);
+  });
+
+  test('returns false when access token is expired', () => {
+    expect(
+      isAppShellSession({
+        user: { name: 'u', accessToken: 'tok' },
+        expires: '2026-01-01',
+        error: 'AccessTokenExpired',
+      }),
+    ).toBe(false);
+  });
+
+  test('returns true for a usable session', () => {
+    expect(
+      isAppShellSession({
+        user: { name: 'u', accessToken: 'tok' },
+        expires: '2026-01-01',
+      }),
+    ).toBe(true);
+  });
+});
 
 describe('shouldRefreshAccessToken', () => {
   test('returns true when session is marked expired', () => {
