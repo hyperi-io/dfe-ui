@@ -11,7 +11,7 @@ describe('isAppShellSession', () => {
     expect(isAppShellSession(null)).toBe(false);
     expect(
       isAppShellSession({
-        user: { name: 'u' },
+        user: { id: 'u1', name: 'u' },
         expires: '2026-01-01',
       }),
     ).toBe(false);
@@ -20,7 +20,7 @@ describe('isAppShellSession', () => {
   test('returns false when access token is expired', () => {
     expect(
       isAppShellSession({
-        user: { name: 'u', accessToken: 'tok' },
+        user: { id: 'u1', name: 'u', accessToken: 'tok' },
         expires: '2026-01-01',
         error: 'AccessTokenExpired',
       }),
@@ -30,7 +30,7 @@ describe('isAppShellSession', () => {
   test('returns true for a usable session', () => {
     expect(
       isAppShellSession({
-        user: { name: 'u', accessToken: 'tok' },
+        user: { id: 'u1', name: 'u', accessToken: 'tok' },
         expires: '2026-01-01',
       }),
     ).toBe(true);
