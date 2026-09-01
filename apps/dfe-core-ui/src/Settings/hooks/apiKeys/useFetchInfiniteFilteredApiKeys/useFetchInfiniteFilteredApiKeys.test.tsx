@@ -73,6 +73,8 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
         short_token: 'string',
         enabled: true,
         created_at: 'string',
+        expires_at: null,
+        expired: false,
       };
 
       expect(result.current.data).toBeDefined();
@@ -146,6 +148,8 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
         short_token: 'string',
         enabled: true,
         created_at: 'string',
+        expires_at: null,
+        expired: false,
       };
 
       // Data should be flattened - 20 items total
@@ -182,6 +186,8 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
         short_token: 'string',
         enabled: true,
         created_at: 'string',
+        expires_at: null,
+        expired: false,
       };
 
       // Verify we have 20 items (pages 1 and 2)

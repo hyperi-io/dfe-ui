@@ -49,6 +49,8 @@ export const apiKeys = {
           description: 'string',
           created_at: 'string',
           full_key: 'string',
+          expires_at: null,
+          expired: false,
         },
       }: {
         mockedResponse?: TApiKeyCreateResponse;
