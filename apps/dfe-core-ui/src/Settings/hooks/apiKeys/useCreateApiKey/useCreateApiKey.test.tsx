@@ -51,6 +51,8 @@ describe('.useCreateApiKey', () => {
         enabled: true,
         created_at: 'string',
         full_key: 'string',
+        expires_at: null,
+        expired: false,
       };
 
       await waitFor(() => {
