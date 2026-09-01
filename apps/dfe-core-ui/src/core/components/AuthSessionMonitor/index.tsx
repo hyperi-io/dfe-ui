@@ -4,10 +4,7 @@ import {
   SESSION_CHECK_INTERVAL_MS,
   shouldRefreshAccessToken,
 } from '@/core/config/authSession';
-import {
-  loginRedirectPath,
-  pathWithSearch,
-} from '@/core/config/loginCallback';
+import { loginRedirectPath, pathWithSearch } from '@/core/config/loginCallback';
 import { isNoAuthRoute } from '@/core/config/isNoAuthRoute';
 import { useRefreshToken } from '@/core/hooks/useRefreshToken';
 import { signOut, useSession } from 'next-auth/react';
