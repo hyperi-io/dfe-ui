@@ -1,12 +1,20 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
-import { CreateApiKeyForm } from '@/Settings/components/ApiKeyManagement/CreateApiKeyForm';
+import {
+  CreateApiKeyForm,
+  CreateApiKeyFormSchema,
+} from '@/Settings/components/ApiKeyManagement/CreateApiKeyForm';
 import { TApiKeyCreateResponse } from '@/Settings/hooks/apiKeys/useCreateApiKey/types';
+import { IconCopy } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useCallback, useState } from 'react';
 
-export const CreateApiKeyDrawer = () => {
+export const CloneApiKeyDrawer = ({
+  initialValues,
+}: {
+  initialValues: CreateApiKeyFormSchema;
+}) => {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<TApiKeyCreateResponse | null>(null);
 
@@ -41,24 +49,38 @@ export const CreateApiKeyDrawer = () => {
     <>
       <RbacProtected action={RbacProtected.rbacActions.api_key_write}>
         <RbacProtected.Unrestricted>
-          <Button type="primary" onClick={() => setOpen(true)}>
-            Generate API Key
-          </Button>
+          <Button
+            type="default"
+            aria-label="Clone API Key"
+            icon={<IconCopy />}
+            onClick={() => setOpen(true)}
+            size="small"
+            shape="circle"
+          />
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
-          <Button type="primary" disabled>
-            Generate API Key
-          </Button>
+          <Button
+            type="default"
+            aria-label="Clone API Key"
+            icon={<IconCopy />}
+            disabled
+            size="small"
+            shape="circle"
+          />
         </RbacProtected.Restricted>
       </RbacProtected>
 
       <Drawer
-        title={data ? 'API Key Generated' : 'Generate API Key'}
+        title={data ? 'API Key Generated' : 'Clone API Key'}
         open={open}
         onClose={handleClose}
         keyboard={!mustAcknowledgeCopy}
       >
-        <CreateApiKeyForm onSuccess={handleSuccess} onAccept={handleAccept} />
+        <CreateApiKeyForm
+          initialValues={initialValues}
+          onSuccess={handleSuccess}
+          onAccept={handleAccept}
+        />
       </Drawer>
     </>
   );

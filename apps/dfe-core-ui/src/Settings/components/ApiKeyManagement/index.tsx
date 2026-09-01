@@ -8,6 +8,7 @@ import { TApiKeysItemSummary } from '@/Settings/hooks/apiKeys/useFetchInfiniteFi
 import { IconCheck, IconX } from '@repo/dfe-icons';
 import { Input, Table } from 'antd';
 import { useCallback, useState } from 'react';
+import { CloneApiKeyDrawer } from './CloneApiKeyDrawer';
 import { CreateApiKeyDrawer } from './CreateApiKeyDrawer';
 import { RevokeApiKeyModal } from './RevokeApiKeyModal';
 
@@ -87,7 +88,19 @@ export const ApiKeyManagement = () => {
       width: 85,
       align: 'center' as const,
       render: (_: unknown, record: TApiKeysItemSummary) => (
-        <RevokeApiKeyModal shortToken={record.short_token} name={record.name} />
+        <span className="flex items-center gap-2">
+          <CloneApiKeyDrawer
+            initialValues={{
+              name: `${record.name}_clone`,
+              description: record.description,
+              groups: record.groups,
+            }}
+          />
+          <RevokeApiKeyModal
+            shortToken={record.short_token}
+            name={record.name}
+          />
+        </span>
       ),
     },
   ];
