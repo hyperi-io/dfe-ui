@@ -1,9 +1,14 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { LOGIN_CALLBACK_PATH_HEADER } from '@/core/config/loginCallback';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@/core/server/actions/getSetupStatus', () => ({
   getSetupStatus: vi.fn(),
+}));
+
+vi.mock('next/headers', () => ({
+  headers: vi.fn(),
 }));
 
 const Layout = (await import('@/app/(auth)/layout')).default;
@@ -20,6 +25,7 @@ const redirect = vi.mocked((await import('next/navigation')).redirect);
 const getSetupStatus = vi.mocked(
   (await import('@/core/server/actions/getSetupStatus')).getSetupStatus,
 );
+const headers = vi.mocked((await import('next/headers')).headers);
 
 const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
   initial_setup: {
@@ -38,6 +44,7 @@ describe('Layout (auth)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSetupStatus.mockResolvedValue(setupComplete);
+    headers.mockResolvedValue(new Headers());
   });
 
   test('redirects to /setup when initial setup is required', async () => {
@@ -105,7 +112,26 @@ describe('Layout (auth)', () => {
       // redirect() throws in Next.js - ignore
     }
 
-    expect(redirect).toHaveBeenCalledWith('/login');
+    expect(redirect).toHaveBeenCalledWith('/login?callbackUrl=%2F');
+  });
+
+  test('redirects to login with callback URL including search params', async () => {
+    headers.mockResolvedValue(
+      new Headers({
+        [LOGIN_CALLBACK_PATH_HEADER]: '/rules?name=foo',
+      }),
+    );
+    getServerSession.mockResolvedValue(null);
+
+    try {
+      await Layout({ children: <div>Child</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith(
+      '/login?callbackUrl=%2Frules%3Fname%3Dfoo',
+    );
   });
 
   test('redirects to /login when access token is missing', async () => {
@@ -120,7 +146,7 @@ describe('Layout (auth)', () => {
       // redirect() throws in Next.js - ignore
     }
 
-    expect(redirect).toHaveBeenCalledWith('/login');
+    expect(redirect).toHaveBeenCalledWith('/login?callbackUrl=%2F');
   });
 
   test('redirects to /login when the access token has expired (cannot be refreshed)', async () => {
@@ -144,7 +170,7 @@ describe('Layout (auth)', () => {
       // redirect() throws in Next.js - ignore
     }
 
-    expect(redirect).toHaveBeenCalledWith('/login');
+    expect(redirect).toHaveBeenCalledWith('/login?callbackUrl=%2F');
   });
 
   test('renders children when user is authenticated', async () => {

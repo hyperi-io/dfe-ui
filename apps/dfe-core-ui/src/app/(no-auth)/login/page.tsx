@@ -16,6 +16,12 @@ export default async function Login({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
+  const params = await searchParams;
+  const callbackUrl =
+    (typeof params?.callbackUrl === 'string'
+      ? params.callbackUrl
+      : params?.callbackUrl?.[0]) ?? '/';
+
   // The wizard needs an authenticated session, so the form must stay
   // reachable while setup is incomplete -- only signed-in users are
   // herded into the wizard.
@@ -26,14 +32,8 @@ export default async function Login({
     redirect('/setup');
   }
   if (isAppShellSession(session)) {
-    redirect('/');
+    redirect(callbackUrl);
   }
-  const params = await searchParams;
-  const callbackUrl =
-    (typeof params?.callbackUrl === 'string'
-      ? params.callbackUrl
-      : params?.callbackUrl?.[0]) ?? '/';
-
   // Behind the proxy: auto-establish the session from the forwarded engine
   // token instead of showing the password form (falls back to it on failure).
   if (isProxyAuthMode()) {
