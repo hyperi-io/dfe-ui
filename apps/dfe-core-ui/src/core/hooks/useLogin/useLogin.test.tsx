@@ -50,6 +50,24 @@ describe('.useLogin', () => {
     expect(mockPush).toHaveBeenCalledWith('/');
   });
 
+  test('should preserve query string when the full URL is provided', async () => {
+    mockSignIn.mockResolvedValue({
+      url: 'https://example.com/rules?name=foo',
+      error: null,
+    });
+
+    const { result } = renderHook(() => useLogin(), { wrapper });
+
+    result.current.mutate({
+      username: 'admin',
+      password: 'password',
+    });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/rules?name=foo');
+    });
+  });
+
   test('should use only the path if the full URL is provided', async () => {
     mockSignIn.mockResolvedValue({
       url: 'https://example.com/dashboard',

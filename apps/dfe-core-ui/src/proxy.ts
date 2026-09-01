@@ -1,3 +1,7 @@
+import {
+  LOGIN_CALLBACK_PATH_HEADER,
+  pathWithSearch,
+} from '@/core/config/loginCallback';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
@@ -99,6 +103,15 @@ async function isInitialSetupIncomplete(): Promise<boolean> {
   }
 }
 
+function nextWithCallbackPath(req: NextRequest): NextResponse {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set(
+    LOGIN_CALLBACK_PATH_HEADER,
+    pathWithSearch(req.nextUrl.pathname, req.nextUrl.search),
+  );
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
@@ -128,12 +141,9 @@ export default async function proxy(
     req as Parameters<typeof authMiddleware>[0],
     event,
   );
-  // withAuth returns a redirect NextResponse (unauthenticated), a next()
-  // NextResponse, or nothing (both proceed). Plant on whichever response goes
-  // back: a redirect to /login has no session so plantEngineTokenCookie is a
-  // no-op there, and a proceeding request gets its dfe_token mirrored.
-  const response =
-    result instanceof NextResponse ? result : NextResponse.next();
+  const isRedirect =
+    result instanceof NextResponse && result.headers.has('location');
+  const response = isRedirect ? result : nextWithCallbackPath(req);
   await plantEngineTokenCookie(req, response);
   return response;
 }

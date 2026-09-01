@@ -1,13 +1,25 @@
 import { AppLayout } from '@/core/components/AppLayout';
 import { authOptions } from '@/core/config/auth';
+import {
+  LOGIN_CALLBACK_PATH_HEADER,
+  loginRedirectPath,
+} from '@/core/config/loginCallback';
 import { HyperdxPortProvider } from '@/core/contexts/HyperdxContext';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 // Authenticated pages are never static: prerendering them at build time runs
 // getSetupStatus with no deployment env and fails the build.
 export const dynamic = 'force-dynamic';
+
+async function redirectToLogin(): Promise<never> {
+  const headerStore = await headers();
+  const callbackPath =
+    headerStore.get(LOGIN_CALLBACK_PATH_HEADER)?.trim() || '/';
+  redirect(loginRedirectPath(callbackPath));
+}
 
 export default async function RootLayout({
   children,
@@ -21,12 +33,12 @@ export default async function RootLayout({
 
   const session = await getServerSession(authOptions);
   if (!session) {
-    redirect('/login');
+    await redirectToLogin();
   }
 
-  const accessToken = session.user?.accessToken;
+  const accessToken = session?.user?.accessToken;
   if (!accessToken) {
-    redirect('/login');
+    await redirectToLogin();
   }
 
   // A returning user can hold a live session cookie but an engine token that
@@ -35,8 +47,8 @@ export default async function RootLayout({
   // as AccessTokenExpired; redirect to /login rather than let the client fire a
   // 401 storm then sign out. An active user never reaches this because the
   // client refreshes before expiry.
-  if (initial_setup.complete && session.error === 'AccessTokenExpired') {
-    redirect('/login');
+  if (initial_setup.complete && session?.error === 'AccessTokenExpired') {
+    await redirectToLogin();
   }
 
   // Read at request time (this layout is dynamic via getServerSession) so both
