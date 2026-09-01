@@ -10,6 +10,8 @@ const API_KEY_ITEM: TApiKeysItemSummary = {
   short_token: 'string',
   enabled: true,
   created_at: 'string',
+  expires_at: null,
+  expired: false,
 };
 
 const TOTAL_ITEMS = 25;

@@ -4639,6 +4639,17 @@ export interface components {
             /** Created At */
             created_at: string;
             /**
+             * Expires At
+             * @description ISO-8601 UTC expiry, or null if never
+             */
+            expires_at?: string | null;
+            /**
+             * Expired
+             * @description True once expires_at has passed
+             * @default false
+             */
+            expired: boolean;
+            /**
              * Full Key
              * @description Full API key (shown once, cannot be recovered)
              */
@@ -4661,6 +4672,17 @@ export interface components {
             description: string;
             /** Created At */
             created_at: string;
+            /**
+             * Expires At
+             * @description ISO-8601 UTC expiry, or null if never
+             */
+            expires_at?: string | null;
+            /**
+             * Expired
+             * @description True once expires_at has passed
+             * @default false
+             */
+            expired: boolean;
         };
         /**
          * AccountGitPending
@@ -5538,6 +5560,11 @@ export interface components {
              * @default
              */
             description: string;
+            /**
+             * Expires At
+             * @description Optional ISO-8601 expiry (UTC if no offset given); omit for a key that never expires
+             */
+            expires_at?: string | null;
         };
         /** CreateAccountRequest */
         CreateAccountRequest: {
@@ -12763,7 +12790,7 @@ export interface operations {
             query?: {
                 /** @description Search in key name/description */
                 search?: string | null;
-                /** @description Sort field (name, created_at) */
+                /** @description Sort field (name, created_at, expires_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
                 sort_order?: string;
