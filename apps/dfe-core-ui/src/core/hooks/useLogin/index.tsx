@@ -1,3 +1,4 @@
+import { clientNavigationPathFromAuthUrl } from '@/core/config/loginCallback';
 import { useMutation } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -39,12 +40,7 @@ export const useLogin = ({
       }
 
       const url = result?.url ?? callbackUrl;
-      // Extract pathname for client-side navigation (router.push with full URLs can cause full reload)
-      const path =
-        typeof url === 'string' && url.startsWith('http')
-          ? new URL(url).pathname
-          : url;
-      router.push(path);
+      router.push(clientNavigationPathFromAuthUrl(url));
     },
   });
 

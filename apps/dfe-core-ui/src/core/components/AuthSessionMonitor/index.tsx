@@ -4,16 +4,25 @@ import {
   SESSION_CHECK_INTERVAL_MS,
   shouldRefreshAccessToken,
 } from '@/core/config/authSession';
+import {
+  loginRedirectPath,
+  pathWithSearch,
+} from '@/core/config/loginCallback';
 import { isNoAuthRoute } from '@/core/config/isNoAuthRoute';
 import { useRefreshToken } from '@/core/hooks/useRefreshToken';
 import { signOut, useSession } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 /** Keeps the API access token fresh and signs out only when refresh fails. */
 export const AuthSessionMonitor = () => {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const callbackPath = pathWithSearch(
+    pathname,
+    searchParams.size > 0 ? `?${searchParams.toString()}` : '',
+  );
   const { mutateAsync: refreshToken, isPending: isRefreshing } =
     useRefreshToken();
 
@@ -52,7 +61,7 @@ export const AuthSessionMonitor = () => {
       }
       signingOut.current = true;
       void signOut({
-        callbackUrl: `/login?callbackUrl=${encodeURIComponent(pathname)}`,
+        callbackUrl: loginRedirectPath(callbackPath),
       }).finally(() => {
         signingOut.current = false;
       });
@@ -87,7 +96,7 @@ export const AuthSessionMonitor = () => {
         }
         signingOut.current = true;
         void signOut({
-          callbackUrl: `/login?callbackUrl=${encodeURIComponent(pathname)}`,
+          callbackUrl: loginRedirectPath(callbackPath),
         }).finally(() => {
           signingOut.current = false;
         });
@@ -101,6 +110,7 @@ export const AuthSessionMonitor = () => {
     sessionError,
     status,
     pathname,
+    callbackPath,
     isRefreshing,
     scheduledCheck,
     refreshToken,
