@@ -67,6 +67,14 @@ export const ApiKeyManagement = () => {
       render: (createdAt: string) => formatDateToString(createdAt),
     },
     {
+      title: 'Expires at',
+      dataIndex: 'expires_at',
+      key: 'expires_at',
+      render: (expiresAt: string) =>
+        !!expiresAt ? formatDateToString(expiresAt) : <EmptyText />,
+    },
+
+    {
       title: 'Groups',
       dataIndex: 'groups',
       key: 'groups',
@@ -127,6 +135,9 @@ export const ApiKeyManagement = () => {
             <Table
               rowKey="short_token"
               dataSource={apiKeys}
+              rowClassName={({ expired }) =>
+                expired ? 'opacity-50 bg-foreground/5' : ''
+              }
               loading={isLoading}
               columns={columns}
               scroll={{ y: componentHeight }}

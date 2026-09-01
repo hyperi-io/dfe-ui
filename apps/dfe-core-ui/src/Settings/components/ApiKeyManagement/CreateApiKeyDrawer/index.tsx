@@ -7,18 +7,57 @@ import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { useCreateApiKey } from '@/Settings/hooks/apiKeys/useCreateApiKey';
-import { Button, Card, Input, Tag } from 'antd';
+import { Button, Card, DatePicker, Input, Tag } from 'antd';
+import dayjs, { type Dayjs } from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { useCallback, useState } from 'react';
 import z from 'zod';
 import { ApiKeyHiddenCopy } from './ApiKeyHiddenCopy';
+
+dayjs.extend(utc);
+
+const expiryAtEndOfSelectedDay = (val: unknown): unknown => {
+  if (val == null || val === '') {
+    return undefined;
+  }
+  const selected = dayjs.isDayjs(val) ? val : dayjs(val as Date);
+  if (!selected.isValid()) {
+    return val;
+  }
+  return dayjs
+    .utc()
+    .year(selected.year())
+    .month(selected.month())
+    .date(selected.date())
+    .hour(23)
+    .minute(59)
+    .second(59)
+    .millisecond(999)
+    .toDate();
+};
 
 const createApiKeyFormSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
   description: z.string().min(1, { message: 'Description is required' }),
   groups: z.array(z.string()).optional(),
+  expires_at: z.preprocess(
+    expiryAtEndOfSelectedDay,
+    z
+      .date()
+      .optional()
+      .refine(
+        (date) =>
+          date === undefined ||
+          !dayjs.utc(date).startOf('day').isBefore(dayjs.utc().startOf('day')),
+        { message: 'expires_at cannot be less than today' },
+      ),
+  ),
 });
 
 type CreateApiKeyFormSchema = z.infer<typeof createApiKeyFormSchema>;
+
+const disablePastExpiryDates = (current: Dayjs) =>
+  current != null && current.startOf('day').isBefore(dayjs().startOf('day'));
 
 export const CreateApiKeyDrawer = () => {
   const [open, setOpen] = useState(false);
@@ -56,7 +95,12 @@ export const CreateApiKeyDrawer = () => {
   });
 
   const handleOnFinish = (values: CreateApiKeyFormSchema) => {
-    generateApiKey(values);
+    generateApiKey({
+      ...values,
+      expires_at: values.expires_at
+        ? dayjs(values.expires_at).toISOString()
+        : null,
+    });
   };
 
   const handleClose = useCallback(() => {
@@ -136,6 +180,19 @@ export const CreateApiKeyDrawer = () => {
             </Form.Item>
             <Form.Item name="groups" label="Groups" rules={[formValidation]}>
               <GroupRoleSelect />
+            </Form.Item>
+
+            <Form.Item
+              name="expires_at"
+              label="Expires"
+              rules={[formValidation]}
+            >
+              <DatePicker
+                className="w-full!"
+                disabledDate={disablePastExpiryDates}
+                allowClear
+                placeholder="Select expiry date"
+              />
             </Form.Item>
 
             {error && <FormNotification text={error.message} type="error" />}
