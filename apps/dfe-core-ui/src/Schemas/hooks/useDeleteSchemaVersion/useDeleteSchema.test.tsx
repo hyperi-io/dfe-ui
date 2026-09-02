@@ -11,7 +11,7 @@ import {
   test,
   vi,
 } from 'vitest';
-import { useDeleteSchema } from '.';
+import { useDeleteSchemaVersion } from '.';
 import { server } from './useDeleteSchema.mocks';
 
 beforeAll(() =>
@@ -33,7 +33,7 @@ describe('.useDeleteSchema', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useDeleteSchema({ onSuccess, onError }),
+        () => useDeleteSchemaVersion({ onSuccess, onError }),
         { wrapper },
       );
 
@@ -66,7 +66,7 @@ describe('.useDeleteSchema', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(
-        () => useDeleteSchema({ onSuccess, onError }),
+        () => useDeleteSchemaVersion({ onSuccess, onError }),
         { wrapper },
       );
 

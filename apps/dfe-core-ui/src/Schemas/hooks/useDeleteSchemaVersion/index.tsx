@@ -6,7 +6,7 @@ interface UseDeleteSchemaProps {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
-export const useDeleteSchema = ({
+export const useDeleteSchemaVersion = ({
   onSuccess,
   onError,
 }: UseDeleteSchemaProps) => {
