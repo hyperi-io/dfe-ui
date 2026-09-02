@@ -4,15 +4,21 @@ import {
   SESSION_CHECK_INTERVAL_MS,
   shouldRefreshAccessToken,
 } from '@/core/config/authSession';
-import { loginRedirectPath, pathWithSearch } from '@/core/config/loginCallback';
 import { isNoAuthRoute } from '@/core/config/isNoAuthRoute';
+import { loginRedirectPath, pathWithSearch } from '@/core/config/loginCallback';
 import { useRefreshToken } from '@/core/hooks/useRefreshToken';
 import { signOut, useSession } from 'next-auth/react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 /** Keeps the API access token fresh and signs out only when refresh fails. */
-export const AuthSessionMonitor = () => {
+export const AuthSessionMonitor = () => (
+  <Suspense fallback={null}>
+    <AuthSessionMonitorInner />
+  </Suspense>
+);
+
+const AuthSessionMonitorInner = () => {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const searchParams = useSearchParams();
