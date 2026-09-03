@@ -61,6 +61,8 @@ export const API_CONFIG = Object.freeze({
   schemas: {
     default: '/api/v1/schemas',
     schemaVersions: '/api/v1/schemas/definitions/{schema_path}/versions',
+    schemaVersionsVersion:
+      '/api/v1/schemas/definitions/{schema_path}/versions/{version}',
     schema: '/api/v1/schemas/definitions/{schema_path}',
     schemaDetail: '/api/v1/schemas/definitions/{schema_path}/versions/columns',
     elasticConvert: '/api/v1/schemas/elastic-converter',
