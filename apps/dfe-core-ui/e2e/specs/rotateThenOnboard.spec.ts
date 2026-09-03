@@ -22,35 +22,46 @@ test.skip(
   'set E2E_ADMIN_PASSWORD to something other than the bootstrap default to exercise rotation',
 );
 
-test('setup completes after the break-glass password is rotated first', async ({
+test('@acceptance setup completes after the break-glass password is rotated first', async ({
   page,
   playwright,
 }) => {
   // Rotate through the product API, as an operator would, before the wizard
   // has ever run.
   const api = await playwright.request.newContext({ baseURL: ENGINE_API_URL });
-  const login = await api.post('/api/v1/auth/login', {
+  const bootstrapLogin = await api.post('/api/v1/auth/login', {
     data: {
       username: BREAK_GLASS_ADMIN_USERNAME,
       password: BREAK_GLASS_ADMIN_PASSWORD,
     },
   });
-  expect(
-    login.ok(),
-    'bootstrap login must succeed on a fresh deployment',
-  ).toBeTruthy();
-  const { access_token: accessToken } = await login.json();
-  const reset = await api.post(
-    `/api/v1/auth/accounts/${BREAK_GLASS_ADMIN_USERNAME}/reset-password`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      data: { new_password: rotatedPassword },
-    },
-  );
-  expect(
-    reset.ok(),
-    'rotation through the product API must succeed',
-  ).toBeTruthy();
+  if (bootstrapLogin.ok()) {
+    const { access_token: accessToken } = await bootstrapLogin.json();
+    const reset = await api.post(
+      `/api/v1/auth/accounts/${BREAK_GLASS_ADMIN_USERNAME}/reset-password`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        data: { new_password: rotatedPassword },
+      },
+    );
+    expect(
+      reset.ok(),
+      'rotation through the product API must succeed',
+    ).toBeTruthy();
+  } else {
+    // A harness (dfe-ops ui) rotated before the run; the rotated credential
+    // must then log in, or this is not the fresh deployment the spec needs.
+    const rotatedLogin = await api.post('/api/v1/auth/login', {
+      data: {
+        username: BREAK_GLASS_ADMIN_USERNAME,
+        password: rotatedPassword,
+      },
+    });
+    expect(
+      rotatedLogin.ok(),
+      'neither the bootstrap nor the rotated password logs in',
+    ).toBeTruthy();
+  }
   await api.dispose();
 
   // The wizard must still get past its first required step.
