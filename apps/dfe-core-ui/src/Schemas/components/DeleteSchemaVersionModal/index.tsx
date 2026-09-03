@@ -31,7 +31,7 @@ export const DeleteSchemaVersionModal = ({
     onSuccess: () => {
       setOpen(false);
       notification.success({
-        message: 'Schema version deleted successfully',
+        title: 'Schema version deleted successfully',
         description: `${schemaPath} - ${version} has been deleted successfully`,
       });
       onSuccess?.(schemaPath);
