@@ -133,12 +133,12 @@ describe('ResetBreakGlassAccount', () => {
     it('counts down each second and restarts after the retry interval', () => {
       renderStep(vi.fn(), pendingBreakGlass);
 
-      expect(screen.getByText(/Retrying in 5 seconds/)).toBeInTheDocument();
+      expect(screen.getByText(/Retrying in 10 seconds/)).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(1000);
       });
-      expect(screen.getByText(/Retrying in 4 seconds/)).toBeInTheDocument();
+      expect(screen.getByText(/Retrying in 9 seconds/)).toBeInTheDocument();
 
       act(() => {
         vi.advanceTimersByTime(4000);
