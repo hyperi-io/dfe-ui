@@ -2324,6 +2324,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas/definitions/{schema_path}/versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Meta Schema Version
+         * @description Delete a specific meta-schema version.
+         *
+         *     Core schemas are blocked by the core-resource guard (HTTP 409). The last
+         *     remaining version cannot be deleted — delete the schema instead.
+         */
+        delete: operations["delete_meta_schema_version_api_v1_schemas_definitions__schema_path__versions__version__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/definitions/{schema_path}": {
         parameters: {
             query?: never;
@@ -16380,6 +16403,36 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MetaSchemaVersionWriteResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_meta_schema_version_api_v1_schemas_definitions__schema_path__versions__version__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
