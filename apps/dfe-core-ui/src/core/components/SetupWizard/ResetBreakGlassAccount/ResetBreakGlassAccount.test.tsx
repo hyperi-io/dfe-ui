@@ -5,7 +5,7 @@ import {
 } from '@/core/hooks/useFetchSetupStatus/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ResetBreakGlassAccount } from '.';
 
 beforeEach(() => {
@@ -32,6 +32,18 @@ const mergedBreakGlass: TBreakGlass = {
   pending: null,
 };
 
+const pendingBreakGlass: TBreakGlass = {
+  enabled: true,
+  auto_merge: false,
+  committed: true,
+  merged: false,
+  pending: {
+    pr_url: 'https://example.com/pr/1',
+    command: 'git merge origin/break-glass',
+    branch: 'break-glass',
+  },
+};
+
 const setupStatusWith = (
   completedSteps: string[],
 ): TFetchSetupStatusResponse => ({
@@ -50,14 +62,17 @@ const setupStatusWith = (
   break_glass: mergedBreakGlass,
 });
 
-const renderStep = (goNext = vi.fn()) => {
+const renderStep = (
+  goNext = vi.fn(),
+  breakGlass: TBreakGlass = mergedBreakGlass,
+) => {
   const testWrapper = buildTestWrapper().withReactQuery();
   render(
     <ResetBreakGlassAccount
       isAdminReset={false}
       goNext={goNext}
       goPrevious={vi.fn()}
-      breakGlass={mergedBreakGlass}
+      breakGlass={breakGlass}
     />,
     { wrapper: testWrapper.wrapper },
   );
@@ -103,6 +118,32 @@ describe('ResetBreakGlassAccount', () => {
 
     await waitFor(() => {
       expect(goNext).toHaveBeenCalled();
+    });
+  });
+
+  describe('pending merge retry countdown', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('counts down each second and restarts after the retry interval', () => {
+      renderStep(vi.fn(), pendingBreakGlass);
+
+      expect(screen.getByText(/Retrying in 5 seconds/)).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText(/Retrying in 4 seconds/)).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+      expect(screen.getByText(/Retrying in 5 seconds/)).toBeInTheDocument();
     });
   });
 });

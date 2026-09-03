@@ -14,11 +14,11 @@ export const useFetchSetupStatus = ({
     | ((query?: unknown) => number | false)
     | undefined;
 } = {}) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEY_SETUP_STATUS(),
     queryFn: () => fetchSetupStatus(),
     enabled: queryEnabled,
     refetchInterval,
   });
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 };
