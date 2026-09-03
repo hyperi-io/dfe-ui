@@ -3391,7 +3391,7 @@ export interface paths {
         };
         /**
          * List Apps
-         * @description Every manageable app, with the instances currently deployed.
+         * @description Every app at or above the deployment's maturity gate, with its instances.
          */
         get: operations["list_apps_api_v1_apps_get"];
         put?: never;
@@ -5208,6 +5208,8 @@ export interface components {
             scale_deployed: boolean;
             /** Multiplicity */
             multiplicity: string;
+            /** @description Where the app sits on the ladder alpha -> beta -> rc -> release. An app below the deployment's apps.show_maturity gate is not listed at all, so this is only ever at or above it. */
+            maturity: components["schemas"]["Maturity"];
             /**
              * Has Compiled Routing
              * @description Whether this app's routing is compiled from the source definitions. False means the /routing routes answer 400 for every instance of it.
@@ -7301,6 +7303,14 @@ export interface components {
             errors?: components["schemas"]["FieldError"][];
             context: components["schemas"]["MatchConflictContext"];
         };
+        /**
+         * Maturity
+         * @description Where an app sits on the SemVer ladder ``versions.yaml`` uses for a stack.
+         *
+         *     Declared least mature first, so the definition order IS the ladder.
+         * @enum {string}
+         */
+        Maturity: "alpha" | "beta" | "rc" | "release";
         /**
          * MetaSchema
          * @description A schema for a ClickHouse table.

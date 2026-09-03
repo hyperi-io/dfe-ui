@@ -1,6 +1,7 @@
 'use client';
 
 import { AppFileSets } from '@/core/components/appManagement/AppFileSets';
+import { AppMaturityTag } from '@/core/components/appManagement/AppMaturityTag';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
@@ -18,12 +19,23 @@ import { Button, Collapse } from 'antd';
  * Names the app, as a heading rather than loose text.
  *
  * The card header also holds the deploy or undeploy action, so without this the
- * app's name has no accessible name of its own to address it by.
+ * app's name has no accessible name of its own to address it by. The maturity
+ * tag sits beside the heading rather than inside it, so a pre-release level
+ * never becomes part of that name.
  */
-const AppHeading = ({ service }: { service: string }) => (
-  <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
-    {service}
-  </h2>
+const AppHeading = ({
+  service,
+  maturity,
+}: {
+  service: string;
+  maturity: TAppCatalogueEntry['maturity'];
+}) => (
+  <div className="flex items-center gap-2">
+    <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
+      {service}
+    </h2>
+    <AppMaturityTag maturity={maturity} />
+  </div>
 );
 
 /**
@@ -64,7 +76,7 @@ export const SourceAppInstance = ({
   if (!isDeployed) {
     return (
       <SectionCard
-        title={<AppHeading service={app.service} />}
+        title={<AppHeading service={app.service} maturity={app.maturity} />}
         rightTitleSlot={
           <RbacProtected action={RbacProtected.rbacActions.deployment_write}>
             <RbacProtected.Unrestricted>
@@ -93,7 +105,7 @@ export const SourceAppInstance = ({
 
   return (
     <SectionCard
-      title={<AppHeading service={app.service} />}
+      title={<AppHeading service={app.service} maturity={app.maturity} />}
       rightTitleSlot={
         <RbacProtected action={RbacProtected.rbacActions.deployment_delete}>
           <RbacProtected.Unrestricted>

@@ -2,6 +2,7 @@
 
 import { BackingServices } from '@/Apps/components/BackingServices';
 import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
+import { AppMaturityTag } from '@/core/components/appManagement/AppMaturityTag';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
@@ -52,6 +53,7 @@ export const ComponentsScene = () => {
         service: app.service,
         instance,
         scaleDeployed: app.scale_deployed,
+        maturity: app.maturity,
       })),
     );
 
@@ -88,7 +90,12 @@ export const ComponentsScene = () => {
               key: pool.key,
               label: (
                 <NavigationTabLabel
-                  label={pool.service}
+                  label={
+                    <span className="flex items-center gap-2">
+                      {pool.service}
+                      <AppMaturityTag maturity={pool.maturity} />
+                    </span>
+                  }
                   description={`Instance ${pool.instance}`}
                 />
               ),
