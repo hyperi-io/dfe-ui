@@ -1,4 +1,5 @@
 import { cn } from '@/core/utils/style';
+import { ReactNode } from 'react';
 
 export const NavigationTabLabel = ({
   className,
@@ -6,7 +7,7 @@ export const NavigationTabLabel = ({
   description,
 }: {
   className?: string;
-  label: string;
+  label: ReactNode;
   description: string;
 }) => {
   return (

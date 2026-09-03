@@ -35,6 +35,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-receiver',
     scale_deployed: true,
     multiplicity: 'single',
+    maturity: 'release',
     has_compiled_routing: true,
     file_sets: [],
     instances: ['default'],
@@ -43,6 +44,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-vrl',
     scale_deployed: true,
     multiplicity: 'per_config',
+    maturity: 'release',
     has_compiled_routing: false,
     file_sets: [
       {
@@ -59,6 +61,7 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-elastic',
     scale_deployed: true,
     multiplicity: 'per_config',
+    maturity: 'beta',
     has_compiled_routing: false,
     file_sets: [],
     instances: [],
