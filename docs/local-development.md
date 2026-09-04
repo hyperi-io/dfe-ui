@@ -21,6 +21,13 @@ NEXTAUTH_SECRET=any-dev-value \
 yarn workspace dfe-core-ui dev --port 3000
 ```
 
+If `corepack enable` fails with `EACCES` (a system-installed node cannot
+symlink into `/usr/bin`), give it a writable directory on your PATH --
+`corepack enable --install-directory ~/.local/bin` -- or run every yarn command
+through corepack (`corepack yarn install`), which needs no enable. Skipping
+corepack and using a yarn 1 from your PATH runs the wrong yarn against this
+lockfile.
+
 The app answers on http://localhost:3000 within seconds. Port 3000 is not a
 habit -- the engine's default CORS allowlist breaks login on any other port
 (see the gotchas). `yarn dev` (turbo) runs the same app when you do not need
