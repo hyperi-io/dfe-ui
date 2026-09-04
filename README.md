@@ -15,6 +15,12 @@ yarn install
 yarn dev                 # turbo dev - app on http://localhost:3000
 ```
 
+On a system-installed node (`/usr/bin/node`) `corepack enable` fails with
+`EACCES` on its symlink. Either `corepack enable --install-directory
+~/.local/bin` (any writable directory on your PATH), or prefix each command
+with `corepack ` -- `corepack yarn install` -- which needs no enable. A yarn 1
+already on your PATH is the wrong yarn for this lockfile.
+
 Point it at an engine with `NEXT_PUBLIC_API_URL` (defaults suit local dev).
 Full environment reference: [docs/local-development.md](docs/local-development.md).
 
