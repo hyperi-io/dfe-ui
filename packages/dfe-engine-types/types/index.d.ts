@@ -6578,8 +6578,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6627,8 +6630,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6752,8 +6758,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -9643,7 +9652,7 @@ export interface components {
             create_table: string;
             /**
              * Views
-             * @description View name → DDL
+             * @description View name -> DDL
              */
             views?: {
                 [key: string]: string;
@@ -9655,6 +9664,16 @@ export interface components {
              * @default 0
              */
             statements_applied: number;
+            /**
+             * Topics Ensured
+             * @description Kafka topics this source needs that now exist (created or already present)
+             */
+            topics_ensured?: string[];
+            /**
+             * Topics Failed
+             * @description Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all.
+             */
+            topics_failed?: string[];
         };
         /**
          * SchemaDiff
@@ -10215,8 +10234,8 @@ export interface components {
         SourceHeader: {
             /**
              * Type
-             * @description Profile name (time_series, minimal, passthrough)
-             * @default time_series
+             * @description Profile name (timeseries, minimal, passthrough)
+             * @default timeseries
              */
             type: string;
             /**
@@ -10492,12 +10511,12 @@ export interface components {
         };
         /**
          * SourceTransform
-         * @description Transform stage configuration (vector or wasm).
+         * @description Transform stage configuration: the engine is one of the catalogue's transform apps.
          */
         SourceTransform: {
             /**
              * Engine
-             * @description Transform engine (vector or wasm)
+             * @description Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)
              */
             engine: string;
             /**
