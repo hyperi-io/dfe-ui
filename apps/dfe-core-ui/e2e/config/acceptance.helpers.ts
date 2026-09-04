@@ -199,6 +199,58 @@ export const queryRows = async ({
   return body.rows ?? [];
 };
 
+/**
+ * Give the embedded HyperDX a source over one DFE table, and return its id.
+ *
+ * Nothing provisions this: a deployment seeds HyperDX with a fixed set of
+ * sources (`dfe.default`, the hunts table, the otel tables), so a table created
+ * for a DFE source of its own is invisible there until somebody registers it.
+ * Doing it here through HyperDX's own API is what an operator does today, and
+ * it keeps the assertion below about the ROWS rather than about the seed.
+ */
+export const ensureHyperdxSource = async ({
+  hyperdx,
+  name,
+  table,
+}: {
+  hyperdx: APIRequestContext;
+  name: string;
+  table: string;
+}): Promise<string> => {
+  const listed = await hyperdx.get('/api/sources');
+  expect(
+    listed.ok(),
+    'the embedded HyperDX must answer for its sources',
+  ).toBeTruthy();
+  const sources = await listed.json();
+  const existing = sources.find(
+    (source: { name: string }) => source.name === name,
+  );
+  if (existing) return existing.id;
+
+  const created = await hyperdx.post('/api/sources', {
+    data: {
+      name,
+      kind: 'log',
+      connection: sources[0].connection,
+      from: { databaseName: DATA_DATABASE, tableName: table },
+      timestampValueExpression: '_timestamp',
+      displayedTimestampValueExpression: '_timestamp',
+      implicitColumnExpression: '_json',
+      bodyExpression: '_json',
+      serviceNameExpression: '_source',
+      eventAttributesExpression: '_json',
+      defaultTableSelectExpression:
+        '_timestamp,_source,host_name,log_file_path,message',
+    },
+  });
+  expect(
+    created.ok(),
+    `registering the HyperDX source failed: ${created.status()}`,
+  ).toBeTruthy();
+  return (await created.json()).id;
+};
+
 /** POST one JSON event at the receiver's ingest edge. */
 export const postEvent = async (
   api: APIRequestContext,

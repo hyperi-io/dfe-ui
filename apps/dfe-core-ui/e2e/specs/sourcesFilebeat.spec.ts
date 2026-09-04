@@ -1,4 +1,10 @@
-import { APIRequestContext, Locator, Page, expect, test } from '@playwright/test';
+import {
+  APIRequestContext,
+  Locator,
+  Page,
+  expect,
+  test,
+} from '@playwright/test';
 import {
   ACCEPTANCE_ORG,
   ADMIN_USERNAME,
@@ -6,6 +12,7 @@ import {
   HYPERDX_EMBED_URL,
   adminTokenAfterRotation,
   engineContext,
+  ensureHyperdxSource,
   ensureSetupComplete,
   ensureSourceAbsent,
   pollUntil,
@@ -21,8 +28,9 @@ import { adminPassword, loginAs } from '../config/login.helpers';
  * data, and the rows visible where an operator looks for them.
  *
  * Split deliberately. The first test is the CONFIG plane and passes on any
- * deployment. The second is the DATA plane and is fixme'd on the rc.12 docker
- * stack -- see its own note for the two reasons.
+ * deployment. The second is the DATA plane, and needs a deployment that runs a
+ * transform instance for this source -- dfe-docker's `kafka-filebeat` profile
+ * is the compose shape that does.
  */
 
 const SOURCE = 'filebeat';
@@ -154,58 +162,97 @@ test('@acceptance a filebeat source with the VRL transform is created through th
   await expect(page.getByText(META_SCHEMA).first()).toBeVisible();
 });
 
-// Two deployment-side blockers, both verified on the rc.12 compose stack.
-// dfe-docker runs ONE dfe-transform-vrl, consuming default_land with a
-// passthrough program, while the receiver routes _source=filebeat to
-// filebeat_land -- so a source-scoped filebeat pipeline has nothing to run in.
-// Wire that by hand and dfe-loader#127 takes over: source.ip="192.168.0.1" is
-// rejected as "encoding error for column 'source_ip': invalid IPv6", the batch
-// salvage fails all 15 rows, and with no DLQ the offsets are withheld, so
-// dfe.filebeat stays empty and the shared load topic stops moving.
-// Unfixme once a deployment carries a per-source transform and that fix.
-test.fixme(
-  '@acceptance filebeat corpus lands in dfe.filebeat and is visible in the console and HyperDX',
-  async ({ page }) => {
-    const corpus = filebeatCorpus();
-    test.skip(
-      corpus.length === 0,
-      'set E2E_FILEBEAT_CORPUS to the filebeat sample archive to run this',
-    );
+// The data plane, from the schema deploy through to the rows. Runs after the
+// test above and depends on the source it created.
+test('@acceptance filebeat corpus lands in dfe.filebeat and is visible in the console and HyperDX', async ({
+  page,
+  playwright,
+}) => {
+  const corpus = filebeatCorpus();
+  test.skip(
+    corpus.length === 0,
+    'set E2E_FILEBEAT_CORPUS to the filebeat sample archive to run this',
+  );
 
-    const run = `acc${Date.now()}`;
-    for (const sample of corpus) {
-      await postEvent(api, filebeatEvent(sample, run));
-    }
+  // Authoring a source does not materialise its table -- the deploy is a
+  // second, explicit step. Taken through /api/v1 because it is the idempotent
+  // one: the console's own path is DDL Preview -> Build -> Deploy, and those
+  // buttons give way to View Deployment once a table exists, so a re-run
+  // against the same deployment could not find them.
+  const deployed = await api.post(
+    `/api/v1/sources/${SOURCE}/deploy?version=1.0.0`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  expect(
+    deployed.ok(),
+    `deploying the source schema failed: ${deployed.status()} ${await deployed.text()}`,
+  ).toBeTruthy();
 
-    const landed = await pollUntil(async () => {
-      const rows = await queryRows({
-        api,
-        token,
-        sql:
-          `SELECT count() AS c FROM ${DATA_DATABASE}.${SOURCE} ` +
-          "WHERE host_name != '' OR log_file_path != ''",
-      });
-      return Number(Object.values(rows[0] ?? {})[0] ?? 0);
+  const count = async (predicate: string): Promise<number> => {
+    const rows = await queryRows({
+      api,
+      token,
+      sql: `SELECT count() AS c FROM ${DATA_DATABASE}.${SOURCE} WHERE ${predicate}`,
     });
-    expect(
-      landed,
-      `no transformed rows reached ${DATA_DATABASE}.${SOURCE}`,
-    ).toBeTruthy();
+    return Number(Object.values(rows[0] ?? {})[0] ?? 0);
+  };
 
-    await loginAs(page, ADMIN_USERNAME);
-    await page.goto(
-      `${BASE_URL}/sources?source_name=${SOURCE}&source_version=1.0.0`,
-    );
-    await page.getByRole('tab', { name: 'Sample Events', exact: true }).click();
-    await expect(page.getByText('log_file_path').first()).toBeVisible({
-      timeout: 60_000,
-    });
+  // A delta, not an absolute count: the table survives a re-run, and rows left
+  // by the last one would otherwise pass this without anything moving.
+  const before = await count('1');
+  const run = `acc${Date.now()}`;
+  for (const sample of corpus) {
+    await postEvent(api, filebeatEvent(sample, run));
+  }
 
-    // The same rows through the embedded HyperDX, which reads ClickHouse on
-    // its own connection rather than through the engine.
-    await page.goto(`${HYPERDX_EMBED_URL}/search?embed=1`);
-    await expect(page.getByText(SOURCE).first()).toBeVisible({
-      timeout: 60_000,
-    });
-  },
-);
+  const landed = await pollUntil(async () => {
+    const now = await count('1');
+    return now > before ? now - before : 0;
+  });
+  expect(
+    landed,
+    `no rows reached ${DATA_DATABASE}.${SOURCE} for ${corpus.length} corpus events`,
+  ).toBeTruthy();
+
+  // The transform ran, rather than the raw lines being loaded as they arrived:
+  // log_file_path is set by the umbrella branch, and source_ip is the IPv4 the
+  // loader used to reject outright.
+  expect(
+    await count("log_file_path != ''"),
+    'no row carries a parsed log.file.path -- the VRL program did not run',
+  ).toBeTruthy();
+  expect(
+    await count('source_ip IS NOT NULL'),
+    'no row carries a source_ip -- an IPv4 in the corpus was rejected',
+  ).toBeTruthy();
+
+  await loginAs(page, ADMIN_USERNAME);
+  await page.goto(
+    `${BASE_URL}/sources?source_name=${SOURCE}&source_version=1.0.0`,
+  );
+  await page.getByRole('tab', { name: 'Sample Events', exact: true }).click();
+  await expect(page.getByText('log_file_path').first()).toBeVisible({
+    timeout: 60_000,
+  });
+
+  // The same rows through the embedded HyperDX, which reads ClickHouse on
+  // its own connection rather than through the engine.
+  const hyperdx = await playwright.request.newContext({
+    baseURL: HYPERDX_EMBED_URL,
+  });
+  const hyperdxSource = await ensureHyperdxSource({
+    hyperdx,
+    name: SOURCE,
+    table: SOURCE,
+  });
+  await hyperdx.dispose();
+  await page.goto(
+    `${HYPERDX_EMBED_URL}/search?embed=1&source=${hyperdxSource}`,
+  );
+  await expect(page.getByText('log_file_path').first()).toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(page.getByText('/filebeat/cisco_umbrella/').first()).toBeVisible(
+    { timeout: 60_000 },
+  );
+});
