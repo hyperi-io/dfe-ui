@@ -114,6 +114,45 @@ export const schemas = {
       },
     },
   },
+  schemaVersionsVersion: {
+    mockedUrl: '/api/v1/schemas/definitions/{schema_path}/versions/{version}',
+    delete: {
+      success: ({
+        status = 204,
+        schema_path = 'path',
+        version = '1.0.0',
+      }: { status?: number; schema_path?: string; version?: string } = {}) => {
+        return http.delete(
+          schemas.schemaVersionsVersion.mockedUrl
+            .replace('{schema_path}', schema_path)
+            .replace('{version}', version),
+          () => {
+            return HttpResponse.json({}, { status });
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        schema_path = 'path',
+        version = '1.0.0',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        schema_path?: string;
+        version?: string;
+      } = {}) => {
+        return http.delete(
+          schemas.schemaVersionsVersion.mockedUrl
+            .replace('{schema_path}', schema_path)
+            .replace('{version}', version),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
   schema: {
     mockedUrl: '/api/v1/schemas/definitions/{schema_path}',
     post: {
