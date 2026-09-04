@@ -1,14 +1,44 @@
+import { DeleteSchemaVersionModal } from '@/Schemas/components/DeleteSchemaVersionModal';
 import {
   TSchemaListResponse,
   TSchemaSummary,
 } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { render, renderHook } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import { isValidElement, type ReactElement, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import {
   getExpandedKeysForSchemaSelection,
   useTransformMetaSchemaToTree,
 } from '.';
+
+const findByType = (
+  node: ReactNode,
+  type: unknown,
+): ReactElement | undefined => {
+  if (node == null || typeof node === 'boolean') {
+    return undefined;
+  }
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = findByType(child, type);
+      if (found) {
+        return found;
+      }
+    }
+    return undefined;
+  }
+  if (!isValidElement(node)) {
+    return undefined;
+  }
+  if (node.type === type) {
+    return node;
+  }
+  const props = node.props as Record<string, unknown>;
+  return (
+    findByType(props.children as ReactNode, type) ??
+    findByType(props.actions as ReactNode, type)
+  );
+};
 
 type SchemaSummaryObject = TSchemaSummary;
 
@@ -235,5 +265,48 @@ describe('useTransformMetaSchemaToTree', () => {
     });
     expect(result.current.tree[0].key).toBe('schema:b');
     expect(result.current.tree).not.toEqual(firstTree);
+  });
+
+  it('attaches delete version actions to version tree items', () => {
+    const { result } = renderHook(() =>
+      useTransformMetaSchemaToTree({
+        schemaObjects: {
+          items: [
+            baseSchema({
+              name: 'custom.schema',
+              versions: ['v1', 'v2'],
+              current: 'v1',
+            }),
+          ],
+        },
+        setSelectedSchema: vi.fn(),
+        ...defaultSelection,
+      }),
+    );
+
+    const schemaNode = result.current.tree[0];
+    const versionNodes = schemaNode.children!;
+
+    const v1Delete = findByType(
+      versionNodes[0].title as ReactElement,
+      DeleteSchemaVersionModal,
+    );
+    expect(v1Delete?.props).toMatchObject({
+      schemaPath: 'custom.schema',
+      version: 'v1',
+    });
+
+    const v2Delete = findByType(
+      versionNodes[1].title as ReactElement,
+      DeleteSchemaVersionModal,
+    );
+    expect(v2Delete?.props).toMatchObject({
+      schemaPath: 'custom.schema',
+      version: 'v2',
+    });
+
+    expect(
+      findByType(schemaNode.title as ReactElement, DeleteSchemaVersionModal),
+    ).toBeUndefined();
   });
 });

@@ -21,6 +21,13 @@ NEXTAUTH_SECRET=any-dev-value \
 yarn workspace dfe-core-ui dev --port 3000
 ```
 
+If `corepack enable` fails with `EACCES` (a system-installed node cannot
+symlink into `/usr/bin`), give it a writable directory on your PATH --
+`corepack enable --install-directory ~/.local/bin` -- or run every yarn command
+through corepack (`corepack yarn install`), which needs no enable. Skipping
+corepack and using a yarn 1 from your PATH runs the wrong yarn against this
+lockfile.
+
 The app answers on http://localhost:3000 within seconds. Port 3000 is not a
 habit -- the engine's default CORS allowlist breaks login on any other port
 (see the gotchas). `yarn dev` (turbo) runs the same app when you do not need
@@ -66,7 +73,7 @@ The fork iframe is optional for console work. Wiring it up is covered in
 | `NEXTAUTH_URL` / `NEXTAUTH_SECRET`       | runtime            | NextAuth session config -- any non-empty secret works for dev                               |
 | `DFE_AUTH_MODE`                          | runtime            | unset = credentials login form; `proxy` = proxy-trust ([authentication.md](authentication.md)) |
 | `DFE_COOKIE_DOMAIN`                      | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                             |
-| `NEXT_PUBLIC_HYPERDX_URL` + `HYPERDX_PORT` | mixed            | the embed pair -- see [observe-embed.md](observe-embed.md)                                  |
+| `HYPERDX_URL` / `HYPERDX_PORT`           | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                    |
 
 `NEXT_PUBLIC_*` values are baked in at build time -- `next dev` reads them at
 boot, so changing one needs a dev-server restart (a production image needs a

@@ -9,7 +9,7 @@ import {
 } from '@/core/hooks/useFetchSetupStatus';
 import { TBreakGlass } from '@/core/hooks/useFetchSetupStatus/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
+import { IconArrowLeft, IconArrowRight, IconRefresh } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Input, Spin } from 'antd';
 import { useEffect, useState } from 'react';
@@ -19,6 +19,30 @@ const formSchema = z.object({
   new_password: z.string().min(1, { message: 'Password is required' }),
 });
 type FormData = z.infer<typeof formSchema>;
+const RETRY_INTERVAL_SECONDS = 10;
+
+const PendingMergeRetryCountdown = ({
+  intervalSeconds,
+}: {
+  intervalSeconds: number;
+}) => {
+  const [secondsUntilRetry, setSecondsUntilRetry] = useState(intervalSeconds);
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setSecondsUntilRetry((remaining) =>
+        remaining <= 1 ? intervalSeconds : remaining - 1,
+      );
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [intervalSeconds]);
+
+  return `(Retrying in ${secondsUntilRetry} seconds...)`;
+};
+
 export const ResetBreakGlassAccount = ({
   isAdminReset,
   goNext,
@@ -32,15 +56,15 @@ export const ResetBreakGlassAccount = ({
 }) => {
   const queryClient = useQueryClient();
   const [fetchingSetupStatus, setFetchingSetupStatus] = useState(false);
-
   const {
     data: {
       break_glass: breakGlassState,
       initial_setup: initialSetupState,
     } = {},
+    refetch: refetchSetupStatus,
   } = useFetchSetupStatus({
     queryEnabled: fetchingSetupStatus,
-    refetchInterval: 5 * 60 * 1000, //  5 minutes
+    refetchInterval: RETRY_INTERVAL_SECONDS * 1000,
   });
 
   const {
@@ -149,10 +173,28 @@ export const ResetBreakGlassAccount = ({
                 container: 'w-full',
               }}
               title={
-                <span className="flex gap-2 items-center font-semibold">
-                  <Spin size="small" />
-                  Emergency account is pending merge
-                </span>
+                <div className="flex flex-row justify-between items-center">
+                  <span className="flex gap-2 items-center">
+                    <span className="flex gap-2 items-center font-semibold">
+                      <Spin size="small" />
+                      Emergency account is pending merge
+                    </span>
+                    <PendingMergeRetryCountdown
+                      intervalSeconds={RETRY_INTERVAL_SECONDS}
+                    />
+                  </span>
+
+                  <Button
+                    type="default"
+                    className="mb-auto"
+                    icon={<IconRefresh />}
+                    onClick={() => {
+                      void refetchSetupStatus();
+                    }}
+                  >
+                    Refresh Status
+                  </Button>
+                </div>
               }
               description={
                 <div className="flex flex-col gap-2">
@@ -174,7 +216,7 @@ export const ResetBreakGlassAccount = ({
                     </p>
                   )}
 
-                  {breakGlassState?.pending?.command && (
+                  {pendingMergeCommand && (
                     <>
                       <p className="text-sm text-gray-500">
                         Please run the following command to merge the emergency
