@@ -11,6 +11,12 @@ import { BASE_URL } from './e2e.client';
 export const adminPassword = (): string =>
   process.env.E2E_ADMIN_PASSWORD || BREAK_GLASS_ADMIN_PASSWORD;
 
+// The password the deployment booted with, before any rotation -- on a
+// dfe-docker stack the generated DFE_AUTH_LOCAL_ADMIN_PASSWORD, not the app's
+// constant. The fallback keeps a stack still on the default working.
+export const bootstrapPassword = (): string =>
+  process.env.E2E_BOOTSTRAP_PASSWORD || BREAK_GLASS_ADMIN_PASSWORD;
+
 export const loginAs = async (page: Page, user: string) => {
   await page.goto(`${BASE_URL}/login`);
 
