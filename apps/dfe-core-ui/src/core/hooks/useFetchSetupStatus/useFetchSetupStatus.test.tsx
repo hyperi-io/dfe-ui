@@ -37,6 +37,7 @@ describe('.useFetchSetupStatus', () => {
         data: response,
         isLoading: false,
         error: null,
+        refetch: expect.any(Function),
       });
     });
   });

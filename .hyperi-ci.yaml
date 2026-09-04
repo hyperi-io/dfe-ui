@@ -11,6 +11,10 @@
 language: typescript
 quality:
   enabled: true
+  typescript:
+    # npm's advisories endpoint times out from every network we build on (#210),
+    # so the audit cannot complete; Dependabot carries the advisories meanwhile.
+    audit: warn
 test:
   enabled: true
   coverage: true

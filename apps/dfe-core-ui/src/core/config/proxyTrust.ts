@@ -26,8 +26,14 @@ const ENGINE_JWT_ALG = 'ES384';
 
 /**
  * True when the app is deployed behind the proxy (single origin).
- * Server env DFE_AUTH_MODE is authoritative; NEXT_PUBLIC_DFE_AUTH_MODE is the
- * client-visible mirror so the browser can decide to auto-trigger sign-in.
+ *
+ * Every caller runs server-side -- the proxy middleware, authOptions, and the
+ * /login server component that renders ProxyTrustGate. No client code reads
+ * the mode, so NEXT_PUBLIC_DFE_AUTH_MODE is not a browser-visible mirror: it
+ * is an accepted alternative spelling, honoured at runtime only because the
+ * image does not set it at build time (a NEXT_PUBLIC_ name that IS present
+ * during `next build` is inlined as a literal and stops tracking the
+ * deployment). DFE_AUTH_MODE is the one to set.
  */
 export function isProxyAuthMode(): boolean {
   const mode =

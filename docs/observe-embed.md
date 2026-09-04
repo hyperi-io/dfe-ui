@@ -12,19 +12,25 @@ flowchart LR
     SHELL -->|postMessage DFE_SET_THEME| HDX
 ```
 
-## How it is configured today (two mechanisms)
+## How it is configured
 
-As wired right now, two independent settings control the embed:
+One runtime mechanism, two deployment shapes. The `(auth)` layout reads both
+values per request and hands them to `HyperdxContext`; `useHyperdxUrl()` is
+the single source the iframe URL, the sidebar gating and the rule-create
+postMessage origin check all read.
 
-- The `/observe` page iframe URL comes from `NEXT_PUBLIC_HYPERDX_URL` -
-  a BUILD-TIME inlined variable (the shipped container does not set it, so
-  `/observe` reports not-configured in the stock image).
-- Sidebar gating and the rule-create postMessage origin check derive
-  `${origin}:${HYPERDX_PORT}` at RUNTIME.
+| Variable      | Shape                                                             |
+| ------------- | ----------------------------------------------------------------- |
+| `HYPERDX_URL` | HyperDX on its own hostname (k8s gateway: `https://hyperdx.{domain}`). Wins when set. |
+| `HYPERDX_PORT`| Same host, different port (docker compose). Host comes from `window.location`, so it is correct for localhost and LAN alike. |
 
-Set both consistently in a deployment or the nav and the embed disagree.
-The convergence to a single runtime mechanism (single-origin path routing
-is the locked design) is tracked in the 2nd-pass review report.
+Neither is `NEXT_PUBLIC_`, and that is deliberate: a build-inlined read would
+bake the build machine's value into the browser bundle. With neither set,
+`/observe` renders "HyperDX is not configured for this deployment."
+
+The origin check is an exact string compare against `event.origin`, so
+`HYPERDX_URL` must be a bare origin -- no trailing slash, no path -- or
+rule-create messages from the iframe are silently dropped.
 
 ## Rule-create round trip
 

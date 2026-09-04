@@ -37,24 +37,6 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
   ...(hyperdxUrl
     ? [
         {
-          key: '/observe/hunt-results',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/hunt-results',
-                    icon: <IconWrapper icon={<IconRadar />} />,
-                    label: 'Hunt Results',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
-        },
-        {
           key: '/observe/search',
           Component: ({ collapsed }: SidebarMenuProps) => (
             <RbacProtected action={rbacActions.dashboard_read}>
@@ -119,6 +101,26 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
                     key: '/observe/dashboards',
                     icon: <IconWrapper icon={<IconLayoutGrid />} />,
                     label: 'Dashboards',
+                    external: false,
+                  }}
+                />
+              </RbacProtected.Unrestricted>
+            </RbacProtected>
+          ),
+        },
+        // Hunt Results is a saved-search view over dfe.detection, so it sits with
+        // the dashboards it reads like, last of the observe group.
+        {
+          key: '/observe/hunt-results',
+          Component: ({ collapsed }: SidebarMenuProps) => (
+            <RbacProtected action={rbacActions.dashboard_read}>
+              <RbacProtected.Unrestricted>
+                <SidebarLink
+                  collapsed={collapsed}
+                  item={{
+                    key: '/observe/hunt-results',
+                    icon: <IconWrapper icon={<IconRadar />} />,
+                    label: 'Hunt Results',
                     external: false,
                   }}
                 />
