@@ -66,7 +66,7 @@ The fork iframe is optional for console work. Wiring it up is covered in
 | `NEXTAUTH_URL` / `NEXTAUTH_SECRET`       | runtime            | NextAuth session config -- any non-empty secret works for dev                               |
 | `DFE_AUTH_MODE`                          | runtime            | unset = credentials login form; `proxy` = proxy-trust ([authentication.md](authentication.md)) |
 | `DFE_COOKIE_DOMAIN`                      | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                             |
-| `NEXT_PUBLIC_HYPERDX_URL` + `HYPERDX_PORT` | mixed            | the embed pair -- see [observe-embed.md](observe-embed.md)                                  |
+| `HYPERDX_URL` / `HYPERDX_PORT`           | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                    |
 
 `NEXT_PUBLIC_*` values are baked in at build time -- `next dev` reads them at
 boot, so changing one needs a dev-server restart (a production image needs a
