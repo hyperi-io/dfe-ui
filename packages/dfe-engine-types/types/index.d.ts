@@ -6578,8 +6578,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6627,8 +6630,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6752,8 +6758,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
