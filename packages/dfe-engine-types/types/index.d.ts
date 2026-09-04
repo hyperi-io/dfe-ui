@@ -1672,9 +1672,10 @@ export interface paths {
          * @description Report hunt scheduling status.
          *
          *     Hunts execute in the separate dfe-hunt-runner service (pull-based, coordinated
-         *     via ClickHouse), not in this API process. ``running`` reflects whether any
-         *     runner currently holds a hunt lease; ``hunt_count`` is the configured-hunt
-         *     count.
+         *     via ClickHouse), not in this API process, so ``runners`` counts the runners that
+         *     beat within their last two polls and ``running`` is whether any did. For "is this
+         *     hunt running", read the per-hunt ``running`` on the hunts list; ``hunt_count`` is
+         *     the configured-hunt count.
          */
         get: operations["get_engine_status_api_v1_hunts_status_get"];
         put?: never;
@@ -1694,7 +1695,11 @@ export interface paths {
         };
         /**
          * List Hunts
-         * @description List persisted hunt configurations with pagination and search.
+         * @description List persisted hunt configurations, each with its run state, paginated.
+         *
+         *     Run state comes from ONE ClickHouse read across every listed hunt: the watermark
+         *     (last run), the lease (running now), hunt_state (too aggressive) and hunt_run
+         *     (rows the last run wrote). Next due is derived, not stored.
          */
         get: operations["list_hunts_api_v1_hunts_get"];
         put?: never;
@@ -1748,11 +1753,19 @@ export interface paths {
         put?: never;
         /**
          * Trigger Hunt
-         * @description Trigger an ad-hoc hunt execution.
+         * @description Queue an ad-hoc run: mark the hunt due now for the runner to claim.
          *
-         *     Hunts run in the separate dfe-hunt-runner service on their schedule. On-demand
-         *     execution from the API (enqueue a one-shot fire the runner claims) is not wired
-         *     yet, so this returns 501 after validating the hunt exists.
+         *     The pull model is kept. Nothing is pushed at the runner and no listener is added
+         *     -- the fire is written into the coordination state, and the runner that is
+         *     already running picks it up on its next poll, through the same claim that stops
+         *     a hunt double-running. 202 says it is queued, not that it has run; the response
+         *     carries the poll interval so the caller knows the longest wait before it starts.
+         *
+         *     A hunt with no rate schedule is not something the runner ticks, so a queued run
+         *     for one sits unclaimed. That is the schedule's shape, not a failure here.
+         *
+         *     503 is reserved for ClickHouse actually being unreachable; any other failure to
+         *     write the request is a 500, so a bug here never reads as an outage.
          */
         post: operations["trigger_hunt_api_v1_hunts__name__run_post"];
         delete?: never;
@@ -6578,8 +6591,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6627,8 +6643,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6660,9 +6679,15 @@ export interface components {
         HuntEngineStatus: {
             /**
              * Running
-             * @description Whether the scheduler thread is alive
+             * @description Whether at least one hunt runner is alive
              */
             running: boolean;
+            /**
+             * Runners
+             * @description Hunt runners that beat within their last two polls
+             * @default 0
+             */
+            runners: number;
             /**
              * Hunt Count
              * @description Number of loaded hunts across all schedulers
@@ -6691,8 +6716,35 @@ export interface components {
             initial_checkpoint_lookback_minutes?: number | null;
         };
         /**
+         * HuntRunQueued
+         * @description Response from queueing an ad-hoc hunt run.
+         */
+        HuntRunQueued: {
+            /**
+             * Hunt Name
+             * @description Hunt file name the run was queued for
+             */
+            hunt_name: string;
+            /**
+             * Queued
+             * @description The run is recorded and waiting to be claimed
+             * @default true
+             */
+            queued: boolean;
+            /**
+             * Requested Fire
+             * @description Epoch seconds the run was queued at
+             */
+            requested_fire: number;
+            /**
+             * Poll Seconds
+             * @description How often a runner looks for work, so the longest wait before it starts
+             */
+            poll_seconds: number;
+        };
+        /**
          * HuntSummary
-         * @description Summary of a configured hunt.
+         * @description Summary of a configured hunt, with what the runner has done with it.
          */
         HuntSummary: {
             /**
@@ -6731,6 +6783,39 @@ export interface components {
              * @default
              */
             target_table: string;
+            /**
+             * Last Run
+             * @description Epoch seconds of the last window that committed; null = never run
+             */
+            last_run?: number | null;
+            /**
+             * Running
+             * @description A runner holds a live lease on this hunt right now
+             * @default false
+             */
+            running: boolean;
+            /**
+             * Last Run Rows
+             * @description Rows the last completed run wrote; null = no run recorded
+             */
+            last_run_rows?: number | null;
+            /**
+             * Too Aggressive
+             * @description The hunt's schedule is tighter than it can keep up with
+             * @default false
+             */
+            too_aggressive: boolean;
+            /**
+             * Run Requested
+             * @description An ad-hoc run is queued and not yet claimed
+             * @default false
+             */
+            run_requested: boolean;
+            /**
+             * Next Due
+             * @description Epoch seconds of the next scheduled fire; null = no rate schedule
+             */
+            next_due?: number | null;
         };
         /**
          * HuntWriteRequest
@@ -6752,8 +6837,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -9643,7 +9731,7 @@ export interface components {
             create_table: string;
             /**
              * Views
-             * @description View name → DDL
+             * @description View name -> DDL
              */
             views?: {
                 [key: string]: string;
@@ -9655,6 +9743,16 @@ export interface components {
              * @default 0
              */
             statements_applied: number;
+            /**
+             * Topics Ensured
+             * @description Kafka topics this source needs that now exist (created or already present)
+             */
+            topics_ensured?: string[];
+            /**
+             * Topics Failed
+             * @description Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all.
+             */
+            topics_failed?: string[];
         };
         /**
          * SchemaDiff
@@ -10215,8 +10313,8 @@ export interface components {
         SourceHeader: {
             /**
              * Type
-             * @description Profile name (time_series, minimal, passthrough)
-             * @default time_series
+             * @description Profile name (timeseries, minimal, passthrough)
+             * @default timeseries
              */
             type: string;
             /**
@@ -10492,12 +10590,12 @@ export interface components {
         };
         /**
          * SourceTransform
-         * @description Transform stage configuration (vector or wasm).
+         * @description Transform stage configuration: the engine is one of the catalogue's transform apps.
          */
         SourceTransform: {
             /**
              * Engine
-             * @description Transform engine (vector or wasm)
+             * @description Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)
              */
             engine: string;
             /**
@@ -11033,33 +11131,6 @@ export interface components {
              * @description User roles
              */
             roles: string[];
-        };
-        /**
-         * TriggerRequest
-         * @description Request to trigger an ad-hoc hunt execution.
-         */
-        TriggerRequest: {
-            /**
-             * Customer
-             * @description Customer/org ID to run the hunt for
-             */
-            customer: string;
-        };
-        /**
-         * TriggerResponse
-         * @description Response from triggering an ad-hoc hunt.
-         */
-        TriggerResponse: {
-            /**
-             * Task Id
-             * @description Task ID for polling via /tasks/{task_id}
-             */
-            task_id: string;
-            /**
-             * Hunt Name
-             * @description Display name of the triggered hunt
-             */
-            hunt_name: string;
         };
         /** UpdateAccountRequest */
         UpdateAccountRequest: {
@@ -15520,11 +15591,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TriggerRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             202: {
@@ -15532,7 +15599,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TriggerResponse"];
+                    "application/json": components["schemas"]["HuntRunQueued"];
                 };
             };
             /** @description Validation Error */
