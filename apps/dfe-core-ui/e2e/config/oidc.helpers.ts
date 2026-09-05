@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 /**
  * Helpers for the external-OIDC acceptance spec.
@@ -59,22 +59,68 @@ export const submitIdpLogin = async (
   await page.locator('button[type="submit"]').click();
 };
 
-/**
- * The engine's callback answers with JSON, which the browser renders as text.
- *
- * Read as text rather than through an API request context on purpose: the
- * state and nonce live in a cookie the BROWSER holds, so only the browser can
- * complete the flow the way a real user does.
- */
-export const readJsonBody = async (page: Page): Promise<Record<string, unknown>> => {
-  const text = await page.evaluate(() => document.body.innerText);
+/** Keys whose value is a credential, redacted before the page sees the body. */
+const CREDENTIAL_KEY = /token|secret|password/i;
+
+/** The same JSON object with its credentials replaced; anything else is left alone. */
+const withoutCredentials = (text: string): string => {
+  let body: unknown;
   try {
-    return JSON.parse(text);
+    body = JSON.parse(text);
   } catch {
-    expect(
-      false,
-      `the OIDC callback did not answer with JSON: ${text.slice(0, 400)}`,
-    ).toBeTruthy();
-    return {};
+    return text;
   }
+  if (typeof body !== 'object' || body === null) return text;
+  return JSON.stringify(
+    Object.fromEntries(
+      Object.entries(body as Record<string, unknown>).map(([key, value]) => [
+        key,
+        CREDENTIAL_KEY.test(key) ? '[redacted]' : value,
+      ]),
+    ),
+  );
+};
+
+/**
+ * Route the engine's OIDC callback so its JSON is read here, not in the page.
+ *
+ * The callback answers with JSON carrying the token the engine has just minted,
+ * and a browser renders a JSON body as page text -- which `trace:
+ * 'on-first-retry'` then writes into a CI artefact. Routing it keeps the
+ * exchange in the browser, where the state and nonce cookies live, while the
+ * body is read on the Node side and the page is served a redacted copy.
+ *
+ * Call it before the flow starts; the returned reader is valid once the browser
+ * has reached the callback.
+ */
+export const interceptOidcCallback = async (
+  page: Page,
+  provider: string,
+): Promise<() => Record<string, unknown>> => {
+  let raw: string | undefined;
+
+  await page.route(
+    (url) => url.pathname.endsWith(`/auth/oidc/${provider}/callback`),
+    async (route) => {
+      const response = await route.fetch();
+      raw = await response.text();
+      await route.fulfill({
+        status: response.status(),
+        contentType: response.headers()['content-type'] || 'application/json',
+        body: withoutCredentials(raw),
+      });
+    },
+  );
+
+  return () => {
+    if (raw === undefined)
+      throw new Error('the OIDC callback was never reached');
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      throw new Error(
+        `the OIDC callback did not answer with JSON: ${raw.slice(0, 400)}`,
+      );
+    }
+  };
 };
