@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { ENGINE_API_URL } from './e2e.client';
+import { ENGINE_API_URL, transportOptions } from './e2e.client';
 import { SeedRequest } from './e2e.client.types';
 
 /**
@@ -19,6 +19,7 @@ export const seedAppManagement = async ({
   const apiContext = await playwright.request.newContext({
     baseURL: ENGINE_API_URL,
     extraHTTPHeaders: { 'Content-Type': 'application/json' },
+    ...transportOptions(),
   });
 
   const response = await apiContext.post('/api/e2e/seed-static', {

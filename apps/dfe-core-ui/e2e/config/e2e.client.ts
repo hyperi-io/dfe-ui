@@ -21,7 +21,7 @@ export const ENGINE_API_URL =
 export const UI_TIMEOUT = Number(process.env.E2E_UI_TIMEOUT || 60_000);
 
 /**
- * Transport options the browser and every acceptance request context share.
+ * Transport options the browser and every request context share.
  *
  * A docker stack answers on loopback in plain HTTP and needs neither. A real
  * deployment needs both: it terminates TLS with its own CA, and on k8s it
@@ -59,6 +59,7 @@ export const e2eClient = async ({
     extraHTTPHeaders: {
       'Content-Type': 'application/json',
     },
+    ...transportOptions(),
   });
 
   const response = await apiContext[requestType]('/api/e2e/seed-static', {
