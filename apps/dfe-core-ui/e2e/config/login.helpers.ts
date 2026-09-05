@@ -1,6 +1,6 @@
 import { BREAK_GLASS_ADMIN_PASSWORD } from '@/core/components/SetupWizard/constants';
 import { Page, expect } from '@playwright/test';
-import { BASE_URL } from './e2e.client';
+import { BASE_URL, UI_TIMEOUT } from './e2e.client';
 
 // The password the DEPLOYMENT under test actually has, which is not necessarily
 // the one the app baked in. Importing the product's own constant made the suite
@@ -20,10 +20,22 @@ export const bootstrapPassword = (): string =>
 export const loginAs = async (page: Page, user: string) => {
   await page.goto(`${BASE_URL}/login`);
 
-  await page.getByRole('textbox', { name: 'Username', exact: true }).fill(user);
+  // A deployment with an OIDC provider registered puts the local form behind a
+  // tab and opens on the OIDC one; without a provider the form is the page. Both
+  // appear only once setup-status has answered, so the wait is on either.
+  const localTab = page.getByRole('tab', { name: 'Login with Local' });
+  const username = page.getByRole('textbox', { name: 'Username', exact: true });
+  await expect(localTab.or(username).first()).toBeVisible({
+    timeout: UI_TIMEOUT,
+  });
+  if (await localTab.isVisible()) await localTab.click();
+
+  await username.fill(user);
   await page
     .getByRole('textbox', { name: 'Password', exact: true })
     .fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expect(page).toHaveURL(`${BASE_URL}/sources`, {
+    timeout: UI_TIMEOUT,
+  });
 };

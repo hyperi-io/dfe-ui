@@ -11,7 +11,7 @@ import {
   postEvent,
   queryRows,
 } from '../config/acceptance.helpers';
-import { BASE_URL } from '../config/e2e.client';
+import { BASE_URL, UI_TIMEOUT } from '../config/e2e.client';
 import { adminPassword, loginAs } from '../config/login.helpers';
 
 /**
@@ -96,7 +96,7 @@ test('@acceptance the console creates, lists and deletes a source', async ({
   await page.goto(`${BASE_URL}/sources`);
   await expect(
     page.getByRole('treeitem').filter({ hasText: CRUD_SOURCE }),
-  ).toHaveCount(1);
+  ).toHaveCount(1, { timeout: UI_TIMEOUT });
 
   // The deployment agrees with the console, not just the console with itself.
   const listed = await api.get('/api/v1/sources', {
@@ -120,7 +120,7 @@ test('@acceptance the console creates, lists and deletes a source', async ({
     .click();
   await expect(
     page.getByRole('button', { name: `Delete ${CRUD_SOURCE}`, exact: true }),
-  ).toHaveCount(0);
+  ).toHaveCount(0, { timeout: UI_TIMEOUT });
 });
 
 test('@acceptance the console lists the meta schemas the deployment ships', async ({
@@ -132,13 +132,13 @@ test('@acceptance the console lists the meta schemas the deployment ships', asyn
   // Shipped inside the engine image, so any deployment has them.
   await expect(
     page.getByRole('treeitem').filter({ hasText: 'syslog' }).first(),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: UI_TIMEOUT });
   const beats = page.getByRole('treeitem').filter({ hasText: 'beats' }).first();
-  await expect(beats).toBeVisible();
+  await expect(beats).toBeVisible({ timeout: UI_TIMEOUT });
   await beats.click();
   await expect(
     page.getByRole('treeitem').filter({ hasText: 'filebeat' }).first(),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: UI_TIMEOUT });
 });
 
 test('@acceptance a query returns this run’s rows, and the console shows them', async ({
@@ -191,6 +191,10 @@ test('@acceptance the services surface renders the deployment’s components', a
   await loginAs(page, ADMIN_USERNAME);
   await page.goto(`${BASE_URL}/services/surfaces`);
 
-  await expect(page.getByText('dfe-loader').first()).toBeVisible();
-  await expect(page.getByText('dfe-receiver').first()).toBeVisible();
+  await expect(page.getByText('dfe-loader').first()).toBeVisible({
+    timeout: UI_TIMEOUT,
+  });
+  await expect(page.getByText('dfe-receiver').first()).toBeVisible({
+    timeout: UI_TIMEOUT,
+  });
 });

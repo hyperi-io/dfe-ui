@@ -1,5 +1,5 @@
 import { APIRequestContext, expect } from '@playwright/test';
-import { ENGINE_API_URL } from './e2e.client';
+import { ENGINE_API_URL, transportOptions } from './e2e.client';
 import { adminPassword, bootstrapPassword } from './login.helpers';
 
 /**
@@ -37,7 +37,10 @@ type Playwright = typeof import('playwright-core');
 export const engineContext = async (
   playwright: Playwright,
 ): Promise<APIRequestContext> =>
-  playwright.request.newContext({ baseURL: ENGINE_API_URL });
+  playwright.request.newContext({
+    baseURL: ENGINE_API_URL,
+    ...transportOptions(),
+  });
 
 /**
  * A bearer token for the break-glass admin, rotating off the bootstrap
