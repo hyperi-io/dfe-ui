@@ -5144,7 +5144,7 @@
           "Rules"
         ],
         "summary": "Create Rule",
-        "description": "Create a new hunt rule via RuleCreationService.\n\nThe service sanitizes the SQL, applies CEL\u2192SQL transpilation,\nvalidates column references, and optionally estimates query cost.",
+        "description": "Create a new hunt rule via RuleCreationService.\n\nThe service sanitizes the SQL, applies CEL\u2192SQL transpilation,\nvalidates column references, and optionally estimates query cost.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
         "operationId": "create_rule_api_v1_rules_post",
         "requestBody": {
           "required": true,
@@ -5331,7 +5331,7 @@
           "Rules"
         ],
         "summary": "Update Rule",
-        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).",
+        "description": "Replace a detection rule (re-runs creation pipeline, preserves created_at).\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
         "operationId": "update_rule_api_v1_rules__name__put",
         "parameters": [
           {
@@ -5387,7 +5387,7 @@
           "Rules"
         ],
         "summary": "Delete Rule",
-        "description": "Delete a detection rule.",
+        "description": "Delete a detection rule.\n\nA production+team delete is routed to a review branch, so the runner keeps\ncompiling the rule until that branch is merged; ``X-DFE-Review-Required`` says so.",
         "operationId": "delete_rule_api_v1_rules__name__delete",
         "parameters": [
           {
@@ -5552,7 +5552,7 @@
           "Alerts"
         ],
         "summary": "Create Destination",
-        "description": "Create an alert destination.",
+        "description": "Create an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so.",
         "operationId": "create_destination_api_v1_alerts_destinations_post",
         "requestBody": {
           "required": true,
@@ -5645,7 +5645,7 @@
           "Alerts"
         ],
         "summary": "Update Destination",
-        "description": "Update an alert destination.",
+        "description": "Update an alert destination.\n\nLinking it to a hunt writes the hunt YAML, so in production+team that link is\nrouted to a review branch and ``X-DFE-Review-Required`` says so.",
         "operationId": "update_destination_api_v1_alerts_destinations__name__put",
         "parameters": [
           {
@@ -6098,7 +6098,7 @@
           "hunts"
         ],
         "summary": "Get Engine Status",
-        "description": "Report hunt scheduling status.\n\nHunts execute in the separate dfe-hunt-runner service (pull-based, coordinated\nvia ClickHouse), not in this API process. ``running`` reflects whether any\nrunner currently holds a hunt lease; ``hunt_count`` is the configured-hunt\ncount.",
+        "description": "Report hunt scheduling status.\n\nHunts execute in the separate dfe-hunt-runner service (pull-based, coordinated\nvia ClickHouse), not in this API process, so ``runners`` counts the runners that\nbeat within their last two polls and ``running`` is whether any did. For \"is this\nhunt running\", read the per-hunt ``running`` on the hunts list; ``hunt_count`` is\nthe configured-hunt count.",
         "operationId": "get_engine_status_api_v1_hunts_status_get",
         "responses": {
           "200": {
@@ -6125,7 +6125,7 @@
           "hunts"
         ],
         "summary": "List Hunts",
-        "description": "List persisted hunt configurations with pagination and search.",
+        "description": "List persisted hunt configurations, each with its run state, paginated.\n\nRun state comes from ONE ClickHouse read across every listed hunt: the watermark\n(last run), the lease (running now), hunt_state (too aggressive) and hunt_run\n(rows the last run wrote). Next due is derived, not stored.",
         "operationId": "list_hunts_api_v1_hunts_get",
         "parameters": [
           {
@@ -6231,7 +6231,7 @@
           "hunts"
         ],
         "summary": "Create Hunt",
-        "description": "Create a new hunt configuration YAML.",
+        "description": "Create a new hunt configuration YAML.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
         "operationId": "create_hunt_api_v1_hunts_post",
         "requestBody": {
           "required": true,
@@ -6324,7 +6324,7 @@
           "hunts"
         ],
         "summary": "Update Hunt",
-        "description": "Replace an existing hunt configuration.",
+        "description": "Replace an existing hunt configuration.\n\nA production+team write is routed to a review branch instead of the branch the\nrunner git-syncs, and the ``X-DFE-Review-Required`` header says so.",
         "operationId": "update_hunt_api_v1_hunts__name__put",
         "parameters": [
           {
@@ -6380,7 +6380,7 @@
           "hunts"
         ],
         "summary": "Delete Hunt",
-        "description": "Delete a hunt configuration.",
+        "description": "Delete a hunt configuration.\n\nA production+team delete is routed to a review branch, so the runner keeps\nexecuting the hunt until that branch is merged; ``X-DFE-Review-Required`` says so.",
         "operationId": "delete_hunt_api_v1_hunts__name__delete",
         "parameters": [
           {
@@ -6421,7 +6421,7 @@
           "hunts"
         ],
         "summary": "Trigger Hunt",
-        "description": "Trigger an ad-hoc hunt execution.\n\nHunts run in the separate dfe-hunt-runner service on their schedule. On-demand\nexecution from the API (enqueue a one-shot fire the runner claims) is not wired\nyet, so this returns 501 after validating the hunt exists.",
+        "description": "Queue an ad-hoc run: mark the hunt due now for the runner to claim.\n\nThe pull model is kept. Nothing is pushed at the runner and no listener is added\n-- the fire is written into the coordination state, and the runner that is\nalready running picks it up on its next poll, through the same claim that stops\na hunt double-running. 202 says it is queued, not that it has run; the response\ncarries the poll interval so the caller knows the longest wait before it starts.\n\nA hunt with no rate schedule is not something the runner ticks, so a queued run\nfor one sits unclaimed. That is the schedule's shape, not a failure here.\n\n503 is reserved for ClickHouse actually being unreachable; any other failure to\nwrite the request is a 500, so a bug here never reads as an outage.",
         "operationId": "trigger_hunt_api_v1_hunts__name__run_post",
         "parameters": [
           {
@@ -6434,23 +6434,13 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TriggerRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "202": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TriggerResponse"
+                  "$ref": "#/components/schemas/HuntRunQueued"
                 }
               }
             }
@@ -10657,7 +10647,7 @@
           "sigma"
         ],
         "summary": "Propagate",
-        "description": "Generate sigma-bound DFE rules + hunts from the current selection.\n\nFor each SELECTED sigma rule, converts its detection to a ClickHouse WHERE over\nthe matching source's ``{source}_sigma`` view and stores a DFE rule (with a\n``sigma_rule_id`` back-reference), then binds it into a per-source hunt. Drifted\nor hand-edited bindings are reported ``skipped_drifted`` unless ``force``.\nSubmitted to the task manager; blocks up to ``wait`` seconds for inline\ncompletion, else returns ``pending`` - poll via GET /sigma/propagations/{id}.",
+        "description": "Generate sigma-bound DFE rules + hunts from the current selection.\n\nFor each SELECTED sigma rule, converts its detection to a ClickHouse WHERE over\nthe matching source's ``{source}_sigma`` view and stores a DFE rule (with a\n``sigma_rule_id`` back-reference), then binds it into a per-source hunt. Drifted\nor hand-edited bindings are reported ``skipped_drifted`` unless ``force``.\nSubmitted to the task manager; blocks up to ``wait`` seconds for inline\ncompletion, else returns ``pending`` - poll via GET /sigma/propagations/{id}.\n\nA production+team run commits each generated rule and hunt to its own review\nbranch rather than the branch the hunt runner syncs; the report carries every\nbranch and PR, and ``X-DFE-Review-Required`` says so on a run that completed\ninline.",
         "operationId": "propagate_api_v1_sigma_propagate_post",
         "parameters": [
           {
@@ -10917,7 +10907,7 @@
           "sigma"
         ],
         "summary": "Delete Binding",
-        "description": "Delete a generated binding (removes the rule and unlinks it from its hunt).",
+        "description": "Delete a generated binding (removes the rule and unlinks it from its hunt).\n\nA production+team delete is routed to a review branch, so the runner keeps\ncompiling the binding until that branch is merged; ``X-DFE-Review-Required``\nsays so.",
         "operationId": "delete_binding_api_v1_sigma_bindings__rule_id__delete",
         "parameters": [
           {
@@ -16938,6 +16928,7 @@
           "auth_mode": {
             "type": "string",
             "title": "Auth Mode",
+            "description": "'oidc' when an enabled OIDC provider is registered, so the UI offers the SSO button; 'jwt' otherwise. Local login stays available in both.",
             "default": "jwt"
           },
           "features": {
@@ -19017,8 +19008,16 @@
             "default": 60
           },
           "global_target_table_name": {
-            "type": "string",
-            "title": "Global Target Table Name"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Target Table Name",
+            "description": "Results table override; the rule's query carries its own target when omitted"
           },
           "global_source_table_name": {
             "anyOf": [
@@ -19113,7 +19112,6 @@
         "type": "object",
         "required": [
           "cron",
-          "global_target_table_name",
           "customers",
           "rules",
           "name"
@@ -19149,8 +19147,16 @@
             "default": 60
           },
           "global_target_table_name": {
-            "type": "string",
-            "title": "Global Target Table Name"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Target Table Name",
+            "description": "Results table override; the rule's query carries its own target when omitted"
           },
           "global_source_table_name": {
             "anyOf": [
@@ -19245,7 +19251,6 @@
         "required": [
           "display_name",
           "cron",
-          "global_target_table_name",
           "customers",
           "name",
           "rules"
@@ -19258,7 +19263,13 @@
           "running": {
             "type": "boolean",
             "title": "Running",
-            "description": "Whether the scheduler thread is alive"
+            "description": "Whether at least one hunt runner is alive"
+          },
+          "runners": {
+            "type": "integer",
+            "title": "Runners",
+            "description": "Hunt runners that beat within their last two polls",
+            "default": 0
           },
           "hunt_count": {
             "type": "integer",
@@ -19327,6 +19338,39 @@
         "title": "HuntRuleEntry",
         "description": "Per-rule hunt configuration as stored in YAML."
       },
+      "HuntRunQueued": {
+        "properties": {
+          "hunt_name": {
+            "type": "string",
+            "title": "Hunt Name",
+            "description": "Hunt file name the run was queued for"
+          },
+          "queued": {
+            "type": "boolean",
+            "title": "Queued",
+            "description": "The run is recorded and waiting to be claimed",
+            "default": true
+          },
+          "requested_fire": {
+            "type": "integer",
+            "title": "Requested Fire",
+            "description": "Epoch seconds the run was queued at"
+          },
+          "poll_seconds": {
+            "type": "number",
+            "title": "Poll Seconds",
+            "description": "How often a runner looks for work, so the longest wait before it starts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hunt_name",
+          "requested_fire",
+          "poll_seconds"
+        ],
+        "title": "HuntRunQueued",
+        "description": "Response from queueing an ad-hoc hunt run."
+      },
       "HuntSummary": {
         "properties": {
           "name": {
@@ -19384,6 +19428,60 @@
             "type": "string",
             "title": "Target Table",
             "default": ""
+          },
+          "last_run": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run",
+            "description": "Epoch seconds of the last window that committed; null = never run"
+          },
+          "running": {
+            "type": "boolean",
+            "title": "Running",
+            "description": "A runner holds a live lease on this hunt right now",
+            "default": false
+          },
+          "last_run_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run Rows",
+            "description": "Rows the last completed run wrote; null = no run recorded"
+          },
+          "too_aggressive": {
+            "type": "boolean",
+            "title": "Too Aggressive",
+            "description": "The hunt's schedule is tighter than it can keep up with",
+            "default": false
+          },
+          "run_requested": {
+            "type": "boolean",
+            "title": "Run Requested",
+            "description": "An ad-hoc run is queued and not yet claimed",
+            "default": false
+          },
+          "next_due": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due",
+            "description": "Epoch seconds of the next scheduled fire; null = no rate schedule"
           }
         },
         "type": "object",
@@ -19392,7 +19490,7 @@
           "display_name"
         ],
         "title": "HuntSummary",
-        "description": "Summary of a configured hunt."
+        "description": "Summary of a configured hunt, with what the runner has done with it."
       },
       "HuntWriteRequest": {
         "properties": {
@@ -19430,8 +19528,16 @@
             "default": 60
           },
           "global_target_table_name": {
-            "type": "string",
-            "title": "Global Target Table Name"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Global Target Table Name",
+            "description": "Results table override; the rule's query carries its own target when omitted"
           },
           "global_source_table_name": {
             "anyOf": [
@@ -19521,7 +19627,6 @@
         "type": "object",
         "required": [
           "cron",
-          "global_target_table_name",
           "customers",
           "rules"
         ],
@@ -23089,6 +23194,28 @@
             },
             "type": "array",
             "title": "Warnings"
+          },
+          "review_required": {
+            "type": "boolean",
+            "title": "Review Required",
+            "description": "A generated rule or hunt was routed to a review branch, not to the branch the hunt runner syncs; nothing here runs until those branches merge",
+            "default": false
+          },
+          "review_branches": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Branches",
+            "description": "Review branches the run's writes landed on"
+          },
+          "pr_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pr Urls",
+            "description": "Review PRs opened for the run's writes"
           }
         },
         "type": "object",
@@ -25229,7 +25356,7 @@
             },
             "type": "object",
             "title": "Views",
-            "description": "View name \u2192 DDL"
+            "description": "View name -> DDL"
           },
           "validation_errors": {
             "items": {
@@ -25242,6 +25369,22 @@
             "type": "integer",
             "title": "Statements Applied",
             "default": 0
+          },
+          "topics_ensured": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Ensured",
+            "description": "Kafka topics this source needs that now exist (created or already present)"
+          },
+          "topics_failed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Failed",
+            "description": "Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all."
           }
         },
         "type": "object",
@@ -26152,8 +26295,8 @@
           "type": {
             "type": "string",
             "title": "Type",
-            "description": "Profile name (time_series, minimal, passthrough)",
-            "default": "time_series"
+            "description": "Profile name (timeseries, minimal, passthrough)",
+            "default": "timeseries"
           },
           "version": {
             "type": "string",
@@ -26648,7 +26791,7 @@
           "engine": {
             "type": "string",
             "title": "Engine",
-            "description": "Transform engine (vector or wasm)"
+            "description": "Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)"
           },
           "config_file": {
             "anyOf": [
@@ -26684,7 +26827,7 @@
           "engine"
         ],
         "title": "SourceTransform",
-        "description": "Transform stage configuration (vector or wasm)."
+        "description": "Transform stage configuration: the engine is one of the catalogue's transform apps."
       },
       "SourceVersionDetail": {
         "properties": {
@@ -27749,42 +27892,6 @@
           "roles"
         ],
         "title": "TokenResponse"
-      },
-      "TriggerRequest": {
-        "properties": {
-          "customer": {
-            "type": "string",
-            "title": "Customer",
-            "description": "Customer/org ID to run the hunt for"
-          }
-        },
-        "type": "object",
-        "required": [
-          "customer"
-        ],
-        "title": "TriggerRequest",
-        "description": "Request to trigger an ad-hoc hunt execution."
-      },
-      "TriggerResponse": {
-        "properties": {
-          "task_id": {
-            "type": "string",
-            "title": "Task Id",
-            "description": "Task ID for polling via /tasks/{task_id}"
-          },
-          "hunt_name": {
-            "type": "string",
-            "title": "Hunt Name",
-            "description": "Display name of the triggered hunt"
-          }
-        },
-        "type": "object",
-        "required": [
-          "task_id",
-          "hunt_name"
-        ],
-        "title": "TriggerResponse",
-        "description": "Response from triggering an ad-hoc hunt."
       },
       "UpdateAccountRequest": {
         "properties": {
