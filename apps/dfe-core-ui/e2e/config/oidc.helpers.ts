@@ -62,7 +62,19 @@ export const submitIdpLogin = async (
 /** Keys whose value is a credential, redacted before the page sees the body. */
 const CREDENTIAL_KEY = /token|secret|password/i;
 
-/** The same JSON object with its credentials replaced; anything else is left alone. */
+/** Walks objects and arrays, so a credential nested under any key is caught too. */
+const redact = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(redact);
+  if (typeof value !== 'object' || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+      key,
+      CREDENTIAL_KEY.test(key) ? '[redacted]' : redact(item),
+    ]),
+  );
+};
+
+/** The same JSON with its credentials replaced at any depth; anything else is left alone. */
 const withoutCredentials = (text: string): string => {
   let body: unknown;
   try {
@@ -71,14 +83,7 @@ const withoutCredentials = (text: string): string => {
     return text;
   }
   if (typeof body !== 'object' || body === null) return text;
-  return JSON.stringify(
-    Object.fromEntries(
-      Object.entries(body as Record<string, unknown>).map(([key, value]) => [
-        key,
-        CREDENTIAL_KEY.test(key) ? '[redacted]' : value,
-      ]),
-    ),
-  );
+  return JSON.stringify(redact(body));
 };
 
 /**
@@ -90,6 +95,12 @@ const withoutCredentials = (text: string): string => {
  * exchange in the browser, where the state and nonce cookies live, while the
  * body is read on the Node side and the page is served a redacted copy.
  *
+ * The copy replaces the body ONLY: fulfilling from the response itself passes
+ * the status and every header through, Set-Cookie included, so the session the
+ * engine sets on the callback still reaches the browser. Redirects are not
+ * followed, so a callback that answers 302 is reported as a 302 rather than as
+ * whatever non-JSON page it lands on.
+ *
  * Call it before the flow starts; the returned reader is valid once the browser
  * has reached the callback.
  */
@@ -98,17 +109,15 @@ export const interceptOidcCallback = async (
   provider: string,
 ): Promise<() => Record<string, unknown>> => {
   let raw: string | undefined;
+  let status: number | undefined;
 
   await page.route(
     (url) => url.pathname.endsWith(`/auth/oidc/${provider}/callback`),
     async (route) => {
-      const response = await route.fetch();
+      const response = await route.fetch({ maxRedirects: 0 });
       raw = await response.text();
-      await route.fulfill({
-        status: response.status(),
-        contentType: response.headers()['content-type'] || 'application/json',
-        body: withoutCredentials(raw),
-      });
+      status = response.status();
+      await route.fulfill({ response, body: withoutCredentials(raw) });
     },
   );
 
@@ -119,7 +128,7 @@ export const interceptOidcCallback = async (
       return JSON.parse(raw) as Record<string, unknown>;
     } catch {
       throw new Error(
-        `the OIDC callback did not answer with JSON: ${raw.slice(0, 400)}`,
+        `the OIDC callback answered ${status} and not JSON: ${raw.slice(0, 400)}`,
       );
     }
   };
