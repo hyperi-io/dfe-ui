@@ -55,12 +55,15 @@ export const filebeatCorpus = (perModule = 5): FilebeatSample[] => {
   for (const entry of tarEntries(archive).sort((a, b) =>
     a.name.localeCompare(b.name),
   )) {
-    const module = MODULES.find((name) => entry.name.startsWith(`${name}/`));
-    if (!module || !entry.name.endsWith('.log')) continue;
+    // Not `module`: Next's no-assign-module-variable rejects that name here.
+    const moduleName = MODULES.find((name) =>
+      entry.name.startsWith(`${name}/`),
+    );
+    if (!moduleName || !entry.name.endsWith('.log')) continue;
     for (const line of entry.body.toString('utf8').split('\n')) {
-      if (!line.trim() || (seen.get(module) ?? 0) >= perModule) continue;
-      samples.push({ module, line });
-      seen.set(module, (seen.get(module) ?? 0) + 1);
+      if (!line.trim() || (seen.get(moduleName) ?? 0) >= perModule) continue;
+      samples.push({ module: moduleName, line });
+      seen.set(moduleName, (seen.get(moduleName) ?? 0) + 1);
     }
   }
   return samples;

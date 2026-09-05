@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { BASE_URL, ENGINE_API_URL } from '../config/e2e.client';
+import {
+  BASE_URL,
+  ENGINE_API_URL,
+  transportOptions,
+} from '../config/e2e.client';
 import { ADMIN_USERNAME } from '../config/acceptance.helpers';
 import { adminPassword, bootstrapPassword } from '../config/login.helpers';
 
@@ -27,7 +31,10 @@ test('@acceptance setup completes after the break-glass password is rotated firs
 }) => {
   // Rotate through the product API, as an operator or an init script would,
   // before the wizard has ever run.
-  const api = await playwright.request.newContext({ baseURL: ENGINE_API_URL });
+  const api = await playwright.request.newContext({
+    baseURL: ENGINE_API_URL,
+    ...transportOptions(),
+  });
   const bootstrapLogin = await api.post('/api/v1/auth/login', {
     data: { username: ADMIN_USERNAME, password: bootstrapPassword() },
   });
@@ -86,14 +93,18 @@ test('@acceptance setup completes after the break-glass password is rotated firs
   await page
     .getByRole('textbox', { name: 'Password', exact: true })
     .fill(rotatedPassword);
-  await page.getByRole('button', { name: 'Create Account', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Create Account', exact: true })
+    .click();
 
   // BREAK GLASS -- the wizard's own rotation, on top of the operator's.
   await expect(page).toHaveURL(configureBreakGlassPageUrl);
   await page
     .getByRole('textbox', { name: 'New Password', exact: true })
     .fill(rotatedPassword);
-  await page.getByRole('button', { name: 'Reset Password', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Reset Password', exact: true })
+    .click();
 
   // COMPLETE -- the wizard hands off to the login screen, then the landing page.
   await expect(page).toHaveURL(`${BASE_URL}/sources`, { timeout: 60_000 });

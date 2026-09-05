@@ -20,7 +20,7 @@ import {
   queryRows,
 } from '../config/acceptance.helpers';
 import { filebeatCorpus, filebeatEvent } from '../config/filebeat.corpus';
-import { BASE_URL } from '../config/e2e.client';
+import { BASE_URL, UI_TIMEOUT, transportOptions } from '../config/e2e.client';
 import { adminPassword, loginAs } from '../config/login.helpers';
 
 /**
@@ -159,7 +159,9 @@ test('@acceptance a filebeat source with the VRL transform is created through th
   await page.goto(
     `${BASE_URL}/sources?source_name=${SOURCE}&source_version=1.0.0`,
   );
-  await expect(page.getByText(META_SCHEMA).first()).toBeVisible();
+  await expect(page.getByText(META_SCHEMA).first()).toBeVisible({
+    timeout: UI_TIMEOUT,
+  });
 });
 
 // The data plane, from the schema deploy through to the rows. Runs after the
@@ -172,6 +174,12 @@ test('@acceptance filebeat corpus lands in dfe.filebeat and is visible in the co
   test.skip(
     corpus.length === 0,
     'set E2E_FILEBEAT_CORPUS to the filebeat sample archive to run this',
+  );
+  // A brokerless tier wires the receiver straight to the loader over gRPC, so
+  // no transform instance consumes this source and the rows never arrive.
+  test.skip(
+    process.env.E2E_TRANSFORMS === '0',
+    'brokerless tier: no per-source transform instance runs for this source',
   );
 
   // Authoring a source does not materialise its table -- the deploy is a
@@ -239,6 +247,7 @@ test('@acceptance filebeat corpus lands in dfe.filebeat and is visible in the co
   // its own connection rather than through the engine.
   const hyperdx = await playwright.request.newContext({
     baseURL: HYPERDX_EMBED_URL,
+    ...transportOptions(),
   });
   const hyperdxSource = await ensureHyperdxSource({
     hyperdx,
