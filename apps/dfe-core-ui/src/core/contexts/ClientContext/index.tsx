@@ -10,6 +10,7 @@ import { CompatibleStyleWrapper } from './CompatibleStyleWrapper';
 
 import { ErrorBoundary } from '@/core/components/ErrorBoundary';
 import '@/core/config/AceEditor/init';
+import { Suspense } from 'react';
 
 const client = new QueryClient();
 export const ClientContext = ({ children }: { children: React.ReactNode }) => {
@@ -21,7 +22,12 @@ export const ClientContext = ({ children }: { children: React.ReactNode }) => {
             <CompatibleStyleWrapper>
               <SessionAuthBridge />
               <AuthStoreSync />
-              <AuthSessionMonitor />
+              {/* This provider is in the root layout, so AuthSessionMonitor's
+                  useSearchParams fails the prerender of /_not-found unless it
+                  sits behind Suspense. */}
+              <Suspense fallback={null}>
+                <AuthSessionMonitor />
+              </Suspense>
               {children}
             </CompatibleStyleWrapper>
           </ThemeProvider>
