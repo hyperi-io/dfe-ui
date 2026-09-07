@@ -230,6 +230,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/accounts/{username}/rotate-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate Password
+         * @description Rotate an account's password in the deployment's secret store.
+         *
+         *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
+         *     password, so the engine writes the new value through the scalo secrets seam
+         *     and never into its own YAML -- a YAML-only change is reverted by the next boot
+         *     reconcile. Returns 501 with the store command when the deployment has not
+         *     declared a secrets path for the password.
+         */
+        post: operations["rotate_password_api_v1_auth_accounts__username__rotate_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/accounts/{username}/git-status": {
         parameters: {
             query?: never;
@@ -1315,6 +1341,9 @@ export interface paths {
          *
          *     The service sanitizes the SQL, applies CEL→SQL transpilation,
          *     validates column references, and optionally estimates query cost.
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
          */
         post: operations["create_rule_api_v1_rules_post"];
         delete?: never;
@@ -1385,12 +1414,18 @@ export interface paths {
         /**
          * Update Rule
          * @description Replace a detection rule (re-runs creation pipeline, preserves created_at).
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
          */
         put: operations["update_rule_api_v1_rules__name__put"];
         post?: never;
         /**
          * Delete Rule
          * @description Delete a detection rule.
+         *
+         *     A production+team delete is routed to a review branch, so the runner keeps
+         *     compiling the rule until that branch is merged; ``X-DFE-Review-Required`` says so.
          */
         delete: operations["delete_rule_api_v1_rules__name__delete"];
         options?: never;
@@ -1414,6 +1449,9 @@ export interface paths {
         /**
          * Create Destination
          * @description Create an alert destination.
+         *
+         *     Linking it to a hunt writes the hunt YAML, so in production+team that link is
+         *     routed to a review branch and ``X-DFE-Review-Required`` says so.
          */
         post: operations["create_destination_api_v1_alerts_destinations_post"];
         delete?: never;
@@ -1437,6 +1475,9 @@ export interface paths {
         /**
          * Update Destination
          * @description Update an alert destination.
+         *
+         *     Linking it to a hunt writes the hunt YAML, so in production+team that link is
+         *     routed to a review branch and ``X-DFE-Review-Required`` says so.
          */
         put: operations["update_destination_api_v1_alerts_destinations__name__put"];
         post?: never;
@@ -1672,9 +1713,10 @@ export interface paths {
          * @description Report hunt scheduling status.
          *
          *     Hunts execute in the separate dfe-hunt-runner service (pull-based, coordinated
-         *     via ClickHouse), not in this API process. ``running`` reflects whether any
-         *     runner currently holds a hunt lease; ``hunt_count`` is the configured-hunt
-         *     count.
+         *     via ClickHouse), not in this API process, so ``runners`` counts the runners that
+         *     beat within their last two polls and ``running`` is whether any did. For "is this
+         *     hunt running", read the per-hunt ``running`` on the hunts list; ``hunt_count`` is
+         *     the configured-hunt count.
          */
         get: operations["get_engine_status_api_v1_hunts_status_get"];
         put?: never;
@@ -1694,13 +1736,20 @@ export interface paths {
         };
         /**
          * List Hunts
-         * @description List persisted hunt configurations with pagination and search.
+         * @description List persisted hunt configurations, each with its run state, paginated.
+         *
+         *     Run state comes from ONE ClickHouse read across every listed hunt: the watermark
+         *     (last run), the lease (running now), hunt_state (too aggressive) and hunt_run
+         *     (rows the last run wrote). Next due is derived, not stored.
          */
         get: operations["list_hunts_api_v1_hunts_get"];
         put?: never;
         /**
          * Create Hunt
          * @description Create a new hunt configuration YAML.
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
          */
         post: operations["create_hunt_api_v1_hunts_post"];
         delete?: never;
@@ -1724,12 +1773,18 @@ export interface paths {
         /**
          * Update Hunt
          * @description Replace an existing hunt configuration.
+         *
+         *     A production+team write is routed to a review branch instead of the branch the
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
          */
         put: operations["update_hunt_api_v1_hunts__name__put"];
         post?: never;
         /**
          * Delete Hunt
          * @description Delete a hunt configuration.
+         *
+         *     A production+team delete is routed to a review branch, so the runner keeps
+         *     executing the hunt until that branch is merged; ``X-DFE-Review-Required`` says so.
          */
         delete: operations["delete_hunt_api_v1_hunts__name__delete"];
         options?: never;
@@ -1748,11 +1803,19 @@ export interface paths {
         put?: never;
         /**
          * Trigger Hunt
-         * @description Trigger an ad-hoc hunt execution.
+         * @description Queue an ad-hoc run: mark the hunt due now for the runner to claim.
          *
-         *     Hunts run in the separate dfe-hunt-runner service on their schedule. On-demand
-         *     execution from the API (enqueue a one-shot fire the runner claims) is not wired
-         *     yet, so this returns 501 after validating the hunt exists.
+         *     The pull model is kept. Nothing is pushed at the runner and no listener is added
+         *     -- the fire is written into the coordination state, and the runner that is
+         *     already running picks it up on its next poll, through the same claim that stops
+         *     a hunt double-running. 202 says it is queued, not that it has run; the response
+         *     carries the poll interval so the caller knows the longest wait before it starts.
+         *
+         *     A hunt with no rate schedule is not something the runner ticks, so a queued run
+         *     for one sits unclaimed. That is the schedule's shape, not a failure here.
+         *
+         *     503 is reserved for ClickHouse actually being unreachable; any other failure to
+         *     write the request is a 500, so a bug here never reads as an outage.
          */
         post: operations["trigger_hunt_api_v1_hunts__name__run_post"];
         delete?: never;
@@ -3088,6 +3151,11 @@ export interface paths {
          *     or hand-edited bindings are reported ``skipped_drifted`` unless ``force``.
          *     Submitted to the task manager; blocks up to ``wait`` seconds for inline
          *     completion, else returns ``pending`` - poll via GET /sigma/propagations/{id}.
+         *
+         *     A production+team run commits each generated rule and hunt to its own review
+         *     branch rather than the branch the hunt runner syncs; the report carries every
+         *     branch and PR, and ``X-DFE-Review-Required`` says so on a run that completed
+         *     inline.
          */
         post: operations["propagate_api_v1_sigma_propagate_post"];
         delete?: never;
@@ -3153,6 +3221,10 @@ export interface paths {
         /**
          * Delete Binding
          * @description Delete a generated binding (removes the rule and unlinks it from its hunt).
+         *
+         *     A production+team delete is routed to a review branch, so the runner keeps
+         *     compiling the binding until that branch is merged; ``X-DFE-Review-Required``
+         *     says so.
          */
         delete: operations["delete_binding_api_v1_sigma_bindings__rule_id__delete"];
         options?: never;
@@ -5353,6 +5425,7 @@ export interface components {
             hyperdx: components["schemas"]["HyperDXConfig"];
             /**
              * Auth Mode
+             * @description 'oidc' when an enabled OIDC provider is registered, so the UI offers the SSO button; 'jwt' otherwise. Local login stays available in both.
              * @default jwt
              */
             auth_mode: string;
@@ -6578,8 +6651,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6627,8 +6703,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -6660,9 +6739,15 @@ export interface components {
         HuntEngineStatus: {
             /**
              * Running
-             * @description Whether the scheduler thread is alive
+             * @description Whether at least one hunt runner is alive
              */
             running: boolean;
+            /**
+             * Runners
+             * @description Hunt runners that beat within their last two polls
+             * @default 0
+             */
+            runners: number;
             /**
              * Hunt Count
              * @description Number of loaded hunts across all schedulers
@@ -6691,8 +6776,35 @@ export interface components {
             initial_checkpoint_lookback_minutes?: number | null;
         };
         /**
+         * HuntRunQueued
+         * @description Response from queueing an ad-hoc hunt run.
+         */
+        HuntRunQueued: {
+            /**
+             * Hunt Name
+             * @description Hunt file name the run was queued for
+             */
+            hunt_name: string;
+            /**
+             * Queued
+             * @description The run is recorded and waiting to be claimed
+             * @default true
+             */
+            queued: boolean;
+            /**
+             * Requested Fire
+             * @description Epoch seconds the run was queued at
+             */
+            requested_fire: number;
+            /**
+             * Poll Seconds
+             * @description How often a runner looks for work, so the longest wait before it starts
+             */
+            poll_seconds: number;
+        };
+        /**
          * HuntSummary
-         * @description Summary of a configured hunt.
+         * @description Summary of a configured hunt, with what the runner has done with it.
          */
         HuntSummary: {
             /**
@@ -6731,6 +6843,39 @@ export interface components {
              * @default
              */
             target_table: string;
+            /**
+             * Last Run
+             * @description Epoch seconds of the last window that committed; null = never run
+             */
+            last_run?: number | null;
+            /**
+             * Running
+             * @description A runner holds a live lease on this hunt right now
+             * @default false
+             */
+            running: boolean;
+            /**
+             * Last Run Rows
+             * @description Rows the last completed run wrote; null = no run recorded
+             */
+            last_run_rows?: number | null;
+            /**
+             * Too Aggressive
+             * @description The hunt's schedule is tighter than it can keep up with
+             * @default false
+             */
+            too_aggressive: boolean;
+            /**
+             * Run Requested
+             * @description An ad-hoc run is queued and not yet claimed
+             * @default false
+             */
+            run_requested: boolean;
+            /**
+             * Next Due
+             * @description Epoch seconds of the next scheduled fire; null = no rate schedule
+             */
+            next_due?: number | null;
         };
         /**
          * HuntWriteRequest
@@ -6752,8 +6897,11 @@ export interface components {
              * @default 60
              */
             log_buffer: number;
-            /** Global Target Table Name */
-            global_target_table_name: string;
+            /**
+             * Global Target Table Name
+             * @description Results table override; the rule's query carries its own target when omitted
+             */
+            global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
             /** Customers */
@@ -8567,6 +8715,22 @@ export interface components {
             }[];
             /** Warnings */
             warnings?: string[];
+            /**
+             * Review Required
+             * @description A generated rule or hunt was routed to a review branch, not to the branch the hunt runner syncs; nothing here runs until those branches merge
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Review Branches
+             * @description Review branches the run's writes landed on
+             */
+            review_branches?: string[];
+            /**
+             * Pr Urls
+             * @description Review PRs opened for the run's writes
+             */
+            pr_urls?: string[];
         };
         /**
          * ProtectedPolicy
@@ -8944,6 +9108,38 @@ export interface components {
         RollbackRequest: {
             /** Version */
             version: number;
+        };
+        /**
+         * RotatePasswordRequest
+         * @description A rotation the deployment can boot on.
+         *
+         *     The rotated value becomes ``DFE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
+         *     refuses an empty or default one outside a dev posture, so an unconstrained
+         *     rotation is a way for an admin to lock the deployment out of its own restart.
+         *     Both rules are the ones that gate startup, not a second opinion on them.
+         */
+        RotatePasswordRequest: {
+            /**
+             * New Password
+             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             */
+            new_password: string;
+        };
+        /**
+         * RotatePasswordResponse
+         * @description Outcome of a rotation written through the secrets seam.
+         */
+        RotatePasswordResponse: {
+            /**
+             * Message
+             * @default password rotated in the secret store
+             */
+            message: string;
+            /**
+             * Secret Path
+             * @description scalo.secrets path the new password was written to
+             */
+            secret_path: string;
         };
         /**
          * RoutingResponse
@@ -9643,7 +9839,7 @@ export interface components {
             create_table: string;
             /**
              * Views
-             * @description View name → DDL
+             * @description View name -> DDL
              */
             views?: {
                 [key: string]: string;
@@ -9655,6 +9851,16 @@ export interface components {
              * @default 0
              */
             statements_applied: number;
+            /**
+             * Topics Ensured
+             * @description Kafka topics this source needs that now exist (created or already present)
+             */
+            topics_ensured?: string[];
+            /**
+             * Topics Failed
+             * @description Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all.
+             */
+            topics_failed?: string[];
         };
         /**
          * SchemaDiff
@@ -9928,8 +10134,26 @@ export interface components {
              * @description The organisation registry. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
-            /** @description Durability of the break-glass admin password in the deploy repo: enabled/auto_merge/committed/merged, plus pending.pr_url/command/branch when a review PR or CLI merge is still outstanding. */
+            /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged, plus pending.pr_url/command/branch when a review PR or CLI merge is still outstanding. */
             break_glass?: components["schemas"]["AccountGitState"] | null;
+            /**
+             * Default Credentials
+             * @description True when the deployment is running on the shipped default admin password. Only reachable in a dev posture -- the engine refuses to start on it otherwise -- so the UI banners and forces a change.
+             * @default false
+             */
+            default_credentials: boolean;
+            /**
+             * Deploy Kind
+             * @description docker | kubernetes | local. The deployment vehicle, injected by the deployer where it says so and detected from the runtime otherwise.
+             * @default
+             */
+            deploy_kind: string;
+            /**
+             * Credential Fetch Command
+             * @description One-line command that prints this deployment's minted admin password, for the login page to show. Carried after setup completes too -- an operator who has lost the password needs it most then.
+             * @default
+             */
+            credential_fetch_command: string;
         };
         /**
          * SetupStep
@@ -10215,8 +10439,8 @@ export interface components {
         SourceHeader: {
             /**
              * Type
-             * @description Profile name (time_series, minimal, passthrough)
-             * @default time_series
+             * @description Profile name (timeseries, minimal, passthrough)
+             * @default timeseries
              */
             type: string;
             /**
@@ -10492,12 +10716,12 @@ export interface components {
         };
         /**
          * SourceTransform
-         * @description Transform stage configuration (vector or wasm).
+         * @description Transform stage configuration: the engine is one of the catalogue's transform apps.
          */
         SourceTransform: {
             /**
              * Engine
-             * @description Transform engine (vector or wasm)
+             * @description Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)
              */
             engine: string;
             /**
@@ -11033,33 +11257,12 @@ export interface components {
              * @description User roles
              */
             roles: string[];
-        };
-        /**
-         * TriggerRequest
-         * @description Request to trigger an ad-hoc hunt execution.
-         */
-        TriggerRequest: {
             /**
-             * Customer
-             * @description Customer/org ID to run the hunt for
+             * Default Credentials
+             * @description True when this session is running on the shipped default admin password. Only reachable in a dev posture; the UI banners and forces a change.
+             * @default false
              */
-            customer: string;
-        };
-        /**
-         * TriggerResponse
-         * @description Response from triggering an ad-hoc hunt.
-         */
-        TriggerResponse: {
-            /**
-             * Task Id
-             * @description Task ID for polling via /tasks/{task_id}
-             */
-            task_id: string;
-            /**
-             * Hunt Name
-             * @description Display name of the triggered hunt
-             */
-            hunt_name: string;
+            default_credentials: boolean;
         };
         /** UpdateAccountRequest */
         UpdateAccountRequest: {
@@ -12267,6 +12470,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ResetPasswordResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rotate_password_api_v1_auth_accounts__username__rotate_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RotatePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RotatePasswordResponse"];
                 };
             };
             /** @description Validation Error */
@@ -15520,11 +15758,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TriggerRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             202: {
@@ -15532,7 +15766,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TriggerResponse"];
+                    "application/json": components["schemas"]["HuntRunQueued"];
                 };
             };
             /** @description Validation Error */
