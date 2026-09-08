@@ -11,6 +11,9 @@ const HUNT_ITEM: THuntListItem = {
   customer: 'string',
   cron: 'string',
   rules: ['string'],
+  running: false,
+  too_aggressive: false,
+  run_requested: false,
 } as const;
 
 const TOTAL_ITEMS = 25;

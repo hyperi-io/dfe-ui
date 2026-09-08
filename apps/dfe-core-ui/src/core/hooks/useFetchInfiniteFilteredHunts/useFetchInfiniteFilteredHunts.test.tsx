@@ -74,6 +74,9 @@ describe('useFetchInfiniteFilteredHunts', () => {
         customer: 'string',
         cron: 'string',
         rules: ['string'],
+        running: false,
+        too_aggressive: false,
+        run_requested: false,
       };
 
       expect(result.current.data).toBeDefined();

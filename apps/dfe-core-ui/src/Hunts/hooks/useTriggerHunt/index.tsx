@@ -1,7 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { triggerHunt } from './api';
-import { TTriggerRequest, TTriggerResponse } from './types';
+import { TTriggerResponse } from './types';
 
+// The run is queued for the runner to claim; the engine takes no body.
 export const useTriggerHunt = ({
   onSuccess,
   onError,
@@ -12,10 +13,9 @@ export const useTriggerHunt = ({
   onError?: (error: Error) => void;
 }) => {
   const { data, mutate, isPending, error, reset } = useMutation({
-    mutationFn: (triggerRequest: TTriggerRequest) =>
+    mutationFn: () =>
       triggerHunt({
         pathParams: { name },
-        body: triggerRequest,
       }),
     onSuccess: (data) => {
       onSuccess?.(data);

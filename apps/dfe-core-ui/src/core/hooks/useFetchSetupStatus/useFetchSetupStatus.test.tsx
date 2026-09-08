@@ -30,6 +30,9 @@ describe('.useFetchSetupStatus', () => {
       },
       oidc_providers: [],
       organisations: [],
+      default_credentials: false,
+      deploy_kind: 'local',
+      credential_fetch_command: '',
     };
 
     await waitFor(() => {

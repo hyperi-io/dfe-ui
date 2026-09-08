@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { useTriggerHunt } from '.';
-import { TTriggerRequest, TTriggerResponse } from './types';
+import { TTriggerResponse } from './types';
 import { server } from './useTriggerHunt.mocks';
 
 beforeAll(() =>
@@ -26,9 +26,6 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useTriggerHunt', () => {
-  const requestBody: TTriggerRequest = {
-    customer: 'string',
-  };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
       const onSuccess = vi.fn();
@@ -39,11 +36,13 @@ describe('.useTriggerHunt', () => {
         { wrapper },
       );
 
-      result.current.mutate(requestBody);
+      result.current.mutate();
 
       const expectedResponse: TTriggerResponse = {
-        task_id: 'string',
         hunt_name: 'string',
+        queued: true,
+        requested_fire: 0,
+        poll_seconds: 0,
       };
 
       await waitFor(() => {
@@ -79,7 +78,7 @@ describe('.useTriggerHunt', () => {
         { wrapper },
       );
 
-      result.current.mutate(requestBody);
+      result.current.mutate();
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalled();

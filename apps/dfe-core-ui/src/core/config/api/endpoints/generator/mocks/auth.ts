@@ -20,6 +20,7 @@ export const auth = {
           expires_in: 0,
           user_id: 'string',
           roles: ['string'],
+          default_credentials: false,
         },
       }: {
         mockedResponse?: TLoginResponse;
@@ -39,6 +40,7 @@ export const auth = {
           expires_in: 3600,
           user_id: 'string',
           roles: ['string'],
+          default_credentials: false,
         },
       }: {
         mockedResponse?: TRefreshTokenResponse;
@@ -132,6 +134,9 @@ export const auth = {
           },
           oidc_providers: [],
           organisations: [],
+          default_credentials: false,
+          deploy_kind: 'local',
+          credential_fetch_command: '',
         },
       }: {
         mockedResponse?: TFetchSetupStatusResponse;
