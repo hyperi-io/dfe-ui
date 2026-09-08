@@ -1,6 +1,7 @@
 import { ClickhouseCloudStatus } from './ClickhouseCloudStatus';
 import { ClientConfig } from './ClientConfig';
 import SystemSettings from './SystemSettings';
+import { RetentionCard } from './SystemSettings/RetentionCard';
 import { SystemVersion } from './SystemVersion';
 
 export const SystemManagement = () => {
@@ -9,6 +10,7 @@ export const SystemManagement = () => {
       <ClickhouseCloudStatus />
       <ClientConfig />
       <SystemSettings />
+      <RetentionCard />
       <SystemVersion />
     </>
   );

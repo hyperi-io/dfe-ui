@@ -177,6 +177,7 @@ export const API_CONFIG = Object.freeze({
   system: {
     version: '/api/v1/system/version',
     settings: '/api/v1/system/settings',
+    retention: '/api/v1/system/retention',
     clickhouseCloud: '/api/v1/system/clickhouse-cloud',
     clickhouseCloudStart: '/api/v1/system/clickhouse-cloud/start',
     clickhouseCloudStop: '/api/v1/system/clickhouse-cloud/stop',
