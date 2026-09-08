@@ -33,13 +33,20 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    // DFE serves edge TLS from a cluster CA regenerated on every rebuild.
+    ignoreHTTPSErrors: true,
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // ignoreHTTPSErrors misses the top-level navigation Chromium blocks itself.
+        launchOptions: { args: ['--ignore-certificate-errors'] },
+      },
     },
   ],
 
