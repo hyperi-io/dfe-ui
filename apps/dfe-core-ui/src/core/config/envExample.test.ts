@@ -12,8 +12,8 @@ import { describe, expect, test } from 'vitest';
  * .next -- nothing read it.
  *
  * Guards one direction only: every name .env.example advertises must be read
- * somewhere in src/. The reverse would fail on every optional deployment var
- * the file deliberately omits (DFE_AUTH_MODE, GIT_COMMIT, NODE_ENV).
+ * somewhere in src/ or e2e/. The reverse would fail on every optional deployment
+ * var the file deliberately omits (DFE_AUTH_MODE, GIT_COMMIT, NODE_ENV).
  */
 
 const APP_ROOT = join(import.meta.dirname, '..', '..', '..');
@@ -34,20 +34,23 @@ function declaredNames(): string[] {
     .filter((name): name is string => Boolean(name));
 }
 
+// The acceptance suite reads names of its own, so .env.example advertises them too.
+const SCANNED_DIRS = ['src', 'e2e'];
+
 function sourceText(): string {
-  const files = readdirSync(join(APP_ROOT, 'src'), {
-    recursive: true,
-    withFileTypes: true,
-  });
-  return files
-    .filter(
-      (entry) =>
-        entry.isFile() &&
-        /\.tsx?$/.test(entry.name) &&
-        !/\.test\.tsx?$/.test(entry.name),
-    )
-    .map((entry) => readFileSync(join(entry.parentPath, entry.name), 'utf8'))
-    .join('\n');
+  return SCANNED_DIRS.flatMap((dir) =>
+    readdirSync(join(APP_ROOT, dir), {
+      recursive: true,
+      withFileTypes: true,
+    })
+      .filter(
+        (entry) =>
+          entry.isFile() &&
+          /\.tsx?$/.test(entry.name) &&
+          !/\.test\.tsx?$/.test(entry.name),
+      )
+      .map((entry) => readFileSync(join(entry.parentPath, entry.name), 'utf8')),
+  ).join('\n');
 }
 
 describe('.env.example', () => {
