@@ -1,7 +1,9 @@
+import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
+import { TUpdateSystemRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -32,6 +34,7 @@ export const system = {
           clickhouse_host: 'clickhouse_host',
           clickhouse_database: 'clickhouse_database',
           clickhouse_data_database: 'clickhouse_data_database',
+          clickhouse_default_ttl_days: 90,
           sources_dir: 'sources_dir',
           services_config_dir: 'services_config_dir',
           hunt_dir: 'hunt_dir',
@@ -44,6 +47,61 @@ export const system = {
       }: { mockedResponse?: TSystemSettingsResponse } = {}) => {
         return http.get(system.settings.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+  },
+  retention: {
+    mockedUrl: '/api/v1/system/retention',
+    get: {
+      success: ({
+        mockedResponse = {
+          stored: null,
+          effective: 90,
+          origin: 'deployment',
+          deployment_default: 90,
+        },
+      }: { mockedResponse?: TSystemRetentionResponse } = {}) => {
+        return http.get(system.retention.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+    put: {
+      success: ({
+        mockedResponse = {
+          stored: 30,
+          effective: 30,
+          origin: 'override',
+          deployment_default: 90,
+          reconcile: {
+            summary: '0 database(s) created, 1 table(s) altered',
+            tables_altered: ['dfe.main'],
+            sources_reconciled: 0,
+            sources_skipped: 0,
+          },
+        },
+      }: { mockedResponse?: TUpdateSystemRetentionResponse } = {}) => {
+        return http.put(system.retention.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.put(system.retention.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+      reconcileFailed: ({
+        message = 'override stored; ClickHouse reconcile failed: clickhouse down',
+      }: { message?: string } = {}) => {
+        return http.put(system.retention.mockedUrl, () => {
+          return HttpResponse.json(
+            { code: 'reconcile_failed', message },
+            { status: 502 },
+          );
         });
       },
     },

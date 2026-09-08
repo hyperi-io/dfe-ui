@@ -1595,6 +1595,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/retention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Retention
+         * @description Effective default TTL and where it comes from. Answers without gitops too.
+         */
+        get: operations["get_retention_api_v1_system_retention_get"];
+        /**
+         * Put Retention
+         * @description Store the override in the deploy repo, then reconcile every table that follows it.
+         *
+         *     The core tables and every deployed source's table are brought to the new
+         *     effective default in this request. A ClickHouse failure returns 502 with the
+         *     override ALREADY committed: the next schema apply or source deploy picks it up.
+         */
+        put: operations["put_retention_api_v1_system_retention_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/clickhouse-cloud": {
         parameters: {
             query?: never;
@@ -9079,6 +9107,92 @@ export interface components {
              */
             buckets: components["schemas"]["ResourceBucketModel"][];
         };
+        /**
+         * RetentionReconcileSummary
+         * @description What the reconcile that follows a PUT did to the live tables.
+         */
+        RetentionReconcileSummary: {
+            /**
+             * Summary
+             * @description One line: databases created, tables created/altered/current.
+             */
+            summary: string;
+            /**
+             * Tables Altered
+             * @description database.table for every table whose TTL or columns changed.
+             */
+            tables_altered: string[];
+            /**
+             * Sources Reconciled
+             * @description Deployed sources whose table was reconciled.
+             */
+            sources_reconciled: number;
+            /**
+             * Sources Skipped
+             * @description Deployed sources left to their next deploy (table absent or build failed).
+             */
+            sources_skipped: number;
+        };
+        /** RetentionRequest */
+        RetentionRequest: {
+            /**
+             * Default Ttl Days
+             * @description Override in days; 0 = no default TTL; null clears the override.
+             */
+            default_ttl_days: number | null;
+        };
+        /**
+         * RetentionStatus
+         * @description The deployment default TTL: the override, the env value, and which one wins.
+         */
+        RetentionStatus: {
+            /**
+             * Stored
+             * @description The console override committed in the deploy repo; null when none.
+             */
+            stored: number | null;
+            /**
+             * Effective
+             * @description Retention in days a time-series table gets when it declares none; 0 = none.
+             */
+            effective: number;
+            /**
+             * Origin
+             * @description override when the stored value wins, deployment when the env default does.
+             * @enum {string}
+             */
+            origin: "override" | "deployment";
+            /**
+             * Deployment Default
+             * @description clickhouse.default_ttl_days as deployed (DFE_CLICKHOUSE_DEFAULT_TTL_DAYS).
+             */
+            deployment_default: number;
+        };
+        /** RetentionUpdateResponse */
+        RetentionUpdateResponse: {
+            /**
+             * Stored
+             * @description The console override committed in the deploy repo; null when none.
+             */
+            stored: number | null;
+            /**
+             * Effective
+             * @description Retention in days a time-series table gets when it declares none; 0 = none.
+             */
+            effective: number;
+            /**
+             * Origin
+             * @description override when the stored value wins, deployment when the env default does.
+             * @enum {string}
+             */
+            origin: "override" | "deployment";
+            /**
+             * Deployment Default
+             * @description clickhouse.default_ttl_days as deployed (DFE_CLICKHOUSE_DEFAULT_TTL_DAYS).
+             */
+            deployment_default: number;
+            reconcile: components["schemas"]["RetentionReconcileSummary"];
+        };
         /** ReviewRequest */
         ReviewRequest: {
             /** Sql */
@@ -10096,6 +10210,11 @@ export interface components {
             clickhouse_database: string;
             /** Clickhouse Data Database */
             clickhouse_data_database: string;
+            /**
+             * Clickhouse Default Ttl Days
+             * @description Retention in days a time-series table gets when it declares none; 0 = none.
+             */
+            clickhouse_default_ttl_days: number;
             /** Sources Dir */
             sources_dir: string;
             /** Services Config Dir */
@@ -10154,6 +10273,11 @@ export interface components {
              * @default
              */
             credential_fetch_command: string;
+            /**
+             * Default Ttl Days
+             * @description Retention in days a source gets when it sets none; 0 = none.
+             */
+            default_ttl_days: number;
         };
         /**
          * SetupStep
@@ -15442,6 +15566,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsSummary"];
+                };
+            };
+        };
+    };
+    get_retention_api_v1_system_retention_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionStatus"];
+                };
+            };
+        };
+    };
+    put_retention_api_v1_system_retention_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetentionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionUpdateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

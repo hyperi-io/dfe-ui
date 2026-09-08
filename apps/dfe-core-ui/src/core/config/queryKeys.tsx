@@ -40,5 +40,8 @@ export const QUERY_KEYS = {
       ...(per_page ? [per_page] : []),
     ],
   },
+  system: {
+    retention: () => ['system-retention'],
+  },
 };
 /* eslint-enable no-restricted-imports */

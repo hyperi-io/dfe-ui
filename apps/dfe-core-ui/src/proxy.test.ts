@@ -37,6 +37,7 @@ const setupStatus = (complete: boolean): TFetchSetupStatusResponse => ({
   default_credentials: false,
   deploy_kind: 'local',
   credential_fetch_command: '',
+  default_ttl_days: 90,
 });
 
 const request = (path: string, cookie?: string) =>

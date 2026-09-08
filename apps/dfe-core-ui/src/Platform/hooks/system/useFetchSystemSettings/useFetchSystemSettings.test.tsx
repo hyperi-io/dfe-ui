@@ -23,6 +23,7 @@ describe('.useFetchSystemSettings', () => {
       clickhouse_host: 'clickhouse_host',
       clickhouse_database: 'clickhouse_database',
       clickhouse_data_database: 'clickhouse_data_database',
+      clickhouse_default_ttl_days: 90,
       sources_dir: 'sources_dir',
       services_config_dir: 'services_config_dir',
       hunt_dir: 'hunt_dir',

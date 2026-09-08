@@ -1,4 +1,5 @@
 import { Form } from '@/core/components/Form';
+import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import {
@@ -10,7 +11,7 @@ import {
   Select,
 } from 'antd';
 import Link from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CommonHeaderSelect } from './CommonHeaderSelect';
 import { MetaSchemaSelectCreate } from './MetaSchemaSelectCreate';
 
@@ -86,6 +87,22 @@ export const MetaSchemaForm = ({
       })) ?? []
     );
   }, [commonHeaderVersions]);
+
+  const { data: setupStatus } = useFetchSetupStatus();
+  const defaultTtlDays = setupStatus?.default_ttl_days;
+  // A source with no schema yet is new here; an existing source keeps its own value.
+  const [seedDefaultTtl] = useState(
+    () => form.getFieldValue('schema') === undefined,
+  );
+  useEffect(() => {
+    if (!seedDefaultTtl || defaultTtlDays === undefined) return;
+    if (form.getFieldValue(['schema', 'ttl_days']) !== undefined) return;
+    form.setFieldsValue({ schema: { ttl_days: defaultTtlDays } });
+  }, [form, seedDefaultTtl, defaultTtlDays]);
+  const ttlHelp =
+    defaultTtlDays === undefined
+      ? undefined
+      : `Deployment default: ${defaultTtlDays} days. ${seedDefaultTtl ? 'Leave as is' : 'Clear'} to follow it.`;
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -176,9 +193,15 @@ export const MetaSchemaForm = ({
         className="w-full"
         name={['schema', 'ttl_days']}
         label="TTL Days"
+        help={ttlHelp}
         rules={[formValidation]}
       >
-        <InputNumber className="w-full" placeholder="Enter TTL days" />
+        <InputNumber
+          className="w-full"
+          min={0}
+          precision={0}
+          placeholder="Enter TTL days"
+        />
       </Form.Item>
     </div>
   );

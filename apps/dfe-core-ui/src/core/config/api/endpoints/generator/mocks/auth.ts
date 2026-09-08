@@ -137,6 +137,7 @@ export const auth = {
           default_credentials: false,
           deploy_kind: 'local',
           credential_fetch_command: '',
+          default_ttl_days: 90,
         },
       }: {
         mockedResponse?: TFetchSetupStatusResponse;

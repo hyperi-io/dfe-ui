@@ -41,6 +41,7 @@ const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
   default_credentials: false,
   deploy_kind: 'local',
   credential_fetch_command: '',
+  default_ttl_days: 90,
 };
 
 describe('Layout (auth)', () => {
@@ -65,6 +66,7 @@ describe('Layout (auth)', () => {
       default_credentials: false,
       deploy_kind: 'local',
       credential_fetch_command: '',
+      default_ttl_days: 90,
     });
     getServerSession.mockResolvedValue({
       user: {
@@ -99,6 +101,7 @@ describe('Layout (auth)', () => {
       default_credentials: false,
       deploy_kind: 'local',
       credential_fetch_command: '',
+      default_ttl_days: 90,
     });
     getServerSession.mockResolvedValue(null);
 
