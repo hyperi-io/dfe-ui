@@ -37,6 +37,10 @@ const CompatibleStyleProviders = ({
             colorPrimary: colors.brand.tertiary,
           },
           components: {
+            Layout: {
+              // The dark Sider ships navy (#001529); the panels are neutral 800, so match them.
+              siderBg: colors.neutral[800],
+            },
             Typography: {
               fontSizeHeading1: typography.fontSize['xl'],
               fontSizeHeading2: typography.fontSize['lg'],
