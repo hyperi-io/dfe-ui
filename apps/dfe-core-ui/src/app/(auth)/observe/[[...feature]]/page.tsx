@@ -38,6 +38,9 @@ const OBSERVE_ALIASES: Record<
   { feature: string; params: Record<string, string> }
 > = {
   'hunt-results': { feature: 'search', params: { source: 'hunts' } },
+  // HyperDX's /dashboards is the unsaved "temporary dashboard" editor; the
+  // saved ones are listed at /dashboards/list, which is what the sidebar means.
+  dashboards: { feature: 'dashboards/list', params: {} },
 };
 
 export default function ObservePage() {
