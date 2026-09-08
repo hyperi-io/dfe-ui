@@ -60,6 +60,9 @@ const setupStatusWith = (
   oidc_providers: [],
   organisations: [],
   break_glass: mergedBreakGlass,
+  default_credentials: false,
+  deploy_kind: 'local',
+  credential_fetch_command: '',
 });
 
 const renderStep = (

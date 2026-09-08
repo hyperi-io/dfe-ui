@@ -1,13 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { oidcLogin } from './api';
 
-export const useOidcLogin = ({ provider }: { provider: string }) => {
+export const useOidcLogin = ({
+  provider,
+  returnTo,
+}: {
+  provider: string;
+  /** Where the engine's callback sends the browser back to, with the token in the fragment. */
+  returnTo: string;
+}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['oidcLogin', provider],
+    queryKey: ['oidcLogin', provider, returnTo],
     queryFn: async () =>
       oidcLogin({
         pathParams: { provider },
-        queryParams: { redirect: false },
+        queryParams: { redirect: false, return_to: returnTo },
       }),
     enabled: !!provider,
     retry: false,

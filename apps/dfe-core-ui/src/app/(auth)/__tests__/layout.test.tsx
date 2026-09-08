@@ -38,6 +38,9 @@ const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
   },
   oidc_providers: [],
   organisations: [],
+  default_credentials: false,
+  deploy_kind: 'local',
+  credential_fetch_command: '',
 };
 
 describe('Layout (auth)', () => {
@@ -59,6 +62,9 @@ describe('Layout (auth)', () => {
       },
       oidc_providers: [],
       organisations: [],
+      default_credentials: false,
+      deploy_kind: 'local',
+      credential_fetch_command: '',
     });
     getServerSession.mockResolvedValue({
       user: {
@@ -90,6 +96,9 @@ describe('Layout (auth)', () => {
       },
       oidc_providers: [],
       organisations: [],
+      default_credentials: false,
+      deploy_kind: 'local',
+      credential_fetch_command: '',
     });
     getServerSession.mockResolvedValue(null);
 
