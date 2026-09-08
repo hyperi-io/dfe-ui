@@ -1,3 +1,4 @@
+import { oidcTokenProvider } from '@/core/auth/oidcTokenProvider';
 import {
   PROXY_TRUST_PROVIDER_ID,
   extractEngineToken,
@@ -85,10 +86,12 @@ const proxyTrustProvider = CredentialsProvider({
   },
 });
 
+// The OIDC hand-back provider is registered in every mode: an external IdP
+// login lands on /login/oidc with an engine token whichever way the app is fronted.
 export const authOptions: NextAuthOptions = {
   providers: isProxyAuthMode()
-    ? [proxyTrustProvider, credentialsProvider]
-    : [credentialsProvider],
+    ? [proxyTrustProvider, credentialsProvider, oidcTokenProvider(baseUrl)]
+    : [credentialsProvider, oidcTokenProvider(baseUrl)],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {

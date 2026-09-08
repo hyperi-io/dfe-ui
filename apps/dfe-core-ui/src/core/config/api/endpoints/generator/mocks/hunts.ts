@@ -24,6 +24,9 @@ export const hunts = {
               customer: 'string',
               cron: 'string',
               rules: ['string'],
+              running: false,
+              too_aggressive: false,
+              run_requested: false,
             },
           ],
           total: 0,
@@ -106,6 +109,7 @@ export const hunts = {
       success: ({
         mockedResponse = {
           running: true,
+          runners: 1,
           hunt_count: 1,
           scheduling_mode: 'string',
         },
@@ -236,8 +240,10 @@ export const hunts = {
     post: {
       success: ({
         mockedResponse = {
-          task_id: 'string',
           hunt_name: 'string',
+          queued: true,
+          requested_fire: 0,
+          poll_seconds: 0,
         },
         name = 'name',
       }: {

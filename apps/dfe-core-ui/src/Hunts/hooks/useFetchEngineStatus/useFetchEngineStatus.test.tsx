@@ -22,6 +22,7 @@ describe('.useFetchEngineStatus', () => {
 
       const response: THuntEngineStatus = {
         running: true,
+        runners: 1,
         hunt_count: 1,
         scheduling_mode: 'string',
       };

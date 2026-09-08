@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test';
 import { oidcFixture } from '../config/login.helpers';
 import {
   IDP_SIGN_IN,
+  assertConsoleSession,
   assertOidcSessionUsable,
   chooseProvider,
   clickLogin,
   oidcProviders,
   openProviderPicker,
-  readOidcCallback,
 } from '../config/oidc.helpers';
 
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -54,7 +54,7 @@ test.describe('OIDC login', () => {
     await login;
   });
 
-  test('the fixture login signs in and the callback token is accepted', async ({
+  test('the fixture login lands in the console with a usable session', async ({
     page,
     request,
   }) => {
@@ -74,7 +74,7 @@ test.describe('OIDC login', () => {
 
     for (const { provider, signIn, fixture } of runnable) {
       await test.step(`sign in through ${provider.name}`, async () => {
-        // Clear the IdP's own session too, so each provider signs in from cold.
+        // Clear the console and IdP sessions too, so each provider signs in from cold.
         await page.context().clearCookies();
 
         await openProviderPicker(page);
@@ -82,9 +82,9 @@ test.describe('OIDC login', () => {
         await clickLogin(page);
         await signIn(page, fixture);
 
-        const callback = await readOidcCallback(page, provider);
-        expect(callback.access_token).toBeTruthy();
-        await assertOidcSessionUsable(request, callback);
+        const session = await assertConsoleSession(page);
+        expect(page.url()).not.toContain('access_token');
+        await assertOidcSessionUsable(request, session);
       });
     }
   });

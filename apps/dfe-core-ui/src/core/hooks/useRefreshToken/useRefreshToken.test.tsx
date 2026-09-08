@@ -55,6 +55,7 @@ describe('.useRefreshToken', () => {
         expires_in: 3600,
         user_id: 'string',
         roles: ['string'],
+        default_credentials: false,
       };
 
       await waitFor(() => {

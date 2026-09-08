@@ -25,7 +25,12 @@ export const LoginLocalOidcSwitch = ({
         {
           label: 'Login with OIDC',
           key: 'oidc',
-          children: <LoginWithOidcForm oidc_providers={oidc_providers} />,
+          children: (
+            <LoginWithOidcForm
+              oidc_providers={oidc_providers}
+              callbackUrl={callbackUrl}
+            />
+          ),
         },
         {
           label: 'Login with Local',

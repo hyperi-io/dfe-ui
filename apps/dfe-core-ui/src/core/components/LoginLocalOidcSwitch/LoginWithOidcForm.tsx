@@ -14,8 +14,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export const LoginWithOidcForm = ({
   oidc_providers,
+  callbackUrl = '/',
 }: {
   oidc_providers: TFetchSetupStatusResponse['oidc_providers'];
+  callbackUrl?: string;
 }) => {
   const [showOidcLoginPopup, setShowOidcLoginPopup] = useState(false);
   const [form] = Form.useForm<FormData>();
@@ -62,6 +64,7 @@ export const LoginWithOidcForm = ({
         <OidcLoginPopup
           closePopup={() => setShowOidcLoginPopup(false)}
           oidcProviderName={form.getFieldValue('provider')}
+          callbackUrl={callbackUrl}
         />
       )}
 

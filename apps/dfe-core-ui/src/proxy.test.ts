@@ -34,6 +34,9 @@ const setupStatus = (complete: boolean): TFetchSetupStatusResponse => ({
   },
   oidc_providers: [],
   organisations: [],
+  default_credentials: false,
+  deploy_kind: 'local',
+  credential_fetch_command: '',
 });
 
 const request = (path: string, cookie?: string) =>

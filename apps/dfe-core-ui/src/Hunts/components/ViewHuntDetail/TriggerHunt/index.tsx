@@ -1,18 +1,9 @@
-import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useTriggerHunt } from '@/Hunts/hooks/useTriggerHunt';
 import { IconPlayerPlay } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
-import z from 'zod';
-
-const triggerHuntSchema = z.object({
-  customer: z.string().min(1, { message: 'Customer is required' }),
-});
-type TriggerHuntFormValues = z.infer<typeof triggerHuntSchema>;
 
 export const TriggerHunt = ({
   selectedHuntName,
@@ -20,8 +11,6 @@ export const TriggerHunt = ({
   selectedHuntName: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [form] = Form.useForm<TriggerHuntFormValues>();
-  const formValidation = useAntdZodResolver(triggerHuntSchema);
 
   const { notification } = App.useApp();
 
@@ -32,16 +21,18 @@ export const TriggerHunt = ({
     reset,
   } = useTriggerHunt({
     name: selectedHuntName,
-    onSuccess: () => {
+    onSuccess: (data) => {
       setIsOpen(false);
       notification.success({
-        title: 'On-demand triggered successfully',
+        title: 'On-demand run queued',
+        description: `The runner picks it up within ${data.poll_seconds} seconds.`,
       });
     },
   });
 
-  const handleSubmit = (values: TriggerHuntFormValues) => {
-    triggerHunt(values);
+  const close = () => {
+    reset();
+    setIsOpen(false);
   };
 
   return (
@@ -62,24 +53,16 @@ export const TriggerHunt = ({
       <Modal
         title="Trigger On-Demand Hunt"
         open={isOpen}
-        onCancel={() => setIsOpen(false)}
-        footer={null}
+        onCancel={close}
+        onOk={() => triggerHunt()}
+        okText="Trigger Hunt"
+        confirmLoading={isPending}
       >
-        <Form
-          form={form}
-          onFinish={handleSubmit}
-          onValuesChange={() => reset()}
-        >
-          <Form.Item label="Customer" name="customer" rules={[formValidation]}>
-            <OrganisationSelect placeholder="Select Customer" />
-          </Form.Item>
-          {error && <FormNotification text={error.message} type="error" />}
-          <Form.Item>
-            <Button loading={isPending} type="primary" htmlType="submit">
-              Trigger Hunt
-            </Button>
-          </Form.Item>
-        </Form>
+        <p>
+          Queue <strong>{selectedHuntName}</strong> to run now. The run covers
+          every customer the hunt is configured for.
+        </p>
+        {error && <FormNotification text={error.message} type="error" />}
       </Modal>
     </>
   );

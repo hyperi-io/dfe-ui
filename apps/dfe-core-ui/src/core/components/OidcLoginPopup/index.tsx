@@ -1,17 +1,30 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
+import {
+  OIDC_CONSOLE_CALLBACK_PATH,
+  safeCallbackPath,
+} from '@/core/config/oidcToken.constants';
 import { useOidcLogin } from '@/core/hooks/useOidcLogin';
 import { Spin } from 'antd';
 import { useEffect } from 'react';
 
+/** The console page the engine callback returns to; absolute, so it works split-origin too. */
+const returnToFor = (callbackUrl: string): string =>
+  `${window.location.origin}${OIDC_CONSOLE_CALLBACK_PATH}?callbackUrl=${encodeURIComponent(
+    safeCallbackPath(callbackUrl),
+  )}`;
+
 export const OidcLoginPopup = ({
   closePopup,
   oidcProviderName,
+  callbackUrl = '/',
 }: {
   closePopup: () => void;
   oidcProviderName: string;
+  callbackUrl?: string;
 }) => {
   const { data, isLoading, error } = useOidcLogin({
     provider: oidcProviderName,
+    returnTo: returnToFor(callbackUrl),
   });
 
   useEffect(() => {

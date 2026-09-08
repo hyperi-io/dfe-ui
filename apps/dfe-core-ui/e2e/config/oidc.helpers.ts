@@ -5,14 +5,6 @@ import { OidcFixture } from './login.helpers';
 /** A provider as /api/v1/auth/setup-status names it. */
 export type OidcProvider = { name: string; display_name: string };
 
-/** The JSON body the engine's OIDC callback renders into the page. */
-export type OidcCallback = {
-  access_token: string;
-  subject: string;
-  email: string;
-  groups: string[];
-};
-
 // The deployment's own list: the enabled set differs per deploy, so never hardcode one.
 export const oidcProviders = async (
   request: APIRequestContext,
@@ -61,42 +53,72 @@ const signInAtOkta: SignIn = async (page, fixture) => {
   await page.getByRole('button', { name: 'Verify' }).click();
 };
 
-/*
- * Only the providers whose sign-in completes end to end.
- *
- * Entra is left out deliberately. Its form is known -- input[name="loginfmt"]
- * then #idSIButton9, then input[name="passwd"] then #idSIButton9, with a decoy
- * visible #i0118 already on the username screen -- but the tenant still forces
- * Authenticator registration after a correct password, with no skip link.
- *
- * Google has no fixture user, and its OAuth client registers no redirect URI for
- * this host, so it answers redirect_uri_mismatch before any sign-in form.
- *
- * Both fall out through the same skip path as a provider with no password.
- */
+// Entra keeps a hidden password input on the username screen, so the visible
+// one is the target, and its scripts drop keystrokes until they settle.
+const signInAtEntra: SignIn = async (page, fixture) => {
+  await page.locator('input[name="loginfmt"]').fill(fixture.user);
+  await page.locator('#idSIButton9').click();
+  const password = page.locator('input[name="passwd"]:visible');
+  await password.waitFor();
+  await page.waitForTimeout(6000);
+  await password.click();
+  await page.keyboard.type(fixture.password, { delay: 60 });
+  await page.keyboard.press('Enter');
+  // "Stay signed in?" -- either answer completes the login.
+  await page.locator('#idSIButton9').click();
+};
+
+const signInAtGoogle: SignIn = async (page, fixture) => {
+  await page.locator('input[name="identifier"]').fill(fixture.user);
+  await page.locator('#identifierNext button').click();
+  await page.locator('input[name="Passwd"]').fill(fixture.password);
+  await page.locator('#passwordNext button').click();
+  // A Workspace account's first login shows the terms page once.
+  const terms = page.locator('button:has-text("I understand")');
+  if (await terms.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await terms.click();
+  }
+};
+
+// Provider name as setup-status reports it: the engine routes on this name.
 export const IDP_SIGN_IN: Record<string, SignIn | undefined> = {
   dex: signInAtDex,
   okta: signInAtOkta,
+  entra: signInAtEntra,
+  'google-workspace': signInAtGoogle,
 };
 
-// The callback renders the engine's JSON response as the document body.
-export const readOidcCallback = async (
+/** The NextAuth session the console holds after the OIDC hand-back. */
+export type ConsoleSession = {
+  user?: { name?: string; accessToken?: string; roles?: string[] };
+  error?: string;
+};
+
+// The engine's callback 303s to /login/oidc, which signs in and leaves for callbackUrl.
+export const assertConsoleSession = async (
   page: Page,
-  provider: OidcProvider,
-): Promise<OidcCallback> => {
+): Promise<ConsoleSession> => {
   await page.waitForURL(
-    new RegExp(`/api/v1/auth/oidc/${provider.name}/callback`),
+    (url) =>
+      url.origin === new URL(BASE_URL).origin &&
+      !url.pathname.startsWith('/login'),
+    { timeout: 60000 },
   );
-  return JSON.parse(await page.locator('body').innerText()) as OidcCallback;
+  const response = await page.request.get(`${BASE_URL}/api/auth/session`);
+  expect(response.ok()).toBeTruthy();
+  const session = (await response.json()) as ConsoleSession;
+  expect(session.user?.accessToken).toBeTruthy();
+  expect(session.error).toBeUndefined();
+  return session;
 };
 
-// The engine reads Authorization only -- the dfe_token cookie the callback sets is ignored.
+// The engine reads Authorization only, so the session's token is what proves it.
 export const assertOidcSessionUsable = async (
   request: APIRequestContext,
-  callback: OidcCallback,
+  session: ConsoleSession,
 ) => {
   const me = await request.get(`${ENGINE_API_URL}/api/v1/auth/me`, {
-    headers: { Authorization: `Bearer ${callback.access_token}` },
+    headers: { Authorization: `Bearer ${session.user?.accessToken}` },
   });
   expect(me.status()).toBe(200);
 };
