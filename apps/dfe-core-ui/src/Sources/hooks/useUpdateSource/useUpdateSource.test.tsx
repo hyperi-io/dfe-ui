@@ -46,16 +46,9 @@ describe('.useUpdateSource', () => {
       config_file: null,
     },
     fetcher: {
-      source_type: 'string',
-      base_url: 'string',
-      auth: {
-        type: 'string',
-        token_url: 'string',
-        client_id: 'string',
-        client_secret: 'string',
-        api_key: 'string',
-      },
-      poll_interval_secs: 0,
+      source_type: 'crates_io',
+      topic: 'own',
+      config: { crates: ['dfe-fetcher'] },
     },
   };
   describe('onSuccess', () => {

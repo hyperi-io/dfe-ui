@@ -32,6 +32,7 @@ export const sources = {
               header_type: 'string',
               has_transform: false,
               has_fetcher: false,
+              origin: 'receiver',
               state: 'active',
             },
           ],
@@ -119,16 +120,13 @@ export const sources = {
               engine: 'string',
             },
             fetcher: {
-              source_type: 'string',
-              base_url: 'string',
-              auth: {
-                type: 'string',
-                token_url: 'string',
-                client_id: 'string',
-                client_secret: 'string',
-                api_key: 'string',
+              source_type: 'crates_io',
+              topic: 'own',
+              config: {
+                crates: ['dfe-fetcher'],
+                interval_secs: 3600,
+                token: 'env:CRATES_TOKEN',
               },
-              poll_interval_secs: 0,
             },
             transform: {
               engine: 'string',
@@ -392,16 +390,13 @@ export const sources = {
               engine: 'string',
             },
             fetcher: {
-              source_type: 'string',
-              base_url: 'string',
-              auth: {
-                type: 'string',
-                token_url: 'string',
-                client_id: 'string',
-                client_secret: 'string',
-                api_key: 'string',
+              source_type: 'crates_io',
+              topic: 'own',
+              config: {
+                crates: ['dfe-fetcher'],
+                interval_secs: 3600,
+                token: 'env:CRATES_TOKEN',
               },
-              poll_interval_secs: 0,
             },
             transform: {
               engine: 'string',

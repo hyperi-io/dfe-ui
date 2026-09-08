@@ -1,27 +1,24 @@
-import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
 
-export const getInitialSourceType = ({
-  match,
-  fetcher,
-}: {
-  match: TSourceCreateRequestBody['match'] | null;
-  fetcher: TSourceCreateRequestBody['fetcher'] | null;
-}) => {
-  const matchKeys = Object.keys(match ?? {});
-  const fetcherKeys = Object.keys(fetcher ?? {});
-
-  // If both match and fetcher are provided, return null
-  // This is an invalid state
-  if (matchKeys.length > 0 && fetcherKeys.length > 0) {
-    return null;
-  }
-
-  if (matchKeys.length > 0) {
-    return 'receiver';
-  }
-
-  if (fetcherKeys.length > 0) {
-    return 'fetcher';
-  }
-  return null;
+export const EMPTY_MATCH: NonNullable<CreateUpdateSourceFormData['match']> = {
+  field: '',
+  operator: 'equals',
+  value: '',
 };
+
+export const EMPTY_FETCHER: NonNullable<CreateUpdateSourceFormData['fetcher']> =
+  {
+    source_type: '',
+    topic: 'own',
+    config: '',
+  };
+
+/**
+ * The fetcher families the deployed stack accepts.
+ *
+ * The manifest names them, so this reads whichever app declares source_types
+ * rather than knowing an app by name.
+ */
+export const getFetcherSourceTypes = (apps?: TAppsResponse): string[] =>
+  [...new Set((apps ?? []).flatMap((app) => app.source_types ?? []))].sort();

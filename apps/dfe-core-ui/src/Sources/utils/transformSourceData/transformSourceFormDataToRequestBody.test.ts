@@ -4,13 +4,14 @@ import { describe, expect, test } from 'vitest';
 import { transformSourceFormDataToRequestBody } from './transformSourceFormDataToRequestBody';
 
 describe('transformSourceFormDataToRequestBody', () => {
-  test('when fetcher is an empty object, should return fetcher: null', () => {
+  test('a receiver source sends its match rule and no fetcher', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       display_name: 'display name',
-      // @ts-expect-error - test case
-      fetcher: {},
       enabled: true,
+      origin: 'receiver',
+      match: { field: 'field', value: 'value', operator: 'equals' },
+      fetcher: { source_type: 'crates_io', topic: 'own', config: 'crates: []' },
     };
 
     const result = transformSourceFormDataToRequestBody(source);
@@ -20,47 +21,69 @@ describe('transformSourceFormDataToRequestBody', () => {
       display_name: 'display name',
       enabled: true,
       fetcher: null,
-      match: { field: '', operator: 'equals', value: '' },
+      match: { field: 'field', operator: 'equals', value: 'value' },
     };
     expect(result).toEqual(expectedResult);
   });
 
-  test('when fetcher auth type is none, should return fetcher.auth: null', () => {
+  test('a fetcher source sends its stanza as an object and no match', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
-      display_name: 'display name',
       enabled: true,
-      fetcher: {
-        source_type: 'source_type',
-        base_url: 'base_url',
-        poll_interval_secs: 300,
-        auth: {
-          type: 'none',
-        },
-      },
+      origin: 'fetcher',
       match: { field: 'field', value: 'value', operator: 'equals' },
+      fetcher: {
+        source_type: 'crates_io',
+        topic: 'default',
+        config: 'crates:\n  - dfe-fetcher\ninterval_secs: 3600\n',
+      },
     };
 
     const result = transformSourceFormDataToRequestBody(source);
-    const expectedResult: TSourceUpdateRequestBody = {
+
+    expect(result.match).toBeNull();
+    expect(result.fetcher).toEqual({
+      source_type: 'crates_io',
+      topic: 'default',
+      config: { crates: ['dfe-fetcher'], interval_secs: 3600 },
+    });
+  });
+
+  test('an empty config is an empty stanza, not a missing one', () => {
+    const source: CreateUpdateSourceFormData = {
       source: 'source',
-      display_name: 'display name',
       enabled: true,
-      fetcher: {
-        source_type: 'source_type',
-        base_url: 'base_url',
-        poll_interval_secs: 300,
-        auth: null,
-      },
-      match: { field: 'field', operator: 'equals', value: 'value' },
+      origin: 'fetcher',
+      fetcher: { source_type: 'okta', topic: 'own', config: '' },
     };
-    expect(result).toEqual(expectedResult);
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.fetcher).toEqual({
+      source_type: 'okta',
+      topic: 'own',
+      config: {},
+    });
+  });
+
+  test('topic falls back to own when the form never set it', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      origin: 'fetcher',
+      fetcher: { source_type: 'okta' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source).fetcher?.topic).toBe(
+      'own',
+    );
   });
 
   test('maps view custom_mappings from form tuples to API record', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
+      origin: 'receiver',
       match: { field: 'field', operator: 'equals', value: 'value' },
       views: [
         {
