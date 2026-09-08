@@ -937,7 +937,7 @@ export interface paths {
         post?: never;
         /**
          * Delete Source
-         * @description Delete a source by name.
+         * @description Delete a source by name. Its fetcher instance and receiver rule go with it.
          */
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
@@ -967,6 +967,31 @@ export interface paths {
          * @description Perform a bulk action (enable, disable, dormant, delete) on multiple sources.
          */
         post: operations["bulk_action_api_v1_sources_bulk_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/reconcile-apps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reconcile Apps
+         * @description Bring the deploy repo's derived app state into step with the sources.
+         *
+         *     Recompiles every stack-scoped routing block (receiver, loader) and deploys,
+         *     syncs or removes the instances of every instance-scoped app (a fetcher per
+         *     active fetcher-based source). Every source write does this on its own; this
+         *     route is the retry when one reported ``apps_sync_error``.
+         */
+        post: operations["reconcile_apps_api_v1_sources_reconcile_apps_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4978,8 +5003,25 @@ export interface components {
              * @description Whether this app's routing is compiled from the source definitions. False means the /routing routes answer 400 for every instance of it.
              */
             has_compiled_routing: boolean;
+            /**
+             * Routing Scope
+             * @description stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources
+             * @default stack
+             */
+            routing_scope: string;
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
+        };
+        /**
+         * AppsReconcileResponse
+         * @description What the reconcile wrote into the deploy repo.
+         */
+        AppsReconcileResponse: {
+            /**
+             * Changes
+             * @description Overlay writes made (service/instance: action)
+             */
+            changes?: string[];
         };
         /** ArtifactModel */
         ArtifactModel: {
@@ -5313,6 +5355,17 @@ export interface components {
              * @description Whether this app's routing is compiled from the source definitions. False means the /routing routes answer 400 for every instance of it.
              */
             has_compiled_routing: boolean;
+            /**
+             * Routing Scope
+             * @description stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources
+             * @default stack
+             */
+            routing_scope: string;
+            /**
+             * Source Types
+             * @description The source families a source-bound instance of this app can poll; a fetcher-based source's fetcher.source_type must be one of them
+             */
+            source_types?: string[];
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
@@ -6188,37 +6241,6 @@ export interface components {
             context?: {
                 [key: string]: unknown;
             } | null;
-        };
-        /**
-         * FetcherAuth
-         * @description Fetcher authentication configuration.
-         */
-        FetcherAuth: {
-            /**
-             * Type
-             * @description Auth type (oauth2, api_key, basic)
-             */
-            type: string;
-            /**
-             * Token Url
-             * @description OAuth2 token URL
-             */
-            token_url?: string | null;
-            /**
-             * Client Id
-             * @description OAuth2 client ID
-             */
-            client_id?: string | null;
-            /**
-             * Client Secret
-             * @description OAuth2 client secret
-             */
-            client_secret?: string | null;
-            /**
-             * Api Key
-             * @description API key
-             */
-            api_key?: string | null;
         };
         /**
          * FieldError
@@ -9975,6 +9997,16 @@ export interface components {
              * @description Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all.
              */
             topics_failed?: string[];
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes this deploy made so the apps follow the sources: the receiver and loader routing, and a fetcher instance for a fetcher-based source (service/instance: action)
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it.
+             */
+            apps_sync_error?: string | null;
         };
         /**
          * SchemaDiff
@@ -10511,6 +10543,12 @@ export interface components {
             readonly match: components["schemas"]["SourceMatch"] | null;
             /** @description Transform config on the deployed version (serialized for API compat). */
             readonly transform: components["schemas"]["SourceTransform"] | null;
+            /**
+             * Origin
+             * @description How the deployed version's data enters: receiver match or a fetcher.
+             * @enum {string}
+             */
+            readonly origin: "receiver" | "fetcher";
         };
         /**
          * SourceEnabledPatchRequest
@@ -10534,27 +10572,33 @@ export interface components {
         };
         /**
          * SourceFetcher
-         * @description Fetcher configuration for SaaS API pull sources.
+         * @description Fetcher-based origin: one dfe-fetcher deployment, named for the source.
+         *
+         *     ``config`` is the fetcher's own per-type stanza, carried verbatim into the
+         *     deployed instance under ``config.sources.<source_type>``. The engine owns
+         *     ``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records
+         *     land on the source's own topic (and table) or on the platform default.
          */
         SourceFetcher: {
             /**
              * Source Type
-             * @description Fetcher type (crowdstrike, m365, etc.)
+             * @description A dfe-fetcher source family (aws, okta, crates_io, ...); the deployed app manifest lists the accepted values
              */
             source_type: string;
             /**
-             * Base Url
-             * @description API base URL
+             * Topic
+             * @description own: records land on this source's topic and table; default: they land on the platform default table
+             * @default own
+             * @enum {string}
              */
-            base_url?: string | null;
-            /** @description Authentication config */
-            auth?: components["schemas"]["FetcherAuth"] | null;
+            topic: "own" | "default";
             /**
-             * Poll Interval Secs
-             * @description Polling interval in seconds
-             * @default 300
+             * Config
+             * @description The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references
              */
-            poll_interval_secs: number;
+            config?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * SourceHeader
@@ -10687,6 +10731,16 @@ export interface components {
              * @description All version ids on the source
              */
             versions: string[];
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step; reconcile-apps retries it
+             */
+            apps_sync_error?: string | null;
         };
         /**
          * SourceSchema
@@ -10833,6 +10887,13 @@ export interface components {
              */
             has_fetcher: boolean;
             /**
+             * Origin
+             * @description How data enters: receiver match or a fetcher
+             * @default receiver
+             * @enum {string}
+             */
+            origin: "receiver" | "fetcher";
+            /**
              * Views
              * @description Naming-standard views on the deployed version (standard names)
              */
@@ -10887,8 +10948,8 @@ export interface components {
             views?: components["schemas"]["SourceView"][];
             /** @description SaaS API fetcher (optional) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
-            /** @description Receiver match rule (required) */
-            match: components["schemas"]["SourceMatch"];
+            /** @description Receiver match rule (receiver-based sources) */
+            match?: components["schemas"]["SourceMatch"] | null;
             /** @description Transform stage (optional) */
             transform?: components["schemas"]["SourceTransform"] | null;
             /** @description Last schema build for this version (source-builds) */
@@ -11030,15 +11091,15 @@ export interface components {
              * @description Tri-state lifecycle (active | dormant | disabled); overrides ``enabled``
              */
             state?: ("active" | "dormant" | "disabled") | null;
-            /** @description Receiver match rule (required) */
-            match: components["schemas"]["SourceMatch"];
+            /** @description Receiver match rule; required unless ``fetcher`` is set */
+            match?: components["schemas"]["SourceMatch"] | null;
             /** @description Common schema header configuration for this revision */
             header?: components["schemas"]["SourceHeader"] | null;
             /** @description Schema configuration for this revision */
             schema?: components["schemas"]["SourceSchema"] | null;
             /** @description Transform stage (optional, top-level) */
             transform?: components["schemas"]["SourceTransform"] | null;
-            /** @description SaaS API fetcher (optional) */
+            /** @description Fetcher-based origin; required unless ``match`` is set */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /**
              * Views
@@ -14337,6 +14398,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reconcile_apps_api_v1_sources_reconcile_apps_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppsReconcileResponse"];
                 };
             };
         };
