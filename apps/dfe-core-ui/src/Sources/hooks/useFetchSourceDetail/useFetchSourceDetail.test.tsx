@@ -58,16 +58,13 @@ describe('.useFetchSourceDetail', () => {
             files: ['string'],
           },
           fetcher: {
-            source_type: 'string',
-            base_url: 'string',
-            auth: {
-              type: 'string',
-              token_url: 'string',
-              client_id: 'string',
-              client_secret: 'string',
-              api_key: 'string',
+            source_type: 'crates_io',
+            topic: 'own',
+            config: {
+              crates: ['dfe-fetcher'],
+              interval_secs: 3600,
+              token: 'env:CRATES_TOKEN',
             },
-            poll_interval_secs: 0,
           },
           match: {
             field: 'string',

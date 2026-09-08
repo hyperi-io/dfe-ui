@@ -1,12 +1,12 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 
-import { objectArrayToObject } from './helpers';
+import { objectArrayToObject, parseFetcherConfig } from './helpers';
 
 /*
  * Transforms the source form data to a request body for the update source API.
- * If the fetcher is an empty object or not present, it will be set to null.
- * If the fetcher auth type is none, it will be set to null.
+ * The selected origin decides which of match and fetcher is sent; the engine
+ * refuses a body carrying both or neither.
  *
  * @param source - The source form data to transform
  * @returns The transformed source request body
@@ -15,13 +15,26 @@ import { objectArrayToObject } from './helpers';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): TSourceUpdateRequestBody => {
-  const { fetcher, match, views, transform, ...rest } = source;
+  const { fetcher, match, origin, views, transform, ...rest } = source;
 
-  let apiMatch: TSourceUpdateRequestBody['match'] | undefined;
-  if (match) {
-    const { operator: _operator, field, value } = match;
-    apiMatch = { field, operator: _operator ?? 'equals', value: value ?? '' };
-  }
+  const isFetcherOrigin = origin === 'fetcher';
+
+  const parsedConfig = parseFetcherConfig(fetcher?.config);
+  const apiFetcher: TSourceUpdateRequestBody['fetcher'] = isFetcherOrigin
+    ? {
+        source_type: fetcher?.source_type ?? '',
+        topic: fetcher?.topic ?? 'own',
+        config: parsedConfig.ok ? parsedConfig.config : {},
+      }
+    : null;
+
+  const apiMatch: TSourceUpdateRequestBody['match'] = isFetcherOrigin
+    ? null
+    : {
+        field: match?.field ?? '',
+        operator: match?.operator ?? 'equals',
+        value: match?.value ?? '',
+      };
 
   const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
@@ -39,21 +52,11 @@ export const transformSourceFormDataToRequestBody = (
           }),
         }
       : {}),
-    ...(apiMatch
-      ? { match: apiMatch }
-      : { match: { field: '', operator: 'equals', value: '' } }),
+    match: apiMatch,
     ...(transform != null
       ? { transform: { ...transform, env: objectArrayToObject(transform.env) } }
       : {}),
-    fetcher:
-      Object.keys(fetcher ?? {}).length > 0
-        ? {
-            ...fetcher,
-            auth: fetcher?.auth?.type === 'none' ? null : fetcher?.auth,
-            source_type: fetcher?.source_type ?? '',
-            poll_interval_secs: fetcher?.poll_interval_secs ?? 0,
-          }
-        : null,
+    fetcher: apiFetcher,
   };
   return transformedSource;
 };

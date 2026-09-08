@@ -12,12 +12,15 @@ import {
   IconRocket,
   IconStarFilled,
 } from '@repo/dfe-icons';
-import { Button, notification, Tooltip, TreeDataNode } from 'antd';
+import { Button, notification, Tag, Tooltip, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
+
+const originTagColour = (origin: string) =>
+  origin === 'fetcher' ? 'purple' : 'blue';
 
 /** Ant Design Tree keys must be globally unique; folder and source paths can share the same string. */
 export const folderTreeKey = (pathSegments: string[]) =>
@@ -162,6 +165,10 @@ const sourceSummaryToTreeData = ({
             title={
               <span className="flex gap-2 items-center">
                 {source.name.split('/').pop() ?? ''}
+
+                <Tag className="m-0" color={originTagColour(source.origin)}>
+                  {source.origin}
+                </Tag>
 
                 {!isDeployed && (
                   <Tooltip destroyOnHidden title="_default_land">

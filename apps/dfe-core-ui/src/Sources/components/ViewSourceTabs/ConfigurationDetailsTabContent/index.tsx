@@ -1,7 +1,10 @@
+import { AceEditor } from '@/core/components/AceEditor';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { cn } from '@/core/utils/style';
+import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 import { ViewDetailsModal } from './ViewDetailsModal';
@@ -66,8 +69,10 @@ export const ConfigurationDetailsTabContent = ({
   version: { header, schema, transform, match, fetcher, source_build, views },
 }: TSourceVersionDetail) => {
   const hasSchema = schema?.meta_schema || header?.type;
-  const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
+  const isFetcherOrigin = Object.keys(fetcher ?? {}).length > 0;
+  const hasOrigin = match?.field || isFetcherOrigin;
   const hasViews = views && views.length > 0;
+  const fetcherConfig = stringifyFetcherConfig(fetcher?.config);
   const { data: setupStatus } = useFetchSetupStatus();
 
   return (
@@ -93,6 +98,9 @@ export const ConfigurationDetailsTabContent = ({
 
         <dt className={dataListTermStyle}>Build Status:</dt>
         <dd>{source_build ? 'Build Executed' : <EmptyData />}</dd>
+
+        <dt className={dataListTermStyle}>Origin:</dt>
+        <dd>{isFetcherOrigin ? 'Fetcher' : 'Receiver'}</dd>
       </dl>
       {hasSchema && (
         <SimpleCollapse
@@ -192,87 +200,40 @@ export const ConfigurationDetailsTabContent = ({
           title="Origin"
           defaultOpen={true}
         >
-          <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
-            <dt className={dataListTermStyle}>Field:</dt>
-            <dd>{match?.field ? match?.field : <EmptyData />}</dd>
-            <dt className={dataListTermStyle}>Value:</dt>
-            <dd>{match?.value ? match?.value : <EmptyData />}</dd>
-          </dl>
-
-          {fetcher && (
-            <SimpleCollapse
-              classNames={{
-                container: 'px-0',
-                content: 'flex flex-col gap-2',
-                title: formCollapseTitleStyle,
-              }}
-              title="Fetcher"
-              defaultOpen={true}
-            >
+          {isFetcherOrigin ? (
+            <div className="flex flex-col gap-2">
               <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
                 <dt className={dataListTermStyle}>Source Type:</dt>
                 <dd>
                   {fetcher?.source_type ? fetcher?.source_type : <EmptyData />}
                 </dd>
-                <dt className={dataListTermStyle}>Base URL:</dt>
-                <dd>{fetcher?.base_url ? fetcher?.base_url : <EmptyData />}</dd>
-                <dt className={dataListTermStyle}>Poll Interval Secs:</dt>
+                <dt className={dataListTermStyle}>Topic:</dt>
                 <dd>
-                  {fetcher?.poll_interval_secs ? (
-                    fetcher?.poll_interval_secs
-                  ) : (
-                    <EmptyData />
-                  )}
+                  {fetcher?.topic
+                    ? FETCHER_TOPIC_LABELS[fetcher.topic]
+                    : FETCHER_TOPIC_LABELS.own}
                 </dd>
               </dl>
-              <p className={cn(dataListTermStyle, 'mt-2')}>Auth Details</p>
-              <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
-                <dt className={dataListTermStyle}>Auth Type:</dt>
-                <dd>
-                  {fetcher?.auth?.type ? fetcher?.auth?.type : <EmptyData />}
-                </dd>
-                {fetcher?.auth?.type === 'oauth2' && (
-                  <>
-                    <dt className={dataListTermStyle}>Token URL:</dt>
-                    <dd>
-                      {fetcher?.auth?.token_url ? (
-                        fetcher?.auth?.token_url
-                      ) : (
-                        <EmptyData />
-                      )}
-                    </dd>
-                    <dt className={dataListTermStyle}>Client ID:</dt>
-                    <dd>
-                      {fetcher?.auth?.client_id ? (
-                        fetcher?.auth?.client_id
-                      ) : (
-                        <EmptyData />
-                      )}
-                    </dd>
-                    <dt className={dataListTermStyle}>Client Secret:</dt>
-                    <dd>
-                      {fetcher?.auth?.client_secret ? (
-                        fetcher?.auth?.client_secret
-                      ) : (
-                        <EmptyData />
-                      )}
-                    </dd>
-                  </>
-                )}
-                {fetcher?.auth?.type === 'api_key' && (
-                  <>
-                    <dt className={dataListTermStyle}>API Key:</dt>
-                    <dd>
-                      {fetcher?.auth?.api_key ? (
-                        fetcher?.auth?.api_key
-                      ) : (
-                        <EmptyData />
-                      )}
-                    </dd>
-                  </>
-                )}
-              </dl>
-            </SimpleCollapse>
+              <p className={cn(dataListTermStyle, 'mt-2')}>Config</p>
+              {fetcherConfig ? (
+                <AceEditor
+                  name="fetcher_config_detail"
+                  mode="yaml"
+                  height="240px"
+                  readOnly
+                  value={fetcherConfig}
+                />
+              ) : (
+                <EmptyData />
+              )}
+            </div>
+          ) : (
+            <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
+              <dt className={dataListTermStyle}>Field:</dt>
+              <dd>{match?.field ? match?.field : <EmptyData />}</dd>
+              <dt className={dataListTermStyle}>Value:</dt>
+              <dd>{match?.value ? match?.value : <EmptyData />}</dd>
+            </dl>
           )}
         </SimpleCollapse>
       )}

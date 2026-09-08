@@ -29,6 +29,8 @@ export const DeployedSourceDetails = ({
     views,
     validation_errors,
     statements_applied,
+    apps_synced,
+    apps_sync_error,
   } = data || {};
 
   return (
@@ -68,7 +70,16 @@ export const DeployedSourceDetails = ({
             <dd>{applied ? 'Yes' : 'No'}</dd>
             <dt>Statements Applied:</dt>
             <dd>{statements_applied}</dd>
+            <dt>Apps Synced:</dt>
+            <dd>{apps_synced?.length ? apps_synced.join(', ') : 'None'}</dd>
           </dl>
+          {apps_sync_error && (
+            <NotificationCard
+              title="The apps did not follow this source"
+              description={apps_sync_error}
+              type="warning"
+            />
+          )}
           {create_table ? (
             <SimpleCollapse
               className="px-0"

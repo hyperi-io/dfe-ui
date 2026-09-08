@@ -26,9 +26,11 @@ import {
 } from './endpoints.generator.mocks.types';
 
 /**
- * A default catalogue that carries all three app shapes on purpose: a single
- * app with compiled routing, a per-config app with file sets, and a per-config
- * app with none. A UI that special-cases an app name fails against this.
+ * A default catalogue that carries all four app shapes on purpose: a single
+ * app with stack-scoped compiled routing, a per-config app with file sets, a
+ * per-config app with none, and the instance-scoped app that declares the
+ * fetcher source families. A UI that special-cases an app name fails against
+ * this.
  */
 const DEFAULT_APPS: TAppsResponse = [
   {
@@ -36,6 +38,7 @@ const DEFAULT_APPS: TAppsResponse = [
     scale_deployed: true,
     multiplicity: 'single',
     has_compiled_routing: true,
+    routing_scope: 'stack',
     file_sets: [],
     instances: ['default'],
   },
@@ -44,6 +47,7 @@ const DEFAULT_APPS: TAppsResponse = [
     scale_deployed: true,
     multiplicity: 'per_config',
     has_compiled_routing: false,
+    routing_scope: 'stack',
     file_sets: [
       {
         name: 'transforms',
@@ -60,6 +64,17 @@ const DEFAULT_APPS: TAppsResponse = [
     scale_deployed: true,
     multiplicity: 'per_config',
     has_compiled_routing: false,
+    routing_scope: 'stack',
+    file_sets: [],
+    instances: [],
+  },
+  {
+    service: 'dfe-fetcher',
+    scale_deployed: false,
+    multiplicity: 'per_config',
+    has_compiled_routing: true,
+    routing_scope: 'instance',
+    source_types: ['crates_io', 'okta', 'aws'],
     file_sets: [],
     instances: [],
   },
@@ -142,6 +157,7 @@ export const apps = {
           scale_deployed: true,
           multiplicity: 'per_config',
           has_compiled_routing: false,
+          routing_scope: 'stack',
           file_sets: [],
         },
         service = 'service',

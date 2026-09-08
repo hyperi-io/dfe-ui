@@ -78,6 +78,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         updated_at: 'string',
         has_transform: false,
         has_fetcher: false,
+        origin: 'receiver',
         state: 'active',
         deployed_version: 'string',
       };

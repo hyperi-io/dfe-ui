@@ -21,10 +21,26 @@ describe('useFetchApps', () => {
       'dfe-receiver',
       'dfe-transform-vrl',
       'dfe-transform-elastic',
+      'dfe-fetcher',
     ]);
     expect(result.current.data?.[0].multiplicity).toBe('single');
     expect(result.current.data?.[1].multiplicity).toBe('per_config');
     expect(result.current.data?.[1].instances).toEqual(['syslog']);
+  });
+
+  it('carries the routing scope and the source families off the manifest', async () => {
+    const { result } = renderHook(() => useFetchApps(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data?.[0].routing_scope).toBe('stack');
+    expect(result.current.data?.[0].source_types).toBeUndefined();
+    expect(result.current.data?.[3].routing_scope).toBe('instance');
+    expect(result.current.data?.[3].source_types).toEqual([
+      'crates_io',
+      'okta',
+      'aws',
+    ]);
   });
 
   it('carries the file sets an app declares, and the empty set for one that declares none', async () => {
