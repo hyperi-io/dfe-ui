@@ -1,0 +1,132 @@
+import { Form } from '@/core/components/Form';
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button, FormRule } from 'antd';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import { MetaSchemaForm } from './MetaSchemaForm';
+import { server } from './MetaSchemaForm.mocks';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/sources',
+}));
+
+// CreateSchemaDrawer transitively loads AceEditor, which needs a global `ace` ClientContext sets.
+vi.mock('@/core/components/CreateSchemaDrawer', () => ({
+  CreateSchemaDrawer: () => null,
+}));
+
+class MockIntersectionObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+global.IntersectionObserver = MockIntersectionObserver as any;
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+
+// The zod rules are not under test here, so every field accepts what it holds.
+const acceptAll: FormRule = { validator: async () => undefined };
+
+const Harness = ({
+  onFinish,
+  initialValues,
+}: {
+  onFinish: (values: CreateUpdateSourceFormData) => void;
+  initialValues?: Partial<CreateUpdateSourceFormData>;
+}) => {
+  const [form] = Form.useForm<CreateUpdateSourceFormData>();
+  return (
+    <Form form={form} onFinish={onFinish} initialValues={initialValues}>
+      <MetaSchemaForm formValidation={acceptAll} form={form} />
+      <Button htmlType="submit">Submit</Button>
+    </Form>
+  );
+};
+
+describe('MetaSchemaForm TTL Days', () => {
+  it('seeds a new source with the deployment default', async () => {
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    const ttl = await screen.findByLabelText(
+      'TTL Days',
+      {},
+      { timeout: 15000 },
+    );
+    await waitFor(() => expect(ttl).toHaveValue('90'), { timeout: 15000 });
+    expect(
+      screen.getByText(
+        'Deployment default: 90 days. Leave as is to follow it.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the value an existing source already has', async () => {
+    render(
+      <Harness
+        onFinish={vi.fn()}
+        initialValues={{
+          schema: {
+            meta_schema: 'meta/string',
+            meta_schema_version: '1',
+            ttl_days: 7,
+            engine: 'MergeTree',
+          },
+        }}
+      />,
+      { wrapper },
+    );
+
+    const ttl = await screen.findByLabelText(
+      'TTL Days',
+      {},
+      { timeout: 15000 },
+    );
+    expect(
+      await screen.findByText(
+        'Deployment default: 90 days. Clear to follow it.',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+    expect(ttl).toHaveValue('7');
+  });
+
+  it('submits null, not 0, when the box is cleared', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<Harness onFinish={onFinish} />, { wrapper });
+
+    const ttl = await screen.findByLabelText(
+      'TTL Days',
+      {},
+      { timeout: 15000 },
+    );
+    await waitFor(() => expect(ttl).toHaveValue('90'), { timeout: 15000 });
+    await user.clear(ttl);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+      timeout: 15000,
+    });
+    const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+    expect(submitted.schema?.ttl_days).toBeNull();
+  });
+});

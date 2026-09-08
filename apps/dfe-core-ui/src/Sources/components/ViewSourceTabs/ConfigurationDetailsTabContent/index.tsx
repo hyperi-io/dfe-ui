@@ -1,4 +1,5 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
@@ -67,6 +68,7 @@ export const ConfigurationDetailsTabContent = ({
   const hasSchema = schema?.meta_schema || header?.type;
   const hasOrigin = match?.field || Object.keys(fetcher ?? {}).length > 0;
   const hasViews = views && views.length > 0;
+  const { data: setupStatus } = useFetchSetupStatus();
 
   return (
     <div className="relative h-full min-h-0">
@@ -159,7 +161,7 @@ export const ConfigurationDetailsTabContent = ({
                 </dd>
               </>
             )}
-            {schema?.ttl_days ? (
+            {typeof schema?.ttl_days === 'number' ? (
               <>
                 <dt className={dataListTermStyle}>TTL Days:</dt>
                 <dd>{schema?.ttl_days}</dd>
@@ -168,7 +170,12 @@ export const ConfigurationDetailsTabContent = ({
               <>
                 <dt className={dataListTermStyle}>TTL Days:</dt>
                 <dd>
-                  <EmptyData />
+                  <span className="text-foreground/40 dark:text-dark-foreground/40">
+                    system default
+                    {setupStatus
+                      ? ` (${setupStatus.default_ttl_days} days)`
+                      : ''}
+                  </span>
                 </dd>
               </>
             )}

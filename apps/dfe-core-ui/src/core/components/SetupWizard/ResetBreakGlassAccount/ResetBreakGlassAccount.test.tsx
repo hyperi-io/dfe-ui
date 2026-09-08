@@ -63,6 +63,7 @@ const setupStatusWith = (
   default_credentials: false,
   deploy_kind: 'local',
   credential_fetch_command: '',
+  default_ttl_days: 90,
 });
 
 const renderStep = (
