@@ -9,6 +9,10 @@ import { getValidationErrors, type FormValidationErrors } from './helpers';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
+  EMPTY_FETCHER,
+  EMPTY_MATCH,
+} from './SourceDetailsTabContent/OriginFormSection/helpers';
+import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
@@ -104,13 +108,11 @@ export const CreateUpdateSourceFormBase = ({
       onFinish={handleFinish}
       initialValues={{
         enabled: true,
-        match: {
-          field: '',
-          operator: 'equals',
-          value: '',
-          ...initialValues?.match,
-        },
+        origin: 'receiver',
         ...initialValues,
+        // Both blocks are seeded so switching origin lands on a usable form.
+        match: { ...EMPTY_MATCH, ...initialValues?.match },
+        fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}

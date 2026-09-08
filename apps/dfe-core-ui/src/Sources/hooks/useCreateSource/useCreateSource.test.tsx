@@ -1,6 +1,8 @@
+import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -46,16 +48,9 @@ describe('.useCreateSource', () => {
       config_file: null,
     },
     fetcher: {
-      source_type: 'string',
-      base_url: 'string',
-      auth: {
-        type: 'string',
-        token_url: 'string',
-        client_id: 'string',
-        client_secret: 'string',
-        api_key: 'string',
-      },
-      poll_interval_secs: 0,
+      source_type: 'crates_io',
+      topic: 'own',
+      config: { crates: ['dfe-fetcher'] },
     },
     state: 'active',
   };
@@ -119,6 +114,46 @@ describe('.useCreateSource', () => {
       await waitFor(() => {
         expect(onSuccess).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('when the engine refuses a literal credential in the stanza', () => {
+    // The engine owns that rule; the console has to name the key it refused.
+    const message =
+      'fetcher.config.token must be an env: or vault: reference, not a literal';
+
+    beforeEach(() => {
+      server.use(
+        http.post('/api/v1/sources', () =>
+          HttpResponse.json(
+            { code: 'validation_error', message },
+            { status: 422 },
+          ),
+        ),
+      );
+    });
+
+    test('carries the message the engine gave back to the caller', async () => {
+      const onError = vi.fn();
+
+      const { result } = renderHook(() => useCreateSource({ onError }), {
+        wrapper,
+      });
+
+      result.current.mutate({
+        ...requestBody,
+        match: null,
+        fetcher: {
+          source_type: 'crates_io',
+          topic: 'own',
+          config: { token: 'a-literal-token' },
+        },
+      });
+
+      await waitFor(() => expect(onError).toHaveBeenCalled());
+      expect(getApiErrorResponseBody(onError.mock.calls[0][0])?.message).toBe(
+        message,
+      );
     });
   });
 });

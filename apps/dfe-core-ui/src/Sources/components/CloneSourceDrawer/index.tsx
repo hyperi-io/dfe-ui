@@ -8,6 +8,7 @@ import {
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification, Spin, Tooltip } from 'antd';
@@ -71,6 +72,7 @@ export const CloneSourceDrawer = ({
     const transformedValues = transformSourceFormDataToRequestBody(values);
     createSourceMutation(transformedValues);
   };
+  const clonedFetcher = sourceDetail?.version?.fetcher;
   return (
     <>
       {contextHolder}
@@ -173,6 +175,16 @@ export const CloneSourceDrawer = ({
               display_name: `Copy - ${sourceDetail.display_name}`,
               current: sourceDetail.current,
               versions: sourceDetail.versions,
+              // The clone keeps the origin it was cut from; a receiver clone
+              // still re-asks for its match rule, which must be unique.
+              origin: clonedFetcher ? 'fetcher' : 'receiver',
+              fetcher: clonedFetcher
+                ? {
+                    source_type: clonedFetcher.source_type ?? '',
+                    topic: clonedFetcher.topic ?? 'own',
+                    config: stringifyFetcherConfig(clonedFetcher.config),
+                  }
+                : null,
               match: {
                 field: '',
                 operator: 'equals',

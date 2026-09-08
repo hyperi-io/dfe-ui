@@ -1,11 +1,11 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
-import { objectToObjectArray } from './helpers';
+import { objectToObjectArray, stringifyFetcherConfig } from './helpers';
 
 /*
  * Transforms the source request body to a form data object.
- * If the fetcher auth type is none, it will be set to null.
+ * A version carrying a fetcher is fetcher-based; anything else is receiver-based.
  *
  * @param source - The source request body to transform
  * @returns The transformed form data object
@@ -13,6 +13,9 @@ import { objectToObjectArray } from './helpers';
 export const transformSourceRequestBodyToFormData = (
   source?: TSourceVersionDetail,
 ): CreateUpdateSourceFormData => {
+  const fetcher = source?.version?.fetcher;
+  const hasFetcher = Object.keys(fetcher ?? {}).length > 0;
+
   const transformedSource: CreateUpdateSourceFormData = {
     ...source,
     source: source?.source ?? '',
@@ -42,22 +45,14 @@ export const transformSourceRequestBodyToFormData = (
           config_file: source?.version?.transform?.config_file ?? null,
         }
       : undefined,
-    // If the fetcher is present it transforms the auth type to none if it is null
-    fetcher:
-      Object.keys(source?.version?.fetcher ?? {}).length > 0
-        ? {
-            ...source?.version?.fetcher,
-            base_url: source?.version?.fetcher?.base_url ?? '',
-            poll_interval_secs:
-              source?.version?.fetcher?.poll_interval_secs ?? 0,
-            auth: {
-              ...source?.version?.fetcher?.auth,
-              type: source?.version?.fetcher?.auth
-                ? source?.version?.fetcher?.auth?.type
-                : 'none',
-            },
-          }
-        : null,
+    origin: hasFetcher ? 'fetcher' : 'receiver',
+    fetcher: hasFetcher
+      ? {
+          source_type: fetcher?.source_type ?? '',
+          topic: fetcher?.topic ?? 'own',
+          config: stringifyFetcherConfig(fetcher?.config),
+        }
+      : null,
     match: source?.version?.match
       ? { ...source.version.match }
       : { field: '', value: '' },

@@ -36,6 +36,14 @@ export const EditSourceDrawer = ({
       title: `${response.source} updated successfully`,
       placement: 'bottomLeft',
     });
+    // The source is saved either way; only the deploy-repo follow-up failed.
+    if (response.apps_sync_error) {
+      api.warning({
+        title: 'The apps did not follow this source',
+        description: response.apps_sync_error,
+        placement: 'bottomLeft',
+      });
+    }
   };
 
   return (

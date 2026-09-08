@@ -13,6 +13,7 @@ const SOURCE_ITEM: TSourceListSummary = {
   updated_at: 'string',
   has_transform: false,
   has_fetcher: false,
+  origin: 'receiver',
   state: 'active',
 };
 

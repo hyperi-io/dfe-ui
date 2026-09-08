@@ -39,15 +39,17 @@ describe('SourceProcessingTabContent', () => {
 
     expect(await screen.findByText('dfe-transform-vrl')).toBeInTheDocument();
     expect(screen.getByText('dfe-transform-elastic')).toBeInTheDocument();
+    // A fetcher is per-source too, so it belongs on this list.
+    expect(screen.getByText('dfe-fetcher')).toBeInTheDocument();
   });
 
   it('offers a deploy for an app with no instance for this source', async () => {
     render(<SourceProcessingTabContent source="syslog" />, { wrapper });
 
     expect(
-      await screen.findByText('Not deployed for this source.'),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Deploy/ })).toBeInTheDocument();
+      await screen.findAllByText('Not deployed for this source.'),
+    ).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /Deploy/ })).toHaveLength(2);
   });
 
   it('gives an editor only to the app whose manifest declares file sets', async () => {

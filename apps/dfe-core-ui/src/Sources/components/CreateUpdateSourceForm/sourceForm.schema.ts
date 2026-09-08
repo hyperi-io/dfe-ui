@@ -1,10 +1,16 @@
 import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
 import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
+import {
+  ENGINE_OWNED_FETCHER_KEYS,
+  parseFetcherConfig,
+} from '@/Sources/utils/transformSourceData/helpers';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 
 import z from 'zod';
 
-const AUTH_TYPES = ['none', 'oauth2', 'api_key'] as const;
+type TSourceMatch = NonNullable<TSourceCreateRequestBody['match']>;
+type TSourceFetcher = NonNullable<TSourceCreateRequestBody['fetcher']>;
+
 export const MATCH_OPERATORS = [
   'equals',
   'exists',
@@ -12,7 +18,18 @@ export const MATCH_OPERATORS = [
   'starts_with',
   'ends_with',
   'not_equals',
-] as TSourceCreateRequestBody['match']['operator'][];
+] as TSourceMatch['operator'][];
+
+/** A source is receiver-based or fetcher-based; the engine refuses both or neither. */
+export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
+export type SourceOrigin = (typeof SOURCE_ORIGINS)[number];
+
+export const FETCHER_TOPICS = ['own', 'default'] as const;
+
+export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
+  own: 'Own topic and table',
+  default: 'Platform default table',
+};
 
 const sourceDetailsTabSchema = {
   source: sourceNameValidator,
@@ -21,92 +38,26 @@ const sourceDetailsTabSchema = {
   enabled: z.boolean({ message: 'Enabled is required' }),
 };
 
+/**
+ * Both origin blocks stay loose here: which one has to be filled in depends on
+ * the selected origin, so the rules live in the cross-field refinement below.
+ */
 const originTabSchema = {
+  origin: z.enum(SOURCE_ORIGINS, { message: 'Origin is required' }),
   match: z
     .object({
-      field: z.string().min(1, { message: 'Field is required' }),
-      operator: z
-        .enum(MATCH_OPERATORS, { message: 'Operator is required' })
-        .optional(),
+      field: z.string().optional().nullable(),
+      operator: z.enum(MATCH_OPERATORS).optional().nullable(),
       value: z.string().optional().nullable(),
     })
-    .superRefine((data, ctx) => {
-      if (!data.operator) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Operator is required',
-          path: ['operator'],
-        });
-        return;
-      }
-      if (data.operator === 'exists') {
-        return;
-      }
-      if (!data.value?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Value is required',
-          path: ['value'],
-        });
-      }
-    }),
+    .optional()
+    .nullable(),
   fetcher: z
     .object({
-      source_type: z
-        .string({ message: 'Source type is required' })
-        .optional()
-        .nullable(),
-      base_url: z.string({ message: 'Base URL is required' }),
-      poll_interval_secs: z.number({
-        message: 'Poll interval is required',
-      }),
-      auth: z
-        .object({
-          type: z
-            .string({ message: 'Auth type is required' })
-            .min(1, { message: 'Auth type is required' })
-            .refine((v) => (AUTH_TYPES as readonly string[]).includes(v), {
-              message: 'Auth type is required',
-            }),
-          token_url: z.string().optional().nullable(),
-          client_id: z.string().optional().nullable(),
-          client_secret: z.string().optional().nullable(),
-          api_key: z.string().optional().nullable(),
-        })
-        .superRefine((data, ctx) => {
-          if (data.type === 'oauth2') {
-            if (!data.token_url?.trim()) {
-              ctx.addIssue({
-                code: 'custom',
-                message: 'Token URL is required',
-                path: ['token_url'],
-              });
-            }
-            if (!data.client_id?.trim()) {
-              ctx.addIssue({
-                code: 'custom',
-                message: 'Client ID is required',
-                path: ['client_id'],
-              });
-            }
-            if (!data.client_secret?.trim()) {
-              ctx.addIssue({
-                code: 'custom',
-                message: 'Client secret is required',
-                path: ['client_secret'],
-              });
-            }
-          }
-          if (data.type === 'api_key') {
-            if (!data.api_key?.trim()) {
-              ctx.addIssue({
-                code: 'custom',
-                message: 'API key is required',
-                path: ['api_key'],
-              });
-            }
-          }
-        }),
+      source_type: z.string().optional().nullable(),
+      topic: z.enum(FETCHER_TOPICS).optional().nullable(),
+      // YAML text in the form; an object on the wire.
+      config: z.string().optional().nullable(),
     })
     .optional()
     .nullable(),
@@ -178,13 +129,70 @@ const viewsTabSchema = {
     .nullable(),
 };
 
-export const formSchema = z.object({
-  ...sourceDetailsTabSchema,
-  ...originTabSchema,
-  ...schemaConfigTabSchema,
-  ...transformTabSchema,
-  ...viewsTabSchema,
-});
+export const formSchema = z
+  .object({
+    ...sourceDetailsTabSchema,
+    ...originTabSchema,
+    ...schemaConfigTabSchema,
+    ...transformTabSchema,
+    ...viewsTabSchema,
+  })
+  .superRefine((data, ctx) => {
+    if (data.origin === 'fetcher') {
+      if (!data.fetcher?.source_type?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Source type is required',
+          path: ['fetcher', 'source_type'],
+        });
+      }
+
+      const parsed = parseFetcherConfig(data.fetcher?.config);
+      if (!parsed.ok) {
+        ctx.addIssue({
+          code: 'custom',
+          message: parsed.message,
+          path: ['fetcher', 'config'],
+        });
+        return;
+      }
+
+      const engineOwned = ENGINE_OWNED_FETCHER_KEYS.filter(
+        (key) => key in parsed.config,
+      );
+      if (engineOwned.length > 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `The engine sets ${engineOwned.join(' and ')}; remove ${engineOwned.length > 1 ? 'them' : 'it'} from the config`,
+          path: ['fetcher', 'config'],
+        });
+      }
+      return;
+    }
+
+    if (!data.match?.field?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Field is required',
+        path: ['match', 'field'],
+      });
+    }
+    if (!data.match?.operator) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Operator is required',
+        path: ['match', 'operator'],
+      });
+      return;
+    }
+    if (data.match.operator !== 'exists' && !data.match.value?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Value is required',
+        path: ['match', 'value'],
+      });
+    }
+  });
 
 export type CreateUpdateSourceFormData = z.input<typeof formSchema>;
 
