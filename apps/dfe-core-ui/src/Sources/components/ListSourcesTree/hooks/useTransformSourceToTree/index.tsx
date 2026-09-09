@@ -171,7 +171,7 @@ const sourceSummaryToTreeData = ({
                 </Tag>
 
                 {!isDeployed && (
-                  <Tooltip destroyOnHidden title="_default_land">
+                  <Tooltip destroyOnHidden title="_main_land">
                     <IconBucket className="opacity-80" />
                   </Tooltip>
                 )}

@@ -26653,10 +26653,10 @@
             "type": "string",
             "enum": [
               "own",
-              "default"
+              "main"
             ],
             "title": "Topic",
-            "description": "own: records land on this source's topic and table; default: they land on the platform default table",
+            "description": "own: records land on this source's topic and table; main: they land on the shared main topic and table",
             "default": "own"
           },
           "config": {
@@ -26671,7 +26671,7 @@
           "source_type"
         ],
         "title": "SourceFetcher",
-        "description": "Fetcher-based origin: one dfe-fetcher deployment, named for the source.\n\n``config`` is the fetcher's own per-type stanza, carried verbatim into the\ndeployed instance under ``config.sources.<source_type>``. The engine owns\n``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records\nland on the source's own topic (and table) or on the platform default."
+        "description": "Fetcher-based origin: one dfe-fetcher deployment, named for the source.\n\n``config`` is the fetcher's own per-type stanza, carried verbatim into the\ndeployed instance under ``config.sources.<source_type>``. The engine owns\n``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records\nland on the source's own topic (and table) or on the shared ``main`` landing."
       },
       "SourceHeader": {
         "properties": {

@@ -24,11 +24,11 @@ export const MATCH_OPERATORS = [
 export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
 export type SourceOrigin = (typeof SOURCE_ORIGINS)[number];
 
-export const FETCHER_TOPICS = ['own', 'default'] as const;
+export const FETCHER_TOPICS = ['own', 'main'] as const;
 
 export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
   own: 'Own topic and table',
-  default: 'Platform default table',
+  main: 'Shared main table',
 };
 
 const sourceDetailsTabSchema = {
