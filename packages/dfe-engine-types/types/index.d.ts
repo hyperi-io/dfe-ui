@@ -10577,7 +10577,7 @@ export interface components {
          *     ``config`` is the fetcher's own per-type stanza, carried verbatim into the
          *     deployed instance under ``config.sources.<source_type>``. The engine owns
          *     ``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records
-         *     land on the source's own topic (and table) or on the platform default.
+         *     land on the source's own topic (and table) or on the shared ``main`` landing.
          */
         SourceFetcher: {
             /**
@@ -10587,11 +10587,11 @@ export interface components {
             source_type: string;
             /**
              * Topic
-             * @description own: records land on this source's topic and table; default: they land on the platform default table
+             * @description own: records land on this source's topic and table; main: they land on the shared main topic and table
              * @default own
              * @enum {string}
              */
-            topic: "own" | "default";
+            topic: "own" | "main";
             /**
              * Config
              * @description The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references

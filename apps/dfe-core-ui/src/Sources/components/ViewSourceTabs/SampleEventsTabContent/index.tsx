@@ -57,7 +57,7 @@ export const SampleEventsTabContent = ({
           description={
             <p className="flex gap-2">
               This source has no meta schema defined. Results will be sent to{' '}
-              <span className="font-semibold">_default_land.</span>
+              <span className="font-semibold">_main_land.</span>
             </p>
           }
         />
