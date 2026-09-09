@@ -4713,6 +4713,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalogue
+         * @description List the sources the deployed transforms already handle.
+         *
+         *     Empty when no catalogue is mounted, which is a deployment without one rather
+         *     than an error: the catalogue is a release asset of the app that ships it.
+         */
+        get: operations["list_catalogue_api_v1_sources_catalogue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/from-catalogue/{entry}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Source From Catalogue
+         * @description Create a source from a catalogue entry, on the intake it arrives by.
+         *
+         *     The entry supplies the match rule or the fetcher family, the transform
+         *     variant and the shipped meta schema; everything after that is the ordinary
+         *     create, so the source is indistinguishable from a hand-written one.
+         */
+        post: operations["create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -12272,6 +12319,119 @@ export interface components {
              * @description Column fields that matched the search query (API only)
              */
             _matched_searchable?: string[];
+        };
+        /**
+         * CatalogueEntryObject
+         * @description One source a deployed transform already handles, as the console lists it.
+         */
+        CatalogueEntryObject: {
+            /**
+             * Name
+             * @description The shipping app's key for this source
+             */
+            name: string;
+            /**
+             * Package
+             * @description Vendor integration package it came from
+             */
+            package: string;
+            /**
+             * Data Stream
+             * @description Data stream within that package
+             */
+            data_stream: string;
+            /**
+             * Dataset
+             * @description package.data_stream - what a Beats event stamps
+             */
+            dataset: string;
+            /**
+             * Intakes
+             * @description Ways this source's payload can reach the platform
+             */
+            intakes: string[];
+            /**
+             * Framing
+             * @description Pushed intakes only: whether the pipeline wants the syslog line or the body
+             */
+            framing?: string | null;
+            /**
+             * Transforms
+             * @description Programs the app compiled for this source
+             */
+            transforms: string[];
+            /**
+             * Beats
+             * @description Beats module and fileset carrying the same source, when one does
+             */
+            beats?: {
+                [key: string]: string;
+            };
+            /**
+             * Source
+             * @description Source name this entry derives; empty when the entry's own name is not a legal source name and one must be supplied on create
+             * @default
+             */
+            source: string;
+        };
+        /**
+         * CatalogueSourceRequest
+         * @description Create a source from a catalogue entry.
+         */
+        CatalogueSourceRequest: {
+            /**
+             * Intake
+             * @description How this source's data arrives: beats, receiver or fetcher
+             */
+            intake: string;
+            /**
+             * Name
+             * @description Source name; defaults to the entry's own name as a Kubernetes label
+             */
+            name?: string | null;
+            /**
+             * Transform
+             * @description Which of the entry's transforms this source runs
+             * @default default
+             */
+            transform: string;
+            /**
+             * Transport
+             * @description bus or direct; omitted takes the deployment default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep the raw record as it arrived; needs the bus transport
+             * @default false
+             */
+            archive: boolean;
+        };
+        /** PaginatedResponse[CatalogueEntryObject] */
+        PaginatedResponse_CatalogueEntryObject_: {
+            /** Items */
+            items: components["schemas"]["CatalogueEntryObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
         };
     };
     responses: never;
@@ -21145,6 +21305,86 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_catalogue_api_v1_sources_catalogue_get: {
+        parameters: {
+            query?: {
+                /** @description Only entries that arrive this way (beats, receiver, fetcher) */
+                intake?: string | null;
+                /** @description Search the entry name, package and data stream */
+                search?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogueSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description A source of that name already exists, or its match duplicates another */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {

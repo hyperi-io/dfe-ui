@@ -1,6 +1,8 @@
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TCatalogueSourceResponse } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
+import { TSourceCatalogueResponse } from '@/Sources/hooks/useFetchSourceCatalogue/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
@@ -90,6 +92,91 @@ export const sources = {
         return http.post(sources.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
+      },
+    },
+  },
+  catalogue: {
+    mockedUrl: '/api/v1/sources/catalogue',
+    get: {
+      success: ({
+        mockedResponse = {
+          items: [
+            {
+              name: 'okta',
+              package: 'okta',
+              data_stream: 'system',
+              dataset: 'okta.system',
+              intakes: ['beats', 'fetcher'],
+              framing: null,
+              transforms: ['default'],
+              beats: { module: 'okta', fileset: 'system' },
+              source: 'okta',
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 20,
+          total_pages: 1,
+          next_page: null,
+          prev_page: null,
+        },
+      }: {
+        mockedResponse?: TSourceCatalogueResponse;
+      } = {}) => {
+        return http.get(sources.catalogue.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.get(sources.catalogue.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  fromCatalogue: {
+    mockedUrl: '/api/v1/sources/from-catalogue/{entry}',
+    post: {
+      success: ({
+        mockedResponse = {
+          source: 'okta',
+          message: 'created',
+          current: '1.0.0',
+          versions: ['1.0.0'],
+        },
+        entry = 'okta',
+      }: {
+        mockedResponse?: TCatalogueSourceResponse;
+        entry?: string;
+      } = {}) => {
+        return http.post(
+          sources.fromCatalogue.mockedUrl.replace('{entry}', entry),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        entry = 'okta',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        entry?: string;
+      } = {}) => {
+        return http.post(
+          sources.fromCatalogue.mockedUrl.replace('{entry}', entry),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
       },
     },
   },
