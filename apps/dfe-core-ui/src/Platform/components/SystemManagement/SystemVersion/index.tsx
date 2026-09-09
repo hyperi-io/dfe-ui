@@ -1,6 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
-import { useFetchSystemVersion } from '@/Platform/hooks/system/useFetchSystemVersion';
+import { useFetchSystemVersion } from '@/core/hooks/useFetchSystemVersion';
 import { Spin } from 'antd';
 
 export const SystemVersion = () => {
@@ -27,8 +27,10 @@ export const SystemVersion = () => {
       )}
       {systemVersion && (
         <dl className="grid grid-cols-[auto_1fr_auto_1fr] gap-2 text-xs">
-          <dt>Version</dt>
-          <dd>{systemVersion.version}</dd>
+          <dt>Stack Version</dt>
+          <dd>{systemVersion.stack ?? 'Not pinned'}</dd>
+          <dt>Engine Version</dt>
+          <dd>{systemVersion.engine}</dd>
           <dt>Python Version</dt>
           <dd>{systemVersion.python_version}</dd>
         </dl>

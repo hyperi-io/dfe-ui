@@ -1589,7 +1589,11 @@ export interface paths {
         };
         /**
          * Get Version
-         * @description Get engine version info.
+         * @description What this deployment runs.
+         *
+         *     Authenticated but ungated on purpose: the console footer is on every page, and
+         *     the body carries versions only. Without a deploy repo the stack is unknown and
+         *     the engine's own version is the whole answer.
          */
         get: operations["get_version_api_v1_system_version_get"];
         put?: never;
@@ -11699,13 +11703,32 @@ export interface components {
             /** Content */
             content: string;
         };
-        /** VersionResponse */
+        /**
+         * VersionResponse
+         * @description What this deployment runs: the certified stack, and the parts of it.
+         */
         VersionResponse: {
             /**
-             * Version
-             * @description Package version
+             * Stack
+             * @description Certified stack version pinned in the deploy repo; null when there is none.
              */
-            version: string;
+            stack: string | null;
+            /**
+             * Engine
+             * @description dfe-engine package version
+             */
+            engine: string;
+            /**
+             * Ui
+             * @description dfe-ui version when the deploy repo pins one off the certified stack.
+             */
+            ui: string | null;
+            /**
+             * Source
+             * @description deploy-repo when the stack version was read from pins.yaml, else engine.
+             * @enum {string}
+             */
+            source: "deploy-repo" | "engine";
             /**
              * Python Version
              * @description Python interpreter version
