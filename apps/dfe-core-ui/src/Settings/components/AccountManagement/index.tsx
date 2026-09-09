@@ -4,6 +4,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
 import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
@@ -29,6 +30,12 @@ export const AccountManagement = () => {
     offset: 350,
   });
 
+  // The engine names its own bootstrap admin, so a renamed one is still marked.
+  const { data: setupStatus } = useFetchSetupStatus();
+  const isRetiredAdmin = (account: TAccountsItemSummary) =>
+    Boolean(setupStatus?.admin_retired) &&
+    account.username === setupStatus?.admin_username;
+
   const columns = [
     {
       title: 'Username',
@@ -40,11 +47,19 @@ export const AccountManagement = () => {
       dataIndex: 'enabled',
       key: 'enabled',
       width: 120,
-      render: (enabled: boolean) => (
-        <Tag color={enabled ? 'green' : 'red'}>
-          {enabled ? 'Active' : 'Inactive'}
-        </Tag>
-      ),
+      render: (enabled: boolean, record: TAccountsItemSummary) =>
+        isRetiredAdmin(record) ? (
+          <Tooltip
+            destroyOnHidden
+            title="Retired: the deployment stopped recreating this account, so its installed password no longer works. Break-glass is the way back in."
+          >
+            <Tag color="default">Retired</Tag>
+          </Tooltip>
+        ) : (
+          <Tag color={enabled ? 'green' : 'red'}>
+            {enabled ? 'Active' : 'Inactive'}
+          </Tag>
+        ),
     },
     {
       title: 'Groups',
