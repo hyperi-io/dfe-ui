@@ -26,11 +26,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { initial_setup } = await getSetupStatus();
-  if (!initial_setup.complete) {
-    redirect('/setup');
-  }
-
+  // Authentication first, setup second. The wizard runs entirely on
+  // authenticated engine calls, so an anonymous visitor sent to /setup gets a
+  // form that 401s the moment they submit it.
   const session = await getServerSession(authOptions);
   if (!session) {
     await redirectToLogin();
@@ -47,8 +45,13 @@ export default async function RootLayout({
   // as AccessTokenExpired; redirect to /login rather than let the client fire a
   // 401 storm then sign out. An active user never reaches this because the
   // client refreshes before expiry.
-  if (initial_setup.complete && session?.error === 'AccessTokenExpired') {
+  if (session?.error === 'AccessTokenExpired') {
     await redirectToLogin();
+  }
+
+  const { initial_setup } = await getSetupStatus();
+  if (!initial_setup.complete) {
+    redirect('/setup');
   }
 
   // Read at request time (this layout is dynamic via getServerSession) so both
