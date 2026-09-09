@@ -4,7 +4,6 @@ import { ConfigureOidcStep } from './ConfigureOidcStep';
 import { ConfigureOrganisationStep } from './ConfigureOrganisation';
 import { ConfigureUserStep } from './ConfigureUserStep';
 import { useSetupWizardNavigateToStep } from './helpers';
-import { ResetBreakGlassAccount } from './ResetBreakGlassAccount';
 import { SETUP_WIZARD_STEPS } from './server.helpers';
 import { WelcomeStep } from './WelcomeStep';
 
@@ -12,7 +11,6 @@ export const SetupWizard = ({
   oidcProvider,
   organisation,
   userCreated,
-  breakGlass,
 }: TSetupWizardProps) => {
   // No auto-login here. The operator signs in on /login with the password their
   // deployment minted, and the route's layout guard is what guarantees this
@@ -90,26 +88,6 @@ export const SetupWizard = ({
           }
         />
       )}
-      {currentStep === 'resetBreakGlassAccount' && (
-        <ResetBreakGlassAccount
-          goNext={() =>
-            navigateToStep(
-              SETUP_WIZARD_STEPS[
-                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) + 1
-              ],
-            )
-          }
-          goPrevious={() =>
-            navigateToStep(
-              SETUP_WIZARD_STEPS[
-                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) - 1
-              ],
-            )
-          }
-          breakGlass={breakGlass}
-        />
-      )}
-
       {currentStep === 'complete' && (
         <CompleteStep
           goPrevious={() =>

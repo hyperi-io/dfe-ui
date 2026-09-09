@@ -21,7 +21,7 @@ export default async function SetupStepPage({
     notFound();
   }
 
-  const { initial_setup, oidc_providers, organisations, break_glass } =
+  const { initial_setup, oidc_providers, organisations } =
     await getSetupStatus();
   if (initial_setup.complete) {
     redirect('/');
@@ -35,7 +35,6 @@ export default async function SetupStepPage({
       oidcProvider={oidc_providers?.[0] || null}
       organisation={organisations?.[0] || null}
       userCreated={userCreated}
-      breakGlass={break_glass || null}
     />
   );
 }

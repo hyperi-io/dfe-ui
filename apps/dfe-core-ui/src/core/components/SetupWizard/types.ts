@@ -3,5 +3,4 @@ export type TSetupWizardStep =
   | 'configureLogin'
   | 'configureUser'
   | 'configureOrganisation'
-  | 'resetBreakGlassAccount'
   | 'complete';

@@ -1,18 +1,20 @@
 import { Page, expect } from '@playwright/test';
 import { BASE_URL } from './e2e.client';
 
-// Only a dev-posture engine still answers to this; every other posture refuses
-// to start on it.
-const DEV_POSTURE_PASSWORD = 'changeme';
-
-// The password the DEPLOYMENT under test actually has, which is not necessarily
-// the one the app baked in. Importing the product's own constant made the suite
-// share the app's assumption: against a deployment whose admin password had been
-// rotated, the test typed the same wrong value the wizard did and both failed
-// together, so the suite could never catch the mismatch (dfe-ui#206).
-// E2E_ADMIN_PASSWORD lets the harness rotate the credential and still log in.
-export const adminPassword = (): string =>
-  process.env.E2E_ADMIN_PASSWORD || DEV_POSTURE_PASSWORD;
+// The password the DEPLOYMENT under test actually has, never the product's own
+// constant: sharing that constant made the test type the same wrong value as the
+// wizard, so a rotated deployment failed both at once (dfe-ui#206).
+// No default -- every deployment mints its own, so a literal here would be wrong.
+export const adminPassword = (): string => {
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error(
+      'E2E_ADMIN_PASSWORD is not set: put the admin password this deployment ' +
+        'minted into .env.local before running the suite.',
+    );
+  }
+  return password;
+};
 
 /** A resolved OIDC fixture login for one provider. */
 export type OidcFixture = { user: string; password: string };

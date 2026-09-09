@@ -9,7 +9,6 @@ const welcomePageUrl = `${baseUrl}/setup/welcome`;
 const configureOrganisationPageUrl = `${baseUrl}/setup/configureOrganisation`;
 const configureLoginPageUrl = `${baseUrl}/setup/configureLogin`;
 const configureUserPageUrl = `${baseUrl}/setup/configureUser`;
-const configureBreakGlassPageUrl = `${baseUrl}/setup/resetBreakGlassAccount`;
 const completePageUrl = `${baseUrl}/setup/complete`;
 const loginPageUrl = `${baseUrl}/login`;
 
@@ -113,39 +112,14 @@ test('setup from start testing forward and back navigation', async ({
   await page
     .getByRole('button', { name: 'Create Account', exact: true })
     .click();
-  await expect(page).toHaveURL(configureBreakGlassPageUrl);
+  await expect(page).toHaveURL(completePageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page).toHaveURL(configureUserPageUrl);
   await expect(page.getByText('Account Created'));
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-  /* CONFIGURE BREAK GLASS */
-  await expect(page).toHaveURL(configureBreakGlassPageUrl);
-  await expect(
-    page.getByRole('button', { name: 'Next', exact: true }),
-  ).toBeDisabled();
-  await page
-    .getByRole('textbox', { name: 'New Password', exact: true })
-    .fill('test_break_glass_password');
-  await page
-    .getByRole('button', { name: 'Reset Password', exact: true })
-    .click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
 
   /* COMPLETE -- already signed in, so it lands in the app, not back on login */
   await expect(page).toHaveURL(completePageUrl);
   await page.getByRole('button', { name: 'Get started', exact: true }).click();
   await expect(page).toHaveURL(`${baseUrl}/sources`);
-});
-
-test('the break-glass reset can be skipped, keeping the minted password', async ({
-  page,
-}) => {
-  await page.goto(baseUrl);
-  await login(page);
-  await page.goto(configureBreakGlassPageUrl);
-
-  await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
-
-  await expect(page).toHaveURL(completePageUrl);
 });
