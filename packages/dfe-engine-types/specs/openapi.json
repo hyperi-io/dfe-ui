@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.19.10"
+    "version": "1.19.17"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -3081,6 +3081,185 @@
         ]
       }
     },
+    "/api/v1/sources/catalogue": {
+      "get": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "List Catalogue",
+        "description": "List the sources the deployed transforms already handle.\n\nEmpty when no catalogue is mounted, which is a deployment without one rather\nthan an error: the catalogue is a release asset of the app that ships it.",
+        "operationId": "list_catalogue_api_v1_sources_catalogue_get",
+        "parameters": [
+          {
+            "name": "intake",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only entries that arrive this way (beats, receiver, fetcher)",
+              "title": "Intake"
+            },
+            "description": "Only entries that arrive this way (beats, receiver, fetcher)"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search the entry name, package and data stream",
+              "title": "Search"
+            },
+            "description": "Search the entry name, package and data stream"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_CatalogueEntryObject_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sources/from-catalogue/{entry}": {
+      "post": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Create Source From Catalogue",
+        "description": "Create a source from a catalogue entry, on the intake it arrives by.\n\nThe entry supplies the match rule or the fetcher family, the transform\nvariant and the shipped meta schema; everything after that is the ordinary\ncreate, so the source is indistinguishable from a hand-written one.",
+        "operationId": "create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post",
+        "parameters": [
+          {
+            "name": "entry",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entry"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogueSourceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A source of that name already exists, or its match duplicates another",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SourceNameConflictErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "conflict": "#/components/schemas/SourceNameConflictErrorResponse",
+                      "match_conflict": "#/components/schemas/MatchConflictErrorResponse"
+                    }
+                  },
+                  "title": "Response 409 Create Source From Catalogue Api V1 Sources From Catalogue  Entry  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/sources/{name}/versions/{version}": {
       "get": {
         "tags": [
@@ -3231,7 +3410,7 @@
           "Sources"
         ],
         "summary": "Build Source Schema",
-        "description": "Build complete schema (DDL) from a source version snapshot.\n\nRuns the v2 YAML \u2192 DDL pipeline and returns the generated DDL\nwithout executing it against ClickHouse.",
+        "description": "Build complete schema (DDL) from a source version snapshot.\n\nRuns the v2 YAML -> DDL pipeline and returns the generated DDL\nwithout executing it against ClickHouse.",
         "operationId": "build_source_schema_api_v1_sources__name__build_post",
         "parameters": [
           {
@@ -3441,7 +3620,7 @@
           "Sources"
         ],
         "summary": "Get Source",
-        "description": "Get a full source definition by name, including build/deploy per version.",
+        "description": "Get a full source definition by name, including build/deploy per version.\n\n``default`` is the one name that always answers. It is a normal source once\nwritten; until then the deployment's own default flow is synthesised, so the\nconsole has the card it draws before anyone has configured anything.",
         "operationId": "get_source_api_v1_sources__name__get",
         "parameters": [
           {
@@ -3645,6 +3824,47 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sources/{name}/flow": {
+      "get": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Get Source Flow",
+        "description": "The stages this source's records travel, resolved against this deployment.\n\nThe console draws the flow from this rather than from the source's fields,\nfor the same reason the compilers write from it: the topics, the endpoints\nand the instance running each stage follow from the source plus the\ndeployment, and one resolver is what keeps the drawing and the deployed\nconfig the same answer.",
+        "operationId": "get_source_flow_api_v1_sources__name__flow_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceFlowResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The source's stages cannot be run as declared - the message names which stage refused and why"
           }
         },
         "security": [
@@ -5975,7 +6195,7 @@
           "System"
         ],
         "summary": "Get Version",
-        "description": "Get engine version info.",
+        "description": "What this deployment runs.\n\nAuthenticated but ungated on purpose: the console footer is on every page, and\nthe body carries versions only.\n\nThe pins win where there are any: they are what the operator chose. A deploy\nwith no pins base still knows what stood it up, because the chart passes that\nin, so the footer shows a stack version rather than nothing. With neither, the\nengine's own version is the whole answer.",
         "operationId": "get_version_api_v1_system_version_get",
         "responses": {
           "200": {
@@ -11745,17 +11965,41 @@
         "summary": "List Apps",
         "description": "Every manageable app, with the instances currently deployed.",
         "operationId": "list_apps_api_v1_apps_get",
+        "parameters": [
+          {
+            "name": "profile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and every app is reported as offered.",
+              "default": "",
+              "title": "Profile"
+            },
+            "description": "Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and every app is reported as offered."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/CatalogueEntry"
                   },
-                  "type": "array",
                   "title": "Response List Apps Api V1 Apps Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -16261,6 +16505,43 @@
             "description": "stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources",
             "default": "stack"
           },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "description": "Whether a deployment runs without this app. Derived from default_in being empty, so it cannot disagree with it: an app nothing deploys by default is the one an operator turns on.",
+            "default": false
+          },
+          "profiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profiles",
+            "description": "The deployment profiles this app may be deployed in; empty means every profile. An offer to list, not a gate: the deploy repo decides what is actually deployed."
+          },
+          "default_in": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default In",
+            "description": "The profiles a deployment runs this app in without being asked. Null means the same as profiles; an empty list means nothing deploys it, which is what optional reports."
+          },
+          "idle_when": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Idle When",
+            "description": "The app's own config dot-paths whose emptiness means it has no work, so an instance that is Ready and doing nothing can be reported as unconfigured rather than broken. Declared by the app, evaluated by the app: the engine reports these and never resolves them."
+          },
           "file_sets": {
             "items": {
               "$ref": "#/components/schemas/FileSetSummary"
@@ -16875,6 +17156,41 @@
             "description": "stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources",
             "default": "stack"
           },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "description": "Whether a deployment runs without this app. Derived from default_in being empty, so it cannot disagree with it: an app nothing deploys by default is the one an operator turns on.",
+            "default": false
+          },
+          "profiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profiles",
+            "description": "The deployment profiles this app may be deployed in; empty means every profile. An offer to list, not a gate: the deploy repo decides what is actually deployed."
+          },
+          "default_in": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default In",
+            "description": "The profiles a deployment runs this app in without being asked. Null means the same as profiles; an empty list means nothing deploys it, which is what optional reports."
+          },
+          "offered": {
+            "type": "boolean",
+            "title": "Offered",
+            "description": "Whether this app is offered in the profile the caller asked about. True for every app when the caller named no profile, so a console that does not know the deployment's profile lists everything rather than hiding what it cannot rule out.",
+            "default": true
+          },
           "source_types": {
             "items": {
               "type": "string"
@@ -16908,6 +17224,139 @@
           "instances"
         ],
         "title": "CatalogueEntry"
+      },
+      "CatalogueEntryObject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The shipping app's key for this source"
+          },
+          "package": {
+            "type": "string",
+            "title": "Package",
+            "description": "Vendor integration package it came from"
+          },
+          "data_stream": {
+            "type": "string",
+            "title": "Data Stream",
+            "description": "Data stream within that package"
+          },
+          "dataset": {
+            "type": "string",
+            "title": "Dataset",
+            "description": "package.data_stream - what a Beats event stamps"
+          },
+          "intakes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Intakes",
+            "description": "Ways this source's payload can reach the platform"
+          },
+          "framing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Framing",
+            "description": "Pushed intakes only: whether the pipeline wants the syslog line or the body"
+          },
+          "transforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Transforms",
+            "description": "Programs the app compiled for this source"
+          },
+          "beats": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Beats",
+            "description": "Beats module and fileset carrying the same source, when one does"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Source name this entry derives; empty when the entry's own name is not a legal source name and one must be supplied on create",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "package",
+          "data_stream",
+          "dataset",
+          "intakes",
+          "transforms"
+        ],
+        "title": "CatalogueEntryObject",
+        "description": "One source a deployed transform already handles, as the console lists it."
+      },
+      "CatalogueSourceRequest": {
+        "properties": {
+          "intake": {
+            "type": "string",
+            "title": "Intake",
+            "description": "How this source's data arrives: beats, receiver or fetcher"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Source name; defaults to the entry's own name as a Kubernetes label"
+          },
+          "transform": {
+            "type": "string",
+            "title": "Transform",
+            "description": "Which of the entry's transforms this source runs",
+            "default": "default"
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "bus or direct; omitted takes the deployment default"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Keep the raw record as it arrived; needs the bus transport",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intake"
+        ],
+        "title": "CatalogueSourceRequest",
+        "description": "Create a source from a catalogue entry."
       },
       "CelCheckBatchRequest": {
         "properties": {
@@ -17858,34 +18307,6 @@
         ],
         "title": "CreateRoleRequest"
       },
-      "DDLResult": {
-        "properties": {
-          "source_name": {
-            "type": "string",
-            "title": "Source Name"
-          },
-          "create_table": {
-            "type": "string",
-            "title": "Create Table",
-            "description": "CREATE TABLE DDL"
-          },
-          "views": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Views",
-            "description": "View name \u2192 DDL"
-          }
-        },
-        "type": "object",
-        "required": [
-          "source_name",
-          "create_table"
-        ],
-        "title": "DDLResult",
-        "description": "Generated DDL output."
-      },
       "DatabaseInfo": {
         "properties": {
           "name": {
@@ -18350,6 +18771,26 @@
         "title": "ErrorResponse",
         "description": "Unified error response.\n\nAll API errors return this shape. The UI can always parse:\n- ``code`` for programmatic branching\n- ``message`` for a human-readable summary\n- ``errors`` for field-level validation details (422 only)\n- ``context`` for optional structured data on specific errors (e.g. conflicts)"
       },
+      "FetcherRoute": {
+        "properties": {
+          "match": {
+            "$ref": "#/components/schemas/SourceMatch",
+            "description": "Which fetched records take this route"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "The source whose landing the matched records go to"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match",
+          "source"
+        ],
+        "title": "FetcherRoute",
+        "description": "One fetched record family this fetcher hands to a DIFFERENT source's landing.\n\nA fetcher polls one upstream but can pull several record shapes off it. A route\nsends the ones that match somewhere other than the owning source's landing, so\nthey get that source's table and transform instead."
+      },
       "FieldError": {
         "properties": {
           "field": {
@@ -18644,6 +19085,87 @@
         ],
         "title": "FilterTier",
         "description": "Performance tier for a filter expression."
+      },
+      "FlowOutputsModel": {
+        "properties": {
+          "loader": {
+            "type": "string",
+            "title": "Loader",
+            "description": "The topic the loader consumes, or the endpoint it is pushed to"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Whether the archiver also keeps the raw record off the landing topic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loader",
+          "archive"
+        ],
+        "title": "FlowOutputsModel",
+        "description": "Where the records end up."
+      },
+      "FlowTransformModel": {
+        "properties": {
+          "app": {
+            "type": "string",
+            "title": "App",
+            "description": "Catalogued app running it, e.g. dfe-transform-vrl"
+          },
+          "instance": {
+            "type": "string",
+            "title": "Instance",
+            "description": "Its deployed name, e.g. dfe-transform-vrl-auth"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant",
+            "description": "The compiled-in program it runs, where the app offers a catalogue of them"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint",
+            "description": "Direct: the address records reach it on. Null on the bus."
+          },
+          "topics": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topics",
+            "description": "Bus: the landing and transformed topics. Null on direct."
+          }
+        },
+        "type": "object",
+        "required": [
+          "app",
+          "instance"
+        ],
+        "title": "FlowTransformModel",
+        "description": "The transform stage, when the source has one."
       },
       "FromHyperdxRequest": {
         "properties": {
@@ -21875,6 +22397,72 @@
         ],
         "title": "PaginatedResponse[CatalogRuleSummary]"
       },
+      "PaginatedResponse_CatalogueEntryObject_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogueEntryObject"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total matching items across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "readOnly": true
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page",
+            "readOnly": true
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "total_pages",
+          "next_page",
+          "prev_page"
+        ],
+        "title": "PaginatedResponse[CatalogueEntryObject]"
+      },
       "PaginatedResponse_DeploymentSummary_": {
         "properties": {
           "items": {
@@ -24273,12 +24861,15 @@
           "compiler": {
             "type": "string",
             "title": "Compiler",
-            "description": "Manifest-declared compiler that derives this block"
+            "description": "Manifest-declared compiler that derives these blocks"
           },
-          "values_path": {
-            "type": "string",
-            "title": "Values Path",
-            "description": "Overlay dot-path the block is written to"
+          "values_paths": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Values Paths",
+            "description": "Each derived block by name, and the overlay dot-path it is written to"
           },
           "drift": {
             "type": "boolean",
@@ -24293,12 +24884,14 @@
           "compiled": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Compiled"
+            "title": "Compiled",
+            "description": "Each block the sources call for now, by name"
           },
           "deployed": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Deployed"
+            "title": "Deployed",
+            "description": "The same blocks as the overlay carries them"
           },
           "etag": {
             "anyOf": [
@@ -24316,7 +24909,6 @@
         "type": "object",
         "required": [
           "compiler",
-          "values_path",
           "drift",
           "absent"
         ],
@@ -26551,7 +27143,7 @@
             },
             "type": "object",
             "title": "Versions",
-            "description": "Version id \u2192 configuration snapshot and pipeline artifacts"
+            "description": "Version id -> configuration snapshot and pipeline artifacts"
           },
           "enabled": {
             "type": "boolean",
@@ -26592,6 +27184,29 @@
             "title": "Origin",
             "description": "How the deployed version's data enters: receiver match or a fetcher.",
             "readOnly": true
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "Declared transport on the deployed version (None = the deployment default).",
+            "readOnly": true
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Whether the deployed version keeps the raw record.",
+            "readOnly": true
           }
         },
         "type": "object",
@@ -26600,7 +27215,9 @@
           "enabled",
           "match",
           "transform",
-          "origin"
+          "origin",
+          "transport",
+          "archive"
         ],
         "title": "SourceDetailResponse",
         "description": "Full source definition with per-version build/plan/deploy status."
@@ -26664,6 +27281,14 @@
             "type": "object",
             "title": "Config",
             "description": "The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/FetcherRoute"
+            },
+            "type": "array",
+            "title": "Routes",
+            "description": "Send matching fetched records to another source's landing instead of this one's. The named source must exist, which is checked when the fetcher instance is compiled, not here"
           }
         },
         "type": "object",
@@ -26672,6 +27297,63 @@
         ],
         "title": "SourceFetcher",
         "description": "Fetcher-based origin: one dfe-fetcher deployment, named for the source.\n\n``config`` is the fetcher's own per-type stanza, carried verbatim into the\ndeployed instance under ``config.sources.<source_type>``. The engine owns\n``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records\nland on the source's own topic (and table) or on the platform default."
+      },
+      "SourceFlowResponse": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "transport": {
+            "type": "string",
+            "title": "Transport",
+            "description": "bus: a broker holds records between stages; direct: no store"
+          },
+          "carrier": {
+            "type": "string",
+            "title": "Carrier",
+            "description": "What carries it here - the bus provider, or the direct protocol"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "description": "receiver or fetcher"
+          },
+          "input": {
+            "type": "string",
+            "title": "Input",
+            "description": "The receiver match that selects the records, or the fetcher instance polling them"
+          },
+          "transform": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowTransformModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outputs": {
+            "$ref": "#/components/schemas/FlowOutputsModel"
+          },
+          "table": {
+            "type": "string",
+            "title": "Table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "transport",
+          "carrier",
+          "origin",
+          "input",
+          "outputs",
+          "table"
+        ],
+        "title": "SourceFlowResponse",
+        "description": "One source's whole path, as the resolver reports it.\n\nThe wire shape of ``dfe_engine.source.flow.SourceFlow``, and the only copy of\nit: everything here is built by ``_flow_response`` from that dataclass, so a\nstage the resolver gains is a field added in one place."
       },
       "SourceHeader": {
         "properties": {
@@ -26734,16 +27416,17 @@
               "exists",
               "includes",
               "starts_with",
-              "ends_with"
+              "ends_with",
+              "always"
             ],
             "title": "Operator",
-            "description": "How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals",
+            "description": "How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source",
             "default": "equals"
           },
           "value": {
             "type": "string",
             "title": "Value",
-            "description": "Operand for the operator (not used when operator is ``exists``)",
+            "description": "Operand for the operator (not used by ``exists`` or ``always``)",
             "default": ""
           }
         },
@@ -26818,7 +27501,7 @@
           "ddl": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DDLResult"
+                "$ref": "#/components/schemas/dfe_engine__api__v1__sources__DDLResult"
               },
               {
                 "type": "null"
@@ -27206,6 +27889,18 @@
             "title": "Engine",
             "description": "Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)"
           },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant",
+            "description": "The compiled-in program this instance runs, where the app offers a catalogue of them (dfe-transform-elastic selects one by source.name). None for an app whose program is the authored files it is given"
+          },
           "config_file": {
             "anyOf": [
               {
@@ -27311,6 +28006,28 @@
               }
             ],
             "description": "Transform stage (optional)"
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "How this source's stages hand records on: bus (a broker holds them) or direct (point to point). None takes the deployment default"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Keep a copy of every record as it arrived, before any transform. The archiver reads the landing topic, so this needs the bus transport",
+            "default": false
           },
           "source_build": {
             "anyOf": [
@@ -27630,6 +28347,28 @@
               }
             ],
             "description": "Fetcher-based origin; required unless ``match`` is set"
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "bus or direct; omitted takes the deployment default"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Keep the raw record as it arrived; needs the bus transport",
+            "default": false
           },
           "views": {
             "anyOf": [
@@ -28890,10 +29629,44 @@
       },
       "VersionResponse": {
         "properties": {
-          "version": {
+          "stack": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack",
+            "description": "Certified stack version this deployment runs; null when nothing states one."
+          },
+          "engine": {
             "type": "string",
-            "title": "Version",
-            "description": "Package version"
+            "title": "Engine",
+            "description": "dfe-engine package version"
+          },
+          "ui": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ui",
+            "description": "dfe-ui version when the deploy repo pins one off the certified stack."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "deploy-repo",
+              "deployment",
+              "engine"
+            ],
+            "title": "Source",
+            "description": "deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine."
           },
           "python_version": {
             "type": "string",
@@ -28903,10 +29676,14 @@
         },
         "type": "object",
         "required": [
-          "version",
+          "stack",
+          "engine",
+          "ui",
+          "source",
           "python_version"
         ],
-        "title": "VersionResponse"
+        "title": "VersionResponse",
+        "description": "What this deployment runs: the certified stack, and the parts of it."
       },
       "VersionSummary": {
         "properties": {
@@ -29620,6 +30397,34 @@
         ],
         "title": "TestResponse"
       },
+      "dfe_engine__api__v1__schemas__DDLResult": {
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "create_table": {
+            "type": "string",
+            "title": "Create Table",
+            "description": "CREATE TABLE DDL"
+          },
+          "views": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Views",
+            "description": "View name \u2192 DDL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_name",
+          "create_table"
+        ],
+        "title": "DDLResult",
+        "description": "Generated DDL output."
+      },
       "dfe_engine__api__v1__schemas__SchemaBuildResult": {
         "properties": {
           "source_name": {
@@ -29641,7 +30446,7 @@
           "ddl": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DDLResult"
+                "$ref": "#/components/schemas/dfe_engine__api__v1__schemas__DDLResult"
               },
               {
                 "type": "null"
@@ -29787,6 +30592,34 @@
         "title": "SyncResponse",
         "description": "Submit/poll envelope for a provider sync (submit -> poll, like the sampler)."
       },
+      "dfe_engine__api__v1__sources__DDLResult": {
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "create_table": {
+            "type": "string",
+            "title": "Create Table",
+            "description": "CREATE TABLE DDL"
+          },
+          "views": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Views",
+            "description": "View name -> DDL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_name",
+          "create_table"
+        ],
+        "title": "DDLResult",
+        "description": "Generated DDL output."
+      },
       "dfe_engine__api__v1__sources__SchemaBuildResult": {
         "properties": {
           "source_name": {
@@ -29808,7 +30641,7 @@
           "ddl": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DDLResult"
+                "$ref": "#/components/schemas/dfe_engine__api__v1__sources__DDLResult"
               },
               {
                 "type": "null"
