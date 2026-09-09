@@ -918,6 +918,10 @@ export interface paths {
         /**
          * Get Source
          * @description Get a full source definition by name, including build/deploy per version.
+         *
+         *     ``default`` is the one name that always answers. It is a normal source once
+         *     written; until then the deployment's own default flow is synthesised, so the
+         *     console has the card it draws before anyone has configured anything.
          */
         get: operations["get_source_api_v1_sources__name__get"];
         /**
@@ -1589,7 +1593,11 @@ export interface paths {
         };
         /**
          * Get Version
-         * @description Get engine version info.
+         * @description What this deployment runs.
+         *
+         *     Authenticated but ungated on purpose: the console footer is on every page, and
+         *     the body carries versions only. Without a deploy repo the stack is unknown and
+         *     the engine's own version is the whole answer.
          */
         get: operations["get_version_api_v1_system_version_get"];
         put?: never;
@@ -6243,6 +6251,23 @@ export interface components {
             } | null;
         };
         /**
+         * FetcherRoute
+         * @description One fetched record family this fetcher hands to a DIFFERENT source's landing.
+         *
+         *     A fetcher polls one upstream but can pull several record shapes off it. A route
+         *     sends the ones that match somewhere other than the owning source's landing, so
+         *     they get that source's table and transform instead.
+         */
+        FetcherRoute: {
+            /** @description Which fetched records take this route */
+            match: components["schemas"]["SourceMatch"];
+            /**
+             * Source
+             * @description The source whose landing the matched records go to
+             */
+            source: string;
+        };
+        /**
          * FieldError
          * @description A validation error on a specific field.
          */
@@ -10549,6 +10574,16 @@ export interface components {
              * @enum {string}
              */
             readonly origin: "receiver" | "fetcher";
+            /**
+             * Transport
+             * @description Declared transport on the deployed version (None = the deployment default).
+             */
+            readonly transport: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Whether the deployed version keeps the raw record.
+             */
+            readonly archive: boolean;
         };
         /**
          * SourceEnabledPatchRequest
@@ -10599,6 +10634,11 @@ export interface components {
             config?: {
                 [key: string]: unknown;
             };
+            /**
+             * Routes
+             * @description Send matching fetched records to another source's landing instead of this one's. The named source must exist, which is checked when the fetcher instance is compiled, not here
+             */
+            routes?: components["schemas"]["FetcherRoute"][];
         };
         /**
          * SourceHeader
@@ -10642,14 +10682,14 @@ export interface components {
             field: string;
             /**
              * Operator
-             * @description How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals
+             * @description How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source
              * @default equals
              * @enum {string}
              */
-            operator: "equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with";
+            operator: "equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with" | "always";
             /**
              * Value
-             * @description Operand for the operator (not used when operator is ``exists``)
+             * @description Operand for the operator (not used by ``exists`` or ``always``)
              * @default
              */
             value: string;
@@ -10910,6 +10950,11 @@ export interface components {
              */
             engine: string;
             /**
+             * Variant
+             * @description The compiled-in program this instance runs, where the app offers a catalogue of them (dfe-transform-elastic selects one by source.name). None for an app whose program is the authored files it is given
+             */
+            variant?: string | null;
+            /**
              * Config File
              * @description Path to engine-specific config
              */
@@ -10952,6 +10997,17 @@ export interface components {
             match?: components["schemas"]["SourceMatch"] | null;
             /** @description Transform stage (optional) */
             transform?: components["schemas"]["SourceTransform"] | null;
+            /**
+             * Transport
+             * @description How this source's stages hand records on: bus (a broker holds them) or direct (point to point). None takes the deployment default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep a copy of every record as it arrived, before any transform. The archiver reads the landing topic, so this needs the bus transport
+             * @default false
+             */
+            archive: boolean;
             /** @description Last schema build for this version (source-builds) */
             source_build?: components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"] | null;
             /** @description Last deploy run for this version (source-deploys) */
@@ -11101,6 +11157,17 @@ export interface components {
             transform?: components["schemas"]["SourceTransform"] | null;
             /** @description Fetcher-based origin; required unless ``match`` is set */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /**
+             * Transport
+             * @description bus or direct; omitted takes the deployment default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep the raw record as it arrived; needs the bus transport
+             * @default false
+             */
+            archive: boolean;
             /**
              * Views
              * @description Naming-standard views for this revision (sigma, ecs, cim, ocsf)
@@ -11699,13 +11766,32 @@ export interface components {
             /** Content */
             content: string;
         };
-        /** VersionResponse */
+        /**
+         * VersionResponse
+         * @description What this deployment runs: the certified stack, and the parts of it.
+         */
         VersionResponse: {
             /**
-             * Version
-             * @description Package version
+             * Stack
+             * @description Certified stack version pinned in the deploy repo; null when there is none.
              */
-            version: string;
+            stack: string | null;
+            /**
+             * Engine
+             * @description dfe-engine package version
+             */
+            engine: string;
+            /**
+             * Ui
+             * @description dfe-ui version when the deploy repo pins one off the certified stack.
+             */
+            ui: string | null;
+            /**
+             * Source
+             * @description deploy-repo when the stack version was read from pins.yaml, else engine.
+             * @enum {string}
+             */
+            source: "deploy-repo" | "engine";
             /**
              * Python Version
              * @description Python interpreter version
