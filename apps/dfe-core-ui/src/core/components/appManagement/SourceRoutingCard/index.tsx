@@ -123,7 +123,9 @@ export const SourceRoutingCard = ({
       }
     >
       <p className="text-foreground/60 dark:text-dark-foreground/60 text-sm">
-        {`Compiled by the ${routing.compiler} compiler into ${routing.values_path}`}
+        {/* An app owns each derived block whole, so the compile writes more
+            than one of them and all of them are named here. */}
+        {`Compiled by the ${routing.compiler} compiler into ${Object.values(routing.values_paths ?? {}).join(', ')}`}
       </p>
 
       {routing.absent && (

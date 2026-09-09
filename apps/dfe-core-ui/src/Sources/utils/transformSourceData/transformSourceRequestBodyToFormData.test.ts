@@ -15,6 +15,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         fetcher: {
           source_type: 'crates_io',
           topic: 'default',
@@ -46,6 +47,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         match: { field: 'field', value: 'value', operator: 'equals' },
       },
     };
@@ -78,7 +80,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['1.0.0'],
       selected: '1.0.0',
       state: 'active',
-      version: { date_time: 'string', fetcher },
+      version: { date_time: 'string', archive: false, fetcher },
     };
 
     const formData = transformSourceRequestBodyToFormData(source);
@@ -98,6 +100,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         header: { type: 'string', version: 'string' },
       },
     };

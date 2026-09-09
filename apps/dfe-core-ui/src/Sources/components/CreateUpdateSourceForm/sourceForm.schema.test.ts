@@ -4,7 +4,8 @@ import { CreateUpdateSourceFormData, formSchema } from './sourceForm.schema';
 const BASE = {
   source: 'crates_audit',
   enabled: true,
-} satisfies Pick<CreateUpdateSourceFormData, 'source' | 'enabled'>;
+  archive: false,
+} satisfies Pick<CreateUpdateSourceFormData, 'source' | 'enabled' | 'archive'>;
 
 const messagesAt = (
   data: CreateUpdateSourceFormData,

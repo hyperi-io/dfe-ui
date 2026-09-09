@@ -1,6 +1,5 @@
-import { IconWrapper } from '@/core/components/IconWrapper';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SidebarLink } from '@/core/components/SidebarMenu/SidebarLink';
+import type { UI_DISPLAY_ACTIONS_TYPE } from '@/core/components/RbacProtected/hooks/rbac.constants';
 import {
   IconArrowBounce,
   IconBookmark,
@@ -16,298 +15,162 @@ import {
   IconStack2,
   IconTable,
   IconTargetArrow,
+  type IconComponent,
 } from '@repo/dfe-icons';
 
 const { rbacActions } = RbacProtected;
 
-interface SidebarMenuProps {
-  collapsed: boolean;
-  isNewViewEnabled?: boolean;
+/** One destination in the sidebar. */
+export interface SidebarNavItem {
+  /** Route it links to, and the key selection matches the pathname against. */
+  key: string;
+  label: string;
+  icon: React.ReactElement<IconComponent & { className?: string }>;
+  /** Any one of these authorises the entry; without one it is hidden. */
+  actions: UI_DISPLAY_ACTIONS_TYPE[];
 }
 
-// Unpermitted nav items are hidden, not greyed: each renders only inside
-// RbacProtected.Unrestricted, with no Restricted fallback. AppLayout's
-// no-access guard covers a user for whom none would render.
-export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
-  // HyperDX features embedded as seamless siblings via /observe/* (an iframe of
-  // the chromeless fork -- dfe-ui owns the nav). These route INTERNALLY
-  // (external: false) to the embed page, which iframes
-  // `${hyperdxUrl}/<feature>?embed=1`. Gated on hyperdxUrl being configured +
-  // the dashboard_read RBAC action.
-  ...(hyperdxUrl
+/** A stage of the flow, and the destinations that belong to it. */
+export interface SidebarNavGroup {
+  label: string;
+  items: SidebarNavItem[];
+}
+
+// HyperDX features embedded as siblings via /observe/* (an iframe of the
+// chromeless fork -- dfe-ui owns the nav). They route INTERNALLY to the embed
+// page, which iframes `${hyperdxUrl}/<feature>?embed=1`, so they appear only
+// once a HyperDX URL is configured.
+const observeItems = (hyperdxUrl?: string): SidebarNavItem[] =>
+  hyperdxUrl
     ? [
         {
           key: '/observe/search',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/search',
-                    icon: <IconWrapper icon={<IconTable />} />,
-                    label: 'Search',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
+          label: 'Search',
+          icon: <IconTable />,
+          actions: [rbacActions.dashboard_read],
         },
         {
           key: '/observe/search/list',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/search/list',
-                    icon: <IconWrapper icon={<IconBookmark />} />,
-                    label: 'Saved Searches',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
+          label: 'Saved Searches',
+          icon: <IconBookmark />,
+          actions: [rbacActions.dashboard_read],
         },
         {
           key: '/observe/chart',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/chart',
-                    icon: <IconWrapper icon={<IconChartDots />} />,
-                    label: 'Chart Explorer',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
+          label: 'Chart Explorer',
+          icon: <IconChartDots />,
+          actions: [rbacActions.dashboard_read],
         },
         {
           key: '/observe/dashboards',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/dashboards',
-                    icon: <IconWrapper icon={<IconLayoutGrid />} />,
-                    label: 'Dashboards',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
+          label: 'Dashboards',
+          icon: <IconLayoutGrid />,
+          actions: [rbacActions.dashboard_read],
         },
-        // Hunt Results is a saved-search view over dfe.detection, so it sits with
-        // the dashboards it reads like, last of the observe group.
+        // Hunt Results is a saved-search view over dfe.detection, so it sits
+        // with the dashboards it reads like, last of the observe group.
         {
           key: '/observe/hunt-results',
-          Component: ({ collapsed }: SidebarMenuProps) => (
-            <RbacProtected action={rbacActions.dashboard_read}>
-              <RbacProtected.Unrestricted>
-                <SidebarLink
-                  collapsed={collapsed}
-                  item={{
-                    key: '/observe/hunt-results',
-                    icon: <IconWrapper icon={<IconRadar />} />,
-                    label: 'Hunt Results',
-                    external: false,
-                  }}
-                />
-              </RbacProtected.Unrestricted>
-            </RbacProtected>
-          ),
+          label: 'Hunt Results',
+          icon: <IconRadar />,
+          actions: [rbacActions.dashboard_read],
         },
       ]
-    : []),
+    : [];
+
+/**
+ * The sidebar, grouped in the order a record travels.
+ *
+ * Observe is where the data is looked at; Data flow defines what comes in, how
+ * it is shaped and where it lands; Detect defines what to look for; Stack is
+ * what is running; Access is who may do what. Each group is one RBAC family, so
+ * a user sees a heading exactly when at least one destination under it is
+ * theirs.
+ *
+ * Entries are DATA. One renderer draws every one of them, so a destination is a
+ * row added here rather than another copy of the RbacProtected wrapper.
+ */
+export const buildSidebarMenuGroups = (
+  hyperdxUrl?: string,
+): SidebarNavGroup[] => [
   {
-    key: '/sources',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+    label: 'Observe',
+    items: observeItems(hyperdxUrl),
+  },
+  {
+    label: 'Data flow',
+    items: [
+      {
+        key: '/sources',
+        label: 'Sources',
+        icon: <IconArrowBounce />,
+        actions: [
           rbacActions.source_read,
           rbacActions.source_write,
           rbacActions.source_delete,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/sources',
-              icon: <IconWrapper icon={<IconArrowBounce />} />,
-              label: 'Sources',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
-  },
-  {
-    key: '/schemas',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+        ],
+      },
+      {
+        key: '/schemas',
+        label: 'Meta Schemas',
+        icon: <IconDatabase />,
+        actions: [
           rbacActions.schema_read,
           rbacActions.schema_write,
           rbacActions.schema_delete,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/schemas',
-              icon: <IconWrapper icon={<IconDatabase />} />,
-              label: 'Meta Schemas',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
+        ],
+      },
+      {
+        key: '/library',
+        label: 'Library',
+        icon: <IconBooks />,
+        actions: [rbacActions.library_read, rbacActions.library_write],
+      },
+    ],
   },
-
   {
-    key: '/rules',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+    label: 'Detect',
+    items: [
+      {
+        key: '/rules',
+        label: 'Rules',
+        icon: <IconShieldCheck />,
+        actions: [
           rbacActions.rule_read,
           rbacActions.rule_write,
           rbacActions.rule_delete,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/rules',
-              icon: <IconWrapper icon={<IconShieldCheck />} />,
-              label: 'Rules',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
-  },
-  {
-    key: '/hunts',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+        ],
+      },
+      {
+        key: '/hunts',
+        label: 'Hunts',
+        icon: <IconTargetArrow />,
+        actions: [
           rbacActions.hunt_read,
           rbacActions.hunt_write,
           rbacActions.hunt_delete,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/hunts',
-              icon: <IconWrapper icon={<IconTargetArrow />} />,
-              label: 'Hunts',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
+        ],
+      },
+    ],
   },
-  // {
-  //   key: '/field-maps',
-  //   Component: ({ collapsed }: SidebarMenuProps) => (
-  //     <RbacProtected action={rbacActions.fieldmap_read}>
-  //       <RbacProtected.Unrestricted>
-  //         <SidebarLink
-  //           collapsed={collapsed}
-  //           item={{
-  //             key: '/field-maps',
-  //             icon: <IconWrapper icon={<IconRotate2 />} />,
-  //             label: 'Field Maps',
-  //             external: false,
-  //           }}
-  //         />
-  //       </RbacProtected.Unrestricted>
-  //     </RbacProtected>
-  //   ),
-  // },
-  // {
-  //   key: '/transforms',
-  //   Component: ({ collapsed }: SidebarMenuProps) => (
-  //     <SidebarLink
-  //       collapsed={collapsed}
-  //       item={{
-  //         key: '/transforms',
-  //         icon: <IconWrapper icon={<IconTransform />} />,
-  //         label: 'Transforms',
-  //         external: false,
-  //       }}
-  //     />
-  //   ),
-  // },
   {
-    key: '/components',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+    label: 'Stack',
+    items: [
+      {
+        key: '/components',
+        label: 'Components',
+        icon: <IconServer2 />,
+        actions: [
           rbacActions.deployment_read,
           rbacActions.helmvars_read,
           rbacActions.helmvars_write,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/components',
-              icon: <IconWrapper icon={<IconServer2 />} />,
-              label: 'Components',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
-  },
-  {
-    key: '/library',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[rbacActions.library_read, rbacActions.library_write]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/library',
-              icon: <IconWrapper icon={<IconBooks />} />,
-              label: 'Library',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
-  },
-  {
-    key: '/services',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+        ],
+      },
+      {
+        key: '/services',
+        label: 'Services',
+        icon: <IconCode />,
+        actions: [
           rbacActions.service_read,
           rbacActions.service_write,
           rbacActions.service_delete,
@@ -316,27 +179,31 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
           rbacActions.deployment_delete,
           rbacActions.service_surface_read,
           rbacActions.service_surface_write,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/services',
-              icon: <IconWrapper icon={<IconCode />} />,
-              label: 'Services',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
+        ],
+      },
+      {
+        key: '/platform',
+        label: 'Platform',
+        icon: <IconStack2 />,
+        actions: [
+          rbacActions.lifecycle_read,
+          rbacActions.config_write,
+          rbacActions.helmvars_read,
+          rbacActions.helmvars_write,
+          rbacActions.governance_read,
+          rbacActions.governance_write,
+        ],
+      },
+    ],
   },
   {
-    key: '/settings',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
+    label: 'Access',
+    items: [
+      {
+        key: '/settings',
+        label: 'Settings',
+        icon: <IconSettings2 />,
+        actions: [
           rbacActions.org_read,
           rbacActions.org_write,
           rbacActions.org_delete,
@@ -355,47 +222,12 @@ export const buildFeatureFlagSidebarMenuItems = (hyperdxUrl?: string) => [
           rbacActions.api_key_read,
           rbacActions.api_key_write,
           rbacActions.api_key_delete,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/settings',
-              icon: <IconWrapper icon={<IconSettings2 />} />,
-              label: 'Settings',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
-  },
-  {
-    key: '/platform',
-    Component: ({ collapsed }: SidebarMenuProps) => (
-      <RbacProtected
-        action={[
-          rbacActions.lifecycle_read,
-          rbacActions.config_write,
-          rbacActions.helmvars_read,
-          rbacActions.helmvars_write,
-          rbacActions.governance_read,
-          rbacActions.governance_write,
-        ]}
-      >
-        <RbacProtected.Unrestricted>
-          <SidebarLink
-            collapsed={collapsed}
-            item={{
-              key: '/platform',
-              icon: <IconWrapper icon={<IconStack2 />} />,
-              label: 'Platform',
-              external: false,
-            }}
-          />
-        </RbacProtected.Unrestricted>
-      </RbacProtected>
-    ),
+        ],
+      },
+    ],
   },
 ];
+
+/** Every destination, ungrouped -- what selection matches a pathname against. */
+export const sidebarMenuItems = (groups: SidebarNavGroup[]): SidebarNavItem[] =>
+  groups.flatMap((group) => group.items);

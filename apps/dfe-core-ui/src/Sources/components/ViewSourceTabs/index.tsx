@@ -1,6 +1,7 @@
 'use client';
 
 import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
+import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -15,6 +16,7 @@ import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
 import { PromoteRowsProvider } from './contexts/PromoteRows.context';
 
 const SOURCE_DETAIL_TAB_KEY_MAP = {
+  flow: 'Flow',
   configuration: 'Configuration Details',
   'sample-events': 'Sample Events',
   processing: 'Processing',
@@ -28,7 +30,9 @@ const SOURCE_DETAIL_TAB_KEYS = Object.keys(SOURCE_DETAIL_TAB_KEY_MAP);
 
 type SourceDetailTabKey = keyof typeof SOURCE_DETAIL_TAB_KEY_MAP;
 
-const DEFAULT_SOURCE_DETAIL_TAB: SourceDetailTabKey = 'configuration';
+// The flow answers "where do this source's records go", which is the question
+// the rest of the tabs are details of.
+const DEFAULT_SOURCE_DETAIL_TAB: SourceDetailTabKey = 'flow';
 
 const isSourceDetailTabKey = (
   value: string | null,
@@ -83,6 +87,21 @@ export const ViewSourceDetailTabs = ({
       activeKey={activeTab}
       onChange={handleTabChange}
       items={[
+        {
+          key: 'flow',
+          label: SOURCE_DETAIL_TAB_KEY_MAP['flow'],
+          children: (
+            <RbacProtected action={RbacProtected.rbacActions.source_read}>
+              <RbacProtected.Unrestricted>
+                <SourceFlowCard source={selectedSourceName} />
+              </RbacProtected.Unrestricted>
+              <RbacProtected.Restricted className="h-full">
+                <RbacProtected.RestrictedRoute />
+              </RbacProtected.Restricted>
+            </RbacProtected>
+          ),
+        },
+
         {
           key: 'configuration',
           label: SOURCE_DETAIL_TAB_KEY_MAP['configuration'],
