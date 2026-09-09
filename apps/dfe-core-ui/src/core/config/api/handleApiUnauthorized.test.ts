@@ -56,10 +56,18 @@ describe('handleApiUnauthorized', () => {
     expect(signOutMock).toHaveBeenCalled();
   });
 
-  test('does not sign out on setup wizard routes', async () => {
+  test('signs out on setup wizard routes, which run behind the login', async () => {
+    // Returning early here left a dead engine token in place with nothing to
+    // clear it, stranding the operator on a wizard whose every call 401s.
     window.history.replaceState({}, '', '/setup/welcome');
     await handleApiUnauthorized();
     expect(executeAccessTokenRefreshMock).toHaveBeenCalled();
+    expect(signOutMock).toHaveBeenCalled();
+  });
+
+  test('does not sign out on the login page', async () => {
+    window.history.replaceState({}, '', '/login');
+    await handleApiUnauthorized();
     expect(signOutMock).not.toHaveBeenCalled();
   });
 });
