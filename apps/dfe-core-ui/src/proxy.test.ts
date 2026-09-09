@@ -55,24 +55,29 @@ describe('proxy (auth middleware)', () => {
     );
   });
 
-  test('redirects unauthenticated requests to /setup while initial setup is incomplete', async () => {
+  test('sends an unauthenticated request to /login, not the wizard, while initial setup is incomplete', async () => {
+    // The wizard's every call is an authenticated engine call, so handing it to
+    // an anonymous visitor produces a form that 401s on submit (dfe-ui#206).
     getSetupStatus.mockResolvedValue(setupStatus(false));
 
     const response = await proxy(request('/sources'), undefined as never);
 
-    expect(response.headers.get('location')).toBe('http://localhost/setup');
-    expect(authMiddleware).not.toHaveBeenCalled();
+    expect(response.headers.get('location')).toBe('http://localhost/login');
+    // The ordering, not just the destination: an anonymous request must cost no
+    // engine round trip.
+    expect(getSetupStatus).not.toHaveBeenCalled();
   });
 
-  test('redirects any (auth) path to /setup while initial setup is incomplete', async () => {
+  test('redirects an authenticated request to /setup while initial setup is incomplete', async () => {
     getSetupStatus.mockResolvedValue(setupStatus(false));
+    authMiddleware.mockResolvedValue(NextResponse.next());
 
     const response = await proxy(request('/'), undefined as never);
 
     expect(response.headers.get('location')).toBe('http://localhost/setup');
   });
 
-  test('does not bounce proxy-trust arrivals to /login while initial setup is incomplete', async () => {
+  test('bounces a proxy-trust arrival to /login so the gate can mint its session', async () => {
     vi.stubEnv('DFE_AUTH_MODE', 'proxy');
     getSetupStatus.mockResolvedValue(setupStatus(false));
 
@@ -81,7 +86,9 @@ describe('proxy (auth middleware)', () => {
       undefined as never,
     );
 
-    expect(response.headers.get('location')).toBe('http://localhost/setup');
+    expect(response.headers.get('location')).toBe(
+      'http://localhost/login?callbackUrl=%2F',
+    );
   });
 
   test('defers to withAuth when initial setup is complete', async () => {

@@ -1,12 +1,24 @@
-import { QUERY_KEY_SETUP_STATUS } from '@/core/hooks/useFetchSetupStatus';
-import {
-  TBreakGlass,
-  TFetchSetupStatusResponse,
-} from '@/core/hooks/useFetchSetupStatus/types';
+import { TBreakGlass } from '@/core/hooks/useFetchSetupStatus/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { ResetBreakGlassAccount } from '.';
+import { server } from './ResetBreakGlassAccount.mocks';
+
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 beforeEach(() => {
   Object.defineProperty(window, 'matchMedia', {
@@ -44,28 +56,6 @@ const pendingBreakGlass: TBreakGlass = {
   },
 };
 
-const setupStatusWith = (
-  completedSteps: string[],
-): TFetchSetupStatusResponse => ({
-  initial_setup: {
-    complete: completedSteps.includes('admin_password'),
-    current_step: 'admin_password',
-    steps: ['organisations', 'first_user', 'admin_password'],
-    pending_steps: completedSteps.includes('admin_password')
-      ? []
-      : ['admin_password'],
-    completed_steps: completedSteps,
-    step_details: [],
-  },
-  oidc_providers: [],
-  organisations: [],
-  break_glass: mergedBreakGlass,
-  default_credentials: false,
-  deploy_kind: 'local',
-  credential_fetch_command: '',
-  default_ttl_days: 90,
-});
-
 const renderStep = (
   goNext = vi.fn(),
   breakGlass: TBreakGlass = mergedBreakGlass,
@@ -73,7 +63,6 @@ const renderStep = (
   const testWrapper = buildTestWrapper().withReactQuery();
   render(
     <ResetBreakGlassAccount
-      isAdminReset={false}
       goNext={goNext}
       goPrevious={vi.fn()}
       breakGlass={breakGlass}
@@ -84,17 +73,8 @@ const renderStep = (
 };
 
 describe('ResetBreakGlassAccount', () => {
-  it('keeps the rotation form when merged=true but admin_password is not complete', async () => {
-    const { testWrapper, goNext } = renderStep();
-
-    // Account durability merges the seeded account before any rotation, so a
-    // gitops deploy reports merged=true while the step is still pending.
-    act(() => {
-      testWrapper.queryClient?.setQueryData(
-        QUERY_KEY_SETUP_STATUS(),
-        setupStatusWith(['organisations', 'first_user']),
-      );
-    });
+  it('offers the rotation form without advancing on its own', async () => {
+    const { goNext } = renderStep();
 
     expect(await screen.findByLabelText('New Password')).toBeInTheDocument();
     expect(
@@ -103,26 +83,85 @@ describe('ResetBreakGlassAccount', () => {
     expect(goNext).not.toHaveBeenCalled();
   });
 
-  it('does not advance on a cold render with only the server break_glass prop', async () => {
+  it('advances on skip, keeping the password the deployment minted', async () => {
+    const user = userEvent.setup();
     const { goNext } = renderStep();
 
-    expect(await screen.findByLabelText('New Password')).toBeInTheDocument();
-    expect(goNext).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: /skip for now/i }));
+
+    expect(goNext).toHaveBeenCalled();
   });
 
-  it('advances once the engine reports admin_password complete', async () => {
-    const { testWrapper, goNext } = renderStep();
+  it('resets the breakglass account, not the everyday admin', async () => {
+    // An admin reset is reverted by the next boot, which reconciles that
+    // password from the deployment's config; a breakglass reset is durable.
+    const user = userEvent.setup();
+    let resetPath = '';
+    server.use(
+      http.post(
+        '/api/v1/auth/accounts/:username/reset-password',
+        ({ params }) => {
+          resetPath = String(params.username);
+          return HttpResponse.json({
+            message: 'password reset',
+            git: {
+              enabled: false,
+              committed: false,
+              auto_merge: false,
+              merged: false,
+            },
+          });
+        },
+      ),
+    );
+    renderStep();
 
-    act(() => {
-      testWrapper.queryClient?.setQueryData(
-        QUERY_KEY_SETUP_STATUS(),
-        setupStatusWith(['organisations', 'first_user', 'admin_password']),
-      );
-    });
+    await user.type(
+      await screen.findByLabelText('New Password'),
+      'a-minted-password',
+    );
+    await user.click(screen.getByRole('button', { name: /reset password/i }));
 
     await waitFor(() => {
-      expect(goNext).toHaveBeenCalled();
+      expect(resetPath).toBe('breakglass');
     });
+  });
+
+  it('reports the reset and enables Next once it succeeds', async () => {
+    const user = userEvent.setup();
+    const { goNext } = renderStep();
+
+    await user.type(
+      await screen.findByLabelText('New Password'),
+      'a-minted-password',
+    );
+    await user.click(screen.getByRole('button', { name: /reset password/i }));
+
+    expect(
+      await screen.findByText(/breakglass account password has been reset/i),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /next/i }));
+    expect(goNext).toHaveBeenCalled();
+  });
+
+  it('does not claim the reset survives a restart', async () => {
+    // breakglass.seed() reconciles the account from the committed hash on every
+    // boot, so the durable path is the deployment variable, not this form.
+    const user = userEvent.setup();
+    renderStep();
+
+    await user.type(
+      await screen.findByLabelText('New Password'),
+      'a-minted-password',
+    );
+    await user.click(screen.getByRole('button', { name: /reset password/i }));
+
+    expect(
+      await screen.findByText(/until the next engine restart/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/DFE_AUTH_BREAKGLASS_PASSWORD/),
+    ).toBeInTheDocument();
   });
 
   describe('pending merge retry countdown', () => {

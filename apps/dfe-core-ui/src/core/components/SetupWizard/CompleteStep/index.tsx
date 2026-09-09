@@ -24,9 +24,9 @@ export const CompleteStep = ({ goPrevious }: { goPrevious: () => void }) => {
         <Button
           type="text"
           className="text-white text-light p-0"
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/')}
         >
-          Login <IconArrowRight />
+          Get started <IconArrowRight />
         </Button>
       </div>
     </div>

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function Setup() {
   const { initial_setup } = await getSetupStatus();
   if (initial_setup.complete) {
-    redirect('/login');
+    redirect('/');
   }
 
   const currenStep = getSetupWizardStepFromStateStep(

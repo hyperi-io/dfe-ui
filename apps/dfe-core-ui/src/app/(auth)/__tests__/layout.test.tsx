@@ -86,7 +86,9 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/setup');
   });
 
-  test('redirects to /setup when initial setup is required and user is not authenticated', async () => {
+  test('redirects to /login, not /setup, when setup is required and the user is not authenticated', async () => {
+    // The wizard's every call is an authenticated engine call, so handing it to
+    // an anonymous visitor produces a form that 401s on submit (dfe-ui#206).
     getSetupStatus.mockResolvedValue({
       initial_setup: {
         complete: false,
@@ -111,7 +113,10 @@ describe('Layout (auth)', () => {
       // redirect() throws in Next.js - ignore
     }
 
-    expect(redirect).toHaveBeenCalledWith('/setup');
+    // The first call is the assertion: redirect() throws in Next.js, so the
+    // real request stops there, where the mocked one runs on to the /setup
+    // branch below it.
+    expect(redirect.mock.calls[0]).toEqual(['/login?callbackUrl=%2F']);
   });
 
   test('redirects to /login when user is not authenticated', async () => {

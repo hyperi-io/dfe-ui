@@ -1,7 +1,11 @@
 import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { BREAK_GLASS_ADMIN_USERNAME } from '@/core/components/SetupWizard/constants';
+import {
+  BREAK_GLASS_PASSWORD_ENV,
+  BREAK_GLASS_USERNAME,
+} from '@/core/components/SetupWizard/constants';
+import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
 import {
   QUERY_KEY_SETUP_STATUS,
@@ -44,23 +48,19 @@ const PendingMergeRetryCountdown = ({
 };
 
 export const ResetBreakGlassAccount = ({
-  isAdminReset,
   goNext,
   goPrevious,
   breakGlass: breakGlassServerResponse,
 }: {
-  isAdminReset: boolean;
   goNext: () => void;
   goPrevious: () => void;
   breakGlass: TBreakGlass | null;
 }) => {
   const queryClient = useQueryClient();
   const [fetchingSetupStatus, setFetchingSetupStatus] = useState(false);
+  const [passwordReset, setPasswordReset] = useState(false);
   const {
-    data: {
-      break_glass: breakGlassState,
-      initial_setup: initialSetupState,
-    } = {},
+    data: { break_glass: breakGlassState } = {},
     refetch: refetchSetupStatus,
   } = useFetchSetupStatus({
     queryEnabled: fetchingSetupStatus,
@@ -73,8 +73,9 @@ export const ResetBreakGlassAccount = ({
     isPending,
     error,
   } = useAccountResetPassword({
-    username: BREAK_GLASS_ADMIN_USERNAME,
+    username: BREAK_GLASS_USERNAME,
     onSuccess: () => {
+      setPasswordReset(true);
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEY_SETUP_STATUS(),
       });
@@ -108,18 +109,6 @@ export const ResetBreakGlassAccount = ({
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
-  // Advance on the engine's completed_steps, not break_glass.merged: account
-  // durability merges the seeded account to deploy-repo main before any
-  // rotation, so merged=true can precede the rotation this step requires.
-  const isAdminPasswordComplete =
-    initialSetupState?.completed_steps?.includes('admin_password') ?? false;
-
-  useEffect(() => {
-    if (isAdminPasswordComplete) {
-      goNext();
-    }
-  }, [isAdminPasswordComplete, goNext]);
-
   return (
     <Card
       classNames={{
@@ -129,24 +118,31 @@ export const ResetBreakGlassAccount = ({
     >
       <h1 className="text-2xl font-light">Reset Break Glass Account</h1>
 
-      {isAdminReset ? (
+      {passwordReset ? (
         <NotificationCard
-          title="Default admin account password has been successfully reset."
+          title={`The ${BREAK_GLASS_USERNAME} account password has been reset until the next engine restart.`}
+          description={`To change it for good, set ${BREAK_GLASS_PASSWORD_ENV} in the deployment and re-seed.`}
           type="success"
         />
       ) : (
         <>
           <NotificationCard
-            title="We have created an emergency account in case you lose access to or delete your primary account."
+            title={`We have created an emergency account, ${BREAK_GLASS_USERNAME}, in case you lose access to or delete your primary account.`}
             description={
               <>
                 <p>
-                  The account currently has the default password set. Please
-                  update it to a more secure password.
+                  It was minted with your deployment&apos;s own password, which
+                  you can keep by skipping this step.
                 </p>
                 <p>
-                  Make sure that you store this password in a secure location
-                  and be careful not to lose it.
+                  A password set here holds until the next engine restart, which
+                  reconciles the account from the hash committed on its first
+                  boot. The durable path is {BREAK_GLASS_PASSWORD_ENV} in the
+                  deployment.
+                </p>
+                <p>
+                  Either way, store it somewhere you can reach when the rest of
+                  this system is unreachable.
                 </p>
               </>
             }
@@ -270,11 +266,17 @@ export const ResetBreakGlassAccount = ({
         </Button>
 
         <div className="flex flex-row items-center gap-6">
+          {!passwordReset && (
+            <SkipForNow
+              goNext={goNext}
+              title="Keep the password your deployment minted. You can reset it later from the accounts page."
+            />
+          )}
           <Button
             type="text"
             className="text-light p-0 pl-2"
             onClick={goNext}
-            disabled={!isAdminReset}
+            disabled={!passwordReset}
           >
             Next <IconArrowRight />
           </Button>

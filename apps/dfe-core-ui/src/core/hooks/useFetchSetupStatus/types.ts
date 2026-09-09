@@ -20,6 +20,5 @@ export type TSetupWizardProps = {
   oidcProvider: TOidcProvider;
   organisation: TOrganisation;
   userCreated: boolean;
-  isAdminReset: boolean;
   breakGlass: TBreakGlass | null;
 };
