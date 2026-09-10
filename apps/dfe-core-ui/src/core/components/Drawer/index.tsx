@@ -15,6 +15,10 @@ export const Drawer = ({ children, onClose, title, ...props }: DrawerProps) => {
     <AntdDrawer
       title={title}
       closeIcon={null}
+      // antd routes Escape through onClose, so without this only the X closes.
+      onClose={() => onClose?.()}
+      // A stray click outside a part-filled form should not discard it.
+      maskClosable={false}
       extra={
         <Button shape="circle" icon={<IconX />} onClick={() => onClose?.()} />
       }

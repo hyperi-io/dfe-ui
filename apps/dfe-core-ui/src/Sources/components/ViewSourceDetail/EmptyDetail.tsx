@@ -21,7 +21,8 @@ export const EmptyDetail = () => {
         <IconInfoCircle className="h-6 w-6 text-foreground" />
         <h2 className="text-xl font-medium">No source selected</h2>
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
-          Please add or select a source to see the detail.
+          {/* No "add": a viewer cannot, and the Add button says so for those who can. */}
+          Select a source to see the detail.
         </p>
       </div>
     </div>

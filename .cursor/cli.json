@@ -1,5 +1,5 @@
 {
   "settings": {
-    "contextFiles": ["STATE.md", "TODO.md", "hyperi-ai/standards/STANDARDS.md"]
+    "contextFiles": ["README.md", "CONTRIBUTING.md"]
   }
 }

@@ -15,7 +15,9 @@ export const ClickhouseCloudStatus = () => {
 
   return (
     <SectionCard
-      title="Clickhouse Status"
+      // Named for what it reads: /system/clickhouse-cloud says nothing about the
+      // ClickHouse the stack is running against.
+      title="ClickHouse Cloud"
       rightTitleSlot={
         clickhouseStatus?.configured ? (
           <StartStopClickhouseButton
@@ -88,11 +90,13 @@ export const ClickhouseCloudStatus = () => {
                   </>
                 )}
               </dl>
-              <NotificationCard
-                icon={<IconInfoCircle />}
-                description="Clickhouse Cloud is not configured. Please contact your administrator for support."
-                type="default"
-              />
+              {!clickhouseStatus.configured && (
+                <NotificationCard
+                  icon={<IconInfoCircle />}
+                  description="ClickHouse Cloud is not configured. A self-hosted ClickHouse is unaffected by this card."
+                  type="default"
+                />
+              )}
             </>
           )}
         </RbacProtected.Unrestricted>

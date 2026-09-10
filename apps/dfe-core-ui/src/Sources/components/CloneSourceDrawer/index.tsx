@@ -168,7 +168,8 @@ export const CloneSourceDrawer = ({
             error={error}
             buttonLabel={title}
             initialValues={{
-              source: `${sourceName}_copy`,
+              // Hyphen, not underscore: the engine takes a DNS-1123 label.
+              source: `${sourceName}-copy`,
               enabled: sourceDetail.enabled,
               state: sourceDetail.state,
               description: sourceDetail.description,
