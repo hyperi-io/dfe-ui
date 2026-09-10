@@ -2,6 +2,7 @@
 
 import { Toolbar } from '@/core/components/Toolbar';
 import { cn } from '@/core/utils/style';
+import { AddFromCatalogueDrawer } from '@/Sources/components/AddFromCatalogueDrawer';
 import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
 import { ListSourcesProvider } from '@/Sources/contexts/ListSourcesContext';
 import Link from 'next/link';
@@ -41,7 +42,10 @@ export const SourcesToolbar = () => {
           ))}
         </nav>
 
-        <CreateSourceDrawer />
+        <div className="flex gap-2">
+          <AddFromCatalogueDrawer />
+          <CreateSourceDrawer />
+        </div>
       </Toolbar>
     </ListSourcesProvider>
   );
