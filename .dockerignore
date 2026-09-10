@@ -16,3 +16,9 @@
 docs
 *.md
 !apps/dfe-core-ui/README.md
+# Untracked is not un-copied: Next loads apps/dfe-core-ui/.env.local in the
+# builder and inlines every NEXT_PUBLIC_* value into the client bundle.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.example.*

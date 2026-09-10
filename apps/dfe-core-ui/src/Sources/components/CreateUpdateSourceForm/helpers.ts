@@ -18,6 +18,38 @@ export type FormValidationErrors = {
   [K in keyof typeof TAB_FORM_VALIDATION_KEY_MAP]: string[];
 };
 
+// Origin has no tab of its own: those fields render inside Configuration, so
+// their errors report there.
+const TAB_ERROR_KEYS = {
+  sourceDetails: ['sourceDetails', 'origin'],
+  schemaConfig: ['schemaConfig'],
+  transform: ['transform'],
+  views: ['views'],
+} as const;
+
+export type SourceFormTab = keyof typeof TAB_ERROR_KEYS;
+
+export const TAB_LABEL_MAP: Record<SourceFormTab, string> = {
+  sourceDetails: 'Configuration',
+  schemaConfig: 'Meta Schema',
+  transform: 'Transform',
+  views: 'Views',
+};
+
+export const getTabErrors = (
+  validationErrors: FormValidationErrors,
+  tab: SourceFormTab,
+): string[] => TAB_ERROR_KEYS[tab].flatMap((key) => validationErrors[key]);
+
+/** Labels of the tabs that are on screen AND hold at least one error. */
+export const getTabsWithErrors = (
+  validationErrors: FormValidationErrors,
+  visibleTabs: readonly SourceFormTab[],
+): string[] =>
+  visibleTabs
+    .filter((tab) => getTabErrors(validationErrors, tab).length > 0)
+    .map((tab) => TAB_LABEL_MAP[tab]);
+
 export const getValidationErrors = ({
   formFields,
 }: {

@@ -3,6 +3,11 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 
 const dataListTermStyle = 'text-foreground/50 dark:text-foreground/50';
+
+// React renders a boolean child as nothing, so the flags need a word.
+const yesNo = (value: boolean | undefined) =>
+  value === undefined ? '' : value ? 'Yes' : 'No';
+
 export default function SystemSettings() {
   const { data: systemSettings, isLoading, error } = useFetchSystemSettings();
   return (
@@ -26,9 +31,9 @@ export default function SystemSettings() {
               <dt className={dataListTermStyle}>Hunts Directory</dt>
               <dd>{systemSettings.hunt_dir}</dd>
               <dt className={dataListTermStyle}>Auth Enabled</dt>
-              <dd>{systemSettings.auth_enabled}</dd>
+              <dd>{yesNo(systemSettings.auth_enabled)}</dd>
               <dt className={dataListTermStyle}>Auth Local Enabled</dt>
-              <dd>{systemSettings.auth_local_enabled}</dd>
+              <dd>{yesNo(systemSettings.auth_local_enabled)}</dd>
               <dt className={dataListTermStyle}>API Host</dt>
               <dd>{systemSettings.api_host}</dd>
               <dt className={dataListTermStyle}>API Port</dt>

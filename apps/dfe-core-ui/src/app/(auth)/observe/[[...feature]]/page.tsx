@@ -57,13 +57,22 @@ export default function ObservePage() {
   const alias = OBSERVE_ALIASES[path];
   const feature = alias?.feature ?? path;
 
+  // Before the iframe navigates, contentWindow is still about:blank on OUR
+  // origin, so posting to the HyperDX origin is refused and the message is lost.
+  const hasNavigated = useRef(false);
+
   const sendTheme = useCallback(() => {
-    if (!hyperdxUrl) return;
+    if (!hyperdxUrl || !hasNavigated.current) return;
     iframeRef.current?.contentWindow?.postMessage(
       { type: 'DFE_SET_THEME', theme: colorMode },
       hyperdxUrl,
     );
   }, [colorMode, hyperdxUrl]);
+
+  const handleLoad = useCallback(() => {
+    hasNavigated.current = true;
+    sendTheme();
+  }, [sendTheme]);
 
   // Re-sync on every dfe-ui theme toggle (no iframe reload).
   useEffect(() => {
@@ -102,7 +111,7 @@ export default function ObservePage() {
       ref={iframeRef}
       src={src}
       title="DFE Observe"
-      onLoad={sendTheme}
+      onLoad={handleLoad}
       allow="clipboard-read; clipboard-write"
       style={{
         display: 'block',
