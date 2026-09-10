@@ -1,7 +1,7 @@
 import { uiBuildVersion } from '@/core/appVersion/buildVersion';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
-import { useFetchSystemVersion } from '@/Platform/hooks/system/useFetchSystemVersion';
+import { useFetchSystemVersion } from '@/core/hooks/useFetchSystemVersion';
 import { Spin } from 'antd';
 
 export const SystemVersion = () => {

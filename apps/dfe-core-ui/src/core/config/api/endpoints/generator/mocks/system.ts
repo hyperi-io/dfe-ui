@@ -1,9 +1,9 @@
 import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
-import { TSystemVersionResponse } from '@/Platform/hooks/system/useFetchSystemVersion/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TUpdateSystemRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
+import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
