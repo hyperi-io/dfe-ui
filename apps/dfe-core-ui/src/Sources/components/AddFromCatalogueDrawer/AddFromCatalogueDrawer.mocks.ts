@@ -16,6 +16,9 @@ const handlers = [
   API_CONFIG_MOCKS.sources.fromCatalogue.post.success(),
   // The sources list sits behind the drawer and refetches once a source lands.
   API_CONFIG_MOCKS.sources.default.get.success(),
+  // The listed source's row fetches its columns and its flow once it renders.
+  API_CONFIG_MOCKS.sources.sourceColumns.get.success({ source_name: 'test' }),
+  API_CONFIG_MOCKS.sources.sourceFlow.get.success({ name: 'test' }),
 ];
 
 export const server = setupServer(...handlers);
