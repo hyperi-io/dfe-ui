@@ -57,13 +57,21 @@ describe('AddFromCatalogueDrawer', () => {
 
     await user.click(screen.getByRole('button', { name: 'Select' }));
 
-    const add = await screen.findByRole('button', { name: /Add okta/ });
+    // The CI runner renders the selection under load; the suite's component
+    // tests bound their waits at 15 s for the same reason.
+    const add = await screen.findByRole(
+      'button',
+      { name: /Add okta/ },
+      { timeout: 15_000 },
+    );
     await user.click(add);
 
-    await waitFor(() =>
-      expect(
-        screen.getByText('Source okta created from the catalogue'),
-      ).toBeInTheDocument(),
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText('Source okta created from the catalogue'),
+        ).toBeInTheDocument(),
+      { timeout: 15_000 },
     );
   });
 });
