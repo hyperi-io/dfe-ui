@@ -15,7 +15,9 @@ describe('sourceNameValidator', () => {
   });
 
   it('names the underscore fix when that is the only problem', () => {
-    expect(firstMessage('aws_cloudtrail')).toBe(SOURCE_NAME_VALIDATOR.underscoreMessage);
+    expect(firstMessage('aws_cloudtrail')).toBe(
+      SOURCE_NAME_VALIDATOR.underscoreMessage,
+    );
   });
 
   it('refuses uppercase, a leading digit and a trailing hyphen', () => {
