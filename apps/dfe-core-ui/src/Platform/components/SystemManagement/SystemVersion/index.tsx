@@ -1,3 +1,4 @@
+import { uiBuildVersion } from '@/core/appVersion/buildVersion';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchSystemVersion } from '@/core/hooks/useFetchSystemVersion';
@@ -27,10 +28,14 @@ export const SystemVersion = () => {
       )}
       {systemVersion && (
         <dl className="grid grid-cols-[auto_1fr_auto_1fr] gap-2 text-xs">
-          <dt>Stack Version</dt>
-          <dd>{systemVersion.stack ?? 'Not pinned'}</dd>
-          <dt>Engine Version</dt>
+          {/* The certified stack is what an operator upgrades; the engine's own
+              version only answers when nothing states one. */}
+          <dt>Stack</dt>
+          <dd>{systemVersion.stack ?? 'not stated'}</dd>
+          <dt>Engine</dt>
           <dd>{systemVersion.engine}</dd>
+          <dt>UI</dt>
+          <dd>{systemVersion.ui ?? uiBuildVersion() ?? 'not stated'}</dd>
           <dt>Python Version</dt>
           <dd>{systemVersion.python_version}</dd>
         </dl>

@@ -9,6 +9,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       source: 'source',
       display_name: 'display name',
       enabled: true,
+      archive: false,
       origin: 'receiver',
       match: { field: 'field', value: 'value', operator: 'equals' },
       fetcher: { source_type: 'crates_io', topic: 'own', config: 'crates: []' },
@@ -20,6 +21,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       source: 'source',
       display_name: 'display name',
       enabled: true,
+      archive: false,
       fetcher: null,
       match: { field: 'field', operator: 'equals', value: 'value' },
     };
@@ -30,6 +32,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
+      archive: false,
       origin: 'fetcher',
       match: { field: 'field', value: 'value', operator: 'equals' },
       fetcher: {
@@ -53,6 +56,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
+      archive: false,
       origin: 'fetcher',
       fetcher: { source_type: 'okta', topic: 'own', config: '' },
     };
@@ -70,6 +74,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
+      archive: false,
       origin: 'fetcher',
       fetcher: { source_type: 'okta' },
     };
@@ -83,6 +88,7 @@ describe('transformSourceFormDataToRequestBody', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
+      archive: false,
       origin: 'receiver',
       match: { field: 'field', operator: 'equals', value: 'value' },
       views: [

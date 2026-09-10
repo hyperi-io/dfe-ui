@@ -31,6 +31,7 @@ describe('.useUpdateSource', () => {
     display_name: 'string',
     description: 'string',
     enabled: true,
+    archive: false,
     header: {
       type: 'string',
       version: 'string',

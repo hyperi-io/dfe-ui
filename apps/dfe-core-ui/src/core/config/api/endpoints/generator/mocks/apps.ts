@@ -26,11 +26,11 @@ import {
 } from './endpoints.generator.mocks.types';
 
 /**
- * A default catalogue that carries all four app shapes on purpose: a single
+ * A default catalogue that carries all five app shapes on purpose: a single
  * app with stack-scoped compiled routing, a per-config app with file sets, a
- * per-config app with none, and the instance-scoped app that declares the
- * fetcher source families. A UI that special-cases an app name fails against
- * this.
+ * per-config app with none, the instance-scoped app that declares the fetcher
+ * source families, and an optional app this profile is not offered. A UI that
+ * special-cases an app name fails against this.
  */
 const DEFAULT_APPS: TAppsResponse = [
   {
@@ -39,6 +39,8 @@ const DEFAULT_APPS: TAppsResponse = [
     multiplicity: 'single',
     has_compiled_routing: true,
     routing_scope: 'stack',
+    optional: false,
+    offered: true,
     file_sets: [],
     instances: ['default'],
   },
@@ -48,6 +50,8 @@ const DEFAULT_APPS: TAppsResponse = [
     multiplicity: 'per_config',
     has_compiled_routing: false,
     routing_scope: 'stack',
+    optional: false,
+    offered: true,
     file_sets: [
       {
         name: 'transforms',
@@ -65,6 +69,8 @@ const DEFAULT_APPS: TAppsResponse = [
     multiplicity: 'per_config',
     has_compiled_routing: false,
     routing_scope: 'stack',
+    optional: false,
+    offered: true,
     file_sets: [],
     instances: [],
   },
@@ -74,7 +80,22 @@ const DEFAULT_APPS: TAppsResponse = [
     multiplicity: 'per_config',
     has_compiled_routing: true,
     routing_scope: 'instance',
+    optional: false,
+    offered: true,
     source_types: ['crates_io', 'okta', 'aws'],
+    file_sets: [],
+    instances: [],
+  },
+  {
+    service: 'culvert',
+    scale_deployed: false,
+    multiplicity: 'single',
+    has_compiled_routing: false,
+    routing_scope: 'stack',
+    optional: true,
+    profiles: ['scale', 'scale-mesh'],
+    default_in: [],
+    offered: false,
     file_sets: [],
     instances: [],
   },
@@ -158,6 +179,7 @@ export const apps = {
           multiplicity: 'per_config',
           has_compiled_routing: false,
           routing_scope: 'stack',
+          optional: false,
           file_sets: [],
         },
         service = 'service',
@@ -426,7 +448,12 @@ export const apps = {
       success: ({
         mockedResponse = {
           compiler: 'receiver',
-          values_path: 'config.routing',
+          // An app owns each derived block whole, so a compile writes more than
+          // one of them; the receiver's rules and its destinations are siblings.
+          values_paths: {
+            routing: 'config.routing',
+            destinations: 'config.destinations',
+          },
           drift: false,
           absent: false,
           compiled: {
