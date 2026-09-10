@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { CreateUpdateSourceFormData, formSchema } from './sourceForm.schema';
 
 const BASE = {
-  source: 'crates_audit',
+  source: 'crates-audit',
   enabled: true,
 } satisfies Pick<CreateUpdateSourceFormData, 'source' | 'enabled'>;
 
