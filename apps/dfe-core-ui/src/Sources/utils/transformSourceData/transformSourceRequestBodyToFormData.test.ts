@@ -17,7 +17,7 @@ describe('transformSourceRequestBodyToFormData', () => {
         date_time: 'string',
         fetcher: {
           source_type: 'crates_io',
-          topic: 'default',
+          topic: 'main',
           config: { crates: ['dfe-fetcher'], interval_secs: 3600 },
         },
       },
@@ -27,7 +27,7 @@ describe('transformSourceRequestBodyToFormData', () => {
     expect(result.origin).toBe('fetcher');
     expect(result.fetcher).toEqual({
       source_type: 'crates_io',
-      topic: 'default',
+      topic: 'main',
       config: 'crates:\n  - dfe-fetcher\ninterval_secs: 3600\n',
     });
     expect(result.source).toBe('source');

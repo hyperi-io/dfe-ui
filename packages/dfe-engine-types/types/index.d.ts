@@ -113,6 +113,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/setup/retire-admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retire Bootstrap Admin
+         * @description Retire the bootstrap admin: disable it and record the fact in the deploy repo.
+         *
+         *     The deployment mints the admin password and the engine reasserts it on every
+         *     boot, so until it is retired the plaintext in the Secret or ``.env`` is a
+         *     working admin credential for anyone with cluster or host access. Retiring
+         *     ends the reseed: the account stays disabled, the password may be deleted, and
+         *     ``breakglass`` is the recovery path.
+         *
+         *     Refused unless the deployment already has an enabled admin-role account of its
+         *     own -- ``retire_admin_available`` on the setup status is the same predicate, so
+         *     the wizard only offers what this accepts. Returns the setup status, which now
+         *     reports ``admin_retired``. Reversal is not an API: remove ``admin_retired``
+         *     from ``governance/settings/auth.yaml`` in the deploy repo and restart.
+         */
+        post: operations["retire_bootstrap_admin_api_v1_auth_setup_retire_admin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/oidc/{provider}/login": {
         parameters: {
             query?: never;
@@ -10314,6 +10346,24 @@ export interface components {
              * @description Retention in days a source gets when it sets none; 0 = none.
              */
             default_ttl_days: number;
+            /**
+             * Admin Username
+             * @description The bootstrap admin's account name, which the deployment may rename. The console names it in the retire prompt and marks it retired in the account list, so it cannot guess at 'admin'.
+             * @default
+             */
+            admin_username: string;
+            /**
+             * Admin Retired
+             * @description True when the bootstrap admin has been retired: the deploy repo carries the fact, the account is disabled and never reseeded, and the minted password may be deleted from the Secret or .env.
+             * @default false
+             */
+            admin_retired: boolean;
+            /**
+             * Retire Admin Available
+             * @description True when retiring the bootstrap admin would be accepted now: setup is complete, an enabled admin-role account other than the seeded pair exists, and the admin is not retired yet. The wizard enables its button on it.
+             * @default false
+             */
+            retire_admin_available: boolean;
         };
         /**
          * SetupStep
@@ -10581,7 +10631,7 @@ export interface components {
          *     ``config`` is the fetcher's own per-type stanza, carried verbatim into the
          *     deployed instance under ``config.sources.<source_type>``. The engine owns
          *     ``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records
-         *     land on the source's own topic (and table) or on the platform default.
+         *     land on the source's own topic (and table) or on the shared ``main`` landing.
          */
         SourceFetcher: {
             /**
@@ -10591,11 +10641,11 @@ export interface components {
             source_type: string;
             /**
              * Topic
-             * @description own: records land on this source's topic and table; default: they land on the platform default table
+             * @description own: records land on this source's topic and table; main: they land on the shared main topic and table
              * @default own
              * @enum {string}
              */
-            topic: "own" | "default";
+            topic: "own" | "main";
             /**
              * Config
              * @description The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references
@@ -12399,6 +12449,26 @@ export interface operations {
         };
     };
     get_setup_status_api_v1_auth_setup_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupStatus"];
+                };
+            };
+        };
+    };
+    retire_bootstrap_admin_api_v1_auth_setup_retire_admin_post: {
         parameters: {
             query?: never;
             header?: never;

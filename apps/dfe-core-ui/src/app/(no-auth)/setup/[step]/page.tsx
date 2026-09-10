@@ -21,24 +21,20 @@ export default async function SetupStepPage({
     notFound();
   }
 
-  const { initial_setup, oidc_providers, organisations, break_glass } =
+  const { initial_setup, oidc_providers, organisations } =
     await getSetupStatus();
   if (initial_setup.complete) {
-    redirect('/login');
+    redirect('/');
   }
 
   const userCreated =
     initial_setup?.completed_steps?.includes('first_user') ?? false;
-  const isAdminReset =
-    initial_setup?.completed_steps?.includes('admin_password') ?? false;
 
   return (
     <SetupScene
       oidcProvider={oidc_providers?.[0] || null}
       organisation={organisations?.[0] || null}
       userCreated={userCreated}
-      isAdminReset={isAdminReset}
-      breakGlass={break_glass || null}
     />
   );
 }

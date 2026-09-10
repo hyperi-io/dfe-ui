@@ -14,12 +14,8 @@ export type TOidcProvider =
 export type TOrganisation =
   | NonNullable<TFetchSetupStatusResponse['organisations']>[number]
   | null;
-export type TBreakGlass = NonNullable<TFetchSetupStatusResponse['break_glass']>;
-
 export type TSetupWizardProps = {
   oidcProvider: TOidcProvider;
   organisation: TOrganisation;
   userCreated: boolean;
-  isAdminReset: boolean;
-  breakGlass: TBreakGlass | null;
 };

@@ -28,7 +28,10 @@ export default async function Login({
   const session = await getServerSession(authOptions);
   const { initial_setup } = await getSetupStatus();
 
-  if (session && !initial_setup.complete) {
+  // isAppShellSession, not a bare truthy check: a session whose engine token is
+  // missing or expired cannot run the wizard, so sending it there strands the
+  // operator on a form that 401s with no way back to this page.
+  if (isAppShellSession(session) && !initial_setup.complete) {
     redirect('/setup');
   }
   if (isAppShellSession(session)) {
