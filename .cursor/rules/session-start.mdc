@@ -1,11 +1,10 @@
 ---
 category: Auto Attached
-description: Session initialization — read STANDARDS.md for coding standards
+description: Session initialization — read the repo's own docs for project context
 ---
 
 # Start Session
 
-1. Read `STATE.md` and `TODO.md` for project context
-2. Read `hyperi-ai/standards/STANDARDS.md` for coding standards index
-3. Standards in `hyperi-ai/standards/` — language and infrastructure standards
-   are in `languages/` and `infrastructure/`, auto-matched by file type
+1. Read `README.md` and `CONTRIBUTING.md` for project context
+2. Coding standards are the `.cursor/rules/*.mdc` files in this repo, matched by
+   file type

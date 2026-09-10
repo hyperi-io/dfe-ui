@@ -5,7 +5,14 @@ import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
-import { getValidationErrors, type FormValidationErrors } from './helpers';
+import {
+  getTabErrors,
+  getTabsWithErrors,
+  getValidationErrors,
+  TAB_LABEL_MAP,
+  type FormValidationErrors,
+  type SourceFormTab,
+} from './helpers';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
@@ -35,14 +42,6 @@ type CreateUpdateSourceFormProps = FormProps<CreateUpdateSourceFormData> & {
   buttonLabel?: string;
   disabledFields?: DisabledFields;
   hasReset?: boolean;
-};
-
-const TAB_LABEL_MAP = {
-  sourceDetails: 'Configuration',
-  origin: 'Origin',
-  schemaConfig: 'Meta Schema',
-  transform: 'Transform',
-  views: 'Views',
 };
 
 export const CreateUpdateSourceFormBase = ({
@@ -102,6 +101,81 @@ export const CreateUpdateSourceFormBase = ({
   const metaSchema = Form.useWatch(['schema'], form);
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
+  const tabItems = [
+    {
+      key: 'sourceDetails',
+      label: (
+        <TabLabel
+          label={TAB_LABEL_MAP['sourceDetails']}
+          validationErrors={getTabErrors(validationErrors, 'sourceDetails')}
+        />
+      ),
+      forceRender: true,
+      children: (
+        <SourceDetailsTabContent
+          formValidation={formValidation}
+          disabledFields={disabledFields}
+          form={form}
+        />
+      ),
+    },
+    {
+      key: 'schemaConfig',
+      label: (
+        <TabLabel
+          label={TAB_LABEL_MAP['schemaConfig']}
+          validationErrors={getTabErrors(validationErrors, 'schemaConfig')}
+        />
+      ),
+      forceRender: true,
+      children: (
+        <SchemaConfigTabContent formValidation={formValidation} form={form} />
+      ),
+    },
+
+    ...(isMetaSchemaFormValueDefined
+      ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
+        [
+          {
+            key: 'transform',
+            label: (
+              <TabLabel
+                label={TAB_LABEL_MAP['transform']}
+                validationErrors={getTabErrors(validationErrors, 'transform')}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <TransformTabContent
+                formValidation={formValidation}
+                form={form}
+              />
+            ),
+          },
+          {
+            key: 'views',
+            label: (
+              <TabLabel
+                label={TAB_LABEL_MAP['views']}
+                validationErrors={getTabErrors(validationErrors, 'views')}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <ViewsTabContent formValidation={formValidation} form={form} />
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  // Named off the rendered tabs, so the banner can never send the user to a tab
+  // this dialog does not have.
+  const tabsWithErrors = getTabsWithErrors(
+    validationErrors,
+    tabItems.map((item) => item.key as SourceFormTab),
+  );
+
   return (
     <Form
       form={form}
@@ -119,82 +193,7 @@ export const CreateUpdateSourceFormBase = ({
       onFieldsChange={handleFieldsChange}
       {...props}
     >
-      <Tabs
-        destroyOnHidden={false}
-        items={[
-          {
-            key: 'sourceDetails',
-            label: (
-              <TabLabel
-                label={TAB_LABEL_MAP['sourceDetails']}
-                validationErrors={validationErrors?.sourceDetails}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <SourceDetailsTabContent
-                formValidation={formValidation}
-                disabledFields={disabledFields}
-                form={form}
-              />
-            ),
-          },
-          {
-            key: 'schemaConfig',
-            label: (
-              <TabLabel
-                label="Meta Schema"
-                validationErrors={validationErrors?.schemaConfig}
-              />
-            ),
-            forceRender: true,
-            children: (
-              <SchemaConfigTabContent
-                formValidation={formValidation}
-                form={form}
-              />
-            ),
-          },
-
-          ...(isMetaSchemaFormValueDefined
-            ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
-              [
-                {
-                  key: 'transform',
-                  label: (
-                    <TabLabel
-                      label="Transform"
-                      validationErrors={validationErrors?.transform}
-                    />
-                  ),
-                  forceRender: true,
-                  children: (
-                    <TransformTabContent
-                      formValidation={formValidation}
-                      form={form}
-                    />
-                  ),
-                },
-                {
-                  key: 'views',
-                  label: (
-                    <TabLabel
-                      label="Views"
-                      validationErrors={validationErrors?.views}
-                    />
-                  ),
-                  forceRender: true,
-                  children: (
-                    <ViewsTabContent
-                      formValidation={formValidation}
-                      form={form}
-                    />
-                  ),
-                },
-              ]
-            : []),
-        ]}
-      />
+      <Tabs destroyOnHidden={false} items={tabItems} />
 
       {error && (
         <Form.Item>
@@ -205,19 +204,14 @@ export const CreateUpdateSourceFormBase = ({
         </Form.Item>
       )}
 
-      {Object.values(validationErrors).some((errors) => errors.length > 0) && (
+      {tabsWithErrors.length > 0 && (
         <Form.Item>
           <FormNotification
             type="warning"
             text={
               <>
-                There are validation errors in the following tabs:
-                {Object.keys(validationErrors)
-                  .map(
-                    (key) => TAB_LABEL_MAP[key as keyof typeof TAB_LABEL_MAP],
-                  )
-                  .join(', ')}
-                .<br />
+                There are validation errors in the following tabs:{' '}
+                {tabsWithErrors.join(', ')}.<br />
                 Please address the errors and try again.
               </>
             }

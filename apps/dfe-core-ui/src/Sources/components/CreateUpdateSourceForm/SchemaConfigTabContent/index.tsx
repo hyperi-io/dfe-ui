@@ -28,7 +28,8 @@ export const SchemaConfigTabContent = ({
           setAssignSchema(e.target.value as AssignSchemaOptions);
         }}
       >
-        <Radio value="default">Default</Radio>
+        {/* The shared landing table is dfe.main, so the choice is named for it. */}
+        <Radio value="default">main</Radio>
         <Radio value="define_schema">Define Schema</Radio>
       </Radio.Group>
 

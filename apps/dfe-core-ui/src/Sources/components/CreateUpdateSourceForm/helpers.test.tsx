@@ -1,5 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import { FormValidationErrors, getValidationErrors } from './helpers';
+import {
+  FormValidationErrors,
+  getTabsWithErrors,
+  getValidationErrors,
+} from './helpers';
+
+const NO_ERRORS: FormValidationErrors = {
+  sourceDetails: [],
+  origin: [],
+  schemaConfig: [],
+  transform: [],
+  views: [],
+};
 
 const ERROR_FIELDS = [
   {
@@ -166,5 +178,40 @@ describe('getValidationErrors', () => {
   test('when formFields are from onFieldsChange it should return the correct validation errors', () => {
     const result = getValidationErrors({ formFields: ALL_FIELDS });
     expect(result).toEqual(expectedResponse);
+  });
+});
+
+describe('getTabsWithErrors', () => {
+  test('names only the tabs that hold an error', () => {
+    expect(
+      getTabsWithErrors(
+        { ...NO_ERRORS, schemaConfig: ['Engine is required'] },
+        ['sourceDetails', 'schemaConfig'],
+      ),
+    ).toEqual(['Meta Schema']);
+  });
+
+  test('never names a tab the dialog is not showing', () => {
+    expect(
+      getTabsWithErrors(
+        { ...NO_ERRORS, transform: ['Transform is required'] },
+        ['sourceDetails', 'schemaConfig'],
+      ),
+    ).toEqual([]);
+  });
+
+  test('reports an origin error against Configuration, which is where it renders', () => {
+    expect(
+      getTabsWithErrors({ ...NO_ERRORS, origin: ['Topic is required'] }, [
+        'sourceDetails',
+        'schemaConfig',
+      ]),
+    ).toEqual(['Configuration']);
+  });
+
+  test('is empty when nothing failed', () => {
+    expect(
+      getTabsWithErrors(NO_ERRORS, ['sourceDetails', 'schemaConfig']),
+    ).toEqual([]);
   });
 });
