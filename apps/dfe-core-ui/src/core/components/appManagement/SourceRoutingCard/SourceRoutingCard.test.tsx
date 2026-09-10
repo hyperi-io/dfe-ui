@@ -50,7 +50,7 @@ describe('SourceRoutingCard', () => {
         instance: 'default',
         mockedResponse: {
           compiler: 'receiver',
-          values_path: 'config.routing',
+          values_paths: { routing: 'config.routing' },
           drift: true,
           absent: false,
           compiled: {
@@ -83,7 +83,7 @@ describe('SourceRoutingCard', () => {
         instance: 'default',
         mockedResponse: {
           compiler: 'receiver',
-          values_path: 'config.routing',
+          values_paths: { routing: 'config.routing' },
           drift: true,
           absent: true,
           compiled: { source_rules: [] },
@@ -116,7 +116,7 @@ describe('SourceRoutingCard', () => {
         instance: 'default',
         mockedResponse: {
           compiler: 'loader',
-          values_path: 'config.routing',
+          values_paths: { routing: 'config.routing' },
           drift: false,
           absent: false,
           compiled: { source_routing: true, source_to_table: {} },
