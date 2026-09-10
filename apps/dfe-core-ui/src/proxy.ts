@@ -10,10 +10,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 /*
  * Next.js 16 middleware (renamed middleware -> proxy; nodejs runtime).
  *
- * withAuth guards the (auth) route group and would send unauthenticated
- * users to /login before the (auth) layout can send first-run traffic to
- * /setup. Consult setup status here: incomplete → /setup, otherwise
- * unauthenticated → /login.
+ * withAuth guards the (auth) route group. Authentication is checked FIRST and
+ * the setup redirect only applies to a request that already carries a session:
+ * the wizard's every call is an authenticated engine call, so handing an
+ * anonymous visitor the wizard produces a form that 401s on submit. Anonymous →
+ * /login, authenticated + incomplete → /setup.
  *
  * Proxy-trust addition (DFE_AUTH_MODE=proxy, single origin behind Envoy): when
  * the engine has forwarded its ES384 token (dfe_token cookie) but NextAuth has
@@ -116,15 +117,6 @@ export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
-  if (await isInitialSetupIncomplete()) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/setup';
-    url.search = '';
-    const response = NextResponse.redirect(url);
-    await plantEngineTokenCookie(req, response);
-    return response;
-  }
-
   if (isProxyAuthMode()) {
     const hasSession = SESSION_COOKIES.some((name) => req.cookies.has(name));
     const hasEngineToken = req.cookies.has(DFE_TOKEN_COOKIE);
@@ -143,7 +135,22 @@ export default async function proxy(
   );
   const isRedirect =
     result instanceof NextResponse && result.headers.has('location');
-  const response = isRedirect ? result : nextWithCallbackPath(req);
+  if (isRedirect) {
+    await plantEngineTokenCookie(req, result);
+    return result;
+  }
+
+  // Authenticated from here, so the setup status is worth the engine round trip.
+  if (await isInitialSetupIncomplete()) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/setup';
+    url.search = '';
+    const response = NextResponse.redirect(url);
+    await plantEngineTokenCookie(req, response);
+    return response;
+  }
+
+  const response = nextWithCallbackPath(req);
   await plantEngineTokenCookie(req, response);
   return response;
 }

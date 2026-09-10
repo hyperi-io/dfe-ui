@@ -3,6 +3,7 @@ import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 import { TLoginResponse } from '@/core/hooks/useLogin/types';
 import { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
+import { TRetireAdminResponse } from '@/core/hooks/useRetireAdmin/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -138,12 +139,58 @@ export const auth = {
           deploy_kind: 'local',
           credential_fetch_command: '',
           default_ttl_days: 90,
+          admin_username: 'admin',
+          admin_retired: false,
+          retire_admin_available: false,
         },
       }: {
         mockedResponse?: TFetchSetupStatusResponse;
       } = {}) => {
         return http.get(auth.setupStatus.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+  },
+  retireAdmin: {
+    mockedUrl: '/api/v1/auth/setup/retire-admin',
+    post: {
+      success: ({
+        mockedResponse = {
+          initial_setup: {
+            complete: true,
+            current_step: null,
+            steps: [],
+            pending_steps: [],
+            completed_steps: [],
+            step_details: [],
+          },
+          oidc_providers: [],
+          organisations: [],
+          default_credentials: false,
+          deploy_kind: 'local',
+          credential_fetch_command: '',
+          default_ttl_days: 90,
+          admin_username: 'admin',
+          admin_retired: true,
+          retire_admin_available: false,
+        },
+      }: {
+        mockedResponse?: TRetireAdminResponse;
+      } = {}) => {
+        return http.post(auth.retireAdmin.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 409,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(auth.retireAdmin.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
         });
       },
     },

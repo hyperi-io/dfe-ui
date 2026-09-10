@@ -15,9 +15,10 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         fetcher: {
           source_type: 'crates_io',
-          topic: 'default',
+          topic: 'main',
           config: { crates: ['dfe-fetcher'], interval_secs: 3600 },
         },
       },
@@ -27,7 +28,7 @@ describe('transformSourceRequestBodyToFormData', () => {
     expect(result.origin).toBe('fetcher');
     expect(result.fetcher).toEqual({
       source_type: 'crates_io',
-      topic: 'default',
+      topic: 'main',
       config: 'crates:\n  - dfe-fetcher\ninterval_secs: 3600\n',
     });
     expect(result.source).toBe('source');
@@ -46,6 +47,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         match: { field: 'field', value: 'value', operator: 'equals' },
       },
     };
@@ -78,7 +80,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['1.0.0'],
       selected: '1.0.0',
       state: 'active',
-      version: { date_time: 'string', fetcher },
+      version: { date_time: 'string', archive: false, fetcher },
     };
 
     const formData = transformSourceRequestBodyToFormData(source);
@@ -98,6 +100,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       state: 'active',
       version: {
         date_time: 'string',
+        archive: false,
         header: { type: 'string', version: 'string' },
       },
     };

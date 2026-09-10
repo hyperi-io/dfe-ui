@@ -39,6 +39,7 @@ describe('.useFetchSourceDetail', () => {
         state: 'active',
         version: {
           date_time: 'string',
+          archive: false,
           header: {
             type: 'string',
             version: 'string',

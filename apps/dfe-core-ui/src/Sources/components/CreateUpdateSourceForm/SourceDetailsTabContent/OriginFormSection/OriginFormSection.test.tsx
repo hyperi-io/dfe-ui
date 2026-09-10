@@ -127,7 +127,7 @@ describe('OriginFormSection', () => {
           origin: 'fetcher',
           fetcher: {
             source_type: 'crates_io',
-            topic: 'default',
+            topic: 'main',
             config: 'crates:\n  - dfe-fetcher\n',
           },
         }}

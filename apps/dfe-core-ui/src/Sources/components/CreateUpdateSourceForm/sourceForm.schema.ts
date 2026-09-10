@@ -24,11 +24,22 @@ export const MATCH_OPERATORS = [
 export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
 export type SourceOrigin = (typeof SOURCE_ORIGINS)[number];
 
-export const FETCHER_TOPICS = ['own', 'default'] as const;
+export const FETCHER_TOPICS = ['own', 'main'] as const;
 
 export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
   own: 'Own topic and table',
-  default: 'Platform default table',
+  main: 'Shared main table',
+};
+
+/** Which of a deployment's two transports carries this source's records. */
+export const SOURCE_TRANSPORTS = ['bus', 'direct'] as const;
+
+export const SOURCE_TRANSPORT_LABELS: Record<
+  (typeof SOURCE_TRANSPORTS)[number],
+  string
+> = {
+  bus: 'Bus - a broker holds records between stages',
+  direct: 'Direct - point to point, nothing stored between stages',
 };
 
 const sourceDetailsTabSchema = {
@@ -36,6 +47,10 @@ const sourceDetailsTabSchema = {
   display_name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   enabled: z.boolean({ message: 'Enabled is required' }),
+  // Null is a value here, not an omission: it puts the source back on the
+  // deployment default, and the engine refuses one the deployment lacks.
+  transport: z.enum(SOURCE_TRANSPORTS).optional().nullable(),
+  archive: z.boolean(),
 };
 
 /**

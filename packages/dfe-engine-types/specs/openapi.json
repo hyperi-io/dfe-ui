@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.19.10"
+    "version": "1.19.15"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -142,6 +142,33 @@
         "summary": "Get Setup Status",
         "description": "Report first-run setup state and what is configured (no auth \u2014 pre-login UI).\n\nDriven by the setup state machine (``state_machines/setup.py``). The\nregistries the wizard renders \u2014 OIDC providers and organisations \u2014 are\nreturned while setup is outstanding and dropped once it completes, so a\nconfigured deployment does not serve its inventory to anonymous callers.\nThe exception is the name and display name of each enabled OIDC provider,\nwhich stay (no configuration) because the login screen needs to know which\nIdPs to offer and what to call them. Accounts are never returned; the\n``first_user`` step reports whether a real (non break-glass) user exists.",
         "operationId": "get_setup_status_api_v1_auth_setup_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/setup/retire-admin": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Retire Bootstrap Admin",
+        "description": "Retire the bootstrap admin: disable it and record the fact in the deploy repo.\n\nThe deployment mints the admin password and the engine reasserts it on every\nboot, so until it is retired the plaintext in the Secret or ``.env`` is a\nworking admin credential for anyone with cluster or host access. Retiring\nends the reseed: the account stays disabled, the password may be deleted, and\n``breakglass`` is the recovery path.\n\nRefused unless the deployment already has an enabled admin-role account of its\nown -- ``retire_admin_available`` on the setup status is the same predicate, so\nthe wizard only offers what this accepts. Returns the setup status, which now\nreports ``admin_retired``. Reversal is not an API: remove ``admin_retired``\nfrom ``governance/settings/auth.yaml`` in the deploy repo and restart.",
+        "operationId": "retire_bootstrap_admin_api_v1_auth_setup_retire_admin_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -3441,7 +3468,7 @@
           "Sources"
         ],
         "summary": "Get Source",
-        "description": "Get a full source definition by name, including build/deploy per version.",
+        "description": "Get a full source definition by name, including build/deploy per version.\n\n``default`` is the one name that always answers. It is a normal source once\nwritten; until then the deployment's own default flow is synthesised, so the\nconsole has the card it draws before anyone has configured anything.",
         "operationId": "get_source_api_v1_sources__name__get",
         "parameters": [
           {
@@ -3645,6 +3672,47 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sources/{name}/flow": {
+      "get": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "Get Source Flow",
+        "description": "The stages this source's records travel, resolved against this deployment.\n\nThe console draws the flow from this rather than from the source's fields,\nfor the same reason the compilers write from it: the topics, the endpoints\nand the instance running each stage follow from the source plus the\ndeployment, and one resolver is what keeps the drawing and the deployed\nconfig the same answer.",
+        "operationId": "get_source_flow_api_v1_sources__name__flow_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceFlowResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The source's stages cannot be run as declared - the message names which stage refused and why"
           }
         },
         "security": [
@@ -5975,7 +6043,7 @@
           "System"
         ],
         "summary": "Get Version",
-        "description": "Get engine version info.",
+        "description": "What this deployment runs.\n\nAuthenticated but ungated on purpose: the console footer is on every page, and\nthe body carries versions only.\n\nThe pins win where there are any: they are what the operator chose. A deploy\nwith no pins base still knows what stood it up, because the chart passes that\nin, so the footer shows a stack version rather than nothing. With neither, the\nengine's own version is the whole answer.",
         "operationId": "get_version_api_v1_system_version_get",
         "responses": {
           "200": {
@@ -11745,17 +11813,41 @@
         "summary": "List Apps",
         "description": "Every manageable app, with the instances currently deployed.",
         "operationId": "list_apps_api_v1_apps_get",
+        "parameters": [
+          {
+            "name": "profile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and every app is reported as offered.",
+              "default": "",
+              "title": "Profile"
+            },
+            "description": "Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and every app is reported as offered."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/CatalogueEntry"
                   },
-                  "type": "array",
                   "title": "Response List Apps Api V1 Apps Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -16440,6 +16532,35 @@
             "description": "stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources",
             "default": "stack"
           },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "description": "Whether a deployment runs without this app. Derived from default_in being empty, so it cannot disagree with it: an app nothing deploys by default is the one an operator turns on.",
+            "default": false
+          },
+          "profiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profiles",
+            "description": "The deployment profiles this app may be deployed in; empty means every profile. An offer to list, not a gate: the deploy repo decides what is actually deployed."
+          },
+          "default_in": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default In",
+            "description": "The profiles a deployment runs this app in without being asked. Null means the same as profiles; an empty list means nothing deploys it, which is what optional reports."
+          },
           "file_sets": {
             "items": {
               "$ref": "#/components/schemas/FileSetSummary"
@@ -17053,6 +17174,41 @@
             "title": "Routing Scope",
             "description": "stack: the routing compiles from every source into one deployment; instance: it compiles from the one source the instance is named for, and the engine deploys and removes such instances with their sources",
             "default": "stack"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "description": "Whether a deployment runs without this app. Derived from default_in being empty, so it cannot disagree with it: an app nothing deploys by default is the one an operator turns on.",
+            "default": false
+          },
+          "profiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Profiles",
+            "description": "The deployment profiles this app may be deployed in; empty means every profile. An offer to list, not a gate: the deploy repo decides what is actually deployed."
+          },
+          "default_in": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default In",
+            "description": "The profiles a deployment runs this app in without being asked. Null means the same as profiles; an empty list means nothing deploys it, which is what optional reports."
+          },
+          "offered": {
+            "type": "boolean",
+            "title": "Offered",
+            "description": "Whether this app is offered in the profile the caller asked about. True for every app when the caller named no profile, so a console that does not know the deployment's profile lists everything rather than hiding what it cannot rule out.",
+            "default": true
           },
           "source_types": {
             "items": {
@@ -18529,6 +18685,26 @@
         "title": "ErrorResponse",
         "description": "Unified error response.\n\nAll API errors return this shape. The UI can always parse:\n- ``code`` for programmatic branching\n- ``message`` for a human-readable summary\n- ``errors`` for field-level validation details (422 only)\n- ``context`` for optional structured data on specific errors (e.g. conflicts)"
       },
+      "FetcherRoute": {
+        "properties": {
+          "match": {
+            "$ref": "#/components/schemas/SourceMatch",
+            "description": "Which fetched records take this route"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "The source whose landing the matched records go to"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match",
+          "source"
+        ],
+        "title": "FetcherRoute",
+        "description": "One fetched record family this fetcher hands to a DIFFERENT source's landing.\n\nA fetcher polls one upstream but can pull several record shapes off it. A route\nsends the ones that match somewhere other than the owning source's landing, so\nthey get that source's table and transform instead."
+      },
       "FieldError": {
         "properties": {
           "field": {
@@ -18823,6 +18999,87 @@
         ],
         "title": "FilterTier",
         "description": "Performance tier for a filter expression."
+      },
+      "FlowOutputsModel": {
+        "properties": {
+          "loader": {
+            "type": "string",
+            "title": "Loader",
+            "description": "The topic the loader consumes, or the endpoint it is pushed to"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Whether the archiver also keeps the raw record off the landing topic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loader",
+          "archive"
+        ],
+        "title": "FlowOutputsModel",
+        "description": "Where the records end up."
+      },
+      "FlowTransformModel": {
+        "properties": {
+          "app": {
+            "type": "string",
+            "title": "App",
+            "description": "Catalogued app running it, e.g. dfe-transform-vrl"
+          },
+          "instance": {
+            "type": "string",
+            "title": "Instance",
+            "description": "Its deployed name, e.g. dfe-transform-vrl-auth"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant",
+            "description": "The compiled-in program it runs, where the app offers a catalogue of them"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint",
+            "description": "Direct: the address records reach it on. Null on the bus."
+          },
+          "topics": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topics",
+            "description": "Bus: the landing and transformed topics. Null on direct."
+          }
+        },
+        "type": "object",
+        "required": [
+          "app",
+          "instance"
+        ],
+        "title": "FlowTransformModel",
+        "description": "The transform stage, when the source has one."
       },
       "FromHyperdxRequest": {
         "properties": {
@@ -24452,12 +24709,15 @@
           "compiler": {
             "type": "string",
             "title": "Compiler",
-            "description": "Manifest-declared compiler that derives this block"
+            "description": "Manifest-declared compiler that derives these blocks"
           },
-          "values_path": {
-            "type": "string",
-            "title": "Values Path",
-            "description": "Overlay dot-path the block is written to"
+          "values_paths": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Values Paths",
+            "description": "Each derived block by name, and the overlay dot-path it is written to"
           },
           "drift": {
             "type": "boolean",
@@ -24472,12 +24732,14 @@
           "compiled": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Compiled"
+            "title": "Compiled",
+            "description": "Each block the sources call for now, by name"
           },
           "deployed": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Deployed"
+            "title": "Deployed",
+            "description": "The same blocks as the overlay carries them"
           },
           "etag": {
             "anyOf": [
@@ -24495,7 +24757,6 @@
         "type": "object",
         "required": [
           "compiler",
-          "values_path",
           "drift",
           "absent"
         ],
@@ -26417,6 +26678,24 @@
             "type": "integer",
             "title": "Default Ttl Days",
             "description": "Retention in days a source gets when it sets none; 0 = none."
+          },
+          "admin_username": {
+            "type": "string",
+            "title": "Admin Username",
+            "description": "The bootstrap admin's account name, which the deployment may rename. The console names it in the retire prompt and marks it retired in the account list, so it cannot guess at 'admin'.",
+            "default": ""
+          },
+          "admin_retired": {
+            "type": "boolean",
+            "title": "Admin Retired",
+            "description": "True when the bootstrap admin has been retired: the deploy repo carries the fact, the account is disabled and never reseeded, and the minted password may be deleted from the Secret or .env.",
+            "default": false
+          },
+          "retire_admin_available": {
+            "type": "boolean",
+            "title": "Retire Admin Available",
+            "description": "True when retiring the bootstrap admin would be accepted now: setup is complete, an enabled admin-role account other than the seeded pair exists, and the admin is not retired yet. The wizard enables its button on it.",
+            "default": false
           }
         },
         "type": "object",
@@ -26771,6 +27050,29 @@
             "title": "Origin",
             "description": "How the deployed version's data enters: receiver match or a fetcher.",
             "readOnly": true
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "Declared transport on the deployed version (None = the deployment default).",
+            "readOnly": true
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Whether the deployed version keeps the raw record.",
+            "readOnly": true
           }
         },
         "type": "object",
@@ -26779,7 +27081,9 @@
           "enabled",
           "match",
           "transform",
-          "origin"
+          "origin",
+          "transport",
+          "archive"
         ],
         "title": "SourceDetailResponse",
         "description": "Full source definition with per-version build/plan/deploy status."
@@ -26832,10 +27136,10 @@
             "type": "string",
             "enum": [
               "own",
-              "default"
+              "main"
             ],
             "title": "Topic",
-            "description": "own: records land on this source's topic and table; default: they land on the platform default table",
+            "description": "own: records land on this source's topic and table; main: they land on the shared main topic and table",
             "default": "own"
           },
           "config": {
@@ -26843,6 +27147,14 @@
             "type": "object",
             "title": "Config",
             "description": "The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/FetcherRoute"
+            },
+            "type": "array",
+            "title": "Routes",
+            "description": "Send matching fetched records to another source's landing instead of this one's. The named source must exist, which is checked when the fetcher instance is compiled, not here"
           }
         },
         "type": "object",
@@ -26850,7 +27162,64 @@
           "source_type"
         ],
         "title": "SourceFetcher",
-        "description": "Fetcher-based origin: one dfe-fetcher deployment, named for the source.\n\n``config`` is the fetcher's own per-type stanza, carried verbatim into the\ndeployed instance under ``config.sources.<source_type>``. The engine owns\n``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records\nland on the source's own topic (and table) or on the platform default."
+        "description": "Fetcher-based origin: one dfe-fetcher deployment, named for the source.\n\n``config`` is the fetcher's own per-type stanza, carried verbatim into the\ndeployed instance under ``config.sources.<source_type>``. The engine owns\n``enabled`` and ``topic`` on that stanza: ``topic`` selects whether records\nland on the source's own topic (and table) or on the shared ``main`` landing."
+      },
+      "SourceFlowResponse": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "transport": {
+            "type": "string",
+            "title": "Transport",
+            "description": "bus: a broker holds records between stages; direct: no store"
+          },
+          "carrier": {
+            "type": "string",
+            "title": "Carrier",
+            "description": "What carries it here - the bus provider, or the direct protocol"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "description": "receiver or fetcher"
+          },
+          "input": {
+            "type": "string",
+            "title": "Input",
+            "description": "The receiver match that selects the records, or the fetcher instance polling them"
+          },
+          "transform": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowTransformModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outputs": {
+            "$ref": "#/components/schemas/FlowOutputsModel"
+          },
+          "table": {
+            "type": "string",
+            "title": "Table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "transport",
+          "carrier",
+          "origin",
+          "input",
+          "outputs",
+          "table"
+        ],
+        "title": "SourceFlowResponse",
+        "description": "One source's whole path, as the resolver reports it.\n\nThe wire shape of ``dfe_engine.source.flow.SourceFlow``, and the only copy of\nit: everything here is built by ``_flow_response`` from that dataclass, so a\nstage the resolver gains is a field added in one place."
       },
       "SourceHeader": {
         "properties": {
@@ -26913,16 +27282,17 @@
               "exists",
               "includes",
               "starts_with",
-              "ends_with"
+              "ends_with",
+              "always"
             ],
             "title": "Operator",
-            "description": "How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals",
+            "description": "How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source",
             "default": "equals"
           },
           "value": {
             "type": "string",
             "title": "Value",
-            "description": "Operand for the operator (not used when operator is ``exists``)",
+            "description": "Operand for the operator (not used by ``exists`` or ``always``)",
             "default": ""
           }
         },
@@ -27385,6 +27755,18 @@
             "title": "Engine",
             "description": "Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)"
           },
+          "variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant",
+            "description": "The compiled-in program this instance runs, where the app offers a catalogue of them (dfe-transform-elastic selects one by source.name). None for an app whose program is the authored files it is given"
+          },
           "config_file": {
             "anyOf": [
               {
@@ -27490,6 +27872,28 @@
               }
             ],
             "description": "Transform stage (optional)"
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "How this source's stages hand records on: bus (a broker holds them) or direct (point to point). None takes the deployment default"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Keep a copy of every record as it arrived, before any transform. The archiver reads the landing topic, so this needs the bus transport",
+            "default": false
           },
           "source_build": {
             "anyOf": [
@@ -27809,6 +28213,28 @@
               }
             ],
             "description": "Fetcher-based origin; required unless ``match`` is set"
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bus",
+                  "direct"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transport",
+            "description": "bus or direct; omitted takes the deployment default"
+          },
+          "archive": {
+            "type": "boolean",
+            "title": "Archive",
+            "description": "Keep the raw record as it arrived; needs the bus transport",
+            "default": false
           },
           "views": {
             "anyOf": [
@@ -29069,10 +29495,44 @@
       },
       "VersionResponse": {
         "properties": {
-          "version": {
+          "stack": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack",
+            "description": "Certified stack version this deployment runs; null when nothing states one."
+          },
+          "engine": {
             "type": "string",
-            "title": "Version",
-            "description": "Package version"
+            "title": "Engine",
+            "description": "dfe-engine package version"
+          },
+          "ui": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ui",
+            "description": "dfe-ui version when the deploy repo pins one off the certified stack."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "deploy-repo",
+              "deployment",
+              "engine"
+            ],
+            "title": "Source",
+            "description": "deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine."
           },
           "python_version": {
             "type": "string",
@@ -29082,10 +29542,14 @@
         },
         "type": "object",
         "required": [
-          "version",
+          "stack",
+          "engine",
+          "ui",
+          "source",
           "python_version"
         ],
-        "title": "VersionResponse"
+        "title": "VersionResponse",
+        "description": "What this deployment runs: the certified stack, and the parts of it."
       },
       "VersionSummary": {
         "properties": {
