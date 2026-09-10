@@ -829,6 +829,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalogue
+         * @description List the sources the deployed transforms already handle.
+         *
+         *     Empty when no catalogue is mounted, which is a deployment without one rather
+         *     than an error: the catalogue is a release asset of the app that ships it.
+         */
+        get: operations["list_catalogue_api_v1_sources_catalogue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/from-catalogue/{entry}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Source From Catalogue
+         * @description Create a source from a catalogue entry, on the intake it arrives by.
+         *
+         *     The entry supplies the match rule or the fetcher family, the transform
+         *     variant and the shipped meta schema; everything after that is the ordinary
+         *     create, so the source is indistinguishable from a hand-written one.
+         */
+        post: operations["create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{name}/versions/{version}": {
         parameters: {
             query?: never;
@@ -884,7 +931,7 @@ export interface paths {
          * Build Source Schema
          * @description Build complete schema (DDL) from a source version snapshot.
          *
-         *     Runs the v2 YAML → DDL pipeline and returns the generated DDL
+         *     Runs the v2 YAML -> DDL pipeline and returns the generated DDL
          *     without executing it against ClickHouse.
          */
         post: operations["build_source_schema_api_v1_sources__name__build_post"];
@@ -951,8 +998,8 @@ export interface paths {
          * Get Source
          * @description Get a full source definition by name, including build/deploy per version.
          *
-         *     ``default`` is the one name that always answers. It is a normal source once
-         *     written; until then the deployment's own default flow is synthesised, so the
+         *     ``main`` is the one name that always answers. It is a normal source once
+         *     written; until then the deployment's own main flow is synthesised, so the
          *     console has the card it draws before anyone has configured anything.
          */
         get: operations["get_source_api_v1_sources__name__get"];
@@ -1007,6 +1054,32 @@ export interface paths {
          *     config the same answer.
          */
         get: operations["get_source_flow_api_v1_sources__name__flow_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{name}/signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Source Signals
+         * @description Whether this source's records are arriving, and how fast.
+         *
+         *     Reads the loader's per-table counter out of the otel tables over a bounded
+         *     five-minute window, so the console can put a number beside a source without
+         *     the operator opening HyperDX. It answers 200 with nulls where the series is
+         *     absent: a source that was only just defined has nothing to report, and that
+         *     is not an error.
+         */
+        get: operations["get_source_signals_api_v1_sources__name__signals_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1642,6 +1715,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/deployment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Deployment
+         * @description What this deployment IS: its profile, what it can carry records on, and its versions.
+         *
+         *     Authenticated but ungated, for the same reason /version is: every console pane
+         *     that must not guess reads this, and the body carries deployment shape and
+         *     versions only. Without it the console has to assume the widest deployment and
+         *     offer a transport or an app this tier does not run.
+         */
+        get: operations["get_deployment_api_v1_system_deployment_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/version": {
         parameters: {
             query?: never;
@@ -1655,11 +1753,6 @@ export interface paths {
          *
          *     Authenticated but ungated on purpose: the console footer is on every page, and
          *     the body carries versions only.
-         *
-         *     The pins win where there are any: they are what the operator chose. A deploy
-         *     with no pins base still knows what stood it up, because the chart passes that
-         *     in, so the footer shows a stack version rather than nothing. With neither, the
-         *     engine's own version is the whole answer.
          */
         get: operations["get_version_api_v1_system_version_get"];
         put?: never;
@@ -4783,53 +4876,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sources/catalogue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Catalogue
-         * @description List the sources the deployed transforms already handle.
-         *
-         *     Empty when no catalogue is mounted, which is a deployment without one rather
-         *     than an error: the catalogue is a release asset of the app that ships it.
-         */
-        get: operations["list_catalogue_api_v1_sources_catalogue_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/sources/from-catalogue/{entry}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create Source From Catalogue
-         * @description Create a source from a catalogue entry, on the intake it arrives by.
-         *
-         *     The entry supplies the match rule or the fetcher family, the transform
-         *     variant and the shipped meta schema; everything after that is the ordinary
-         *     create, so the source is indistinguishable from a hand-written one.
-         */
-        post: operations["create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5142,6 +5188,11 @@ export interface components {
              * @description The profiles a deployment runs this app in without being asked. Null means the same as profiles; an empty list means nothing deploys it, which is what optional reports.
              */
             default_in?: string[] | null;
+            /**
+             * Idle When
+             * @description The app's own config dot-paths whose emptiness means it has no work, so an instance that is Ready and doing nothing can be reported as unconfigured rather than broken. Declared by the app, evaluated by the app: the engine reports these and never resolves them.
+             */
+            idle_when?: string[];
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
         };
@@ -5525,6 +5576,93 @@ export interface components {
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
             instances: string[];
+        };
+        /**
+         * CatalogueEntryObject
+         * @description One source a deployed transform already handles, as the console lists it.
+         */
+        CatalogueEntryObject: {
+            /**
+             * Name
+             * @description The shipping app's key for this source
+             */
+            name: string;
+            /**
+             * Package
+             * @description Vendor integration package it came from
+             */
+            package: string;
+            /**
+             * Data Stream
+             * @description Data stream within that package
+             */
+            data_stream: string;
+            /**
+             * Dataset
+             * @description package.data_stream - what a Beats event stamps
+             */
+            dataset: string;
+            /**
+             * Intakes
+             * @description Ways this source's payload can reach the platform
+             */
+            intakes: string[];
+            /**
+             * Framing
+             * @description Pushed intakes only: whether the pipeline wants the syslog line or the body
+             */
+            framing?: string | null;
+            /**
+             * Transforms
+             * @description Programs the app compiled for this source
+             */
+            transforms: string[];
+            /**
+             * Beats
+             * @description Beats module and fileset carrying the same source, when one does
+             */
+            beats?: {
+                [key: string]: string;
+            };
+            /**
+             * Source
+             * @description Source name this entry derives; empty when the entry's own name is not a legal source name and one must be supplied on create
+             * @default
+             */
+            source: string;
+        };
+        /**
+         * CatalogueSourceRequest
+         * @description Create a source from a catalogue entry.
+         */
+        CatalogueSourceRequest: {
+            /**
+             * Intake
+             * @description How this source's data arrives: beats, receiver or fetcher
+             */
+            intake: string;
+            /**
+             * Name
+             * @description Source name; defaults to the entry's own name as a Kubernetes label
+             */
+            name?: string | null;
+            /**
+             * Transform
+             * @description Which of the entry's transforms this source runs
+             * @default default
+             */
+            transform: string;
+            /**
+             * Transport
+             * @description bus or direct; omitted takes the deployment default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep the raw record as it arrived; needs the bus transport
+             * @default false
+             */
+            archive: boolean;
         };
         /**
          * CelCheckBatchRequest
@@ -6088,26 +6226,6 @@ export interface components {
             scoped: boolean;
         };
         /**
-         * DDLResult
-         * @description Generated DDL output.
-         */
-        DDLResult: {
-            /** Source Name */
-            source_name: string;
-            /**
-             * Create Table
-             * @description CREATE TABLE DDL
-             */
-            create_table: string;
-            /**
-             * Views
-             * @description View name → DDL
-             */
-            views?: {
-                [key: string]: string;
-            };
-        };
-        /**
          * DatabaseInfo
          * @description Summary of a ClickHouse database.
          */
@@ -6173,6 +6291,45 @@ export interface components {
             author: string;
             /** Date */
             date: string;
+        };
+        /**
+         * DeploymentResponse
+         * @description What this deployment IS, so a console never has to guess at it.
+         */
+        DeploymentResponse: {
+            /**
+             * Profile
+             * @description The tier this deployment was stood up as (DFE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
+             */
+            profile: string;
+            transports: components["schemas"]["TransportFacts"];
+            mesh: components["schemas"]["MeshFacts"];
+            /**
+             * Applies Routing
+             * @description Whether the routing a deployed source compiles to reaches the apps that run it. False on a Compose stack, which mounts each app's config file read-only: the engine still writes the overlay, and nothing carries it into the container, so a console must not offer the source as live.
+             */
+            applies_routing: boolean;
+            /**
+             * Stack
+             * @description Certified stack version this deployment runs; null when nothing states one.
+             */
+            stack: string | null;
+            /**
+             * Engine
+             * @description dfe-engine package version
+             */
+            engine: string;
+            /**
+             * Ui
+             * @description dfe-ui version, from the deploy repo's pins where they name one, else the version the chart was rendered with. Null when neither states one.
+             */
+            ui: string | null;
+            /**
+             * Source
+             * @description deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine.
+             * @enum {string}
+             */
+            source: "deploy-repo" | "deployment" | "engine";
         };
         /** DeploymentSummary */
         DeploymentSummary: {
@@ -7719,6 +7876,22 @@ export interface components {
             context: components["schemas"]["MatchConflictContext"];
         };
         /**
+         * MeshFacts
+         * @description Whether this deployment's stage pools sit behind balancing listeners.
+         */
+        MeshFacts: {
+            /**
+             * Enabled
+             * @description True where a listener fronts each stage pool.
+             */
+            enabled: boolean;
+            /**
+             * Namespace
+             * @description Namespace holding those listeners; empty when the pools are dialled directly.
+             */
+            namespace: string;
+        };
+        /**
          * MetaSchema
          * @description A schema for a ClickHouse table.
          *
@@ -8315,6 +8488,32 @@ export interface components {
         PaginatedResponse_CatalogRuleSummary_: {
             /** Items */
             items: components["schemas"]["CatalogRuleSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[CatalogueEntryObject] */
+        PaginatedResponse_CatalogueEntryObject_: {
+            /** Items */
+            items: components["schemas"]["CatalogueEntryObject"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -10772,7 +10971,7 @@ export interface components {
             current: string;
             /**
              * Versions
-             * @description Version id → configuration snapshot and pipeline artifacts
+             * @description Version id -> configuration snapshot and pipeline artifacts
              */
             versions?: {
                 [key: string]: components["schemas"]["SourceVersionDetail"];
@@ -10933,7 +11132,7 @@ export interface components {
         SourceMatch: {
             /**
              * Field
-             * @description Field to match on. Prefix with '_json.' to match a path inside the JSON column (e.g. '_json._source_fetcher'); a bare name matches a real top-level column (e.g. '_org_id').
+             * @description Field to match on: a dotted path into the record as it arrives (e.g. 'tags.collector.type', or a bare '_source'). The receiver matches the JSON payload, not a ClickHouse column, so a '_json.' prefix would be read as a first segment no record has.
              */
             field: string;
             /**
@@ -10988,7 +11187,7 @@ export interface components {
             validation_errors?: string[];
             /** Statements */
             statements?: string[];
-            ddl?: components["schemas"]["DDLResult"] | null;
+            ddl?: components["schemas"]["dfe_engine__api__v1__sources__DDLResult"] | null;
             /**
              * Ready
              * @default false
@@ -11110,6 +11309,43 @@ export interface components {
             readonly next_page: number | null;
             /** Prev Page */
             readonly prev_page: number | null;
+        };
+        /**
+         * SourceSignalsResponse
+         * @description What this source's records are actually doing, beside its definition.
+         *
+         *     A reading is null when the window holds nothing to compute it from, and the
+         *     console hides a null rather than showing a zero: an absent series means "not
+         *     measurable here", which is a different statement from "no records".
+         */
+        SourceSignalsResponse: {
+            /** Source */
+            source: string;
+            /**
+             * Table
+             * @description The ClickHouse table these records land in.
+             */
+            table: string;
+            /**
+             * Landed In Default
+             * @description True when that table is the platform's default landing table, which every unmatched record shares. The loader counts records per TABLE, so the rate below then covers the whole table rather than this source alone.
+             */
+            landed_in_default: boolean;
+            /**
+             * Window Seconds
+             * @description How far back the readings look.
+             */
+            window_seconds: number;
+            /**
+             * Records Per Min
+             * @description Records a minute across the window; null when no series answers.
+             */
+            records_per_min: number | null;
+            /**
+             * Last Seen
+             * @description UTC ISO-8601 timestamp of the last increase in the window; null when the counter never moved. A flat counter keeps reporting after traffic stops, so a present series is not itself an arrival.
+             */
+            last_seen: string | null;
         };
         /**
          * SourceSummaryObject
@@ -11772,6 +12008,22 @@ export interface components {
              */
             default_credentials: boolean;
         };
+        /**
+         * TransportFacts
+         * @description What this deployment can carry a source's records on, between its stages.
+         */
+        TransportFacts: {
+            /**
+             * Default
+             * @description Transport a source that names none takes here.
+             */
+            default: string;
+            /**
+             * Available
+             * @description Every transport a source may name here. One entry: a deployment binds its stages to a single transport, and a source on the other is refused at save.
+             */
+            available: string[];
+        };
         /** UpdateAccountRequest */
         UpdateAccountRequest: {
             /**
@@ -12406,6 +12658,26 @@ export interface components {
             message: string;
         };
         /**
+         * DDLResult
+         * @description Generated DDL output.
+         */
+        dfe_engine__api__v1__schemas__DDLResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Create Table
+             * @description CREATE TABLE DDL
+             */
+            create_table: string;
+            /**
+             * Views
+             * @description View name → DDL
+             */
+            views?: {
+                [key: string]: string;
+            };
+        };
+        /**
          * SchemaBuildResult
          * @description Result of building a schema from a source.
          */
@@ -12419,7 +12691,7 @@ export interface components {
             version: string;
             /** Columns */
             columns: components["schemas"]["dfe_engine__api__v1__schemas__SchemaColumn"][];
-            ddl?: components["schemas"]["DDLResult"] | null;
+            ddl?: components["schemas"]["dfe_engine__api__v1__schemas__DDLResult"] | null;
         };
         /**
          * SchemaColumn
@@ -12480,6 +12752,26 @@ export interface components {
             error?: string | null;
         };
         /**
+         * DDLResult
+         * @description Generated DDL output.
+         */
+        dfe_engine__api__v1__sources__DDLResult: {
+            /** Source Name */
+            source_name: string;
+            /**
+             * Create Table
+             * @description CREATE TABLE DDL
+             */
+            create_table: string;
+            /**
+             * Views
+             * @description View name -> DDL
+             */
+            views?: {
+                [key: string]: string;
+            };
+        };
+        /**
          * SchemaBuildResult
          * @description Result of building a schema from a source.
          */
@@ -12493,7 +12785,7 @@ export interface components {
             version: string;
             /** Columns */
             columns: components["schemas"]["dfe_engine__api__v1__sources__SchemaColumn"][];
-            ddl?: components["schemas"]["DDLResult"] | null;
+            ddl?: components["schemas"]["dfe_engine__api__v1__sources__DDLResult"] | null;
             /** Validation Errors */
             validation_errors?: string[];
             /**
@@ -12614,119 +12906,6 @@ export interface components {
              * @description Column fields that matched the search query (API only)
              */
             _matched_searchable?: string[];
-        };
-        /**
-         * CatalogueEntryObject
-         * @description One source a deployed transform already handles, as the console lists it.
-         */
-        CatalogueEntryObject: {
-            /**
-             * Name
-             * @description The shipping app's key for this source
-             */
-            name: string;
-            /**
-             * Package
-             * @description Vendor integration package it came from
-             */
-            package: string;
-            /**
-             * Data Stream
-             * @description Data stream within that package
-             */
-            data_stream: string;
-            /**
-             * Dataset
-             * @description package.data_stream - what a Beats event stamps
-             */
-            dataset: string;
-            /**
-             * Intakes
-             * @description Ways this source's payload can reach the platform
-             */
-            intakes: string[];
-            /**
-             * Framing
-             * @description Pushed intakes only: whether the pipeline wants the syslog line or the body
-             */
-            framing?: string | null;
-            /**
-             * Transforms
-             * @description Programs the app compiled for this source
-             */
-            transforms: string[];
-            /**
-             * Beats
-             * @description Beats module and fileset carrying the same source, when one does
-             */
-            beats?: {
-                [key: string]: string;
-            };
-            /**
-             * Source
-             * @description Source name this entry derives; empty when the entry's own name is not a legal source name and one must be supplied on create
-             * @default
-             */
-            source: string;
-        };
-        /**
-         * CatalogueSourceRequest
-         * @description Create a source from a catalogue entry.
-         */
-        CatalogueSourceRequest: {
-            /**
-             * Intake
-             * @description How this source's data arrives: beats, receiver or fetcher
-             */
-            intake: string;
-            /**
-             * Name
-             * @description Source name; defaults to the entry's own name as a Kubernetes label
-             */
-            name?: string | null;
-            /**
-             * Transform
-             * @description Which of the entry's transforms this source runs
-             * @default default
-             */
-            transform: string;
-            /**
-             * Transport
-             * @description bus or direct; omitted takes the deployment default
-             */
-            transport?: ("bus" | "direct") | null;
-            /**
-             * Archive
-             * @description Keep the raw record as it arrived; needs the bus transport
-             * @default false
-             */
-            archive: boolean;
-        };
-        /** PaginatedResponse[CatalogueEntryObject] */
-        PaginatedResponse_CatalogueEntryObject_: {
-            /** Items */
-            items: components["schemas"]["CatalogueEntryObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** Total Pages */
-            readonly total_pages: number;
-            /** Next Page */
-            readonly next_page: number | null;
-            /** Prev Page */
-            readonly prev_page: number | null;
         };
     };
     responses: never;
@@ -14524,6 +14703,86 @@ export interface operations {
             };
         };
     };
+    list_catalogue_api_v1_sources_catalogue_get: {
+        parameters: {
+            query?: {
+                /** @description Only entries that arrive this way (beats, receiver, fetcher) */
+                intake?: string | null;
+                /** @description Search the entry name, package and data stream */
+                search?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogueSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description A source of that name already exists, or its match duplicates another */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_source_version_api_v1_sources__name__versions__version__get: {
         parameters: {
             query?: never;
@@ -14870,6 +15129,37 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    get_source_signals_api_v1_sources__name__signals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceSignalsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -16111,6 +16401,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_deployment_api_v1_system_deployment_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeploymentResponse"];
                 };
             };
         };
@@ -19478,7 +19788,7 @@ export interface operations {
     list_apps_api_v1_apps_get: {
         parameters: {
             query?: {
-                /** @description Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and every app is reported as offered. */
+                /** @description Deployment profile to judge each app's offer against, so the rule stays in one place rather than being re-derived by every caller. Omit it and this deployment's own profile is used; omit it where the deployment states none and every app is reported as offered. */
                 profile?: string;
             };
             header?: never;
@@ -21661,86 +21971,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_catalogue_api_v1_sources_catalogue_get: {
-        parameters: {
-            query?: {
-                /** @description Only entries that arrive this way (beats, receiver, fetcher) */
-                intake?: string | null;
-                /** @description Search the entry name, package and data stream */
-                search?: string | null;
-                page?: number;
-                per_page?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                entry: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogueSourceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SourceResponse"];
-                };
-            };
-            /** @description A source of that name already exists, or its match duplicates another */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
-                };
             };
             /** @description Validation Error */
             422: {
