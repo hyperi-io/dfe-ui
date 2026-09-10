@@ -20,7 +20,10 @@ describe('.useFetchSystemVersion', () => {
     const { result } = renderHook(() => useFetchSystemVersion(), { wrapper });
 
     const response: TSystemVersionResponse = {
-      version: 'version',
+      stack: '2.2.0-rc.13',
+      engine: '1.19.15',
+      ui: null,
+      source: 'deploy-repo',
       python_version: 'python_version',
     };
 

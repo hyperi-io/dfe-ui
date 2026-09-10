@@ -12,6 +12,7 @@ export const API_CONFIG = Object.freeze({
   sources: {
     default: '/api/v1/sources',
     source: '/api/v1/sources/{name}',
+    sourceFlow: '/api/v1/sources/{name}/flow',
     sourceColumns: '/api/v1/sources/{name}/columns',
     sourceBuild: '/api/v1/sources/{name}/build',
     sourceVersion: '/api/v1/sources/{name}/versions/{version}',

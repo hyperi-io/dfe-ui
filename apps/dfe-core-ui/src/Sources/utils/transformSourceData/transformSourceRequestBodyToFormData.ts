@@ -21,6 +21,10 @@ export const transformSourceRequestBodyToFormData = (
     source: source?.source ?? '',
     enabled: source?.enabled ?? false,
     ...source?.version,
+    // Both are absent on a source written before they existed, and absence is
+    // not the same as a choice: null puts it back on the deployment default.
+    transport: source?.version?.transport ?? null,
+    archive: source?.version?.archive ?? false,
     header: source?.version?.header
       ? {
           ...source?.version?.header,

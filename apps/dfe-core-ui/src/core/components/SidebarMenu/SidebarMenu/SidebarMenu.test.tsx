@@ -2,6 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { buildSidebarMenuGroups, sidebarMenuItems } from './constants';
 import { SidebarMenu } from './index';
 import { server } from './SidebarMenu.mocks';
 
@@ -29,23 +30,50 @@ describe('SidebarMenu', () => {
         .filter((item) => !!item);
 
       expect(menuItemList).toEqual([
+        // Observe
         'Search',
         'Saved Searches',
         'Chart Explorer',
         'Dashboards',
         'Hunt Results',
+        // Data flow
         'Sources',
         'Meta Schemas',
+        'Library',
+        // Detect
         'Rules',
         'Hunts',
-        // 'Field Maps',
-        // 'Transforms',
+        // Stack
         'Components',
-        'Library',
         'Services',
-        'Settings',
         'Platform',
+        // Access
+        'Settings',
       ]);
+    });
+
+    it('should group the destinations in the order a record travels', async () => {
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+      await screen.findAllByRole('link');
+
+      const headings = screen
+        .getAllByRole('presentation')
+        .map((item) => item.textContent);
+
+      expect(headings).toEqual([
+        'Observe',
+        'Data flow',
+        'Detect',
+        'Stack',
+        'Access',
+      ]);
+    });
+
+    it('should place every destination under exactly one group', async () => {
+      const groups = buildSidebarMenuGroups('http://hyperdx.example:8090');
+      const keys = sidebarMenuItems(groups).map((item) => item.key);
+
+      expect(new Set(keys).size).toBe(keys.length);
     });
 
     it('should navigate to the correct page when a menu item is clicked', async () => {

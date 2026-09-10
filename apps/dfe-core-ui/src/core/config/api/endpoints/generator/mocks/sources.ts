@@ -1,3 +1,5 @@
+import { ApiErrorResponseBody } from '@/core/config/api/client';
+import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
@@ -109,6 +111,7 @@ export const sources = {
           state: 'active',
           version: {
             date_time: 'string',
+            archive: false,
             header: {
               type: 'string',
               version: 'string',
@@ -273,6 +276,61 @@ export const sources = {
       },
     },
   },
+  sourceFlow: {
+    mockedUrl: '/api/v1/sources/{name}/flow',
+    get: {
+      success: ({
+        mockedResponse = {
+          source: 'source',
+          transport: 'bus',
+          carrier: 'kafka',
+          origin: 'receiver',
+          input: 'tags.collector.type equals source',
+          transform: {
+            app: 'dfe-transform-vrl',
+            instance: 'dfe-transform-vrl-source',
+            variant: null,
+            endpoint: null,
+            topics: ['source_land', 'source_load'],
+          },
+          outputs: { loader: 'source_load', archive: false },
+          table: 'source',
+        },
+        name = 'source',
+      }: {
+        mockedResponse?: TSourceFlow;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          sources.sourceFlow.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      // A refused flow answers with the engine's ErrorResponse, not a field
+      // validation error: what refused is a stage, and the message names it.
+      error: ({
+        mockedResponse = {
+          code: 'flow_error',
+          message: 'the flow cannot run as declared',
+        },
+        status = 422,
+        name = 'source',
+      }: {
+        mockedResponse?: ApiErrorResponseBody;
+        status?: number;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          sources.sourceFlow.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
   sourceColumns: {
     mockedUrl: '/api/v1/sources/{name}/columns',
     get: {
@@ -379,6 +437,7 @@ export const sources = {
           state: 'active',
           version: {
             date_time: 'string',
+            archive: false,
             header: {
               type: 'string',
               version: 'string',

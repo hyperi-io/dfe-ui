@@ -22,6 +22,7 @@ describe('useFetchApps', () => {
       'dfe-transform-vrl',
       'dfe-transform-elastic',
       'dfe-fetcher',
+      'culvert',
     ]);
     expect(result.current.data?.[0].multiplicity).toBe('single');
     expect(result.current.data?.[1].multiplicity).toBe('per_config');
@@ -55,6 +56,18 @@ describe('useFetchApps', () => {
       reload: 'roll',
     });
     expect(result.current.data?.[2].file_sets).toEqual([]);
+  });
+
+  it('says which apps a deployment runs without, and where they may be deployed', async () => {
+    const { result } = renderHook(() => useFetchApps(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const optional = result.current.data?.filter((app) => app.optional);
+    expect(optional?.map((app) => app.service)).toEqual(['culvert']);
+    expect(optional?.[0].profiles).toEqual(['scale', 'scale-mesh']);
+    expect(optional?.[0].default_in).toEqual([]);
+    expect(optional?.[0].offered).toBe(false);
   });
 
   it('flags which apps have routing compiled from the sources', async () => {

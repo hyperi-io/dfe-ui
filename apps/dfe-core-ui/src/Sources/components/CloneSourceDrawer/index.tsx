@@ -175,6 +175,10 @@ export const CloneSourceDrawer = ({
               display_name: `Copy - ${sourceDetail.display_name}`,
               current: sourceDetail.current,
               versions: sourceDetail.versions,
+              // A clone runs the same flow as what it was cut from, so it
+              // carries the transport choice and the archive decision over.
+              transport: sourceDetail.version?.transport ?? null,
+              archive: sourceDetail.version?.archive ?? false,
               // The clone keeps the origin it was cut from; a receiver clone
               // still re-asks for its match rule, which must be unique.
               origin: clonedFetcher ? 'fetcher' : 'receiver',

@@ -1,5 +1,6 @@
 'use client';
 
+import { uiBuildVersion } from '@/core/appVersion/buildVersion';
 import { IconWrapper } from '@/core/components/IconWrapper';
 import {
   IconLayoutSidebarLeftCollapse as MenuFoldOutlined,
@@ -20,7 +21,7 @@ const { Sider } = Layout;
 export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+  const appVersion = uiBuildVersion();
   return (
     <Sider
       className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
