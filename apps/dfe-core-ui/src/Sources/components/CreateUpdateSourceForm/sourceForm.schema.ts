@@ -50,7 +50,8 @@ const sourceDetailsTabSchema = {
   // Null is a value here, not an omission: it puts the source back on the
   // deployment default, and the engine refuses one the deployment lacks.
   transport: z.enum(SOURCE_TRANSPORTS).optional().nullable(),
-  archive: z.boolean(),
+  // Required, so a form that lost the value is refused rather than sending none.
+  archive: z.boolean({ message: 'Archive is required' }),
 };
 
 /**
