@@ -242,4 +242,37 @@ export const accounts = {
       },
     },
   },
+  resetCurrentUserPassword: {
+    mockedUrl: '/api/v1/auth/accounts/reset-password',
+    post: {
+      success: ({
+        mockedResponse = {
+          message: 'password reset',
+          git: {
+            enabled: false,
+            auto_merge: false,
+            committed: false,
+            merged: false,
+          },
+        },
+      }: {
+        mockedResponse?: TAccountResetPasswordResponse;
+      } = {}) => {
+        return http.post(accounts.resetCurrentUserPassword.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(accounts.resetCurrentUserPassword.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
 };
