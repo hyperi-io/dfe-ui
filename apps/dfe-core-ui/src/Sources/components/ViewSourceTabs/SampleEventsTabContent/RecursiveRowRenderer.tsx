@@ -28,14 +28,19 @@ export const RecursiveRowRenderer = ({
     promotedOnSchemaFieldsSet.has(fieldPath);
   return (
     <div className="flex flex-col gap-2">
-      <ul className="flex gap-1 flex-wrap">
+      <ul className="flex gap-1 flex-wrap wrap-break-words">
         {keys.map((key) => {
           const fieldPath = parentPath ? `${parentPath}.${key}` : key;
 
           return (
-            <li key={key} className="font-mono text-xs flex items-center gap-1">
+            <li
+              key={key}
+              className="font-mono text-xs flex items-center gap-1 break-all"
+            >
               <span
                 className={cn(
+                  // Shrink
+                  'shrink-0',
                   // Text
                   'font-medium',
                   // Chip

@@ -7,9 +7,13 @@ import { DiscoverJsonPathsDrawer } from './DiscoverJsonPathsDrawer';
 export const FieldPromoteBanner = ({
   selectedSourceName,
   selectedSourceVersion,
+  classNames,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
+  classNames?: {
+    root?: string;
+  };
 }) => {
   const { fieldsToPromote, handleRemovePromoteField } = usePromoteRowsContext();
 
@@ -17,6 +21,7 @@ export const FieldPromoteBanner = ({
     <NotificationCard
       type="action"
       title="Fields for Promote"
+      classNames={classNames}
       description={
         <div className="flex flex-col gap-y-2">
           <p>The following fields will be promoted in the source schema:</p>
