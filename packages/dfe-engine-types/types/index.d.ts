@@ -997,10 +997,6 @@ export interface paths {
         /**
          * Get Source
          * @description Get a full source definition by name, including build/deploy per version.
-         *
-         *     ``main`` is the one name that always answers. It is a normal source once
-         *     written; until then the deployment's own main flow is synthesised, so the
-         *     console has the card it draws before anyone has configured anything.
          */
         get: operations["get_source_api_v1_sources__name__get"];
         /**
@@ -10942,6 +10938,13 @@ export interface components {
              */
             source: string;
             /**
+             * Resource Type
+             * @description core for engine-owned sources, custom for operator-created ones
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
              * Display Name
              * @description Human-readable display name
              */
@@ -10989,10 +10992,9 @@ export interface components {
             readonly transform: components["schemas"]["SourceTransform"] | null;
             /**
              * Origin
-             * @description How the deployed version's data enters: receiver match or a fetcher.
-             * @enum {string}
+             * @description How the deployed version's data enters: a receiver match, a fetcher, or nothing.
              */
-            readonly origin: "receiver" | "fetcher";
+            readonly origin: ("receiver" | "fetcher") | null;
             /**
              * Transport
              * @description Declared transport on the deployed version (None = the deployment default).
@@ -11082,9 +11084,9 @@ export interface components {
             carrier: string;
             /**
              * Origin
-             * @description receiver or fetcher
+             * @description receiver, fetcher, or null when nothing selects the records
              */
-            origin: string;
+            origin?: string | null;
             /**
              * Input
              * @description The receiver match that selects the records, or the fetcher instance polling them
@@ -11358,6 +11360,13 @@ export interface components {
              */
             name: string;
             /**
+             * Resource Type
+             * @description core for engine-owned sources, custom for operator-created ones
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
              * Display Name
              * @description Human-readable display name
              */
@@ -11420,11 +11429,9 @@ export interface components {
             has_fetcher: boolean;
             /**
              * Origin
-             * @description How data enters: receiver match or a fetcher
-             * @default receiver
-             * @enum {string}
+             * @description How data enters: a receiver match, a fetcher, or null when nothing selects it
              */
-            origin: "receiver" | "fetcher";
+            origin?: ("receiver" | "fetcher") | null;
             /**
              * Views
              * @description Naming-standard views on the deployed version (standard names)
@@ -11515,6 +11522,13 @@ export interface components {
              * @description Source name (_source label)
              */
             source: string;
+            /**
+             * Resource Type
+             * @description core for engine-owned sources, custom for operator-created ones
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
             /**
              * Display Name
              * @description Human-readable display name
