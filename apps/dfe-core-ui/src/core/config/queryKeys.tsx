@@ -19,6 +19,7 @@ export const QUERY_KEYS = {
     ],
   },
   accounts: {
+    me: () => ['current-user', 'me'],
     infiniteFiltered: ({
       search,
       sort_by,

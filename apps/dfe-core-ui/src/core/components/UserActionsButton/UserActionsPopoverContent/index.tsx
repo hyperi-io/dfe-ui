@@ -3,8 +3,9 @@
 import { useFetchPermissions } from '@/core/hooks/_useFetchPermissions';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useLogout } from '@/core/hooks/useLogout';
-import { IconLogout } from '@repo/dfe-icons';
+import { IconLogout, IconUser } from '@repo/dfe-icons';
 import { Button, Spin } from 'antd';
+import { useRouter } from 'next/navigation';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -17,6 +18,7 @@ const PERMISSION_LIMIT = 3;
 const GROUP_LIMIT = 3;
 
 export const UserActionsPopoverContent = () => {
+  const router = useRouter();
   const { handleLogout } = useLogout();
   const { data: me, isLoading: isLoadingUser, error: errorUser } = useAuthMe();
 
@@ -109,6 +111,17 @@ export const UserActionsPopoverContent = () => {
           </dd>
         </dl>
       )}
+      <Button
+        color="default"
+        variant="outlined"
+        icon={<IconUser />}
+        onClick={() => {
+          router.push('/account');
+        }}
+      >
+        User Profile
+      </Button>
+
       <Button
         color="default"
         variant="outlined"

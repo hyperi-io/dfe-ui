@@ -10,6 +10,9 @@ const formSchema = z.object({
   username: z.string().min(1, { message: 'Username is required' }),
   password: z.string().min(1, { message: 'Password is required' }),
   groups: z.array(z.string()).optional(),
+  email: z.email({ message: 'Valid email is required' }),
+  phone: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
 });
 
 export type CreateAccountFormData = z.infer<typeof formSchema>;
@@ -20,7 +23,14 @@ export const CreateAccountForm = ({
   error,
   isPending,
   buttonLabel = 'Create Account',
-  initialValues = { username: '', password: '', groups: [] },
+  initialValues = {
+    username: '',
+    password: '',
+    groups: [],
+    email: '',
+    phone: '',
+    name: '',
+  },
 }: {
   onFinish: (values: TAccountCreateRequestBody) => void;
   error: Error | null;
@@ -39,9 +49,9 @@ export const CreateAccountForm = ({
       username: values.username,
       password: values.password,
       groups: values.groups ?? [],
-      email: '',
-      phone: '',
-      name: '',
+      email: values.email,
+      phone: values.phone ?? '',
+      name: values.name ?? values.username,
     });
   };
 
@@ -52,15 +62,51 @@ export const CreateAccountForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item name="username" label="Username" rules={[formValidation]}>
+      <Form.Item
+        name="username"
+        label={<Form.Label required>Username</Form.Label>}
+        rules={[formValidation]}
+      >
         <Input placeholder="Enter username" />
       </Form.Item>
 
-      <Form.Item name="password" label="Password" rules={[formValidation]}>
+      <Form.Item
+        name="email"
+        label={<Form.Label required>Email</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input type="email" placeholder="Enter email" />
+      </Form.Item>
+
+      <Form.Item
+        name="name"
+        label={<Form.Label>Name</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter name" />
+      </Form.Item>
+
+      <Form.Item
+        name="phone"
+        label={<Form.Label>Phone</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter phone" />
+      </Form.Item>
+
+      <Form.Item
+        name="password"
+        label={<Form.Label required>Password</Form.Label>}
+        rules={[formValidation]}
+      >
         <Input.Password placeholder="Enter password" />
       </Form.Item>
 
-      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
+      <Form.Item
+        name="groups"
+        label={<Form.Label required>Groups</Form.Label>}
+        rules={[formValidation]}
+      >
         <AccountGroupSelect disabled={disabledFields?.groups} />
       </Form.Item>
 

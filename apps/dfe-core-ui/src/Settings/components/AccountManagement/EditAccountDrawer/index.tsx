@@ -1,8 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ResetAccountPasswordForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPasswordForm';
-import { UpdateAccountForm } from '@/Settings/components/AccountManagement/EditAccountDrawer/UpdateAccountForm';
+import { ResetAccountPassword } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPassword';
+import { UpdateAccountForm } from '@/Settings/components/AccountManagement/UpdateAccountForm';
 import { ACCOUNT_DETAIL_QUERY_KEY } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
 import { IconEdit } from '@repo/dfe-icons';
@@ -87,7 +87,7 @@ export const EditAccountDrawer = ({
             action={RbacProtected.rbacActions.accounts_reset_password}
           >
             <RbacProtected.Unrestricted>
-              <ResetAccountPasswordForm username={username} />
+              <ResetAccountPassword username={username} />
             </RbacProtected.Unrestricted>
             <RbacProtected.Restricted>
               <NotificationCard
