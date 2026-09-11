@@ -36,7 +36,12 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
 
   const handleFinish = (values: CreateAccountFormData) => {
     setLoginValues({ username: values.username, password: values.password });
-    createAccount(values);
+    createAccount({
+      ...values,
+      email: '',
+      phone: '',
+      name: '',
+    });
   };
 
   return (
