@@ -1,5 +1,8 @@
 import { TAccountResetPasswordResponse } from '@/core/hooks/useAccountResetPassword/types';
 import { TAccountCreateResponse } from '@/core/hooks/useCreateAccount/types';
+import { TCurrentUserResetPasswordResponse } from '@/core/hooks/useCurrentUserResetPassword/types';
+import { TCurrentUserResponse } from '@/core/hooks/useFetchCurrentUser/types';
+import { TCurrentUserUpdateResponse } from '@/core/hooks/useUpdateCurrentUser/types';
 import { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
 import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { TAccountUpdateResponse } from '@/Settings/hooks/accounts/useUpdateAccount/types';
@@ -256,7 +259,7 @@ export const accounts = {
           },
         },
       }: {
-        mockedResponse?: TAccountResetPasswordResponse;
+        mockedResponse?: TCurrentUserResetPasswordResponse;
       } = {}) => {
         return http.post(accounts.resetCurrentUserPassword.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
@@ -270,6 +273,71 @@ export const accounts = {
         status?: number;
       } = {}) => {
         return http.post(accounts.resetCurrentUserPassword.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  me: {
+    mockedUrl: '/api/v1/auth/accounts/me',
+    get: {
+      success: ({
+        mockedResponse = {
+          username: 'string',
+          enabled: true,
+          groups: ['string'],
+          email: 'string',
+          phone: 'string',
+          name: 'string',
+          created_at: 'string',
+          updated_at: 'string',
+        },
+      }: {
+        mockedResponse?: TCurrentUserResponse;
+      } = {}) => {
+        return http.get(accounts.me.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.get(accounts.me.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+    put: {
+      success: ({
+        mockedResponse = {
+          username: 'string',
+          enabled: true,
+          groups: ['string'],
+          email: 'string',
+          phone: 'string',
+          name: 'string',
+          created_at: 'string',
+          updated_at: 'string',
+        },
+      }: {
+        mockedResponse?: TCurrentUserUpdateResponse;
+      } = {}) => {
+        return http.put(accounts.me.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.put(accounts.me.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
       },
