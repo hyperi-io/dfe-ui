@@ -72,6 +72,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',
+        email: 'string',
+        phone: 'string',
+        name: 'string',
       };
 
       expect(result.current.data).toBeDefined();
@@ -144,6 +147,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',
+        email: 'string',
+        phone: 'string',
+        name: 'string',
       };
 
       // Data should be flattened - 20 items total
@@ -179,6 +185,9 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',
+        email: 'string',
+        phone: 'string',
+        name: 'string',
       };
 
       // Verify we have 20 items (pages 1 and 2)
