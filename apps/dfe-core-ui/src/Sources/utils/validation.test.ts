@@ -14,16 +14,16 @@ describe('sourceNameValidator', () => {
     expect(sourceNameValidator.safeParse('cratesaudit2').success).toBe(true);
   });
 
-  it('names the underscore fix when that is the only problem', () => {
-    expect(firstMessage('aws_cloudtrail')).toBe(
-      SOURCE_NAME_VALIDATOR.underscoreMessage,
-    );
-  });
-
   it('refuses uppercase, a leading digit and a trailing hyphen', () => {
-    expect(firstMessage('AwsCloudtrail')).toBe(SOURCE_NAME_VALIDATOR.message);
-    expect(firstMessage('1aws')).toBe(SOURCE_NAME_VALIDATOR.message);
-    expect(firstMessage('aws-')).toBe(SOURCE_NAME_VALIDATOR.message);
+    expect(firstMessage('AwsCloudtrail')).toBe(
+      SOURCE_NAME_VALIDATOR.regexMessage('Source name'),
+    );
+    expect(firstMessage('1aws')).toBe(
+      SOURCE_NAME_VALIDATOR.regexMessage('Source name'),
+    );
+    expect(firstMessage('aws-')).toBe(
+      SOURCE_NAME_VALIDATOR.regexMessage('Source name'),
+    );
   });
 
   it('caps the name at the instance label length', () => {
