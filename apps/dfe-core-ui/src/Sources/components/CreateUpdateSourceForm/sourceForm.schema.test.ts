@@ -22,6 +22,19 @@ const messagesAt = (
     .map((issue) => issue.message);
 };
 
+describe('formSchema source details', () => {
+  test('a source carrying no archive decision is refused', () => {
+    const { archive: _archive, ...withoutArchive } = BASE;
+    const data = {
+      ...withoutArchive,
+      origin: 'receiver',
+      match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
+    } as CreateUpdateSourceFormData;
+
+    expect(messagesAt(data, ['archive'])).toEqual(['Archive is required']);
+  });
+});
+
 describe('formSchema origin', () => {
   test('a receiver source needs its match rule and ignores the fetcher block', () => {
     const data: CreateUpdateSourceFormData = {
