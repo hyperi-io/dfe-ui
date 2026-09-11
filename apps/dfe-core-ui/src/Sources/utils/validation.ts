@@ -6,10 +6,9 @@ import z from 'zod';
 // DNS-1123 label of at most 40 characters.
 export const SOURCE_NAME_VALIDATOR = {
   regex: /^[a-z]([a-z0-9-]*[a-z0-9])?$/,
+  regexMessage: (fieldName: string = 'Name') =>
+    `${fieldName} must be lowercase letters, numbers and hyphens, start with a letter and end with a letter or number`,
   maxLength: 40,
-  message:
-    'Source name must be lowercase letters, numbers and hyphens, start with a letter and end with a letter or number',
-  underscoreMessage: "Source name must use '-' instead of '_'",
 };
 
 export const sourceNameValidator = z
@@ -18,9 +17,6 @@ export const sourceNameValidator = z
   .max(SOURCE_NAME_VALIDATOR.maxLength, {
     message: `Source name must be at most ${SOURCE_NAME_VALIDATOR.maxLength} characters`,
   })
-  .refine((value) => !value.includes('_'), {
-    message: SOURCE_NAME_VALIDATOR.underscoreMessage,
-  })
   .refine((value) => SOURCE_NAME_VALIDATOR.regex.test(value), {
-    message: SOURCE_NAME_VALIDATOR.message,
+    message: SOURCE_NAME_VALIDATOR.regexMessage('Source name'),
   });
