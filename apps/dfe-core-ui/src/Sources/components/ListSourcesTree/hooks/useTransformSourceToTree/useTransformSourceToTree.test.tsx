@@ -19,6 +19,7 @@ const baseSource = (
 ): TSourceListSummary => ({
   //@ts-expect-error - name is specified more than once, so this usage will be overwritten.
   name: 'source',
+  resource_type: 'custom',
   display_name: 'Source',
   enabled: true,
   current: 'v1',

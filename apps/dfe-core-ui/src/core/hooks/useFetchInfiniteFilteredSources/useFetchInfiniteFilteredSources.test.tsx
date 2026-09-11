@@ -71,6 +71,7 @@ describe('useFetchInfiniteFilteredSources', () => {
 
       const responseItem: TSourceListSummary = {
         name: 'string',
+        resource_type: 'custom',
         display_name: 'string',
         enabled: true,
         current: 'string',

@@ -4,9 +4,9 @@ import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSource
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TCatalogueSourceResponse } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
-import { TSourceCatalogueResponse } from '@/Sources/hooks/useFetchSourceCatalogue/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
+import { TSourceCatalogueResponse } from '@/Sources/hooks/useFetchSourceCatalogue/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
@@ -26,6 +26,7 @@ export const sources = {
           items: [
             {
               name: 'string',
+              resource_type: 'custom',
               display_name: 'string',
               description: 'string',
               enabled: true,
@@ -188,6 +189,7 @@ export const sources = {
       success: ({
         mockedResponse = {
           source: 'source',
+          resource_type: 'custom',
           enabled: true,
           display_name: 'string',
           description: 'string',
@@ -514,6 +516,7 @@ export const sources = {
       success: ({
         mockedResponse = {
           source: 'source',
+          resource_type: 'custom',
           display_name: 'string',
           description: 'string',
           enabled: true,
