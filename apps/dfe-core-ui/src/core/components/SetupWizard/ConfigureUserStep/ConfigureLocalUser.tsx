@@ -38,9 +38,8 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
     setLoginValues({ username: values.username, password: values.password });
     createAccount({
       ...values,
-      email: '',
-      phone: '',
-      name: '',
+      phone: values.phone ?? '',
+      name: values.name ?? '',
     });
   };
 
@@ -50,7 +49,14 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
         onFinish={handleFinish}
         error={createAccountError}
         isPending={isCreateAccountPending}
-        initialValues={{ username: '', password: '', groups: ['dfe-admins'] }}
+        initialValues={{
+          username: '',
+          password: '',
+          groups: ['dfe-admins'],
+          email: '',
+          phone: '',
+          name: '',
+        }}
         disabledFields={{ groups: true }}
       />
 
