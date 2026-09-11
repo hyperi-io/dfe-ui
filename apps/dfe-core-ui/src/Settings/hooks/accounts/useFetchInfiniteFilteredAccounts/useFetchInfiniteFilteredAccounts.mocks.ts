@@ -9,6 +9,9 @@ const ACCOUNT_ITEM: TAccountsItemSummary = {
   groups: ['string'],
   created_at: '2021-01-01',
   updated_at: '2021-01-01',
+  email: 'string',
+  phone: 'string',
+  name: 'string',
 };
 
 const TOTAL_ITEMS = 25;

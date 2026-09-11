@@ -22,6 +22,9 @@ export const accounts = {
               groups: ['string'],
               created_at: 'string',
               updated_at: 'string',
+              email: 'string',
+              phone: 'string',
+              name: 'string',
             },
           ],
           total: 1,
@@ -58,6 +61,9 @@ export const accounts = {
           groups: ['string'],
           created_at: 'string',
           updated_at: 'string',
+          email: 'string',
+          phone: 'string',
+          name: 'string',
         },
       }: {
         mockedResponse?: TAccountCreateResponse;
@@ -89,6 +95,9 @@ export const accounts = {
           groups: ['string'],
           created_at: 'string',
           updated_at: 'string',
+          email: 'string',
+          phone: 'string',
+          name: 'string',
         },
         username = 'string',
       }: {
@@ -127,6 +136,9 @@ export const accounts = {
           groups: ['string'],
           created_at: 'string',
           updated_at: 'string',
+          email: 'string',
+          phone: 'string',
+          name: 'string',
         },
         username = 'string',
       }: {

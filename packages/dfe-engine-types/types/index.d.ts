@@ -209,6 +209,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Current User Account
+         * @description Return the authenticated user's account. No extra scope required.
+         */
+        get: operations["get_current_user_account_api_v1_auth_accounts_me_get"];
+        /**
+         * Update Current User Account
+         * @description Update the authenticated user's contact fields. No extra scope required.
+         *
+         *     Groups and enabled cannot be changed here: those stay on the admin
+         *     ``PUT /{username}`` route, which requires ``account:write``.
+         */
+        put: operations["update_current_user_account_api_v1_auth_accounts_me_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/accounts/{username}": {
         parameters: {
             query?: never;
@@ -223,7 +250,7 @@ export interface paths {
         get: operations["get_account_api_v1_auth_accounts__username__get"];
         /**
          * Update Account
-         * @description Update account groups or enabled status (admin only).
+         * @description Update account groups, enabled status, or contact fields (admin only).
          */
         put: operations["update_account_api_v1_auth_accounts__username__put"];
         post?: never;
@@ -232,6 +259,31 @@ export interface paths {
          * @description Delete an account (admin only).
          */
         delete: operations["delete_account_api_v1_auth_accounts__username__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accounts/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Current User Password
+         * @description Reset the authenticated user's password.
+         *
+         *     The username is taken from the session, not the request, so a caller cannot
+         *     reset another account through this route. The live store takes the new
+         *     password immediately; the ``git`` block reports whether the durable mirror
+         *     merged, is pending review, or is a no-op for a non-git-backed account.
+         */
+        post: operations["reset_current_user_password_api_v1_auth_accounts_reset_password_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5051,6 +5103,18 @@ export interface components {
             enabled: boolean;
             /** Groups */
             groups: string[];
+            /** Email */
+            email: string;
+            /**
+             * Phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Name
+             * @default
+             */
+            name: string;
             /** Created At */
             created_at: string;
             /** Updated At */
@@ -6045,10 +6109,27 @@ export interface components {
              */
             password: string;
             /**
+             * Email
+             * @description Contact email
+             */
+            email: string;
+            /**
              * Groups
              * @description Group memberships
              */
             groups?: string[];
+            /**
+             * Phone
+             * @description Contact phone
+             * @default
+             */
+            phone: string;
+            /**
+             * Name
+             * @description Display name
+             * @default
+             */
+            name: string;
         };
         /** CreateArtifactRequest */
         CreateArtifactRequest: {
@@ -12050,6 +12131,21 @@ export interface components {
              * @description Enable or disable the account
              */
             enabled?: boolean | null;
+            /**
+             * Email
+             * @description Contact email
+             */
+            email?: string | null;
+            /**
+             * Phone
+             * @description Contact phone
+             */
+            phone?: string | null;
+            /**
+             * Name
+             * @description Display name
+             */
+            name?: string | null;
         };
         /** UpdateGroupRequest */
         UpdateGroupRequest: {
@@ -12086,6 +12182,27 @@ export interface components {
              * @description Enable or disable the org
              */
             enabled?: boolean | null;
+        };
+        /**
+         * UpdateOwnAccountRequest
+         * @description Contact fields a session owner may change on their own account.
+         */
+        UpdateOwnAccountRequest: {
+            /**
+             * Email
+             * @description Contact email
+             */
+            email?: string | null;
+            /**
+             * Phone
+             * @description Contact phone
+             */
+            phone?: string | null;
+            /**
+             * Name
+             * @description Display name
+             */
+            name?: string | null;
         };
         /** UpdateProviderRequest */
         UpdateProviderRequest: {
@@ -13147,7 +13264,7 @@ export interface operations {
     list_accounts_api_v1_auth_accounts_get: {
         parameters: {
             query?: {
-                /** @description Search in username */
+                /** @description Search in username, name, or email */
                 search?: string | null;
                 /** @description Sort field (username, created_at, updated_at) */
                 sort_by?: string | null;
@@ -13197,6 +13314,59 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_current_user_account_api_v1_auth_accounts_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponse"];
+                };
+            };
+        };
+    };
+    update_current_user_account_api_v1_auth_accounts_me_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOwnAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13298,6 +13468,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_current_user_password_api_v1_auth_accounts_reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetPasswordResponse"];
+                };
             };
             /** @description Validation Error */
             422: {

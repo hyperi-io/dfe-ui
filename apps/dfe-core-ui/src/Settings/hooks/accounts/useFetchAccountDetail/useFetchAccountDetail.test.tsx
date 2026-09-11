@@ -32,6 +32,9 @@ describe('.useFetchAccountDetail', () => {
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',
+        email: 'string',
+        phone: 'string',
+        name: 'string',
       };
 
       await waitFor(() => {

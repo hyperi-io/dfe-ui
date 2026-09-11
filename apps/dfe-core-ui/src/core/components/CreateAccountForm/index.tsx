@@ -39,6 +39,9 @@ export const CreateAccountForm = ({
       username: values.username,
       password: values.password,
       groups: values.groups ?? [],
+      email: '',
+      phone: '',
+      name: '',
     });
   };
 

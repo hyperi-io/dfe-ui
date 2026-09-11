@@ -30,6 +30,9 @@ describe('.useCreateAccount', () => {
     username: 'string',
     password: 'string',
     groups: ['string'],
+    email: 'string',
+    phone: 'string',
+    name: 'string',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -49,6 +52,9 @@ describe('.useCreateAccount', () => {
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',
+        email: 'string',
+        phone: 'string',
+        name: 'string',
       };
 
       await waitFor(() => {
