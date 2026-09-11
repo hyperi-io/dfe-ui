@@ -5,11 +5,15 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { TAccountUpdateRequestBody } from '@/Settings/hooks/accounts/useUpdateAccount/types';
-import { Button, Spin } from 'antd';
+import { Button, Input, Spin } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
+  username: z.string().min(1, { message: 'Username is required' }),
   groups: z.array(z.string()).optional(),
+  email: z.email({ message: 'Valid email is required' }),
+  phone: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
 });
 
 type UpdateAccountFormValues = z.infer<typeof formSchema>;
@@ -67,9 +71,37 @@ export const UpdateAccountForm = ({
       name={`update-account-form-${username}`}
       form={form}
       onFinish={handleFinish}
-      initialValues={{ groups: accountDetail.groups }}
+      initialValues={{ ...accountDetail }}
     >
-      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
+      <Form.Item
+        name="email"
+        label={<Form.Label required>Email</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input type="email" placeholder="Enter email" />
+      </Form.Item>
+
+      <Form.Item
+        name="name"
+        label={<Form.Label>Name</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter name" />
+      </Form.Item>
+
+      <Form.Item
+        name="phone"
+        label={<Form.Label>Phone</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter phone" />
+      </Form.Item>
+
+      <Form.Item
+        name="groups"
+        label={<Form.Label required>Groups</Form.Label>}
+        rules={[formValidation]}
+      >
         <AccountGroupSelect />
       </Form.Item>
 
