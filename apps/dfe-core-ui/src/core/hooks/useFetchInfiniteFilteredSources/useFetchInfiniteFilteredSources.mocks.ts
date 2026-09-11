@@ -5,6 +5,7 @@ import { TSourceListResponse, TSourceListSummary } from './types';
 
 const SOURCE_ITEM: TSourceListSummary = {
   name: 'string',
+  resource_type: 'custom',
   display_name: 'string',
   enabled: true,
   current: 'string',
