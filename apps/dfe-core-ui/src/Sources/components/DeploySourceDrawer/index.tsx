@@ -48,6 +48,7 @@ export const DeploySourceDrawer = ({
           <Button
             className={cn('flex items-center gap-2', classNames?.button)}
             type="primary"
+            loading={planSourceData.isPending}
             onClick={() => handleTriggerPlan()}
           >
             Deploy <IconRocket />
@@ -86,6 +87,7 @@ export const DeploySourceDrawer = ({
                 source_name={source_name}
                 version={version}
                 onDeploy={deployMutation}
+                isPending={deploySourceData.isPending}
               />
             )}
         </div>

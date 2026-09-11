@@ -53,6 +53,7 @@ export const PlanSourceDetails = ({
               description="Review the planned schema before deploying."
               action={
                 <Button
+                  loading={isPending}
                   className="flex items-center gap-2"
                   type="primary"
                   onClick={() => handleDeploySource()}
