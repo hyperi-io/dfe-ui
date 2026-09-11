@@ -14,7 +14,7 @@ interface UseUpdateCurrentUserProps {
 export const useUpdateCurrentUser = ({
   onSuccess,
   onError,
-}: UseUpdateCurrentUserProps) => {
+}: UseUpdateCurrentUserProps = {}) => {
   const queryClient = useQueryClient();
 
   const { data, mutate, isPending, error } = useMutation({

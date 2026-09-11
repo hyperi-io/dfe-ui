@@ -12,7 +12,7 @@ interface UseCurrentUserResetPasswordProps {
 export const useCurrentUserResetPassword = ({
   onSuccess,
   onError,
-}: UseCurrentUserResetPasswordProps) => {
+}: UseCurrentUserResetPasswordProps = {}) => {
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: TCurrentUserResetPasswordRequestBody) =>
       resetCurrentUserPassword({
