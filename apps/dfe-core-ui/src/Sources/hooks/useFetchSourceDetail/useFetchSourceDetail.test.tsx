@@ -29,6 +29,7 @@ describe('.useFetchSourceDetail', () => {
 
       const response: TSourceVersionDetail = {
         source: 'source',
+        resource_type: 'custom',
         enabled: true,
         display_name: 'string',
         description: 'string',

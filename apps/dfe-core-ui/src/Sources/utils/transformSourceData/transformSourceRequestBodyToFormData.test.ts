@@ -7,6 +7,7 @@ describe('transformSourceRequestBodyToFormData', () => {
   test('a version carrying a fetcher is fetcher-based, with the stanza as YAML', () => {
     const source: TSourceVersionDetail = {
       source: 'source',
+      resource_type: 'custom',
       display_name: 'display name',
       enabled: false,
       current: 'string',
@@ -39,6 +40,7 @@ describe('transformSourceRequestBodyToFormData', () => {
   test('a version carrying a match rule is receiver-based', () => {
     const source: TSourceVersionDetail = {
       source: 'source',
+      resource_type: 'custom',
       display_name: 'display name',
       enabled: false,
       current: 'string',
@@ -75,6 +77,7 @@ describe('transformSourceRequestBodyToFormData', () => {
     };
     const source: TSourceVersionDetail = {
       source: 'source',
+      resource_type: 'custom',
       enabled: true,
       current: '1.0.0',
       versions: ['1.0.0'],
@@ -92,6 +95,7 @@ describe('transformSourceRequestBodyToFormData', () => {
   test('when the version has no origin at all, it falls back to receiver', () => {
     const source: TSourceVersionDetail = {
       source: 'source',
+      resource_type: 'custom',
       display_name: 'display name',
       enabled: false,
       current: 'string',

@@ -19,8 +19,16 @@ import { useMemo } from 'react';
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
 
-const originTagColour = (origin: string) =>
-  origin === 'fetcher' ? 'purple' : 'blue';
+const originTagColour = (origin: string) => {
+  switch (origin) {
+    case 'fetcher':
+      return 'purple';
+    case 'receiver':
+      return 'blue';
+    default:
+      return 'default';
+  }
+};
 
 /** Ant Design Tree keys must be globally unique; folder and source paths can share the same string. */
 export const folderTreeKey = (pathSegments: string[]) =>
@@ -166,7 +174,10 @@ const sourceSummaryToTreeData = ({
               <span className="flex gap-2 items-center">
                 {source.name.split('/').pop() ?? ''}
 
-                <Tag className="m-0" color={originTagColour(source.origin)}>
+                <Tag
+                  className="m-0"
+                  color={originTagColour(source.origin ?? '')}
+                >
                   {source.origin}
                 </Tag>
 

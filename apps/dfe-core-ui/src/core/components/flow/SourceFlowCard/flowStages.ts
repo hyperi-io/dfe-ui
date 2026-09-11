@@ -26,7 +26,7 @@ export const flowStages = (
     title:
       flow.origin === 'fetcher' ? flow.input : `Receiver match: ${flow.input}`,
     details: [
-      { label: 'Origin', value: flow.origin },
+      { label: 'Origin', value: flow.origin ?? 'default' },
       { label: 'Transport', value: `${flow.transport} (${flow.carrier})` },
     ],
     engineOwned: flow.origin === 'fetcher',
