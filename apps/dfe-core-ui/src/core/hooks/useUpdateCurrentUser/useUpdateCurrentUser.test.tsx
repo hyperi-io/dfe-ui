@@ -51,7 +51,7 @@ describe('.useUpdateCurrentUser', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TCurrentUserUpdateResponse = {
-        name: 'name',
+        name: 'string',
         email: 'string',
         phone: 'string',
         username: 'string',
