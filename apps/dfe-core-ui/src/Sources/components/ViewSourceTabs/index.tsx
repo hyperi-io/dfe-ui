@@ -1,10 +1,10 @@
 'use client';
 
-import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
-import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
+import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -82,7 +82,8 @@ export const ViewSourceDetailTabs = ({
           '[&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:flex-1',
           '[&_.ant-tabs-content]:h-full',
         ),
-        content: 'h-full min-h-0 overflow-y-auto css-custom-scrollbar',
+        content:
+          'h-full max-h-[calc(100vh-150px)] pb-8 min-h-0 overflow-y-auto css-custom-scrollbar',
       }}
       activeKey={activeTab}
       onChange={handleTabChange}

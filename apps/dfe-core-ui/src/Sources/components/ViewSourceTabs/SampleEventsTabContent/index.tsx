@@ -38,38 +38,46 @@ export const SampleEventsTabContent = ({
     );
 
   return (
-    <div className="flex flex-col gap-y-3">
-      {sampleRows?.rows.length === 0 && (
-        <NotificationCard
-          title="No fields to promote"
-          description="Sample rows have been analysed and no fields were found for promotion."
-        />
-      )}
+    <>
       {fieldsToPromote.size > 0 && (
-        <FieldPromoteBanner
-          selectedSourceName={source.source}
-          selectedSourceVersion={version}
-        />
+        <div className="relative mb-4">
+          <FieldPromoteBanner
+            selectedSourceName={source.source}
+            selectedSourceVersion={version}
+            classNames={{
+              root: 'sticky w-full top-0 left-0',
+            }}
+          />
+        </div>
       )}
-      {!isMetaSchemaDefined && (
-        <NotificationCard
-          icon={<IconInfoCircle className="w-4 h-4" />}
-          description={
-            <p className="flex gap-2">
-              This source has no meta schema defined. Results will be sent to{' '}
-              <span className="font-semibold">_main_land.</span>
-            </p>
-          }
-        />
-      )}
+      <div className="flex flex-col gap-y-3">
+        {sampleRows?.rows.length === 0 && (
+          <NotificationCard
+            title="No fields to promote"
+            description="Sample rows have been analysed and no fields were found for promotion."
+          />
+        )}
 
-      <ul className="flex flex-col gap-y-3 mt-2">
-        {sampleRows?.rows.map((row) => (
-          <li key={row._uuid as string}>
-            <SampleRowsCard row={row} />
-          </li>
-        ))}
-      </ul>
-    </div>
+        {!isMetaSchemaDefined && (
+          <NotificationCard
+            icon={<IconInfoCircle className="w-4 h-4" />}
+            description={
+              <p className="flex gap-2">
+                This source has no meta schema defined. Results will be sent to{' '}
+                <span className="font-semibold">_main_land.</span>
+              </p>
+            }
+          />
+        )}
+
+        <ul className="flex flex-col gap-y-3 mt-2 max-h-[calc(100vh-400px)] pb-4 css-custom-scrollbar">
+          {sampleRows?.rows.map((row) => (
+            <li key={row._uuid as string}>
+              <SampleRowsCard row={row} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 };
