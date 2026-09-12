@@ -1,12 +1,18 @@
 import { Form } from '@/core/components/Form';
+import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { FormRule, Input, Select } from 'antd';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
+import { getTransformEngines } from './TransformTabContent.helpers';
 
 export const TransformForm = ({
   formValidation,
 }: {
   formValidation: FormRule;
 }) => {
+  const { data: apps, isLoading } = useFetchApps();
+  const engines = getTransformEngines(apps);
+  const hasEngines = engines.length > 0;
+
   return (
     <>
       <div className="grid grid-cols-2 gap-2">
@@ -14,32 +20,20 @@ export const TransformForm = ({
           name={['transform', 'engine']}
           label="Transform Engine"
           rules={[formValidation]}
+          help={
+            hasEngines
+              ? undefined
+              : 'No transform app is deployed, so there are no engines to pick from'
+          }
         >
           <Select
+            loading={isLoading}
+            disabled={!hasEngines}
             placeholder="Select engine"
-            options={[
-              {
-                disabled: true,
-                label: (
-                  <span className="text-foreground-muted/40 dark:text-foreground-muted/40">
-                    Elastic - Coming soon!
-                  </span>
-                ),
-                value: 'elastic',
-              },
-              {
-                disabled: true,
-                label: (
-                  <span className="text-foreground-muted/40 dark:text-foreground-muted/40">
-                    Splack - Coming soon!
-                  </span>
-                ),
-                value: 'splack',
-              },
-              { label: 'Vector', value: 'vector' },
-              { label: 'VRL', value: 'vrl' },
-              { label: 'Wasm', value: 'wasm' },
-            ]}
+            options={engines.map(({ engine, service }) => ({
+              label: service,
+              value: engine,
+            }))}
             allowClear
           />
         </Form.Item>
