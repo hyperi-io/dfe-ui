@@ -10510,6 +10510,16 @@ export interface components {
              * @description Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it.
              */
             apps_sync_error?: string | null;
+            /**
+             * Hyperdx Source Id
+             * @description HyperDX source now pointed at this source's table, by id
+             */
+            hyperdx_source_id?: string | null;
+            /**
+             * Hyperdx Source Error
+             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             */
+            hyperdx_source_error?: string | null;
         };
         /**
          * SchemaDiff
