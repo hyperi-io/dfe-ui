@@ -4849,6 +4849,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hyperdx/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hyperdx Sources
+         * @description List every HyperDX team and the DFE sources on it.
+         *
+         *     A deploy writes its source to every team, so this is the read that says where
+         *     it landed. 503 when HyperDX is not deployed or not answering -- an empty list
+         *     would read as "the source is missing", which is a different fault.
+         */
+        get: operations["hyperdx_sources_api_v1_hyperdx_sources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/repository/preferences": {
         parameters: {
             query?: never;
@@ -7453,6 +7477,55 @@ export interface components {
             username: string;
             /** Password */
             password: string;
+        };
+        /**
+         * HyperDXSourcesResponse
+         * @description Where every deployed DFE source actually landed in HyperDX.
+         */
+        HyperDXSourcesResponse: {
+            /** Teams */
+            teams?: components["schemas"]["HyperDXTeamSources"][];
+        };
+        /**
+         * HyperDXTeamSource
+         * @description One HyperDX source on one team, as the fork holds it.
+         */
+        HyperDXTeamSource: {
+            /**
+             * Id
+             * @description HyperDX source id on that team
+             */
+            id: string;
+            /**
+             * Name
+             * @description DFE source name; the HyperDX source carries the same one
+             */
+            name: string;
+            /**
+             * Table
+             * @description The ClickHouse table the source reads (databaseName, tableName)
+             */
+            table?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * HyperDXTeamSources
+         * @description One HyperDX team and the DFE sources it holds.
+         */
+        HyperDXTeamSources: {
+            /**
+             * Team
+             * @description HyperDX team id
+             */
+            team: string;
+            /**
+             * Team Name
+             * @description HyperDX team name; the caller's OIDC group
+             */
+            team_name: string;
+            /** Sources */
+            sources?: components["schemas"]["HyperDXTeamSource"][];
         };
         /**
          * InitialSetupState
@@ -10510,6 +10583,16 @@ export interface components {
              * @description Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it.
              */
             apps_sync_error?: string | null;
+            /**
+             * Hyperdx Source Teams
+             * @description How many HyperDX teams now carry a source over this source's table
+             */
+            hyperdx_source_teams?: number | null;
+            /**
+             * Hyperdx Source Error
+             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             */
+            hyperdx_source_error?: string | null;
         };
         /**
          * SchemaDiff
@@ -22004,6 +22087,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HyperDXConnection"];
+                };
+            };
+        };
+    };
+    hyperdx_sources_api_v1_hyperdx_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HyperDXSourcesResponse"];
                 };
             };
         };
