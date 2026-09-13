@@ -5,7 +5,6 @@ import React from 'react';
 
 import { useHasAppAccess } from '@/core/components/RbacProtected/hooks/useHasAppAccess';
 import { Sidebar } from '@/core/components/SidebarMenu';
-import { VersionFooter } from '@/core/components/VersionFooter';
 import { NoAccessScene } from '@/core/scenes/NoAccessScene';
 import { cn } from '@/core/utils/style';
 
@@ -27,7 +26,6 @@ export const AppLayout = ({ className, children }: AppLayoutProps) => {
     <Layout className={cn('min-h-screen', className)}>
       <Sidebar />
       <Layout>{children}</Layout>
-      <VersionFooter />
     </Layout>
   );
 };

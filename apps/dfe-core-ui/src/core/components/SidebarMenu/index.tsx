@@ -1,6 +1,5 @@
 'use client';
 
-import { uiBuildVersion } from '@/core/appVersion/buildVersion';
 import { IconWrapper } from '@/core/components/IconWrapper';
 import {
   IconLayoutSidebarLeftCollapse as MenuFoldOutlined,
@@ -15,13 +14,13 @@ import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { cn } from '@/core/utils/style';
 import { Logo } from './Logo';
 import { SidebarMenu } from './SidebarMenu';
+import { SuiteVersion } from './SuiteVersion';
 
 const { Sider } = Layout;
 
 export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
-  const appVersion = uiBuildVersion();
   return (
     <Sider
       className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
@@ -61,11 +60,7 @@ export const Sidebar = () => {
         </div>
 
         <div className="flex gap-x-1 gap-y-2 flex-wrap px-7 content-end mb-4 w-full items-center justify-end">
-          {!collapsed && appVersion && (
-            <p className="text-sm text-gray-400 dark:text-gray-500 mr-auto">
-              v{appVersion}
-            </p>
-          )}
+          {!collapsed && <SuiteVersion className="mr-auto" />}
           <ThemeToggle className="mr-2" collapsed={collapsed} />
           <UserActionsButton />
         </div>
