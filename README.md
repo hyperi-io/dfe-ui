@@ -48,6 +48,13 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 | [docs/build-and-deploy.md](docs/build-and-deploy.md)         | standalone build, container, publish                                         |
 | [docs/local-development.md](docs/local-development.md)       | toolchain, env vars, tests, storybook                                        |
 
+## Third-party
+
+The `/observe` surface embeds [HyperDX](https://github.com/hyperdxio/hyperdx)
+(MIT) via the `hyperi-io/dfe-hyperdx` fork, iframed at runtime - dfe-ui ships
+none of its code. Full notice text, including the upstream licence, is in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) at the repo root.
+
 ## License
 
 Licensed under BUSL-1.1 - see [LICENSE](LICENSE).
