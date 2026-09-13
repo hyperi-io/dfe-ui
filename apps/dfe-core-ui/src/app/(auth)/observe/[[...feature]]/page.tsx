@@ -23,7 +23,13 @@ import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
  * The embed target comes from useHyperdxUrl (runtime, deployment-provided) --
  * a build-inlined NEXT_PUBLIC_ read here would bake the container's empty
  * value into the bundle.
+ *
+ * dfe-ui carries no HyperDX source -- this page only iframes the hyperi-io/
+ * dfe-hyperdx fork, so the attribution caption below is the one place that
+ * credit is visible in the running app (see THIRD-PARTY-NOTICES.md).
  */
+const HYPERDX_UPSTREAM_URL = 'https://github.com/hyperdxio/hyperdx';
+
 /**
  * dfe-ui paths that are a HyperDX route plus fixed params.
  *
@@ -107,18 +113,34 @@ export default function ObservePage() {
   const src = `${hyperdxUrl}/${feature}?${query.toString()}`;
 
   return (
-    <iframe
-      ref={iframeRef}
-      src={src}
-      title="DFE Observe"
-      onLoad={handleLoad}
-      allow="clipboard-read; clipboard-write"
-      style={{
-        display: 'block',
-        width: '100%',
-        height: '100vh',
-        border: 'none',
-      }}
-    />
+    <>
+      <iframe
+        ref={iframeRef}
+        src={src}
+        title="DFE Observe"
+        onLoad={handleLoad}
+        allow="clipboard-read; clipboard-write"
+        style={{
+          display: 'block',
+          width: '100%',
+          height: '100vh',
+          border: 'none',
+        }}
+      />
+      {/* Opposite corner from VersionFooter (bottom-right) so the two captions
+          never overlap. */}
+      <div className="fixed bottom-2 left-3 z-10 text-xs text-foreground/50 dark:text-dark-foreground/50">
+        Explore is powered by{' '}
+        <a
+          href={HYPERDX_UPSTREAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline text-foreground/70 dark:text-dark-foreground/70"
+        >
+          HyperDX
+        </a>
+        , MIT licensed
+      </div>
+    </>
   );
 }
