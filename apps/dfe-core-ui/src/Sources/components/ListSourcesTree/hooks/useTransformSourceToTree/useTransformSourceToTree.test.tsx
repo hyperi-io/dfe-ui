@@ -3,6 +3,7 @@ import {
   TSourceSummary,
 } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { render, renderHook } from '@testing-library/react';
+import type { TreeDataNode } from 'antd';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
@@ -10,6 +11,13 @@ import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
 // CloneSourceDrawer transitively loads AceEditor, which needs a global `ace` ClientContext sets.
 vi.mock('@/Sources/components/CloneSourceDrawer', () => ({
   CloneSourceDrawer: () => null,
+}));
+
+// DeleteSourceModal reaches RBAC and the API; what is under test is whether the node mounts it.
+vi.mock('@/Sources/components/DeleteSourceModal', () => ({
+  DeleteSourceModal: ({ source }: { source: string }) => (
+    <button aria-label={`Delete ${source}`} />
+  ),
 }));
 
 const refetchSources = vi.fn();
@@ -46,6 +54,12 @@ const expectTreeNodeTitle = (
 ) => {
   const { container } = render(<>{title}</>);
   expect(container).toHaveTextContent(expectedText);
+};
+
+/** A source node's title is a render function, unlike a folder node's element. */
+const renderSourceNodeTitle = (node: TreeDataNode) => {
+  const Title = node.title as () => ReactElement;
+  return render(<Title />);
 };
 
 describe('getExpandedKeysForSourceSelection', () => {
@@ -199,6 +213,44 @@ describe('useTransformSourceToTree', () => {
     const keys = result.current.tree.map((node) => node.key);
     expect(keys).toEqual(['source:test', 'dir:test']);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('offers a delete action on a custom source node', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [baseSource({ name: 'syslog', versions: [] })],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByLabelText } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(getByLabelText('Delete syslog')).toBeInTheDocument();
+  });
+
+  it('offers no delete action on a core source node', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'main',
+              resource_type: 'core',
+              versions: [],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { queryByLabelText } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(queryByLabelText('Delete main')).not.toBeInTheDocument();
   });
 
   it('memoises the tree when sourceObjects and setters are stable', () => {

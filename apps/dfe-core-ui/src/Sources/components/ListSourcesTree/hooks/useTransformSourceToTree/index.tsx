@@ -1,6 +1,7 @@
 import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
 import {
@@ -234,16 +235,18 @@ const sourceSummaryToTreeData = ({
                   sourceName={source.name}
                   sourceVersion={source.current}
                 />
-                <DeleteSourceModal
-                  source={`${source.name}`}
-                  onSuccess={() =>
-                    apiNotification.success({
-                      title: 'Source deleted successfully',
-                      description: `${source.name} has been deleted successfully`,
-                      placement: 'bottomLeft',
-                    })
-                  }
-                />
+                {source.resource_type !== RESOURCE_TYPES.CORE && (
+                  <DeleteSourceModal
+                    source={`${source.name}`}
+                    onSuccess={() =>
+                      apiNotification.success({
+                        title: 'Source deleted successfully',
+                        description: `${source.name} has been deleted successfully`,
+                        placement: 'bottomLeft',
+                      })
+                    }
+                  />
+                )}
               </>
             }
           />
