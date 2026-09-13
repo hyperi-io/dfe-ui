@@ -3,18 +3,19 @@ import { DEFAULT_SOURCE_NAME } from '@/core/components/flow/SourceFlowCard/defau
 import { IconInfoCircle } from '@repo/dfe-icons';
 
 /**
- * What the console shows before a source is picked: the default flow.
+ * What the console shows before a source is picked: the main flow.
  *
  * Every record the receiver cannot place lands there, so it is running before
  * anyone has configured anything, and it is the first flow a new operator can
- * read end to end.
+ * read end to end. The card only reads: main is a core source, and the engine
+ * refuses every write to one.
  */
 export const EmptyDetail = () => {
   return (
     <div className="flex h-full w-full flex-col gap-6 overflow-y-auto pr-4 pt-4">
       <SourceFlowCard
         source={DEFAULT_SOURCE_NAME}
-        title="Default flow"
+        title="Main flow"
         description="Where a record the receiver cannot place lands."
       />
       <div className="flex flex-col items-center justify-center">

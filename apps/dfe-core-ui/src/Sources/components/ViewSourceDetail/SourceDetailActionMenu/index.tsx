@@ -1,4 +1,5 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
@@ -19,6 +20,8 @@ export const SourceDetailActionMenu = ({
 }: SourceDetailActionMenuProps) => {
   const { refetch: refetchSources, setSelectedSource } =
     useListSourcesContext();
+  // The engine owns a core source and reconciles it, so it refuses every write to one.
+  const coreResource = source.resource_type === RESOURCE_TYPES.CORE;
   return (
     <ActionsMenu
       placement="left"
@@ -26,20 +29,22 @@ export const SourceDetailActionMenu = ({
         menu: 'w-48 p-0',
       }}
     >
-      <EditSourceDrawer
-        key="edit-source"
-        trigger={
-          <Button
-            className="flex items-center justify-start"
-            type="text"
-            icon={<IconEdit />}
-            aria-label="Edit Source"
-          >
-            Edit Source
-          </Button>
-        }
-        onSuccess={onEditSuccess}
-      />
+      {!coreResource && (
+        <EditSourceDrawer
+          key="edit-source"
+          trigger={
+            <Button
+              className="flex items-center justify-start"
+              type="text"
+              icon={<IconEdit />}
+              aria-label="Edit Source"
+            >
+              Edit Source
+            </Button>
+          }
+          onSuccess={onEditSuccess}
+        />
+      )}
       <CloneSourceDrawer
         key="clone-source"
         sourceName={source.source}
@@ -55,27 +60,29 @@ export const SourceDetailActionMenu = ({
           </Button>
         }
       />
-      <DeleteSourceModal
-        key="delete-source"
-        source={source.source}
-        trigger={
-          <Button
-            className="flex items-center justify-start"
-            type="text"
-            icon={<IconTrash />}
-            aria-label="Delete Source"
-          >
-            Delete Source
-          </Button>
-        }
-        onSuccess={() => {
-          setSelectedSource({
-            source_name: null,
-            source_version: null,
-          });
-          refetchSources();
-        }}
-      />
+      {!coreResource && (
+        <DeleteSourceModal
+          key="delete-source"
+          source={source.source}
+          trigger={
+            <Button
+              className="flex items-center justify-start"
+              type="text"
+              icon={<IconTrash />}
+              aria-label="Delete Source"
+            >
+              Delete Source
+            </Button>
+          }
+          onSuccess={() => {
+            setSelectedSource({
+              source_name: null,
+              source_version: null,
+            });
+            refetchSources();
+          }}
+        />
+      )}
     </ActionsMenu>
   );
 };
