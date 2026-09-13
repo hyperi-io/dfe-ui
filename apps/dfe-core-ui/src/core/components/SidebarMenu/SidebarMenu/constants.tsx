@@ -10,11 +10,11 @@ import {
   IconLayoutGrid,
   IconRadar,
   IconServer2,
-  IconSettings2,
   IconShieldCheck,
   IconStack2,
   IconTable,
   IconTargetArrow,
+  IconUsersGroup,
   type IconComponent,
 } from '@repo/dfe-icons';
 
@@ -202,7 +202,7 @@ export const buildSidebarMenuGroups = (
       {
         key: '/settings',
         label: 'Settings',
-        icon: <IconSettings2 />,
+        icon: <IconUsersGroup />,
         actions: [
           rbacActions.org_read,
           rbacActions.org_write,
