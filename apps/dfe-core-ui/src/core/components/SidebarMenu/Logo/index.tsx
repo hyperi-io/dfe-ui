@@ -33,7 +33,10 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           height={21}
         />
       ) : (
-        <>
+        // The caption's box is the wordmark image's own rendered width (an
+        // inline-block shrinks to its widest child, the img), so the text
+        // below can never render wider than the wordmark above it.
+        <div className="inline-block">
           {/* Colour SVG wordmark (light = navy #000647, dark = white #FFFFFF): render
               as-is via <img>, not tinted through the currentColor icon components. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -46,16 +49,16 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
             alt="DFE"
             className="h-8 w-auto"
           />
-          {/* Brand caption in Martel Sans ExtraBold; the wordmark stays the SVG. */}
+          {/* Brand caption in Martel Sans ExtraBold, sized to the wordmark's width so it never overflows. */}
           <span
             className={cn(
-              'font-brand text-xs font-extrabold uppercase tracking-widest',
+              'font-brand block w-full text-center text-[9px] font-extrabold uppercase tracking-tight',
               'text-foreground-muted dark:text-dark-foreground-muted',
             )}
           >
             Data Fusion Engine
           </span>
-        </>
+        </div>
       )}
     </Link>
   );
