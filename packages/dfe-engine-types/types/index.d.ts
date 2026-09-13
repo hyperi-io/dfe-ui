@@ -1069,6 +1069,9 @@ export interface paths {
         /**
          * Delete Source
          * @description Delete a source by name. Its fetcher instance and receiver rule go with it.
+         *
+         *     An engine-owned source -- the landing table's own -- is refused with 409
+         *     ``conflict``, the same answer PUT and PATCH give.
          */
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
@@ -4849,6 +4852,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hyperdx/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hyperdx Sources
+         * @description List every HyperDX team and the DFE sources on it.
+         *
+         *     A deploy writes its source to every team, so this is the read that says where
+         *     it landed. 503 when HyperDX is not deployed or not answering -- an empty list
+         *     would read as "the source is missing", which is a different fault.
+         */
+        get: operations["hyperdx_sources_api_v1_hyperdx_sources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/repository/preferences": {
         parameters: {
             query?: never;
@@ -5266,6 +5293,11 @@ export interface components {
              * @description Overlay writes made (service/instance: action)
              */
             changes?: string[];
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands.
+             */
+            restart_required?: string[];
         };
         /** ArtifactModel */
         ArtifactModel: {
@@ -5469,7 +5501,10 @@ export interface components {
             action: string;
             /** Succeeded */
             succeeded?: string[];
-            /** Failed */
+            /**
+             * Failed
+             * @description One entry per source left untouched: its name, the same code the single-source route answers with, and the message
+             */
             failed?: {
                 [key: string]: string;
             }[];
@@ -6020,10 +6055,45 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             /** Copied */
             copied?: string[];
             /** Skipped */
             skipped?: string[];
+        };
+        /**
+         * CoreResourceConflictContext
+         * @description Structured context for a write that named an engine-owned resource.
+         */
+        CoreResourceConflictContext: {
+            /**
+             * Source
+             * @description The engine-owned source the write named
+             */
+            source: string;
+        };
+        /**
+         * CoreResourceConflictErrorResponse
+         * @description 409 when a write names a resource the engine owns and reconciles itself.
+         */
+        CoreResourceConflictErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            code: "conflict";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["CoreResourceConflictContext"];
         };
         /** CostEstimate */
         CostEstimate: {
@@ -6383,7 +6453,7 @@ export interface components {
             mesh: components["schemas"]["MeshFacts"];
             /**
              * Applies Routing
-             * @description Whether the routing a deployed source compiles to reaches the apps that run it. False on a Compose stack, which mounts each app's config file read-only: the engine still writes the overlay, and nothing carries it into the container, so a console must not offer the source as live.
+             * @description Whether the routing a deployed source compiles to reaches the apps that run it. A GitOps controller applies it on Kubernetes; off it the engine renders each app's config file into a directory the containers mount. False where neither is wired, so a console must not offer the source as live.
              */
             applies_routing: boolean;
             /**
@@ -6401,6 +6471,13 @@ export interface components {
              * @description dfe-ui version, from the deploy repo's pins where they name one, else the version the chart was rendered with. Null when neither states one.
              */
             ui: string | null;
+            /**
+             * Apps
+             * @description Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above.
+             */
+            apps: {
+                [key: string]: string;
+            };
             /**
              * Source
              * @description deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine.
@@ -7455,6 +7532,55 @@ export interface components {
             password: string;
         };
         /**
+         * HyperDXSourcesResponse
+         * @description Where every deployed DFE source actually landed in HyperDX.
+         */
+        HyperDXSourcesResponse: {
+            /** Teams */
+            teams?: components["schemas"]["HyperDXTeamSources"][];
+        };
+        /**
+         * HyperDXTeamSource
+         * @description One HyperDX source on one team, as the fork holds it.
+         */
+        HyperDXTeamSource: {
+            /**
+             * Id
+             * @description HyperDX source id on that team
+             */
+            id: string;
+            /**
+             * Name
+             * @description DFE source name; the HyperDX source carries the same one
+             */
+            name: string;
+            /**
+             * Table
+             * @description The ClickHouse table the source reads (databaseName, tableName)
+             */
+            table?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * HyperDXTeamSources
+         * @description One HyperDX team and the DFE sources it holds.
+         */
+        HyperDXTeamSources: {
+            /**
+             * Team
+             * @description HyperDX team id
+             */
+            team: string;
+            /**
+             * Team Name
+             * @description HyperDX team name; the caller's OIDC group
+             */
+            team_name: string;
+            /** Sources */
+            sources?: components["schemas"]["HyperDXTeamSource"][];
+        };
+        /**
          * InitialSetupState
          * @description The machine's verdict on where first-run setup stands.
          */
@@ -7695,6 +7821,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             link?: components["schemas"]["LinkModel"] | null;
         };
         /** LinkStatusModel */
@@ -9569,6 +9700,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             /** Relinked */
             relinked?: components["schemas"]["LinkModel"][];
         };
@@ -10510,6 +10646,21 @@ export interface components {
              * @description Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it.
              */
             apps_sync_error?: string | null;
+            /**
+             * Hyperdx Source Teams
+             * @description How many HyperDX teams now carry a source over this source's table
+             */
+            hyperdx_source_teams?: number | null;
+            /**
+             * Hyperdx Source Error
+             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             */
+            hyperdx_source_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this deploy's config change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /**
          * SchemaDiff
@@ -11319,6 +11470,11 @@ export interface components {
              * @description Why the apps could not be brought into step; reconcile-apps retries it
              */
             apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /**
          * SourceSchema
@@ -12426,6 +12582,13 @@ export interface components {
              */
             ui: string | null;
             /**
+             * Apps
+             * @description Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above.
+             */
+            apps: {
+                [key: string]: string;
+            };
+            /**
              * Source
              * @description deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine.
              * @enum {string}
@@ -12706,6 +12869,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /** SeedResponse */
         dfe_engine__api__v1__deployments__SeedResponse: {
@@ -15227,13 +15395,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description Receiver match duplicates another enabled source */
+            /** @description Receiver match duplicates another enabled source (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -15264,6 +15432,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The source is engine-owned and no write path may delete it */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoreResourceConflictErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -15300,13 +15477,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description Enabling would duplicate another enabled source's receiver match */
+            /** @description Enabling would duplicate another enabled source's receiver match (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -22004,6 +22181,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HyperDXConnection"];
+                };
+            };
+        };
+    };
+    hyperdx_sources_api_v1_hyperdx_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HyperDXSourcesResponse"];
                 };
             };
         };
