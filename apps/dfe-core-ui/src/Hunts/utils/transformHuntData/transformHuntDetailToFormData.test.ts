@@ -39,6 +39,8 @@ describe('transformHuntDetailToFormData', () => {
       log_buffer: 120,
       customers: ['org_a'],
       rules: ['rule_one'],
+      global_target_table_name: 'target',
+      global_source_table_name: '',
     };
     expect(transformHuntDetailToFormData(huntDetail)).toEqual(expectedFormData);
   });

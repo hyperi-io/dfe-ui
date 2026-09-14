@@ -9,6 +9,7 @@ import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';
+import { isValidElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SchemaUploadCollapse } from './index';
 
@@ -16,17 +17,26 @@ const bypassFormValidation = {
   validator: async () => Promise.resolve(),
 } as FormRule;
 
+const tabLabelToId = (label: string | ReactNode) => {
+  if (typeof label === 'string') return label.replace(/\s+/g, '-');
+  if (isValidElement<{ children?: ReactNode }>(label)) {
+    const children = label.props.children;
+    if (typeof children === 'string') return children.replace(/\s+/g, '-');
+  }
+  return 'unknown';
+};
+
 const tabLabelSpy = vi.fn(
   ({
     label,
     validationErrors,
   }: {
-    label: string;
+    label: string | ReactNode;
     validationErrors: string[];
   }) => (
     <span
-      data-testid={`tab-label-${label.replace(/\s+/g, '-')}`}
-      data-error-count={validationErrors.length}
+      data-testid={`tab-label-${tabLabelToId(label)}`}
+      data-error-count={validationErrors?.length ?? 0}
     />
   ),
 );
@@ -36,8 +46,10 @@ const addSchemaTableSpy = vi.fn((props: AddSchemaTableProps) => (
 ));
 
 vi.mock('@/core/components/TabLabel', () => ({
-  TabLabel: (props: { label: string; validationErrors: string[] }) =>
-    tabLabelSpy(props),
+  TabLabel: (props: {
+    label: string | ReactNode;
+    validationErrors: string[];
+  }) => tabLabelSpy(props),
 }));
 
 vi.mock(

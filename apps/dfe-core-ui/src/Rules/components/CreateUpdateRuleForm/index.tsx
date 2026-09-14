@@ -64,7 +64,7 @@ const CreateUpdateRuleFormBase = ({
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
 
   const { componentHeight } = useSetComponentHeight({
-    offset: 300,
+    offset: 370,
   });
 
   useEffect(() => {
@@ -113,6 +113,7 @@ const CreateUpdateRuleFormBase = ({
       <ContentCard className="flex flex-col gap-y-2">
         <Form.Item
           name="user_sql"
+          label={<Form.Label required>User SQL</Form.Label>}
           className="m-0! grow"
           rules={[formValidation]}
         >

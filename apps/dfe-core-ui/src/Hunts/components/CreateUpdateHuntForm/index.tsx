@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
+import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
@@ -11,19 +12,35 @@ const NAME_REGEX = /^[a-z][a-z0-9_]*$/;
 
 const formSchema = z.object({
   name: z
-    .string()
+    .string({ message: 'Identifier is required' })
     .min(1, { message: 'Identifier is required' })
     .refine((v) => NAME_REGEX.test(v), {
       message:
         'Identifier must contain only lowercase letters, numbers, and underscores',
     }),
   display_name: z.string().optional().nullable(),
-  customers: z.array(z.string()).min(1, { message: 'Customers are required' }),
+  global_target_table_name: z
+    .string({ message: 'Global target table name is required' })
+    .min(1, { message: 'Global target table name is required' }),
+  global_source_table_name: z
+    .string({ message: 'Global source table name is required' })
+    .min(1, { message: 'Global source table name is required' }),
+  customers: z
+    .array(z.string({ message: 'Customer is required' }))
+    .min(1, { message: 'Customers are required' }),
   rules: z
-    .array(z.string().min(1, { message: 'Rule is required' }))
+    .array(
+      z
+        .string({ message: 'Rule is required' })
+        .min(1, { message: 'Rule is required' }),
+    )
     .min(1, { message: 'Rules are required' }),
-  cron: z.string().min(1, { message: 'Cron is required' }),
-  log_buffer: z.number().min(1, { message: 'Log buffer is required' }),
+  cron: z
+    .string({ message: 'Cron is required' })
+    .min(1, { message: 'Cron is required' }),
+  log_buffer: z
+    .number({ message: 'Log buffer is required' })
+    .min(1, { message: 'Log buffer is required' }),
 });
 export type CreateUpdateHuntFormData = z.infer<typeof formSchema>;
 
@@ -64,7 +81,11 @@ export const CreateUpdateHuntForm = ({
       initialValues={initialValues}
       {...props}
     >
-      <Form.Item name="name" label="Name" rules={[formValidation]}>
+      <Form.Item
+        name="name"
+        label={<Form.Label required>Name</Form.Label>}
+        rules={[formValidation]}
+      >
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
       <Form.Item
@@ -76,7 +97,7 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="customers"
-        label="Organisations"
+        label={<Form.Label required>Organisations</Form.Label>}
         rules={[formValidation]}
       >
         <OrganisationSelect
@@ -84,11 +105,33 @@ export const CreateUpdateHuntForm = ({
           placeholder="Select organisations"
         />
       </Form.Item>
-      <Form.Item name="rules" label="Rules" rules={[formValidation]}>
+      <Form.Item
+        name="global_source_table_name"
+        label={<Form.Label required>Source Table</Form.Label>}
+        rules={[formValidation]}
+      >
+        <SourceSelect placeholder="Select source" />
+      </Form.Item>
+      <Form.Item
+        name="global_target_table_name"
+        label={<Form.Label required>Target Table</Form.Label>}
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter target table" />
+      </Form.Item>
+      <Form.Item
+        name="rules"
+        label={<Form.Label required>Rules</Form.Label>}
+        rules={[formValidation]}
+      >
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
-      <Form.Item name="cron" label="Cron" rules={[formValidation]}>
+      <Form.Item
+        name="cron"
+        label={<Form.Label required>Cron</Form.Label>}
+        rules={[formValidation]}
+      >
         <Input placeholder="Enter cron expression" />
       </Form.Item>
 

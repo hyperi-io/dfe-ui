@@ -35,8 +35,12 @@ const expiryAtEndOfSelectedDay = (val: unknown): unknown => {
 };
 
 const createApiKeyFormSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  description: z.string().min(1, { message: 'Description is required' }),
+  name: z
+    .string({ message: 'Name is required' })
+    .min(1, { message: 'Name is required' }),
+  description: z
+    .string({ message: 'Description is required' })
+    .min(1, { message: 'Description is required' }),
   groups: z.array(z.string()).optional(),
   expires_at: z.preprocess(
     expiryAtEndOfSelectedDay,
@@ -141,12 +145,16 @@ export const CreateApiKeyForm = ({
             expires_at: undefined,
           }}
         >
-          <Form.Item name="name" label="Name" rules={[formValidation]}>
+          <Form.Item
+            name="name"
+            label={<Form.Label required>Name</Form.Label>}
+            rules={[formValidation]}
+          >
             <Input />
           </Form.Item>
           <Form.Item
             name="description"
-            label="Description"
+            label={<Form.Label required>Description</Form.Label>}
             rules={[formValidation]}
           >
             <Input.TextArea />

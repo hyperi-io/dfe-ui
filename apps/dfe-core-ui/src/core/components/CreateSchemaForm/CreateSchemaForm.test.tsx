@@ -43,11 +43,11 @@ describe('CreateSchemaForm', () => {
   test('renders schema detail fields, upload section, and submit control', () => {
     render(<CreateSchemaForm />, { wrapper });
 
-    expect(screen.getByLabelText('Path')).toBeInTheDocument();
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Type')).toBeInTheDocument();
-    expect(screen.getByLabelText('Version')).toBeInTheDocument();
-    expect(screen.getByLabelText('Description')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Path/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Name/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Type/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Version/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Description/)).toBeInTheDocument();
     expect(screen.getByTestId('schema-upload-collapse')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
   });

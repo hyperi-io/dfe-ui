@@ -148,7 +148,7 @@ const CreateSchemaFormBase = ({
         <Form.Item
           className="w-96"
           name="schema_type"
-          label="Schema Type"
+          label={<Form.Label required>Schema Type</Form.Label>}
           rules={[formValidation]}
         >
           <Select
@@ -173,7 +173,7 @@ const CreateSchemaFormBase = ({
         <Form.Item
           className="w-full"
           name="name"
-          label="Name"
+          label={<Form.Label required>Name</Form.Label>}
           rules={[formValidation]}
         >
           <Input placeholder="Enter name" disabled={disabledFields?.name} />
@@ -183,7 +183,7 @@ const CreateSchemaFormBase = ({
         <Form.Item
           className="w-full"
           name="type"
-          label="Type"
+          label={<Form.Label required>Type</Form.Label>}
           rules={[formValidation]}
         >
           <Select
@@ -207,7 +207,7 @@ const CreateSchemaFormBase = ({
 
       <Form.Item
         name="description"
-        label="Description"
+        label={<Form.Label required>Description</Form.Label>}
         rules={[formValidation]}
       >
         <Input.TextArea

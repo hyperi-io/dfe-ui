@@ -1,24 +1,31 @@
 'use client';
 
-import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { useCreateLibraryArtifact } from '@/Library/hooks/useCreateLibraryArtifact';
-import { useFetchLibraryKinds } from '@/Library/hooks/useFetchLibraryKinds';
 import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useCreateLibraryArtifact } from '@/Library/hooks/useCreateLibraryArtifact';
+import { useFetchLibraryKinds } from '@/Library/hooks/useFetchLibraryKinds';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, Input, Select } from 'antd';
 import { useState } from 'react';
+import z from 'zod';
 
-type CreateArtifactFormData = {
-  name: string;
-  kind: string;
-  group?: string;
-  description?: string;
-  content?: string;
-};
+const formSchema = z.object({
+  name: z
+    .string({ message: 'Name is required' })
+    .min(1, { message: 'Name is required' }),
+  kind: z
+    .string({ message: 'Kind is required' })
+    .min(1, { message: 'Kind is required' }),
+  group: z.string().optional(),
+  description: z.string().optional(),
+  content: z.string().optional(),
+});
+type CreateArtifactFormData = z.infer<typeof formSchema>;
 
 /**
  * Create an artefact, with or without a first version.
@@ -30,6 +37,7 @@ export const CreateArtifactDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [form] = Form.useForm<CreateArtifactFormData>();
   const { data: kinds } = useFetchLibraryKinds({ queryEnabled: isOpen });
+  const formValidation = useAntdZodResolver(formSchema);
   const {
     data: result,
     mutate: createArtifact,
@@ -76,16 +84,16 @@ export const CreateArtifactDrawer = () => {
         <Form form={form} onFinish={handleFinish}>
           <Form.Item
             name="name"
-            label="Name"
-            rules={[{ required: true, message: 'A name is required' }]}
+            label={<Form.Label required>Name</Form.Label>}
+            rules={[formValidation]}
           >
             <Input placeholder="syslog-parse" />
           </Form.Item>
 
           <Form.Item
             name="kind"
-            label="Kind"
-            rules={[{ required: true, message: 'A kind is required' }]}
+            label={<Form.Label required>Kind</Form.Label>}
+            rules={[formValidation]}
           >
             <Select
               placeholder="Select a kind"
@@ -100,11 +108,16 @@ export const CreateArtifactDrawer = () => {
             name="group"
             label="Group"
             help="Optional namespace, used for filtering."
+            rules={[formValidation]}
           >
             <Input placeholder="network" />
           </Form.Item>
 
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[formValidation]}
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
 
@@ -112,6 +125,7 @@ export const CreateArtifactDrawer = () => {
             name="content"
             label="First version"
             help="Leave empty to create the artefact without content and publish later."
+            rules={[formValidation]}
           >
             <Input.TextArea rows={8} className="font-mono" />
           </Form.Item>
