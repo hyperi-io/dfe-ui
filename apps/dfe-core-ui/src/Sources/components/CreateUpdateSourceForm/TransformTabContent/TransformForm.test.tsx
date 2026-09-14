@@ -45,7 +45,7 @@ describe('TransformForm', () => {
     const user = userEvent.setup();
     render(<Harness />, { wrapper });
 
-    await user.click(await screen.findByLabelText('Transform Engine'));
+    await user.click(await screen.findByLabelText(/^Transform Engine/));
 
     expect(
       await screen.findByTitle('dfe-transform-elastic'),
@@ -57,7 +57,7 @@ describe('TransformForm', () => {
     const user = userEvent.setup();
     render(<Harness />, { wrapper });
 
-    await user.click(await screen.findByLabelText('Transform Engine'));
+    await user.click(await screen.findByLabelText(/^Transform Engine/));
 
     await screen.findByTitle('dfe-transform-vrl');
     expect(screen.queryByTitle('dfe-receiver')).not.toBeInTheDocument();
@@ -69,7 +69,7 @@ describe('TransformForm', () => {
     const onFinish = vi.fn();
     render(<Harness onFinish={onFinish} />, { wrapper });
 
-    await user.click(await screen.findByLabelText('Transform Engine'));
+    await user.click(await screen.findByLabelText(/^Transform Engine/));
     await user.click(await screen.findByTitle('dfe-transform-vrl'));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
@@ -89,6 +89,6 @@ describe('TransformForm', () => {
         'No transform app is deployed, so there are no engines to pick from',
       ),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Transform Engine')).toBeDisabled();
+    expect(screen.getByLabelText(/^Transform Engine/)).toBeDisabled();
   });
 });

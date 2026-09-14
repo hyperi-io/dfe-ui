@@ -24,7 +24,7 @@ export const SourceDetailsTabContent = ({
       <Form.Item
         className="w-full"
         name="source"
-        label="Source"
+        label={<Form.Label required>Source Name</Form.Label>}
         rules={[formValidation]}
       >
         <Input placeholder="Enter source" disabled={!!disabledFields?.source} />

@@ -1,6 +1,7 @@
 import { ContentCard } from '@/core/components/ContentCard';
+import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
-import { Form, FormRule, Input, Select } from 'antd';
+import { FormRule, Input, Select } from 'antd';
 import { DisabledFields } from '..';
 
 export const RuleSettings = ({
@@ -27,7 +28,7 @@ export const RuleSettings = ({
         >
           <Form.Item
             name="name"
-            label="Name"
+            label={<Form.Label required>Name</Form.Label>}
             className="m-0! grow text-sm w-full"
             layout="vertical"
             rules={[formValidation]}

@@ -6,7 +6,7 @@ export const TabLabel = ({
   label,
   validationErrors,
 }: {
-  label: string;
+  label: string | React.ReactNode;
   validationErrors: string[];
 }) => {
   return (

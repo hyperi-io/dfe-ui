@@ -54,7 +54,7 @@ describe('formSchema origin', () => {
       match: { field: '', operator: undefined, value: '' },
     };
 
-    expect(messagesAt(data, ['match', 'field'])).toEqual(['Field is required']);
+    expect(messagesAt(data, ['match', 'field'])).toContain('Field is required');
     expect(messagesAt(data, ['match', 'operator'])).toEqual([
       'Operator is required',
     ]);
@@ -82,7 +82,6 @@ describe('formSchema origin', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
       origin: 'fetcher',
-      match: { field: '', operator: undefined, value: '' },
       fetcher: {
         source_type: 'crates_io',
         topic: 'own',

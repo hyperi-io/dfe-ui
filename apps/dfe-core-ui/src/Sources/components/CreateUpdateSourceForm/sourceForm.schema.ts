@@ -62,7 +62,9 @@ const originTabSchema = {
   origin: z.enum(SOURCE_ORIGINS, { message: 'Origin is required' }),
   match: z
     .object({
-      field: z.string().optional().nullable(),
+      field: z
+        .string({ message: 'Field is required' })
+        .min(1, { message: 'Field is required' }),
       operator: z.enum(MATCH_OPERATORS).optional().nullable(),
       value: z.string().optional().nullable(),
     })
@@ -116,6 +118,7 @@ const transformTabSchema = {
     .optional()
     .nullable(),
 };
+export type TransformTabSchemaValues = z.infer<typeof transformTabSchema>;
 
 export const customMappingsFormSchema = z
   .array(

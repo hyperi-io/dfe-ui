@@ -132,7 +132,11 @@ export const SchemaUploadCollapse = ({
             label: (
               <TabLabel
                 label={
-                  hasUploadedSchema ? 'Additional Columns' : 'Schema Columns'
+                  hasUploadedSchema ? (
+                    'Additional Columns'
+                  ) : (
+                    <Form.Label required>Schema Columns</Form.Label>
+                  )
                 }
                 validationErrors={validationErrors.schemaColumns ?? []}
               />

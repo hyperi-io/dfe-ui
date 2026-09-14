@@ -18,6 +18,8 @@ export const transformHuntDetailToFormData = (
   cron: normalizeCron(hunt.cron),
   log_buffer: hunt.log_buffer ?? 60,
   rules: hunt.rules.map((rule) => rule.rule_name),
+  global_target_table_name: hunt.global_target_table_name ?? '',
+  global_source_table_name: hunt.global_source_table_name ?? '',
 });
 
 export const transformHuntFormDataToUpdateRequest = (

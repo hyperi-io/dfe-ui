@@ -21,7 +21,9 @@ const formSchema = z.object({
   path: schemaGroupValidator.optional(),
   name: schemaNameValidator,
   version: schemaVersionValidator,
-  description: z.string().min(1, { message: 'Description is required' }),
+  description: z
+    .string({ message: 'Description is required' })
+    .min(1, { message: 'Description is required' }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -126,6 +128,7 @@ export const CloneSchemaModal = ({
             path,
             name: `${name}_copy`,
             description: `Copy: ${name}`,
+            version: versions?.length === 1 ? versions[0] : undefined,
           }}
         >
           <div className="flex gap-x-2">
@@ -139,7 +142,7 @@ export const CloneSchemaModal = ({
             </Form.Item>
             <Form.Item
               name="name"
-              label="Name"
+              label={<Form.Label required>Name</Form.Label>}
               rules={[formValidation]}
               className="w-full mb-2"
             >
@@ -149,7 +152,7 @@ export const CloneSchemaModal = ({
 
           <Form.Item
             name="version"
-            label="Version"
+            label={<Form.Label required>Version</Form.Label>}
             rules={[formValidation]}
             className="w-full mb-2"
           >
@@ -163,7 +166,7 @@ export const CloneSchemaModal = ({
           </Form.Item>
           <Form.Item
             name="description"
-            label="Description"
+            label={<Form.Label required>Description</Form.Label>}
             rules={[formValidation]}
             className="w-full mb-2"
           >

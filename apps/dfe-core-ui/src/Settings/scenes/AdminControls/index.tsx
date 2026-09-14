@@ -43,7 +43,8 @@ export const AdminControlsScene = () => {
         onChange={handleTabChange}
         classNames={{
           root: 'min-h-0',
-          header: 'w-full max-w-68 shrink-0',
+          header:
+            'w-full max-w-68 shrink-0 h-full max-h-[calc(100vh-100px)] css-custom-scrollbar',
           content: 'min-w-0 flex-1 pl-6',
         }}
         items={[

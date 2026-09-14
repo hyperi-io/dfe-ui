@@ -201,7 +201,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Name',
+            title: <Form.Label required>Name</Form.Label>,
             dataIndex: 'name',
             key: 'name',
             render: (_: unknown, record: SchemaColumnListRow) => {
@@ -227,7 +227,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: 'Type',
+            title: <Form.Label required>Type</Form.Label>,
             dataIndex: 'type',
             key: 'type',
             width: 250,

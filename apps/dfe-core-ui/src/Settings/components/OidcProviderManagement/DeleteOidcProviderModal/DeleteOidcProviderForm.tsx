@@ -7,7 +7,7 @@ import z from 'zod';
 
 const formSchema = z.object({
   oidcProviderName: z
-    .string()
+    .string({ message: 'OIDC Provider Name is required' })
     .min(1, { message: 'OIDC Provider Name is required' }),
 });
 export type DeleteOidcProviderFormData = z.infer<typeof formSchema>;

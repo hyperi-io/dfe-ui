@@ -55,7 +55,7 @@ export const CreateUpdateOrganisationForm = ({
         <Form.Item
           className="flex-1"
           name="name"
-          label="Name"
+          label={<Form.Label required>Name</Form.Label>}
           rules={[formValidation]}
           normalize={(value) =>
             typeof value === 'string' ? value.toLowerCase() : value
@@ -67,7 +67,7 @@ export const CreateUpdateOrganisationForm = ({
 
       <Form.Item
         name="display_name"
-        label="Display Name"
+        label={<Form.Label required>Display Name</Form.Label>}
         rules={[formValidation]}
       >
         <Input placeholder="Enter display name" />

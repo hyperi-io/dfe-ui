@@ -60,11 +60,11 @@ describe('CreateUpdateSourceForm archive', () => {
     );
 
     await user.type(
-      await screen.findByLabelText('Source', {}, { timeout: 15_000 }),
+      await screen.findByLabelText(/^Source Name/, {}, { timeout: 15_000 }),
       'crates-audit',
     );
-    await user.type(screen.getByLabelText('Field'), '_json.app');
-    await user.type(screen.getByLabelText('Value'), 'kv-proof');
+    await user.type(screen.getByLabelText(/^Field/), '_json.app');
+    await user.type(screen.getByLabelText(/^Value/), 'kv-proof');
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {

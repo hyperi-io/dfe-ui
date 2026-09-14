@@ -6,7 +6,9 @@ import { useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  role_name: z.string().min(1, { message: 'Role Name is required' }),
+  role_name: z
+    .string({ message: 'Role Name is required' })
+    .min(1, { message: 'Role Name is required' }),
 });
 export type DeleteRoleFormData = z.infer<typeof formSchema>;
 

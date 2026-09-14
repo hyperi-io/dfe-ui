@@ -72,7 +72,7 @@ describe('OriginFormSection', () => {
   it('opens on the receiver match fields', async () => {
     render(<Harness onFinish={vi.fn()} />, { wrapper });
 
-    expect(await screen.findByLabelText('Field')).toBeInTheDocument();
+    expect(await screen.findByLabelText(/^Field/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Source type')).not.toBeInTheDocument();
   });
 
@@ -84,7 +84,7 @@ describe('OriginFormSection', () => {
 
     expect(await screen.findByLabelText('Source type')).toBeInTheDocument();
     expect(await screen.findByLabelText('Config')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Field')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Field/)).not.toBeInTheDocument();
   });
 
   it('offers the source families the manifest declares', async () => {
@@ -110,12 +110,12 @@ describe('OriginFormSection', () => {
       { wrapper },
     );
 
-    expect(await screen.findByLabelText('Field')).toHaveValue('_json.app');
+    expect(await screen.findByLabelText(/^Field/)).toHaveValue('_json.app');
     await user.click(screen.getByRole('radio', { name: 'Fetcher' }));
     await user.click(await screen.findByRole('radio', { name: 'Receiver' }));
 
-    expect(await screen.findByLabelText('Field')).toHaveValue('');
-    expect(screen.getByLabelText('Value')).toHaveValue('');
+    expect(await screen.findByLabelText(/^Field/)).toHaveValue('');
+    expect(screen.getByLabelText(/^Value/)).toHaveValue('');
   });
 
   it('leaves the fetcher stanza empty after a trip through the receiver', async () => {

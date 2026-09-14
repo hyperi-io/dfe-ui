@@ -1,17 +1,27 @@
 'use client';
 
-import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
-import { useDeleteLibraryTag } from '@/Library/hooks/useDeleteLibraryTag';
-import { useSetLibraryTag } from '@/Library/hooks/useSetLibraryTag';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { useDeleteLibraryTag } from '@/Library/hooks/useDeleteLibraryTag';
+import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
+import { useSetLibraryTag } from '@/Library/hooks/useSetLibraryTag';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, Input, InputNumber, Select, Tag } from 'antd';
+import z from 'zod';
 
-type TagFormData = { tag: string; version: number };
+const formSchema = z.object({
+  tag: z
+    .string({ message: 'Tag name is required' })
+    .min(1, { message: 'Tag name is required' }),
+  version: z
+    .number({ message: 'Version is required' })
+    .min(1, { message: 'Version is required' }),
+});
+type TagFormData = z.infer<typeof formSchema>;
 
 /**
  * Tags point at versions; labels classify the artefact. Two mechanisms, kept
@@ -26,6 +36,7 @@ export const ArtifactTags = ({
   artifact: TLibraryArtifactDetail;
 }) => {
   const [form] = Form.useForm<TagFormData>();
+  const formValidation = useAntdZodResolver(formSchema);
   const {
     data: setResult,
     mutate: setTag,
@@ -84,15 +95,15 @@ export const ArtifactTags = ({
             <div className="grid grid-cols-2 gap-3">
               <Form.Item
                 name="tag"
-                label="Tag"
-                rules={[{ required: true, message: 'A tag name is required' }]}
+                label={<Form.Label required>Tag</Form.Label>}
+                rules={[formValidation]}
               >
                 <Input placeholder="stable" />
               </Form.Item>
               <Form.Item
                 name="version"
-                label="Points at version"
-                rules={[{ required: true, message: 'A version is required' }]}
+                label={<Form.Label required>Points at version</Form.Label>}
+                rules={[formValidation]}
               >
                 {(artifact.versions ?? []).length > 0 ? (
                   <Select

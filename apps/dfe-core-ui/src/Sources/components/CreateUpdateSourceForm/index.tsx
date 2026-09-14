@@ -186,6 +186,9 @@ export const CreateUpdateSourceFormBase = ({
         // The engine's write body requires archive, so a fresh create carries
         // it rather than leaving the field undefined and unsubmittable.
         archive: false,
+        transform: {
+          engine: initialValues?.transform?.engine || '',
+        },
         ...initialValues,
         // Both blocks are seeded so switching origin lands on a usable form.
         match: { ...EMPTY_MATCH, ...initialValues?.match },

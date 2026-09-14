@@ -15,6 +15,7 @@ import {
 } from './constants';
 
 interface SidebarMenuProps {
+  className?: string;
   collapsed: boolean;
 }
 
@@ -73,7 +74,7 @@ const GroupHeading = ({ group }: { group: SidebarNavGroup }) => {
   );
 };
 
-export const SidebarMenu = ({ collapsed }: SidebarMenuProps) => {
+export const SidebarMenu = ({ className, collapsed }: SidebarMenuProps) => {
   const pathname = usePathname();
   const hyperdxUrl = useHyperdxUrl();
   const groups = buildSidebarMenuGroups(hyperdxUrl).filter(
@@ -91,7 +92,7 @@ export const SidebarMenu = ({ collapsed }: SidebarMenuProps) => {
     );
 
   return (
-    <ul className={cn(collapsed ? 'max-w-24' : 'max-w-96')}>
+    <ul className={cn(collapsed ? 'max-w-24' : 'max-w-96', className)}>
       {groups.map((group) => (
         <Fragment key={group.label}>
           {/* Collapsed to icons there is no room for a heading, and the

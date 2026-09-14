@@ -44,15 +44,7 @@ export const CreateHuntDrawer = ({
     },
   });
   const handleCreateHunt = (values: CreateUpdateHuntFormData) => {
-    createHuntMutation({
-      display_name: values.display_name,
-      name: values.name,
-      customers: values.customers,
-      cron: values.cron,
-      log_buffer: values.log_buffer,
-      global_target_table_name: '',
-      rules: values.rules,
-    });
+    createHuntMutation(values);
   };
   return (
     <>
@@ -104,6 +96,8 @@ export const CreateHuntDrawer = ({
             cron: '* * * * *',
             log_buffer: 60,
             display_name: '',
+            global_target_table_name: '',
+            global_source_table_name: '',
           }}
         />
       </Drawer>

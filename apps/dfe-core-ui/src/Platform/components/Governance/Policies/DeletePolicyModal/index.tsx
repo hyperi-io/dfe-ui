@@ -1,9 +1,9 @@
+import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteGovernancePolicy } from '@/Platform/hooks/governance/useDeleteGovernancePolicy';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button, Modal } from 'antd';
 import { useState } from 'react';
-import { DeletePolicyForm, DeletePolicyFormData } from './DeletePolicyForm';
 
 interface DeletePolicyModalProps {
   policy_name: string;
@@ -34,8 +34,8 @@ export const DeletePolicyModal = ({
       });
     },
   });
-  const handleDeletePolicy = (values: DeletePolicyFormData) => {
-    mutate({ name: values.policy_name });
+  const handleDeletePolicy = () => {
+    mutate({ name: policy_name });
   };
 
   return (
@@ -73,13 +73,32 @@ export const DeletePolicyModal = ({
         onCancel={() => setOpen(false)}
         footer={null}
       >
-        <DeletePolicyForm
-          onFinish={handleDeletePolicy}
-          error={error}
-          isPending={isPending}
-          onCancel={() => setOpen(false)}
-          policy_name={policy_name}
-        />
+        <p>
+          Are you sure you want to delete{' '}
+          <span className="font-semibold">{policy_name}</span>?
+        </p>
+
+        {error && <FormNotification text={error?.message} type="error" />}
+
+        <div className="flex w-full justify-end gap-x-2">
+          <Button
+            loading={isPending}
+            disabled={isPending}
+            type="primary"
+            danger
+            onClick={handleDeletePolicy}
+          >
+            Delete
+          </Button>
+          <Button
+            loading={isPending}
+            disabled={isPending}
+            type="default"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+        </div>
       </Modal>
     </>
   );

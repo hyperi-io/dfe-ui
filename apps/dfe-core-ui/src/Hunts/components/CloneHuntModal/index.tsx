@@ -15,7 +15,7 @@ import z from 'zod';
 
 const formSchema = z.object({
   name: z
-    .string()
+    .string({ message: 'Name is required' })
     .min(1, { message: 'Name is required' })
     .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
       message: DB_NAME_VALIDATOR.message('Name'),
@@ -148,7 +148,7 @@ export const CloneHuntModal = ({
         >
           <Form.Item
             name="name"
-            label="Name"
+            label={<Form.Label required>Name</Form.Label>}
             rules={[formValidation]}
             className="w-full mb-2"
           >
