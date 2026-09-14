@@ -1,18 +1,26 @@
 'use client';
 
-import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
-import { useFetchLibraryVersions } from '@/Library/hooks/useFetchLibraryVersions';
-import { usePublishLibraryVersion } from '@/Library/hooks/usePublishLibraryVersion';
-import { useRollbackLibraryArtifact } from '@/Library/hooks/useRollbackLibraryArtifact';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Table } from '@/core/components/Table';
+import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
+import { useFetchLibraryVersions } from '@/Library/hooks/useFetchLibraryVersions';
+import { usePublishLibraryVersion } from '@/Library/hooks/usePublishLibraryVersion';
+import { useRollbackLibraryArtifact } from '@/Library/hooks/useRollbackLibraryArtifact';
 import { Button, Input, Tag } from 'antd';
+import z from 'zod';
 
-type PublishFormData = { content: string; description?: string };
+const formSchema = z.object({
+  content: z
+    .string({ message: 'Content is required' })
+    .min(1, { message: 'Content is required' }),
+  description: z.string().optional(),
+});
+type PublishFormData = z.infer<typeof formSchema>;
 
 /**
  * An artefact's version history, plus publishing and rollback.
@@ -26,6 +34,7 @@ export const ArtifactVersions = ({
   artifact: TLibraryArtifactDetail;
 }) => {
   const [form] = Form.useForm<PublishFormData>();
+  const formValidation = useAntdZodResolver(formSchema);
   const { data: versions } = useFetchLibraryVersions({
     artifact: artifact.name,
   });
@@ -115,8 +124,8 @@ export const ArtifactVersions = ({
           >
             <Form.Item
               name="content"
-              label="Publish a new version"
-              rules={[{ required: true, message: 'Content is required' }]}
+              label={<Form.Label required>Publish a new version</Form.Label>}
+              rules={[formValidation]}
             >
               <Input.TextArea rows={10} className="font-mono" />
             </Form.Item>
@@ -124,6 +133,7 @@ export const ArtifactVersions = ({
               name="description"
               label="What changed"
               help="Fixed to this version at publish - it does not change afterwards."
+              rules={[formValidation]}
             >
               <Input />
             </Form.Item>

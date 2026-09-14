@@ -1,22 +1,29 @@
 'use client';
 
-import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { useLinkAppFile } from '@/core/hooks/apps/files/useLinkAppFile';
-import { useFetchLibraryArtifacts } from '@/core/hooks/library/useFetchLibraryArtifacts';
 import { Drawer } from '@/core/components/Drawer';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { useLinkAppFile } from '@/core/hooks/apps/files/useLinkAppFile';
+import { useFetchLibraryArtifacts } from '@/core/hooks/library/useFetchLibraryArtifacts';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { IconLink } from '@repo/dfe-icons';
 import { Button, Input, Select } from 'antd';
 import { useMemo, useState } from 'react';
+import z from 'zod';
 
-type LinkFormData = {
-  name: string;
-  artifact: string;
-  tag?: string;
-  version?: number;
-};
+const formSchema = z.object({
+  name: z
+    .string({ message: 'Filename is required' })
+    .min(1, { message: 'Filename is required' }),
+  artifact: z
+    .string({ message: 'Artefact is required' })
+    .min(1, { message: 'Artefact is required' }),
+  tag: z.string().optional(),
+  version: z.number().optional(),
+});
+type LinkFormData = z.infer<typeof formSchema>;
 
 /**
  * Point one file in the set at a library artefact.
@@ -38,6 +45,7 @@ export const LinkArtifactDrawer = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [form] = Form.useForm<LinkFormData>();
+  const formValidation = useAntdZodResolver(formSchema);
   const { data: artifacts } = useFetchLibraryArtifacts({
     queryEnabled: isOpen,
   });
@@ -94,17 +102,17 @@ export const LinkArtifactDrawer = ({
         <Form form={form} onFinish={handleFinish}>
           <Form.Item
             name="name"
-            label="Filename"
+            label={<Form.Label required>Filename</Form.Label>}
             help={`Must end in one of ${suffixes.join(', ')}`}
-            rules={[{ required: true, message: 'A filename is required' }]}
+            rules={[formValidation]}
           >
             <Input placeholder={`my-file${suffixes[0] ?? ''}`} />
           </Form.Item>
 
           <Form.Item
             name="artifact"
-            label="Artefact"
-            rules={[{ required: true, message: 'An artefact is required' }]}
+            label={<Form.Label required>Artefact</Form.Label>}
+            rules={[formValidation]}
           >
             <Select
               options={artifactOptions}
