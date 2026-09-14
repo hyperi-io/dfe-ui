@@ -60,7 +60,7 @@ export const OriginFormSection = ({
             <Form.Item
               className="w-full"
               name={['match', 'field']}
-              label="Field"
+              label={<Form.Label required>Field</Form.Label>}
               rules={[formValidation]}
             >
               <Input placeholder="Enter field" />

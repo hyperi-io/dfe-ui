@@ -113,7 +113,7 @@ export const MetaSchemaForm = ({
          * Validate on blur to prevent form submission when clearing the meta schema
          */
         validateTrigger={['onBlur']}
-        label="Header Type"
+        label={<Form.Label required>Header Type</Form.Label>}
         rules={[formValidation]}
       >
         <CommonHeaderSelect onChange={handleChangeCommonHeader} />
@@ -122,7 +122,7 @@ export const MetaSchemaForm = ({
       <Form.Item
         className="w-full"
         name={['header', 'version']}
-        label="Header Version"
+        label={<Form.Label required>Header Version</Form.Label>}
         rules={[formValidation]}
       >
         <Select
@@ -144,7 +144,7 @@ export const MetaSchemaForm = ({
          */
         validateTrigger={['onBlur']}
         label={
-          <>
+          <Form.Label required>
             Meta Schema{' '}
             <Popover
               destroyOnHidden
@@ -167,7 +167,7 @@ export const MetaSchemaForm = ({
                 icon={<IconInfoCircle />}
               />
             </Popover>
-          </>
+          </Form.Label>
         }
         rules={[formValidation]}
       >
@@ -176,7 +176,7 @@ export const MetaSchemaForm = ({
       <Form.Item
         className="w-full"
         name={['schema', 'meta_schema_version']}
-        label="Meta Schema Version"
+        label={<Form.Label required>Meta Schema Version</Form.Label>}
         rules={[formValidation]}
       >
         <Select
