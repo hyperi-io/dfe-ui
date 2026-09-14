@@ -23,6 +23,7 @@ export const system = {
           ui: null,
           source: 'deploy-repo',
           python_version: 'python_version',
+          apps: { 'dfe-loader': 'v1.18.36', 'dfe-receiver': 'v1.15.35' },
         },
       }: { mockedResponse?: TSystemVersionResponse } = {}) => {
         return http.get(system.version.mockedUrl, () => {

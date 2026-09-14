@@ -31,6 +31,7 @@ describe('SuiteVersion', () => {
           ui: 'v1.20.0@sha256:abc',
           source: 'deploy-repo',
           python_version: '3.12.12',
+          apps: {},
         },
       }),
     );
@@ -58,6 +59,7 @@ describe('SuiteVersion', () => {
           ui: null,
           source: 'engine',
           python_version: '3.12.12',
+          apps: {},
         },
       }),
     );
