@@ -22,6 +22,9 @@ const formSchema = z.object({
   global_target_table_name: z
     .string({ message: 'Global target table name is required' })
     .min(1, { message: 'Global target table name is required' }),
+  global_source_table_name: z
+    .string({ message: 'Global source table name is required' })
+    .min(1, { message: 'Global source table name is required' }),
   customers: z
     .array(z.string({ message: 'Customer is required' }))
     .min(1, { message: 'Customers are required' }),
