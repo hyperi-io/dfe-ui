@@ -52,13 +52,13 @@ export const AddFromCatalogueDrawer = () => {
       });
       setIsOpen(false);
       api.success({
-        message: `Source ${response.source} created from the catalogue`,
+        title: `Source ${response.source} created from the catalogue`,
         placement: 'bottomLeft',
       });
       // The source is saved either way; only the deploy-repo follow-up failed.
       if (response.apps_sync_error) {
         api.warning({
-          message: 'The apps did not follow this source',
+          title: 'The apps did not follow this source',
           description: response.apps_sync_error,
           placement: 'bottomLeft',
         });
@@ -150,7 +150,7 @@ export const AddFromCatalogueDrawer = () => {
           {total === 0 && !isLoading && (
             <Alert
               type="info"
-              message="No catalogue is mounted on this deployment, or nothing matches the filter."
+              title="No catalogue is mounted on this deployment, or nothing matches the filter."
             />
           )}
 
