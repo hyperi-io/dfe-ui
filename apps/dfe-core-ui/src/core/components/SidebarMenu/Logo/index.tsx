@@ -16,11 +16,11 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
       href="/"
       className={cn(
         'logo my-[10px] flex w-auto [&:focus_img]:shadow-[inset_0_0_0_2px_var(--color-tertiary)] [&:focus_img]:rounded',
-        // Centre the narrow mark on a collapsed rail; right-justify the wide
-        // wordmark, stacked over its caption, when expanded.
+        // Centre the narrow mark on a collapsed rail; when expanded, start the
+        // wordmark at the same left gutter as the nav group headers (px-8).
         collapsed
           ? 'h-[44px] mx-auto justify-center'
-          : 'flex-col items-end justify-end gap-1',
+          : 'flex-col items-start justify-start gap-1 pl-8',
       )}
     >
       {collapsed ? (
@@ -52,7 +52,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
           {/* Brand caption in Martel Sans ExtraBold, sized to the wordmark's width so it never overflows. */}
           <span
             className={cn(
-              'font-brand block w-full text-center text-[9px] font-extrabold uppercase tracking-tight',
+              'font-brand block w-full text-left text-[9px] font-extrabold uppercase tracking-tight',
               'text-foreground-muted dark:text-dark-foreground-muted',
             )}
           >
