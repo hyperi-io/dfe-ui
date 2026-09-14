@@ -1069,6 +1069,9 @@ export interface paths {
         /**
          * Delete Source
          * @description Delete a source by name. Its fetcher instance and receiver rule go with it.
+         *
+         *     An engine-owned source -- the landing table's own -- is refused with 409
+         *     ``conflict``, the same answer PUT and PATCH give.
          */
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
@@ -3828,6 +3831,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/apps/{service}/{instance}/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get App Config
+         * @description Every option the app declares, with this instance's value and where it comes from.
+         *
+         *     The overlay alone cannot answer this: it holds only what was written, so an
+         *     option nobody has touched is invisible in it. The app's own contract supplies
+         *     the rest, which is what lets the console show an untouched option with the
+         *     default it would run rather than an empty box.
+         */
+        get: operations["get_app_config_api_v1_apps__service___instance__config_get"];
+        /**
+         * Set App Config
+         * @description Write options the app declares, and environment keys it does not.
+         *
+         *     Judged against the app's own contract before anything is committed, so a value
+         *     the app would refuse at startup leaves the deploy repo where it was rather than
+         *     landing a commit an operator then has to revert.
+         *
+         *     A secret is written like any other option: it goes into the overlay as the rest
+         *     of this surface writes one, and the read route still never says what it is.
+         */
+        put: operations["set_app_config_api_v1_apps__service___instance__config_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/apps/{service}/{instance}/scaling": {
         parameters: {
             query?: never;
@@ -4119,6 +4158,26 @@ export interface paths {
          *     is already one config.
          */
         get: operations["get_resource_series_api_v1_apps__service___instance__metrics_series_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/app-contracts/{service}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get App Contract
+         * @description One app's config schema and capability catalogue, or that none is mounted.
+         */
+        get: operations["get_app_contract_api_v1_app_contracts__service__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4849,6 +4908,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hyperdx/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hyperdx Sources
+         * @description List every HyperDX team and the DFE sources on it.
+         *
+         *     A deploy writes its source to every team, so this is the read that says where
+         *     it landed. 503 when HyperDX is not deployed or not answering -- an empty list
+         *     would read as "the source is missing", which is a different fault.
+         */
+        get: operations["hyperdx_sources_api_v1_hyperdx_sources_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/repository/preferences": {
         parameters: {
             query?: never;
@@ -5209,6 +5292,76 @@ export interface components {
              */
             url_scheme: string;
         };
+        /**
+         * AppConfigResponse
+         * @description Every option an instance has, and the overlay keys none of them explain.
+         */
+        AppConfigResponse: {
+            /**
+             * Etag
+             * @description The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource.
+             */
+            etag?: string | null;
+            /**
+             * Available
+             * @description False when this deployment has mounted no contract for the app
+             */
+            available: boolean;
+            /** Fields */
+            fields?: components["schemas"]["ConfigFieldModel"][];
+            /** Unknown */
+            unknown?: components["schemas"]["UnknownFieldModel"][];
+            /**
+             * Custom
+             * @description Environment keys written under `extraEnv`. Reported apart from `unknown`, which is a config key that has outrun its contract; these are outside every contract on purpose.
+             */
+            custom?: components["schemas"]["CustomEnvModel"][];
+        };
+        /**
+         * AppContractResponse
+         * @description One app's contract, as the pinned image wrote it.
+         */
+        AppContractResponse: {
+            /** Service */
+            service: string;
+            /**
+             * Available
+             * @description False when this deployment has mounted no contract for the app
+             */
+            available: boolean;
+            /**
+             * Source
+             * @description Where the contract came from: `mount` or `absent`
+             */
+            source: string;
+            /**
+             * Pinned Ref
+             * @description The image digest that emitted it, when the emit step recorded one
+             */
+            pinned_ref?: string | null;
+            /**
+             * Schema Version
+             * @description The JSON Schema dialect the app emitted
+             */
+            schema_version?: string | null;
+            /**
+             * Schema
+             * @description The app's own config schema
+             */
+            schema?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Capabilities
+             * @description The sources, sinks and transforms the app ships
+             */
+            capabilities?: unknown[];
+            /**
+             * Dials
+             * @description Which options an operator is steered towards; not resolved yet
+             */
+            dials?: unknown[];
+        };
         /** AppSummary */
         AppSummary: {
             /** Service */
@@ -5266,6 +5419,11 @@ export interface components {
              * @description Overlay writes made (service/instance: action)
              */
             changes?: string[];
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands.
+             */
+            restart_required?: string[];
         };
         /** ArtifactModel */
         ArtifactModel: {
@@ -5469,7 +5627,10 @@ export interface components {
             action: string;
             /** Succeeded */
             succeeded?: string[];
-            /** Failed */
+            /**
+             * Failed
+             * @description One entry per source left untouched: its name, the same code the single-source route answers with, and the message
+             */
             failed?: {
                 [key: string]: string;
             }[];
@@ -5953,6 +6114,69 @@ export interface components {
             /** Wasm Bytes */
             wasm_bytes: number;
         };
+        /**
+         * ConfigFieldModel
+         * @description One option the app declares, and what this instance would run for it.
+         */
+        ConfigFieldModel: {
+            /**
+             * Path
+             * @description The overlay path a write addresses, `config.` rooted
+             */
+            path: string;
+            /** Type */
+            type: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Secret
+             * @description Credential material: neither its value nor its default is returned
+             */
+            secret: boolean;
+            /**
+             * Enum
+             * @description The values it accepts, where the app declares a closed set
+             */
+            enum?: unknown[] | null;
+            /**
+             * Default
+             * @description The app's own default, null for a secret
+             */
+            default?: unknown;
+            /**
+             * Value
+             * @description What this instance would run, null for a secret
+             */
+            value?: unknown;
+            /**
+             * Provenance
+             * @description Where the value comes from: `overlay`, `default`, `chart` or `unset`
+             */
+            provenance: string;
+            /**
+             * Dial
+             * @description Not resolved yet; always null
+             */
+            dial?: string | null;
+            /**
+             * Protected
+             * @description Whether the protected-var policy covers this path
+             */
+            protected: boolean;
+            /**
+             * Set
+             * @description Whether this instance has a value at all
+             */
+            set: boolean;
+        };
         /** ConfigHistoryEntry */
         ConfigHistoryEntry: {
             /** Commit */
@@ -5981,6 +6205,58 @@ export interface components {
             description: string;
             /** Default */
             default?: unknown;
+        };
+        /**
+         * ConfigWriteRequest
+         * @description Changes to one instance's config, each keyed by the path the GET reports.
+         */
+        ConfigWriteRequest: {
+            /**
+             * Changes
+             * @description One entry per option. A `config.*` key is checked against the app's own schema before anything is committed; an `extraEnv.<NAME>` key is checked as an environment name only, and a null value there removes it.
+             */
+            changes: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * ConfigWriteResult
+         * @description A config write, and how any custom environment in it reaches the container.
+         */
+        ConfigWriteResult: {
+            /** Changed */
+            changed: boolean;
+            /** Commit Sha */
+            commit_sha?: string | null;
+            /**
+             * Auto Merged
+             * @default false
+             */
+            auto_merged: boolean;
+            /**
+             * Review Required
+             * @default false
+             */
+            review_required: boolean;
+            /** Pr Url */
+            pr_url?: string | null;
+            validation?: components["schemas"]["ValidationModel"] | null;
+            /**
+             * Reload
+             * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
+             */
+            reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
+            /**
+             * Custom Env
+             * @description How the `extraEnv` keys in this write reach the app. Empty when the write carried none.
+             * @default
+             */
+            custom_env: string;
         };
         /** CopyFilesRequest */
         CopyFilesRequest: {
@@ -6020,10 +6296,45 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             /** Copied */
             copied?: string[];
             /** Skipped */
             skipped?: string[];
+        };
+        /**
+         * CoreResourceConflictContext
+         * @description Structured context for a write that named an engine-owned resource.
+         */
+        CoreResourceConflictContext: {
+            /**
+             * Source
+             * @description The engine-owned source the write named
+             */
+            source: string;
+        };
+        /**
+         * CoreResourceConflictErrorResponse
+         * @description 409 when a write names a resource the engine owns and reconciles itself.
+         */
+        CoreResourceConflictErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            code: "conflict";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["CoreResourceConflictContext"];
         };
         /** CostEstimate */
         CostEstimate: {
@@ -6303,6 +6614,16 @@ export interface components {
             scoped: boolean;
         };
         /**
+         * CustomEnvModel
+         * @description An environment key written under `extraEnv`, which no contract declares.
+         */
+        CustomEnvModel: {
+            /** Path */
+            path: string;
+            /** Value */
+            value?: unknown;
+        };
+        /**
          * DatabaseInfo
          * @description Summary of a ClickHouse database.
          */
@@ -6383,7 +6704,7 @@ export interface components {
             mesh: components["schemas"]["MeshFacts"];
             /**
              * Applies Routing
-             * @description Whether the routing a deployed source compiles to reaches the apps that run it. False on a Compose stack, which mounts each app's config file read-only: the engine still writes the overlay, and nothing carries it into the container, so a console must not offer the source as live.
+             * @description Whether the routing a deployed source compiles to reaches the apps that run it. A GitOps controller applies it on Kubernetes; off it the engine renders each app's config file into a directory the containers mount. False where neither is wired, so a console must not offer the source as live.
              */
             applies_routing: boolean;
             /**
@@ -6401,6 +6722,13 @@ export interface components {
              * @description dfe-ui version, from the deploy repo's pins where they name one, else the version the chart was rendered with. Null when neither states one.
              */
             ui: string | null;
+            /**
+             * Apps
+             * @description Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above.
+             */
+            apps: {
+                [key: string]: string;
+            };
             /**
              * Source
              * @description deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine.
@@ -7455,6 +7783,55 @@ export interface components {
             password: string;
         };
         /**
+         * HyperDXSourcesResponse
+         * @description Where every deployed DFE source actually landed in HyperDX.
+         */
+        HyperDXSourcesResponse: {
+            /** Teams */
+            teams?: components["schemas"]["HyperDXTeamSources"][];
+        };
+        /**
+         * HyperDXTeamSource
+         * @description One HyperDX source on one team, as the fork holds it.
+         */
+        HyperDXTeamSource: {
+            /**
+             * Id
+             * @description HyperDX source id on that team
+             */
+            id: string;
+            /**
+             * Name
+             * @description DFE source name; the HyperDX source carries the same one
+             */
+            name: string;
+            /**
+             * Table
+             * @description The ClickHouse table the source reads (databaseName, tableName)
+             */
+            table?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * HyperDXTeamSources
+         * @description One HyperDX team and the DFE sources it holds.
+         */
+        HyperDXTeamSources: {
+            /**
+             * Team
+             * @description HyperDX team id
+             */
+            team: string;
+            /**
+             * Team Name
+             * @description HyperDX team name; the caller's OIDC group
+             */
+            team_name: string;
+            /** Sources */
+            sources?: components["schemas"]["HyperDXTeamSource"][];
+        };
+        /**
          * InitialSetupState
          * @description The machine's verdict on where first-run setup stands.
          */
@@ -7695,6 +8072,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             link?: components["schemas"]["LinkModel"] | null;
         };
         /** LinkStatusModel */
@@ -9569,6 +9951,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
             /** Relinked */
             relinked?: components["schemas"]["LinkModel"][];
         };
@@ -10510,6 +10897,21 @@ export interface components {
              * @description Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it.
              */
             apps_sync_error?: string | null;
+            /**
+             * Hyperdx Source Teams
+             * @description How many HyperDX teams now carry a source over this source's table
+             */
+            hyperdx_source_teams?: number | null;
+            /**
+             * Hyperdx Source Error
+             * @description Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all.
+             */
+            hyperdx_source_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this deploy's config change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /**
          * SchemaDiff
@@ -11238,8 +11640,9 @@ export interface components {
          */
         SourceNameConflictErrorResponse: {
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Code
+             * @default conflict
+             * @constant
              */
             code: "conflict";
             /**
@@ -11319,6 +11722,11 @@ export interface components {
              * @description Why the apps could not be brought into step; reconcile-apps retries it
              */
             apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /**
          * SourceSchema
@@ -12119,6 +12527,16 @@ export interface components {
              */
             available: string[];
         };
+        /**
+         * UnknownFieldModel
+         * @description An overlay key under `config:` that the app's contract does not declare.
+         */
+        UnknownFieldModel: {
+            /** Path */
+            path: string;
+            /** Value */
+            value?: unknown;
+        };
         /** UpdateAccountRequest */
         UpdateAccountRequest: {
             /**
@@ -12426,6 +12844,13 @@ export interface components {
              */
             ui: string | null;
             /**
+             * Apps
+             * @description Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above.
+             */
+            apps: {
+                [key: string]: string;
+            };
+            /**
              * Source
              * @description deploy-repo when the stack version came from pins.yaml, deployment when it came from what deployed this pod, else engine.
              * @enum {string}
@@ -12706,6 +13131,11 @@ export interface components {
              * @description How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one.
              */
             reload?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself.
+             */
+            restart_required?: string[];
         };
         /** SeedResponse */
         dfe_engine__api__v1__deployments__SeedResponse: {
@@ -14900,13 +15330,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description Source name already exists (code conflict), or receiver match duplicates another enabled source (code match_conflict) */
+            /** @description Source name already exists (code conflict), the name is the core landing the engine owns and reconciles itself (code conflict), or receiver match duplicates another enabled source (code match_conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -14980,13 +15410,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description A source of that name already exists, or its match duplicates another */
+            /** @description A source of that name already exists, the name is the core landing the engine owns and reconciles itself, or its match duplicates another */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -15227,13 +15657,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description Receiver match duplicates another enabled source */
+            /** @description Receiver match duplicates another enabled source (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -15264,6 +15694,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The source is engine-owned and no write path may delete it */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoreResourceConflictErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -15300,13 +15739,13 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description Enabling would duplicate another enabled source's receiver match */
+            /** @description Enabling would duplicate another enabled source's receiver match (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -20204,6 +20643,76 @@ export interface operations {
             };
         };
     };
+    get_app_config_api_v1_apps__service___instance__config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppConfigResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_app_config_api_v1_apps__service___instance__config_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfigWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfigWriteResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_scaling_api_v1_apps__service___instance__scaling_get: {
         parameters: {
             query?: never;
@@ -20752,6 +21261,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ResourceSeriesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_app_contract_api_v1_app_contracts__service__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppContractResponse"];
                 };
             };
             /** @description Validation Error */
@@ -22004,6 +22544,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HyperDXConnection"];
+                };
+            };
+        };
+    };
+    hyperdx_sources_api_v1_hyperdx_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HyperDXSourcesResponse"];
                 };
             };
         };
