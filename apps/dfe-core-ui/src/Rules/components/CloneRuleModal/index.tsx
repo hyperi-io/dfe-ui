@@ -148,7 +148,7 @@ export const CloneRuleModal = ({
         >
           <Form.Item
             name="name"
-            label="Name"
+            label={<Form.Label required>Name</Form.Label>}
             rules={[formValidation]}
             className="w-full mb-2"
           >
