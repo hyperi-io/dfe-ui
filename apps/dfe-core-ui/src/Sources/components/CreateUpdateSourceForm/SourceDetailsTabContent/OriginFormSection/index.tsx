@@ -94,7 +94,11 @@ export const OriginFormSection = ({
             <Form.Item
               className="w-full"
               name={['match', 'value']}
-              label="Value"
+              label={
+                <Form.Label required={operationType !== 'exists'}>
+                  Value
+                </Form.Label>
+              }
               rules={[formValidation]}
             >
               <Input
