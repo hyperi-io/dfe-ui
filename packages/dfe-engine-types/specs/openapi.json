@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.19.36"
+    "version": "1.20.6"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -3185,25 +3185,21 @@
             }
           },
           "409": {
-            "description": "Source name already exists (code conflict), or receiver match duplicates another enabled source (code match_conflict)",
+            "description": "Source name already exists (code conflict), the name is the core landing the engine owns and reconciles itself (code conflict), or receiver match duplicates another enabled source (code match_conflict)",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/SourceNameConflictErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CoreResourceConflictErrorResponse"
                     },
                     {
                       "$ref": "#/components/schemas/MatchConflictErrorResponse"
                     }
                   ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "conflict": "#/components/schemas/SourceNameConflictErrorResponse",
-                      "match_conflict": "#/components/schemas/MatchConflictErrorResponse"
-                    }
-                  },
                   "title": "Response 409 Create Source Api V1 Sources Post"
                 }
               }
@@ -3364,25 +3360,21 @@
             }
           },
           "409": {
-            "description": "A source of that name already exists, or its match duplicates another",
+            "description": "A source of that name already exists, the name is the core landing the engine owns and reconciles itself, or its match duplicates another",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/SourceNameConflictErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CoreResourceConflictErrorResponse"
                     },
                     {
                       "$ref": "#/components/schemas/MatchConflictErrorResponse"
                     }
                   ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "conflict": "#/components/schemas/SourceNameConflictErrorResponse",
-                      "match_conflict": "#/components/schemas/MatchConflictErrorResponse"
-                    }
-                  },
                   "title": "Response 409 Create Source From Catalogue Api V1 Sources From Catalogue  Entry  Post"
                 }
               }
@@ -3847,11 +3839,26 @@
             }
           },
           "409": {
-            "description": "Receiver match duplicates another enabled source",
+            "description": "Receiver match duplicates another enabled source (code match_conflict), or the source is engine-owned and no write path may change it (code conflict)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CoreResourceConflictErrorResponse"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "match_conflict": "#/components/schemas/MatchConflictErrorResponse",
+                      "conflict": "#/components/schemas/CoreResourceConflictErrorResponse"
+                    }
+                  },
+                  "title": "Response 409 Update Source Api V1 Sources  Name  Put"
                 }
               }
             }
@@ -3913,11 +3920,26 @@
             }
           },
           "409": {
-            "description": "Enabling would duplicate another enabled source's receiver match",
+            "description": "Enabling would duplicate another enabled source's receiver match (code match_conflict), or the source is engine-owned and no write path may change it (code conflict)",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/MatchConflictErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CoreResourceConflictErrorResponse"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "match_conflict": "#/components/schemas/MatchConflictErrorResponse",
+                      "conflict": "#/components/schemas/CoreResourceConflictErrorResponse"
+                    }
+                  },
+                  "title": "Response 409 Patch Source Enabled Api V1 Sources  Name  Patch"
                 }
               }
             }
@@ -3944,7 +3966,7 @@
           "Sources"
         ],
         "summary": "Delete Source",
-        "description": "Delete a source by name. Its fetcher instance and receiver rule go with it.",
+        "description": "Delete a source by name. Its fetcher instance and receiver rule go with it.\n\nAn engine-owned source -- the landing table's own -- is refused with 409\n``conflict``, the same answer PUT and PATCH give.",
         "operationId": "delete_source_api_v1_sources__name__delete",
         "parameters": [
           {
@@ -3960,6 +3982,16 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "409": {
+            "description": "The source is engine-owned and no write path may delete it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreResourceConflictErrorResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -12579,6 +12611,144 @@
         ]
       }
     },
+    "/api/v1/apps/{service}/{instance}/config": {
+      "get": {
+        "tags": [
+          "App Management"
+        ],
+        "summary": "Get App Config",
+        "description": "Every option the app declares, with this instance's value and where it comes from.\n\nThe overlay alone cannot answer this: it holds only what was written, so an\noption nobody has touched is invisible in it. The app's own contract supplies\nthe rest, which is what lets the console show an untouched option with the\ndefault it would run rather than an empty box.",
+        "operationId": "get_app_config_api_v1_apps__service___instance__config_get",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "App Management"
+        ],
+        "summary": "Set App Config",
+        "description": "Write options the app declares, and environment keys it does not.\n\nJudged against the app's own contract before anything is committed, so a value\nthe app would refuse at startup leaves the deploy repo where it was rather than\nlanding a commit an operator then has to revert.\n\nA secret is written like any other option: it goes into the overlay as the rest\nof this surface writes one, and the read route still never says what it is.\n\n409 where the deployment already decides the value: a config path the chart\nderives, or an `extraEnv` name the chart sets for this app.",
+        "operationId": "set_app_config_api_v1_apps__service___instance__config_put",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
+          },
+          {
+            "name": "instance",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Instance"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigWriteResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/apps/{service}/{instance}/scaling": {
       "get": {
         "tags": [
@@ -13761,6 +13931,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResourceSeriesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app-contracts/{service}": {
+      "get": {
+        "tags": [
+          "App Management"
+        ],
+        "summary": "Get App Contract",
+        "description": "One app's config schema and capability catalogue, or that none is mounted.",
+        "operationId": "get_app_contract_api_v1_app_contracts__service__get",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppContractResponse"
                 }
               }
             }
@@ -15823,6 +16041,33 @@
         ]
       }
     },
+    "/api/v1/hyperdx/sources": {
+      "get": {
+        "tags": [
+          "HyperDX"
+        ],
+        "summary": "Hyperdx Sources",
+        "description": "List every HyperDX team and the DFE sources on it.\n\nA deploy writes its source to every team, so this is the read that says where\nit landed. 503 when HyperDX is not deployed or not answering -- an empty list\nwould read as \"the source is missing\", which is a different fault.",
+        "operationId": "hyperdx_sources_api_v1_hyperdx_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HyperDXSourcesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/repository/preferences": {
       "get": {
         "tags": [
@@ -16708,6 +16953,123 @@
         ],
         "title": "AlertDestinationSummary"
       },
+      "AppConfigResponse": {
+        "properties": {
+          "etag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etag",
+            "description": "The deploy repo's revision when this was read. Send it back as the If-Match header on a write to have the write refused with a 409 if anything has been committed since. Repo-wide, not per resource."
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available",
+            "description": "False when this deployment has mounted no contract for the app"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigFieldModel"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "unknown": {
+            "items": {
+              "$ref": "#/components/schemas/UnknownFieldModel"
+            },
+            "type": "array",
+            "title": "Unknown"
+          },
+          "custom": {
+            "items": {
+              "$ref": "#/components/schemas/CustomEnvModel"
+            },
+            "type": "array",
+            "title": "Custom",
+            "description": "Environment keys written under `extraEnv`. Reported apart from `unknown`, which is a config key that has outrun its contract; these are outside every contract on purpose."
+          }
+        },
+        "type": "object",
+        "required": [
+          "available"
+        ],
+        "title": "AppConfigResponse",
+        "description": "Every option an instance has, and the overlay keys none of them explain."
+      },
+      "AppContractResponse": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available",
+            "description": "False when this deployment has mounted no contract for the app"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Where the contract came from: `mount` or `absent`"
+          },
+          "pinned_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pinned Ref",
+            "description": "The image digest that emitted it, when the emit step recorded one"
+          },
+          "schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Version",
+            "description": "The JSON Schema dialect the app emitted"
+          },
+          "schema": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Schema",
+            "description": "The app's own config schema"
+          },
+          "capabilities": {
+            "items": {},
+            "type": "array",
+            "title": "Capabilities",
+            "description": "The sources, sinks and transforms the app ships"
+          },
+          "dials": {
+            "items": {},
+            "type": "array",
+            "title": "Dials",
+            "description": "Which options an operator is steered towards; not resolved yet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "available",
+          "source"
+        ],
+        "title": "AppContractResponse",
+        "description": "One app's contract, as the pinned image wrote it."
+      },
       "AppSummary": {
         "properties": {
           "service": {
@@ -16807,6 +17169,14 @@
             "type": "array",
             "title": "Changes",
             "description": "Overlay writes made (service/instance: action)"
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands."
           }
         },
         "type": "object",
@@ -17175,7 +17545,8 @@
               "type": "object"
             },
             "type": "array",
-            "title": "Failed"
+            "title": "Failed",
+            "description": "One entry per source left untouched: its name, the same code the single-source route answers with, and the message"
           }
         },
         "type": "object",
@@ -17959,6 +18330,93 @@
         ],
         "title": "CompileResponse"
       },
+      "ConfigFieldModel": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "The overlay path a write addresses, `config.` rooted"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "secret": {
+            "type": "boolean",
+            "title": "Secret",
+            "description": "Credential material: neither its value nor its default is returned"
+          },
+          "enum": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enum",
+            "description": "The values it accepts, where the app declares a closed set"
+          },
+          "default": {
+            "title": "Default",
+            "description": "The app's own default, null for a secret"
+          },
+          "value": {
+            "title": "Value",
+            "description": "What this instance would run, null for a secret"
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance",
+            "description": "Where the value comes from: `overlay`, `default`, `chart` or `unset`"
+          },
+          "dial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dial",
+            "description": "Not resolved yet; always null"
+          },
+          "protected": {
+            "type": "boolean",
+            "title": "Protected",
+            "description": "Whether the protected-var policy covers this path"
+          },
+          "set": {
+            "type": "boolean",
+            "title": "Set",
+            "description": "Whether this instance has a value at all"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "type",
+          "secret",
+          "provenance",
+          "protected",
+          "set"
+        ],
+        "title": "ConfigFieldModel",
+        "description": "One option the app declares, and what this instance would run for it."
+      },
       "ConfigHistoryEntry": {
         "properties": {
           "commit": {
@@ -18006,6 +18464,104 @@
         "type": "object",
         "title": "ConfigSurfaceEntry",
         "description": "A single configurable setting for a Rust service."
+      },
+      "ConfigWriteRequest": {
+        "properties": {
+          "changes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Changes",
+            "description": "One entry per option. A `config.*` key is checked against the app's own schema before anything is committed; an `extraEnv.<NAME>` key is checked as an environment name only, and a null value there removes it."
+          }
+        },
+        "type": "object",
+        "required": [
+          "changes"
+        ],
+        "title": "ConfigWriteRequest",
+        "description": "Changes to one instance's config, each keyed by the path the GET reports."
+      },
+      "ConfigWriteResult": {
+        "properties": {
+          "changed": {
+            "type": "boolean",
+            "title": "Changed"
+          },
+          "commit_sha": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commit Sha"
+          },
+          "auto_merged": {
+            "type": "boolean",
+            "title": "Auto Merged",
+            "default": false
+          },
+          "review_required": {
+            "type": "boolean",
+            "title": "Review Required",
+            "default": false
+          },
+          "pr_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pr Url"
+          },
+          "validation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reload": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reload",
+            "description": "How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one."
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself."
+          },
+          "custom_env": {
+            "type": "string",
+            "title": "Custom Env",
+            "description": "How the `extraEnv` keys in this write reach the app. Empty when the write carried none.",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "changed"
+        ],
+        "title": "ConfigWriteResult",
+        "description": "A config write, and how any custom environment in it reaches the container."
       },
       "CopyFilesRequest": {
         "properties": {
@@ -18087,6 +18643,14 @@
             "title": "Reload",
             "description": "How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one."
           },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself."
+          },
           "copied": {
             "items": {
               "type": "string"
@@ -18107,6 +18671,53 @@
           "changed"
         ],
         "title": "CopyFilesResult"
+      },
+      "CoreResourceConflictContext": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "The engine-owned source the write named"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source"
+        ],
+        "title": "CoreResourceConflictContext",
+        "description": "Structured context for a write that named an engine-owned resource."
+      },
+      "CoreResourceConflictErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "conflict",
+            "title": "Code",
+            "default": "conflict"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable explanation"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "context": {
+            "$ref": "#/components/schemas/CoreResourceConflictContext"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "context"
+        ],
+        "title": "CoreResourceConflictErrorResponse",
+        "description": "409 when a write names a resource the engine owns and reconciles itself."
       },
       "CostEstimate": {
         "properties": {
@@ -18417,6 +19028,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
             "title": "Name",
             "description": "Unique org name (used as identifier)"
           },
@@ -18562,6 +19174,23 @@
         ],
         "title": "CreateRoleRequest"
       },
+      "CustomEnvModel": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "CustomEnvModel",
+        "description": "An environment key written under `extraEnv`, which no contract declares."
+      },
       "DatabaseInfo": {
         "properties": {
           "name": {
@@ -18685,7 +19314,7 @@
           "applies_routing": {
             "type": "boolean",
             "title": "Applies Routing",
-            "description": "Whether the routing a deployed source compiles to reaches the apps that run it. False on a Compose stack, which mounts each app's config file read-only: the engine still writes the overlay, and nothing carries it into the container, so a console must not offer the source as live."
+            "description": "Whether the routing a deployed source compiles to reaches the apps that run it. A GitOps controller applies it on Kubernetes; off it the engine renders each app's config file into a directory the containers mount. False where neither is wired, so a console must not offer the source as live."
           },
           "stack": {
             "anyOf": [
@@ -18716,6 +19345,14 @@
             "title": "Ui",
             "description": "dfe-ui version, from the deploy repo's pins where they name one, else the version the chart was rendered with. Null when neither states one."
           },
+          "apps": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Apps",
+            "description": "Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above."
+          },
           "source": {
             "type": "string",
             "enum": [
@@ -18736,6 +19373,7 @@
           "stack",
           "engine",
           "ui",
+          "apps",
           "source"
         ],
         "title": "DeploymentResponse",
@@ -20677,6 +21315,77 @@
         "title": "HyperDXConnection",
         "description": "Connection material in the fork's shape (name, host URL, username, password)."
       },
+      "HyperDXSourcesResponse": {
+        "properties": {
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/HyperDXTeamSources"
+            },
+            "type": "array",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "title": "HyperDXSourcesResponse",
+        "description": "Where every deployed DFE source actually landed in HyperDX."
+      },
+      "HyperDXTeamSource": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "HyperDX source id on that team"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "DFE source name; the HyperDX source carries the same one"
+          },
+          "table": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Table",
+            "description": "The ClickHouse table the source reads (databaseName, tableName)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "HyperDXTeamSource",
+        "description": "One HyperDX source on one team, as the fork holds it."
+      },
+      "HyperDXTeamSources": {
+        "properties": {
+          "team": {
+            "type": "string",
+            "title": "Team",
+            "description": "HyperDX team id"
+          },
+          "team_name": {
+            "type": "string",
+            "title": "Team Name",
+            "description": "HyperDX team name; the caller's OIDC group"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/HyperDXTeamSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team",
+          "team_name"
+        ],
+        "title": "HyperDXTeamSources",
+        "description": "One HyperDX team and the DFE sources it holds."
+      },
       "InitialSetupState": {
         "properties": {
           "complete": {
@@ -21151,6 +21860,14 @@
             ],
             "title": "Reload",
             "description": "How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one."
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself."
           },
           "link": {
             "anyOf": [
@@ -24829,6 +25546,14 @@
             "title": "Reload",
             "description": "How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one."
           },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself."
+          },
           "relinked": {
             "items": {
               "$ref": "#/components/schemas/LinkModel"
@@ -26680,6 +27405,38 @@
             ],
             "title": "Apps Sync Error",
             "description": "Why the apps could not be brought into step. Never fails the deploy - the schema is live; POST /api/v1/sources/reconcile-apps retries it."
+          },
+          "hyperdx_source_teams": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hyperdx Source Teams",
+            "description": "How many HyperDX teams now carry a source over this source's table"
+          },
+          "hyperdx_source_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hyperdx Source Error",
+            "description": "Why HyperDX was not pointed at the table. Never fails the deploy - the schema is live and HyperDX may be down or not deployed at all."
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this deploy's config change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself."
           }
         },
         "type": "object",
@@ -27979,6 +28736,14 @@
             ],
             "title": "Apps Sync Error",
             "description": "Why the apps could not be brought into step; reconcile-apps retries it"
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself."
           }
         },
         "type": "object",
@@ -29558,6 +30323,23 @@
         "title": "TransportFacts",
         "description": "What this deployment can carry a source's records on, between its stages."
       },
+      "UnknownFieldModel": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "UnknownFieldModel",
+        "description": "An overlay key under `config:` that the app's contract does not declare."
+      },
       "UpdateAccountRequest": {
         "properties": {
           "groups": {
@@ -30236,6 +31018,14 @@
             "title": "Ui",
             "description": "dfe-ui version when the deploy repo pins one off the certified stack."
           },
+          "apps": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Apps",
+            "description": "Every component the deploy repo pins off the certified stack, name to version tag; empty when the deploy repo carries no pins. Includes dfe-ui, which then matches the ui field above."
+          },
           "source": {
             "type": "string",
             "enum": [
@@ -30257,6 +31047,7 @@
           "stack",
           "engine",
           "ui",
+          "apps",
           "source",
           "python_version"
         ],
@@ -30749,6 +31540,14 @@
             ],
             "title": "Reload",
             "description": "How the change reaches the running process: 'hot' applies without a restart, 'roll' needs the pod to roll, 'restart' needs a manual one."
+          },
+          "restart_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Restart Required",
+            "description": "One command per app whose running process cannot take this change where it stands. Empty where the write was hot, or where a GitOps controller rolls the pod itself."
           }
         },
         "type": "object",
