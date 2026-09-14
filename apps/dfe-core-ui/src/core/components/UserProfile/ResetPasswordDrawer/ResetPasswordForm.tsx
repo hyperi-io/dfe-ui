@@ -43,13 +43,17 @@ export const ResetPasswordForm = ({
   };
   return (
     <Form form={form} onFinish={onFinish}>
-      <Form.Item name="password" label="Password" rules={[formValidation]}>
+      <Form.Item
+        name="password"
+        label={<Form.Label required>Password</Form.Label>}
+        rules={[formValidation]}
+      >
         <Input.Password />
       </Form.Item>
 
       <Form.Item
         name="confirmPassword"
-        label="Confirm Password"
+        label={<Form.Label required>Confirm Password</Form.Label>}
         rules={[formValidation]}
       >
         <Input.Password />
