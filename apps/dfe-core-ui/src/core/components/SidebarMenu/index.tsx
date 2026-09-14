@@ -56,10 +56,13 @@ export const Sidebar = () => {
             }
             onClick={() => setCollapsed(!collapsed)}
           />
-          <SidebarMenu collapsed={collapsed} />
+          <SidebarMenu
+            className="h-full max-h-[calc(100vh-130px)] css-custom-scrollbar"
+            collapsed={collapsed}
+          />
         </div>
 
-        <div className="flex gap-x-1 gap-y-2 flex-wrap px-7 content-end mb-4 w-full items-center justify-end">
+        <div className="absolute bottom-0 left-0 right-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background">
           {!collapsed && <SuiteVersion className="mr-auto" />}
           <ThemeToggle className="mr-2" collapsed={collapsed} />
           <UserActionsButton />
