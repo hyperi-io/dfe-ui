@@ -25,6 +25,9 @@ describe('.useFetchSystemVersion', () => {
       ui: null,
       source: 'deploy-repo',
       python_version: 'python_version',
+      // Matches the endpoint mock's default (no override here), not an
+      // arbitrary fixture value.
+      apps: { 'dfe-loader': 'v1.18.36', 'dfe-receiver': 'v1.15.35' },
     };
 
     await waitFor(() => {

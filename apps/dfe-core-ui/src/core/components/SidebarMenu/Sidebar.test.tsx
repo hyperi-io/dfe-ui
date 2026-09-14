@@ -25,6 +25,7 @@ describe('Sidebar footer version', () => {
           ui: null,
           source: 'deploy-repo',
           python_version: '3.12.12',
+          apps: {},
         },
       }),
     );
