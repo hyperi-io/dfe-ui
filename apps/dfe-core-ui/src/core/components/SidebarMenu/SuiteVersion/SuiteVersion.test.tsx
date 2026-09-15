@@ -30,7 +30,6 @@ describe('SuiteVersion', () => {
           engine: '1.19.12',
           ui: 'v1.20.0@sha256:abc',
           source: 'deploy-repo',
-          apps: {},
           python_version: '3.12.12',
           apps: {
             'dfe-core-ui': '1.0.0',
@@ -66,7 +65,6 @@ describe('SuiteVersion', () => {
           engine: '1.19.12',
           ui: null,
           source: 'engine',
-          apps: {},
           python_version: '3.12.12',
           apps: {
             'dfe-core-ui': '1.0.0',

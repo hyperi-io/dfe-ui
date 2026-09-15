@@ -16,4 +16,5 @@ export const server = setupServer(
   }),
   API_CONFIG_MOCKS.auth.setupStatus.get.success(),
   API_CONFIG_MOCKS.schemas.default.get.success(),
+  API_CONFIG_MOCKS.sources.engines.get.success(),
 );

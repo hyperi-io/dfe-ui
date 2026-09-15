@@ -24,7 +24,6 @@ describe('.useFetchSystemVersion', () => {
       engine: '1.19.15',
       ui: null,
       source: 'deploy-repo',
-      apps: {},
       python_version: 'python_version',
       apps: {
         'dfe-core-ui': '1.0.0',

@@ -1,4 +1,5 @@
 import { Form } from '@/core/components/Form';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -166,27 +167,29 @@ describe('MetaSchemaForm TTL Days', () => {
   });
 });
 
+const withSchema = (engine: string) => ({
+  schema: {
+    meta_schema: 'meta/string',
+    meta_schema_version: '1',
+    engine,
+  },
+});
+
 describe('MetaSchemaForm Engine', () => {
   it('leaves a new source blank, with the DFE default as the placeholder', async () => {
     render(<Harness onFinish={vi.fn()} />, { wrapper });
 
-    const engine = await screen.findByLabelText(
-      /^Engine/,
-      {},
-      { timeout: 15000 },
-    );
-    await waitFor(
-      () =>
-        expect(engine).toHaveAttribute(
-          'placeholder',
-          'MergeTree (DFE default)',
-        ),
-      { timeout: 15000 },
-    );
-    expect(engine).toHaveValue('');
+    expect(
+      await screen.findByText(
+        'MergeTree (DFE default)',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Override')).not.toBeInTheDocument();
   });
 
-  it('marks a typed engine as an override', async () => {
+  it('offers the registry engines and marks a picked one as an override', async () => {
     const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
 
@@ -195,8 +198,123 @@ describe('MetaSchemaForm Engine', () => {
       {},
       { timeout: 15000 },
     );
-    await user.type(engine, 'ReplacingMergeTree');
+    await user.click(engine);
+    await user.click(
+      await screen.findByTitle(
+        'Keeps every row as inserted.',
+        {},
+        { timeout: 15000 },
+      ),
+    );
 
     expect(await screen.findByText('Override')).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('MergeTree arguments'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the arguments box for a variant that takes them and submits the composed engine', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <Harness
+        onFinish={onFinish}
+        initialValues={withSchema('ReplacingMergeTree')}
+      />,
+      { wrapper },
+    );
+
+    const args = await screen.findByLabelText(
+      'ReplacingMergeTree arguments',
+      {},
+      { timeout: 15000 },
+    );
+    expect(args).toHaveAttribute(
+      'placeholder',
+      'version_column[, is_deleted_column] (optional)',
+    );
+    await user.type(args, 'updated_at');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+      timeout: 15000,
+    });
+    const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+    expect(submitted.schema?.engine).toBe('ReplacingMergeTree(updated_at)');
+  });
+
+  it('refuses a variant whose required arguments are missing', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <Harness
+        onFinish={onFinish}
+        initialValues={withSchema('CollapsingMergeTree')}
+      />,
+      { wrapper },
+    );
+
+    await screen.findByLabelText(
+      'CollapsingMergeTree arguments',
+      {},
+      { timeout: 15000 },
+    );
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(
+      await screen.findByText(
+        'CollapsingMergeTree requires arguments: sign_column',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  it('keeps stored arguments editable on a variant that takes none', async () => {
+    render(
+      <Harness onFinish={vi.fn()} initialValues={withSchema('MergeTree(x)')} />,
+      { wrapper },
+    );
+
+    const args = await screen.findByLabelText(
+      'MergeTree arguments',
+      {},
+      { timeout: 15000 },
+    );
+    expect(args).toHaveValue('x');
+  });
+
+  it('falls back to free text when the engine offers no registry', async () => {
+    server.use(
+      API_CONFIG_MOCKS.sources.engines.get.success({
+        mockedResponse: {
+          items: [],
+          total: 0,
+          page: 1,
+          per_page: 100,
+          total_pages: 0,
+          next_page: null,
+          prev_page: null,
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<Harness onFinish={onFinish} />, { wrapper });
+
+    const engine = await screen.findByPlaceholderText(
+      'MergeTree (DFE default)',
+      {},
+      { timeout: 15000 },
+    );
+    await user.type(engine, 'ReplacingMergeTree(ver)');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+      timeout: 15000,
+    });
+    const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+    expect(submitted.schema?.engine).toBe('ReplacingMergeTree(ver)');
   });
 });

@@ -6,12 +6,12 @@ import {
   OverrideTag,
   ttlDaysText,
 } from '@/Sources/components/DefaultOverride';
+import { useFetchTableEngines } from '@/Sources/hooks/useFetchTableEngines';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import {
   Button,
   FormInstance,
   FormRule,
-  Input,
   InputNumber,
   Popover,
   Select,
@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { CommonHeaderSelect } from './CommonHeaderSelect';
 import { MetaSchemaSelectCreate } from './MetaSchemaSelectCreate';
+import { engineArgumentsError, TableEngineInput } from './TableEngineInput';
 
 export const MetaSchemaForm = ({
   formValidation,
@@ -95,6 +96,7 @@ export const MetaSchemaForm = ({
   }, [commonHeaderVersions]);
 
   const { data: setupStatus } = useFetchSetupStatus();
+  const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
   // Blank follows the DFE default; a value is a sticky override of it.
   const ttlDays = Form.useWatch(['schema', 'ttl_days'], form);
   const engine = Form.useWatch(['schema', 'engine'], form);
@@ -213,10 +215,21 @@ export const MetaSchemaForm = ({
             Engine {engine && <OverrideTag />}
           </span>
         }
-        rules={[formValidation]}
+        rules={[
+          formValidation,
+          {
+            validator: async (_, value?: string | null) => {
+              const message = engineArgumentsError(value, engines);
+              if (message) {
+                throw new Error(message);
+              }
+            },
+          },
+        ]}
       >
-        <Input
-          allowClear
+        <TableEngineInput
+          engines={engines}
+          loading={isLoadingEngines}
           placeholder={dfeDefaultText(setupStatus?.default_engine)}
         />
       </Form.Item>
