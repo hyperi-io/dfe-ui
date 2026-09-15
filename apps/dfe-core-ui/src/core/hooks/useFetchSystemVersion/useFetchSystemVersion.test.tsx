@@ -25,6 +25,14 @@ describe('.useFetchSystemVersion', () => {
       ui: null,
       source: 'deploy-repo',
       python_version: 'python_version',
+      apps: {
+        'dfe-core-ui': '1.0.0',
+        'dfe-core-api': '1.0.0',
+        'dfe-core-db': '1.0.0',
+        'dfe-core-auth': '1.0.0',
+        'dfe-core-storage': '1.0.0',
+        'dfe-core-messaging': '1.0.0',
+      },
     };
 
     await waitFor(() => {
