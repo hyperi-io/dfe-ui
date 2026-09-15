@@ -28,6 +28,25 @@ describe('transformSourceFormDataToRequestBody', () => {
     expect(result).toEqual(expectedResult);
   });
 
+  test('a blank engine is sent empty, which follows the DFE default', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', value: 'value', operator: 'equals' },
+      schema: { meta_schema: 'meta/a', meta_schema_version: '1.0.0' },
+    };
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.schema).toEqual({
+      meta_schema: 'meta/a',
+      meta_schema_version: '1.0.0',
+      engine: '',
+    });
+  });
+
   test('a fetcher source sends its stanza as an object and no match', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',

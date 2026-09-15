@@ -8,6 +8,7 @@ import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 import { TSourceCatalogueResponse } from '@/Sources/hooks/useFetchSourceCatalogue/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TTableEnginesResponse } from '@/Sources/hooks/useFetchTableEngines/types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
@@ -139,6 +140,47 @@ export const sources = {
       } = {}) => {
         return http.get(sources.catalogue.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  engines: {
+    mockedUrl: '/api/v1/sources/engines',
+    get: {
+      success: ({
+        mockedResponse = {
+          items: [
+            {
+              name: 'MergeTree',
+              description: 'Keeps every row as inserted.',
+              arguments: 'none',
+              argument_hint: '',
+            },
+            {
+              name: 'ReplacingMergeTree',
+              description: 'Keeps the latest row per sorting key.',
+              arguments: 'optional',
+              argument_hint: 'version_column[, is_deleted_column]',
+            },
+            {
+              name: 'CollapsingMergeTree',
+              description: 'Cancels row pairs whose sign column is 1 and -1.',
+              arguments: 'required',
+              argument_hint: 'sign_column',
+            },
+          ],
+          total: 3,
+          page: 1,
+          per_page: 100,
+          total_pages: 1,
+          next_page: null,
+          prev_page: null,
+        },
+      }: {
+        mockedResponse?: TTableEnginesResponse;
+      } = {}) => {
+        return http.get(sources.engines.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
         });
       },
     },

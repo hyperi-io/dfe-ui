@@ -33,6 +33,7 @@ describe('.useFetchSetupStatus', () => {
       default_credentials: false,
       deploy_kind: 'local',
       credential_fetch_command: '',
+      default_engine: 'MergeTree',
       default_ttl_days: 90,
       admin_username: 'admin',
       admin_retired: false,

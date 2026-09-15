@@ -253,6 +253,45 @@ describe('useTransformSourceToTree', () => {
     expect(queryByLabelText('Delete main')).not.toBeInTheDocument();
   });
 
+  it('tags a source node with its origin', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [baseSource({ name: 'syslog', versions: [] })],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByText } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(getByText('receiver')).toBeInTheDocument();
+  });
+
+  it('shows no origin tag on a source the engine reports no origin for', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'main',
+              resource_type: 'core',
+              origin: null,
+              versions: [],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { container } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(container.querySelector('.ant-tag')).not.toBeInTheDocument();
+  });
+
   it('memoises the tree when sourceObjects and setters are stable', () => {
     const source_objects: TSourceSummary = {
       items: [baseSource({ name: 'a' })],
