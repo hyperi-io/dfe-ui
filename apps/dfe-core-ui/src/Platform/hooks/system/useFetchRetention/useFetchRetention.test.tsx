@@ -20,10 +20,7 @@ describe('.useFetchRetention', () => {
     const { result } = renderHook(() => useFetchRetention(), { wrapper });
 
     const response: TSystemRetentionResponse = {
-      stored: null,
-      effective: 90,
-      origin: 'deployment',
-      deployment_default: 90,
+      default_ttl_days: 90,
     };
 
     await waitFor(() => {
