@@ -15,7 +15,7 @@ import { objectArrayToObject, parseFetcherConfig } from './helpers';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): TSourceUpdateRequestBody => {
-  const { fetcher, match, origin, views, transform, ...rest } = source;
+  const { fetcher, match, origin, schema, views, transform, ...rest } = source;
 
   const isFetcherOrigin = origin === 'fetcher';
 
@@ -38,6 +38,10 @@ export const transformSourceFormDataToRequestBody = (
 
   const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
+    // An empty engine is how the API is told to follow the DFE default.
+    ...(schema != null
+      ? { schema: { ...schema, engine: schema.engine ?? '' } }
+      : {}),
     ...(views != null
       ? {
           views: views.map((view) => {

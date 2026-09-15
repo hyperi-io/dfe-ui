@@ -24,6 +24,7 @@ describe('Sidebar footer version', () => {
           engine: '1.19.12',
           ui: null,
           source: 'deploy-repo',
+          apps: {},
           python_version: '3.12.12',
           apps: {
             'dfe-core-ui': '1.0.0',

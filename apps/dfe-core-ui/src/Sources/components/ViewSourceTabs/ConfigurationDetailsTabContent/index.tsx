@@ -3,6 +3,10 @@ import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { cn } from '@/core/utils/style';
 import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import {
+  DefaultOrOverride,
+  ttlDaysText,
+} from '@/Sources/components/DefaultOverride';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
@@ -71,6 +75,9 @@ export const ConfigurationDetailsTabContent = ({
   const hasSchema = schema?.meta_schema || header?.type;
   const isFetcherOrigin = Object.keys(fetcher ?? {}).length > 0;
   const hasOrigin = match?.field || isFetcherOrigin;
+  // A core source such as main has neither, and the engine reports no origin for it.
+  const receiverOrNone = match?.field ? 'Receiver' : null;
+  const originLabel = isFetcherOrigin ? 'Fetcher' : receiverOrNone;
   const hasViews = views && views.length > 0;
   const fetcherConfig = stringifyFetcherConfig(fetcher?.config);
   const { data: setupStatus } = useFetchSetupStatus();
@@ -100,7 +107,7 @@ export const ConfigurationDetailsTabContent = ({
         <dd>{source_build ? 'Build Executed' : <EmptyData />}</dd>
 
         <dt className={dataListTermStyle}>Origin:</dt>
-        <dd>{isFetcherOrigin ? 'Fetcher' : 'Receiver'}</dd>
+        <dd>{originLabel ?? <EmptyData />}</dd>
       </dl>
       {hasSchema && (
         <SimpleCollapse
@@ -156,37 +163,20 @@ export const ConfigurationDetailsTabContent = ({
                 </dd>
               </>
             )}
-            {schema?.engine ? (
-              <>
-                <dt className={dataListTermStyle}>Engine:</dt>
-                <dd>{schema?.engine}</dd>
-              </>
-            ) : (
-              <>
-                <dt className={dataListTermStyle}>Engine:</dt>
-                <dd>
-                  <EmptyData />
-                </dd>
-              </>
-            )}
-            {typeof schema?.ttl_days === 'number' ? (
-              <>
-                <dt className={dataListTermStyle}>TTL Days:</dt>
-                <dd>{schema?.ttl_days}</dd>
-              </>
-            ) : (
-              <>
-                <dt className={dataListTermStyle}>TTL Days:</dt>
-                <dd>
-                  <span className="text-foreground/40 dark:text-dark-foreground/40">
-                    system default
-                    {setupStatus
-                      ? ` (${setupStatus.default_ttl_days} days)`
-                      : ''}
-                  </span>
-                </dd>
-              </>
-            )}
+            <dt className={dataListTermStyle}>Engine:</dt>
+            <dd>
+              <DefaultOrOverride
+                defaultValue={setupStatus?.default_engine}
+                value={schema?.engine}
+              />
+            </dd>
+            <dt className={dataListTermStyle}>TTL Days:</dt>
+            <dd>
+              <DefaultOrOverride
+                defaultValue={ttlDaysText(setupStatus?.default_ttl_days)}
+                value={ttlDaysText(schema?.ttl_days)}
+              />
+            </dd>
           </dl>
         </SimpleCollapse>
       )}

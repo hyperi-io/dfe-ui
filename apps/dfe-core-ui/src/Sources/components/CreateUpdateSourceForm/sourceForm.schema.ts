@@ -89,7 +89,8 @@ const schemaConfigTabSchema = {
         message: 'Meta schema version is required',
       }),
       ttl_days: z.number().optional().nullable(),
-      engine: z.string({ message: 'Engine is required' }),
+      // Blank follows the DFE default.
+      engine: z.string().optional().nullable(),
     })
     .optional(),
   header: z

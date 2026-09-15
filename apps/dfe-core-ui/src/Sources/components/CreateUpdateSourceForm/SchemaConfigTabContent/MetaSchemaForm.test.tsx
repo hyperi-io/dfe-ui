@@ -62,23 +62,23 @@ const Harness = ({
 };
 
 describe('MetaSchemaForm TTL Days', () => {
-  it('seeds a new source with the deployment default', async () => {
+  it('leaves a new source blank, with the DFE default as the placeholder', async () => {
     render(<Harness onFinish={vi.fn()} />, { wrapper });
 
     const ttl = await screen.findByLabelText(
-      'TTL Days',
+      /^TTL Days/,
       {},
       { timeout: 15000 },
     );
-    await waitFor(() => expect(ttl).toHaveValue('90'), { timeout: 15000 });
-    expect(
-      screen.getByText(
-        'Deployment default: 90 days. Leave as is to follow it.',
-      ),
-    ).toBeInTheDocument();
+    await waitFor(
+      () => expect(ttl).toHaveAttribute('placeholder', '90 (DFE default)'),
+      { timeout: 15000 },
+    );
+    expect(ttl).toHaveValue('');
+    expect(screen.queryByText('Override')).not.toBeInTheDocument();
   });
 
-  it('keeps the value an existing source already has', async () => {
+  it('marks a value the source sets as an override', async () => {
     render(
       <Harness
         onFinish={vi.fn()}
@@ -87,7 +87,7 @@ describe('MetaSchemaForm TTL Days', () => {
             meta_schema: 'meta/string',
             meta_schema_version: '1',
             ttl_days: 7,
-            engine: 'MergeTree',
+            engine: '',
           },
         }}
       />,
@@ -95,31 +95,66 @@ describe('MetaSchemaForm TTL Days', () => {
     );
 
     const ttl = await screen.findByLabelText(
-      'TTL Days',
+      /^TTL Days/,
       {},
       { timeout: 15000 },
     );
-    expect(
-      await screen.findByText(
-        'Deployment default: 90 days. Clear to follow it.',
-        {},
-        { timeout: 15000 },
-      ),
-    ).toBeInTheDocument();
     expect(ttl).toHaveValue('7');
+    expect(screen.getAllByText('Override')).toHaveLength(1);
+  });
+
+  it('keeps 0 as an override that means no TTL', async () => {
+    render(
+      <Harness
+        onFinish={vi.fn()}
+        initialValues={{
+          schema: {
+            meta_schema: 'meta/string',
+            meta_schema_version: '1',
+            ttl_days: 0,
+            engine: '',
+          },
+        }}
+      />,
+      { wrapper },
+    );
+
+    const ttl = await screen.findByLabelText(
+      /^TTL Days/,
+      {},
+      { timeout: 15000 },
+    );
+    expect(ttl).toHaveValue('0');
+    expect(screen.getAllByText('Override')).toHaveLength(1);
+    expect(
+      screen.getByText('Whole days. 0 keeps data forever with no TTL.'),
+    ).toBeInTheDocument();
   });
 
   it('submits null, not 0, when the box is cleared', async () => {
     const user = userEvent.setup();
     const onFinish = vi.fn();
-    render(<Harness onFinish={onFinish} />, { wrapper });
+    render(
+      <Harness
+        onFinish={onFinish}
+        initialValues={{
+          schema: {
+            meta_schema: 'meta/string',
+            meta_schema_version: '1',
+            ttl_days: 7,
+            engine: '',
+          },
+        }}
+      />,
+      { wrapper },
+    );
 
     const ttl = await screen.findByLabelText(
-      'TTL Days',
+      /^TTL Days/,
       {},
       { timeout: 15000 },
     );
-    await waitFor(() => expect(ttl).toHaveValue('90'), { timeout: 15000 });
+    await waitFor(() => expect(ttl).toHaveValue('7'), { timeout: 15000 });
     await user.clear(ttl);
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
@@ -128,5 +163,40 @@ describe('MetaSchemaForm TTL Days', () => {
     });
     const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
     expect(submitted.schema?.ttl_days).toBeNull();
+  });
+});
+
+describe('MetaSchemaForm Engine', () => {
+  it('leaves a new source blank, with the DFE default as the placeholder', async () => {
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    const engine = await screen.findByLabelText(
+      /^Engine/,
+      {},
+      { timeout: 15000 },
+    );
+    await waitFor(
+      () =>
+        expect(engine).toHaveAttribute(
+          'placeholder',
+          'MergeTree (DFE default)',
+        ),
+      { timeout: 15000 },
+    );
+    expect(engine).toHaveValue('');
+  });
+
+  it('marks a typed engine as an override', async () => {
+    const user = userEvent.setup();
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    const engine = await screen.findByLabelText(
+      /^Engine/,
+      {},
+      { timeout: 15000 },
+    );
+    await user.type(engine, 'ReplacingMergeTree');
+
+    expect(await screen.findByText('Override')).toBeInTheDocument();
   });
 });

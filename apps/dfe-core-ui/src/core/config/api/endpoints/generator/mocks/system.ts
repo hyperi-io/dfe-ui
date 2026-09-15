@@ -22,6 +22,7 @@ export const system = {
           // is why the console falls back to its own build version.
           ui: null,
           source: 'deploy-repo',
+          apps: {},
           python_version: 'python_version',
           apps: {
             'dfe-core-ui': '1.0.0',

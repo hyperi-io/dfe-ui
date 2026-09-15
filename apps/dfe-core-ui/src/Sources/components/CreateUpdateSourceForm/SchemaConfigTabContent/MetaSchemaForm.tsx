@@ -1,17 +1,23 @@
 import { Form } from '@/core/components/Form';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import {
+  dfeDefaultText,
+  OverrideTag,
+  ttlDaysText,
+} from '@/Sources/components/DefaultOverride';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import {
   Button,
   FormInstance,
   FormRule,
+  Input,
   InputNumber,
   Popover,
   Select,
 } from 'antd';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CommonHeaderSelect } from './CommonHeaderSelect';
 import { MetaSchemaSelectCreate } from './MetaSchemaSelectCreate';
 
@@ -89,20 +95,10 @@ export const MetaSchemaForm = ({
   }, [commonHeaderVersions]);
 
   const { data: setupStatus } = useFetchSetupStatus();
-  const defaultTtlDays = setupStatus?.default_ttl_days;
-  // A source with no schema yet is new here; an existing source keeps its own value.
-  const [seedDefaultTtl] = useState(
-    () => form.getFieldValue('schema') === undefined,
-  );
-  useEffect(() => {
-    if (!seedDefaultTtl || defaultTtlDays === undefined) return;
-    if (form.getFieldValue(['schema', 'ttl_days']) !== undefined) return;
-    form.setFieldsValue({ schema: { ttl_days: defaultTtlDays } });
-  }, [form, seedDefaultTtl, defaultTtlDays]);
-  const ttlHelp =
-    defaultTtlDays === undefined
-      ? undefined
-      : `Deployment default: ${defaultTtlDays} days. ${seedDefaultTtl ? 'Leave as is' : 'Clear'} to follow it.`;
+  // Blank follows the DFE default; a value is a sticky override of it.
+  const ttlDays = Form.useWatch(['schema', 'ttl_days'], form);
+  const engine = Form.useWatch(['schema', 'engine'], form);
+  const isTtlOverride = ttlDays !== undefined && ttlDays !== null;
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -192,15 +188,36 @@ export const MetaSchemaForm = ({
       <Form.Item
         className="w-full"
         name={['schema', 'ttl_days']}
-        label="TTL Days"
-        help={ttlHelp}
+        label={
+          <span className="flex items-center gap-2">
+            TTL Days {isTtlOverride && <OverrideTag />}
+          </span>
+        }
         rules={[formValidation]}
+        extra="Whole days. 0 keeps data forever with no TTL."
       >
         <InputNumber
           className="w-full"
           min={0}
           precision={0}
-          placeholder="Enter TTL days"
+          placeholder={dfeDefaultText(
+            ttlDaysText(setupStatus?.default_ttl_days),
+          )}
+        />
+      </Form.Item>
+      <Form.Item
+        className="w-full"
+        name={['schema', 'engine']}
+        label={
+          <span className="flex items-center gap-2">
+            Engine {engine && <OverrideTag />}
+          </span>
+        }
+        rules={[formValidation]}
+      >
+        <Input
+          allowClear
+          placeholder={dfeDefaultText(setupStatus?.default_engine)}
         />
       </Form.Item>
     </div>
