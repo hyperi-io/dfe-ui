@@ -691,6 +691,10 @@ export interface paths {
         /**
          * Create Provider
          * @description Create a new OIDC provider configuration (admin only).
+         *
+         *     Secret values in the body are written to the secret store before the YAML is
+         *     written, so nothing is stored against a name that already belongs to someone
+         *     else's provider.
          */
         post: operations["create_provider_api_v1_auth_oidc_providers_post"];
         delete?: never;
@@ -714,6 +718,9 @@ export interface paths {
         /**
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
+         *
+         *     A secret the body omits keeps the path the provider already holds, so an
+         *     update that only flips ``enabled`` does not strand a stored credential.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
@@ -722,7 +729,8 @@ export interface paths {
          * @description Detach an OIDC provider and report orphaned groups (admin only).
          *
          *     Does NOT delete groups — they become orphaned with their source_provider
-         *     still set to the deleted provider name.
+         *     still set to the deleted provider name. The provider's stored credentials
+         *     ARE removed: nothing is left that can authenticate as a detached provider.
          */
         delete: operations["delete_provider_api_v1_auth_oidc_providers__name__delete"];
         options?: never;
@@ -783,9 +791,8 @@ export interface paths {
          *
          *     Answers "are the login creds real and is the IdP reachable" WITHOUT
          *     attempting an interactive login - the gap ``/{name}/test`` leaves for
-         *     generic providers. Checks: the client_id env var resolves, the
-         *     client_secret env var resolves, and the issuer's discovery document is
-         *     reachable and well-formed.
+         *     generic providers. Checks: the client_id resolves, the client_secret
+         *     resolves, and the issuer's discovery document is reachable and well-formed.
          */
         get: operations["verify_login_config_api_v1_auth_oidc_providers__name__verify_login_get"];
         put?: never;
@@ -6579,11 +6586,23 @@ export interface components {
              */
             issuer: string;
             /**
+             * Client Id
+             * @description OIDC client ID. Not a secret, so it is stored in config.
+             * @default
+             */
+            client_id: string;
+            /**
              * Client Id Env
              * @description Env var name for OIDC client ID
              * @default
              */
             client_id_env: string;
+            /**
+             * Client Secret
+             * @description RP client secret used in the auth-code exchange. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            client_secret: string;
             /**
              * Client Secret Env
              * @description Env var name for the RP client secret used in the auth-code exchange
@@ -7310,6 +7329,11 @@ export interface components {
              */
             service_account_json_env: string;
             /**
+             * Service Account Json Path
+             * @default
+             */
+            service_account_json_path: string;
+            /**
              * Admin Email
              * @default
              */
@@ -7330,10 +7354,20 @@ export interface components {
              */
             client_secret_env: string;
             /**
+             * Client Secret Path
+             * @default
+             */
+            client_secret_path: string;
+            /**
              * Api Token Env
              * @default
              */
             api_token_env: string;
+            /**
+             * Api Token Path
+             * @default
+             */
+            api_token_path: string;
             /**
              * Okta Domain
              * @default
@@ -7368,6 +7402,12 @@ export interface components {
              */
             enrich_on_login: boolean;
             /**
+             * Service Account Json
+             * @description Google service account JSON. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            service_account_json: string;
+            /**
              * Service Account Json Env
              * @description Env var for Google SA JSON
              * @default
@@ -7392,11 +7432,23 @@ export interface components {
              */
             tenant_id_env: string;
             /**
+             * Client Secret
+             * @description Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            client_secret: string;
+            /**
              * Client Secret Env
              * @description Env var for Entra ID client secret
              * @default
              */
             client_secret_env: string;
+            /**
+             * Api Token
+             * @description Okta API token. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            api_token: string;
             /**
              * Api Token Env
              * @description Env var for Okta API token
@@ -7422,6 +7474,8 @@ export interface components {
             enrich_on_login: boolean;
             /** Service Account Json Env */
             service_account_json_env: string;
+            /** Service Account Json Path */
+            service_account_json_path: string;
             /** Admin Email */
             admin_email: string;
             /** Domain */
@@ -7430,8 +7484,12 @@ export interface components {
             tenant_id_env: string;
             /** Client Secret Env */
             client_secret_env: string;
+            /** Client Secret Path */
+            client_secret_path: string;
             /** Api Token Env */
             api_token_env: string;
+            /** Api Token Path */
+            api_token_path: string;
             /** Okta Domain */
             okta_domain: string;
         };
@@ -8580,8 +8638,9 @@ export interface components {
          * OIDCProviderSummary
          * @description A registry OIDC provider, with its registry name folded in.
          *
-         *     ``OIDCProvider`` holds env var *names* rather than secret values, so the
-         *     whole model is safe to return.
+         *     ``OIDCProvider`` holds secret-store paths and env var *names* rather than
+         *     secret values, and the client id is public by design (the browser carries it
+         *     to the IdP authorize endpoint), so the whole model is safe to return.
          */
         OIDCProviderSummary: {
             /**
@@ -8606,6 +8665,11 @@ export interface components {
              */
             issuer: string;
             /**
+             * Client Id
+             * @default
+             */
+            client_id: string;
+            /**
              * Client Id Env
              * @default
              */
@@ -8615,6 +8679,11 @@ export interface components {
              * @default
              */
             client_secret_env: string;
+            /**
+             * Client Secret Path
+             * @default
+             */
+            client_secret_path: string;
             /**
              * Scopes
              * @default openid email profile groups
@@ -9777,7 +9846,7 @@ export interface components {
         ProviderKind: "git_repo" | "valhalla" | "local_files";
         /**
          * ProviderResponse
-         * @description Provider config — env var names are shown, never actual secret values.
+         * @description Provider config — env var names and secret paths, never a secret value.
          */
         ProviderResponse: {
             /** Name */
@@ -9790,10 +9859,14 @@ export interface components {
             display_name: string;
             /** Issuer */
             issuer: string;
+            /** Client Id */
+            client_id: string;
             /** Client Id Env */
             client_id_env: string;
             /** Client Secret Env */
             client_secret_env: string;
+            /** Client Secret Path */
+            client_secret_path: string;
             groups: components["schemas"]["GroupResolutionResponse"];
             /** Created At */
             created_at: string;
@@ -12633,6 +12706,21 @@ export interface components {
              * @description Human-readable label
              */
             display_name?: string | null;
+            /**
+             * Client Id
+             * @description OIDC client ID (not a secret)
+             */
+            client_id?: string | null;
+            /**
+             * Client Id Env
+             * @description Env var name for OIDC client ID
+             */
+            client_id_env?: string | null;
+            /**
+             * Client Secret
+             * @description Rotate the RP client secret. Write-only: it goes to the secret store and only its path is kept in config.
+             */
+            client_secret?: string | null;
             /**
              * Client Secret Env
              * @description Env var name for the RP client secret
