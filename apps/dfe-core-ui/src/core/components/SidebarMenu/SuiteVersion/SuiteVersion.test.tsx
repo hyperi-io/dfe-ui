@@ -31,6 +31,14 @@ describe('SuiteVersion', () => {
           ui: 'v1.20.0@sha256:abc',
           source: 'deploy-repo',
           python_version: '3.12.12',
+          apps: {
+            'dfe-core-ui': '1.0.0',
+            'dfe-core-api': '1.0.0',
+            'dfe-core-db': '1.0.0',
+            'dfe-core-auth': '1.0.0',
+            'dfe-core-storage': '1.0.0',
+            'dfe-core-messaging': '1.0.0',
+          },
         },
       }),
     );
@@ -58,6 +66,14 @@ describe('SuiteVersion', () => {
           ui: null,
           source: 'engine',
           python_version: '3.12.12',
+          apps: {
+            'dfe-core-ui': '1.0.0',
+            'dfe-core-api': '1.0.0',
+            'dfe-core-db': '1.0.0',
+            'dfe-core-auth': '1.0.0',
+            'dfe-core-storage': '1.0.0',
+            'dfe-core-messaging': '1.0.0',
+          },
         },
       }),
     );
