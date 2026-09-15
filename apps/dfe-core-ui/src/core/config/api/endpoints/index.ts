@@ -22,6 +22,7 @@ export const API_CONFIG = Object.freeze({
     deploy: '/api/v1/sources/{name}/deploy',
     catalogue: '/api/v1/sources/catalogue',
     fromCatalogue: '/api/v1/sources/from-catalogue/{entry}',
+    engines: '/api/v1/sources/engines',
   },
   serviceConfigs: {
     default: '/api/v1/services',

@@ -175,12 +175,11 @@ const sourceSummaryToTreeData = ({
               <span className="flex gap-2 items-center">
                 {source.name.split('/').pop() ?? ''}
 
-                <Tag
-                  className="m-0"
-                  color={originTagColour(source.origin ?? '')}
-                >
-                  {source.origin}
-                </Tag>
+                {source.origin && (
+                  <Tag className="m-0" color={originTagColour(source.origin)}>
+                    {source.origin}
+                  </Tag>
+                )}
 
                 {!isDeployed && (
                   <Tooltip destroyOnHidden title="_main_land">

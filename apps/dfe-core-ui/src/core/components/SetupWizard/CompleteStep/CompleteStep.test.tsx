@@ -46,6 +46,7 @@ const status = (
   default_credentials: false,
   deploy_kind: 'docker',
   credential_fetch_command: 'make creds',
+  default_engine: 'MergeTree',
   default_ttl_days: 90,
   admin_username: 'admin',
   admin_retired: false,

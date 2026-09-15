@@ -904,6 +904,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Table Engines
+         * @description List the table engines a source may select, from dfe-schemas ``registries/engines.yaml``.
+         */
+        get: operations["list_table_engines_api_v1_sources_engines_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/from-catalogue/{entry}": {
         parameters: {
             query?: never;
@@ -9258,6 +9278,32 @@ export interface components {
             /** Prev Page */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[TableEngineObject] */
+        PaginatedResponse_TableEngineObject_: {
+            /** Items */
+            items: components["schemas"]["TableEngineObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
         /**
          * PaginatedSchemaSummaryResponse
          * @description Schema list: path tree in ``objects`` plus paginated ``items``.
@@ -11219,6 +11265,12 @@ export interface components {
              */
             default_ttl_days: number;
             /**
+             * Default Engine
+             * @description MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The topology prefix (Replicated, Shared) is resolved against the server at DDL time, not here.
+             * @default MergeTree
+             */
+            default_engine: string;
+            /**
              * Admin Username
              * @description The bootstrap admin's account name, which the deployment may rename. The console names it in the retire prompt and marks it retired in the account list, so it cannot guess at 'admin'.
              * @default
@@ -11758,7 +11810,7 @@ export interface components {
             additional_fields?: string | null;
             /**
              * Ttl Days
-             * @description Data retention in days
+             * @description Data retention in days. Unset follows the deployment default; 0 keeps rows forever (no TTL).
              */
             ttl_days?: number | null;
             /**
@@ -12371,6 +12423,33 @@ export interface components {
             commit_sha?: string | null;
             /** Warnings */
             warnings?: string[];
+        };
+        /**
+         * TableEngineObject
+         * @description One table engine a source may select, as the console offers it.
+         */
+        TableEngineObject: {
+            /**
+             * Name
+             * @description MergeTree-family variant, e.g. ReplacingMergeTree
+             */
+            name: string;
+            /**
+             * Description
+             * @description What the engine does with rows
+             */
+            description: string;
+            /**
+             * Arguments
+             * @description Whether the variant takes arguments inside its parentheses
+             * @enum {string}
+             */
+            arguments: "none" | "optional" | "required";
+            /**
+             * Argument Hint
+             * @description What goes inside the parentheses; empty when arguments is none
+             */
+            argument_hint: string;
         };
         /**
          * TableInfo
@@ -15376,6 +15455,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_table_engines_api_v1_sources_engines_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_TableEngineObject_"];
                 };
             };
             /** @description Validation Error */
