@@ -44,7 +44,9 @@ export const ConfigureOIDCForm = ({
 }: ConfigureOidcProviderFormProps) => {
   const formValidation = useAntdZodResolver(createUpdateOidcProviderSchema);
   const typeWatch = Form.useWatch('type', form);
-  const modeWatch = Form.useWatch(['groups', 'mode'], form);
+  // Uncomment this when we have a way to handle the mode watch
+  // for different field per oidc provider type
+  // const modeWatch = Form.useWatch(['groups', 'mode'], form);
 
   return (
     <Form
@@ -147,24 +149,28 @@ export const ConfigureOIDCForm = ({
                 <Switch />
               </Form.Item>
 
-              {typeWatch === 'okta' && (
-                <>
-                  <Form.Item
-                    label="Okta Domain"
-                    name={[GROUPS_FORM_NAME, 'okta_domain']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                  <Form.Item
-                    label="API Token"
-                    name={[GROUPS_FORM_NAME, 'api_token_env']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </>
-              )}
+              <Form.Item
+                label="Okta Domain"
+                name={[GROUPS_FORM_NAME, 'okta_domain']}
+                rules={[formValidation]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="API Token"
+                name={[GROUPS_FORM_NAME, 'api_token_env']}
+                rules={[formValidation]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                label="API Token"
+                name={[GROUPS_FORM_NAME, 'api_token']}
+                rules={[formValidation]}
+              >
+                <Input />
+              </Form.Item>
 
               {typeWatch === 'google' && (
                 <>
@@ -189,27 +195,40 @@ export const ConfigureOIDCForm = ({
                   >
                     <Input />
                   </Form.Item>
+                  <Form.Item
+                    label="Service Account JSON"
+                    name={[GROUPS_FORM_NAME, 'service_account_json']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
                 </>
               )}
 
-              {typeWatch === 'entra_id' && (
-                <>
-                  <Form.Item
-                    label="Tenant ID"
-                    name={[GROUPS_FORM_NAME, 'tenant_id_env']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                  <Form.Item
-                    label="Client Secret"
-                    name={[GROUPS_FORM_NAME, 'client_secret_env']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </>
-              )}
+              <>
+                <Form.Item
+                  label="Tenant ID"
+                  name={[GROUPS_FORM_NAME, 'tenant_id_env']}
+                  rules={[formValidation]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  label="Client Secret ENV"
+                  name={[GROUPS_FORM_NAME, 'client_secret_env']}
+                  rules={[formValidation]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Client Secret"
+                  name={[GROUPS_FORM_NAME, 'client_secret']}
+                  rules={[formValidation]}
+                >
+                  <Input />
+                </Form.Item>
+              </>
 
               <Form.Item
                 label="Claim Name"
@@ -219,17 +238,15 @@ export const ConfigureOIDCForm = ({
                 <Input />
               </Form.Item>
 
-              {modeWatch === 'api' && (
-                <>
-                  <Form.Item
-                    label="Sync Interval"
-                    name={[GROUPS_FORM_NAME, 'sync_interval']}
-                    rules={[formValidation]}
-                  >
-                    <InputNumber className="w-full" />
-                  </Form.Item>
-                </>
-              )}
+              <>
+                <Form.Item
+                  label="Sync Interval"
+                  name={[GROUPS_FORM_NAME, 'sync_interval']}
+                  rules={[formValidation]}
+                >
+                  <InputNumber className="w-full" />
+                </Form.Item>
+              </>
             </div>
           </div>
         )}

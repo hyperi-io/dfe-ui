@@ -90,9 +90,18 @@ export const CreateUpdateOidcProviderForm = ({
             >
               <Input />
             </Form.Item>
+            <Form.Item label="Client ID" name="client_id">
+              <Input />
+            </Form.Item>
             <Form.Item
               label="Client Secret Environment Variable"
               name="client_secret_env"
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item
+              label="Client Secret Environment Variable"
+              name="client_secret"
             >
               <Input.Password />
             </Form.Item>
