@@ -108,7 +108,7 @@ export const ConfigurationDetailsTabContent = ({
         <dt className={dataListTermStyle}>Build Status:</dt>
         <dd>{source_build ? 'Build Executed' : <EmptyData />}</dd>
 
-        {isMainSource && (
+        {!isMainSource && (
           <>
             <dt className={dataListTermStyle}>Origin:</dt>
             <dd>{originLabel ?? <EmptyData />}</dd>

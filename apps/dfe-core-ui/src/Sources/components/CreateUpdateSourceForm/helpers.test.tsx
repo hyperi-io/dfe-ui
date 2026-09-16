@@ -188,7 +188,7 @@ describe('getTabsWithErrors', () => {
         { ...NO_ERRORS, schemaConfig: ['Engine is required'] },
         ['sourceDetails', 'schemaConfig'],
       ),
-    ).toEqual(['Meta Schema']);
+    ).toEqual(['Table Settings']);
   });
 
   test('never names a tab the dialog is not showing', () => {
