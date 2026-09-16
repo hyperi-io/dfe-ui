@@ -10,6 +10,7 @@ import {
   IconCaptureOff,
   IconFile,
   IconFolder,
+  IconLock,
   IconRocket,
   IconStarFilled,
 } from '@repo/dfe-icons';
@@ -155,7 +156,82 @@ const sourceSummaryToTreeData = ({
 }): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
-  for (const source of node.items ?? []) {
+  const mainSource =
+    node.items?.find((source) => source.name == 'main') ?? null;
+
+  const nodeItems = node.items?.filter((source) => source.name != 'main') ?? [];
+
+  if (mainSource) {
+    // Push custom main first
+    out.push({
+      key: sourceTreeKey(mainSource.name),
+      title: () => {
+        const isDeployed = mainSource.deployed_version;
+        return (
+          <TreeInteractiveLabel
+            icon={<IconLock className="shrink-0" />}
+            title={
+              <span className="flex gap-2 items-center">
+                {mainSource.name.split('/').pop() ?? ''}
+                <Tooltip destroyOnHidden title="_main_land">
+                  <IconBucket className="opacity-80" />
+                </Tooltip>
+
+                {isDeployed && (
+                  <Tooltip destroyOnHidden title="Is deployed">
+                    <IconRocket className="text-tertiary opacity-80" />
+                  </Tooltip>
+                )}
+              </span>
+            }
+            onClick={() => {
+              expandTreeNode(sourceTreeKey(mainSource.name));
+              setSelectedSource({
+                source_name: mainSource.name,
+                source_version: mainSource.current,
+              });
+            }}
+            selected={
+              selectedSourceName === mainSource.name &&
+              selectedSourceVersion === mainSource.current
+            }
+            actions={
+              <>
+                <Tooltip
+                  destroyOnHidden
+                  title={
+                    mainSource.enabled
+                      ? 'Source is enabled'
+                      : 'Source is disabled'
+                  }
+                  placement="right"
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    size="small"
+                    className={cn(
+                      'p-0.5',
+                      mainSource.enabled
+                        ? 'text-success border-success bg-background dark:bg-dark-background'
+                        : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
+                    )}
+                    icon={
+                      mainSource.enabled ? <IconCapture /> : <IconCaptureOff />
+                    }
+                  />
+                </Tooltip>
+              </>
+            }
+          />
+        );
+      },
+      children: undefined,
+      isLeaf: true,
+    });
+  }
+
+  for (const source of nodeItems ?? []) {
     const versionChildren = buildVersionChildren(
       source,
       setSelectedSource,
