@@ -36,6 +36,8 @@ describe('.useCreateOidcProvider', () => {
     issuer: 'string',
     client_id_env: 'string',
     client_secret_env: 'string',
+    client_id: 'string',
+    client_secret: 'string',
     groups: {
       mode: 'manual',
       claim_name: 'string',
@@ -48,6 +50,9 @@ describe('.useCreateOidcProvider', () => {
       client_secret_env: 'string',
       api_token_env: 'string',
       okta_domain: 'string',
+      service_account_json: 'string',
+      client_secret: 'string',
+      api_token: 'string',
     },
   };
   describe('onSuccess', () => {
@@ -74,6 +79,8 @@ describe('.useCreateOidcProvider', () => {
         last_sync_at: 'string',
         last_sync_status: 'string',
         sync_error: 'string',
+        client_id: 'string',
+        client_secret_path: 'string',
         groups: {
           mode: 'manual',
           claim_name: 'string',
@@ -86,6 +93,9 @@ describe('.useCreateOidcProvider', () => {
           client_secret_env: 'string',
           api_token_env: 'string',
           okta_domain: 'string',
+          service_account_json_path: 'string',
+          client_secret_path: 'string',
+          api_token_path: 'string',
         },
       };
 
