@@ -82,6 +82,8 @@ export const ConfigurationDetailsTabContent = ({
   const fetcherConfig = stringifyFetcherConfig(fetcher?.config);
   const { data: setupStatus } = useFetchSetupStatus();
 
+  const isMainSource = sourceName === 'main';
+
   return (
     <div className="relative h-full min-h-0">
       <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1 mb-4">
@@ -106,8 +108,12 @@ export const ConfigurationDetailsTabContent = ({
         <dt className={dataListTermStyle}>Build Status:</dt>
         <dd>{source_build ? 'Build Executed' : <EmptyData />}</dd>
 
-        <dt className={dataListTermStyle}>Origin:</dt>
-        <dd>{originLabel ?? <EmptyData />}</dd>
+        {isMainSource && (
+          <>
+            <dt className={dataListTermStyle}>Origin:</dt>
+            <dd>{originLabel ?? <EmptyData />}</dd>
+          </>
+        )}
       </dl>
       {hasSchema && (
         <SimpleCollapse
@@ -123,11 +129,12 @@ export const ConfigurationDetailsTabContent = ({
             <dd>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas/other-schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
+                href={`/schemas/other-schemas?schema_path=${isMainSource ? 'common-header/' : ''}${header?.type}&schema_version=${header?.version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 <span className="text-foreground/40 dark:text-dark-foreground/40">
-                  {header?.type?.split('/').slice(0, -1).join('/')}/
+                  {header?.type?.split('/').slice(0, -1).join('/')}
+                  {isMainSource ? '' : '/'}
                 </span>
                 {/* Header type name */}
                 {header?.type?.split('/').pop()}.yaml
@@ -155,6 +162,8 @@ export const ConfigurationDetailsTabContent = ({
                 <dt className={dataListTermStyle}>Meta Schema Version:</dt>
                 <dd>{schema?.meta_schema_version}</dd>
               </>
+            ) : isMainSource ? (
+              <></>
             ) : (
               <>
                 <dt className={dataListTermStyle}>Meta Schema:</dt>
