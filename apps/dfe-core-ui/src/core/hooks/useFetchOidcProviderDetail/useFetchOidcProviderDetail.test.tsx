@@ -38,6 +38,8 @@ describe('.useFetchOidcProviderDetail', () => {
         last_sync_at: 'last_sync_at',
         last_sync_status: 'last_sync_status',
         sync_error: 'sync_error',
+        client_id: 'client_id',
+        client_secret_path: 'client_secret_path',
         groups: {
           mode: 'mode',
           claim_name: 'claim_name',
@@ -50,6 +52,9 @@ describe('.useFetchOidcProviderDetail', () => {
           client_secret_env: 'client_secret_env',
           api_token_env: 'api_token_env',
           okta_domain: 'okta_domain',
+          service_account_json_path: 'service_account_json_path',
+          client_secret_path: 'client_secret_path',
+          api_token_path: 'api_token_path',
         },
       };
 

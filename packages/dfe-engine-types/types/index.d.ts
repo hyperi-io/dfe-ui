@@ -691,6 +691,10 @@ export interface paths {
         /**
          * Create Provider
          * @description Create a new OIDC provider configuration (admin only).
+         *
+         *     Secret values in the body are written to the secret store before the YAML is
+         *     written, so nothing is stored against a name that already belongs to someone
+         *     else's provider.
          */
         post: operations["create_provider_api_v1_auth_oidc_providers_post"];
         delete?: never;
@@ -714,6 +718,9 @@ export interface paths {
         /**
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
+         *
+         *     A secret the body omits keeps the path the provider already holds, so an
+         *     update that only flips ``enabled`` does not strand a stored credential.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
@@ -722,7 +729,8 @@ export interface paths {
          * @description Detach an OIDC provider and report orphaned groups (admin only).
          *
          *     Does NOT delete groups — they become orphaned with their source_provider
-         *     still set to the deleted provider name.
+         *     still set to the deleted provider name. The provider's stored credentials
+         *     ARE removed: nothing is left that can authenticate as a detached provider.
          */
         delete: operations["delete_provider_api_v1_auth_oidc_providers__name__delete"];
         options?: never;
@@ -783,9 +791,8 @@ export interface paths {
          *
          *     Answers "are the login creds real and is the IdP reachable" WITHOUT
          *     attempting an interactive login - the gap ``/{name}/test`` leaves for
-         *     generic providers. Checks: the client_id env var resolves, the
-         *     client_secret env var resolves, and the issuer's discovery document is
-         *     reachable and well-formed.
+         *     generic providers. Checks: the client_id resolves, the client_secret
+         *     resolves, and the issuer's discovery document is reachable and well-formed.
          */
         get: operations["verify_login_config_api_v1_auth_oidc_providers__name__verify_login_get"];
         put?: never;
@@ -1088,7 +1095,7 @@ export interface paths {
         post?: never;
         /**
          * Delete Source
-         * @description Delete a source by name. Its fetcher instance and receiver rule go with it.
+         * @description Delete a source by name. Its fetcher instance, receiver rule and topics go with it.
          *
          *     An engine-owned source -- the landing table's own -- is refused with 409
          *     ``conflict``, the same answer PUT and PATCH give.
@@ -1192,9 +1199,9 @@ export interface paths {
          * Reconcile Apps
          * @description Bring the deploy repo's derived app state into step with the sources.
          *
-         *     Recompiles every stack-scoped routing block (receiver, loader) and deploys,
-         *     syncs or removes the instances of every instance-scoped app (a fetcher per
-         *     active fetcher-based source). Every source write does this on its own; this
+         *     Recompiles every stack-scoped routing block (receiver, loader, archiver) and
+         *     deploys, syncs or removes the instances of every instance-scoped app (a fetcher
+         *     per active fetcher-based source). Every source write does this on its own; this
          *     route is the retry when one reported ``apps_sync_error``.
          */
         post: operations["reconcile_apps_api_v1_sources_reconcile_apps_post"];
@@ -1218,6 +1225,100 @@ export interface paths {
          * @description Seed built-in default source definitions. Non-destructive (skips existing).
          */
         post: operations["seed_sources_api_v1_sources_seed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kafka/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Topic Status
+         * @description Report each source topic's existence, shape, config and drift.
+         *
+         *     Read-only: it creates nothing, so a status call against a broker mid-restart
+         *     reports that it could not be read rather than reporting every topic missing.
+         */
+        get: operations["list_topic_status_api_v1_kafka_topics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kafka/topics/ensure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ensure Source Topics
+         * @description Create every topic the sources in scope need and do not have.
+         *
+         *     Idempotent, and it never touches a topic that already exists: widening an
+         *     existing topic is ``update``, deliberately, so a re-ensure cannot reshape a
+         *     live topic as a side effect.
+         */
+        post: operations["ensure_source_topics_api_v1_kafka_topics_ensure_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kafka/topics/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update Source Topics
+         * @description Converge existing topics onto their spec: alter configs, widen partitions.
+         *
+         *     A topic that does not exist is reported as absent rather than created, so a
+         *     source that never deployed shows up here instead of being quietly fixed.
+         */
+        post: operations["update_source_topics_api_v1_kafka_topics_update_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kafka/topics/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove Source Topics
+         * @description Delete one source's topics. DESTRUCTIVE - the records on them are gone.
+         *
+         *     Guarded twice over: a source name is required (there is no remove-everything
+         *     call), and ``confirm`` must be set. A dry run needs neither the confirmation
+         *     nor a broker write, so it is the safe way to see what would go.
+         */
+        post: operations["remove_source_topics_api_v1_kafka_topics_remove_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6422,7 +6523,14 @@ export interface components {
              */
             expires_at?: string | null;
         };
-        /** CreateAccountRequest */
+        /**
+         * CreateAccountRequest
+         * @description What a console sends to create an account.
+         *
+         *     Only the credentials are required. The setup wizard creates the first user
+         *     from a form that collects no contact details, so a required field here is a
+         *     deployment that cannot get into its own console.
+         */
         CreateAccountRequest: {
             /**
              * Username
@@ -6437,6 +6545,7 @@ export interface components {
             /**
              * Email
              * @description Contact email
+             * @default
              */
             email: string;
             /**
@@ -6579,11 +6688,23 @@ export interface components {
              */
             issuer: string;
             /**
+             * Client Id
+             * @description OIDC client ID. Not a secret, so it is stored in config.
+             * @default
+             */
+            client_id: string;
+            /**
              * Client Id Env
              * @description Env var name for OIDC client ID
              * @default
              */
             client_id_env: string;
+            /**
+             * Client Secret
+             * @description RP client secret used in the auth-code exchange. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            client_secret: string;
             /**
              * Client Secret Env
              * @description Env var name for the RP client secret used in the auth-code exchange
@@ -7310,6 +7431,11 @@ export interface components {
              */
             service_account_json_env: string;
             /**
+             * Service Account Json Path
+             * @default
+             */
+            service_account_json_path: string;
+            /**
              * Admin Email
              * @default
              */
@@ -7330,10 +7456,20 @@ export interface components {
              */
             client_secret_env: string;
             /**
+             * Client Secret Path
+             * @default
+             */
+            client_secret_path: string;
+            /**
              * Api Token Env
              * @default
              */
             api_token_env: string;
+            /**
+             * Api Token Path
+             * @default
+             */
+            api_token_path: string;
             /**
              * Okta Domain
              * @default
@@ -7368,6 +7504,12 @@ export interface components {
              */
             enrich_on_login: boolean;
             /**
+             * Service Account Json
+             * @description Google service account JSON. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            service_account_json: string;
+            /**
              * Service Account Json Env
              * @description Env var for Google SA JSON
              * @default
@@ -7392,11 +7534,23 @@ export interface components {
              */
             tenant_id_env: string;
             /**
+             * Client Secret
+             * @description Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            client_secret: string;
+            /**
              * Client Secret Env
              * @description Env var for Entra ID client secret
              * @default
              */
             client_secret_env: string;
+            /**
+             * Api Token
+             * @description Okta API token. Write-only: it goes to the secret store and only its path is kept in config.
+             * @default
+             */
+            api_token: string;
             /**
              * Api Token Env
              * @description Env var for Okta API token
@@ -7422,6 +7576,8 @@ export interface components {
             enrich_on_login: boolean;
             /** Service Account Json Env */
             service_account_json_env: string;
+            /** Service Account Json Path */
+            service_account_json_path: string;
             /** Admin Email */
             admin_email: string;
             /** Domain */
@@ -7430,8 +7586,12 @@ export interface components {
             tenant_id_env: string;
             /** Client Secret Env */
             client_secret_env: string;
+            /** Client Secret Path */
+            client_secret_path: string;
             /** Api Token Env */
             api_token_env: string;
+            /** Api Token Path */
+            api_token_path: string;
             /** Okta Domain */
             okta_domain: string;
         };
@@ -8580,8 +8740,9 @@ export interface components {
          * OIDCProviderSummary
          * @description A registry OIDC provider, with its registry name folded in.
          *
-         *     ``OIDCProvider`` holds env var *names* rather than secret values, so the
-         *     whole model is safe to return.
+         *     ``OIDCProvider`` holds secret-store paths and env var *names* rather than
+         *     secret values, and the client id is public by design (the browser carries it
+         *     to the IdP authorize endpoint), so the whole model is safe to return.
          */
         OIDCProviderSummary: {
             /**
@@ -8606,6 +8767,11 @@ export interface components {
              */
             issuer: string;
             /**
+             * Client Id
+             * @default
+             */
+            client_id: string;
+            /**
              * Client Id Env
              * @default
              */
@@ -8615,6 +8781,11 @@ export interface components {
              * @default
              */
             client_secret_env: string;
+            /**
+             * Client Secret Path
+             * @default
+             */
+            client_secret_path: string;
             /**
              * Scopes
              * @default openid email profile groups
@@ -9777,7 +9948,7 @@ export interface components {
         ProviderKind: "git_repo" | "valhalla" | "local_files";
         /**
          * ProviderResponse
-         * @description Provider config — env var names are shown, never actual secret values.
+         * @description Provider config — env var names and secret paths, never a secret value.
          */
         ProviderResponse: {
             /** Name */
@@ -9790,10 +9961,14 @@ export interface components {
             display_name: string;
             /** Issuer */
             issuer: string;
+            /** Client Id */
+            client_id: string;
             /** Client Id Env */
             client_id_env: string;
             /** Client Secret Env */
             client_secret_env: string;
+            /** Client Secret Path */
+            client_secret_path: string;
             groups: components["schemas"]["GroupResolutionResponse"];
             /** Created At */
             created_at: string;
@@ -11964,7 +12139,7 @@ export interface components {
             transport?: ("bus" | "direct") | null;
             /**
              * Archive
-             * @description Keep a copy of every record as it arrived, before any transform. The archiver reads the landing topic, so this needs the bus transport
+             * @description Keep a copy of every record as it arrived, before any transform. On the bus the archiver reads the landing topic; on direct the receiver fans the record out to it beside the stage that loads it
              * @default false
              */
             archive: boolean;
@@ -12131,7 +12306,7 @@ export interface components {
             transport?: ("bus" | "direct") | null;
             /**
              * Archive
-             * @description Keep the raw record as it arrived; needs the bus transport
+             * @description Keep the raw record as it arrived, on either transport
              * @default false
              */
             archive: boolean;
@@ -12511,6 +12686,121 @@ export interface components {
             default_credentials: boolean;
         };
         /**
+         * TopicEnsureResponse
+         * @description Outcome of an ensure pass: every topic in scope lands in exactly one list.
+         */
+        TopicEnsureResponse: {
+            /** Created */
+            created?: string[];
+            /** Existing */
+            existing?: string[];
+            /** Failed */
+            failed?: components["schemas"]["TopicFailure"][];
+            /**
+             * Dry Run
+             * @default false
+             */
+            dry_run: boolean;
+        };
+        /**
+         * TopicFailure
+         * @description One topic the broker would not do the thing to, and what it said.
+         */
+        TopicFailure: {
+            /** Name */
+            name: string;
+            /** Error */
+            error: string;
+        };
+        /**
+         * TopicRemoveResponse
+         * @description Outcome of a remove pass.
+         */
+        TopicRemoveResponse: {
+            /** Removed */
+            removed?: string[];
+            /** Absent */
+            absent?: string[];
+            /** Failed */
+            failed?: components["schemas"]["TopicFailure"][];
+            /**
+             * Dry Run
+             * @default false
+             */
+            dry_run: boolean;
+        };
+        /**
+         * TopicStateResponse
+         * @description What the broker holds for one topic, against what its source asks for.
+         */
+        TopicStateResponse: {
+            /** Name */
+            name: string;
+            /** Source */
+            source: string;
+            /** Exists */
+            exists: boolean;
+            /** Desired Partitions */
+            desired_partitions: number;
+            /** Desired Replication Factor */
+            desired_replication_factor: number;
+            /** Partitions */
+            partitions?: number | null;
+            /** Replication Factor */
+            replication_factor?: number | null;
+            /** Config */
+            config?: {
+                [key: string]: string;
+            };
+            /** Drift */
+            drift?: string[];
+        };
+        /**
+         * TopicStatusResponse
+         * @description Status for every topic the sources in scope imply.
+         */
+        TopicStatusResponse: {
+            /**
+             * Reachable
+             * @description False when the broker could not be read at all
+             */
+            reachable: boolean;
+            /**
+             * Error
+             * @description Why the broker could not be read; null when it could
+             */
+            error?: string | null;
+            /** Topics */
+            topics?: components["schemas"]["TopicStateResponse"][];
+        };
+        /**
+         * TopicUpdateResponse
+         * @description Outcome of a converge pass.
+         *
+         *     ``refused`` is what DFE declined to do (a partition decrease, a replication
+         *     factor change); ``failed`` is what the broker rejected. They are different
+         *     problems with different fixes, so they are different lists.
+         */
+        TopicUpdateResponse: {
+            /** Altered */
+            altered?: string[];
+            /** Widened */
+            widened?: string[];
+            /** Unchanged */
+            unchanged?: string[];
+            /** Absent */
+            absent?: string[];
+            /** Refused */
+            refused?: components["schemas"]["TopicFailure"][];
+            /** Failed */
+            failed?: components["schemas"]["TopicFailure"][];
+            /**
+             * Dry Run
+             * @default false
+             */
+            dry_run: boolean;
+        };
+        /**
          * TransportFacts
          * @description What this deployment can carry a source's records on, between its stages.
          */
@@ -12633,6 +12923,21 @@ export interface components {
              * @description Human-readable label
              */
             display_name?: string | null;
+            /**
+             * Client Id
+             * @description OIDC client ID (not a secret)
+             */
+            client_id?: string | null;
+            /**
+             * Client Id Env
+             * @description Env var name for OIDC client ID
+             */
+            client_id_env?: string | null;
+            /**
+             * Client Secret
+             * @description Rotate the RP client secret. Write-only: it goes to the secret store and only its path is kept in config.
+             */
+            client_secret?: string | null;
             /**
              * Client Secret Env
              * @description Env var name for the RP client secret
@@ -15919,6 +16224,142 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["dfe_engine__api__v1__sources__SeedResponse"];
+                };
+            };
+        };
+    };
+    list_topic_status_api_v1_kafka_topics_get: {
+        parameters: {
+            query?: {
+                /** @description Limit to one source's topics; omitted means every source */
+                source?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ensure_source_topics_api_v1_kafka_topics_ensure_post: {
+        parameters: {
+            query?: {
+                /** @description Limit to one source's topics; omitted means every source */
+                source?: string | null;
+                /** @description Report what would change without changing it */
+                dry_run?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicEnsureResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_source_topics_api_v1_kafka_topics_update_post: {
+        parameters: {
+            query?: {
+                /** @description Limit to one source's topics; omitted means every source */
+                source?: string | null;
+                /** @description Report what would change without changing it */
+                dry_run?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicUpdateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_source_topics_api_v1_kafka_topics_remove_post: {
+        parameters: {
+            query: {
+                /** @description The source whose topics go; never every source at once */
+                source: string;
+                /** @description Must be true: the topic's records go with it and do not come back */
+                confirm?: boolean;
+                /** @description Report what would change without changing it */
+                dry_run?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicRemoveResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

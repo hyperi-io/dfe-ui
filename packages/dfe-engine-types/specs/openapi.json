@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.20.10"
+    "version": "1.20.14"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -2294,7 +2294,7 @@
           "OIDC Providers"
         ],
         "summary": "Create Provider",
-        "description": "Create a new OIDC provider configuration (admin only).",
+        "description": "Create a new OIDC provider configuration (admin only).\n\nSecret values in the body are written to the secret store before the YAML is\nwritten, so nothing is stored against a name that already belongs to someone\nelse's provider.",
         "operationId": "create_provider_api_v1_auth_oidc_providers_post",
         "requestBody": {
           "required": true,
@@ -2493,7 +2493,7 @@
           "OIDC Providers"
         ],
         "summary": "Update Provider",
-        "description": "Update an OIDC provider configuration (admin only).",
+        "description": "Update an OIDC provider configuration (admin only).\n\nA secret the body omits keeps the path the provider already holds, so an\nupdate that only flips ``enabled`` does not strand a stored credential.",
         "operationId": "update_provider_api_v1_auth_oidc_providers__name__put",
         "parameters": [
           {
@@ -2549,7 +2549,7 @@
           "OIDC Providers"
         ],
         "summary": "Delete Provider",
-        "description": "Detach an OIDC provider and report orphaned groups (admin only).\n\nDoes NOT delete groups \u2014 they become orphaned with their source_provider\nstill set to the deleted provider name.",
+        "description": "Detach an OIDC provider and report orphaned groups (admin only).\n\nDoes NOT delete groups \u2014 they become orphaned with their source_provider\nstill set to the deleted provider name. The provider's stored credentials\nARE removed: nothing is left that can authenticate as a detached provider.",
         "operationId": "delete_provider_api_v1_auth_oidc_providers__name__delete",
         "parameters": [
           {
@@ -2693,7 +2693,7 @@
           "OIDC Providers"
         ],
         "summary": "Verify Login Config",
-        "description": "Verify a provider's OIDC LOGIN config (admin only).\n\nAnswers \"are the login creds real and is the IdP reachable\" WITHOUT\nattempting an interactive login - the gap ``/{name}/test`` leaves for\ngeneric providers. Checks: the client_id env var resolves, the\nclient_secret env var resolves, and the issuer's discovery document is\nreachable and well-formed.",
+        "description": "Verify a provider's OIDC LOGIN config (admin only).\n\nAnswers \"are the login creds real and is the IdP reachable\" WITHOUT\nattempting an interactive login - the gap ``/{name}/test`` leaves for\ngeneric providers. Checks: the client_id resolves, the client_secret\nresolves, and the issuer's discovery document is reachable and well-formed.",
         "operationId": "verify_login_config_api_v1_auth_oidc_providers__name__verify_login_get",
         "parameters": [
           {
@@ -4026,7 +4026,7 @@
           "Sources"
         ],
         "summary": "Delete Source",
-        "description": "Delete a source by name. Its fetcher instance and receiver rule go with it.\n\nAn engine-owned source -- the landing table's own -- is refused with 409\n``conflict``, the same answer PUT and PATCH give.",
+        "description": "Delete a source by name. Its fetcher instance, receiver rule and topics go with it.\n\nAn engine-owned source -- the landing table's own -- is refused with 409\n``conflict``, the same answer PUT and PATCH give.",
         "operationId": "delete_source_api_v1_sources__name__delete",
         "parameters": [
           {
@@ -4213,7 +4213,7 @@
           "Sources"
         ],
         "summary": "Reconcile Apps",
-        "description": "Bring the deploy repo's derived app state into step with the sources.\n\nRecompiles every stack-scoped routing block (receiver, loader) and deploys,\nsyncs or removes the instances of every instance-scoped app (a fetcher per\nactive fetcher-based source). Every source write does this on its own; this\nroute is the retry when one reported ``apps_sync_error``.",
+        "description": "Bring the deploy repo's derived app state into step with the sources.\n\nRecompiles every stack-scoped routing block (receiver, loader, archiver) and\ndeploys, syncs or removes the instances of every instance-scoped app (a fetcher\nper active fetcher-based source). Every source write does this on its own; this\nroute is the retry when one reported ``apps_sync_error``.",
         "operationId": "reconcile_apps_api_v1_sources_reconcile_apps_post",
         "responses": {
           "200": {
@@ -4249,6 +4249,275 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/dfe_engine__api__v1__sources__SeedResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/kafka/topics": {
+      "get": {
+        "tags": [
+          "Kafka Topics"
+        ],
+        "summary": "List Topic Status",
+        "description": "Report each source topic's existence, shape, config and drift.\n\nRead-only: it creates nothing, so a status call against a broker mid-restart\nreports that it could not be read rather than reporting every topic missing.",
+        "operationId": "list_topic_status_api_v1_kafka_topics_get",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit to one source's topics; omitted means every source",
+              "title": "Source"
+            },
+            "description": "Limit to one source's topics; omitted means every source"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/kafka/topics/ensure": {
+      "post": {
+        "tags": [
+          "Kafka Topics"
+        ],
+        "summary": "Ensure Source Topics",
+        "description": "Create every topic the sources in scope need and do not have.\n\nIdempotent, and it never touches a topic that already exists: widening an\nexisting topic is ``update``, deliberately, so a re-ensure cannot reshape a\nlive topic as a side effect.",
+        "operationId": "ensure_source_topics_api_v1_kafka_topics_ensure_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit to one source's topics; omitted means every source",
+              "title": "Source"
+            },
+            "description": "Limit to one source's topics; omitted means every source"
+          },
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Report what would change without changing it",
+              "default": false,
+              "title": "Dry Run"
+            },
+            "description": "Report what would change without changing it"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicEnsureResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/kafka/topics/update": {
+      "post": {
+        "tags": [
+          "Kafka Topics"
+        ],
+        "summary": "Update Source Topics",
+        "description": "Converge existing topics onto their spec: alter configs, widen partitions.\n\nA topic that does not exist is reported as absent rather than created, so a\nsource that never deployed shows up here instead of being quietly fixed.",
+        "operationId": "update_source_topics_api_v1_kafka_topics_update_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit to one source's topics; omitted means every source",
+              "title": "Source"
+            },
+            "description": "Limit to one source's topics; omitted means every source"
+          },
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Report what would change without changing it",
+              "default": false,
+              "title": "Dry Run"
+            },
+            "description": "Report what would change without changing it"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicUpdateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/kafka/topics/remove": {
+      "post": {
+        "tags": [
+          "Kafka Topics"
+        ],
+        "summary": "Remove Source Topics",
+        "description": "Delete one source's topics. DESTRUCTIVE - the records on them are gone.\n\nGuarded twice over: a source name is required (there is no remove-everything\ncall), and ``confirm`` must be set. A dry run needs neither the confirmation\nnor a broker write, so it is the safe way to see what would go.",
+        "operationId": "remove_source_topics_api_v1_kafka_topics_remove_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The source whose topics go; never every source at once",
+              "title": "Source"
+            },
+            "description": "The source whose topics go; never every source at once"
+          },
+          {
+            "name": "confirm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Must be true: the topic's records go with it and do not come back",
+              "default": false,
+              "title": "Confirm"
+            },
+            "description": "Must be true: the topic's records go with it and do not come back"
+          },
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Report what would change without changing it",
+              "default": false,
+              "title": "Dry Run"
+            },
+            "description": "Report what would change without changing it"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicRemoveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -18890,9 +19159,9 @@
           },
           "email": {
             "type": "string",
-            "minLength": 1,
             "title": "Email",
-            "description": "Contact email"
+            "description": "Contact email",
+            "default": ""
           },
           "groups": {
             "items": {
@@ -18918,10 +19187,10 @@
         "type": "object",
         "required": [
           "username",
-          "password",
-          "email"
+          "password"
         ],
-        "title": "CreateAccountRequest"
+        "title": "CreateAccountRequest",
+        "description": "What a console sends to create an account.\n\nOnly the credentials are required. The setup wizard creates the first user\nfrom a form that collects no contact details, so a required field here is a\ndeployment that cannot get into its own console."
       },
       "CreateArtifactRequest": {
         "properties": {
@@ -19098,10 +19367,22 @@
             "description": "OIDC issuer URL",
             "default": ""
           },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "description": "OIDC client ID. Not a secret, so it is stored in config.",
+            "default": ""
+          },
           "client_id_env": {
             "type": "string",
             "title": "Client Id Env",
             "description": "Env var name for OIDC client ID",
+            "default": ""
+          },
+          "client_secret": {
+            "type": "string",
+            "title": "Client Secret",
+            "description": "RP client secret used in the auth-code exchange. Write-only: it goes to the secret store and only its path is kept in config.",
             "default": ""
           },
           "client_secret_env": {
@@ -20347,6 +20628,11 @@
             "title": "Service Account Json Env",
             "default": ""
           },
+          "service_account_json_path": {
+            "type": "string",
+            "title": "Service Account Json Path",
+            "default": ""
+          },
           "admin_email": {
             "type": "string",
             "title": "Admin Email",
@@ -20367,9 +20653,19 @@
             "title": "Client Secret Env",
             "default": ""
           },
+          "client_secret_path": {
+            "type": "string",
+            "title": "Client Secret Path",
+            "default": ""
+          },
           "api_token_env": {
             "type": "string",
             "title": "Api Token Env",
+            "default": ""
+          },
+          "api_token_path": {
+            "type": "string",
+            "title": "Api Token Path",
             "default": ""
           },
           "okta_domain": {
@@ -20413,6 +20709,12 @@
             "description": "Fetch the user's groups from the directory API at each login (needed by providers with no groups claim, e.g. Google Workspace)",
             "default": false
           },
+          "service_account_json": {
+            "type": "string",
+            "title": "Service Account Json",
+            "description": "Google service account JSON. Write-only: it goes to the secret store and only its path is kept in config.",
+            "default": ""
+          },
           "service_account_json_env": {
             "type": "string",
             "title": "Service Account Json Env",
@@ -20437,10 +20739,22 @@
             "description": "Env var for Entra ID tenant ID",
             "default": ""
           },
+          "client_secret": {
+            "type": "string",
+            "title": "Client Secret",
+            "description": "Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config.",
+            "default": ""
+          },
           "client_secret_env": {
             "type": "string",
             "title": "Client Secret Env",
             "description": "Env var for Entra ID client secret",
+            "default": ""
+          },
+          "api_token": {
+            "type": "string",
+            "title": "Api Token",
+            "description": "Okta API token. Write-only: it goes to the secret store and only its path is kept in config.",
             "default": ""
           },
           "api_token_env": {
@@ -20481,6 +20795,10 @@
             "type": "string",
             "title": "Service Account Json Env"
           },
+          "service_account_json_path": {
+            "type": "string",
+            "title": "Service Account Json Path"
+          },
           "admin_email": {
             "type": "string",
             "title": "Admin Email"
@@ -20497,9 +20815,17 @@
             "type": "string",
             "title": "Client Secret Env"
           },
+          "client_secret_path": {
+            "type": "string",
+            "title": "Client Secret Path"
+          },
           "api_token_env": {
             "type": "string",
             "title": "Api Token Env"
+          },
+          "api_token_path": {
+            "type": "string",
+            "title": "Api Token Path"
           },
           "okta_domain": {
             "type": "string",
@@ -20513,11 +20839,14 @@
           "sync_interval",
           "enrich_on_login",
           "service_account_json_env",
+          "service_account_json_path",
           "admin_email",
           "domain",
           "tenant_id_env",
           "client_secret_env",
+          "client_secret_path",
           "api_token_env",
+          "api_token_path",
           "okta_domain"
         ],
         "title": "GroupResolutionResponse"
@@ -22774,6 +23103,11 @@
             "title": "Issuer",
             "default": ""
           },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id",
+            "default": ""
+          },
           "client_id_env": {
             "type": "string",
             "title": "Client Id Env",
@@ -22782,6 +23116,11 @@
           "client_secret_env": {
             "type": "string",
             "title": "Client Secret Env",
+            "default": ""
+          },
+          "client_secret_path": {
+            "type": "string",
+            "title": "Client Secret Path",
             "default": ""
           },
           "scopes": {
@@ -22823,7 +23162,7 @@
           "name"
         ],
         "title": "OIDCProviderSummary",
-        "description": "A registry OIDC provider, with its registry name folded in.\n\n``OIDCProvider`` holds env var *names* rather than secret values, so the\nwhole model is safe to return."
+        "description": "A registry OIDC provider, with its registry name folded in.\n\n``OIDCProvider`` holds secret-store paths and env var *names* rather than\nsecret values, and the client id is public by design (the browser carries it\nto the IdP authorize endpoint), so the whole model is safe to return."
       },
       "ObjectEntry": {
         "properties": {
@@ -25226,6 +25565,10 @@
             "type": "string",
             "title": "Issuer"
           },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
           "client_id_env": {
             "type": "string",
             "title": "Client Id Env"
@@ -25233,6 +25576,10 @@
           "client_secret_env": {
             "type": "string",
             "title": "Client Secret Env"
+          },
+          "client_secret_path": {
+            "type": "string",
+            "title": "Client Secret Path"
           },
           "groups": {
             "$ref": "#/components/schemas/GroupResolutionResponse"
@@ -25261,8 +25608,10 @@
           "enabled",
           "display_name",
           "issuer",
+          "client_id",
           "client_id_env",
           "client_secret_env",
+          "client_secret_path",
           "groups",
           "created_at",
           "last_sync_at",
@@ -25270,7 +25619,7 @@
           "sync_error"
         ],
         "title": "ProviderResponse",
-        "description": "Provider config \u2014 env var names are shown, never actual secret values."
+        "description": "Provider config \u2014 env var names and secret paths, never a secret value."
       },
       "PublishVersionRequest": {
         "properties": {
@@ -29208,7 +29557,7 @@
           "archive": {
             "type": "boolean",
             "title": "Archive",
-            "description": "Keep a copy of every record as it arrived, before any transform. The archiver reads the landing topic, so this needs the bus transport",
+            "description": "Keep a copy of every record as it arrived, before any transform. On the bus the archiver reads the landing topic; on direct the receiver fans the record out to it beside the stage that loads it",
             "default": false
           },
           "source_build": {
@@ -29559,7 +29908,7 @@
           "archive": {
             "type": "boolean",
             "title": "Archive",
-            "description": "Keep the raw record as it arrived; needs the bus transport",
+            "description": "Keep the raw record as it arrived, on either transport",
             "default": false
           },
           "views": {
@@ -30291,6 +30640,249 @@
         ],
         "title": "TokenResponse"
       },
+      "TopicEnsureResponse": {
+        "properties": {
+          "created": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Created"
+          },
+          "existing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Existing"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/TopicFailure"
+            },
+            "type": "array",
+            "title": "Failed"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TopicEnsureResponse",
+        "description": "Outcome of an ensure pass: every topic in scope lands in exactly one list."
+      },
+      "TopicFailure": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "error"
+        ],
+        "title": "TopicFailure",
+        "description": "One topic the broker would not do the thing to, and what it said."
+      },
+      "TopicRemoveResponse": {
+        "properties": {
+          "removed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Removed"
+          },
+          "absent": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Absent"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/TopicFailure"
+            },
+            "type": "array",
+            "title": "Failed"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TopicRemoveResponse",
+        "description": "Outcome of a remove pass."
+      },
+      "TopicStateResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "exists": {
+            "type": "boolean",
+            "title": "Exists"
+          },
+          "desired_partitions": {
+            "type": "integer",
+            "title": "Desired Partitions"
+          },
+          "desired_replication_factor": {
+            "type": "integer",
+            "title": "Desired Replication Factor"
+          },
+          "partitions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partitions"
+          },
+          "replication_factor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replication Factor"
+          },
+          "config": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Config"
+          },
+          "drift": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Drift"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "source",
+          "exists",
+          "desired_partitions",
+          "desired_replication_factor"
+        ],
+        "title": "TopicStateResponse",
+        "description": "What the broker holds for one topic, against what its source asks for."
+      },
+      "TopicStatusResponse": {
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "title": "Reachable",
+            "description": "False when the broker could not be read at all"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Why the broker could not be read; null when it could"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicStateResponse"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reachable"
+        ],
+        "title": "TopicStatusResponse",
+        "description": "Status for every topic the sources in scope imply."
+      },
+      "TopicUpdateResponse": {
+        "properties": {
+          "altered": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Altered"
+          },
+          "widened": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Widened"
+          },
+          "unchanged": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unchanged"
+          },
+          "absent": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Absent"
+          },
+          "refused": {
+            "items": {
+              "$ref": "#/components/schemas/TopicFailure"
+            },
+            "type": "array",
+            "title": "Refused"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/TopicFailure"
+            },
+            "type": "array",
+            "title": "Failed"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TopicUpdateResponse",
+        "description": "Outcome of a converge pass.\n\n``refused`` is what DFE declined to do (a partition decrease, a replication\nfactor change); ``failed`` is what the broker rejected. They are different\nproblems with different fixes, so they are different lists."
+      },
       "TransportFacts": {
         "properties": {
           "default": {
@@ -30564,6 +31156,42 @@
             ],
             "title": "Display Name",
             "description": "Human-readable label"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id",
+            "description": "OIDC client ID (not a secret)"
+          },
+          "client_id_env": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id Env",
+            "description": "Env var name for OIDC client ID"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret",
+            "description": "Rotate the RP client secret. Write-only: it goes to the secret store and only its path is kept in config."
           },
           "client_secret_env": {
             "anyOf": [

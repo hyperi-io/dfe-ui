@@ -13,6 +13,9 @@ export const groupResolutionRequestSchema = z.object({
   client_secret_env: z.string(),
   api_token_env: z.string(),
   okta_domain: z.string(),
+  service_account_json: z.string(),
+  client_secret: z.string(),
+  api_token: z.string(),
 });
 
 export const DEFAULT_GROUP_RESOLUTION: z.infer<
@@ -29,6 +32,9 @@ export const DEFAULT_GROUP_RESOLUTION: z.infer<
   client_secret_env: '',
   api_token_env: '',
   okta_domain: '',
+  service_account_json: '',
+  client_secret: '',
+  api_token: '',
 };
 
 export const createUpdateOidcProviderSchema = z.object({
@@ -42,10 +48,12 @@ export const createUpdateOidcProviderSchema = z.object({
   type: z.enum(['google', 'entra_id', 'okta', 'generic']),
   display_name: z.string(),
   issuer: z.string(),
-  client_id_env: z.string(),
-  client_secret_env: z.string(),
   groups: groupResolutionRequestSchema.optional(),
   scopes: z.string().optional(),
+  client_id: z.string(),
+  client_id_env: z.string(),
+  client_secret: z.string(),
+  client_secret_env: z.string(),
 });
 
 export type CreateUpdateOidcProviderFormData = z.infer<
