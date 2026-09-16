@@ -833,6 +833,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/available-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Available Org Ids
+         * @description Tenant ids the deployment's data actually carries (admin only).
+         *
+         *     Suggestions for the org form's Organisation IDs field, so an operator picks
+         *     an id that matches rows rather than typing one that matches none. Declared
+         *     above ``/{name}`` so the literal path wins the match.
+         */
+        get: operations["available_org_ids_api_v1_orgs_available_ids_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{name}": {
         parameters: {
             query?: never;
@@ -5603,6 +5627,19 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** AvailableOrgIdsResponse */
+        AvailableOrgIdsResponse: {
+            /**
+             * Database
+             * @description Data database the ids were read from
+             */
+            database: string;
+            /**
+             * Org Ids
+             * @description Distinct _org_id values present across that database's tables
+             */
+            org_ids?: string[];
+        };
         /**
          * BackingServiceConfig
          * @description A backing service's deploy configuration AS DECLARED, not as observed.
@@ -5909,6 +5946,11 @@ export interface components {
              * @description The source families a source-bound instance of this app can poll; a fetcher-based source's fetcher.source_type must be one of them
              */
             source_types?: string[];
+            /**
+             * Transform Engine
+             * @description The engine name a source writes in transform.engine to select this app, or null when the app is not a transform. Derived from the same catalogue rule the write path validates against, so a picker reading this field and the validator cannot disagree.
+             */
+            transform_engine?: string | null;
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
@@ -15464,6 +15506,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    available_org_ids_api_v1_orgs_available_ids_get: {
+        parameters: {
+            query?: {
+                /** @description Most tenant ids to return -- a suggestion list, not an export */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailableOrgIdsResponse"];
                 };
             };
             /** @description Validation Error */
