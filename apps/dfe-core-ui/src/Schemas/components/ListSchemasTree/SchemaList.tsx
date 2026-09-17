@@ -9,6 +9,9 @@ import {
   useTransformMetaSchemaToTree,
 } from './hooks/useTransformMetaSchemaToTree';
 
+const META_ROOT_PATH_SEGMENTS = ['meta'];
+const EMPTY_PATH_SEGMENTS: string[] = [];
+
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
     data: { items: metaSchemas, objects: schemaObjectsResponse },
@@ -45,6 +48,11 @@ export const SchemaList = ({ className }: { className?: string }) => {
       selectedSchemaPath,
       selectedSchemaVersion,
       expandTreeNode,
+      // Meta-only view roots the tree at children.meta, but schema.name / selection
+      // still include the meta/ prefix — keep folder path segments aligned.
+      rootPathSegments: hasOnlyMetaSchemas
+        ? META_ROOT_PATH_SEGMENTS
+        : EMPTY_PATH_SEGMENTS,
     });
 
   const expandedKeysForSelection = useMemo(

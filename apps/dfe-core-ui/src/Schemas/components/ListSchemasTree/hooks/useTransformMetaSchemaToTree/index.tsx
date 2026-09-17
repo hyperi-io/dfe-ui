@@ -44,6 +44,21 @@ export const getExpandedKeysForSchemaSelection = (
   return keys;
 };
 
+/** True when the selected schema lives in this folder or is nested under it. */
+export const isSchemaPathUnderFolder = (
+  selectedSchemaPath: string | null,
+  folderSegments: string[],
+) => {
+  if (!selectedSchemaPath || folderSegments.length === 0) {
+    return false;
+  }
+  const folderPath = folderSegments.join('/');
+  return (
+    selectedSchemaPath === folderPath ||
+    selectedSchemaPath.startsWith(`${folderPath}/`)
+  );
+};
+
 const buildVersionChildren = (
   schema: NonNullable<TSchemaListResponse['objects']['items']>[number],
   setSelectedSchema: ({
@@ -151,10 +166,7 @@ const schemaSummaryToTreeData = ({
               schema_version: schema.current,
             });
           }}
-          selected={
-            selectedSchemaPath === schema.name &&
-            selectedSchemaVersion === schema.current
-          }
+          selected={selectedSchemaPath === schema.name}
           actions={
             <>
               <CloneSchemaModal
@@ -217,6 +229,7 @@ const schemaSummaryToTreeData = ({
           icon={folderIcon}
           title={segment}
           onClick={() => expandTreeNode(folderKey)}
+          selected={isSchemaPathUnderFolder(selectedSchemaPath, nextSegments)}
         />
       ),
       children: nested,
@@ -232,6 +245,7 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaPath,
   selectedSchemaVersion,
   expandTreeNode,
+  rootPathSegments = [],
 }: {
   schemaObjects: TSchemaListResponse['objects'];
   setSelectedSchema: ({
@@ -244,6 +258,8 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaPath: string | null;
   selectedSchemaVersion: string | null;
   expandTreeNode: (key: string) => void;
+  /** Prefix for folder keys when the tree is rooted below the full schema path (e.g. meta-only view). */
+  rootPathSegments?: string[];
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
@@ -252,7 +268,7 @@ export const useTransformMetaSchemaToTree = ({
     () =>
       schemaSummaryToTreeData({
         node: schemaObjects,
-        pathSegments: [],
+        pathSegments: rootPathSegments,
         setSelectedSchema,
         selectedSchemaPath,
         selectedSchemaVersion,
@@ -261,6 +277,7 @@ export const useTransformMetaSchemaToTree = ({
       }),
     [
       schemaObjects,
+      rootPathSegments,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,

@@ -1,4 +1,5 @@
 import { DeleteSchemaVersionModal } from '@/Schemas/components/DeleteSchemaVersionModal';
+import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
 import {
   TSchemaListResponse,
   TSchemaSummary,
@@ -11,16 +12,16 @@ import {
   useTransformMetaSchemaToTree,
 } from '.';
 
-const findByType = (
+const findByType = <P extends object>(
   node: ReactNode,
   type: unknown,
-): ReactElement | undefined => {
+): ReactElement<P> | undefined => {
   if (node == null || typeof node === 'boolean') {
     return undefined;
   }
   if (Array.isArray(node)) {
     for (const child of node) {
-      const found = findByType(child, type);
+      const found = findByType<P>(child, type);
       if (found) {
         return found;
       }
@@ -31,12 +32,12 @@ const findByType = (
     return undefined;
   }
   if (node.type === type) {
-    return node;
+    return node as ReactElement<P>;
   }
   const props = node.props as Record<string, unknown>;
   return (
-    findByType(props.children as ReactNode, type) ??
-    findByType(props.actions as ReactNode, type)
+    findByType<P>(props.children as ReactNode, type) ??
+    findByType<P>(props.actions as ReactNode, type)
   );
 };
 
@@ -308,5 +309,131 @@ describe('useTransformMetaSchemaToTree', () => {
     expect(
       findByType(schemaNode.title as ReactElement, DeleteSchemaVersionModal),
     ).toBeUndefined();
+  });
+
+  it('highlights the schema row when a non-current version is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformMetaSchemaToTree({
+        schemaObjects: {
+          items: [
+            baseSchema({
+              name: 'custom.schema',
+              versions: ['v1', 'v2'],
+              current: 'v1',
+            }),
+          ],
+        },
+        setSelectedSchema: vi.fn(),
+        selectedSchemaPath: 'custom.schema',
+        selectedSchemaVersion: 'v2',
+        expandTreeNode: vi.fn(),
+      }),
+    );
+
+    const label = findByType<{ selected?: boolean }>(
+      result.current.tree[0].title as ReactElement,
+      TreeInteractiveLabel,
+    );
+    expect(label?.props.selected).toBe(true);
+  });
+
+  it('highlights ancestor folders when a nested schema is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformMetaSchemaToTree({
+        schemaObjects: {
+          children: {
+            azure: {
+              children: {
+                activity_log: {
+                  items: [
+                    baseSchema({
+                      name: 'azure/activity_log/schema1',
+                      versions: ['v1', 'v2'],
+                      current: 'v1',
+                    }),
+                  ],
+                },
+              },
+            },
+          },
+        },
+        setSelectedSchema: vi.fn(),
+        selectedSchemaPath: 'azure/activity_log/schema1',
+        selectedSchemaVersion: 'v2',
+        expandTreeNode: vi.fn(),
+      }),
+    );
+
+    const azureFolder = result.current.tree[0];
+    const activityLogFolder = azureFolder.children![0];
+    const schemaNode = activityLogFolder.children![0];
+
+    expect(
+      findByType<{ selected?: boolean }>(
+        azureFolder.title as ReactElement,
+        TreeInteractiveLabel,
+      )?.props.selected,
+    ).toBe(true);
+    expect(
+      findByType<{ selected?: boolean }>(
+        activityLogFolder.title as ReactElement,
+        TreeInteractiveLabel,
+      )?.props.selected,
+    ).toBe(true);
+    expect(
+      findByType<{ selected?: boolean }>(
+        schemaNode.title as ReactElement,
+        TreeInteractiveLabel,
+      )?.props.selected,
+    ).toBe(true);
+  });
+
+  it('highlights folders when the meta root is stripped but schema paths still include meta/', () => {
+    // SchemaList passes children.meta as the tree root while selection keeps
+    // the full schema.name (meta/...). Folder segments must start with meta.
+    const { result } = renderHook(() =>
+      useTransformMetaSchemaToTree({
+        schemaObjects: {
+          children: {
+            test: {
+              children: {
+                test: {
+                  items: [
+                    baseSchema({
+                      name: 'meta/test/test/test',
+                      versions: ['1.0.0'],
+                      current: '1.0.0',
+                    }),
+                  ],
+                },
+              },
+            },
+          },
+        },
+        rootPathSegments: ['meta'],
+        setSelectedSchema: vi.fn(),
+        selectedSchemaPath: 'meta/test/test/test',
+        selectedSchemaVersion: '1.0.0',
+        expandTreeNode: vi.fn(),
+      }),
+    );
+
+    const outerFolder = result.current.tree[0];
+    const innerFolder = outerFolder.children![0];
+
+    expect(outerFolder.key).toBe('dir:meta.test');
+    expect(innerFolder.key).toBe('dir:meta.test.test');
+    expect(
+      findByType<{ selected?: boolean }>(
+        outerFolder.title as ReactElement,
+        TreeInteractiveLabel,
+      )?.props.selected,
+    ).toBe(true);
+    expect(
+      findByType<{ selected?: boolean }>(
+        innerFolder.title as ReactElement,
+        TreeInteractiveLabel,
+      )?.props.selected,
+    ).toBe(true);
   });
 });
