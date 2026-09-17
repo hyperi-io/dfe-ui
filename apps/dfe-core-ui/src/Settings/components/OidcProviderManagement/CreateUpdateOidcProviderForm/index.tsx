@@ -1,5 +1,5 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
@@ -111,12 +111,7 @@ export const CreateUpdateOidcProviderForm = ({
         </>
       )}
 
-      {error && (
-        <FormNotification
-          type="error"
-          text={error.message ?? 'An unexpected error occurred'}
-        />
-      )}
+      {error && <ApiErrorNotification error={error} />}
 
       <Form.Item className="flex justify-end col-span-2">
         {hasReset && (

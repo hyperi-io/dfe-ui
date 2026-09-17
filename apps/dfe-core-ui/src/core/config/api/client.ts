@@ -161,11 +161,13 @@ export function createApiClient(config: ApiClientConfig) {
       throw new ApiError(res.status, res.statusText, detail);
     }
 
-    // 204 No Content has an empty body - do not attempt to parse JSON
-    if (res.status === 204) {
-      return undefined as unknown as Promise<
-        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-      >;
+    // The browser follows the proxy's login redirect itself, so a response that
+    // was redirected answered for a request the engine never saw.
+    if (res.redirected) {
+      throw new ApiError(res.status, res.statusText, {
+        code: 'invalid_response',
+        message: `The request was redirected to ${res.url} and never reached the engine.`,
+      });
     }
 
     const contentType = res.headers.get('Content-Type');
@@ -175,9 +177,19 @@ export function createApiClient(config: ApiClientConfig) {
       >;
     }
 
-    return undefined as unknown as Promise<
-      DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-    >;
+    // Every engine 2xx is JSON or an empty body, so a page here is the proxy
+    // answering in its place.
+    const text = await res.text();
+    if (text.trim() === '') {
+      return undefined as unknown as Promise<
+        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
+      >;
+    }
+
+    throw new ApiError(res.status, res.statusText, {
+      code: 'invalid_response',
+      message: `The API answered ${res.status} with ${contentType ?? 'no content type'} instead of JSON, so the request never reached the engine.`,
+    });
   }
 
   return {
@@ -264,11 +276,19 @@ export class ApiError extends Error {
   }
 }
 
+/** The engine's FieldError: which field was refused and why. */
+export type ApiErrorFieldDetail = {
+  /** Dotted path to the invalid field, empty when the whole body was refused. */
+  field?: string;
+  message: string;
+  code?: string;
+};
+
 /** The engine's ErrorResponse: a machine-readable code beside the prose. */
 export type ApiErrorResponseBody = {
   code?: string;
   message: string;
-  errors?: { message: string }[];
+  errors?: ApiErrorFieldDetail[];
   context?: Record<string, unknown> | null;
 };
 
@@ -286,6 +306,23 @@ export function getApiErrorResponseBody(
     return null;
   }
   return detail as ApiErrorResponseBody;
+}
+
+/**
+ * The field-level lines behind the summary, each prefixed by the field it names.
+ *
+ * The summary alone is often a count - "3 validation error(s)" - so dropping
+ * this array leaves the user with no way to know which field the engine
+ * refused.
+ */
+export function getApiErrorFieldMessages(error: unknown): string[] {
+  const errors = getApiErrorResponseBody(error)?.errors;
+  if (!Array.isArray(errors)) return [];
+  return errors
+    .filter((detail) => typeof detail?.message === 'string' && detail.message)
+    .map((detail) =>
+      detail.field ? `${detail.field}: ${detail.message}` : detail.message,
+    );
 }
 
 /** A write refused because the resource moved since it was read. */

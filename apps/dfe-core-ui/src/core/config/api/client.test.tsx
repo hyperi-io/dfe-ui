@@ -12,6 +12,7 @@ import {
 import {
   ApiError,
   createApiClient,
+  getApiErrorFieldMessages,
   getApiErrorResponseBody,
   getApiWriteConflict,
   getErrorMessage,
@@ -454,5 +455,92 @@ describe('getApiWriteConflict', () => {
   test('ignores anything that is not an ApiError', () => {
     expect(getApiWriteConflict(new Error('offline'))).toBeNull();
     expect(getApiWriteConflict(null)).toBeNull();
+  });
+});
+
+const ORGS_URL = `${BASE_URL}/api/v1/orgs`;
+const newOrg = { name: 'acme', display_name: 'Acme' };
+
+describe('a 2xx that is not JSON', () => {
+  // The proxy bounces an engine call on the UI host to the login page, and a
+  // 200 carrying that page used to read as a write the engine had accepted.
+  test('the login page is a failure, not a write that worked', async () => {
+    server.use(http.post(ORGS_URL, () => HttpResponse.html('<html>Sign in')));
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const write = client.post('/api/v1/orgs', { body: newOrg });
+
+    await expect(write).rejects.toThrow(ApiError);
+    await expect(write).rejects.toThrow(/never reached the engine/);
+  });
+
+  // The browser follows the proxy's 307 itself and reports it on the response
+  // it hands back, which is the only place the client can see it.
+  test('a followed redirect is a failure whatever it answers with', async () => {
+    const followedToLogin = vi.fn().mockResolvedValue(
+      Object.defineProperties(
+        HttpResponse.json({ ok: true }) as unknown as Response,
+        {
+          redirected: { value: true },
+          url: { value: `${BASE_URL}/login` },
+        },
+      ),
+    );
+
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      fetch: followedToLogin,
+    });
+    const write = client.post('/api/v1/orgs', { body: newOrg });
+
+    await expect(write).rejects.toThrow(ApiError);
+    await expect(write).rejects.toThrow(/never reached the engine/);
+  });
+
+  // A 200 with nothing in it is an honest empty answer, unlike a 200 with a page
+  // in it, so it must keep resolving.
+  test('an empty body still resolves', async () => {
+    server.use(
+      http.delete(
+        `${BASE_URL}/api/v1/sources/my-source`,
+        () => new HttpResponse(null, { status: 200 }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const data = await client.delete('/api/v1/sources/{name}', {
+      pathParams: { name: 'my-source' },
+    });
+
+    expect(data).toBeUndefined();
+  });
+});
+
+describe('getApiErrorFieldMessages', () => {
+  test('names the field each line belongs to', () => {
+    const lines = getApiErrorFieldMessages(
+      apiError(422, {
+        code: 'validation_error',
+        message: '2 validation error(s)',
+        errors: [
+          { field: 'name', message: 'Name is required', code: 'value_error' },
+          { field: '', message: 'At least one column is required' },
+        ],
+      }),
+    );
+
+    expect(lines).toEqual([
+      'name: Name is required',
+      'At least one column is required',
+    ]);
+  });
+
+  test('returns nothing when the engine sent no field detail', () => {
+    expect(
+      getApiErrorFieldMessages(
+        apiError(409, { code: 'conflict', message: 'already exists' }),
+      ),
+    ).toEqual([]);
+    expect(getApiErrorFieldMessages(new Error('offline'))).toEqual([]);
   });
 });

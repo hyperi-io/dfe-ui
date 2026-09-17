@@ -1,5 +1,5 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -135,12 +135,7 @@ export const CreateUpdateHuntForm = ({
         <Input placeholder="Enter cron expression" />
       </Form.Item>
 
-      {error && (
-        <FormNotification
-          type="error"
-          text={error?.message ?? 'An unexpected error occurred'}
-        />
-      )}
+      {error && <ApiErrorNotification error={error} />}
 
       <div className="flex gap-x-2 ml-auto! mt-2">
         <Button

@@ -1,3 +1,4 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { TabLabel } from '@/core/components/TabLabel';
@@ -203,10 +204,7 @@ export const CreateUpdateSourceFormBase = ({
 
       {error && (
         <Form.Item>
-          <FormNotification
-            type="error"
-            text={error.message ?? 'An unexpected error occurred'}
-          />
+          <ApiErrorNotification error={error} />
         </Form.Item>
       )}
 
