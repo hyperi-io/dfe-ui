@@ -65,9 +65,20 @@ const Harness = ({
   );
 };
 
+const openOverrideDefaults = async (
+  user: ReturnType<typeof userEvent.setup>,
+) => {
+  await user.click(
+    await screen.findByRole('button', { name: 'Override Defaults' }),
+  );
+};
+
 describe('MetaSchemaForm TTL Days', () => {
   it('populates a new source with the DFE default', async () => {
+    const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await openOverrideDefaults(user);
 
     const ttl = await screen.findByLabelText(
       /^TTL Days/,
@@ -176,7 +187,10 @@ const withSchema = (engine: string) => ({
 
 describe('MetaSchemaForm Engine', () => {
   it('populates a new source with the DFE default', async () => {
+    const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await openOverrideDefaults(user);
 
     await waitFor(
       () => expect(screen.getByText('MergeTree')).toBeInTheDocument(),
@@ -188,6 +202,8 @@ describe('MetaSchemaForm Engine', () => {
   it('offers the registry engines and marks a picked one as an override', async () => {
     const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await openOverrideDefaults(user);
 
     const engine = await screen.findByLabelText(
       /^Engine/,

@@ -35,10 +35,27 @@ export const DefaultsSection = ({
   const { data: defaults, isLoading, error } = useFetchSystemDefaults();
   const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
 
-  const formValues = form.getFieldsValue();
-  const hasOverrides = hasOverridesHelper({ formValues, defaults });
+  const headerTypeInitialValue = Form.useWatch(['header', 'type'], form);
+  const headerVersionInitialValue = Form.useWatch(['header', 'version'], form);
+  const ttlDaysInitialValue = Form.useWatch(['schema', 'ttl_days'], form);
+  const engineInitialValue = Form.useWatch(['schema', 'engine'], form);
 
-  const [isEditing, setIsEditing] = useState(hasOverrides);
+  const hasOverrides = hasOverridesHelper({
+    formValues: {
+      header: {
+        type: headerTypeInitialValue,
+        version: headerVersionInitialValue,
+      },
+      schema: {
+        ttl_days: ttlDaysInitialValue,
+        engine: engineInitialValue,
+      },
+    },
+    defaults,
+  });
+  // null = follow hasOverrides; once the user toggles, keep their choice
+  const [manualEditing, setManualEditing] = useState<boolean | null>(null);
+  const isEditing = manualEditing ?? hasOverrides;
 
   const [commonHeaderVersions, setCommonHeaderVersions] = useState<string[]>(
     [],
@@ -75,12 +92,6 @@ export const DefaultsSection = ({
     );
   }, [commonHeaderVersions]);
 
-  // Default overrides
-  const headerTypeInitialValue = Form.useWatch(['header', 'type'], form);
-  const headerVersionInitialValue = Form.useWatch(['header', 'version'], form);
-  const ttlDaysInitialValue = Form.useWatch(['schema', 'ttl_days'], form);
-  const engineInitialValue = Form.useWatch(['schema', 'engine'], form);
-
   return (
     <div
       className={cn(
@@ -95,7 +106,7 @@ export const DefaultsSection = ({
         <Button
           htmlType="button"
           type="default"
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => setManualEditing(!isEditing)}
         >
           Override Defaults
         </Button>
@@ -122,7 +133,7 @@ export const DefaultsSection = ({
                */
               validateTrigger={['onBlur']}
               {...setInitialValue(
-                formValues?.header?.type,
+                headerTypeInitialValue,
                 defaults?.default_header_type,
               )}
               label={
@@ -143,7 +154,7 @@ export const DefaultsSection = ({
               className="w-full"
               name={['header', 'version']}
               {...setInitialValue(
-                formValues?.header?.version,
+                headerVersionInitialValue,
                 defaults?.default_header_version,
               )}
               label={
@@ -171,7 +182,7 @@ export const DefaultsSection = ({
               className="w-full"
               name={['schema', 'ttl_days']}
               {...setInitialValue(
-                formValues?.schema?.ttl_days,
+                ttlDaysInitialValue,
                 defaults?.default_ttl_days,
               )}
               label={
@@ -198,10 +209,7 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['schema', 'engine']}
-              {...setInitialValue(
-                formValues?.schema?.engine,
-                defaults?.default_engine,
-              )}
+              {...setInitialValue(engineInitialValue, defaults?.default_engine)}
               label={
                 <span className="flex items-center gap-2">
                   Engine{' '}

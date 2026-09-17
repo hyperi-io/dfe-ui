@@ -1,5 +1,4 @@
 import { TSystemDefaults } from '@/core/hooks/useFetchSystemDefaults/types';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 
 export const isDefaultOveridden = (
   initialValue: string | number | null | undefined,
@@ -29,42 +28,29 @@ export const hasOverrides = ({
   formValues,
   defaults,
 }: {
-  formValues: CreateUpdateSourceFormData;
+  formValues: {
+    header?: { type?: string | null; version?: string | null };
+    schema?: { ttl_days?: number | null; engine?: string | null };
+  };
   defaults: TSystemDefaults | null | undefined;
 }) => {
+  if (!defaults) {
+    return false;
+  }
+
   const {
     default_header_type,
     default_header_version,
     default_ttl_days,
     default_engine,
-  } = defaults ?? {};
+  } = defaults;
   const { header: { type, version } = {}, schema: { ttl_days, engine } = {} } =
     formValues;
 
-  console.log({
-    type,
-    version,
-    ttl_days,
-    engine,
-  });
-  console.log({
-    default_header_type,
-    default_header_version,
-    default_ttl_days,
-    default_engine,
-  });
-  const hasOverride =
-    type !== default_header_type ||
-    version !== default_header_version ||
-    ttl_days !== default_ttl_days ||
-    engine !== default_engine;
-
-  console.log({ hasOverride });
-
   return (
-    type !== default_header_type ||
-    version !== default_header_version ||
-    ttl_days !== default_ttl_days ||
-    engine !== default_engine
+    isDefaultOveridden(type, default_header_type) ||
+    isDefaultOveridden(version, default_header_version) ||
+    isDefaultOveridden(ttl_days, default_ttl_days) ||
+    isDefaultOveridden(engine, default_engine)
   );
 };
