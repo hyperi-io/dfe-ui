@@ -7,10 +7,7 @@ import {
 import { render, renderHook } from '@testing-library/react';
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  getExpandedKeysForSchemaSelection,
-  useTransformMetaSchemaToTree,
-} from '.';
+import { useTransformMetaSchemaToTree } from '.';
 
 const findByType = <P extends object>(
   node: ReactNode,
@@ -67,30 +64,6 @@ const expectTreeNodeTitle = (
   const { container } = render(<>{title}</>);
   expect(container).toHaveTextContent(expectedText);
 };
-
-describe('getExpandedKeysForSchemaSelection', () => {
-  it('returns folder keys and schema key for a nested path with a version', () => {
-    expect(
-      getExpandedKeysForSchemaSelection('azure/activity_log/schema1', 'v1'),
-    ).toEqual([
-      'dir:azure',
-      'dir:azure.activity_log',
-      'schema:azure/activity_log/schema1',
-    ]);
-  });
-
-  it('returns only folder keys when no version is selected', () => {
-    expect(
-      getExpandedKeysForSchemaSelection('azure/activity_log/schema1', null),
-    ).toEqual(['dir:azure', 'dir:azure.activity_log']);
-  });
-
-  it('returns schema key only for a root-level schema with a version', () => {
-    expect(getExpandedKeysForSchemaSelection('solo.schema', 'v1')).toEqual([
-      'schema:solo.schema',
-    ]);
-  });
-});
 
 describe('useTransformMetaSchemaToTree', () => {
   it('returns an empty tree for empty objects', () => {

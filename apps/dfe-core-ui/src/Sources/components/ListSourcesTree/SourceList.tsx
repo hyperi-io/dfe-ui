@@ -4,10 +4,7 @@ import { ErrorList } from '@/Sources/components/ListSourcesTree/ErrorList';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  getExpandedKeysForSourceSelection,
-  useTransformSourceToTree,
-} from './hooks/useTransformSourceToTree';
+import { useTransformSourceToTree } from './hooks/useTransformSourceToTree';
 
 export const SourceList = ({ className }: { className?: string }) => {
   const {
@@ -40,18 +37,9 @@ export const SourceList = ({ className }: { className?: string }) => {
       refetchSources,
     });
 
-  const expandedKeysForSelection = useMemo(
-    () =>
-      getExpandedKeysForSourceSelection(
-        selectedSourceName,
-        selectedSourceVersion,
-      ),
-    [selectedSourceName, selectedSourceVersion],
-  );
-
   const expandedKeys = useMemo(
-    () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
-    [userExpandedKeys, expandedKeysForSelection],
+    () => [...new Set([...userExpandedKeys])],
+    [userExpandedKeys],
   );
 
   if (sources.length === 0) {

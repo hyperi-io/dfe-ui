@@ -4,10 +4,7 @@ import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  getExpandedKeysForSchemaSelection,
-  useTransformMetaSchemaToTree,
-} from './hooks/useTransformMetaSchemaToTree';
+import { useTransformMetaSchemaToTree } from './hooks/useTransformMetaSchemaToTree';
 
 const META_ROOT_PATH_SEGMENTS = ['meta'];
 const EMPTY_PATH_SEGMENTS: string[] = [];
@@ -55,18 +52,9 @@ export const SchemaList = ({ className }: { className?: string }) => {
         : EMPTY_PATH_SEGMENTS,
     });
 
-  const expandedKeysForSelection = useMemo(
-    () =>
-      getExpandedKeysForSchemaSelection(
-        selectedSchemaPath,
-        selectedSchemaVersion,
-      ),
-    [selectedSchemaPath, selectedSchemaVersion],
-  );
-
   const expandedKeys = useMemo(
-    () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
-    [userExpandedKeys, expandedKeysForSelection],
+    () => [...new Set([...userExpandedKeys])],
+    [userExpandedKeys],
   );
 
   // An empty list is only empty once it has loaded. Without this the first

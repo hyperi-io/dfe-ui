@@ -11,6 +11,8 @@ import { useMemo } from 'react';
 
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
+/** Stable default so useMemo does not invalidate when the prop is omitted. */
+const EMPTY_PATH_SEGMENTS: string[] = [];
 
 /** Ant Design Tree keys must be globally unique; folder and schema paths can share the same string. */
 export const folderTreeKey = (pathSegments: string[]) =>
@@ -20,29 +22,6 @@ export const schemaTreeKey = (schemaPath: string) => `schema:${schemaPath}`;
 
 export const versionTreeKey = (schemaPath: string, version: string) =>
   `${schemaTreeKey(schemaPath)}@${version}`;
-
-/** Folder keys (dot-separated) plus schema key when a version is selected. */
-export const getExpandedKeysForSchemaSelection = (
-  schemaPath: string | null,
-  schemaVersion: string | null,
-): string[] => {
-  if (!schemaPath) {
-    return [];
-  }
-
-  const segments = schemaPath.split('/');
-  const keys: string[] = [];
-
-  for (let i = 0; i < segments.length - 1; i++) {
-    keys.push(folderTreeKey(segments.slice(0, i + 1)));
-  }
-
-  if (schemaVersion) {
-    keys.push(schemaTreeKey(schemaPath));
-  }
-
-  return keys;
-};
 
 /** True when the selected schema lives in this folder or is nested under it. */
 export const isSchemaPathUnderFolder = (
@@ -245,7 +224,7 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaPath,
   selectedSchemaVersion,
   expandTreeNode,
-  rootPathSegments = [],
+  rootPathSegments = EMPTY_PATH_SEGMENTS,
 }: {
   schemaObjects: TSchemaListResponse['objects'];
   setSelectedSchema: ({

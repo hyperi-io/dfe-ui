@@ -41,29 +41,6 @@ export const sourceTreeKey = (sourcePath: string) => `source:${sourcePath}`;
 export const versionTreeKey = (sourcePath: string, version: string) =>
   `${sourceTreeKey(sourcePath)}@${version}`;
 
-/** Folder keys (dot-separated) plus source key when a version is selected. */
-export const getExpandedKeysForSourceSelection = (
-  sourcePath: string | null,
-  sourceVersion: string | null,
-): string[] => {
-  if (!sourcePath) {
-    return [];
-  }
-
-  const segments = sourcePath.split('/');
-  const keys: string[] = [];
-
-  for (let i = 0; i < segments.length - 1; i++) {
-    keys.push(folderTreeKey(segments.slice(0, i + 1)));
-  }
-
-  if (sourceVersion) {
-    keys.push(sourceTreeKey(sourcePath));
-  }
-
-  return keys;
-};
-
 const buildVersionChildren = (
   source: NonNullable<TSourceSummary['items']>[number],
   setSelectedSource: ({
