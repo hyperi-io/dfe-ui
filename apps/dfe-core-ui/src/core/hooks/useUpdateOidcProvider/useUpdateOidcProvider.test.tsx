@@ -58,6 +58,8 @@ describe('.useUpdateOidcProvider', () => {
         issuer: 'issuer',
         client_id_env: 'client_id_env',
         client_secret_env: 'client_secret_env',
+        client_id: 'client_id',
+        client_secret_path: 'client_secret_path',
         groups: {
           mode: 'mode',
           claim_name: 'claim_name',
@@ -70,6 +72,9 @@ describe('.useUpdateOidcProvider', () => {
           client_secret_env: 'client_secret_env',
           api_token_env: 'api_token_env',
           okta_domain: 'okta_domain',
+          service_account_json_path: 'service_account_json_path',
+          client_secret_path: 'client_secret_path',
+          api_token_path: 'api_token_path',
         },
         created_at: 'created_at',
         last_sync_at: 'last_sync_at',

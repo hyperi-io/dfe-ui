@@ -84,6 +84,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
         created_at: 'string',
         last_sync_at: 'string',
         last_sync_status: 'string',
+        client_id: 'string',
+        client_secret_path: 'string',
         groups: {
           mode: 'string',
           claim_name: 'string',
@@ -96,6 +98,9 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
           client_secret_env: 'string',
           api_token_env: 'string',
           okta_domain: 'string',
+          service_account_json_path: 'string',
+          client_secret_path: 'string',
+          api_token_path: 'string',
         },
       };
 
