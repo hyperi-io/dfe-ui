@@ -1,6 +1,6 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { FieldMapSelect } from '@/core/components/FieldMapSelect';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, FormProps, Input } from 'antd';
@@ -95,10 +95,7 @@ export const CreateFieldMapForm = ({
 
       {error && (
         <Form.Item>
-          <FormNotification
-            type="error"
-            text={error.message ?? 'An unexpected error occurred'}
-          />
+          <ApiErrorNotification error={error} />
         </Form.Item>
       )}
 

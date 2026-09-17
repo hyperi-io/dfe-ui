@@ -1,7 +1,7 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { ContentCard } from '@/core/components/ContentCard';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -15,6 +15,7 @@ import z from 'zod';
 import { AdvancedSettings } from './AdvancedSettings';
 import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
+import { SqlValidationErrors } from './SqlValidationErrors';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
@@ -90,6 +91,11 @@ const CreateUpdateRuleFormBase = ({
     validateRule({ sql: userSql ?? '' });
   };
 
+  // The engine sets valid only when errors is empty, so a pass has nothing to show.
+  const sqlValidationErrors = validateRuleResponse?.valid
+    ? []
+    : (validateRuleResponse?.errors ?? []);
+
   useEffect(() => {
     resetValidateRule();
   }, [userSql, resetValidateRule]);
@@ -124,12 +130,13 @@ const CreateUpdateRuleFormBase = ({
           />
         </Form.Item>
 
-        {error && (
-          <FormNotification
-            type="error"
-            text={error?.message ?? 'An unexpected error occurred'}
-          />
+        <SqlValidationErrors errors={sqlValidationErrors} />
+
+        {validateRuleError && (
+          <ApiErrorNotification error={validateRuleError} />
         )}
+
+        {error && <ApiErrorNotification error={error} />}
 
         <div className="flex gap-x-2 ml-auto! mt-2">
           <RbacProtected action={RbacProtected.rbacActions.rule_validate}>
@@ -137,11 +144,8 @@ const CreateUpdateRuleFormBase = ({
               <ValidateButton
                 validate={handleValidateRule}
                 loading={isValidateRulePending}
-                validationErrors={validateRuleResponse?.errors?.map(
-                  (error) => error.message,
-                )}
+                failed={sqlValidationErrors.length > 0 || !!validateRuleError}
                 success={validateRuleResponse?.valid}
-                error={validateRuleError?.message}
               />
             </RbacProtected.Unrestricted>
             <RbacProtected.Restricted
