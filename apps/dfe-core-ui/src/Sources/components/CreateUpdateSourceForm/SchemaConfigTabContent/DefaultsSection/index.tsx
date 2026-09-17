@@ -17,7 +17,11 @@ import { useFetchTableEngines } from '@/Sources/hooks/useFetchTableEngines';
 import { Button, FormInstance, InputNumber, Select } from 'antd';
 import { Rule } from 'antd/es/form';
 import { useCallback, useMemo, useState } from 'react';
-import { isDefaultOveridden } from './defaultSection.helpers';
+import {
+  hasOverrides as hasOverridesHelper,
+  isDefaultOveridden,
+  setInitialValue,
+} from './defaultSection.helpers';
 
 export const DefaultsSection = ({
   formValidation,
@@ -28,9 +32,13 @@ export const DefaultsSection = ({
   form: FormInstance<CreateUpdateSourceFormData>;
   className?: string;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
   const { data: defaults, isLoading, error } = useFetchSystemDefaults();
   const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
+
+  const formValues = form.getFieldsValue();
+  const hasOverrides = hasOverridesHelper({ formValues, defaults });
+
+  const [isEditing, setIsEditing] = useState(hasOverrides);
 
   const [commonHeaderVersions, setCommonHeaderVersions] = useState<string[]>(
     [],
@@ -101,7 +109,7 @@ export const DefaultsSection = ({
         />
       )}
 
-      {!isLoading && !error && (
+      {!isLoading && !error && defaults && (
         <div
           className={cn('grid grid-cols-2 gap-4', !isEditing ? 'hidden' : '')}
         >
@@ -113,6 +121,10 @@ export const DefaultsSection = ({
                * Validate on blur to prevent form submission when clearing the meta schema
                */
               validateTrigger={['onBlur']}
+              {...setInitialValue(
+                formValues?.header?.type,
+                defaults?.default_header_type,
+              )}
               label={
                 <Form.Label required>
                   Header Type{' '}
@@ -130,6 +142,10 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['header', 'version']}
+              {...setInitialValue(
+                formValues?.header?.version,
+                defaults?.default_header_version,
+              )}
               label={
                 <Form.Label required>
                   Header Version{' '}
@@ -154,12 +170,16 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['schema', 'ttl_days']}
+              {...setInitialValue(
+                formValues?.schema?.ttl_days,
+                defaults?.default_ttl_days,
+              )}
               label={
                 <span className="flex items-center gap-2">
                   TTL Days
                   {isDefaultOveridden(
                     ttlDaysInitialValue,
-                    defaults?.default_ttl_days?.toString(),
+                    defaults?.default_ttl_days,
                   ) && <OverrideTag />}
                 </span>
               }
@@ -178,6 +198,10 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['schema', 'engine']}
+              {...setInitialValue(
+                formValues?.schema?.engine,
+                defaults?.default_engine,
+              )}
               label={
                 <span className="flex items-center gap-2">
                   Engine{' '}
