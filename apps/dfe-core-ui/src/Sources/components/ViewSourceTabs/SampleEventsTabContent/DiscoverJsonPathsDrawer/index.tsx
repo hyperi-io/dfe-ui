@@ -6,8 +6,8 @@ import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useCallback, useState } from 'react';
-import { MainSourcePromoteWorkflow } from './MainSourcePromoteWorkflow';
-import { NonMainSourcePromoteWorkflow } from './NonMainSourcePromoteWorkflow';
+import { MainSourcePromoteWizard } from './MainSourcePromoteWizard';
+import { NonMainSourcePromoteWizard } from './NonMainSourcePromoteWizard';
 
 const UNCOMMITTED_CLOSE_MESSAGE =
   'Field promotions have not been committed. Leave anyway and discard your review?';
@@ -73,14 +73,14 @@ export const DiscoverJsonPathsDrawer = ({
         destroyOnHidden
       >
         {isMainSource ? (
-          <MainSourcePromoteWorkflow
+          <MainSourcePromoteWizard
             selectedSourceName={selectedSourceName}
             selectedSourceVersion={selectedSourceVersion}
             fieldsToPromote={fieldsToPromote}
             onSuccess={closeDrawer}
           />
         ) : (
-          <NonMainSourcePromoteWorkflow
+          <NonMainSourcePromoteWizard
             selectedSourceName={selectedSourceName}
             selectedSourceVersion={selectedSourceVersion}
             fieldsToPromote={fieldsToPromote}

@@ -1,13 +1,13 @@
-import { PromoteJsonPaths } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer/PromoteJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { App, Tabs } from 'antd';
 import { useCallback, useState } from 'react';
 import { DiscoverJsonPathsDetails } from './DiscoverJsonPathsDetails';
+import { PromoteJsonPaths } from './PromoteJsonPathsDetails';
 
 type ActiveTab = 'discover' | 'review';
 
-export const MainSourcePromoteWorkflow = ({
+export const NonMainSourcePromoteWizard = ({
   selectedSourceName,
   selectedSourceVersion,
   fieldsToPromote,
