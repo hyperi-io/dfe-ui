@@ -269,6 +269,58 @@ describe('useTransformSourceToTree', () => {
     expect(getByText('receiver')).toBeInTheDocument();
   });
 
+  it('highlights the source row when its deployed version is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'syslog',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: 'syslog',
+        selectedSourceVersion: 'v1',
+        expandTreeNode: vi.fn(),
+        refetchSources,
+      }),
+    );
+
+    const { container } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(container.querySelector('.font-semibold')).toBeInTheDocument();
+  });
+
+  it('highlights the main source row when its deployed version is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'main',
+              resource_type: 'core',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+              origin: null,
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: 'main',
+        selectedSourceVersion: 'v1',
+        expandTreeNode: vi.fn(),
+        refetchSources,
+      }),
+    );
+
+    const { container } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(container.querySelector('.font-semibold')).toBeInTheDocument();
+  });
+
   it('shows no origin tag on a source the engine reports no origin for', () => {
     const { result } = renderHook(() =>
       useTransformSourceToTree({

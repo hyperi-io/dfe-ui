@@ -191,10 +191,7 @@ const sourceSummaryToTreeData = ({
                 source_version: mainSource.current,
               });
             }}
-            selected={
-              selectedSourceName === mainSource.name &&
-              selectedSourceVersion === mainSource.current
-            }
+            selected={selectedSourceName === mainSource.name}
             actions={
               <>
                 <Tooltip
@@ -276,10 +273,7 @@ const sourceSummaryToTreeData = ({
                 source_version: source.current,
               });
             }}
-            selected={
-              selectedSourceName === source.name &&
-              selectedSourceVersion === source.current
-            }
+            selected={selectedSourceName === source.name}
             actions={
               <>
                 <Tooltip
