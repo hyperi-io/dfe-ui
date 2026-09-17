@@ -135,6 +135,7 @@ export const API_CONFIG = Object.freeze({
     default: '/api/v1/apps',
     instances: '/api/v1/apps/{service}/instances',
     app: '/api/v1/apps/{service}/{instance}',
+    config: '/api/v1/apps/{service}/{instance}/config',
     scaling: '/api/v1/apps/{service}/{instance}/scaling',
     status: '/api/v1/apps/{service}/{instance}/status',
     metrics: '/api/v1/apps/{service}/{instance}/metrics',

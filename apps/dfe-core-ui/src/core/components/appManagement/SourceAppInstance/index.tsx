@@ -2,6 +2,7 @@
 
 import { AppFileSets } from '@/core/components/appManagement/AppFileSets';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
+import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { useCreateAppInstance } from '@/core/hooks/apps/instances/useCreateAppInstance';
@@ -152,6 +153,13 @@ export const SourceAppInstance = ({
                 },
               ]
             : []),
+          {
+            key: 'settings',
+            label: 'Settings',
+            children: (
+              <AppConfigCard service={app.service} instance={source} />
+            ),
+          },
         ]}
       />
     </SectionCard>
