@@ -22,6 +22,7 @@ describe('.useFetchSystemVersion', () => {
     const response: TSystemVersionResponse = {
       stack: '2.2.0-rc.13',
       engine: '1.19.15',
+      schemas: '1.9.4',
       ui: null,
       source: 'deploy-repo',
       python_version: 'python_version',

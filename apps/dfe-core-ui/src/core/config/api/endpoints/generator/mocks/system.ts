@@ -17,6 +17,7 @@ export const system = {
         mockedResponse = {
           stack: '2.2.0-rc.13',
           engine: '1.19.15',
+          schemas: '1.9.4',
           // Null unless the deploy repo pins a UI version off the stack, which
           // is why the console falls back to its own build version.
           ui: null,

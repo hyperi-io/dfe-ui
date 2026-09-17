@@ -833,6 +833,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orgs/available-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Available Org Ids
+         * @description Tenant ids the deployment's data actually carries (admin only).
+         *
+         *     Suggestions for the org form's Organisation IDs field, so an operator picks
+         *     an id that matches rows rather than typing one that matches none. Declared
+         *     above ``/{name}`` so the literal path wins the match.
+         */
+        get: operations["available_org_ids_api_v1_orgs_available_ids_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orgs/{name}": {
         parameters: {
             query?: never;
@@ -1927,6 +1951,31 @@ export interface paths {
          *     the body carries versions only.
          */
         get: operations["get_version_api_v1_system_version_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/system/schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Schema Status
+         * @description What the last schema bootstrap pass did, object by object.
+         *
+         *     This is the operator's record of the schema apply, replacing the completed
+         *     ArgoCD Job the engine took over from. ``state`` is what readiness follows:
+         *     converged or observed is ready, failed leaves the pod up and NotReady with
+         *     the cause here.
+         */
+        get: operations["get_schema_status_api_v1_system_schema_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5603,6 +5652,19 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** AvailableOrgIdsResponse */
+        AvailableOrgIdsResponse: {
+            /**
+             * Database
+             * @description Data database the ids were read from
+             */
+            database: string;
+            /**
+             * Org Ids
+             * @description Distinct _org_id values present across that database's tables
+             */
+            org_ids?: string[];
+        };
         /**
          * BackingServiceConfig
          * @description A backing service's deploy configuration AS DECLARED, not as observed.
@@ -5909,6 +5971,11 @@ export interface components {
              * @description The source families a source-bound instance of this app can poll; a fetcher-based source's fetcher.source_type must be one of them
              */
             source_types?: string[];
+            /**
+             * Transform Engine
+             * @description The engine name a source writes in transform.engine to select this app, or null when the app is not a transform. Derived from the same catalogue rule the write path validates against, so a picker reading this field and the validator cannot disagree.
+             */
+            transform_engine?: string | null;
             /** File Sets */
             file_sets: components["schemas"]["FileSetSummary"][];
             /** Instances */
@@ -11069,6 +11136,132 @@ export interface components {
             /** Copy Directives */
             copy_directives?: string[];
         };
+        /**
+         * SchemaObjectStatus
+         * @description What the last pass did to one manifest object.
+         */
+        SchemaObjectStatus: {
+            /**
+             * Id
+             * @description The object's manifest id, e.g. data.main
+             */
+            id: string;
+            /**
+             * Kind
+             * @description database, table, materialized_view, view, role or topic
+             */
+            kind: string;
+            /**
+             * Object
+             * @description Database-qualified name, or topic:<name>
+             */
+            object: string;
+            /**
+             * Action
+             * @description created, altered, unchanged, refused or skipped
+             */
+            action: string;
+            /**
+             * Checksum
+             * @description sha256 of the normalised rendered statement
+             */
+            checksum: string;
+            /** Columns Added */
+            columns_added?: string[];
+            /**
+             * Drift
+             * @description Non-additive differences found; each one is why the change was refused.
+             */
+            drift?: string[];
+            /**
+             * Extra Columns
+             * @description Live columns the schema no longer declares. Reported, never actioned.
+             */
+            extra_columns?: string[];
+        };
+        /**
+         * SchemaStatusResponse
+         * @description The schema bootstrap phase's record of its last pass.
+         */
+        SchemaStatusResponse: {
+            /**
+             * State
+             * @description unknown, running, converged, observed or failed
+             */
+            state: string;
+            /**
+             * Ready
+             * @description Whether readiness may be reported on the schema check.
+             */
+            ready: boolean;
+            /**
+             * Converged
+             * @description Whether the manifest's objects are known to exist on this deployment.
+             */
+            converged: boolean;
+            /**
+             * Schemas Version
+             * @description dfe-schemas release the plan was rendered from
+             */
+            schemas_version: string;
+            /**
+             * Engine Version
+             * @description dfe-engine release that ran the pass
+             */
+            engine_version: string;
+            /**
+             * Topology
+             * @description single, replicated or replicated_on_cluster
+             */
+            topology: string;
+            /**
+             * Database
+             * @description The one database every DFE object lands in
+             */
+            database: string;
+            /**
+             * Holder
+             * @description Who held the bootstrap lease for this pass
+             */
+            holder: string;
+            /** Started At */
+            started_at: string;
+            /** Finished At */
+            finished_at: string;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /**
+             * Error
+             * @description Why the pass failed; empty when it did not.
+             */
+            error: string;
+            /**
+             * Counts
+             * @description One count per action
+             */
+            counts?: {
+                [key: string]: number;
+            };
+            /** Objects */
+            objects?: components["schemas"]["SchemaObjectStatus"][];
+            /**
+             * Refused
+             * @description Objects whose change was declined as drift, each named with the reason.
+             */
+            refused?: string[];
+            /**
+             * Overlay Refused
+             * @description Overlay objects refused for redefining a core path.
+             */
+            overlay_refused?: string[];
+            /** Topics Created */
+            topics_created?: string[];
+            /**
+             * Topics Skipped
+             * @description Why the topic set was skipped; empty when it was applied.
+             */
+            topics_skipped: string;
+        };
         /** SchemaSuggestRequest */
         SchemaSuggestRequest: {
             /** Source Name */
@@ -13142,6 +13335,11 @@ export interface components {
              * @description dfe-engine package version
              */
             engine: string;
+            /**
+             * Schemas
+             * @description dfe-schemas release the engine applies its schema from. The wheel rides inside the engine image, so this is the schema version this deployment is on.
+             */
+            schemas: string;
             /**
              * Ui
              * @description dfe-ui version when the deploy repo pins one off the certified stack.
@@ -15477,6 +15675,38 @@ export interface operations {
             };
         };
     };
+    available_org_ids_api_v1_orgs_available_ids_get: {
+        parameters: {
+            query?: {
+                /** @description Most tenant ids to return -- a suggestion list, not an export */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailableOrgIdsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_org_api_v1_orgs__name__get: {
         parameters: {
             query?: never;
@@ -17569,6 +17799,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    get_schema_status_api_v1_system_schema_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaStatusResponse"];
                 };
             };
         };
