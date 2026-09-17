@@ -22,6 +22,7 @@ describe('Sidebar footer version', () => {
         mockedResponse: {
           stack: '2.2.0-rc.13',
           engine: '1.19.12',
+          schemas: '1.9.4',
           ui: null,
           source: 'deploy-repo',
           python_version: '3.12.12',

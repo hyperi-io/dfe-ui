@@ -28,6 +28,7 @@ describe('SuiteVersion', () => {
         mockedResponse: {
           stack: '2.2.0-rc.13',
           engine: '1.19.12',
+          schemas: '1.9.4',
           ui: 'v1.20.0@sha256:abc',
           source: 'deploy-repo',
           python_version: '3.12.12',
@@ -63,6 +64,7 @@ describe('SuiteVersion', () => {
         mockedResponse: {
           stack: null,
           engine: '1.19.12',
+          schemas: '1.9.4',
           ui: null,
           source: 'engine',
           python_version: '3.12.12',
@@ -89,6 +91,7 @@ describe('SuiteVersion', () => {
         mockedResponse: {
           stack: '2.2.0-rc.13',
           engine: '1.19.12',
+          schemas: '1.9.4',
           ui: null,
           source: 'deploy-repo',
           python_version: '3.12.12',
