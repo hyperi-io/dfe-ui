@@ -16,11 +16,11 @@ import {
 import { useFetchTableEngines } from '@/Sources/hooks/useFetchTableEngines';
 import { Button, FormInstance, InputNumber, Select } from 'antd';
 import { Rule } from 'antd/es/form';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  buildUnsetDefaultsPatch,
   hasOverrides as hasOverridesHelper,
   isDefaultOveridden,
-  setInitialValue,
 } from './defaultSection.helpers';
 
 export const DefaultsSection = ({
@@ -34,21 +34,45 @@ export const DefaultsSection = ({
 }) => {
   const { data: defaults, isLoading, error } = useFetchSystemDefaults();
   const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
+  const defaultsAppliedRef = useRef(false);
 
-  const headerTypeInitialValue = Form.useWatch(['header', 'type'], form);
-  const headerVersionInitialValue = Form.useWatch(['header', 'version'], form);
-  const ttlDaysInitialValue = Form.useWatch(['schema', 'ttl_days'], form);
-  const engineInitialValue = Form.useWatch(['schema', 'engine'], form);
+  const headerType = Form.useWatch(['header', 'type'], form);
+  const headerVersion = Form.useWatch(['header', 'version'], form);
+  const ttlDays = Form.useWatch(['schema', 'ttl_days'], form);
+  const engine = Form.useWatch(['schema', 'engine'], form);
+
+  useEffect(() => {
+    if (!defaults || defaultsAppliedRef.current) {
+      return;
+    }
+    const patch = buildUnsetDefaultsPatch(
+      {
+        header: {
+          type: form.getFieldValue(['header', 'type']),
+          version: form.getFieldValue(['header', 'version']),
+        },
+        schema: {
+          ttl_days: form.getFieldValue(['schema', 'ttl_days']),
+          engine: form.getFieldValue(['schema', 'engine']),
+        },
+      },
+      defaults,
+    );
+    if (patch.header || patch.schema) {
+      form.setFieldsValue(patch);
+    }
+    defaultsAppliedRef.current = true;
+  }, [defaults, form]);
 
   const hasOverrides = hasOverridesHelper({
     formValues: {
       header: {
-        type: headerTypeInitialValue,
-        version: headerVersionInitialValue,
+        type: headerType,
+        version: headerVersion,
       },
       schema: {
-        ttl_days: ttlDaysInitialValue,
-        engine: engineInitialValue,
+        ttl_days: ttlDays,
+        engine,
       },
     },
     defaults,
@@ -132,15 +156,11 @@ export const DefaultsSection = ({
                * Validate on blur to prevent form submission when clearing the meta schema
                */
               validateTrigger={['onBlur']}
-              {...setInitialValue(
-                headerTypeInitialValue,
-                defaults?.default_header_type,
-              )}
               label={
                 <Form.Label required>
                   Header Type{' '}
                   {isDefaultOveridden(
-                    headerTypeInitialValue,
+                    headerType,
                     defaults?.default_header_type,
                   ) && <OverrideTag />}
                 </Form.Label>
@@ -153,15 +173,11 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['header', 'version']}
-              {...setInitialValue(
-                headerVersionInitialValue,
-                defaults?.default_header_version,
-              )}
               label={
                 <Form.Label required>
                   Header Version{' '}
                   {isDefaultOveridden(
-                    headerVersionInitialValue,
+                    headerVersion,
                     defaults?.default_header_version,
                   ) && <OverrideTag />}
                 </Form.Label>
@@ -181,17 +197,12 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['schema', 'ttl_days']}
-              {...setInitialValue(
-                ttlDaysInitialValue,
-                defaults?.default_ttl_days,
-              )}
               label={
                 <span className="flex items-center gap-2">
                   TTL Days
-                  {isDefaultOveridden(
-                    ttlDaysInitialValue,
-                    defaults?.default_ttl_days,
-                  ) && <OverrideTag />}
+                  {isDefaultOveridden(ttlDays, defaults?.default_ttl_days) && (
+                    <OverrideTag />
+                  )}
                 </span>
               }
               rules={[formValidation]}
@@ -209,14 +220,12 @@ export const DefaultsSection = ({
             <Form.Item
               className="w-full"
               name={['schema', 'engine']}
-              {...setInitialValue(engineInitialValue, defaults?.default_engine)}
               label={
                 <span className="flex items-center gap-2">
                   Engine{' '}
-                  {isDefaultOveridden(
-                    engineInitialValue,
-                    defaults?.default_engine,
-                  ) && <OverrideTag />}
+                  {isDefaultOveridden(engine, defaults?.default_engine) && (
+                    <OverrideTag />
+                  )}
                 </span>
               }
               rules={[

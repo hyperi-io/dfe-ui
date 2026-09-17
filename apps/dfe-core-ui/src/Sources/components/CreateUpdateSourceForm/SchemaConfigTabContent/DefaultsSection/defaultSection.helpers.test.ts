@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { hasOverrides } from './defaultSection.helpers';
+import {
+  buildUnsetDefaultsPatch,
+  hasOverrides,
+} from './defaultSection.helpers';
 
 const defaults = {
   default_header_type: 'common',
@@ -7,6 +10,42 @@ const defaults = {
   default_ttl_days: 90,
   default_engine: 'MergeTree',
 };
+
+describe('buildUnsetDefaultsPatch', () => {
+  test('fills only undefined fields (create path)', () => {
+    expect(buildUnsetDefaultsPatch({}, defaults)).toEqual({
+      header: { type: 'common', version: '1.0' },
+      schema: { ttl_days: 90, engine: 'MergeTree' },
+    });
+  });
+
+  test('leaves null and empty string alone (edit follow-default values)', () => {
+    expect(
+      buildUnsetDefaultsPatch(
+        {
+          header: { type: 'common-header/minimal', version: '1.0.1' },
+          schema: { ttl_days: null, engine: '' },
+        },
+        defaults,
+      ),
+    ).toEqual({});
+  });
+
+  test('fills only the fields that are still undefined', () => {
+    expect(
+      buildUnsetDefaultsPatch(
+        {
+          header: { type: 'common-header/minimal' },
+          schema: { engine: '' },
+        },
+        defaults,
+      ),
+    ).toEqual({
+      header: { version: '1.0' },
+      schema: { ttl_days: 90 },
+    });
+  });
+});
 
 describe('hasOverrides', () => {
   test('is false when defaults have not loaded yet', () => {
