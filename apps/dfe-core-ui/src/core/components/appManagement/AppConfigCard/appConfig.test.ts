@@ -77,7 +77,9 @@ describe('placeholderFor', () => {
   });
 
   it('never shows a default for a secret, because none comes back', () => {
-    expect(placeholderFor(field({ secret: true, default: null }))).toBe('unset');
+    expect(placeholderFor(field({ secret: true, default: null }))).toBe(
+      'unset',
+    );
   });
 
   it('says a chart-derived value comes from the deployment', () => {
@@ -91,17 +93,23 @@ describe('placeholderFor', () => {
   });
 
   it('renders a structured default as JSON rather than [object Object]', () => {
-    expect(
-      placeholderFor(field({ type: 'array', default: ['a', 'b'] })),
-    ).toBe('["a","b"]');
+    expect(placeholderFor(field({ type: 'array', default: ['a', 'b'] }))).toBe(
+      '["a","b"]',
+    );
   });
 });
 
 describe('buildChanges', () => {
   const byPath = new Map([
     ['config.log_level', field({ enum: ['info', 'warn'] })],
-    ['config.batch.size', field({ path: 'config.batch.size', type: 'integer' })],
-    ['config.kafka.brokers', field({ path: 'config.kafka.brokers', type: 'array' })],
+    [
+      'config.batch.size',
+      field({ path: 'config.batch.size', type: 'integer' }),
+    ],
+    [
+      'config.kafka.brokers',
+      field({ path: 'config.kafka.brokers', type: 'array' }),
+    ],
   ]);
 
   // The whole point of the edit map: an option nobody touched has no draft, so

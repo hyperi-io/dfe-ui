@@ -156,9 +156,7 @@ export const SourceAppInstance = ({
           {
             key: 'settings',
             label: 'Settings',
-            children: (
-              <AppConfigCard service={app.service} instance={source} />
-            ),
+            children: <AppConfigCard service={app.service} instance={source} />,
           },
         ]}
       />

@@ -80,7 +80,9 @@ export const CustomEnvEditor = ({
         return (
           <div key={row.path} className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-semibold">{row.name}</span>
+              <span className="font-mono text-sm font-semibold">
+                {row.name}
+              </span>
               <Tag variant="filled">{CUSTOM_LABEL}</Tag>
               {removed && (
                 <Tag color="red" variant="filled">
@@ -114,14 +116,19 @@ export const CustomEnvEditor = ({
                   size="small"
                   danger={!removed}
                   disabled={disabled}
-                  onClick={() => onSetDraft(row.path, removed ? undefined : null)}
+                  onClick={() =>
+                    onSetDraft(row.path, removed ? undefined : null)
+                  }
                 >
                   {removed ? 'Keep' : 'Remove'}
                 </Button>
               )}
             </div>
             {message && (
-              <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+              <p
+                role="alert"
+                className="text-xs text-red-600 dark:text-red-400"
+              >
                 {message}
               </p>
             )}

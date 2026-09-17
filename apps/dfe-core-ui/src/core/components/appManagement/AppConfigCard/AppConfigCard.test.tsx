@@ -35,7 +35,9 @@ describe('AppConfigCard', () => {
   it('shows every declared option, grouped by the section its path names', async () => {
     renderCard();
 
-    expect(await screen.findByText('Maximum records per batch')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Maximum records per batch'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Kafka brokers')).toBeInTheDocument();
     expect(screen.getByText('Log level')).toBeInTheDocument();
     expect(screen.getByText('batch')).toBeInTheDocument();
@@ -57,7 +59,9 @@ describe('AppConfigCard', () => {
     renderCard();
 
     await screen.findByText('Batch timeout');
-    const option = screen.getByRole('group', { name: 'config.batch.timeout_ms' });
+    const option = screen.getByRole('group', {
+      name: 'config.batch.timeout_ms',
+    });
     expect(within(option).getByText('override')).toBeInTheDocument();
     expect(screen.getByLabelText('Batch timeout')).toHaveValue('200');
   });
@@ -99,7 +103,9 @@ describe('AppConfigCard', () => {
     renderCard();
 
     await screen.findByText('Log level');
-    expect(screen.getByRole('button', { name: 'Save settings' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Save settings' }),
+    ).toBeDisabled();
   });
 
   it('sends only the option that was edited, never the untouched defaults', async () => {
@@ -114,7 +120,9 @@ describe('AppConfigCard', () => {
     await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
 
     await waitFor(() => expect(body.current).not.toBeNull());
-    expect(body.current).toEqual({ changes: { 'config.batch.max_records': 250 } });
+    expect(body.current).toEqual({
+      changes: { 'config.batch.max_records': 250 },
+    });
   });
 
   it('guards the write with the revision it read', async () => {
@@ -157,7 +165,9 @@ describe('AppConfigCard', () => {
     await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
 
     const alert = await screen.findByRole('alert', {}, { timeout: 15000 });
-    expect(alert).toHaveTextContent('the deployment sets this through kafka.mode');
+    expect(alert).toHaveTextContent(
+      'the deployment sets this through kafka.mode',
+    );
   }, 20000);
 
   it('shows a refused custom env key against that key', async () => {
@@ -179,7 +189,9 @@ describe('AppConfigCard', () => {
     await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
 
     const alert = await screen.findByRole('alert', {}, { timeout: 15000 });
-    expect(alert).toHaveTextContent('the dfe-loader chart sets RUST_BACKTRACE itself');
+    expect(alert).toHaveTextContent(
+      'the dfe-loader chart sets RUST_BACKTRACE itself',
+    );
   }, 20000);
 
   it('adds a custom env key beside the declared options', async () => {

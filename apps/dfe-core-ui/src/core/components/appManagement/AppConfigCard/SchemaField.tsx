@@ -96,7 +96,11 @@ export const SchemaField = ({
           disabled={chartSet}
           allowClear
           placeholder={placeholderFor(field)}
-          value={current === undefined || current === null ? undefined : String(current)}
+          value={
+            current === undefined || current === null
+              ? undefined
+              : String(current)
+          }
           onChange={(next) => onChange(next)}
           options={field.enum.map((option) => ({
             label: String(option),
@@ -167,7 +171,9 @@ export const SchemaField = ({
         </label>
         <Provenance field={field} />
         {field.secret && (
-          <Tag variant="filled">{field.set ? 'secret set' : 'secret unset'}</Tag>
+          <Tag variant="filled">
+            {field.set ? 'secret set' : 'secret unset'}
+          </Tag>
         )}
         {field.protected && (
           <Tooltip title="Locked by a governance policy. A holder of the override grant can still change it deliberately.">

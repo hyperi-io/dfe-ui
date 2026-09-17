@@ -18,7 +18,9 @@ export type TConfigSection = {
   fields: TAppConfigField[];
 };
 
-export type TParsed = { ok: true; value: unknown } | { ok: false; reason: string };
+export type TParsed =
+  | { ok: true; value: unknown }
+  | { ok: false; reason: string };
 
 export type TFieldError = { path: string; message: string };
 
