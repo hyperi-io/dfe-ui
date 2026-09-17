@@ -22,7 +22,7 @@ const SOURCE_DETAIL_TAB_KEY_MAP = {
   processing: 'Processing',
   'table-stats': 'Table Statistics',
   columns: 'Columns',
-  'ddl-preview': 'DDL Preview',
+  'ddl-preview': 'Build & Deploy',
   hunts: 'Hunts',
   rules: 'Rules',
 } as const;
