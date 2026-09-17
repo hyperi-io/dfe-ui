@@ -1,8 +1,8 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
+import { DiscoverJsonPathsDrawer } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer';
 import { IconMinus } from '@repo/dfe-icons';
-import { DiscoverJsonPathsDrawer } from './DiscoverJsonPathsDrawer';
 
 export const FieldPromoteBanner = ({
   selectedSourceName,

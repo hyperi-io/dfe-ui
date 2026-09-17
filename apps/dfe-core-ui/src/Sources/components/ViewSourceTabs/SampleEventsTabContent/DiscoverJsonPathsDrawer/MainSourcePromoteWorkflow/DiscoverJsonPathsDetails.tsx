@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { MetaSchemaSelectCreate } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/MetaSchemaSelectCreate';
-import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
+import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer/JsonPromoteColumnsTable';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
