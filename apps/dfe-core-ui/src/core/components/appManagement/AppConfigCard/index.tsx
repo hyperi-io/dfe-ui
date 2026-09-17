@@ -19,6 +19,7 @@ import { CustomEnvEditor } from './CustomEnvEditor';
 import { SchemaField } from './SchemaField';
 import {
   buildChanges,
+  ENV_ROOT,
   fieldErrorFrom,
   groupFields,
   TFieldError,
@@ -140,14 +141,26 @@ export const AppConfigCard = ({
   // local JSON parse failure is reported the same way, before any request.
   const refusal = fieldErrorFrom(updateError);
   const fieldError = localError ?? refusal;
+  // Only a path actually on screen can carry its own message. A refusal naming
+  // anything else falls back to the card, rather than being hung on a box that
+  // is not rendered and vanishing.
+  const shownPaths = new Set([
+    ...fields.map((field) => field.path),
+    ...(config.custom ?? []).map((entry) => entry.path),
+    ...added.map((name) => `${ENV_ROOT}.${name}`),
+  ]);
+  const onField = fieldError !== null && shownPaths.has(fieldError.path);
   const errorFor = (path: string) =>
-    fieldError?.path === path ? fieldError.message : undefined;
+    onField && fieldError?.path === path ? fieldError.message : undefined;
 
   const conflict = getApiWriteConflict(updateError);
   const cardMessage =
-    conflict || refusal
+    conflict || onField
       ? undefined
-      : (getApiErrorResponseBody(updateError)?.message ?? updateError?.message);
+      : (getApiErrorResponseBody(updateError)?.message ??
+        updateError?.message ??
+        // A write that never left the browser still has to say why.
+        (fieldError ? `${fieldError.path}: ${fieldError.message}` : undefined));
 
   const pendingCount = Object.keys(drafts).length;
 
@@ -224,7 +237,19 @@ export const AppConfigCard = ({
               <NotificationCard type="error" title={cardMessage} />
             )}
 
+            {/* WriteResultFeedback says "Committed" rather than saved, names
+                the commit and says when the process sees it -- this write is a
+                commit in the deploy repo, not a live change. */}
             {writeResult && <WriteResultFeedback result={writeResult} />}
+
+            {writeResult?.custom_env && (
+              <NotificationCard
+                type="info"
+                variant="subtle"
+                title="How the custom environment reaches the app"
+                description={writeResult.custom_env}
+              />
+            )}
 
             <div className="flex justify-end">
               <Button

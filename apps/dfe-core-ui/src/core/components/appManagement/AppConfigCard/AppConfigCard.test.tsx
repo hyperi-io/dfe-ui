@@ -194,6 +194,94 @@ describe('AppConfigCard', () => {
     );
   }, 20000);
 
+  // A git write can fail for reasons no field can express. If the refusal names
+  // a path that is not on screen, hanging it on that box would lose it, so it
+  // has to fall back to the card.
+  it('shows a refusal naming an off-screen path at card level rather than losing it', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.config.put.chartDerived({
+        service: SERVICE,
+        instance: INSTANCE,
+        path: 'config.some.option.this.page.never.rendered',
+        message: 'the deployment sets this through kafka.mode',
+      }),
+    );
+
+    renderCard();
+
+    const input = await screen.findByLabelText('Maximum records per batch');
+    await user.type(input, '250');
+    await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
+
+    expect(
+      await screen.findByText(
+        'the deployment sets this through kafka.mode',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+  }, 20000);
+
+  // The write is a commit in the deploy repo, not a live change, so the result
+  // must not read as though the app is already running the new value.
+  it('reports a save as committed, with when the process will see it', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.config.put.success({
+        service: SERVICE,
+        instance: INSTANCE,
+      }),
+    );
+
+    renderCard();
+
+    const input = await screen.findByLabelText('Maximum records per batch');
+    await user.type(input, '250');
+    await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
+
+    expect(
+      await screen.findByText('Committed', {}, { timeout: 15000 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Takes effect when the pod rolls'),
+    ).toBeInTheDocument();
+  }, 20000);
+
+  it('says how a custom env key reaches the container when the engine explains it', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.config.put.success({
+        service: SERVICE,
+        instance: INSTANCE,
+        mockedResponse: {
+          changed: true,
+          commit_sha: 'abc1234',
+          auto_merged: true,
+          review_required: false,
+          pr_url: null,
+          validation: null,
+          reload: 'roll',
+          custom_env: 'the app own chart renders extraEnv onto the container',
+        },
+      }),
+    );
+
+    renderCard();
+
+    await user.clear(await screen.findByLabelText('extraEnv.RUST_BACKTRACE'));
+    await user.type(screen.getByLabelText('extraEnv.RUST_BACKTRACE'), '0');
+    await user.click(screen.getByRole('button', { name: 'Save 1 change' }));
+
+    expect(
+      await screen.findByText(
+        'the app own chart renders extraEnv onto the container',
+        {},
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+  }, 20000);
+
   it('adds a custom env key beside the declared options', async () => {
     const user = userEvent.setup();
     const body: { current: Record<string, unknown> | null } = { current: null };
