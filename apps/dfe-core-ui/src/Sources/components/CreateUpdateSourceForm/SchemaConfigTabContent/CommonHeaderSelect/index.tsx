@@ -48,6 +48,10 @@ export const CommonHeaderSelect = ({
   const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  if (value && value !== commonHeaderValue) {
+    setCommonHeaderValue(value);
+  }
+
   const {
     data: { items: commonHeaders },
     isLoading,

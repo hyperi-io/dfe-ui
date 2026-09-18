@@ -1,16 +1,12 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
+import { DiscoverJsonPathsDrawer } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer';
 import { IconMinus } from '@repo/dfe-icons';
-import { DiscoverJsonPathsDrawer } from './DiscoverJsonPathsDrawer';
 
 export const FieldPromoteBanner = ({
-  selectedSourceName,
-  selectedSourceVersion,
   classNames,
 }: {
-  selectedSourceName: string;
-  selectedSourceVersion: string;
   classNames?: {
     root?: string;
   };
@@ -50,13 +46,7 @@ export const FieldPromoteBanner = ({
           </ul>
         </div>
       }
-      action={
-        <DiscoverJsonPathsDrawer
-          selectedSourceName={selectedSourceName}
-          selectedSourceVersion={selectedSourceVersion}
-          fieldsToPromote={fieldsToPromote}
-        />
-      }
+      action={<DiscoverJsonPathsDrawer />}
     />
   );
 };

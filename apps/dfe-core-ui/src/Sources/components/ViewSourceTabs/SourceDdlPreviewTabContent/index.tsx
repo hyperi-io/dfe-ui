@@ -15,11 +15,15 @@ export const SourceDdlPreviewTabContent = ({
   source_version,
   build_result: buildResult,
   deploy_result: deployResult,
+  onSuccess,
 }: {
   source_name: string;
   source_version: string;
   build_result: TSourceVersionDetail['version']['source_build'];
   deploy_result: TSourceVersionDetail['version']['source_deployment'];
+  onSuccess?: {
+    onDeploySuccess?: () => void;
+  };
 }) => {
   const {
     mutate: buildSourceMutation,
@@ -91,6 +95,7 @@ export const SourceDdlPreviewTabContent = ({
                 }}
                 source_name={source_name}
                 version={source_version}
+                onSuccess={onSuccess}
               />
               {deployResult && (
                 <ViewDeployedSourceDrawer

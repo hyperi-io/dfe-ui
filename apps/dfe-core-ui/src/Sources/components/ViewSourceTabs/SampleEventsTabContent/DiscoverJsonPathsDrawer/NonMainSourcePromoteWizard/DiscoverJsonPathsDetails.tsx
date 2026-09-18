@@ -1,7 +1,8 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { MetaSchemaSelectCreate } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/MetaSchemaSelectCreate';
-import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/JsonPromoteColumnsTable';
+import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
+import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer/JsonPromoteColumnsTable';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
@@ -13,19 +14,18 @@ import { useEffect, useMemo } from 'react';
 export const DiscoverJsonPathsDetails = ({
   selectedSourceName,
   selectedSourceVersion,
-  fieldsToPromote,
-
   onSuccess,
   onDataLoad,
   setAttachedSchemaPath,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  fieldsToPromote: string[];
   onSuccess: (response: TPromoteFieldResponse) => void;
   onDataLoad: (response: TJsonPathsResponse) => void;
   setAttachedSchemaPath?: (schemaPath: string) => void;
 }) => {
+  const { fieldsToPromote: fieldsToPromoteSet } = usePromoteRowsContext();
+  const fieldsToPromote = Array.from(fieldsToPromoteSet);
   const { isMetaSchemaDefined } = useSourceDetailsContext();
   const [form] = Form.useForm<{ schema_path: string }>();
   const {

@@ -11,6 +11,7 @@ export interface SourceDetailsContextValue {
   isLoadingSourceDetail: boolean;
   errorSourceDetail: Error | null | undefined;
   isMetaSchemaDefined: boolean;
+  isMainSource: boolean;
 }
 
 const SourceDetailsContext = createContext<SourceDetailsContextValue | null>(
@@ -25,6 +26,10 @@ export const SourceDetailsProvider = ({
   children,
 }: SourceDetailsProviderProps) => {
   const { selectedSourceName, selectedSourceVersion } = useListSourcesContext();
+
+  const isMainSource = useMemo(() => {
+    return selectedSourceName === 'main';
+  }, [selectedSourceName]);
 
   const {
     data: sourceDetail,
@@ -48,12 +53,14 @@ export const SourceDetailsProvider = ({
       isLoadingSourceDetail,
       errorSourceDetail,
       isMetaSchemaDefined,
+      isMainSource,
     }),
     [
       sourceDetail,
       isLoadingSourceDetail,
       errorSourceDetail,
       isMetaSchemaDefined,
+      isMainSource,
     ],
   );
 

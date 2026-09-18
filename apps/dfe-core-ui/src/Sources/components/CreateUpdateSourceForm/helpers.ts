@@ -31,7 +31,7 @@ export type SourceFormTab = keyof typeof TAB_ERROR_KEYS;
 
 export const TAB_LABEL_MAP: Record<SourceFormTab, string> = {
   sourceDetails: 'Configuration',
-  schemaConfig: 'Meta Schema',
+  schemaConfig: 'Table Settings',
   transform: 'Transform',
   views: 'Views',
 };

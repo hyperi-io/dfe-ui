@@ -1,5 +1,6 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
@@ -187,7 +188,7 @@ export const TableLayout = ({
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
             File pathname:
           </dt>
-          <dd>{`${requestBody.path}.yaml`}</dd>
+          <dd>{`${requestBody.path}${YAML_POSTFIX}`}</dd>
 
           {!hideFields?.version && (
             <>

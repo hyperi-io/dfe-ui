@@ -11,6 +11,8 @@ import { useMemo } from 'react';
 
 const folderIcon = <IconFolder className="shrink-0" />;
 const fileIcon = <IconFile className="shrink-0" />;
+/** Stable default so useMemo does not invalidate when the prop is omitted. */
+const EMPTY_PATH_SEGMENTS: string[] = [];
 
 /** Ant Design Tree keys must be globally unique; folder and schema paths can share the same string. */
 export const folderTreeKey = (pathSegments: string[]) =>
@@ -21,27 +23,19 @@ export const schemaTreeKey = (schemaPath: string) => `schema:${schemaPath}`;
 export const versionTreeKey = (schemaPath: string, version: string) =>
   `${schemaTreeKey(schemaPath)}@${version}`;
 
-/** Folder keys (dot-separated) plus schema key when a version is selected. */
-export const getExpandedKeysForSchemaSelection = (
-  schemaPath: string | null,
-  schemaVersion: string | null,
-): string[] => {
-  if (!schemaPath) {
-    return [];
+/** True when the selected schema lives in this folder or is nested under it. */
+export const isSchemaPathUnderFolder = (
+  selectedSchemaPath: string | null,
+  folderSegments: string[],
+) => {
+  if (!selectedSchemaPath || folderSegments.length === 0) {
+    return false;
   }
-
-  const segments = schemaPath.split('/');
-  const keys: string[] = [];
-
-  for (let i = 0; i < segments.length - 1; i++) {
-    keys.push(folderTreeKey(segments.slice(0, i + 1)));
-  }
-
-  if (schemaVersion) {
-    keys.push(schemaTreeKey(schemaPath));
-  }
-
-  return keys;
+  const folderPath = folderSegments.join('/');
+  return (
+    selectedSchemaPath === folderPath ||
+    selectedSchemaPath.startsWith(`${folderPath}/`)
+  );
 };
 
 const buildVersionChildren = (
@@ -151,10 +145,7 @@ const schemaSummaryToTreeData = ({
               schema_version: schema.current,
             });
           }}
-          selected={
-            selectedSchemaPath === schema.name &&
-            selectedSchemaVersion === schema.current
-          }
+          selected={selectedSchemaPath === schema.name}
           actions={
             <>
               <CloneSchemaModal
@@ -217,6 +208,7 @@ const schemaSummaryToTreeData = ({
           icon={folderIcon}
           title={segment}
           onClick={() => expandTreeNode(folderKey)}
+          selected={isSchemaPathUnderFolder(selectedSchemaPath, nextSegments)}
         />
       ),
       children: nested,
@@ -232,6 +224,7 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaPath,
   selectedSchemaVersion,
   expandTreeNode,
+  rootPathSegments = EMPTY_PATH_SEGMENTS,
 }: {
   schemaObjects: TSchemaListResponse['objects'];
   setSelectedSchema: ({
@@ -244,6 +237,8 @@ export const useTransformMetaSchemaToTree = ({
   selectedSchemaPath: string | null;
   selectedSchemaVersion: string | null;
   expandTreeNode: (key: string) => void;
+  /** Prefix for folder keys when the tree is rooted below the full schema path (e.g. meta-only view). */
+  rootPathSegments?: string[];
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
@@ -252,7 +247,7 @@ export const useTransformMetaSchemaToTree = ({
     () =>
       schemaSummaryToTreeData({
         node: schemaObjects,
-        pathSegments: [],
+        pathSegments: rootPathSegments,
         setSelectedSchema,
         selectedSchemaPath,
         selectedSchemaVersion,
@@ -261,6 +256,7 @@ export const useTransformMetaSchemaToTree = ({
       }),
     [
       schemaObjects,
+      rootPathSegments,
       setSelectedSchema,
       selectedSchemaPath,
       selectedSchemaVersion,

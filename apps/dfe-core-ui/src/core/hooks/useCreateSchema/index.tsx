@@ -53,7 +53,7 @@ interface UseCreateSchemaProps {
 export const useCreateSchema = ({
   onSuccess,
   onError,
-}: UseCreateSchemaProps) => {
+}: UseCreateSchemaProps = {}) => {
   const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: ({ schema_type, ...schema }: TCreateSchemaRequest) => {

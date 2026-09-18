@@ -168,6 +168,15 @@ export const CloneSourceDrawer = ({
             error={error}
             buttonLabel={title}
             initialValues={{
+              _assignSchema: sourceDetail.version?.schema?.meta_schema
+                ? 'define_schema'
+                : 'default',
+              schema: {
+                ...sourceDetail.version?.schema,
+                meta_schema: sourceDetail.version?.schema?.meta_schema ?? '',
+                meta_schema_version:
+                  sourceDetail.version?.schema?.meta_schema_version ?? '',
+              },
               // Hyphen, not underscore: the engine takes a DNS-1123 label.
               source: `${sourceName}-copy`,
               enabled: sourceDetail.enabled,

@@ -6,7 +6,7 @@ import { render, renderHook } from '@testing-library/react';
 import type { TreeDataNode } from 'antd';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { getExpandedKeysForSourceSelection, useTransformSourceToTree } from '.';
+import { useTransformSourceToTree } from '.';
 
 // CloneSourceDrawer transitively loads AceEditor, which needs a global `ace` ClientContext sets.
 vi.mock('@/Sources/components/CloneSourceDrawer', () => ({
@@ -61,30 +61,6 @@ const renderSourceNodeTitle = (node: TreeDataNode) => {
   const Title = node.title as () => ReactElement;
   return render(<Title />);
 };
-
-describe('getExpandedKeysForSourceSelection', () => {
-  it('returns folder keys and source key for a nested path with a version', () => {
-    expect(
-      getExpandedKeysForSourceSelection('azure/activity_log/source1', 'v1'),
-    ).toEqual([
-      'dir:azure',
-      'dir:azure.activity_log',
-      'source:azure/activity_log/source1',
-    ]);
-  });
-
-  it('returns only folder keys when no version is selected', () => {
-    expect(
-      getExpandedKeysForSourceSelection('azure/activity_log/source1', null),
-    ).toEqual(['dir:azure', 'dir:azure.activity_log']);
-  });
-
-  it('returns source key only for a root-level source with a version', () => {
-    expect(getExpandedKeysForSourceSelection('solo.source', 'v1')).toEqual([
-      'source:solo.source',
-    ]);
-  });
-});
 
 describe('useTransformSourceToTree', () => {
   it('returns an empty tree for empty objects', () => {
@@ -267,6 +243,58 @@ describe('useTransformSourceToTree', () => {
 
     const { getByText } = renderSourceNodeTitle(result.current.tree[0]);
     expect(getByText('receiver')).toBeInTheDocument();
+  });
+
+  it('highlights the source row when its deployed version is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'syslog',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: 'syslog',
+        selectedSourceVersion: 'v1',
+        expandTreeNode: vi.fn(),
+        refetchSources,
+      }),
+    );
+
+    const { container } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(container.querySelector('.font-semibold')).toBeInTheDocument();
+  });
+
+  it('highlights the main source row when its deployed version is selected', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'main',
+              resource_type: 'core',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+              origin: null,
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: 'main',
+        selectedSourceVersion: 'v1',
+        expandTreeNode: vi.fn(),
+        refetchSources,
+      }),
+    );
+
+    const { container } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(container.querySelector('.font-semibold')).toBeInTheDocument();
   });
 
   it('shows no origin tag on a source the engine reports no origin for', () => {
