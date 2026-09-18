@@ -5,10 +5,10 @@ import {
 } from '@/core/config/api/client.types';
 import { createSourcePath } from './api';
 
-export type TSourceCreateRequestBody = DfeClientRequestBody<
+export type TCreateSourceRequestBody = DfeClientRequestBody<
   DfeClientOperationFor<typeof createSourcePath, 'post'>
 >;
 
-export type TSourceCreateResponse = DfeClientSuccessResponseBody<
+export type TCreateSourceResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof createSourcePath, 'post'>
 >;

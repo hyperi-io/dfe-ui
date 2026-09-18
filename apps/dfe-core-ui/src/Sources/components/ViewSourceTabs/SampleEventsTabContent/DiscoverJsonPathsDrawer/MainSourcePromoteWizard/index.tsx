@@ -4,10 +4,10 @@ import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/conte
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { IconExternalLink } from '@repo/dfe-icons';
-import { Steps, StepsProps } from 'antd';
+import { Button, Steps, StepsProps } from 'antd';
 import Link from 'next/link';
 import { useState } from 'react';
-import { BuildSourceStep } from './BuildSourceStep';
+import { BuildDeploySourceStep } from './BuildDeploySourceStep';
 import { CreateSourceStep } from './CreateSourceStep';
 import { DiscoverPromoteStep } from './DiscoverPromoteStep';
 
@@ -28,14 +28,19 @@ const STEP_INDEX_MAP: Record<
 const getStepStatus = ({
   stepKey,
   createdSchema,
+  createdSource,
 }: {
   stepKey: string;
   createdSchema: string | null | undefined;
+  createdSource: string | null | undefined;
 }): NonNullable<StepsProps['items']>[number]['status'] => {
   if (stepKey === STEP_INDEX_MAP.discoverPromote.key && createdSchema) {
     return 'finish';
   }
 
+  if (stepKey === STEP_INDEX_MAP.createAssign.key && createdSource) {
+    return 'finish';
+  }
   return 'wait';
 };
 
@@ -53,25 +58,40 @@ export const MainSourcePromoteWizard = ({
   const [createdSchema, setCreatedSchema] = useState<string | null | undefined>(
     null,
   );
+  const [createdSource, setCreatedSource] = useState<string | null | undefined>(
+    null,
+  );
 
   const steps = [
     {
       key: STEP_INDEX_MAP.discoverPromote.key,
       title: 'Discover & Promote',
-      status: getStepStatus({ stepKey: 'discover-paths', createdSchema }),
+      status: getStepStatus({
+        stepKey: 'discover-paths',
+        createdSchema,
+        createdSource,
+      }),
     },
     {
       key: STEP_INDEX_MAP.createAssign.key,
       title: 'Create & Assign to Source',
       subTitle: '(Optional)',
       disabled: !createdSchema,
-      status: getStepStatus({ stepKey: 'create-source', createdSchema }),
+      status: getStepStatus({
+        stepKey: 'create-source',
+        createdSchema,
+        createdSource,
+      }),
     },
     {
       key: STEP_INDEX_MAP.buildDeploy.key,
       title: 'Build & Deploy Source (Optional)',
-      disabled: !createdSchema,
-      status: getStepStatus({ stepKey: 'build-source', createdSchema }),
+      disabled: !createdSchema && !createdSource,
+      status: getStepStatus({
+        stepKey: 'build-source',
+        createdSchema,
+        createdSource,
+      }),
     },
   ];
 
@@ -102,29 +122,13 @@ export const MainSourcePromoteWizard = ({
         items={steps}
         size="small"
       />
-
-      {current.key === STEP_INDEX_MAP.discoverPromote.key && (
-        <>
-          {!createdSchema && (
-            <DiscoverPromoteStep
-              jsonPaths={{
-                data: jsonPaths,
-                isLoading: isLoadingJsonPaths,
-                error: errorJsonPaths,
-              }}
-              onSuccess={(schema) => {
-                setCreatedSchema(schema.path);
-                setCurrent(STEP_INDEX_MAP.createAssign);
-              }}
-              isCreatedSchema={!!createdSchema}
-            />
-          )}
-
-          {createdSchema && (
-            <NotificationCard
-              title={
+      {createdSchema && (
+        <NotificationCard
+          title={
+            <div className="flex flex-col gap-2">
+              {createdSchema && (
                 <span className="flex items-center gap-2">
-                  View Schema:
+                  Schema Created:
                   <Link
                     target="_blank"
                     rel="noopener noreferrer"
@@ -143,18 +147,72 @@ export const MainSourcePromoteWizard = ({
                     {createdSchema}
                   </Link>
                 </span>
-              }
-              description="Schema created successfully"
-              type="success"
-            />
-          )}
-        </>
+              )}
+              {createdSource && (
+                <span className="flex items-center gap-2">
+                  Source Created:
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`/sources?${new URLSearchParams({
+                      source_name: createdSource,
+                      source_version: '1.0.0',
+                    }).toString()}`}
+                    className={cn(
+                      // Layout
+                      'flex items-center gap-2',
+                      // Style
+                      'text-foreground-muted dark:text-foreground-muted hover:underline',
+                    )}
+                  >
+                    <IconExternalLink />
+                    {createdSource}
+                  </Link>
+                </span>
+              )}
+            </div>
+          }
+          type="success"
+          action={
+            <Button
+              type="primary"
+              className="bg-green-500 text-white hover:bg-green-600"
+              htmlType="button"
+              onClick={() => {
+                onFinalSuccess?.();
+              }}
+            >
+              Close Wizard
+            </Button>
+          }
+        />
       )}
-      {current.key === STEP_INDEX_MAP.createAssign.key && (
-        <CreateSourceStep schemaPath={createdSchema ?? ''} />
+
+      {current.key === STEP_INDEX_MAP.discoverPromote.key && !createdSchema && (
+        <DiscoverPromoteStep
+          jsonPaths={{
+            data: jsonPaths,
+            isLoading: isLoadingJsonPaths,
+            error: errorJsonPaths,
+          }}
+          onSuccess={(schema) => {
+            setCreatedSchema(schema.path);
+            setCurrent(STEP_INDEX_MAP.createAssign);
+          }}
+          isCreatedSchema={!!createdSchema}
+        />
+      )}
+      {current.key === STEP_INDEX_MAP.createAssign.key && !createdSource && (
+        <CreateSourceStep
+          schemaPath={createdSchema ?? ''}
+          onSuccess={(source) => {
+            setCreatedSource(source.source);
+            setCurrent(STEP_INDEX_MAP.buildDeploy);
+          }}
+        />
       )}
       {current.key === STEP_INDEX_MAP.buildDeploy.key && (
-        <BuildSourceStep onSuccess={onFinalSuccess} />
+        <BuildDeploySourceStep onSuccess={onFinalSuccess} />
       )}
     </div>
   );

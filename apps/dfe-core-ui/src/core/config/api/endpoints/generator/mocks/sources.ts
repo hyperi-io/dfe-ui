@@ -2,7 +2,7 @@ import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
-import { TSourceCreateResponse } from '@/Sources/hooks/useCreateSource/types';
+import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TCatalogueSourceResponse } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
@@ -80,7 +80,7 @@ export const sources = {
           versions: ['string'],
         },
       }: {
-        mockedResponse?: TSourceCreateResponse;
+        mockedResponse?: TCreateSourceResponse;
       } = {}) => {
         return http.post(sources.default.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
