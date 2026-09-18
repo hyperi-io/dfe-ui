@@ -1,8 +1,9 @@
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { cn } from '@/core/utils/style';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { ListSourcesFilterForm } from './ListSourcesFilterForm';
 
-export const ListSourcesFilters = () => {
+export const ListSourcesFilters = ({ className }: { className?: string }) => {
   const {
     data: { items: sources, total },
   } = useListSourcesContext();
@@ -18,7 +19,10 @@ export const ListSourcesFilters = () => {
           </p>
         </span>
       }
-      className="absolute top-0 left-0 z-10 bg-background dark:bg-dark-background"
+      className={cn(
+        'absolute top-0 left-0 z-10 bg-background dark:bg-dark-background',
+        className,
+      )}
     >
       {({ setOpen }) => (
         <ListSourcesFilterForm onSuccess={() => setOpen(false)} />

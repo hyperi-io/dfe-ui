@@ -39,6 +39,7 @@ describe('formSchema origin', () => {
   test('a receiver source needs its match rule and ignores the fetcher block', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'receiver',
       match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
       fetcher: { source_type: '', topic: 'own', config: '' },
@@ -50,6 +51,7 @@ describe('formSchema origin', () => {
   test('a receiver source with no match rule is refused field by field', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'receiver',
       match: { field: '', operator: undefined, value: '' },
     };
@@ -63,6 +65,7 @@ describe('formSchema origin', () => {
   test('the exists operator needs no value; every other operator does', () => {
     const exists: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'receiver',
       match: { field: '_json.app', operator: 'exists', value: '' },
     };
@@ -70,6 +73,7 @@ describe('formSchema origin', () => {
 
     const equals: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'receiver',
       match: { field: '_json.app', operator: 'equals', value: '' },
     };
@@ -81,6 +85,7 @@ describe('formSchema origin', () => {
   test('a fetcher source needs a source type and ignores the match block', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
@@ -95,6 +100,7 @@ describe('formSchema origin', () => {
   test('a fetcher source with no source type is refused', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'fetcher',
       fetcher: { source_type: '', topic: 'own', config: '' },
     };
@@ -107,6 +113,7 @@ describe('formSchema origin', () => {
   test('config that is not YAML is a form error rather than a request', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
@@ -121,6 +128,7 @@ describe('formSchema origin', () => {
   test('config that is not a mapping is refused', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
@@ -137,6 +145,7 @@ describe('formSchema origin', () => {
   test('the two keys the engine sets are refused in the config', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
+      _assignSchema: 'default',
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',

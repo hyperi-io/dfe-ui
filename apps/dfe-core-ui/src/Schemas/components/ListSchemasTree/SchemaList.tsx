@@ -4,10 +4,10 @@ import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  getExpandedKeysForSchemaSelection,
-  useTransformMetaSchemaToTree,
-} from './hooks/useTransformMetaSchemaToTree';
+import { useTransformMetaSchemaToTree } from './hooks/useTransformMetaSchemaToTree';
+
+const META_ROOT_PATH_SEGMENTS = ['meta'];
+const EMPTY_PATH_SEGMENTS: string[] = [];
 
 export const SchemaList = ({ className }: { className?: string }) => {
   const {
@@ -45,20 +45,16 @@ export const SchemaList = ({ className }: { className?: string }) => {
       selectedSchemaPath,
       selectedSchemaVersion,
       expandTreeNode,
+      // Meta-only view roots the tree at children.meta, but schema.name / selection
+      // still include the meta/ prefix — keep folder path segments aligned.
+      rootPathSegments: hasOnlyMetaSchemas
+        ? META_ROOT_PATH_SEGMENTS
+        : EMPTY_PATH_SEGMENTS,
     });
 
-  const expandedKeysForSelection = useMemo(
-    () =>
-      getExpandedKeysForSchemaSelection(
-        selectedSchemaPath,
-        selectedSchemaVersion,
-      ),
-    [selectedSchemaPath, selectedSchemaVersion],
-  );
-
   const expandedKeys = useMemo(
-    () => [...new Set([...userExpandedKeys, ...expandedKeysForSelection])],
-    [userExpandedKeys, expandedKeysForSelection],
+    () => [...new Set([...userExpandedKeys])],
+    [userExpandedKeys],
   );
 
   // An empty list is only empty once it has loaded. Without this the first

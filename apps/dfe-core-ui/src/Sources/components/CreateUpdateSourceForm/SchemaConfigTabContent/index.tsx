@@ -1,6 +1,6 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
-import { FormInstance, FormRule, Radio } from 'antd';
+import { Form, FormInstance, FormRule, Radio } from 'antd';
 import { useState } from 'react';
 import { MetaSchemaForm } from './MetaSchemaForm';
 import { getInitialAssignSchema } from './SchemaConfigTabContent.helpers';
@@ -22,16 +22,18 @@ export const SchemaConfigTabContent = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <Radio.Group
-        value={assignSchema}
-        onChange={(e) => {
-          setAssignSchema(e.target.value as AssignSchemaOptions);
-        }}
-      >
-        {/* The shared landing table is dfe.main, so the choice is named for it. */}
-        <Radio value="default">main</Radio>
-        <Radio value="define_schema">Define Schema</Radio>
-      </Radio.Group>
+      <Form.Item name="_assignSchema" label="Assign Schema">
+        <Radio.Group
+          value={assignSchema}
+          onChange={(e) => {
+            setAssignSchema(e.target.value as AssignSchemaOptions);
+          }}
+        >
+          {/* The shared landing table is dfe.main, so the choice is named for it. */}
+          <Radio value="default">main</Radio>
+          <Radio value="define_schema">Define Schema</Radio>
+        </Radio.Group>
+      </Form.Item>
 
       {assignSchema === 'define_schema' && (
         <RbacProtected action={RbacProtected.rbacActions.schema_read}>

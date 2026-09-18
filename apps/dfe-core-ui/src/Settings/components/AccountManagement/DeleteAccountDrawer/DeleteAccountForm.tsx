@@ -37,7 +37,7 @@ export const DeleteAccountForm = ({
   };
 
   return (
-    <Form form={form} onFinish={handleFinish}>
+    <Form form={form} onFinish={handleFinish} initialValues={{ username: '' }}>
       <p>
         Are you sure you want to delete{' '}
         <span className="font-semibold">{username}</span>?

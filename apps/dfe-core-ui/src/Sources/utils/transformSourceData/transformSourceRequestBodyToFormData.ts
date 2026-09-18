@@ -25,6 +25,7 @@ export const transformSourceRequestBodyToFormData = (
     // not the same as a choice: null puts it back on the deployment default.
     transport: source?.version?.transport ?? null,
     archive: source?.version?.archive ?? false,
+    _assignSchema: 'default',
     header: source?.version?.header
       ? {
           ...source?.version?.header,

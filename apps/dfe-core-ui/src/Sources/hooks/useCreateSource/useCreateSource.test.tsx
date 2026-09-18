@@ -14,7 +14,7 @@ import {
   vi,
 } from 'vitest';
 import { useCreateSource } from '.';
-import { TSourceCreateRequestBody, TSourceCreateResponse } from './types';
+import { TCreateSourceRequestBody, TCreateSourceResponse } from './types';
 import { server } from './useCreateSource.mocks';
 
 beforeAll(() =>
@@ -28,7 +28,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useCreateSource', () => {
-  const requestBody: TSourceCreateRequestBody = {
+  const requestBody: TCreateSourceRequestBody = {
     source: 'source',
     display_name: 'string',
     description: 'string',
@@ -67,7 +67,7 @@ describe('.useCreateSource', () => {
 
       result.current.mutate(requestBody);
 
-      const expectedResponse: TSourceCreateResponse = {
+      const expectedResponse: TCreateSourceResponse = {
         source: 'string',
         message: 'ok',
         current: 'string',

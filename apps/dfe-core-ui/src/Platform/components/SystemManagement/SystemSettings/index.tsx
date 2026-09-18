@@ -1,6 +1,6 @@
-import { useFetchSystemSettings } from '@/Platform/hooks/system/useFetchSystemSettings';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useFetchSystemSettings } from '@/core/hooks/useFetchSystemSettings';
 
 const dataListTermStyle = 'text-foreground/50 dark:text-foreground/50';
 

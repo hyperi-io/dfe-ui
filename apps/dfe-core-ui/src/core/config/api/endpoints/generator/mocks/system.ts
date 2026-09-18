@@ -1,7 +1,7 @@
 import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
-import { TSystemSettingsResponse } from '@/Platform/hooks/system/useFetchSystemSettings/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
+import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
 import {
@@ -60,6 +60,14 @@ export const system = {
       }: { mockedResponse?: TSystemSettingsResponse } = {}) => {
         return http.get(system.settings.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.get(system.settings.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
         });
       },
     },

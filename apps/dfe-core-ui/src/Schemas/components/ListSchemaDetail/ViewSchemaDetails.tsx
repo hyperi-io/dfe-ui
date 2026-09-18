@@ -1,6 +1,7 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -253,7 +254,10 @@ export const ViewSchemaDetails = ({
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
             File pathname:
           </dt>
-          <dd>{path}.yaml</dd>
+          <dd>
+            {path}
+            {YAML_POSTFIX}
+          </dd>
           <dt className="font-medium text-foreground/40 dark:text-dark-foreground/40">
             Current Version:
           </dt>

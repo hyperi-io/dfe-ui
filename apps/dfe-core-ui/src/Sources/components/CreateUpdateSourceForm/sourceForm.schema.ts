@@ -1,5 +1,5 @@
 import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
-import { TSourceCreateRequestBody } from '@/Sources/hooks/useCreateSource/types';
+import { TCreateSourceRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import {
   ENGINE_OWNED_FETCHER_KEYS,
   parseFetcherConfig,
@@ -8,8 +8,8 @@ import { sourceNameValidator } from '@/Sources/utils/validation';
 
 import z from 'zod';
 
-type TSourceMatch = NonNullable<TSourceCreateRequestBody['match']>;
-type TSourceFetcher = NonNullable<TSourceCreateRequestBody['fetcher']>;
+type TSourceMatch = NonNullable<TCreateSourceRequestBody['match']>;
+type TSourceFetcher = NonNullable<TCreateSourceRequestBody['fetcher']>;
 
 export const MATCH_OPERATORS = [
   'equals',
@@ -52,6 +52,10 @@ const sourceDetailsTabSchema = {
   transport: z.enum(SOURCE_TRANSPORTS).optional().nullable(),
   // Required, so a form that lost the value is refused rather than sending none.
   archive: z.boolean({ message: 'Archive is required' }),
+  // For form control only, not validation.
+  _assignSchema: z.enum(['default', 'define_schema'], {
+    message: 'Assign schema is required',
+  }),
 };
 
 /**

@@ -37,11 +37,19 @@ describe('SourceDetailActionMenu', () => {
     expect(screen.getByLabelText('Delete Source')).toBeInTheDocument();
   });
 
-  it('offers clone only on a core source, which the engine refuses to change', () => {
-    renderMenu('main', 'core');
+  it('offers clone only on core source', () => {
+    renderMenu('syslog', 'core');
 
     expect(screen.queryByLabelText('Edit Source')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Delete Source')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Clone Source')).toBeInTheDocument();
+  });
+
+  it('offers no actions on a main source', () => {
+    renderMenu('main', 'core');
+
+    expect(screen.queryByLabelText('Edit Source')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Delete Source')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Clone Source')).not.toBeInTheDocument();
   });
 });

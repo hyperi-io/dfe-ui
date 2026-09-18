@@ -15,7 +15,7 @@ import {
   vi,
 } from 'vitest';
 import { MetaSchemaForm } from './MetaSchemaForm';
-import { server } from './MetaSchemaForm.mocks';
+import { resetSystemDefaultsStore, server } from './MetaSchemaForm.mocks';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: vi.fn() }),
@@ -38,7 +38,10 @@ class MockIntersectionObserver {
 global.IntersectionObserver = MockIntersectionObserver as any;
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  resetSystemDefaultsStore();
+});
 afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
@@ -62,20 +65,27 @@ const Harness = ({
   );
 };
 
+const openOverrideDefaults = async (
+  user: ReturnType<typeof userEvent.setup>,
+) => {
+  await user.click(
+    await screen.findByRole('button', { name: 'Override Defaults' }),
+  );
+};
+
 describe('MetaSchemaForm TTL Days', () => {
-  it('leaves a new source blank, with the DFE default as the placeholder', async () => {
+  it('populates a new source with the DFE default', async () => {
+    const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await openOverrideDefaults(user);
 
     const ttl = await screen.findByLabelText(
       /^TTL Days/,
       {},
       { timeout: 15000 },
     );
-    await waitFor(
-      () => expect(ttl).toHaveAttribute('placeholder', '90 (DFE default)'),
-      { timeout: 15000 },
-    );
-    expect(ttl).toHaveValue('');
+    await waitFor(() => expect(ttl).toHaveValue('90'), { timeout: 15000 });
     expect(screen.queryByText('Override')).not.toBeInTheDocument();
   });
 
@@ -176,22 +186,24 @@ const withSchema = (engine: string) => ({
 });
 
 describe('MetaSchemaForm Engine', () => {
-  it('leaves a new source blank, with the DFE default as the placeholder', async () => {
+  it('populates a new source with the DFE default', async () => {
+    const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
 
-    expect(
-      await screen.findByText(
-        'MergeTree (DFE default)',
-        {},
-        { timeout: 15000 },
-      ),
-    ).toBeInTheDocument();
+    await openOverrideDefaults(user);
+
+    await waitFor(
+      () => expect(screen.getByText('MergeTree')).toBeInTheDocument(),
+      { timeout: 15000 },
+    );
     expect(screen.queryByText('Override')).not.toBeInTheDocument();
   });
 
   it('offers the registry engines and marks a picked one as an override', async () => {
     const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await openOverrideDefaults(user);
 
     const engine = await screen.findByLabelText(
       /^Engine/,
@@ -201,16 +213,13 @@ describe('MetaSchemaForm Engine', () => {
     await user.click(engine);
     await user.click(
       await screen.findByTitle(
-        'Keeps every row as inserted.',
+        'Keeps the latest row per sorting key.',
         {},
         { timeout: 15000 },
       ),
     );
 
     expect(await screen.findByText('Override')).toBeInTheDocument();
-    expect(
-      screen.queryByLabelText('MergeTree arguments'),
-    ).not.toBeInTheDocument();
   });
 
   it('shows the arguments box for a variant that takes them and submits the composed engine', async () => {
@@ -303,11 +312,14 @@ describe('MetaSchemaForm Engine', () => {
     const onFinish = vi.fn();
     render(<Harness onFinish={onFinish} />, { wrapper });
 
-    const engine = await screen.findByPlaceholderText(
-      'MergeTree (DFE default)',
-      {},
+    // Re-query inside waitFor: the control mounts as a Select while engines load,
+    // then swaps to a free-text Input when the registry is empty.
+    await waitFor(
+      () => expect(screen.getByLabelText(/^Engine/)).toHaveValue('MergeTree'),
       { timeout: 15000 },
     );
+    const engine = screen.getByLabelText(/^Engine/);
+    await user.clear(engine);
     await user.type(engine, 'ReplacingMergeTree(ver)');
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
