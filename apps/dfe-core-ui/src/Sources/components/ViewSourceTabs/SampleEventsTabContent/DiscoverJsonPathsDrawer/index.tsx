@@ -10,16 +10,8 @@ import { MainSourcePromoteWizard } from './MainSourcePromoteWizard';
 import { NonMainSourcePromoteWizard } from './NonMainSourcePromoteWizard';
 
 const UNCOMMITTED_CLOSE_MESSAGE =
-  'Field promotions have not been committed. Leave anyway and discard your review?';
-export const DiscoverJsonPathsDrawer = ({
-  selectedSourceName,
-  selectedSourceVersion,
-  fieldsToPromote,
-}: {
-  selectedSourceName: string;
-  selectedSourceVersion: string;
-  fieldsToPromote: Set<string>;
-}) => {
+  'Field promotions have not been committed. Leave anyway an∂d discard your review?';
+export const DiscoverJsonPathsDrawer = () => {
   const { isMainSource } = useSourceDetailsContext();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
 
@@ -73,19 +65,9 @@ export const DiscoverJsonPathsDrawer = ({
         destroyOnHidden
       >
         {isMainSource ? (
-          <MainSourcePromoteWizard
-            selectedSourceName={selectedSourceName}
-            selectedSourceVersion={selectedSourceVersion}
-            fieldsToPromote={fieldsToPromote}
-            onSuccess={closeDrawer}
-          />
+          <MainSourcePromoteWizard onSuccess={closeDrawer} />
         ) : (
-          <NonMainSourcePromoteWizard
-            selectedSourceName={selectedSourceName}
-            selectedSourceVersion={selectedSourceVersion}
-            fieldsToPromote={fieldsToPromote}
-            onSuccess={closeDrawer}
-          />
+          <NonMainSourcePromoteWizard onSuccess={closeDrawer} />
         )}
       </Drawer>
     </>

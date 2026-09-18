@@ -1,3 +1,4 @@
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { App, Tabs } from 'antd';
@@ -8,16 +9,11 @@ import { PromoteJsonPaths } from './PromoteJsonPathsDetails';
 type ActiveTab = 'discover' | 'review';
 
 export const NonMainSourcePromoteWizard = ({
-  selectedSourceName,
-  selectedSourceVersion,
-  fieldsToPromote,
   onSuccess,
 }: {
-  selectedSourceName: string;
-  selectedSourceVersion: string;
-  fieldsToPromote: Set<string>;
   onSuccess?: (response?: TPromoteFieldResponse) => void;
 }) => {
+  const { selectedSourceName, selectedSourceVersion } = useListSourcesContext();
   const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
     null,
   );
@@ -51,9 +47,8 @@ export const NonMainSourcePromoteWizard = ({
           label: 'Discover',
           children: (
             <DiscoverJsonPathsDetails
-              selectedSourceName={selectedSourceName}
-              selectedSourceVersion={selectedSourceVersion}
-              fieldsToPromote={Array.from(fieldsToPromote)}
+              selectedSourceName={String(selectedSourceName)}
+              selectedSourceVersion={String(selectedSourceVersion)}
               onSuccess={(response) => {
                 setCanPromote(true);
                 setActiveTab('review');
@@ -74,8 +69,8 @@ export const NonMainSourcePromoteWizard = ({
           disabled: !canPromote,
           children: (
             <PromoteJsonPaths
-              selectedSourceName={selectedSourceName}
-              selectedSourceVersion={selectedSourceVersion}
+              selectedSourceName={String(selectedSourceName)}
+              selectedSourceVersion={String(selectedSourceVersion)}
               data={promoteTestResponse}
               jsonPaths={jsonPaths}
               onSuccess={handleSuccess}

@@ -2,19 +2,12 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { FieldPromoteBanner } from './FieldPromoteBanner';
 import { SampleRowsCard } from './SampleRowsCard';
 
-export const SampleEventsTabContent = ({
-  source,
-  version,
-}: {
-  source: TSourceVersionDetail;
-  version: string;
-}) => {
+export const SampleEventsTabContent = () => {
   const { isMetaSchemaDefined, isMainSource } = useSourceDetailsContext();
 
   const { sampleRows, isLoadingSampleRows, errorSampleRows } =
@@ -42,8 +35,6 @@ export const SampleEventsTabContent = ({
       {fieldsToPromote.size > 0 && (
         <div className="relative mb-4">
           <FieldPromoteBanner
-            selectedSourceName={source.source}
-            selectedSourceVersion={version}
             classNames={{
               root: 'sticky w-full top-0 left-0',
             }}

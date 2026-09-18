@@ -141,6 +141,8 @@ const CreateSchemaFormBase = ({
         name: '',
         description: '',
         schema_type: isMetaSchemaScope ? 'meta' : 'common_header',
+        version: '1.0.0',
+        type: 'model',
         ...initialValues,
       }}
     >

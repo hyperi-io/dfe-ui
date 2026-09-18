@@ -5,12 +5,8 @@ import { DiscoverJsonPathsDrawer } from '@/Sources/components/ViewSourceTabs/Sam
 import { IconMinus } from '@repo/dfe-icons';
 
 export const FieldPromoteBanner = ({
-  selectedSourceName,
-  selectedSourceVersion,
   classNames,
 }: {
-  selectedSourceName: string;
-  selectedSourceVersion: string;
   classNames?: {
     root?: string;
   };
@@ -50,13 +46,7 @@ export const FieldPromoteBanner = ({
           </ul>
         </div>
       }
-      action={
-        <DiscoverJsonPathsDrawer
-          selectedSourceName={selectedSourceName}
-          selectedSourceVersion={selectedSourceVersion}
-          fieldsToPromote={fieldsToPromote}
-        />
-      }
+      action={<DiscoverJsonPathsDrawer />}
     />
   );
 };

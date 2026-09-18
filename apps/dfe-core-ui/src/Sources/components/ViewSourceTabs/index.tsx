@@ -128,10 +128,7 @@ export const ViewSourceDetailTabs = ({
                   source_name={selectedSourceName}
                   version={selectedSourceVersion}
                 >
-                  <SampleEventsTabContent
-                    source={sourceDetailData}
-                    version={selectedSourceVersion}
-                  />
+                  <SampleEventsTabContent />
                 </PromoteRowsProvider>
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="h-full">
