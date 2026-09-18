@@ -15,6 +15,7 @@ import {
   type SourceFormTab,
 } from './helpers';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
+import { getInitialAssignSchema } from './SchemaConfigTabContent/SchemaConfigTabContent.helpers';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   EMPTY_FETCHER,
@@ -194,6 +195,12 @@ export const CreateUpdateSourceFormBase = ({
         // Both blocks are seeded so switching origin lands on a usable form.
         match: { ...EMPTY_MATCH, ...initialValues?.match },
         fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
+        // Empty creates have no schema yet, so the radio starts on main.
+        _assignSchema:
+          initialValues?._assignSchema ??
+          getInitialAssignSchema({
+            meta_schema: initialValues?.schema?.meta_schema ?? null,
+          }),
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}

@@ -46,6 +46,24 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
+describe('CreateUpdateSourceForm assign schema', () => {
+  it('selects main on an empty form', async () => {
+    const user = userEvent.setup();
+    render(
+      <CreateUpdateSourceForm
+        onFinish={vi.fn()}
+        isPending={false}
+        error={null}
+      />,
+      { wrapper },
+    );
+
+    await user.click(await screen.findByRole('tab', { name: 'Table Settings' }));
+
+    expect(screen.getByRole('radio', { name: 'main' })).toBeChecked();
+  });
+});
+
 describe('CreateUpdateSourceForm archive', () => {
   it('carries an archive decision through a fresh create', async () => {
     const user = userEvent.setup();
