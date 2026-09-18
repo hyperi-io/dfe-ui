@@ -47,7 +47,7 @@ const getStepStatus = ({
 export const MainSourcePromoteWizard = ({
   onSuccess: onFinalSuccess,
 }: {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }) => {
   const { selectedSourceName, selectedSourceVersion } = useListSourcesContext();
   const { fieldsToPromote: fieldsToPromoteSet } = usePromoteRowsContext();
@@ -112,6 +112,10 @@ export const MainSourcePromoteWizard = ({
     version: String(selectedSourceVersion),
     paths: fieldsToPromote.join(','),
   });
+
+  const handleFinalSuccess = () => {
+    onFinalSuccess?.();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -212,7 +216,10 @@ export const MainSourcePromoteWizard = ({
         />
       )}
       {current.key === STEP_INDEX_MAP.buildDeploy.key && (
-        <BuildDeploySourceStep onSuccess={onFinalSuccess} />
+        <BuildDeploySourceStep
+          onSuccess={handleFinalSuccess}
+          createdSource={createdSource ?? ''}
+        />
       )}
     </div>
   );

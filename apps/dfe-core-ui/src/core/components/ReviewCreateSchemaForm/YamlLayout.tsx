@@ -1,5 +1,6 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { FormNotification } from '@/core/components/FormNotification';
+import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
 import { TCreateSchemaRequest } from '@/core/hooks/useCreateSchema/types';
 import { Button } from 'antd';
@@ -39,7 +40,8 @@ export const YamlLayout = ({
         <span className="font-medium text-foreground/40 dark:text-dark-foreground/40">
           File pathname:
         </span>{' '}
-        {path}.yaml
+        {path}
+        {YAML_POSTFIX}
       </p>
       <AceEditor value={yamlContent} mode="yaml" readOnly />
 

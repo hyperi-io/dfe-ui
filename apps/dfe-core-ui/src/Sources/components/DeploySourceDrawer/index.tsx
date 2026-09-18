@@ -15,6 +15,7 @@ export const DeploySourceDrawer = ({
   source_name,
   version,
   classNames,
+  onSuccess,
 }: {
   open?: boolean;
   onClose?: () => void;
@@ -22,6 +23,9 @@ export const DeploySourceDrawer = ({
   version: string;
   classNames?: {
     button?: string;
+  };
+  onSuccess?: {
+    onDeploySuccess?: () => void;
   };
 }) => {
   const title = 'Deploy Source';
@@ -39,7 +43,12 @@ export const DeploySourceDrawer = ({
     planSourceMutation({ name: source_name, version });
   };
 
-  const { mutate: deployMutation, ...deploySourceData } = useDeploySource();
+  const { mutate: deployMutation, ...deploySourceData } = useDeploySource({
+    onSuccess: () => {
+      handleClose();
+      onSuccess?.onDeploySuccess?.();
+    },
+  });
 
   return (
     <>

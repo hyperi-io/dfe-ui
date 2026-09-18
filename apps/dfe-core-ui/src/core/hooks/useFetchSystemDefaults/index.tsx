@@ -7,7 +7,7 @@ import type { TSystemDefaults } from './types';
 
 const FALLBACK_DEFAULTS = {
   default_engine: 'MergeTree',
-  default_header_type: 'common-header/timeseries.yml',
+  default_header_type: 'common-header/timeseries',
   default_header_version: '1.0.1',
 } as const;
 

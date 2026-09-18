@@ -10,7 +10,7 @@ describe('useSystemDefaultsStore', () => {
     const defaults = {
       default_ttl_days: 90,
       default_engine: 'MergeTree',
-      default_header_type: 'common-header/timeseries.yml',
+      default_header_type: 'common-header/timeseries',
       default_header_version: '1.0.1',
     };
 

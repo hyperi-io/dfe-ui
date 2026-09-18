@@ -1,5 +1,6 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { cn } from '@/core/utils/style';
 import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
@@ -137,7 +138,8 @@ export const ConfigurationDetailsTabContent = ({
                   {isMainSource ? '' : '/'}
                 </span>
                 {/* Header type name */}
-                {header?.type?.split('/').pop()}.yaml
+                {header?.type?.split('/').pop()}
+                {YAML_POSTFIX}
               </Link>
             </dd>
             <dt className={dataListTermStyle}>Header Version:</dt>
@@ -156,7 +158,8 @@ export const ConfigurationDetailsTabContent = ({
                       {schema?.meta_schema?.split('/').slice(0, -1).join('/')}/
                     </span>
                     {/* Meta schema name */}
-                    {schema?.meta_schema?.split('/').pop()}.yaml
+                    {schema?.meta_schema?.split('/').pop()}
+                    {YAML_POSTFIX}
                   </Link>
                 </dd>
                 <dt className={dataListTermStyle}>Meta Schema Version:</dt>

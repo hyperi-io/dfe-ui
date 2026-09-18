@@ -40,6 +40,15 @@ vi.mock('./DiscoverPromoteStep', () => ({
   ),
 }));
 
+// CreateSourceStep and BuildDeploySourceStep transitively load AceEditor.
+vi.mock('./CreateSourceStep', () => ({
+  CreateSourceStep: () => <div>CreateSourceStep</div>,
+}));
+
+vi.mock('./BuildDeploySourceStep', () => ({
+  BuildDeploySourceStep: () => <div>BuildSourceStep</div>,
+}));
+
 const { wrapper } = buildTestWrapper().withTheme();
 
 describe('MainSourcePromoteWizard', () => {
@@ -51,7 +60,10 @@ describe('MainSourcePromoteWizard', () => {
 
     await user.click(screen.getByRole('button', { name: 'Finish schema' }));
 
-    expect(screen.getByText('Schema Path: meta/okta')).toBeInTheDocument();
+    expect(screen.getByText('Schema Created:')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /meta\/okta/ }),
+    ).toBeInTheDocument();
   });
 
   it('lets the user open later steps after a schema is created', async () => {
