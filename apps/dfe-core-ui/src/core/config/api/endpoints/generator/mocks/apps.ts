@@ -9,6 +9,8 @@ import { TRelinkAppFilesResponse } from '@/core/hooks/apps/files/useRelinkAppFil
 import { TUpdateAppFileResponse } from '@/core/hooks/apps/files/useUpdateAppFile/types';
 import { TCreateAppInstanceResponse } from '@/core/hooks/apps/instances/useCreateAppInstance/types';
 import { TDeleteAppInstanceResponse } from '@/core/hooks/apps/instances/useDeleteAppInstance/types';
+import { TAppConfigResponse } from '@/core/hooks/apps/config/useFetchAppConfig/types';
+import { TUpdateAppConfigResponse } from '@/core/hooks/apps/config/useUpdateAppConfig/types';
 import { TAppDetailResponse } from '@/core/hooks/apps/instances/useFetchAppDetail/types';
 import { TAppHistoryResponse } from '@/core/hooks/apps/instances/useFetchAppHistory/types';
 import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
@@ -100,6 +102,104 @@ const DEFAULT_APPS: TAppsResponse = [
     instances: [],
   },
 ];
+
+/**
+ * A contract carrying every provenance the engine reports, plus each control
+ * the declared types resolve to. A console that folds `chart` into `default`,
+ * or renders a secret's value, fails against this.
+ */
+const DEFAULT_APP_CONFIG: TAppConfigResponse = {
+  etag: 'aaaaaaa1111',
+  available: true,
+  fields: [
+    {
+      path: 'config.batch.max_records',
+      type: 'integer',
+      title: 'Maximum records per batch',
+      description: 'Records buffered before a flush.',
+      secret: false,
+      enum: null,
+      default: 1000,
+      value: 1000,
+      provenance: 'default',
+      dial: null,
+      protected: false,
+      set: false,
+    },
+    {
+      path: 'config.batch.timeout_ms',
+      type: 'integer',
+      title: 'Batch timeout',
+      description: 'Milliseconds before a partial batch flushes anyway.',
+      secret: false,
+      enum: null,
+      default: 5000,
+      value: 200,
+      provenance: 'overlay',
+      dial: null,
+      protected: false,
+      set: true,
+    },
+    {
+      path: 'config.kafka.brokers',
+      type: 'array',
+      title: 'Kafka brokers',
+      description: 'Derived from the deployment kafka mode.',
+      secret: false,
+      enum: null,
+      default: null,
+      value: ['kafka-0:9092'],
+      provenance: 'chart',
+      dial: null,
+      protected: false,
+      set: true,
+    },
+    {
+      path: 'config.kafka.sasl_password',
+      type: 'string',
+      title: 'Kafka SASL password',
+      description: 'Credential material.',
+      secret: true,
+      enum: null,
+      default: null,
+      value: null,
+      provenance: 'overlay',
+      dial: null,
+      protected: true,
+      set: true,
+    },
+    {
+      path: 'config.log_level',
+      type: 'string',
+      title: 'Log level',
+      description: 'How much the app says.',
+      secret: false,
+      enum: ['trace', 'debug', 'info', 'warn', 'error'],
+      default: 'info',
+      value: 'info',
+      provenance: 'default',
+      dial: null,
+      protected: false,
+      set: false,
+    },
+    {
+      path: 'config.tls_enabled',
+      type: 'boolean',
+      title: 'TLS enabled',
+      description: 'Whether the listener terminates TLS.',
+      secret: false,
+      enum: null,
+      default: false,
+      value: false,
+      provenance: 'unset',
+      dial: null,
+      protected: false,
+      set: false,
+    },
+  ],
+  unknown: [{ path: 'config.retired_option', value: 'left behind' }],
+  custom: [{ path: 'extraEnv.RUST_BACKTRACE', value: '1' }],
+};
 
 const DEFAULT_WRITE_RESULT = {
   changed: true,
@@ -205,6 +305,103 @@ export const apps = {
       } = {}) =>
         http.delete(withInstance(apps.app.mockedUrl, service, instance), () =>
           HttpResponse.json(mockedResponse),
+        ),
+    },
+  },
+  config: {
+    mockedUrl: '/api/v1/apps/{service}/{instance}/config',
+    get: {
+      success: ({
+        mockedResponse = DEFAULT_APP_CONFIG,
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TAppConfigResponse;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.get(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json(mockedResponse),
+        ),
+      // A deployment that mounted no contract for the app. Not an empty field
+      // list: the engine says so, and the console says so too.
+      unavailable: ({
+        service = 'service',
+        instance = 'instance',
+      }: { service?: string; instance?: string } = {}) =>
+        http.get(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json({
+            etag: null,
+            available: false,
+            fields: [],
+            unknown: [],
+            custom: [],
+          } satisfies TAppConfigResponse),
+        ),
+    },
+    put: {
+      success: ({
+        mockedResponse = { ...DEFAULT_WRITE_RESULT, custom_env: '' },
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TUpdateAppConfigResponse;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json(mockedResponse),
+        ),
+      // The engine's chart-derived refusal. `path` rides in context, because
+      // its handler moves everything outside code and message there, and
+      // `errors` stays empty - so a console reading only `errors` loses it.
+      chartDerived: ({
+        path = 'config.kafka.brokers',
+        message = 'the deployment sets this through kafka.mode, which outranks the overlay, so writing it here would change nothing',
+        service = 'service',
+        instance = 'instance',
+      }: {
+        path?: string;
+        message?: string;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json(
+            { code: 'chart_derived', message, errors: [], context: { path } },
+            { status: 409 },
+          ),
+        ),
+      chartSetEnv: ({
+        path = 'extraEnv.DFE_LOG_LEVEL',
+        message = 'the dfe-loader chart sets DFE_LOG_LEVEL itself, for its own logging, and its value is rendered last, so writing it here would change nothing',
+        service = 'service',
+        instance = 'instance',
+      }: {
+        path?: string;
+        message?: string;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json(
+            { code: 'chart_set_env', message, errors: [], context: { path } },
+            { status: 409 },
+          ),
+        ),
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 400,
+        service = 'service',
+        instance = 'instance',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        service?: string;
+        instance?: string;
+      } = {}) =>
+        http.put(withInstance(apps.config.mockedUrl, service, instance), () =>
+          HttpResponse.json(mockedResponse, { status }),
         ),
     },
   },
