@@ -1,5 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { getAccountDisplayName } from '@/core/helpers/account.helpers';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
 import { Select, SelectProps } from 'antd';
 import { useMemo, useState } from 'react';
@@ -18,10 +19,16 @@ export const GroupMemberSelect = (props: SelectProps) => {
   } = useFetchInfiniteFilteredAccounts({ search });
 
   const options = useMemo(() => {
-    return accounts.map((account) => ({
-      label: account.username,
-      value: account.username,
-    }));
+    return accounts.map((account) => {
+      const displayName = getAccountDisplayName(account);
+      return {
+        label:
+          displayName === account.username
+            ? account.username
+            : `${displayName} (${account.username})`,
+        value: account.username,
+      };
+    });
   }, [accounts]);
 
   const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {

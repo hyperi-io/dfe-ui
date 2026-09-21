@@ -14,6 +14,10 @@ import { useCallback, useState } from 'react';
 import { InviteUserDrawer } from './InviteUserDrawer';
 import { RowActions } from './RowActions';
 
+const EmptyText = () => (
+  <span className="text-foreground/50 dark:text-dark-foreground/50">None</span>
+);
+
 export const AccountManagement = () => {
   const [search, setSearch] = useState('');
   const {
@@ -37,6 +41,18 @@ export const AccountManagement = () => {
     account.username === setupStatus?.admin_username;
 
   const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string) => name?.trim() || <EmptyText />,
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      render: (email: string) => email?.trim() || <EmptyText />,
+    },
     {
       title: 'Username',
       dataIndex: 'username',
