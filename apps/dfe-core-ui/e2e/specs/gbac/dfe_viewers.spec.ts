@@ -91,7 +91,9 @@ test('Sources', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: 'Add Source', exact: true }),
   ).toBeHidden();
-  await expect(page.getByText('No sources found')).toBeVisible();
+  /* reset_all leaves the engine-owned `main` source, which no API can delete */
+  await expect(page.getByRole('treeitem')).toHaveCount(1);
+  await expect(page.getByRole('treeitem', { name: /main/ })).toBeVisible();
   await expect(page.getByText('No source selected')).toBeVisible();
 });
 
@@ -343,9 +345,10 @@ test.describe('Platform', () => {
     await page.getByRole('tab', { name: 'System Settings' }).click();
     await expect(page).toHaveURL(`${BASE_URL}/platform`);
 
+    /* Three cards read system_read: ClickHouse Cloud, System Settings, Retention */
     await expect(
       page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(2);
+    ).toHaveCount(3);
   });
 
   test('Git Operations', async ({ page }) => {
