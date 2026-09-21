@@ -1,7 +1,9 @@
 'use client';
 
+import { getAccountDisplayName } from '@/core/helpers/account.helpers';
 import { useFetchPermissions } from '@/core/hooks/_useFetchPermissions';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
+import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { useLogout } from '@/core/hooks/useLogout';
 import { IconLogout, IconUser } from '@repo/dfe-icons';
 import { Button, Spin } from 'antd';
@@ -21,6 +23,9 @@ export const UserActionsPopoverContent = () => {
   const router = useRouter();
   const { handleLogout } = useLogout();
   const { data: me, isLoading: isLoadingUser, error: errorUser } = useAuthMe();
+  const { data: currentUser, isLoading: isLoadingCurrentUser } =
+    useFetchCurrentUser();
+  const currentUserEmail = currentUser?.email?.trim();
 
   const {
     data: permissions,
@@ -30,7 +35,7 @@ export const UserActionsPopoverContent = () => {
 
   return (
     <div className="flex min-w-48 flex-col gap-y-3">
-      {(isLoadingUser || isLoadingPermissions) && (
+      {(isLoadingUser || isLoadingCurrentUser || isLoadingPermissions) && (
         <div className="flex justify-center py-1">
           <Spin size="small" />
         </div>
@@ -46,6 +51,18 @@ export const UserActionsPopoverContent = () => {
       )}
       {me && (
         <dl className="grid grid-cols-[80px_1fr] gap-x-6 gap-y-1 text-xs">
+          {currentUser && (
+            <>
+              <dt className={dataListTermStyle}>Name:</dt>
+              <dd>{getAccountDisplayName(currentUser)}</dd>
+            </>
+          )}
+          {currentUserEmail && (
+            <>
+              <dt className={dataListTermStyle}>Email:</dt>
+              <dd>{currentUserEmail}</dd>
+            </>
+          )}
           <dt className={dataListTermStyle}>User ID:</dt>
           <dd>{me.user_id}</dd>
           <dt className={dataListTermStyle}>Org ID:</dt>

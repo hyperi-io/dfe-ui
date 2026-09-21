@@ -54,6 +54,10 @@ export const ViewAccountDetails = ({ username }: { username: string }) => {
       </div>
 
       <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
+        <dt className={dataListTermStyle}>Name:</dt>
+        <dd>{data.name?.trim() || <EmptyData />}</dd>
+        <dt className={dataListTermStyle}>Email:</dt>
+        <dd>{data.email?.trim() || <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Username:</dt>
         <dd>{data.username}</dd>
         <dt className={dataListTermStyle}>Enabled:</dt>
