@@ -44,6 +44,28 @@ export const oidcFixture = (provider: string): OidcFixture | undefined => {
   return password ? { user: oidcFixtureUser(provider), password } : undefined;
 };
 
+/**
+ * The console landed on its sources page.
+ *
+ * /sources redirects to whichever source the console selects by default, so the
+ * landing is asserted by path and the query left to the app.
+ */
+export const expectSourcesLanding = (page: Page) =>
+  expect(page).toHaveURL((url) => url.pathname === '/sources');
+
+/**
+ * The session ended and the console offered to return where it was.
+ *
+ * The callback carries whichever sources query the redirect produced, so it is
+ * matched by prefix rather than by an encoded literal.
+ */
+export const expectLoggedOut = (page: Page) =>
+  expect(page).toHaveURL(
+    (url) =>
+      url.pathname === '/login' &&
+      (url.searchParams.get('callbackUrl') ?? '').startsWith('/sources'),
+  );
+
 export const loginAs = async (page: Page, user: string) => {
   await page.goto(`${BASE_URL}/login`);
 
@@ -52,5 +74,5 @@ export const loginAs = async (page: Page, user: string) => {
     .getByRole('textbox', { name: 'Password', exact: true })
     .fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 };

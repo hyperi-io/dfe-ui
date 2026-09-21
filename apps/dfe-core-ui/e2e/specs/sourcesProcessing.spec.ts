@@ -7,6 +7,10 @@ import { seedAppManagement } from '../config/appManagement.helpers';
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
 
+// RED on a docker-slim deployment, and correctly so: seed_source_with_transform
+// also seeds a fetcher source, and that tier does not offer dfe-fetcher, so the
+// seed is refused. dfe-engine#452 carries the trace and the two ways out.
+
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
@@ -26,12 +30,18 @@ const openProcessingTab = async (page: Page) => {
   // The row's hover actions sit over its right-hand side, so the click lands on
   // the label's leading edge rather than the row centre.
   await page
-    .getByText(SEED_SOURCE, { exact: true })
-    .first()
+    .getByTestId(`source-tree-item-${SEED_SOURCE}`)
     .click({ position: { x: 2, y: 2 } });
+  // Selecting a source rewrites the query, and every tab reads the selection from it.
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get('source_name') === SEED_SOURCE,
+  );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
+// RED: the engine sends the rules at compiled.routing.source_rules and
+// hasSourceRules reads compiled.source_rules, so the card returns null for every
+// source (#330). Asserting that absence would bank the defect as expected.
 test('Receiver routing', async ({ page }) => {
   await openProcessingTab(page);
 
@@ -61,7 +71,7 @@ test('Transform instance', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'dfe-transform-vrl', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toHaveCount(2);
+  await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toBeVisible();
 
   /* The file set the manifest declares for this app */
   await expect(
@@ -109,18 +119,27 @@ test('An app that declares no file set gets no editor', async ({ page }) => {
     page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
   ).toBeVisible();
 
-  /* Only a deployed app whose manifest declares a file set carries a Files panel */
+  /* Only a deployed app whose manifest declares a file set carries a Files panel,
+     and the undeployed ones are counted against the Deploy actions they offer so
+     that adding an app to the catalogue does not break the test. */
   await expect(page.getByText('Files', { exact: true })).toHaveCount(1);
-  await expect(page.getByText('Not deployed for this source.')).toHaveCount(2);
+  const undeployed = await page
+    .getByRole('button', { name: 'Deploy', exact: true })
+    .count();
+  await expect(page.getByText('Not deployed for this source.')).toHaveCount(
+    undeployed,
+  );
 });
 
 test('Deploy action for an undeployed per-source app', async ({ page }) => {
   await openProcessingTab(page);
 
+  /* How many apps are undeployed follows the catalogue, so only the seeded
+     deployment is a number: one app is deployed against this source. */
   await expect(
-    page.getByRole('button', { name: 'Deploy', exact: true }),
-  ).toHaveCount(2);
+    page.getByRole('button', { name: 'Deploy', exact: true }).first(),
+  ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Undeploy', exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
 });

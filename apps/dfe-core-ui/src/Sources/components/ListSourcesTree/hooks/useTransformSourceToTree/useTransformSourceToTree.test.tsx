@@ -245,6 +245,31 @@ describe('useTransformSourceToTree', () => {
     expect(getByText('receiver')).toBeInTheDocument();
   });
 
+  it('addresses a source row by its full path, which the origin tag does not disturb', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          children: {
+            azure: {
+              items: [baseSource({ name: 'azure/syslog', versions: [] })],
+            },
+          },
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByTestId } = renderSourceNodeTitle(
+      result.current.tree[0].children![0],
+    );
+    const row = getByTestId('source-tree-item-azure/syslog');
+
+    expect(row).toHaveTextContent('syslog');
+    expect(row).toHaveTextContent('receiver');
+  });
+
   it('highlights the source row when its deployed version is selected', () => {
     const { result } = renderHook(() =>
       useTransformSourceToTree({
@@ -318,6 +343,33 @@ describe('useTransformSourceToTree', () => {
 
     const { container } = renderSourceNodeTitle(result.current.tree[0]);
     expect(container.querySelector('.ant-tag')).not.toBeInTheDocument();
+  });
+
+  it('tags a version state rather than letting it truncate to a spinner lookalike', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'syslog',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const versionNodes = result.current.tree[0].children!;
+    const { getByText } = render(<>{versionNodes[1].title as ReactElement}</>);
+    const workingCopy = getByText('Working Copy');
+
+    expect(workingCopy).toHaveClass('ant-tag');
+    expect(workingCopy).not.toHaveClass('truncate');
   });
 
   it('memoises the tree when sourceObjects and setters are stable', () => {

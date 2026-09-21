@@ -45,6 +45,8 @@ test.describe('redirect when setup is not complete', () => {
     await expect(page).toHaveURL(new RegExp(`^${loginPageUrl}`));
   });
 
+  // RED, and correctly so: the wizard lands on configureOrganisation because the
+  // engine retired the admin_password step that used to map to welcome. dfe-ui#325.
   test('/sources lands on the wizard once signed in', async ({ page }) => {
     await page.goto(`${baseUrl}/sources`);
     await login(page);
@@ -53,6 +55,8 @@ test.describe('redirect when setup is not complete', () => {
   });
 });
 
+// Blocked behind the same landing defect, dfe-ui#325: the file is mode 'serial',
+// so the failure above skips this, and it opens on the same welcome assertion.
 test('setup from start testing forward and back navigation', async ({
   page,
 }) => {
