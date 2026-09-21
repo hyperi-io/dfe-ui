@@ -348,9 +348,10 @@ test.describe('Platform', () => {
     await page.getByRole('tab', { name: 'System Settings' }).click();
     await expect(page).toHaveURL(`${BASE_URL}/platform`);
 
+    /* Three cards read system_read: ClickHouse Cloud, System Settings, Retention */
     await expect(
       page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(2);
+    ).toHaveCount(3);
   });
 
   test('Git Operations', async ({ page }) => {
