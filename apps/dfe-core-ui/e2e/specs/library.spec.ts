@@ -6,6 +6,10 @@ import { loginAs } from '../config/login.helpers';
 
 const SEED_ARTEFACT = 'seed-artefact';
 
+// RED on a docker-slim deployment, and correctly so: seed_library_artefact also
+// seeds a fetcher source, and that tier does not offer dfe-fetcher, so the seed
+// is refused. dfe-engine#452 carries the trace and the two ways out.
+
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });

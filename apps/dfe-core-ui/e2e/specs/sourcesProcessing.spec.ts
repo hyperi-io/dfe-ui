@@ -7,6 +7,10 @@ import { seedAppManagement } from '../config/appManagement.helpers';
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
 
+// RED on a docker-slim deployment, and correctly so: seed_source_with_transform
+// also seeds a fetcher source, and that tier does not offer dfe-fetcher, so the
+// seed is refused. dfe-engine#452 carries the trace and the two ways out.
+
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });

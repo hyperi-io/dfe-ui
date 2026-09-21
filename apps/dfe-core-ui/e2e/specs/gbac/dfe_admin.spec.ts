@@ -88,8 +88,10 @@ test('Sources', async ({ page }) => {
   ).toHaveCount(2);
   await expect(
     page.getByRole('button', { name: 'Add Source', exact: true }),
-  ).toHaveCount(2);
-  await expect(page.getByText('No sources found')).toBeVisible();
+  ).toHaveCount(1);
+  /* reset_all leaves the engine-owned `main` source, which no API can delete */
+  await expect(page.getByRole('treeitem')).toHaveCount(1);
+  await expect(page.getByRole('treeitem', { name: /main/ })).toBeVisible();
   await expect(page.getByText('No source selected')).toBeVisible();
 });
 
