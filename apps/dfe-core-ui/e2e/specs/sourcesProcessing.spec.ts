@@ -30,8 +30,7 @@ const openProcessingTab = async (page: Page) => {
   // The row's hover actions sit over its right-hand side, so the click lands on
   // the label's leading edge rather than the row centre.
   await page
-    .getByText(SEED_SOURCE, { exact: true })
-    .first()
+    .getByTestId(`source-tree-item-${SEED_SOURCE}`)
     .click({ position: { x: 2, y: 2 } });
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };

@@ -245,6 +245,31 @@ describe('useTransformSourceToTree', () => {
     expect(getByText('receiver')).toBeInTheDocument();
   });
 
+  it('addresses a source row by its full path, which the origin tag does not disturb', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          children: {
+            azure: {
+              items: [baseSource({ name: 'azure/syslog', versions: [] })],
+            },
+          },
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByTestId } = renderSourceNodeTitle(
+      result.current.tree[0].children![0],
+    );
+    const row = getByTestId('source-tree-item-azure/syslog');
+
+    expect(row).toHaveTextContent('syslog');
+    expect(row).toHaveTextContent('receiver');
+  });
+
   it('highlights the source row when its deployed version is selected', () => {
     const { result } = renderHook(() =>
       useTransformSourceToTree({

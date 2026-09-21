@@ -38,6 +38,10 @@ export const folderTreeKey = (pathSegments: string[]) =>
 
 export const sourceTreeKey = (sourcePath: string) => `source:${sourcePath}`;
 
+/** The full path, not the leaf, so two sources of the same name in different folders stay distinct. */
+export const sourceTreeTestId = (sourcePath: string) =>
+  `source-tree-item-${sourcePath}`;
+
 export const versionTreeKey = (sourcePath: string, version: string) =>
   `${sourceTreeKey(sourcePath)}@${version}`;
 
@@ -229,7 +233,11 @@ const sourceSummaryToTreeData = ({
           <TreeInteractiveLabel
             icon={fileIcon}
             title={
-              <span className="flex gap-2 items-center">
+              /* The row carries badges beside the name, so its text is not a stable locator; address it by the full source path. */
+              <span
+                className="flex gap-2 items-center"
+                data-testid={sourceTreeTestId(source.name)}
+              >
                 {source.name.split('/').pop() ?? ''}
 
                 {source.origin && (
