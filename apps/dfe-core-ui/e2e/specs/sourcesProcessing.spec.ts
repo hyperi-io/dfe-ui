@@ -39,9 +39,9 @@ const openProcessingTab = async (page: Page) => {
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
-// RED: SourceRoutingCard needs a single-multiplicity app carrying instances, and
-// the tab renders only the four per_config apps, so no routing card appears.
-// Asserting that absence would bank the defect as expected behaviour.
+// RED: the engine sends the rules at compiled.routing.source_rules and
+// hasSourceRules reads compiled.source_rules, so the card returns null for every
+// source (#330). Asserting that absence would bank the defect as expected.
 test('Receiver routing', async ({ page }) => {
   await openProcessingTab(page);
 
