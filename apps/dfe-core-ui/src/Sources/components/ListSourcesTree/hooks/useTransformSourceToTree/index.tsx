@@ -57,7 +57,7 @@ const buildVersionChildren = (
   const displayVersion = (version: string) => {
     return version === source.deployed_version || version === source.current;
   };
-  const versionLabel = (version: string) => {
+  const versionStateLabel = (version: string) => {
     if (version === source.current && version === source.deployed_version) {
       return 'Current Deployed';
     }
@@ -68,7 +68,7 @@ const buildVersionChildren = (
       return 'Deployed';
     }
 
-    return version;
+    return null;
   };
   return (source.versions ?? []).filter(displayVersion).map((version) => ({
     key: versionTreeKey(source.name, version),
@@ -81,7 +81,14 @@ const buildVersionChildren = (
                 <IconRocket className="text-tertiary shrink-0 absolute top-2 -left-5.5" />
               </Tooltip>
             )}
-            <span className="min-w-0 truncate">{versionLabel(version)}</span>
+            {/* A truncated state label reads as a spinner ("Working ..."), so it is a tag and never ellipsised. */}
+            {versionStateLabel(version) ? (
+              <Tag className="m-0 shrink-0 whitespace-nowrap">
+                {versionStateLabel(version)}
+              </Tag>
+            ) : (
+              <span className="min-w-0 truncate">{version}</span>
+            )}
             {version === source.current && (
               <Tooltip destroyOnHidden title="Current version">
                 <IconStarFilled className="text-yellow-500 shrink-0" />
