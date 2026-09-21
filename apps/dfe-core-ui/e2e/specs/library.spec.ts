@@ -88,7 +88,9 @@ test('Usage', async ({ page }) => {
   await page.getByRole('tab', { name: 'Usage' }).click();
 
   await expect(page.getByText('dfe-transform-vrl')).toBeVisible();
-  await expect(page.getByText('seedsource')).toBeVisible();
+  await expect(
+    page.getByTestId('library-usage-instance-seedsource'),
+  ).toBeVisible();
   await expect(page.getByText('seed_library.vrl')).toBeVisible();
   await expect(page.getByText('version 1', { exact: true })).toBeVisible();
 });

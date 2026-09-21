@@ -7,7 +7,15 @@ import { Spin, Tag } from 'antd';
 
 const COLUMNS = [
   { title: 'App', dataIndex: 'service', key: 'service' },
-  { title: 'Instance', dataIndex: 'instance', key: 'instance' },
+  {
+    title: 'Instance',
+    dataIndex: 'instance',
+    key: 'instance',
+    // The cell can gain decoration beside the name, so it is addressed by id rather than by its text.
+    render: (value: string) => (
+      <span data-testid={`library-usage-instance-${value}`}>{value}</span>
+    ),
+  },
   { title: 'File set', dataIndex: 'file_set', key: 'file_set' },
   {
     title: 'File',
