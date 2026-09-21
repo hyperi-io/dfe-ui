@@ -18,7 +18,7 @@ export const PromoteJsonPathsResultCard = ({
     status,
     column_name,
     data_type,
-    index_type,
+    use_case,
     copy_cel,
     error,
   },
@@ -65,8 +65,8 @@ export const PromoteJsonPathsResultCard = ({
           <dd>{status}</dd>
           <dt className={dataListTermStyle}>Data Type</dt>
           <dd>{data_type || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Index Type</dt>
-          <dd>{index_type || <EmptyData />}</dd>
+          <dt className={dataListTermStyle}>Index Use Case</dt>
+          <dd>{use_case || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>Copy Cel</dt>
           <dd>{copy_cel || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>Copy Directive</dt>
