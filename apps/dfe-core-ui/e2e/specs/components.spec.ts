@@ -33,29 +33,29 @@ test('Pools', async ({ page }) => {
   ).toBeHidden();
 });
 
-test('Seeded scaling dials', async ({ page }) => {
+/*
+ * A Compose deployment has no KEDA, so the endpoint refuses the dials.
+ * The Kubernetes form is covered by ScalingCard.test.tsx.
+ */
+test('Scaling dials are refused on a Compose deployment', async ({ page }) => {
   await openComponents(page);
 
   await expect(page.getByText('Scaling')).toBeVisible();
-  await expect(page.getByText('Deploy target: kubernetes')).toBeVisible();
+  await expect(page.getByText('Deploy target: docker')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Scaling dials do not apply here' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Compose has no KEDA', { exact: false }),
+  ).toBeVisible();
 
-  /* Exact: the backing-service cards below carry '<service> CPU request' too */
+  /* The refusal replaces the dials, so neither label reaches the DOM */
   await expect(
     page.getByLabel('Minimum replicas', { exact: true }),
-  ).toHaveValue('2');
+  ).toBeHidden();
   await expect(
     page.getByLabel('Maximum replicas', { exact: true }),
-  ).toHaveValue('12');
-  await expect(page.getByLabel('CPU request', { exact: true })).toHaveValue(
-    '250m',
-  );
-  await expect(page.getByLabel('Memory request', { exact: true })).toHaveValue(
-    '512Mi',
-  );
-  await expect(page.getByLabel('CPU limit', { exact: true })).toHaveValue('1');
-  await expect(page.getByLabel('Memory limit', { exact: true })).toHaveValue(
-    '1Gi',
-  );
+  ).toBeHidden();
 });
 
 test('Backing services', async ({ page }) => {
@@ -83,17 +83,19 @@ test('A node count may be raised and not lowered', async ({ page }) => {
     .getByRole('button', { name: 'Raise count', exact: true })
     .first();
 
-  /* reset_all does not clear the substrate overlay, so work off what is there */
-  const declared = Number(await replicas.inputValue()) || 0;
-  const raised = declared + 1;
+  /*
+   * reset_all clears the substrate overlay, so the count starts undeclared.
+   * The floor of 1 is the field's minimum, below which the guard never runs.
+   */
+  const base = Math.max(Number(await replicas.inputValue()) || 0, 1);
 
-  await replicas.fill(String(raised));
+  await replicas.fill(String(base + 1));
   await raise.click();
   /* Exact: the history table below tags every commit 'committed' */
   await expect(page.getByText('Committed', { exact: true })).toBeVisible();
 
   /* Declared at the raised count now, so lowering it is refused */
-  await replicas.fill(String(raised - 1));
+  await replicas.fill(String(base));
   await expect(page.getByText('Cannot be lowered here')).toBeVisible();
   await expect(
     page.getByText('Removing a node drops a copy of the data', {
