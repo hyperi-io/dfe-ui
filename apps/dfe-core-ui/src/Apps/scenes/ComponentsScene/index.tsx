@@ -1,6 +1,7 @@
 'use client';
 
 import { BackingServices } from '@/Apps/components/BackingServices';
+import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
 import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
@@ -104,6 +105,10 @@ export const ComponentsScene = () => {
                       instance={pool.instance}
                     />
                   )}
+                  <AppConfigCard
+                    service={pool.service}
+                    instance={pool.instance}
+                  />
                   <AppHistoryCard
                     service={pool.service}
                     instance={pool.instance}
