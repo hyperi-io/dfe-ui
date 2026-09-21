@@ -1,6 +1,6 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
-import { useCRONBuilderContext } from '@/Hunts/components/CRONBuilder/CRONBuilder.context';
+import { useCRONBuilderContext } from '@/Hunts/components/CRONBuilderDrawer/CRONBuilder.context';
 import { Button, Input, Tabs } from 'antd';
 import { CRONBuilderProps } from '..';
 import { Custom } from './Custom';

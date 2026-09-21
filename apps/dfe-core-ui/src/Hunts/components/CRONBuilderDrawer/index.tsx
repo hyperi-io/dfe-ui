@@ -18,7 +18,10 @@ export interface CRONBuilderProps extends Omit<
   onChange?: (value: string) => void;
 }
 
-export const CRONBuilderBase = ({ onChange, ...props }: CRONBuilderProps) => {
+export const CRONBuilderDrawerBase = ({
+  onChange,
+  ...props
+}: CRONBuilderProps) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const { cronExpression } = useCRONBuilderContext();
 
@@ -49,10 +52,10 @@ export const CRONBuilderBase = ({ onChange, ...props }: CRONBuilderProps) => {
   );
 };
 
-export const CRONBuilder = ({ value, ...props }: CRONBuilderProps) => {
+export const CRONBuilderDrawer = ({ value, ...props }: CRONBuilderProps) => {
   return (
     <CRONBuilderProvider value={value?.toString()}>
-      <CRONBuilderBase value={value} {...props} />
+      <CRONBuilderDrawerBase value={value} {...props} />
     </CRONBuilderProvider>
   );
 };

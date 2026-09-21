@@ -1,5 +1,5 @@
-import { useCRONBuilderContext } from '@/Hunts/components/CRONBuilder/CRONBuilder.context';
-import { parseCronExpression } from '@/Hunts/components/CRONBuilder/CRONBuilder.helpers';
+import { useCRONBuilderContext } from '@/Hunts/components/CRONBuilderDrawer/CRONBuilder.context';
+import { parseCronExpression } from '@/Hunts/components/CRONBuilderDrawer/CRONBuilder.helpers';
 import { InputNumber } from 'antd';
 
 export const Minutes = () => {
