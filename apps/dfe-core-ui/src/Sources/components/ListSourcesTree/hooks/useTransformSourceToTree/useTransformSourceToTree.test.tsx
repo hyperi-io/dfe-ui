@@ -320,6 +320,33 @@ describe('useTransformSourceToTree', () => {
     expect(container.querySelector('.ant-tag')).not.toBeInTheDocument();
   });
 
+  it('tags a version state rather than letting it truncate to a spinner lookalike', () => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: {
+          items: [
+            baseSource({
+              name: 'syslog',
+              current: 'v2',
+              deployed_version: 'v1',
+              versions: ['v1', 'v2'],
+            }),
+          ],
+        },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const versionNodes = result.current.tree[0].children!;
+    const { getByText } = render(<>{versionNodes[1].title as ReactElement}</>);
+    const workingCopy = getByText('Working Copy');
+
+    expect(workingCopy).toHaveClass('ant-tag');
+    expect(workingCopy).not.toHaveClass('truncate');
+  });
+
   it('memoises the tree when sourceObjects and setters are stable', () => {
     const source_objects: TSourceSummary = {
       items: [baseSource({ name: 'a' })],
