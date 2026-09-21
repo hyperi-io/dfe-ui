@@ -14,23 +14,32 @@ export type TSourceRoutingState = {
   drift: boolean;
 };
 
-const asRules = (block: unknown): TSourceRule[] => {
-  if (typeof block !== 'object' || block === null) return [];
+// The engine keys each derived block by name, so the receiver's rules arrive as
+// compiled.routing.source_rules with a sibling compiled.destinations block.
+const asBlocks = (blocks: unknown): unknown[] =>
+  typeof blocks === 'object' && blocks !== null
+    ? Object.values(blocks as Record<string, unknown>)
+    : [];
+
+const ruleList = (block: unknown): unknown[] | null => {
+  if (typeof block !== 'object' || block === null) return null;
   const rules = (block as { source_rules?: unknown }).source_rules;
-  if (!Array.isArray(rules)) return [];
-  return rules.filter(
-    (rule): rule is TSourceRule =>
-      typeof rule === 'object' &&
-      rule !== null &&
-      typeof (rule as TSourceRule).source === 'string',
-  );
+  return Array.isArray(rules) ? rules : null;
 };
 
+const isSourceRule = (rule: unknown): rule is TSourceRule =>
+  typeof rule === 'object' &&
+  rule !== null &&
+  typeof (rule as TSourceRule).source === 'string';
+
+const asRules = (blocks: unknown): TSourceRule[] =>
+  asBlocks(blocks)
+    .flatMap((block) => ruleList(block) ?? [])
+    .filter(isSourceRule);
+
 /** Whether this compiler emits per-source rules rather than a whole-app map. */
-export const hasSourceRules = (block: unknown): boolean =>
-  typeof block === 'object' &&
-  block !== null &&
-  Array.isArray((block as { source_rules?: unknown }).source_rules);
+export const hasSourceRules = (blocks: unknown): boolean =>
+  asBlocks(blocks).some((block) => ruleList(block) !== null);
 
 const sameRule = (left: TSourceRule | null, right: TSourceRule | null) => {
   if (left === null || right === null) return left === right;
@@ -50,14 +59,14 @@ const sameRule = (left: TSourceRule | null, right: TSourceRule | null) => {
  * receiver agrees with what the source definition now says.
  */
 export const sourceRoutingRule = (
-  compiledBlock: unknown,
-  deployedBlock: unknown,
+  compiledBlocks: unknown,
+  deployedBlocks: unknown,
   source: string,
 ): TSourceRoutingState => {
   const compiled =
-    asRules(compiledBlock).find((rule) => rule.source === source) ?? null;
+    asRules(compiledBlocks).find((rule) => rule.source === source) ?? null;
   const deployed =
-    asRules(deployedBlock).find((rule) => rule.source === source) ?? null;
+    asRules(deployedBlocks).find((rule) => rule.source === source) ?? null;
 
   return { compiled, deployed, drift: !sameRule(compiled, deployed) };
 };

@@ -1,4 +1,8 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import {
+  LOADER_ROUTING_BLOCKS,
+  RECEIVER_ROUTING_BLOCKS,
+} from '@/core/config/api/endpoints/generator/mocks/apps';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -53,17 +57,8 @@ describe('SourceRoutingCard', () => {
           values_paths: { routing: 'config.routing' },
           drift: true,
           absent: false,
-          compiled: {
-            source_rules: [
-              {
-                field: 'event.dataset',
-                mode: 'key_value_set',
-                match_value: 'syslog',
-                source: 'syslog',
-              },
-            ],
-          },
-          deployed: { source_rules: [] },
+          compiled: RECEIVER_ROUTING_BLOCKS,
+          deployed: { routing: { source_rules: [] } },
         },
       }),
     );
@@ -86,7 +81,7 @@ describe('SourceRoutingCard', () => {
           values_paths: { routing: 'config.routing' },
           drift: true,
           absent: true,
-          compiled: { source_rules: [] },
+          compiled: { routing: { source_rules: [] } },
           deployed: {},
         },
       }),
@@ -109,23 +104,34 @@ describe('SourceRoutingCard', () => {
     });
   });
 
-  it('renders nothing for a compiler that emits no per-source rules', async () => {
+  // The loader is the true negative: its routing block is a whole-app map, so a
+  // source page has nothing to show. Pinned so it is never "fixed" into an
+  // empty card.
+  it('renders nothing for dfe-loader, whose routing is a whole-app map', async () => {
     server.use(
       routing({
-        service: 'dfe-receiver',
+        service: 'dfe-loader',
         instance: 'default',
         mockedResponse: {
           compiler: 'loader',
           values_paths: { routing: 'config.routing' },
           drift: false,
           absent: false,
-          compiled: { source_routing: true, source_to_table: {} },
-          deployed: { source_routing: true, source_to_table: {} },
+          compiled: LOADER_ROUTING_BLOCKS,
+          deployed: LOADER_ROUTING_BLOCKS,
         },
       }),
     );
 
-    const { container } = renderCard();
+    const { container } = render(
+      <SourceRoutingCard
+        service="dfe-loader"
+        instance="default"
+        source="syslog"
+        hasCompiledRouting
+      />,
+      { wrapper },
+    );
 
     await waitFor(() => {
       expect(container).toBeEmptyDOMElement();
