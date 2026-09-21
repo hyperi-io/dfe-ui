@@ -8,6 +8,7 @@ import {
 } from '@/core/contexts/ListSchemasContext';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { cn } from '@/core/utils/style';
+import { CreateDerivedSchemaDrawer } from '@/Schemas/components/CreateDerivedSchemaDrawer';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -61,7 +62,11 @@ export const SchemasToolbarBase = () => {
           </Link>
         ))}
       </nav>
-      <CreateSchemaDrawer onSuccess={handleSuccess} />
+      <div className="flex gap-2">
+        {/* No tree lists derived schemas yet, so creating one selects nothing. */}
+        <CreateDerivedSchemaDrawer />
+        <CreateSchemaDrawer onSuccess={handleSuccess} />
+      </div>
     </Toolbar>
   );
 };
