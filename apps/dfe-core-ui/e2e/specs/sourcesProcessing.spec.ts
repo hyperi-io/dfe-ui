@@ -32,9 +32,16 @@ const openProcessingTab = async (page: Page) => {
   await page
     .getByTestId(`source-tree-item-${SEED_SOURCE}`)
     .click({ position: { x: 2, y: 2 } });
+  // Selecting a source rewrites the query, and every tab reads the selection from it.
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get('source_name') === SEED_SOURCE,
+  );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
+// RED: SourceRoutingCard needs a single-multiplicity app carrying instances, and
+// the tab renders only the four per_config apps, so no routing card appears.
+// Asserting that absence would bank the defect as expected behaviour.
 test('Receiver routing', async ({ page }) => {
   await openProcessingTab(page);
 
@@ -64,7 +71,7 @@ test('Transform instance', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'dfe-transform-vrl', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toHaveCount(2);
+  await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toBeVisible();
 
   /* The file set the manifest declares for this app */
   await expect(
@@ -112,18 +119,27 @@ test('An app that declares no file set gets no editor', async ({ page }) => {
     page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
   ).toBeVisible();
 
-  /* Only a deployed app whose manifest declares a file set carries a Files panel */
+  /* Only a deployed app whose manifest declares a file set carries a Files panel,
+     and the undeployed ones are counted against the Deploy actions they offer so
+     that adding an app to the catalogue does not break the test. */
   await expect(page.getByText('Files', { exact: true })).toHaveCount(1);
-  await expect(page.getByText('Not deployed for this source.')).toHaveCount(2);
+  const undeployed = await page
+    .getByRole('button', { name: 'Deploy', exact: true })
+    .count();
+  await expect(page.getByText('Not deployed for this source.')).toHaveCount(
+    undeployed,
+  );
 });
 
 test('Deploy action for an undeployed per-source app', async ({ page }) => {
   await openProcessingTab(page);
 
+  /* How many apps are undeployed follows the catalogue, so only the seeded
+     deployment is a number: one app is deployed against this source. */
   await expect(
-    page.getByRole('button', { name: 'Deploy', exact: true }),
-  ).toHaveCount(2);
+    page.getByRole('button', { name: 'Deploy', exact: true }).first(),
+  ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Undeploy', exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
 });

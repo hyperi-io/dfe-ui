@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { loginAs } from '../../config/login.helpers';
+import {
+  expectLoggedOut,
+  expectSourcesLanding,
+  loginAs,
+} from '../../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -12,7 +16,7 @@ test.beforeEach(async ({ playwright, page }) => {
 
 test('Sidebar Navigation', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   /* Shows the correct sidebar navigation links */
   await expect(
@@ -61,7 +65,7 @@ test('Sidebar Navigation', async ({ page }) => {
 
 test('User actions', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   await page.getByRole('button', { name: 'User actions', exact: true }).click();
   await expect(page.getByText('User ID:')).toBeVisible();
@@ -73,11 +77,11 @@ test('User actions', async ({ page }) => {
 
 test('Logout', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   await page.getByRole('button', { name: 'User actions', exact: true }).click();
   await page.getByRole('button', { name: 'Logout', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/login?callbackUrl=%2Fsources`);
+  await expectLoggedOut(page);
 });
 
 test('Sources', async ({ page }) => {
@@ -92,7 +96,10 @@ test('Sources', async ({ page }) => {
   /* reset_all leaves the engine-owned `main` source, which no API can delete */
   await expect(page.getByRole('treeitem')).toHaveCount(1);
   await expect(page.getByRole('treeitem', { name: /main/ })).toBeVisible();
-  await expect(page.getByText('No source selected')).toBeVisible();
+  /* The console opens main on landing rather than showing an empty detail */
+  await expect(
+    page.getByRole('heading', { name: /Source Configuration: main/ }),
+  ).toBeVisible();
 });
 
 test('Meta Schemas', async ({ page }) => {

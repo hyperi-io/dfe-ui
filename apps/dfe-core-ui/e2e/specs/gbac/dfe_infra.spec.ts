@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { loginAs } from '../../config/login.helpers';
+import {
+  expectLoggedOut,
+  expectSourcesLanding,
+  loginAs,
+} from '../../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -12,7 +16,7 @@ test.beforeEach(async ({ playwright, page }) => {
 
 test('Sidebar Navigation', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   // First landing page is Sources
   // Even if user does not see the nav link they will see the page title link
@@ -66,7 +70,7 @@ test('Sidebar Navigation', async ({ page }) => {
 
 test('User actions', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   await page.getByRole('button', { name: 'User actions', exact: true }).click();
   await expect(page.getByText('User ID:')).toBeVisible();
@@ -78,11 +82,11 @@ test('User actions', async ({ page }) => {
 
 test('Logout', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expect(page).toHaveURL(`${BASE_URL}/sources`);
+  await expectSourcesLanding(page);
 
   await page.getByRole('button', { name: 'User actions', exact: true }).click();
   await page.getByRole('button', { name: 'Logout', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/login?callbackUrl=%2Fsources`);
+  await expectLoggedOut(page);
 });
 
 test('Sources', async ({ page }) => {
