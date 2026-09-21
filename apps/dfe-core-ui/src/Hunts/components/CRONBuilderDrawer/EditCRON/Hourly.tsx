@@ -3,30 +3,41 @@ import { parseCronExpression } from '@/Hunts/components/CRONBuilderDrawer/CRONBu
 import { InputNumber, Radio } from 'antd';
 import { useState } from 'react';
 
+type HourlyType = 'every' | 'at';
+
 export const Hourly = () => {
   const { cronExpression, updateCronExpression } = useCRONBuilderContext();
   const { hour, minute } = parseCronExpression(cronExpression);
 
-  const [hourlyType, setHourlyType] = useState<'every' | 'at'>(
+  const [hourlyType, setHourlyType] = useState<HourlyType>(
     hour?.includes('*/') ? 'every' : 'at',
   );
 
   const handleMinuteChange = (value: number | null) => {
     updateCronExpression({ atomic: { minute: value?.toString() ?? '*' } });
   };
-  const handleHourChange = (value: number | null) => {
-    const updateHourly =
-      hourlyType === 'every'
-        ? `*/${value?.toString() ?? '*'}`
-        : (value?.toString() ?? '*');
-    updateCronExpression({ atomic: { hour: updateHourly } });
+  const handleHourChange = (value: string, type: HourlyType = hourlyType) => {
+    const hourlyPrefix = type === 'every' ? '*/' : '';
+    const updateHourly = `${hourlyPrefix}${value.replace('*/', '')}`;
+    const everyDay = '*/1';
+    updateCronExpression({ atomic: { hour: updateHourly, day: everyDay } });
   };
+
+  const hourValue = hour?.includes('*')
+    ? Number(hour?.replace('*', '').replace('/', ''))
+    : (Number(hour) ?? undefined);
+  const minuteValue = minute?.includes('*')
+    ? Number(minute?.replace('*', '').replace('/', ''))
+    : (Number(minute) ?? undefined);
+
   return (
     <div className="flex flex-col gap-y-2">
       <Radio.Group
         value={hourlyType}
         onChange={(e) => {
-          setHourlyType(e.target.value);
+          const nextType = e.target.value as HourlyType;
+          setHourlyType(nextType);
+          handleHourChange(hour ?? '1', nextType);
         }}
       >
         <Radio value="every">Every hour and minute</Radio>
@@ -37,9 +48,9 @@ export const Hourly = () => {
         <InputNumber
           min={1}
           max={23}
-          value={Number(hour?.replace('*/', '')) ?? 1}
+          value={hourValue}
           onChange={(val) => {
-            handleHourChange(Number(val) ?? 1);
+            handleHourChange((val ?? 1).toString());
           }}
           placeholder="Hours"
         />
@@ -47,7 +58,7 @@ export const Hourly = () => {
         <InputNumber
           min={0}
           max={59}
-          value={Number(minute?.replace('*/', '')) ?? 0}
+          value={minuteValue}
           onChange={(value) => {
             handleMinuteChange(Number(value) ?? 0);
           }}

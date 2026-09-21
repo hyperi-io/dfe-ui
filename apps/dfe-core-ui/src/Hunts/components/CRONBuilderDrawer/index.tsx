@@ -32,16 +32,16 @@ export const CRONBuilderDrawerBase = ({
   return (
     <>
       <Input
+        {...props}
         onClick={() => {
           setIsDrawerVisible(true);
         }}
         readOnly
         value={cronExpression}
-        {...props}
       />
       <Drawer
         title="CRON Schedule Builder"
-        size="30%"
+        size={600}
         placement="right"
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
