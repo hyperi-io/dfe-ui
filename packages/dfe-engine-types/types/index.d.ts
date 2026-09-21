@@ -6989,7 +6989,7 @@ export interface components {
             attribute?: string[];
             /**
              * Use Case
-             * @description Index use case to generate for the column (dimension, range, bloom, fulltext, text_search), or null for no index. Always null on a discovered draft -- set it in the editor if you want an index.
+             * @description The question the column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. The full vocabulary is the type registry's, in dfe-schemas registries/types.yaml. Always null on a discovered draft -- set it in the editor if you want an index.
              */
             use_case?: string | null;
             /**
@@ -9760,10 +9760,10 @@ export interface components {
              */
             data_type?: string | null;
             /**
-             * Index Type
-             * @description Optional ClickHouse secondary index family
+             * Use Case
+             * @description The question the promoted column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. Validated against the type registry dfe-schemas ships as registries/types.yaml, so it follows the registry rather than a list held here.
              */
-            index_type?: ("minmax" | "set" | "bloom_filter" | "tokenbf_v1" | "ngrambf_v1") | null;
+            use_case?: string | null;
             /**
              * Atomic
              * @description When true, all paths succeed or none commit; else best-effort
@@ -9809,8 +9809,8 @@ export interface components {
             column_name?: string | null;
             /** Data Type */
             data_type?: string | null;
-            /** Index Type */
-            index_type?: string | null;
+            /** Use Case */
+            use_case?: string | null;
             /** Copy Cel */
             copy_cel?: string | null;
             /** Error */
