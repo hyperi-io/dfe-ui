@@ -12,20 +12,19 @@ import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
 export const PromoteJsonPaths = ({
   selectedSourceName,
   selectedSourceVersion,
-  data,
   jsonPaths,
   onSuccess,
   attachedSchemaPath,
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  data: TPromoteFieldResponse | null;
   jsonPaths: TJsonPathsResponse | null;
   onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
 }) => {
   const { handleClearFieldsToPromote } = usePromoteRowsContext();
   const {
+    data,
     mutate: promoteFieldsMutation,
     isPending: isPromotingFields,
     error: errorPromotingFields,
@@ -49,13 +48,13 @@ export const PromoteJsonPaths = ({
 
   const tableValues = useMemo(() => {
     return (
-      data?.diff?.new_columns?.map((column) => ({
+      data?.results?.map((column) => ({
         ...column,
-        id: column.name,
-        _field_type: column._field_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
+        id: column.column_name ?? undefined,
+        _field_type: column.data_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
       })) ?? []
     );
-  }, [data?.diff?.new_columns]);
+  }, [data?.results]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -80,7 +79,6 @@ export const PromoteJsonPaths = ({
             <li key={result.json_path}>
               <PromoteJsonPathsResultCard
                 result={result}
-                ddl={data?.diff?.ddl?.[index]}
                 copyDirective={data?.diff?.copy_directives?.[index]}
               />
             </li>

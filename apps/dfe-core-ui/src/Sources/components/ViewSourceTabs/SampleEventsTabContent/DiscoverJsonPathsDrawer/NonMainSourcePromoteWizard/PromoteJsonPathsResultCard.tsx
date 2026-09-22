@@ -1,4 +1,3 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Tooltip } from '@/core/components/Tooltip';
@@ -13,20 +12,10 @@ const EmptyData = () => (
 );
 
 export const PromoteJsonPathsResultCard = ({
-  result: {
-    json_path,
-    status,
-    column_name,
-    data_type,
-    use_case,
-    copy_cel,
-    error,
-  },
-  ddl,
+  result: { json_path, status, column_name, data_type, copy_cel, error },
   copyDirective,
 }: {
   result: TPromoteFieldResponse['results'][number];
-  ddl: string | undefined;
   copyDirective: string | undefined;
 }) => {
   return (
@@ -65,15 +54,12 @@ export const PromoteJsonPathsResultCard = ({
           <dd>{status}</dd>
           <dt className={dataListTermStyle}>Data Type</dt>
           <dd>{data_type || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Index Type</dt>
-          <dd>{use_case || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>Copy Cel</dt>
           <dd>{copy_cel || <EmptyData />}</dd>
           <dt className={dataListTermStyle}>Copy Directive</dt>
           <dd>{copyDirective || <EmptyData />}</dd>
         </dl>
 
-        {ddl && <AceEditor mode="sql" readOnly height="85px" value={ddl} />}
         {error && (
           <NotificationCard
             title={`${json_path} has the following errors`}
