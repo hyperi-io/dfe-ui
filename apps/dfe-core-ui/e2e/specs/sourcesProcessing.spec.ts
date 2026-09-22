@@ -68,9 +68,14 @@ test('Transform instance', async ({ page }) => {
   await openProcessingTab(page);
 
   await expect(
-    page.getByRole('heading', { name: 'dfe-transform-vrl', exact: true }),
+    page.getByRole('heading', { name: 'Transform', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(`Instance ${SEED_SOURCE}`)).toBeVisible();
+  /* This seed writes the instance and leaves the source naming no engine, so
+     the card reports the instance that exists rather than a choice it cannot
+     see. The files and health of that instance stay reachable either way. */
+  await expect(
+    page.getByRole('radio', { name: /dfe-transform-vrl[\s\S]*Running/ }),
+  ).toBeVisible();
 
   /* The file set the manifest declares for this app */
   await expect(
@@ -107,38 +112,32 @@ test('Library link', async ({ page }) => {
 test('An app that declares no file set gets no editor', async ({ page }) => {
   await openProcessingTab(page);
 
-  /* Every per-source app in the catalogue is listed */
+  /* Every transform in the catalogue is offered as one choice */
   await expect(
-    page.getByRole('heading', { name: 'dfe-transform-elastic', exact: true }),
+    page.getByRole('radio', { name: /dfe-transform-elastic/ }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'dfe-transform-vector', exact: true }),
+    page.getByRole('radio', { name: /dfe-transform-vector/ }),
   ).toBeVisible();
+  /* dfe-fetcher is per-source too, and it keeps a card of its own */
   await expect(
     page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
   ).toBeVisible();
 
-  /* Only a deployed app whose manifest declares a file set carries a Files panel,
-     and the undeployed ones are counted against the Deploy actions they offer so
-     that adding an app to the catalogue does not break the test. */
+  /* Only the transform with an instance carries panels, and only it declares files */
   await expect(page.getByText('Files', { exact: true })).toHaveCount(1);
-  const undeployed = await page
-    .getByRole('button', { name: 'Deploy', exact: true })
-    .count();
-  await expect(page.getByText('Not deployed for this source.')).toHaveCount(
-    undeployed,
-  );
 });
 
-test('Deploy action for an undeployed per-source app', async ({ page }) => {
+test('Deploy is offered only by the app that takes one', async ({ page }) => {
   await openProcessingTab(page);
 
-  /* How many apps are undeployed follows the catalogue, so only the seeded
-     deployment is a number: one app is deployed against this source. */
+  /* A transform offers neither: the source names which one runs, and the engine
+     deploys and removes the instance with it. */
   await expect(
-    page.getByRole('button', { name: 'Deploy', exact: true }).first(),
-  ).toBeVisible();
+    page.getByRole('button', { name: 'Deploy', exact: true }),
+  ).toHaveCount(1);
+  await expect(page.getByText('Not deployed for this source.')).toHaveCount(1);
   await expect(
     page.getByRole('button', { name: 'Undeploy', exact: true }),
-  ).toHaveCount(1);
+  ).toHaveCount(0);
 });

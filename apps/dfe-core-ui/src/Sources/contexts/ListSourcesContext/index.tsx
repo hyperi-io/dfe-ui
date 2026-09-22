@@ -45,8 +45,28 @@ const parseFiltersFromParams = (
   return { search, enabled, sort_by, sort_order };
 };
 
-const filtersToSearchString = (f: ListSourcesQueryParams): string => {
-  const params = new URLSearchParams();
+/**
+ * The query string for a set of filters, keeping every parameter they do not own.
+ *
+ * `tab` belongs to the source detail, not to this list: rebuilding the query
+ * from the filters alone dropped it, so selecting a version sent the reader
+ * back to the first tab.
+ */
+const filtersToSearchString = (
+  f: ListSourcesQueryParams,
+  keep?: URLSearchParams,
+): string => {
+  const params = new URLSearchParams(keep);
+  for (const owned of [
+    'search',
+    'enabled',
+    'sort_by',
+    'sort_order',
+    'source_name',
+    'source_version',
+  ]) {
+    params.delete(owned);
+  }
   if (f.search) params.set('search', f.search);
   if (f.enabled !== undefined) params.set('enabled', String(f.enabled));
   if (f.sort_by) params.set('sort_by', f.sort_by);
@@ -178,17 +198,21 @@ export const ListSourcesProvider = ({
     }) => {
       setSelectedSourceName(source_name);
       setSelectedSourceVersion(source_version);
-      const query = filtersToSearchString({
-        ...filters,
-        source_name: source_name ?? '',
-        source_version: source_version ?? '',
-      });
+      const query = filtersToSearchString(
+        {
+          ...filters,
+          source_name: source_name ?? '',
+          source_version: source_version ?? '',
+        },
+        new URLSearchParams(searchParams.toString()),
+      );
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
     [
       router,
       pathname,
       filters,
+      searchParams,
       setSelectedSourceName,
       setSelectedSourceVersion,
     ],

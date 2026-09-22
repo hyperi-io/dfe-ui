@@ -28,11 +28,16 @@ import {
 } from './endpoints.generator.mocks.types';
 
 /**
- * A default catalogue that carries all five app shapes on purpose: a single
- * app with stack-scoped compiled routing, a per-config app with file sets, a
- * per-config app with none, the instance-scoped app that declares the fetcher
- * source families, and an optional app this profile is not offered. A UI that
- * special-cases an app name fails against this.
+ * A default catalogue that carries all six app shapes on purpose: a single app
+ * with stack-scoped compiled routing, a transform with file sets, a transform
+ * with none, a transform this profile is not offered, the instance-scoped app
+ * that declares the fetcher source families, and an optional single app this
+ * profile is not offered. A UI that special-cases an app name fails against
+ * this.
+ *
+ * The transforms carry the engine names and the instance routing scope the
+ * engine reports for them, so a surface reading either against these mocks
+ * reads what it will read against a deployment.
  */
 const DEFAULT_APPS: TAppsResponse = [
   {
@@ -50,10 +55,11 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-vrl',
     scale_deployed: true,
     multiplicity: 'per_config',
-    has_compiled_routing: false,
-    routing_scope: 'stack',
+    has_compiled_routing: true,
+    routing_scope: 'instance',
     optional: false,
     offered: true,
+    transform_engine: 'vrl',
     file_sets: [
       {
         name: 'transforms',
@@ -69,11 +75,33 @@ const DEFAULT_APPS: TAppsResponse = [
     service: 'dfe-transform-elastic',
     scale_deployed: true,
     multiplicity: 'per_config',
-    has_compiled_routing: false,
-    routing_scope: 'stack',
+    has_compiled_routing: true,
+    routing_scope: 'instance',
     optional: false,
     offered: true,
+    transform_engine: 'elastic',
     file_sets: [],
+    instances: [],
+  },
+  {
+    service: 'dfe-transform-vector',
+    scale_deployed: true,
+    multiplicity: 'per_config',
+    has_compiled_routing: true,
+    routing_scope: 'instance',
+    optional: true,
+    default_in: [],
+    offered: false,
+    transform_engine: 'vector',
+    file_sets: [
+      {
+        name: 'transforms',
+        language: 'yaml',
+        suffixes: ['.yaml', '.yml'],
+        reload: 'hot',
+        directory_setting: 'config.transforms.dir',
+      },
+    ],
     instances: [],
   },
   {
