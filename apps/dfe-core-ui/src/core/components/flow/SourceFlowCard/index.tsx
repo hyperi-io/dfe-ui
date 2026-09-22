@@ -76,13 +76,21 @@ export const SourceFlowCard = ({
 
   return (
     <SectionCard title={<Heading title={title} />} description={description}>
-      <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center">
-        {stages.map((stage, index) => (
-          <Fragment key={stage.stage}>
-            {index > 0 && <FlowArrow label={arrows[index - 1]} />}
-            <FlowStage {...stage} />
-          </Fragment>
-        ))}
+      {/* A container query, not a viewport one: this card sits beside the
+          source tree, so the width that decides between a row and a column is
+          the card's own and never the window's. */}
+      <div className="@container">
+        <div
+          data-testid="source-flow"
+          className="flex flex-col gap-2 @2xl:flex-row @2xl:items-stretch"
+        >
+          {stages.map((stage, index) => (
+            <Fragment key={stage.stage}>
+              {index > 0 && <FlowArrow label={arrows[index - 1]} />}
+              <FlowStage {...stage} />
+            </Fragment>
+          ))}
+        </div>
       </div>
     </SectionCard>
   );
