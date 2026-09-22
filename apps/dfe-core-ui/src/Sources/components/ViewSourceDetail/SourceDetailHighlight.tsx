@@ -47,10 +47,19 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Schema:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas/meta-schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`}
+                href={
+                  schema?.meta_schema_version
+                    ? `/schemas/meta-schemas?schema_path=${schema?.meta_schema}&schema_version=${schema?.meta_schema_version}`
+                    : `/schemas/meta-schemas?schema_path=${schema?.meta_schema}`
+                }
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
-                {schema?.meta_schema}@{schema?.meta_schema_version}
+                {/* A source may pin no meta-schema version; the separator is
+                    part of the version, not decoration on the path. */}
+                {schema?.meta_schema}
+                {schema?.meta_schema_version
+                  ? `@${schema.meta_schema_version}`
+                  : ''}
               </Link>
             </li>
             <li className="@xl:col-span-2">
