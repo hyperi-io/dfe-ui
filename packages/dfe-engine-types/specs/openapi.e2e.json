@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API \u2014 E2E",
     "description": "Playwright helpers for `make e2e-server`. Unauthenticated. Mounted and documented only in that mode \u2014 not in the product spec.",
-    "version": "1.20.19"
+    "version": "1.21.2"
   },
   "paths": {
     "/api/e2e/status": {
@@ -119,6 +119,7 @@
               "seed_dfe_infra_user",
               "seed_dfe_viewers_user",
               "seed_source_with_transform",
+              "seed_three_transforms",
               "seed_library_artefact",
               "seed_app_scaling_state",
               "reset_all"
