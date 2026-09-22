@@ -43,31 +43,26 @@ export const FlowStage = ({
   absent = false,
 }: FlowStageProps) => (
   <div
+    data-testid={`flow-stage-${stage.toLowerCase()}`}
     className={cn(
       'flex min-w-0 flex-1 flex-col gap-2 rounded-md border border-solid p-3',
       'border-foreground/20 dark:border-dark-foreground/20',
       absent && 'opacity-50 border-dashed',
     )}
   >
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-foreground/50 dark:text-dark-foreground/50 text-xs font-semibold uppercase tracking-wide">
-        {stage}
-      </span>
-      {engineOwned && (
-        <Tooltip title="Derived from this source, so it is read-only here">
-          <Tag className="m-0 flex items-center gap-1" icon={<IconLock />}>
-            engine-owned
-          </Tag>
-        </Tooltip>
-      )}
-    </div>
+    <span className="text-foreground/50 dark:text-dark-foreground/50 text-xs font-semibold uppercase tracking-wide">
+      {stage}
+    </span>
 
     <p className="m-0 break-words text-sm font-medium">
       {href ? <Link href={href}>{title}</Link> : title}
     </p>
 
     {details.length > 0 && (
-      <dl className="m-0 grid grid-cols-[6rem_1fr] gap-x-2 gap-y-1 text-xs">
+      /* The label column sizes to the labels and the value track may shrink to
+         nothing: a fixed column squeezed the value until it broke mid-phrase
+         and painted past the card's right edge. */
+      <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
         {details.map((detail) => (
           <div key={detail.label} className="contents">
             <dt className="text-foreground/50 dark:text-dark-foreground/50">
@@ -83,26 +78,42 @@ export const FlowStage = ({
         ))}
       </dl>
     )}
+
+    {engineOwned && (
+      <Tooltip title="Derived from this source, so it is read-only here">
+        {/* Along the bottom of the card, so a badge on one stage cannot push
+            its title out of line with the stages either side. */}
+        <Tag
+          className="m-0 mt-auto flex w-fit items-center gap-1"
+          icon={<IconLock />}
+        >
+          engine-owned
+        </Tag>
+      </Tooltip>
+    )}
   </div>
 );
 
 /**
- * What carries records from one stage to the next.
+ * The edge between two stages: a drawn line into an arrowhead.
  *
- * The label is the deployment's answer - the bus provider or the direct
- * protocol - plus the topic or endpoint it lands on, never a string built from
- * a convention this component knows.
+ * What carries records - the bus provider or the direct protocol - plus the
+ * topic or endpoint they land on is the edge's accessible name and its
+ * tooltip. The stage the edge points at already states both, so drawing them
+ * again between the cards only put text in no box at all (dfe-ui#339).
  */
 export const FlowArrow = ({ label }: { label?: string }) => (
   <div
-    className="flex shrink-0 flex-col items-center justify-center gap-1 px-1"
-    aria-hidden={!label}
+    className="flex shrink-0 items-center justify-center self-center @2xl:self-stretch"
+    role={label ? 'img' : undefined}
+    aria-label={label ? `Carried on ${label}` : undefined}
+    aria-hidden={label ? undefined : true}
+    title={label}
   >
-    <IconArrowRight className="text-foreground/40 dark:text-dark-foreground/40" />
-    {label && (
-      <span className="text-foreground/50 dark:text-dark-foreground/50 max-w-28 break-words text-center font-mono text-[0.65rem]">
-        {label}
-      </span>
-    )}
+    {/* The stages stack below the container width, so the edge turns with them. */}
+    <span className="flex rotate-90 items-center @2xl:rotate-0">
+      <span className="bg-foreground/25 dark:bg-dark-foreground/25 h-px w-6" />
+      <IconArrowRight className="text-foreground/40 dark:text-dark-foreground/40 -ml-1.5" />
+    </span>
   </div>
 );

@@ -24,6 +24,18 @@ describe('SourceFlowCard', () => {
     expect(screen.getByText('dfe-transform-vrl-source')).toBeInTheDocument();
   });
 
+  it('names what carries records on the edge rather than in the gap', async () => {
+    render(<SourceFlowCard source="source" />, { wrapper });
+
+    expect(
+      await screen.findByRole('img', { name: 'Carried on kafka source_land' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: 'Carried on kafka source_load' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('kafka source_land')).not.toBeInTheDocument();
+  });
+
   it('shows the engine as the owner of a derived stage', async () => {
     render(<SourceFlowCard source="source" />, { wrapper });
 
