@@ -895,6 +895,9 @@ export interface paths {
         /**
          * List Sources
          * @description List sources with pagination, search, filtering, and a full object tree.
+         *
+         *     The landing source (``main``) is always the first item when it is in the
+         *     result set; remaining sources keep the requested sort.
          */
         get: operations["list_sources_api_v1_sources_get"];
         put?: never;
@@ -1190,6 +1193,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{name}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Source
+         * @description Export one source version as a bundle another deployment can import.
+         *
+         *     The bundle carries the version's routing, schema and transform, each only
+         *     where the source declares it, plus one document per meta schema the schema
+         *     pins name. A pinned schema with ``resource_type: core`` travels as a
+         *     REFERENCE and a version pin rather than a copy of its columns, so importing
+         *     the bundle cannot fork the read-only definition dfe-schemas ships.
+         */
+        get: operations["export_source_api_v1_sources__name__export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/bulk": {
         parameters: {
             query?: never;
@@ -1249,6 +1278,34 @@ export interface paths {
          * @description Seed built-in default source definitions. Non-destructive (skips existing).
          */
         post: operations["seed_sources_api_v1_sources_seed_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Source
+         * @description Import a source bundle exported from another deployment.
+         *
+         *     The bundle's meta-schema definitions are written first, then the source, both
+         *     through the registries that commit to git. A definition marked
+         *     ``resource_type: core`` is resolved against what dfe-schemas already put here
+         *     and never written, so the read-only schema is not forked.
+         *
+         *     Every check runs before the first write: a bundle applied halfway would leave
+         *     the source's schema pins with no definitions behind them.
+         */
+        post: operations["import_source_api_v1_sources_import_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2867,6 +2924,56 @@ export interface paths {
         patch: operations["update_meta_schema_api_v1_schemas_definitions__schema_path__patch"];
         trace?: never;
     };
+    "/api/v1/schemas/definitions/{schema_path}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Meta Schema
+         * @description Export one meta schema as a document another deployment can import.
+         *
+         *     A ``resource_type: core`` schema exports as a REFERENCE -- its path and the
+         *     version it was read at -- and never as a copy of its columns: dfe-schemas ships
+         *     and updates those definitions, so an embedded copy would fork the read-only
+         *     schema on every import.
+         */
+        get: operations["export_meta_schema_api_v1_schemas_definitions__schema_path__export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Meta Schema
+         * @description Import a meta-schema document exported from another deployment.
+         *
+         *     A custom document is written through the schema registry, which commits it to
+         *     git. A core document names a schema dfe-schemas already put here: it is
+         *     RESOLVED against the local registry at its pinned version and nothing is
+         *     written, so the read-only definition is never forked.
+         */
+        post: operations["import_meta_schema_api_v1_schemas_import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas/elastic-converter": {
         parameters: {
             query?: never;
@@ -3011,8 +3118,9 @@ export interface paths {
          * @description Promote JSON path(s) into dedicated typed columns.
          *
          *     Creates a new schema version on the source's meta-schema (or on ``schema_path``
-         *     when the source has none), adding one column per path with a ``@copy`` directive
-         *     so dfe-loader copies the value forward. Core meta-schemas are forked to
+         *     when the source has none), adding one column per path with an ``@source`` directive
+         *     naming the bare record path, which is what dfe-loader reads to fill the column on
+         *     the next ingest. Existing rows are not backfilled. Core meta-schemas are forked to
          *     ``{source_name}_{schema_stem}`` under the same parent path before promoting.
          *     ``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,
          *     adding meta-schema versions, or updating the source.
@@ -5814,6 +5922,36 @@ export interface components {
             }[];
         };
         /**
+         * BundleSchema
+         * @description A source's schema: the pins it declares and the definitions those pins name.
+         */
+        "BundleSchema-Input": {
+            /** @description The source version's own schema block */
+            pins: components["schemas"]["SourceSchema"];
+            /** @description Common-header profile and version, when the version declares one */
+            header?: components["schemas"]["SourceHeader"] | null;
+            /**
+             * Definitions
+             * @description One document per meta schema the pins name, in pin order
+             */
+            definitions?: components["schemas"]["MetaSchemaExport-Input"][];
+        };
+        /**
+         * BundleSchema
+         * @description A source's schema: the pins it declares and the definitions those pins name.
+         */
+        "BundleSchema-Output": {
+            /** @description The source version's own schema block */
+            pins: components["schemas"]["SourceSchema"];
+            /** @description Common-header profile and version, when the version declares one */
+            header?: components["schemas"]["SourceHeader"] | null;
+            /**
+             * Definitions
+             * @description One document per meta schema the pins name, in pin order
+             */
+            definitions?: components["schemas"]["MetaSchemaExport-Output"][];
+        };
+        /**
          * CancelResponse
          * @description Result of a cancel request.
          */
@@ -6989,12 +7127,12 @@ export interface components {
             attribute?: string[];
             /**
              * Use Case
-             * @description Index use case to generate for the column (dimension, range, bloom, fulltext, text_search), or null for no index. Always null on a discovered draft -- set it in the editor if you want an index.
+             * @description The question the column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. The full vocabulary is the type registry's, in dfe-schemas registries/types.yaml. Always null on a discovered draft -- set it in the editor if you want an index.
              */
             use_case?: string | null;
             /**
              * Expr
-             * @description DFE directive used as the column's expression. A '@copy: _json.<path>' directive tells dfe-loader to copy the value forward from the _json column on ingest (e.g. '@copy: _json.user.email').
+             * @description DFE directive used as the column's expression. A promoted column carries '@source: <path>' with the bare record path, which is what dfe-loader reads to fill it on ingest (e.g. '@source: user.email').
              */
             expr: string;
             /**
@@ -8169,7 +8307,7 @@ export interface components {
             is_consistent: boolean;
             /**
              * Promoted To
-             * @description Name of the existing meta-schema column this path is already copied into (via a '@copy' directive), or null if not yet promoted. Only ever populated when discovering against a source that already has a meta_schema; always null while discovering against the catch-all landing table.
+             * @description Name of the existing meta-schema column this path is already promoted into, or null if not yet promoted. Only ever populated when discovering against a source that already has a meta_schema; always null while discovering against the catch-all landing table.
              */
             promoted_to?: string | null;
             /** @description Ready-to-send meta-schema column derived from this path. Post it verbatim to the create-meta-schema-version endpoint (no client-side type mapping needed). */
@@ -8660,6 +8798,104 @@ export interface components {
             path?: string | null;
         };
         /**
+         * MetaSchemaExport
+         * @description One meta schema, in full or as a reference.
+         *
+         *     ``resource_type: core`` carries ``reference`` and no columns. Everything else
+         *     carries ``current`` plus the whole ``versions`` history, because nothing
+         *     upstream defines it.
+         */
+        "MetaSchemaExport-Input": {
+            /**
+             * Kind
+             * @default meta_schema
+             * @constant
+             */
+            kind: "meta_schema";
+            /**
+             * Format
+             * @description Document format version
+             * @default 1
+             */
+            format: number;
+            /**
+             * Path
+             * @description Registry path (e.g. meta/cisco_ios)
+             */
+            path: string;
+            /**
+             * Resource Type
+             * @description core travels as a reference; custom travels in full
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
+             * Current
+             * @description Current version (custom schemas only)
+             */
+            current?: string | null;
+            /**
+             * Versions
+             * @description Full version history (custom schemas only)
+             */
+            versions?: {
+                [key: string]: components["schemas"]["SchemaVersion-Input"];
+            } | null;
+            /** @description Path and version pin (core schemas only) */
+            reference?: components["schemas"]["ResourceReference"] | null;
+        };
+        /**
+         * MetaSchemaExport
+         * @description One meta schema, in full or as a reference.
+         *
+         *     ``resource_type: core`` carries ``reference`` and no columns. Everything else
+         *     carries ``current`` plus the whole ``versions`` history, because nothing
+         *     upstream defines it.
+         */
+        "MetaSchemaExport-Output": {
+            /**
+             * Kind
+             * @default meta_schema
+             * @constant
+             */
+            kind: "meta_schema";
+            /**
+             * Format
+             * @description Document format version
+             * @default 1
+             */
+            format: number;
+            /**
+             * Path
+             * @description Registry path (e.g. meta/cisco_ios)
+             */
+            path: string;
+            /**
+             * Resource Type
+             * @description core travels as a reference; custom travels in full
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
+             * Current
+             * @description Current version (custom schemas only)
+             */
+            current?: string | null;
+            /**
+             * Versions
+             * @description Full version history (custom schemas only)
+             */
+            versions?: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            } | null;
+            /** @description Path and version pin (core schemas only) */
+            reference?: components["schemas"]["ResourceReference"] | null;
+        };
+        /**
          * MetaSchemaGetResponse
          * @description Meta-schema definition for a single requested version.
          */
@@ -8693,6 +8929,34 @@ export interface components {
              * @description All version identifiers defined on this schema
              */
             versions: string[];
+        };
+        /**
+         * MetaSchemaImportResult
+         * @description What an import did with one meta schema.
+         */
+        MetaSchemaImportResult: {
+            /**
+             * Path
+             * @description Registry path written or resolved
+             */
+            path: string;
+            /**
+             * Resource Type
+             * @description core or custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
+             * Action
+             * @description created wrote a new custom schema; resolved matched a core one already present
+             * @enum {string}
+             */
+            action: "created" | "resolved";
+            /**
+             * Version
+             * @description Current version written, or the pin resolved
+             */
+            version: string;
         };
         /**
          * MetaSchemaUpdateRequest
@@ -8777,12 +9041,13 @@ export interface components {
             [key: string]: components["schemas"]["SchemaVersionCreate"];
         };
         NonEmptyDict_str_SchemaVersion_: {
-            [key: string]: components["schemas"]["SchemaVersion"];
+            [key: string]: components["schemas"]["SchemaVersion-Output"];
         };
         NonEmptyList_Annotated_str__AfterValidator__: string[];
         NonEmptyList_SchemaColumnWrite_: components["schemas"]["SchemaColumnWrite"][];
         NonEmptyList_SchemaColumnWrite__MinLen_min_length_1_: components["schemas"]["SchemaColumnWrite"][];
-        NonEmptyList_SchemaColumn_: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+        "NonEmptyList_SchemaColumn_-Input": components["schemas"]["SchemaColumn-Input"][];
+        "NonEmptyList_SchemaColumn_-Output": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
         /**
          * OIDCProviderLoginOption
          * @description An OIDC provider reduced to what a login button needs.
@@ -9760,10 +10025,10 @@ export interface components {
              */
             data_type?: string | null;
             /**
-             * Index Type
-             * @description Optional ClickHouse secondary index family
+             * Use Case
+             * @description The question the promoted column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. Validated against the type registry dfe-schemas ships as registries/types.yaml, so it follows the registry rather than a list held here.
              */
-            index_type?: ("minmax" | "set" | "bloom_filter" | "tokenbf_v1" | "ngrambf_v1") | null;
+            use_case?: string | null;
             /**
              * Atomic
              * @description When true, all paths succeed or none commit; else best-effort
@@ -9809,9 +10074,12 @@ export interface components {
             column_name?: string | null;
             /** Data Type */
             data_type?: string | null;
-            /** Index Type */
-            index_type?: string | null;
-            /** Copy Cel */
+            /** Use Case */
+            use_case?: string | null;
+            /**
+             * Copy Cel
+             * @description Where the value also sits in the JSON column (e.g. '_json.user.email').
+             */
             copy_cel?: string | null;
             /** Error */
             error?: string | null;
@@ -9828,7 +10096,7 @@ export interface components {
             name: string;
             /**
              * Key
-             * @description Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
+             * @description Where the promoted value also sits in the JSON column (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
              */
             key: string;
         };
@@ -10279,6 +10547,22 @@ export interface components {
             p95: number;
             /** Samples */
             samples: number;
+        };
+        /**
+         * ResourceReference
+         * @description A pre-supplied resource named and pinned, never copied.
+         */
+        ResourceReference: {
+            /**
+             * Path
+             * @description Registry path in the exporting deployment
+             */
+            path: string;
+            /**
+             * Version
+             * @description Version the exporting deployment read it at; the importer resolves this
+             */
+            version: string;
         };
         /** ResourceSeriesResponse */
         ResourceSeriesResponse: {
@@ -10885,7 +11169,7 @@ export interface components {
             }[];
             /**
              * Promoted
-             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no @copy columns)
+             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no promoted columns)
              */
             promoted?: components["schemas"]["PromotedJsonField"][];
         };
@@ -10977,6 +11261,72 @@ export interface components {
             cpu_limit?: string | null;
             /** Memory Limit */
             memory_limit?: string | null;
+        };
+        /**
+         * SchemaColumn
+         * @description A column in the schema.
+         */
+        "SchemaColumn-Input": {
+            /**
+             * Name
+             * @description Name of the column
+             */
+            name: string;
+            /**
+             * Type
+             * @description Type of the column
+             */
+            type: string;
+            /**
+             * Attribute
+             * @description Attributes of the column
+             */
+            attribute?: string[] | null;
+            /**
+             * Use Case
+             * @description Use case of the column
+             */
+            use_case?: string | null;
+            /**
+             * Default
+             * @description DEFAULT expression
+             */
+            default?: string | null;
+            /**
+             * Order
+             * @description Position in ORDER BY / PRIMARY KEY
+             */
+            order?: number | null;
+            /**
+             * Expr
+             * @description Expression for the column
+             */
+            expr?: string | null;
+            /**
+             * Comment
+             * @description Comment for the column
+             */
+            comment?: string | null;
+            /**
+             * Field Type
+             * @description Column classification (e.g. base); stored as _field_type in YAML
+             */
+            _field_type?: string | null;
+            /**
+             * Ch Override
+             * @description Exact ClickHouse type — bypasses primitive mapping
+             */
+            ch_override?: string | null;
+            /**
+             * Codec
+             * @description Explicit CODEC contents — required to set a codec with ch_override
+             */
+            codec?: string | null;
+            /**
+             * Matched Searchable
+             * @description Column fields that matched the search query (API only)
+             */
+            matched_searchable?: string[];
         };
         /**
          * SchemaColumnWrite
@@ -11133,7 +11483,10 @@ export interface components {
              * @description ALTER statements that would run
              */
             ddl?: string[];
-            /** Copy Directives */
+            /**
+             * Copy Directives
+             * @description Directive each new column carries in its ClickHouse COMMENT (e.g. '@source: user.email').
+             */
             copy_directives?: string[];
         };
         /**
@@ -11319,7 +11672,7 @@ export interface components {
          * SchemaVersion
          * @description A version in the schema.
          */
-        SchemaVersion: {
+        "SchemaVersion-Input": {
             /**
              * Date
              * @description Date of the version
@@ -11336,7 +11689,30 @@ export interface components {
              */
             summary: string;
             /** @description List of columns in the version */
-            columns: components["schemas"]["NonEmptyList_SchemaColumn_"];
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Input"];
+        };
+        /**
+         * SchemaVersion
+         * @description A version in the schema.
+         */
+        "SchemaVersion-Output": {
+            /**
+             * Date
+             * @description Date of the version
+             */
+            date: string;
+            /**
+             * Type
+             * @description Type of the version
+             */
+            type: string;
+            /**
+             * Summary
+             * @description Summary of the version
+             */
+            summary: string;
+            /** @description List of columns in the version */
+            columns: components["schemas"]["NonEmptyList_SchemaColumn_-Output"];
         };
         /**
          * SchemaVersionCreate
@@ -11751,6 +12127,184 @@ export interface components {
             };
         };
         /**
+         * SourceBundle
+         * @description One source version: its routing, its schema and its transform.
+         *
+         *     A section is present only when that source has it -- a source with no
+         *     transform carries no ``transform`` key rather than an empty one. A
+         *     ``resource_type: core`` source carries ``reference`` and nothing else: the
+         *     engine reconciles it from the deployment's own settings, so a copy would be
+         *     refused on import anyway.
+         */
+        "SourceBundle-Input": {
+            /**
+             * Kind
+             * @default source_bundle
+             * @constant
+             */
+            kind: "source_bundle";
+            /**
+             * Format
+             * @description Document format version
+             * @default 1
+             */
+            format: number;
+            /**
+             * Source
+             * @description The _source label
+             */
+            source: string;
+            /**
+             * Resource Type
+             * @description core travels as a reference; custom travels in full
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /** @description Name and version pin (core sources only) */
+            reference?: components["schemas"]["ResourceReference"] | null;
+            /**
+             * Version
+             * @description Version id of the snapshot this bundle carries
+             */
+            version?: string | null;
+            /**
+             * Date Time
+             * @description Creation date of the exported snapshot; absent takes the import date
+             */
+            date_time?: string | null;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * State
+             * @description Lifecycle state
+             * @default active
+             * @enum {string}
+             */
+            state: "active" | "dormant" | "disabled";
+            /** @description Receiver match rule (receiver-based sources) */
+            routing?: components["schemas"]["SourceMatch"] | null;
+            /** @description Fetcher origin (fetcher-based sources) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Schema pins, header and the definitions they name */
+            schema?: components["schemas"]["BundleSchema-Input"] | null;
+            /** @description Transform stage, when the version declares one */
+            transform?: components["schemas"]["SourceTransform"] | null;
+            /**
+             * Transport
+             * @description bus or direct; absent takes the importing deployment's default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep the record as it arrived
+             * @default false
+             */
+            archive: boolean;
+            /**
+             * Views
+             * @description Naming-standard views the version exposes
+             */
+            views?: components["schemas"]["SourceView"][];
+        };
+        /**
+         * SourceBundle
+         * @description One source version: its routing, its schema and its transform.
+         *
+         *     A section is present only when that source has it -- a source with no
+         *     transform carries no ``transform`` key rather than an empty one. A
+         *     ``resource_type: core`` source carries ``reference`` and nothing else: the
+         *     engine reconciles it from the deployment's own settings, so a copy would be
+         *     refused on import anyway.
+         */
+        "SourceBundle-Output": {
+            /**
+             * Kind
+             * @default source_bundle
+             * @constant
+             */
+            kind: "source_bundle";
+            /**
+             * Format
+             * @description Document format version
+             * @default 1
+             */
+            format: number;
+            /**
+             * Source
+             * @description The _source label
+             */
+            source: string;
+            /**
+             * Resource Type
+             * @description core travels as a reference; custom travels in full
+             * @default custom
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /** @description Name and version pin (core sources only) */
+            reference?: components["schemas"]["ResourceReference"] | null;
+            /**
+             * Version
+             * @description Version id of the snapshot this bundle carries
+             */
+            version?: string | null;
+            /**
+             * Date Time
+             * @description Creation date of the exported snapshot; absent takes the import date
+             */
+            date_time?: string | null;
+            /**
+             * Display Name
+             * @description Human-readable display name
+             */
+            display_name?: string | null;
+            /**
+             * Description
+             * @description Source description
+             */
+            description?: string | null;
+            /**
+             * State
+             * @description Lifecycle state
+             * @default active
+             * @enum {string}
+             */
+            state: "active" | "dormant" | "disabled";
+            /** @description Receiver match rule (receiver-based sources) */
+            routing?: components["schemas"]["SourceMatch"] | null;
+            /** @description Fetcher origin (fetcher-based sources) */
+            fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description Schema pins, header and the definitions they name */
+            schema?: components["schemas"]["BundleSchema-Output"] | null;
+            /** @description Transform stage, when the version declares one */
+            transform?: components["schemas"]["SourceTransform"] | null;
+            /**
+             * Transport
+             * @description bus or direct; absent takes the importing deployment's default
+             */
+            transport?: ("bus" | "direct") | null;
+            /**
+             * Archive
+             * @description Keep the record as it arrived
+             * @default false
+             */
+            archive: boolean;
+            /**
+             * Views
+             * @description Naming-standard views the version exposes
+             */
+            views?: components["schemas"]["SourceView"][];
+        };
+        /**
          * SourceDetailResponse
          * @description Full source definition with per-version build/plan/deploy status.
          */
@@ -11937,6 +12491,48 @@ export interface components {
              * @default 1.0.0
              */
             version: string;
+        };
+        /**
+         * SourceImportResponse
+         * @description A bundle applied, plus what the apps now need to follow it.
+         */
+        SourceImportResponse: {
+            /**
+             * Source
+             * @description The _source label written or resolved
+             */
+            source: string;
+            /**
+             * Action
+             * @description created wrote the source; resolved matched a core one already present
+             * @enum {string}
+             */
+            action: "created" | "resolved";
+            /**
+             * Version
+             * @description Version id written, or the pin resolved
+             */
+            version: string;
+            /**
+             * Schemas
+             * @description One entry per meta schema the bundle carried
+             */
+            schemas?: components["schemas"]["MetaSchemaImportResult"][];
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow the imported source
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step; reconcile-apps retries it
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app whose running process cannot take this change in place
+             */
+            restart_required?: string[];
         };
         /**
          * SourceMappingSummary
@@ -13566,7 +14162,7 @@ export interface components {
         /** PaginatedResponse[SchemaColumn] */
         dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___2: {
             /** Items */
-            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+            items: components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -13908,7 +14504,7 @@ export interface components {
          * SchemaColumn
          * @description A column in the schema.
          */
-        dfe_engine__schema__models__SchemaColumn: {
+        "dfe_engine__schema__models__SchemaColumn-Output": {
             /**
              * Name
              * @description Name of the column
@@ -16385,6 +16981,40 @@ export interface operations {
             };
         };
     };
+    export_source_api_v1_sources__name__export_get: {
+        parameters: {
+            query?: {
+                /** @description Version id to export; omitted takes the source's current */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceBundle-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     bulk_action_api_v1_sources_bulk_post: {
         parameters: {
             query?: never;
@@ -16454,6 +17084,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["dfe_engine__api__v1__sources__SeedResponse"];
+                };
+            };
+        };
+    };
+    import_source_api_v1_sources_import_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceBundle-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceImportResponse"];
+                };
+            };
+            /** @description The source name already exists here, or a meta schema the bundle carries would land on an occupied path (code conflict) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -19207,6 +19879,82 @@ export interface operations {
             };
         };
     };
+    export_meta_schema_api_v1_schemas_definitions__schema_path__export_get: {
+        parameters: {
+            query?: {
+                /** @description Single version to export. Omitted exports the whole history of a custom schema, and pins a core one at its current version. */
+                version?: string | null;
+            };
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchemaExport-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_meta_schema_api_v1_schemas_import_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetaSchemaExport-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetaSchemaImportResult"];
+                };
+            };
+            /** @description A meta schema already exists at the document's path, or that path holds a core schema no import may overwrite (code conflict) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     elastic_converter_api_v1_schemas_elastic_converter_post: {
         parameters: {
             query?: never;
@@ -19226,7 +19974,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn"][];
+                    "application/json": components["schemas"]["dfe_engine__schema__models__SchemaColumn-Output"][];
                 };
             };
             /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
