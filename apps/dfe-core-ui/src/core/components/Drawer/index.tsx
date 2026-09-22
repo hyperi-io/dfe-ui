@@ -10,7 +10,12 @@ import { ClickawayModal } from './ClickawayModal';
 interface DrawerProps extends AntdDrawerProps {
   onClose?: () => void;
   title: React.ReactNode | string;
-  preventClickaway?: boolean;
+  preventClickaway?: {
+    title?: string;
+    message?: string;
+    enabled?: boolean;
+  };
+  onOk?: () => void;
 }
 
 const isDrawerMask = (target: EventTarget | null) =>
@@ -25,7 +30,11 @@ const isConfirmModal = (target: EventTarget | null) =>
 
 export const Drawer = ({
   children,
-  preventClickaway = false,
+  preventClickaway = {
+    enabled: true,
+    message: 'Closing this drawer may discard unsaved data.',
+    title: 'Potential data loss warning',
+  },
   onClose,
   title,
   ...props
@@ -43,24 +52,23 @@ export const Drawer = ({
     onClose?.();
   };
 
-  const handleClose: AntdDrawerProps['onClose'] = (event) => {
-    if (!preventClickaway) {
+  const requestClose = (isMaskClick: boolean) => {
+    if (!preventClickaway.enabled) {
       closeDrawer();
       return;
     }
 
-    if (event.type !== 'click') {
-      closeDrawer();
-      return;
-    }
-
-    if (confirmOpenRef.current) {
+    if (isMaskClick && confirmOpenRef.current) {
       closeDrawer();
       return;
     }
 
     confirmOpenRef.current = true;
     setIsConfirmOpen(true);
+  };
+
+  const handleClose: AntdDrawerProps['onClose'] = (event) => {
+    requestClose(event.type === 'click');
   };
 
   useEffect(() => {
@@ -84,22 +92,26 @@ export const Drawer = ({
   return (
     <>
       <AntdDrawer
+        placement="right"
+        destroyOnHidden
+        size="40%"
+        {...props}
         title={title}
         closeIcon={null}
-        // antd routes Escape through onClose, so without this only the X closes.
         onClose={handleClose}
         extra={<Button shape="circle" icon={<IconX />} onClick={closeDrawer} />}
         footer={null}
-        placement="right"
-        size="40%"
-        destroyOnHidden
-        {...props}
       >
         {children}
+        {isConfirmOpen && (
+          <ClickawayModal
+            onOk={closeDrawer}
+            onCancel={closeConfirm}
+            title={preventClickaway.title}
+            message={preventClickaway.message}
+          />
+        )}
       </AntdDrawer>
-      {isConfirmOpen && (
-        <ClickawayModal onOk={closeDrawer} onCancel={closeConfirm} />
-      )}
     </>
   );
 };

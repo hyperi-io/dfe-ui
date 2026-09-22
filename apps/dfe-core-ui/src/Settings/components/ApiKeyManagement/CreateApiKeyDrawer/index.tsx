@@ -57,6 +57,9 @@ export const CreateApiKeyDrawer = () => {
         open={open}
         onClose={handleClose}
         keyboard={!mustAcknowledgeCopy}
+        preventClickaway={{
+          enabled: false,
+        }}
       >
         <CreateApiKeyForm onSuccess={handleSuccess} onAccept={handleAccept} />
       </Drawer>

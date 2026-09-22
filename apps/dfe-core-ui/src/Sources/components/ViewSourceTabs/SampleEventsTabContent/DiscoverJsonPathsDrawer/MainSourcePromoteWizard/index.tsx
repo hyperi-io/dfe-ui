@@ -6,7 +6,7 @@ import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { IconExternalLink } from '@repo/dfe-icons';
 import { Button, Steps, StepsProps } from 'antd';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BuildDeploySourceStep } from './BuildDeploySourceStep';
 import { CreateSourceStep } from './CreateSourceStep';
 import { DiscoverPromoteStep } from './DiscoverPromoteStep';
@@ -46,7 +46,9 @@ const getStepStatus = ({
 
 export const MainSourcePromoteWizard = ({
   onSuccess: onFinalSuccess,
+  onChange,
 }: {
+  onChange?: (isChanged: boolean) => void;
   onSuccess?: () => void;
 }) => {
   const { selectedSourceName, selectedSourceVersion } = useListSourcesContext();
@@ -61,6 +63,10 @@ export const MainSourcePromoteWizard = ({
   const [createdSource, setCreatedSource] = useState<string | null | undefined>(
     null,
   );
+
+  useEffect(() => {
+    onChange?.(!!createdSchema || !!createdSource);
+  }, [createdSchema, createdSource, onChange]);
 
   const steps = [
     {
@@ -201,6 +207,7 @@ export const MainSourcePromoteWizard = ({
           }}
           onSuccess={(schema) => {
             setCreatedSchema(schema.path);
+            onChange?.(true);
             setCurrent(STEP_INDEX_MAP.createAssign);
           }}
           isCreatedSchema={!!createdSchema}
@@ -211,6 +218,7 @@ export const MainSourcePromoteWizard = ({
           schemaPath={createdSchema ?? ''}
           onSuccess={(source) => {
             setCreatedSource(source.source);
+            onChange?.(true);
             setCurrent(STEP_INDEX_MAP.buildDeploy);
           }}
         />

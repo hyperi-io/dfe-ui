@@ -22,22 +22,68 @@ const clickMask = (container: HTMLElement) => {
 describe('Drawer', () => {
   // The close control lives in `extra`, so antd's own onClose has to be wired
   // or Escape reaches nothing.
-  it('closes on Escape', () => {
+  it('closes on Escape when clickaway protection is off', () => {
     const onClose = vi.fn();
-    renderDrawer(onClose);
+    render(
+      <App>
+        <Drawer
+          title="Edit Source"
+          open
+          onClose={onClose}
+          preventClickaway={{ enabled: false }}
+        >
+          <p>body</p>
+        </Drawer>
+      </App>,
+    );
 
     fireEvent.keyDown(document, { key: 'Escape', keyCode: 27 });
 
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('closes on the X', () => {
+  it('warns on Escape when clickaway protection is on', async () => {
+    const onClose = vi.fn();
+    renderDrawer(onClose);
+
+    fireEvent.keyDown(document, { key: 'Escape', keyCode: 27 });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText('Closing this drawer may discard unsaved data.'),
+    ).toBeInTheDocument();
+  });
+
+  it('closes on the X when clickaway protection is off', () => {
+    const onClose = vi.fn();
+    render(
+      <App>
+        <Drawer
+          title="Edit Source"
+          open
+          onClose={onClose}
+          preventClickaway={{ enabled: false }}
+        >
+          <p>body</p>
+        </Drawer>
+      </App>,
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('warns on the X when clickaway protection is on', async () => {
     const onClose = vi.fn();
     renderDrawer(onClose);
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(onClose).toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText('Closing this drawer may discard unsaved data.'),
+    ).toBeInTheDocument();
   });
 
   it('warns about data loss when the mask is clicked', async () => {
