@@ -1,6 +1,7 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useUpdateGitOpsAutoMerge } from '@/Platform/hooks/gitops/useUpdateGitOpsAutoMerge';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 
 export const EnableDisableAutoMergeButton = ({
   enabled,

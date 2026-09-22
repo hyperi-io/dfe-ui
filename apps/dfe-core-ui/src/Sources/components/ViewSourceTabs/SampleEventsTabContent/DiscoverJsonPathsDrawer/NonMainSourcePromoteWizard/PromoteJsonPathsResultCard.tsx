@@ -1,10 +1,10 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconCheck, IconExclamationMark } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';

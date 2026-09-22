@@ -1,7 +1,8 @@
+import { Modal } from '@/core/components/Modal';
 import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { IconEye } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 type TView = NonNullable<TSourceVersionDetail['version']['views']>[number];

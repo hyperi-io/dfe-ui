@@ -1,5 +1,7 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Table } from '@/core/components/Table';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchLifecycle } from '@/Platform/hooks/lifecycle/useFetchLifecycle';
 import { TLifecycleResponse } from '@/Platform/hooks/lifecycle/useFetchLifecycle/types';
@@ -12,7 +14,7 @@ import {
   IconPlayerStop,
   IconQuestionMark,
 } from '@repo/dfe-icons';
-import { Button, Spin, Table, Tag, Tooltip } from 'antd';
+import { Button, Spin, Tag } from 'antd';
 
 const getTagColor = (state: string) => {
   switch (state) {

@@ -2,6 +2,7 @@ import {
   RESOURCE_TYPES,
   SCHEMA_FIELD_TYPES,
 } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   IconArrowUpFromArc,
   IconLock,
@@ -9,7 +10,6 @@ import {
   IconSettingsBolt,
   IconUpload,
 } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 export const fieldTypeIconSwitch = (field_type: string) => {
   switch (field_type) {

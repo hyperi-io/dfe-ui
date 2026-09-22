@@ -1,12 +1,13 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { Table } from '@/core/components/Table';
 import { formatDateToString } from '@/core/helpers/date.helpers';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteFilteredApiKeys } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys';
 import { TApiKeysItemSummary } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys/types';
 import { IconCheck, IconX } from '@repo/dfe-icons';
-import { Input, Table } from 'antd';
+import { Input } from 'antd';
 import { useCallback, useState } from 'react';
 import { CloneApiKeyDrawer } from './CloneApiKeyDrawer';
 import { CreateApiKeyDrawer } from './CreateApiKeyDrawer';

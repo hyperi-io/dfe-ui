@@ -1,3 +1,4 @@
+import { Form } from '@/core/components/Form';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
@@ -5,7 +6,8 @@ import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
 import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
-import { Button, Card, Form } from 'antd';
+import { Button, Card } from 'antd';
+
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ConfigureOIDCForm } from './ConfigureOIDCForm';

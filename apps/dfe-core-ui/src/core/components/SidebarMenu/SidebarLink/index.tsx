@@ -1,6 +1,6 @@
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import type { IconComponent } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 import Link from 'next/link';
 
 interface SidebarLinkProps {

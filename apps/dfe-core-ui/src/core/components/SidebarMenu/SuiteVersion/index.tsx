@@ -1,9 +1,9 @@
 'use client';
 
 import { uiBuildVersion } from '@/core/appVersion/buildVersion';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchSystemVersion } from '@/core/hooks/useFetchSystemVersion';
 import { cn } from '@/core/utils/style';
-import { Tooltip } from 'antd';
 
 interface SuiteVersionProps {
   className?: string;

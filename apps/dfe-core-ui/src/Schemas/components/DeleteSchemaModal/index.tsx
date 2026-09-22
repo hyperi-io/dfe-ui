@@ -1,9 +1,11 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useDeleteSchema } from '@/Schemas/hooks/useDeleteSchema';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, Modal, Tooltip } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 interface DeleteSchemaModalProps {

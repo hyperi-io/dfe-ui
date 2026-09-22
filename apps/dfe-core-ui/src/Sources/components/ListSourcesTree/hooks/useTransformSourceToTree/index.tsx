@@ -2,6 +2,7 @@ import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { TreeInteractiveLabel } from '@/Sources/components/ListSourcesTree/TreeInteractiveLabel';
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { Tooltip } from '@/core/components/Tooltip';
 import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { cn } from '@/core/utils/style';
 import {
@@ -14,7 +15,7 @@ import {
   IconRocket,
   IconStarFilled,
 } from '@repo/dfe-icons';
-import { Button, notification, Tag, Tooltip, TreeDataNode } from 'antd';
+import { Button, notification, Tag, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 

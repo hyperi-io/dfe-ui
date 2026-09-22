@@ -1,7 +1,9 @@
 import { Form } from '@/core/components/Form';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
@@ -13,7 +15,7 @@ import {
 } from '@/core/validationSchemas/CreateSchemaForm/utils';
 import { useCloneSchema } from '@/Schemas/hooks/useCloneSchema';
 import { IconCopy } from '@repo/dfe-icons';
-import { Button, Input, Modal, Select, Tooltip } from 'antd';
+import { Button, Input, Select } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
 

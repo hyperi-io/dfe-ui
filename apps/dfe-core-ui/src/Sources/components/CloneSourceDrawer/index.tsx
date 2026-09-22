@@ -1,6 +1,7 @@
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
@@ -11,7 +12,7 @@ import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconCopy } from '@repo/dfe-icons';
-import { Button, ButtonProps, notification, Spin, Tooltip } from 'antd';
+import { Button, ButtonProps, notification, Spin } from 'antd';
 import { cloneElement, useState } from 'react';
 
 export const CloneSourceDrawer = ({

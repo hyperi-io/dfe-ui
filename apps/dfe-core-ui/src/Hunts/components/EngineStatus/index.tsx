@@ -1,7 +1,8 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchEngineStatus } from '@/Hunts/hooks/useFetchEngineStatus';
 import { IconGizmo, IconTopologyRing2 } from '@repo/dfe-icons';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 
 export const EngineStatus = () => {
   const { data } = useFetchEngineStatus();
