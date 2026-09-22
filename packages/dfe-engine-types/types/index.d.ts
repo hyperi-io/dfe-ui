@@ -3011,8 +3011,9 @@ export interface paths {
          * @description Promote JSON path(s) into dedicated typed columns.
          *
          *     Creates a new schema version on the source's meta-schema (or on ``schema_path``
-         *     when the source has none), adding one column per path with a ``@copy`` directive
-         *     so dfe-loader copies the value forward. Core meta-schemas are forked to
+         *     when the source has none), adding one column per path with an ``@source`` directive
+         *     naming the bare record path, which is what dfe-loader reads to fill the column on
+         *     the next ingest. Existing rows are not backfilled. Core meta-schemas are forked to
          *     ``{source_name}_{schema_stem}`` under the same parent path before promoting.
          *     ``?dry_run=true`` returns the proposed diff and DDL without forking core schemas,
          *     adding meta-schema versions, or updating the source.
@@ -6989,12 +6990,12 @@ export interface components {
             attribute?: string[];
             /**
              * Use Case
-             * @description Index use case to generate for the column (dimension, range, bloom, fulltext, text_search), or null for no index. Always null on a discovered draft -- set it in the editor if you want an index.
+             * @description The question the column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. The full vocabulary is the type registry's, in dfe-schemas registries/types.yaml. Always null on a discovered draft -- set it in the editor if you want an index.
              */
             use_case?: string | null;
             /**
              * Expr
-             * @description DFE directive used as the column's expression. A '@copy: _json.<path>' directive tells dfe-loader to copy the value forward from the _json column on ingest (e.g. '@copy: _json.user.email').
+             * @description DFE directive used as the column's expression. A promoted column carries '@source: <path>' with the bare record path, which is what dfe-loader reads to fill it on ingest (e.g. '@source: user.email').
              */
             expr: string;
             /**
@@ -8169,7 +8170,7 @@ export interface components {
             is_consistent: boolean;
             /**
              * Promoted To
-             * @description Name of the existing meta-schema column this path is already copied into (via a '@copy' directive), or null if not yet promoted. Only ever populated when discovering against a source that already has a meta_schema; always null while discovering against the catch-all landing table.
+             * @description Name of the existing meta-schema column this path is already promoted into, or null if not yet promoted. Only ever populated when discovering against a source that already has a meta_schema; always null while discovering against the catch-all landing table.
              */
             promoted_to?: string | null;
             /** @description Ready-to-send meta-schema column derived from this path. Post it verbatim to the create-meta-schema-version endpoint (no client-side type mapping needed). */
@@ -9760,10 +9761,10 @@ export interface components {
              */
             data_type?: string | null;
             /**
-             * Index Type
-             * @description Optional ClickHouse secondary index family
+             * Use Case
+             * @description The question the promoted column is asked, which decides the index generated for it (dimension, exact_match, range, word_search, substring_search, key_search, similarity_search(<dims>)), or null for no index. Validated against the type registry dfe-schemas ships as registries/types.yaml, so it follows the registry rather than a list held here.
              */
-            index_type?: ("minmax" | "set" | "bloom_filter" | "tokenbf_v1" | "ngrambf_v1") | null;
+            use_case?: string | null;
             /**
              * Atomic
              * @description When true, all paths succeed or none commit; else best-effort
@@ -9809,9 +9810,12 @@ export interface components {
             column_name?: string | null;
             /** Data Type */
             data_type?: string | null;
-            /** Index Type */
-            index_type?: string | null;
-            /** Copy Cel */
+            /** Use Case */
+            use_case?: string | null;
+            /**
+             * Copy Cel
+             * @description Where the value also sits in the JSON column (e.g. '_json.user.email').
+             */
             copy_cel?: string | null;
             /** Error */
             error?: string | null;
@@ -9828,7 +9832,7 @@ export interface components {
             name: string;
             /**
              * Key
-             * @description Copy source path (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
+             * @description Where the promoted value also sits in the JSON column (e.g. ``_json.CloudTrailEvent.tlsDetails.cipherSuite``)
              */
             key: string;
         };
@@ -10885,7 +10889,7 @@ export interface components {
             }[];
             /**
              * Promoted
-             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no @copy columns)
+             * @description JSON paths already promoted on the source version's meta-schema (empty when the version has no meta_schema or no promoted columns)
              */
             promoted?: components["schemas"]["PromotedJsonField"][];
         };
@@ -11133,7 +11137,10 @@ export interface components {
              * @description ALTER statements that would run
              */
             ddl?: string[];
-            /** Copy Directives */
+            /**
+             * Copy Directives
+             * @description Directive each new column carries in its ClickHouse COMMENT (e.g. '@source: user.email').
+             */
             copy_directives?: string[];
         };
         /**
