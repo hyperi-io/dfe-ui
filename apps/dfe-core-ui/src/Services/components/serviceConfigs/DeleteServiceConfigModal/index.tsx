@@ -109,19 +109,19 @@ export const DeleteServiceConfigModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
               type="primary"
               danger
               onClick={handleDeleteServiceConfig}
             >
               Delete
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

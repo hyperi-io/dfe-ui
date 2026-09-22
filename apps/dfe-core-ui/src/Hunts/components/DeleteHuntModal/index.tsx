@@ -99,19 +99,19 @@ export const DeleteHuntModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
               type="primary"
               danger
               onClick={handleDeleteHunt}
             >
               Delete
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

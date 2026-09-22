@@ -89,19 +89,19 @@ export const DeleteSchemaModal = ({
             <Button
               loading={isDeletingSchema}
               disabled={isDeletingSchema}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isDeletingSchema}
+              disabled={isDeletingSchema}
               type="primary"
               danger
               onClick={() => deleteSchemaMutation(schemaPath)}
             >
               Delete
-            </Button>
-            <Button
-              loading={isDeletingSchema}
-              disabled={isDeletingSchema}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

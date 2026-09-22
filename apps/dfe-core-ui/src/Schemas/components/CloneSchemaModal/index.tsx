@@ -179,18 +179,18 @@ export const CloneSchemaModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
-              htmlType="submit"
-              type="primary"
-            >
-              Clone
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
               type="default"
               onClick={() => setOpen(false)}
             >
               Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              htmlType="submit"
+              type="primary"
+            >
+              Clone
             </Button>
           </div>
         </Form>

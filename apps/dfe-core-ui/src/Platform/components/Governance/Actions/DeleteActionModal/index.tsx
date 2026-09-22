@@ -85,19 +85,19 @@ export const DeleteActionModal = ({
           <Button
             loading={isPending}
             disabled={isPending}
+            type="default"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            loading={isPending}
+            disabled={isPending}
             type="primary"
             danger
             onClick={handleDeleteAction}
           >
             Delete
-          </Button>
-          <Button
-            loading={isPending}
-            disabled={isPending}
-            type="default"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
           </Button>
         </div>
       </Modal>
