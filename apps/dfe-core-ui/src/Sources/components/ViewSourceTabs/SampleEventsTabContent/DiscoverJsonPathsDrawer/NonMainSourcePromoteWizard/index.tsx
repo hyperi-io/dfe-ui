@@ -78,6 +78,7 @@ export const NonMainSourcePromoteWizard = ({
               selectedSourceName={String(selectedSourceName)}
               selectedSourceVersion={String(selectedSourceVersion)}
               jsonPaths={jsonPaths}
+              data={promoteTestResponse}
               onSuccess={handleSuccess}
               attachedSchemaPath={attachedSchemaPath}
             />

@@ -12,6 +12,7 @@ import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
 export const PromoteJsonPaths = ({
   selectedSourceName,
   selectedSourceVersion,
+  data,
   jsonPaths,
   onSuccess,
   attachedSchemaPath,
@@ -21,10 +22,10 @@ export const PromoteJsonPaths = ({
   jsonPaths: TJsonPathsResponse | null;
   onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
+  data: TPromoteFieldResponse | null;
 }) => {
   const { handleClearFieldsToPromote } = usePromoteRowsContext();
   const {
-    data,
     mutate: promoteFieldsMutation,
     isPending: isPromotingFields,
     error: errorPromotingFields,
@@ -48,13 +49,13 @@ export const PromoteJsonPaths = ({
 
   const tableValues = useMemo(() => {
     return (
-      data?.results?.map((column) => ({
+      data?.diff?.new_columns?.map((column) => ({
         ...column,
-        id: column.column_name ?? undefined,
-        _field_type: column.data_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
+        id: column.name ?? undefined,
+        _field_type: column._field_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
       })) ?? []
     );
-  }, [data?.results]);
+  }, [data?.diff?.new_columns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -75,14 +76,17 @@ export const PromoteJsonPaths = ({
           />
         )}
         <ul className="flex flex-col gap-y-2">
-          {data?.results.map((result, index) => (
-            <li key={result.json_path}>
-              <PromoteJsonPathsResultCard
-                result={result}
-                copyDirective={data?.diff?.copy_directives?.[index]}
-              />
-            </li>
-          ))}
+          {data?.results.map(
+            (result, index) =>
+              result.status !== 'ok' && (
+                <li key={result.json_path}>
+                  <PromoteJsonPathsResultCard
+                    result={result}
+                    copyDirective={data?.diff?.copy_directives?.[index]}
+                  />
+                </li>
+              ),
+          )}
         </ul>
 
         {errorPromotingFields && (

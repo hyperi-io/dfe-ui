@@ -45,20 +45,22 @@ export const PromoteJsonPathsResultCard = ({
           </span>
         </span>
       }
-      defaultOpen={true}
+      defaultOpen={false}
       className="border border-foreground/10 dark:border-dark-foreground/10 rounded-md p-2"
     >
       <div className="flex flex-col gap-y-4">
-        <dl className="grid grid-cols-[100px_auto_100px_auto] gap-x-6 gap-y-1 text-sm">
-          <dt className={dataListTermStyle}>Status</dt>
-          <dd>{status}</dd>
-          <dt className={dataListTermStyle}>Data Type</dt>
-          <dd>{data_type || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Copy Cel</dt>
-          <dd>{copy_cel || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Copy Directive</dt>
-          <dd>{copyDirective || <EmptyData />}</dd>
-        </dl>
+        {status === 'ok' && (
+          <dl className="grid grid-cols-[100px_auto_100px_auto] gap-x-6 gap-y-1 text-sm">
+            <dt className={dataListTermStyle}>Status</dt>
+            <dd>{status}</dd>
+            <dt className={dataListTermStyle}>Data Type</dt>
+            <dd>{data_type || <EmptyData />}</dd>
+            <dt className={dataListTermStyle}>Copy Cel</dt>
+            <dd>{copy_cel || <EmptyData />}</dd>
+            <dt className={dataListTermStyle}>Copy Directive</dt>
+            <dd>{copyDirective || <EmptyData />}</dd>
+          </dl>
+        )}
 
         {error && (
           <NotificationCard
