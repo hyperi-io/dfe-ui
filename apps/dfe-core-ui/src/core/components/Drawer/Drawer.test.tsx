@@ -74,16 +74,16 @@ describe('Drawer', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('warns on the X when clickaway protection is on', async () => {
+  it('closes on the X when clickaway protection is on', () => {
     const onClose = vi.fn();
     renderDrawer(onClose);
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(onClose).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
     expect(
-      await screen.findByText('Closing this drawer may discard unsaved data.'),
-    ).toBeInTheDocument();
+      screen.queryByText('Closing this drawer may discard unsaved data.'),
+    ).not.toBeInTheDocument();
   });
 
   it('warns about data loss when the mask is clicked', async () => {

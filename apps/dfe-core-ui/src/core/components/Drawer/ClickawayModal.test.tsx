@@ -11,7 +11,7 @@ describe('ClickawayModal', () => {
 
     expect(container.firstChild).toHaveClass('pointer-events-none');
     expect(
-      screen.getByText('Unsaved changes').closest('.ant-card'),
+      screen.getByText('Potential data loss warning').closest('.ant-card'),
     ).toHaveClass('pointer-events-auto');
   });
 
