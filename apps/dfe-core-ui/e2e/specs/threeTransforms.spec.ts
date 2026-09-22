@@ -29,6 +29,12 @@ const TRANSFORMS = [
   },
 ] as const;
 
+// dfe-fetcher is per-source as well, so a source page lists four apps.
+const PER_SOURCE_APPS = TRANSFORMS.length + 1;
+
+// Each seeded source binds one transform; the rest are offered, not deployed.
+const UNDEPLOYED_HERE = PER_SOURCE_APPS - 1;
+
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
@@ -41,9 +47,12 @@ const openProcessingTab = async (page: Page, source: string) => {
   // The row's hover actions sit over its right-hand side, so the click lands on
   // the label's leading edge rather than the row centre.
   await page
-    .getByText(source, { exact: true })
-    .first()
+    .getByTestId(`source-tree-item-${source}`)
     .click({ position: { x: 2, y: 2 } });
+  // Selecting a source rewrites the query, and every tab reads the selection from it.
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get('source_name') === source,
+  );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
@@ -58,11 +67,10 @@ for (const { engine, source, app } of TRANSFORMS) {
     ).toBeVisible();
     await expect(page.getByText(`Instance ${source}`).first()).toBeVisible();
 
-    // The other two apps are catalogued per-source as well, so each is listed
-    // here and each says it is not deployed for THIS source. That count is what
+    // Every other per-source app says it is not deployed here, which is what
     // proves the instance is bound to one source rather than shared.
     await expect(page.getByText('Not deployed for this source.')).toHaveCount(
-      TRANSFORMS.length - 1,
+      UNDEPLOYED_HERE,
     );
   });
 }
@@ -92,13 +100,12 @@ test('an app that authors files gets an editor, and elastic does not', async ({
 test('every transform app is deployable from its own source', async ({
   page,
 }) => {
-  // Two undeployed per-source apps on each page, so two Deploy actions and one
-  // Undeploy for the app that IS bound here.
+  // One Undeploy for the app bound here, a Deploy for each app that is not.
   for (const { source } of TRANSFORMS) {
     await openProcessingTab(page, source);
     await expect(
       page.getByRole('button', { name: 'Deploy', exact: true }),
-    ).toHaveCount(TRANSFORMS.length - 1);
+    ).toHaveCount(UNDEPLOYED_HERE);
     await expect(
       page.getByRole('button', { name: 'Undeploy', exact: true }),
     ).toHaveCount(1);
