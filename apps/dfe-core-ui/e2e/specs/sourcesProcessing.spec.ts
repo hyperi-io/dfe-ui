@@ -39,9 +39,6 @@ const openProcessingTab = async (page: Page) => {
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
 
-// RED: the engine sends the rules at compiled.routing.source_rules and
-// hasSourceRules reads compiled.source_rules, so the card returns null for every
-// source (#330). Asserting that absence would bank the defect as expected.
 test('Receiver routing', async ({ page }) => {
   await openProcessingTab(page);
 
@@ -52,9 +49,11 @@ test('Receiver routing', async ({ page }) => {
     page.getByText('Compiled by the receiver compiler into config.routing'),
   ).toBeVisible();
 
-  /* Scoped: the source's own match rule is shown above the tabs as well */
+  /* Scoped: the source's own match rule is shown above the tabs as well.
+     The seed's match field carries no `_json.` prefix -- the receiver splits on
+     '.' and walks the raw payload, so that prefix is a segment no record has. */
   const rule = page.locator('dl').filter({ hasText: 'From the sources' });
-  await expect(rule.getByText('_json.tags.collector.type')).toHaveCount(2);
+  await expect(rule.getByText('tags.collector.type')).toHaveCount(2);
   await expect(rule.getByText('key_value_set')).toHaveCount(2);
 
   /* The seeded routing is synced, so no sync action is offered */
