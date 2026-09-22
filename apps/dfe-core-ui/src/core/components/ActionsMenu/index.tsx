@@ -65,6 +65,10 @@ export const ActionsMenu = ({
     >
       <Button
         type="default"
+        // Icon-only, so the name has to be given: without it the menu holding
+        // Edit, Clone and Delete announces as "button" and has no locator.
+        aria-label={isMenuOpen ? 'Close actions' : 'Actions'}
+        aria-expanded={isMenuOpen}
         icon={isMenuOpen ? <IconX /> : <IconMenu2 />}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={classNames?.trigger}

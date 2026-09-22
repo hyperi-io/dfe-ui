@@ -235,25 +235,33 @@ const sourceSummaryToTreeData = ({
             title={
               /* The row carries badges beside the name, so its text is not a stable locator; address it by the full source path. */
               <span
-                className="flex gap-2 items-center"
+                className="flex gap-2 items-center min-w-0"
                 data-testid={sourceTreeTestId(source.name)}
               >
-                {source.name.split('/').pop() ?? ''}
+                {/* The badges hold their width, so the name is the only thing
+                    that can give: without this it hyphenates mid-word at laptop
+                    width instead of ellipsising. */}
+                <span className="min-w-0 truncate">
+                  {source.name.split('/').pop() ?? ''}
+                </span>
 
                 {source.origin && (
-                  <Tag className="m-0" color={originTagColour(source.origin)}>
+                  <Tag
+                    className="m-0 shrink-0"
+                    color={originTagColour(source.origin)}
+                  >
                     {source.origin}
                   </Tag>
                 )}
 
                 {!isDeployed && (
                   <Tooltip destroyOnHidden title="_main_land">
-                    <IconBucket className="opacity-80" />
+                    <IconBucket className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
                 {isDeployed && (
                   <Tooltip destroyOnHidden title="Is deployed">
-                    <IconRocket className="text-tertiary opacity-80" />
+                    <IconRocket className="text-tertiary opacity-80 shrink-0" />
                   </Tooltip>
                 )}
               </span>
