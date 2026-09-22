@@ -211,6 +211,47 @@ const DEFAULT_WRITE_RESULT = {
   reload: 'roll',
 };
 
+/**
+ * The receiver's derived blocks, keyed by name as the engine sends them.
+ *
+ * Shape captured from `GET /api/v1/apps/dfe-receiver/default/routing`: the rules
+ * are at `routing.source_rules`, not off the top of `compiled`, and the compile
+ * writes a sibling `destinations` block. A fixture flattened to `source_rules`
+ * passes a UI that reads the wrong depth (dfe-ui#330).
+ */
+export const RECEIVER_ROUTING_BLOCKS = {
+  routing: {
+    source_rules: [
+      {
+        field: 'event.dataset',
+        mode: 'key_value_set',
+        match_value: 'syslog',
+        source: 'syslog',
+      },
+    ],
+    default_source: 'main',
+    topic_suffix: '_land',
+    source_to_topic: {},
+    legacy_compat: false,
+    dlq: { enabled: true, topic: 'dlq_land' },
+  },
+  destinations: { default: 'kafka', rules: [] },
+};
+
+/**
+ * The loader's derived block, same nesting, no per-source rules.
+ *
+ * Shape captured from `GET /api/v1/apps/dfe-loader/default/routing`. A
+ * whole-app map keyed by source has nothing to say on one source's page, so a
+ * UI reading these blocks is right to render nothing for the loader.
+ */
+export const LOADER_ROUTING_BLOCKS = {
+  routing: {
+    default_db: 'dfe',
+    source_to_table: { main: 'main', syslog: 'syslog' },
+  },
+};
+
 const withInstance = (url: string, service: string, instance: string) =>
   url.replace('{service}', service).replace('{instance}', instance);
 
@@ -653,26 +694,9 @@ export const apps = {
           },
           drift: false,
           absent: false,
-          compiled: {
-            source_rules: [
-              {
-                field: 'event.dataset',
-                mode: 'key_value_set',
-                match_value: 'syslog',
-                source: 'syslog',
-              },
-            ],
-          },
-          deployed: {
-            source_rules: [
-              {
-                field: 'event.dataset',
-                mode: 'key_value_set',
-                match_value: 'syslog',
-                source: 'syslog',
-              },
-            ],
-          },
+          compiled: RECEIVER_ROUTING_BLOCKS,
+          deployed: RECEIVER_ROUTING_BLOCKS,
+          etag: 'abc1234',
         },
         service = 'service',
         instance = 'instance',
