@@ -1,5 +1,7 @@
 'use client';
 
+import { SourceTransformSelector } from '@/Sources/components/SourceTransformSelector';
+import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -74,6 +76,22 @@ export const ViewSourceDetailTabs = ({
   );
 
   const { isMetaSchemaDefined } = useSourceDetailsContext();
+  const { setSelectedSource, refetch: refetchSources } =
+    useListSourcesContext();
+
+  // A transform switch is a source write, and on a deployed source it lands on
+  // a new version: without following it the page keeps reading the old one.
+  const handleSourceUpdated = useCallback(
+    (response: { source: string; current: string }) => {
+      setSelectedSource({
+        source_name: response.source,
+        source_version: response.current,
+      });
+      refetchSources();
+    },
+    [refetchSources, setSelectedSource],
+  );
+
   return (
     <Tabs
       classNames={{
@@ -144,7 +162,20 @@ export const ViewSourceDetailTabs = ({
           children: (
             <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
               <RbacProtected.Unrestricted>
-                <SourceProcessingTabContent source={selectedSourceName} />
+                <SourceProcessingTabContent
+                  source={selectedSourceName}
+                  transformSlot={
+                    <SourceTransformSelector
+                      // Keyed by source: a refusal is one deployment's answer
+                      // about one source, and it must not follow the reader to
+                      // the next one.
+                      key={selectedSourceName}
+                      source={selectedSourceName}
+                      sourceDetail={sourceDetailData}
+                      onSourceUpdated={handleSourceUpdated}
+                    />
+                  }
+                />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="h-full">
                 <RbacProtected.RestrictedRoute />

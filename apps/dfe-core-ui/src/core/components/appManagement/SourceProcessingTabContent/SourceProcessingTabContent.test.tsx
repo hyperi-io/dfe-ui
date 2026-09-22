@@ -23,9 +23,18 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
+const renderTab = () =>
+  render(
+    <SourceProcessingTabContent
+      source="syslog"
+      transformSlot={<div data-testid="transform-slot" />}
+    />,
+    { wrapper },
+  );
+
 describe('SourceProcessingTabContent', () => {
   it('puts the receiver routing rule on the source page', async () => {
-    render(<SourceProcessingTabContent source="syslog" />, { wrapper });
+    renderTab();
 
     expect(
       await screen.findByRole('heading', { name: 'dfe-receiver routing' }),
@@ -34,35 +43,32 @@ describe('SourceProcessingTabContent', () => {
     expect(await screen.findAllByText('event.dataset')).toHaveLength(2);
   });
 
-  it('shows every per-source app, deployed or not', async () => {
-    render(<SourceProcessingTabContent source="syslog" />, { wrapper });
+  it('lifts the transforms into the slot and leaves the fetcher its own card', async () => {
+    renderTab();
 
-    expect(await screen.findByText('dfe-transform-vrl')).toBeInTheDocument();
-    expect(screen.getByText('dfe-transform-elastic')).toBeInTheDocument();
-    // A fetcher is per-source too, so it belongs on this list.
-    expect(screen.getByText('dfe-fetcher')).toBeInTheDocument();
+    expect(await screen.findByTestId('transform-slot')).toBeInTheDocument();
+    // A fetcher is per-source too, and deploying one is a real action, so it
+    // keeps a card of its own rather than joining the transform choice.
+    expect(
+      screen.getByRole('heading', { name: 'dfe-fetcher' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('dfe-transform-vrl')).not.toBeInTheDocument();
+    expect(screen.queryByText('dfe-transform-elastic')).not.toBeInTheDocument();
   });
 
-  it('offers a deploy for an app with no instance for this source', async () => {
-    render(<SourceProcessingTabContent source="syslog" />, { wrapper });
+  it('offers a deploy only for the per-source app that takes one', async () => {
+    renderTab();
 
     expect(
       await screen.findAllByText('Not deployed for this source.'),
-    ).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: /Deploy/ })).toHaveLength(2);
-  });
-
-  it('gives an editor only to the app whose manifest declares file sets', async () => {
-    render(<SourceProcessingTabContent source="syslog" />, { wrapper });
-
-    expect(await screen.findByText('000_parse.vrl')).toBeInTheDocument();
-    expect(screen.getAllByText('Files')).toHaveLength(1);
+    ).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /Deploy/ })).toHaveLength(1);
   });
 
   it('excludes the fleet-wide pools from the per-source list', async () => {
-    render(<SourceProcessingTabContent source="syslog" />, { wrapper });
+    renderTab();
 
-    await screen.findByText('dfe-transform-vrl');
+    await screen.findByRole('heading', { name: 'dfe-fetcher' });
     expect(screen.queryByText('Instance default')).not.toBeInTheDocument();
   });
 });

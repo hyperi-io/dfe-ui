@@ -29,11 +29,9 @@ const TRANSFORMS = [
   },
 ] as const;
 
-// dfe-fetcher is per-source as well, so a source page lists four apps.
-const PER_SOURCE_APPS = TRANSFORMS.length + 1;
-
-// Each seeded source binds one transform; the rest are offered, not deployed.
-const UNDEPLOYED_HERE = PER_SOURCE_APPS - 1;
+// dfe-fetcher is per-source as well, and it is the only one that deploys and
+// undeploys on its own: the transforms are one choice the source carries.
+const STANDALONE_PER_SOURCE_APPS = 1;
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -62,15 +60,14 @@ for (const { engine, source, app } of TRANSFORMS) {
   }) => {
     await openProcessingTab(page, source);
 
-    await expect(
-      page.getByRole('heading', { name: app, exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText(`Instance ${source}`).first()).toBeVisible();
+    // The source names one engine, and that option is the selected one.
+    await expect(page.getByRole('radio', { name: app })).toBeChecked();
+    await expect(page.getByText('Running for this source.')).toHaveCount(1);
 
-    // Every other per-source app says it is not deployed here, which is what
-    // proves the instance is bound to one source rather than shared.
+    // Only dfe-fetcher reports itself undeployed, which is what proves the
+    // transform instances are bound one per source rather than shared.
     await expect(page.getByText('Not deployed for this source.')).toHaveCount(
-      UNDEPLOYED_HERE,
+      STANDALONE_PER_SOURCE_APPS,
     );
   });
 }
@@ -97,17 +94,17 @@ test('an app that authors files gets an editor, and elastic does not', async ({
   await expect(page.getByText('Files', { exact: true })).toHaveCount(0);
 });
 
-test('every transform app is deployable from its own source', async ({
+test('a transform offers no deploy, because the source carries the choice', async ({
   page,
 }) => {
-  // One Undeploy for the app bound here, a Deploy for each app that is not.
   for (const { source } of TRANSFORMS) {
     await openProcessingTab(page, source);
+    // The one Deploy left on the page belongs to dfe-fetcher.
     await expect(
       page.getByRole('button', { name: 'Deploy', exact: true }),
-    ).toHaveCount(UNDEPLOYED_HERE);
+    ).toHaveCount(STANDALONE_PER_SOURCE_APPS);
     await expect(
       page.getByRole('button', { name: 'Undeploy', exact: true }),
-    ).toHaveCount(1);
+    ).toHaveCount(0);
   }
 });

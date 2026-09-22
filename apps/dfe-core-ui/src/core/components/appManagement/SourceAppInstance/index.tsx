@@ -1,9 +1,6 @@
 'use client';
 
-import { AppFileSets } from '@/core/components/appManagement/AppFileSets';
-import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
-import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
-import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
+import { AppInstancePanels } from '@/core/components/appManagement/AppInstancePanels';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { useCreateAppInstance } from '@/core/hooks/apps/instances/useCreateAppInstance';
 import { useDeleteAppInstance } from '@/core/hooks/apps/instances/useDeleteAppInstance';
@@ -13,7 +10,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, Collapse } from 'antd';
+import { Button } from 'antd';
 
 /**
  * Names the app, as a heading rather than loose text.
@@ -117,49 +114,7 @@ export const SourceAppInstance = ({
       {deleteMessage && <NotificationCard type="error" title={deleteMessage} />}
       {deleteResult && <WriteResultFeedback result={deleteResult} />}
 
-      <Collapse
-        defaultActiveKey={app.file_sets.length > 0 ? ['files'] : ['status']}
-        items={[
-          ...(app.file_sets.length > 0
-            ? [
-                {
-                  key: 'files',
-                  label: 'Files',
-                  children: (
-                    <AppFileSets
-                      service={app.service}
-                      instance={source}
-                      fileSets={app.file_sets}
-                    />
-                  ),
-                },
-              ]
-            : []),
-          {
-            key: 'status',
-            label: 'Status and metrics',
-            children: (
-              <AppOperationalCard service={app.service} instance={source} />
-            ),
-          },
-          ...(app.scale_deployed
-            ? [
-                {
-                  key: 'scaling',
-                  label: 'Scaling',
-                  children: (
-                    <ScalingCard service={app.service} instance={source} />
-                  ),
-                },
-              ]
-            : []),
-          {
-            key: 'settings',
-            label: 'Settings',
-            children: <AppConfigCard service={app.service} instance={source} />,
-          },
-        ]}
-      />
+      <AppInstancePanels app={app} instance={source} />
     </SectionCard>
   );
 };

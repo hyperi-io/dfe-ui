@@ -2,9 +2,11 @@
 
 import { SourceAppInstance } from '@/core/components/appManagement/SourceAppInstance';
 import { SourceRoutingCard } from '@/core/components/appManagement/SourceRoutingCard';
+import { isTransformApp } from '@/core/components/appManagement/transformApps';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Spin } from 'antd';
+import { ReactNode } from 'react';
 
 /**
  * Everything that processes THIS source: how the receiver identifies it, and
@@ -14,7 +16,19 @@ import { Spin } from 'antd';
  * belongs to the source; its pool belongs to the fleet. Showing only one of
  * them either hides the routing or duplicates the pool.
  */
-export const SourceProcessingTabContent = ({ source }: { source: string }) => {
+export const SourceProcessingTabContent = ({
+  source,
+  transformSlot,
+}: {
+  source: string;
+  /**
+   * The transform choice, rendered where the transform apps would be listed.
+   *
+   * Choosing a transform writes the SOURCE, which belongs to the Sources scope,
+   * so the control is passed in rather than reached for from here.
+   */
+  transformSlot?: ReactNode;
+}) => {
   const { data: apps, isLoading, error } = useFetchApps();
 
   if (isLoading) return <Spin size="small" />;
@@ -33,6 +47,9 @@ export const SourceProcessingTabContent = ({ source }: { source: string }) => {
   // every source, a per-config one is this source's own.
   const singleApps = apps.filter((app) => app.multiplicity === 'single');
   const perSourceApps = apps.filter((app) => app.multiplicity === 'per_config');
+  // The transforms are one choice, not several deployments, so they are lifted
+  // out of the per-app list into the control that writes that choice.
+  const standaloneApps = perSourceApps.filter((app) => !isTransformApp(app));
 
   return (
     <div className="flex flex-col">
@@ -48,7 +65,9 @@ export const SourceProcessingTabContent = ({ source }: { source: string }) => {
         )),
       )}
 
-      {perSourceApps.map((app) => (
+      {transformSlot}
+
+      {standaloneApps.map((app) => (
         <SourceAppInstance key={app.service} app={app} source={source} />
       ))}
 
