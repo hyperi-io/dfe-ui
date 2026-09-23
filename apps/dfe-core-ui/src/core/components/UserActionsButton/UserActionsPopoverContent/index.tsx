@@ -67,6 +67,8 @@ export const UserActionsPopoverContent = () => {
           <dd>{me.user_id}</dd>
           <dt className={dataListTermStyle}>Org ID:</dt>
           <dd>{me.org_id}</dd>
+          <dt className={dataListTermStyle}>External:</dt>
+          <dd>{me.external ? 'Yes' : 'No'}</dd>
           <dt className={dataListTermStyle}>Roles:</dt>
           <dd>
             {me?.roles?.length && me?.roles?.length > 0 ? (

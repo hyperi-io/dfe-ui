@@ -7,10 +7,12 @@ import { ViewAccountDrawer } from '@/Settings/components/AccountManagement/ViewA
 export const RowActions = ({
   username,
   isActive,
+  isExternal,
   refetch,
 }: {
   username: string;
   isActive: boolean;
+  isExternal: boolean;
   refetch: () => void;
 }) => {
   return (
@@ -21,6 +23,7 @@ export const RowActions = ({
           key="edit-user"
           username={username}
           refetch={refetch}
+          isExternal={isExternal}
         />,
         <DeReactivateAccount
           key="dereactivate-user"

@@ -25,6 +25,7 @@ export const PopoverMenu = ({
       classNames={{
         container: 'p-0.5',
       }}
+      destroyOnHidden={false}
       content={
         <ul
           className="[&_button]:w-full [&_button]:text-left [&_button]:justify-start"

@@ -102,6 +102,7 @@ export const AccountManagement = () => {
           username={record.username}
           isActive={record.enabled}
           refetch={refetch}
+          isExternal={record.external}
         />
       ),
     },

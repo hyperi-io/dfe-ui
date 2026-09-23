@@ -12,9 +12,11 @@ import { useState } from 'react';
 
 export const EditAccountDrawer = ({
   username,
+  isExternal,
   refetch,
 }: {
   username: string;
+  isExternal: boolean;
   refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
@@ -83,11 +85,20 @@ export const EditAccountDrawer = ({
             Set a new password for this account. This does not change group
             memberships.
           </p>
+
           <RbacProtected
             action={RbacProtected.rbacActions.accounts_reset_password}
           >
             <RbacProtected.Unrestricted>
-              <ResetAccountPassword username={username} />
+              {!isExternal && <ResetAccountPassword username={username} />}
+              {isExternal && (
+                <NotificationCard
+                  className="w-full"
+                  title="Cannot reset password for external users"
+                  description="Password is managed by the external OIDC provider"
+                  type="warning"
+                />
+              )}
             </RbacProtected.Unrestricted>
             <RbacProtected.Restricted>
               <NotificationCard
