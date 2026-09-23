@@ -3,10 +3,7 @@
  */
 import { describe, expect, test } from 'vitest';
 import { ESLint } from 'eslint';
-import {
-  antdImportRejectOverrides,
-  RULE_ID,
-} from './antd-import-reject.mjs';
+import { antdImportRejectOverrides, RULE_ID } from './antd-import-reject.mjs';
 
 const createLinter = async () => {
   const eslint = new ESLint({
@@ -45,9 +42,8 @@ const lint = async (
   };
 };
 
-const ruleErrors = (
-  errors: Array<{ ruleId: string; message: string }>,
-) => errors.filter((error) => error.ruleId === RULE_ID);
+const ruleErrors = (errors: Array<{ ruleId: string; message: string }>) =>
+  errors.filter((error) => error.ruleId === RULE_ID);
 
 describe('antd-import-reject', () => {
   test.each(['Drawer', 'Form', 'Table', 'Modal', 'Tooltip'] as const)(
