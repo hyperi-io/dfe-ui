@@ -35,6 +35,9 @@ const accountDetail = (
   updated_at: '2026-01-01T00:00:00Z',
   ...overrides,
   external: overrides.external ?? false,
+  blocked: overrides.blocked ?? false,
+  disabled_at: overrides.disabled_at ?? '',
+  blocked_at: overrides.blocked_at ?? '',
 });
 
 const definitionFor = (term: string) =>

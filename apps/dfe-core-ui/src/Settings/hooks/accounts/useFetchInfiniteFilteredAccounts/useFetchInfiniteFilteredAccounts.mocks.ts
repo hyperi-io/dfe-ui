@@ -17,6 +17,9 @@ const ACCOUNT_ITEM: TAccountsItemSummary = {
   phone: 'string',
   name: 'string',
   external: false,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
 };
 
 const TOTAL_ITEMS = 25;

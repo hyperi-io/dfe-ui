@@ -51,6 +51,9 @@ const accounts = (): TAccountsResponse => ({
       phone: 'string',
       name: 'string',
       external: false,
+      blocked: false,
+      disabled_at: '',
+      blocked_at: '',
     },
     {
       username: 'alice',
@@ -66,6 +69,9 @@ const accounts = (): TAccountsResponse => ({
       phone: 'string',
       name: 'string',
       external: false,
+      blocked: false,
+      disabled_at: '',
+      blocked_at: '',
     },
   ],
   total: 2,
@@ -155,6 +161,9 @@ describe('AccountManagement', () => {
               name: 'DFE dfe-test',
 
               external: false,
+              blocked: false,
+              disabled_at: '',
+              blocked_at: '',
             },
             {
               username: 'admin',
@@ -171,6 +180,9 @@ describe('AccountManagement', () => {
               name: '  ',
 
               external: false,
+              blocked: false,
+              disabled_at: '',
+              blocked_at: '',
             },
           ],
         },

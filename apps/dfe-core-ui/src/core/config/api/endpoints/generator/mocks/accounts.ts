@@ -33,6 +33,9 @@ export const accounts = {
               phone: 'string',
               name: 'string',
               external: false,
+              blocked: false,
+              disabled_at: '',
+              blocked_at: '',
             },
           ],
           total: 1,
@@ -77,6 +80,9 @@ export const accounts = {
           phone: 'string',
           name: 'string',
           external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
         },
       }: {
         mockedResponse?: TAccountCreateResponse;
@@ -116,6 +122,9 @@ export const accounts = {
           phone: 'string',
           name: 'string',
           external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
         },
         username = 'string',
       }: {
@@ -162,6 +171,9 @@ export const accounts = {
           phone: 'string',
           name: 'string',
           external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
         },
         username = 'string',
       }: {
@@ -316,6 +328,9 @@ export const accounts = {
           created_at: 'string',
           updated_at: 'string',
           external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
         },
       }: {
         mockedResponse?: TCurrentUserResponse;
@@ -352,6 +367,9 @@ export const accounts = {
           created_at: 'string',
           updated_at: 'string',
           external: false,
+          blocked: false,
+          disabled_at: '',
+          blocked_at: '',
         },
       }: {
         mockedResponse?: TCurrentUserUpdateResponse;

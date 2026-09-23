@@ -55,6 +55,9 @@ describe('.useAuthMe', () => {
         created_at: 'string',
         updated_at: 'string',
         external: false,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
       };
 
       await waitFor(() => {
