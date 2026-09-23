@@ -1,5 +1,6 @@
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useDeleteAccount } from '@/Settings/hooks/accounts/useDeleteAccount';
 import { IconTrash } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
@@ -10,10 +11,12 @@ export const DeleteAccountDrawer = ({
   username,
   isActive,
   refetch,
+  isExternal,
 }: {
   username: string;
   isActive: boolean;
   refetch: () => void;
+  isExternal: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
@@ -55,15 +58,29 @@ export const DeleteAccountDrawer = ({
     <>
       <RbacProtected action={RbacProtected.rbacActions.account_delete}>
         <RbacProtected.Unrestricted>
-          <Button
-            aria-label={title}
-            type="text"
-            icon={<IconTrash />}
-            onClick={handleOpen}
-            danger
-          >
-            Delete Account
-          </Button>
+          {isExternal ? (
+            <Tooltip title="Cannot delete external users">
+              <Button
+                aria-label={title}
+                type="text"
+                icon={<IconTrash />}
+                disabled
+                danger
+              >
+                Delete Account
+              </Button>
+            </Tooltip>
+          ) : (
+            <Button
+              aria-label={title}
+              type="text"
+              icon={<IconTrash />}
+              onClick={handleOpen}
+              danger
+            >
+              Delete Account
+            </Button>
+          )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button

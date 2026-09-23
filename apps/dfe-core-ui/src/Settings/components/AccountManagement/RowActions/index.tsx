@@ -36,6 +36,7 @@ export const RowActions = ({
           username={username}
           isActive={isActive}
           refetch={refetch}
+          isExternal={isExternal}
         />,
       ]}
       ariaLabel="User actions"
