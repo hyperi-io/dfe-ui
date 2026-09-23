@@ -31,7 +31,7 @@ describe('.usePromoteFields', () => {
     atomic: false,
     column_name: 'string',
     data_type: 'string',
-    index_type: 'minmax',
+    use_case: 'range',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -60,7 +60,7 @@ describe('.usePromoteFields', () => {
             status: 'ok',
             column_name: 'string',
             data_type: 'string',
-            index_type: 'string',
+            use_case: 'string',
             copy_cel: 'string',
             error: 'string',
           },
