@@ -1,6 +1,7 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { HiddenField } from '@/core/components/HiddenField';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
@@ -8,7 +9,6 @@ import {
 import { cn } from '@/core/utils/style';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconCheck, IconX } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';

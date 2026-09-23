@@ -19,10 +19,10 @@ export const PromoteJsonPaths = ({
 }: {
   selectedSourceName: string;
   selectedSourceVersion: string;
-  data: TPromoteFieldResponse | null;
   jsonPaths: TJsonPathsResponse | null;
   onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
+  data: TPromoteFieldResponse | null;
 }) => {
   const { handleClearFieldsToPromote } = usePromoteRowsContext();
   const {
@@ -51,7 +51,7 @@ export const PromoteJsonPaths = ({
     return (
       data?.diff?.new_columns?.map((column) => ({
         ...column,
-        id: column.name,
+        id: column.name ?? undefined,
         _field_type: column._field_type || SCHEMA_FIELD_TYPES.USER_DEFINED,
       })) ?? []
     );
@@ -76,15 +76,17 @@ export const PromoteJsonPaths = ({
           />
         )}
         <ul className="flex flex-col gap-y-2">
-          {data?.results.map((result, index) => (
-            <li key={result.json_path}>
-              <PromoteJsonPathsResultCard
-                result={result}
-                ddl={data?.diff?.ddl?.[index]}
-                copyDirective={data?.diff?.copy_directives?.[index]}
-              />
-            </li>
-          ))}
+          {data?.results.map(
+            (result, index) =>
+              result.status !== 'ok' && (
+                <li key={result.json_path}>
+                  <PromoteJsonPathsResultCard
+                    result={result}
+                    copyDirective={data?.diff?.copy_directives?.[index]}
+                  />
+                </li>
+              ),
+          )}
         </ul>
 
         {errorPromotingFields && (

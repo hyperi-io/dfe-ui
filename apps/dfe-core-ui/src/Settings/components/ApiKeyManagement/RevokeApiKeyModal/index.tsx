@@ -1,9 +1,10 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useRevokeApiKey } from '@/Settings/hooks/apiKeys/useRevokeApiKey';
 import { IconInfoCircle, IconTrash } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 export const RevokeApiKeyModal = ({

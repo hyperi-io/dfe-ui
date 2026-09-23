@@ -2,9 +2,10 @@ import { useDeleteRule } from '@/Rules/hooks/useDeleteRule';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, ButtonProps, Modal } from 'antd';
+import { Button, ButtonProps } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteRuleModalProps {
@@ -92,19 +93,19 @@ export const DeleteRuleModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
               type="primary"
               danger
               onClick={handleDeleteRule}
             >
               Delete
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

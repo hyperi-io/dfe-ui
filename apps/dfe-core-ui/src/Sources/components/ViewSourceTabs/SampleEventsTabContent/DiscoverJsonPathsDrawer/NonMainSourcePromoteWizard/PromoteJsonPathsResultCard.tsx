@@ -1,10 +1,9 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { IconCheck, IconExclamationMark } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
@@ -13,20 +12,10 @@ const EmptyData = () => (
 );
 
 export const PromoteJsonPathsResultCard = ({
-  result: {
-    json_path,
-    status,
-    column_name,
-    data_type,
-    use_case,
-    copy_cel,
-    error,
-  },
-  ddl,
+  result: { json_path, status, column_name, data_type, copy_cel, error },
   copyDirective,
 }: {
   result: TPromoteFieldResponse['results'][number];
-  ddl: string | undefined;
   copyDirective: string | undefined;
 }) => {
   return (
@@ -56,24 +45,23 @@ export const PromoteJsonPathsResultCard = ({
           </span>
         </span>
       }
-      defaultOpen={true}
+      defaultOpen={false}
       className="border border-foreground/10 dark:border-dark-foreground/10 rounded-md p-2"
     >
       <div className="flex flex-col gap-y-4">
-        <dl className="grid grid-cols-[100px_auto_100px_auto] gap-x-6 gap-y-1 text-sm">
-          <dt className={dataListTermStyle}>Status</dt>
-          <dd>{status}</dd>
-          <dt className={dataListTermStyle}>Data Type</dt>
-          <dd>{data_type || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Index Type</dt>
-          <dd>{use_case || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Copy Cel</dt>
-          <dd>{copy_cel || <EmptyData />}</dd>
-          <dt className={dataListTermStyle}>Copy Directive</dt>
-          <dd>{copyDirective || <EmptyData />}</dd>
-        </dl>
+        {status === 'ok' && (
+          <dl className="grid grid-cols-[100px_auto_100px_auto] gap-x-6 gap-y-1 text-sm">
+            <dt className={dataListTermStyle}>Status</dt>
+            <dd>{status}</dd>
+            <dt className={dataListTermStyle}>Data Type</dt>
+            <dd>{data_type || <EmptyData />}</dd>
+            <dt className={dataListTermStyle}>Copy Cel</dt>
+            <dd>{copy_cel || <EmptyData />}</dd>
+            <dt className={dataListTermStyle}>Copy Directive</dt>
+            <dd>{copyDirective || <EmptyData />}</dd>
+          </dl>
+        )}
 
-        {ddl && <AceEditor mode="sql" readOnly height="85px" value={ddl} />}
         {error && (
           <NotificationCard
             title={`${json_path} has the following errors`}

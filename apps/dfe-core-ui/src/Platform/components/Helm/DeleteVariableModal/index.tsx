@@ -1,8 +1,10 @@
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { useDeleteHelmFileVariable } from '@/Platform/hooks/helm/useDeleteHelmFileVariable';
 import { IconTrash } from '@repo/dfe-icons';
-import { App, Button, Modal, Tooltip } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 import {
   DeleteVariableForm,

@@ -75,6 +75,9 @@ export const CloneApiKeyDrawer = ({
         open={open}
         onClose={handleClose}
         keyboard={!mustAcknowledgeCopy}
+        preventClickaway={{
+          enabled: false,
+        }}
       >
         <CreateApiKeyForm
           initialValues={initialValues}

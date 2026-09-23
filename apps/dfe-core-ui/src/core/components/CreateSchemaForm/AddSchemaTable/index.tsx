@@ -5,10 +5,12 @@ import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
+import { Tooltip } from '@/core/components/Tooltip';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import type { ValidatorRule } from '@rc-component/form/lib/interface';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormRule, Input, Tooltip } from 'antd';
+import { Button, FormRule, Input } from 'antd';
+
 import type { FormListFieldData } from 'antd/es/form';
 import { useEffect, useLayoutEffect } from 'react';
 import z from 'zod';

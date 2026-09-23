@@ -1,6 +1,7 @@
+import { Form } from '@/core/components/Form';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
-import { Form, FormInstance, FormRule, Radio } from 'antd';
+import { FormInstance, FormRule, Radio } from 'antd';
 import { useState } from 'react';
 import { MetaSchemaForm } from './MetaSchemaForm';
 import { getInitialAssignSchema } from './SchemaConfigTabContent.helpers';

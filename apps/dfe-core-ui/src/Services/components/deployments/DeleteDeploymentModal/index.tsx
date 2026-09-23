@@ -1,9 +1,11 @@
 import { useDeleteDeployment } from '@/Services/hooks/deployments/useDeleteDeployment';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
-import { App, Button, ButtonProps, Modal, Tooltip } from 'antd';
+import { App, Button, ButtonProps } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteDeploymentModalProps {
@@ -111,19 +113,19 @@ export const DeleteDeploymentModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
               type="primary"
               danger
               onClick={handleDeleteDeployment}
             >
               Delete
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

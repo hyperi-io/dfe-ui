@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
@@ -9,7 +10,7 @@ import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { IconCopy } from '@repo/dfe-icons';
-import { Button, ButtonProps, Input, Modal } from 'antd';
+import { Button, ButtonProps, Input } from 'antd';
 import { cloneElement, useState } from 'react';
 import z from 'zod';
 
@@ -160,18 +161,18 @@ export const CloneRuleModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
-              htmlType="submit"
-              type="primary"
-            >
-              Clone
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
               type="default"
               onClick={() => setOpen(false)}
             >
               Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
+              htmlType="submit"
+              type="primary"
+            >
+              Clone
             </Button>
           </div>
         </Form>

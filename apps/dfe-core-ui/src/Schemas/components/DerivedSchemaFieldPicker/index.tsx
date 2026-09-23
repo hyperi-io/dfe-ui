@@ -1,9 +1,10 @@
 import { Table } from '@/core/components/Table';
+import { Tooltip } from '@/core/components/Tooltip';
 import { INDEX_USE_CASE_OPTIONS } from '@/Schemas/constants/indexUseCase';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { TMetaSchemaDetailColumnItem } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Alert, Input, Select, Tag, Tooltip } from 'antd';
+import { Alert, Input, Select, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useState } from 'react';
 import {

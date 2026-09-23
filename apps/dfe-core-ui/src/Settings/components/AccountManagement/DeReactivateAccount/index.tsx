@@ -1,8 +1,9 @@
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
 import { IconLock } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
 export const DeReactivateAccount = ({

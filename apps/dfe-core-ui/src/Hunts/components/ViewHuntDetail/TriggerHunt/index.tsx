@@ -1,8 +1,9 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useTriggerHunt } from '@/Hunts/hooks/useTriggerHunt';
 import { IconPlayerPlay } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
 export const TriggerHunt = ({
@@ -26,6 +27,7 @@ export const TriggerHunt = ({
       notification.success({
         title: 'On-demand run queued',
         description: `The runner picks it up within ${data.poll_seconds} seconds.`,
+        placement: 'bottomLeft',
       });
     },
   });
@@ -54,9 +56,20 @@ export const TriggerHunt = ({
         title="Trigger On-Demand Hunt"
         open={isOpen}
         onCancel={close}
-        onOk={() => triggerHunt()}
-        okText="Trigger Hunt"
-        confirmLoading={isPending}
+        footer={
+          <>
+            <Button type="default" onClick={close}>
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => triggerHunt()}
+              loading={isPending}
+            >
+              Trigger Hunt
+            </Button>
+          </>
+        }
       >
         <p>
           Queue <strong>{selectedHuntName}</strong> to run now. The run covers

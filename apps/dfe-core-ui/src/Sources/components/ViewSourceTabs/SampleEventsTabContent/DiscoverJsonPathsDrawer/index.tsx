@@ -1,9 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
-import { IconAlertCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useCallback, useState } from 'react';
 import { MainSourcePromoteWizard } from './MainSourcePromoteWizard';
@@ -15,32 +12,14 @@ export const DiscoverJsonPathsDrawer = () => {
   const { isMainSource } = useSourceDetailsContext();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
 
-  const [promoteTestResponse, setPromoteTestResponse] =
-    useState<TPromoteFieldResponse | null>(null);
+  const [isUncommittedChanges, setIsUncommittedChanges] = useState(false);
 
-  const hasUncommittedChanges = isDrawerVisible && promoteTestResponse != null;
-
-  const { confirmLeave } = usePreventNavigate({
-    enabled: hasUncommittedChanges,
-    modal: {
-      title: (
-        <span className="flex items-center gap-x-2">
-          <IconAlertCircle /> Uncommitted changes
-        </span>
-      ),
-      message: UNCOMMITTED_CLOSE_MESSAGE,
-    },
-  });
+  const hasUncommittedChanges = isDrawerVisible && isUncommittedChanges;
 
   const closeDrawer = useCallback(() => {
     setIsDrawerVisible(false);
-
-    setPromoteTestResponse(null);
+    setIsUncommittedChanges(false);
   }, []);
-
-  const requestCloseDrawer = useCallback(() => {
-    confirmLeave(closeDrawer);
-  }, [closeDrawer, confirmLeave]);
 
   return (
     <>
@@ -61,13 +40,24 @@ export const DiscoverJsonPathsDrawer = () => {
         title="Promote Fields"
         open={isDrawerVisible}
         size="80%"
-        onClose={requestCloseDrawer}
+        onClose={closeDrawer}
         destroyOnHidden
+        preventClickaway={{
+          enabled: hasUncommittedChanges,
+          message: UNCOMMITTED_CLOSE_MESSAGE,
+          title: 'Uncommitted changes',
+        }}
       >
         {isMainSource ? (
-          <MainSourcePromoteWizard onSuccess={closeDrawer} />
+          <MainSourcePromoteWizard
+            onChange={setIsUncommittedChanges}
+            onSuccess={closeDrawer}
+          />
         ) : (
-          <NonMainSourcePromoteWizard onSuccess={closeDrawer} />
+          <NonMainSourcePromoteWizard
+            onChange={setIsUncommittedChanges}
+            onSuccess={closeDrawer}
+          />
         )}
       </Drawer>
     </>

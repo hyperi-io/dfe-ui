@@ -1,8 +1,9 @@
 'use client';
 
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { IconArrowRight, IconLock } from '@repo/dfe-icons';
-import { Tag, Tooltip } from 'antd';
+import { Tag } from 'antd';
 import Link from 'next/link';
 
 /** One labelled fact inside a stage box. */

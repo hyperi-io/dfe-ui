@@ -1,9 +1,10 @@
 import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { TableProps } from '@/core/components/Table';
+import { Tooltip } from '@/core/components/Tooltip';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { IconArrowMoveUp } from '@repo/dfe-icons';
-import { Button, Input, Tooltip } from 'antd';
+import { Button, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 

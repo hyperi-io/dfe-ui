@@ -1,6 +1,7 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { Tooltip } from '@/core/components/Tooltip';
 import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
@@ -12,7 +13,7 @@ import {
   TMetaSchemaDetailResponse,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, Input, Select, Tooltip } from 'antd';
+import { Button, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { UIEventHandler, useCallback, useMemo } from 'react';
 import {
