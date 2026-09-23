@@ -60,6 +60,7 @@ describe('.useUpdateAccount', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        external: false,
       };
 
       await waitFor(() => {

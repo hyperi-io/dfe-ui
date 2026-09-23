@@ -32,6 +32,7 @@ export const accounts = {
               email: 'string',
               phone: 'string',
               name: 'string',
+              external: false,
             },
           ],
           total: 1,
@@ -75,6 +76,7 @@ export const accounts = {
           email: 'string',
           phone: 'string',
           name: 'string',
+          external: false,
         },
       }: {
         mockedResponse?: TAccountCreateResponse;
@@ -113,6 +115,7 @@ export const accounts = {
           email: 'string',
           phone: 'string',
           name: 'string',
+          external: false,
         },
         username = 'string',
       }: {
@@ -158,6 +161,7 @@ export const accounts = {
           email: 'string',
           phone: 'string',
           name: 'string',
+          external: false,
         },
         username = 'string',
       }: {
@@ -311,6 +315,7 @@ export const accounts = {
           name: 'string',
           created_at: 'string',
           updated_at: 'string',
+          external: false,
         },
       }: {
         mockedResponse?: TCurrentUserResponse;
@@ -346,6 +351,7 @@ export const accounts = {
           name: 'string',
           created_at: 'string',
           updated_at: 'string',
+          external: false,
         },
       }: {
         mockedResponse?: TCurrentUserUpdateResponse;

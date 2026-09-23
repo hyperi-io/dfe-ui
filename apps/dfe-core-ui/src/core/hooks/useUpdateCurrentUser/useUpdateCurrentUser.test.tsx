@@ -63,6 +63,7 @@ describe('.useUpdateCurrentUser', () => {
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',
+        external: false,
       };
 
       await waitFor(() => {
