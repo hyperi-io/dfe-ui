@@ -1,8 +1,9 @@
 'use client';
 
+import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { IconArrowNarrowRight } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 
 /**
  * The name of one side of the switch, sized to sit level with the arrow.
