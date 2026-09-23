@@ -1,6 +1,7 @@
+import { Popover } from '@/core/components/Popover';
 import { cn } from '@/core/utils/style';
 import { IconMenu2 } from '@repo/dfe-icons';
-import { Button, Popover } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 interface PopoverMenuProps {
