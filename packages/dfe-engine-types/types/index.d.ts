@@ -2810,6 +2810,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schemas/definitions/derived": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Derived Schemas
+         * @description List every stored derived schema.
+         */
+        get: operations["list_derived_schemas_api_v1_schemas_definitions_derived_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/derived/{schema_path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Derived Schema
+         * @description Read one derived schema by registry path (e.g. ``beats/filebeat_auth``).
+         */
+        get: operations["get_derived_schema_api_v1_schemas_definitions_derived__schema_path__get"];
+        /**
+         * Update Derived Schema
+         * @description Replace a derived schema. The body is the whole document, as on create.
+         */
+        put: operations["update_derived_schema_api_v1_schemas_definitions_derived__schema_path__put"];
+        /**
+         * Create Derived Schema
+         * @description Create a derived schema at the given registry path.
+         */
+        post: operations["create_derived_schema_api_v1_schemas_definitions_derived__schema_path__post"];
+        /**
+         * Delete Derived Schema
+         * @description Delete a derived schema by registry path.
+         */
+        delete: operations["delete_derived_schema_api_v1_schemas_definitions_derived__schema_path__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schemas": {
         parameters: {
             query?: never;
@@ -7092,6 +7144,166 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /**
+         * DerivedSchemaResponse
+         * @description A stored derived schema, as the API hands it back.
+         */
+        DerivedSchemaResponse: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>)
+             */
+            path: string;
+            /**
+             * Base
+             * @description Meta-schema registry path the columns come from
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Current version of this derived schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Version id -> selection
+             */
+            versions: {
+                [key: string]: components["schemas"]["DerivedSchemaVersion"];
+            };
+        };
+        /**
+         * DerivedSchemaSummary
+         * @description One row of the derived-schema list.
+         */
+        DerivedSchemaSummary: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>)
+             */
+            path: string;
+            /**
+             * Base
+             * @description Meta-schema registry path the columns come from
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Current version
+             */
+            current: string;
+            /**
+             * Versions
+             * @description All version ids
+             */
+            versions: string[];
+            /**
+             * Column Count
+             * @description Columns the current version selects
+             */
+            column_count: number;
+            /**
+             * Updated At
+             * @description Last write to the stored document
+             */
+            updated_at: string;
+        };
+        /**
+         * DerivedSchemaVersion
+         * @description One version: the ordered selection, plus the loader's catch-all switches.
+         */
+        DerivedSchemaVersion: {
+            /**
+             * Date
+             * @description ISO date the version was written
+             */
+            date: string;
+            /**
+             * Summary
+             * @description What this selection is for
+             * @default
+             */
+            summary: string;
+            /**
+             * Capture Json
+             * @description Whether dfe-loader populates _json for this table. The column and the common header stay in place either way, so the decision is reversible.
+             * @default true
+             */
+            capture_json: boolean;
+            /**
+             * Capture Raw
+             * @description Whether dfe-loader populates _raw for this table
+             * @default true
+             */
+            capture_raw: boolean;
+            /**
+             * Select
+             * @description The complete, ordered column list of the result, after the common header
+             */
+            select: components["schemas"]["DerivedSelectEntry"][];
+        };
+        /**
+         * DerivedSchemaWriteRequest
+         * @description Create or replace a derived schema.
+         *
+         *     ``path`` is optional and, when given, must equal the URL path -- the UI
+         *     sends both and a disagreement between them is a bug worth reporting.
+         */
+        DerivedSchemaWriteRequest: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>); must match the URL when set
+             */
+            path?: string | null;
+            /**
+             * Base
+             * @description Meta-schema registry path, extensionless (e.g. meta/beats/filebeat)
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Version of this derived schema to make current
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Version id -> selection
+             */
+            versions: {
+                [key: string]: components["schemas"]["DerivedSchemaVersion"];
+            };
+        };
+        /**
+         * DerivedSelectEntry
+         * @description One selected column, optionally re-answering the question it is asked.
+         */
+        DerivedSelectEntry: {
+            /**
+             * Name
+             * @description Column name, as the base defines it
+             */
+            name: string;
+            /**
+             * Index
+             * @description Index use case for this column, overriding the base column's. 'none' keeps the column and drops its index; omitting the key keeps the base column's use case.
+             */
+            index?: string | null;
+        };
         /** DetachResponse */
         DetachResponse: {
             /** Deleted */
@@ -9517,6 +9729,32 @@ export interface components {
         PaginatedResponse_DeploymentSummary_: {
             /** Items */
             items: components["schemas"]["DeploymentSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[DerivedSchemaSummary] */
+        PaginatedResponse_DerivedSchemaSummary_: {
+            /** Items */
+            items: components["schemas"]["DerivedSchemaSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -12684,9 +12922,14 @@ export interface components {
             meta_schema_version?: string | null;
             /**
              * Derived Schema
-             * @description Source-specific field overrides (optional YAML reference)
+             * @description Derived-schema registry path (e.g. derived/beats/filebeat_auth). It SELECTS from the meta schema: the table's columns become exactly the names it lists, in its order, after the common header. It is not an override layer -- everything but the column's index resolves from the base -- and it also carries the _json/_raw capture switches for this table
              */
             derived_schema?: string | null;
+            /**
+             * Derived Schema Version
+             * @description Derived schema version (semver). Unset follows the derived schema's own 'current', so publishing a new selection changes this table
+             */
+            derived_schema_version?: string | null;
             /**
              * Additional Fields
              * @description Extra fields/indexes (optional YAML reference)
@@ -19611,6 +19854,174 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ColumnInfo"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_derived_schemas_api_v1_schemas_definitions_derived_get: {
+        parameters: {
+            query?: {
+                /** @description Search in path and base */
+                search?: string | null;
+                /** @description Sort field (path, base, current, updated_at) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DerivedSchemaSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_derived_schema_api_v1_schemas_definitions_derived__schema_path__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_derived_schema_api_v1_schemas_definitions_derived__schema_path__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DerivedSchemaWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_derived_schema_api_v1_schemas_definitions_derived__schema_path__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DerivedSchemaWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_derived_schema_api_v1_schemas_definitions_derived__schema_path__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
