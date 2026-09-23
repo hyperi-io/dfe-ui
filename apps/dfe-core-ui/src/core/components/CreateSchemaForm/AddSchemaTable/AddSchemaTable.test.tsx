@@ -1,19 +1,18 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
-import { Form } from '@/core/components/Form';
+import { Form as AntdForm, Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FormInstance, FormRule } from 'antd';
-import { Form as AntdForm } from 'antd';
 import { useEffect } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   AddSchemaTable,
   AT_LEAST_ONE_SCHEMA_ROW_MESSAGE,
-  type AddSchemaTableProps,
   isBlankSchemaListRow,
+  type AddSchemaTableProps,
   type RowSchema,
 } from './index';
 

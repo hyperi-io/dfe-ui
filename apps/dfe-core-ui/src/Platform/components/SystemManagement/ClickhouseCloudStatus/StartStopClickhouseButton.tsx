@@ -1,7 +1,8 @@
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useSystemStopStartClickhouseCloud } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud';
 import { IconPlayerPlay, IconPlayerStop } from '@repo/dfe-icons';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 
 export const StartStopClickhouseButton = ({
   state,

@@ -1,5 +1,6 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
@@ -7,7 +8,7 @@ import {
 import { cn } from '@/core/utils/style';
 import { useFetchOrganisationDetail } from '@/Settings/hooks/organisations/useFetchOrganisationDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
-import { Spin, Tooltip } from 'antd';
+import { Spin } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';

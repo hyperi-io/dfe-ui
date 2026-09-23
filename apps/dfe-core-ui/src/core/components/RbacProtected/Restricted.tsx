@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 import { AbstractTooltipProps } from 'antd/es/tooltip';
 import { RbacProtectedContext } from './RbacProtected';
 

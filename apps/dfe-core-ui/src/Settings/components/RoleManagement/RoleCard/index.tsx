@@ -1,5 +1,6 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { PopoverMenu } from '@/core/components/PopoverMenu';
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { CloneRoleModal } from '@/Settings/components/RoleManagement/CloneRoleModal';
 import { DeleteRoleModal } from '@/Settings/components/RoleManagement/DeleteRoleModal';
@@ -7,7 +8,6 @@ import { EditRoleDrawer } from '@/Settings/components/RoleManagement/EditRoleDra
 import { ViewRoleDetailsDrawer } from '@/Settings/components/RoleManagement/ViewRoleDetailsDrawer';
 import { TRoleListItem } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
 import { IconLockFilled } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 const PERMISSION_LIMIT = 4;
 

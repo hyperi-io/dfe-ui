@@ -1,7 +1,8 @@
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteRole } from '@/Settings/hooks/roles/useDeleteRole';
 import { IconTrash } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 import { DeleteRoleForm, DeleteRoleFormData } from './DeleteRoleForm';
 

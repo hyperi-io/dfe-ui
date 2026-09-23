@@ -4,6 +4,7 @@ import storybook from 'eslint-plugin-storybook';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import { antdImportRejectOverrides } from './eslint/antd-import-reject.mjs';
 import { importScopeOverrides } from './eslint/import-scope.mjs';
 
 const ERROR = 'error';
@@ -27,6 +28,7 @@ const eslintConfig = defineConfig([
     },
   },
   ...importScopeOverrides,
+  ...antdImportRejectOverrides,
   {
     // Mock generator: may import types from any scope; runs after import-scope overrides.
     files: ['src/core/config/api/endpoints/generator/**'],

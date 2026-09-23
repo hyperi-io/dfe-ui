@@ -1,10 +1,11 @@
 import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteSourceColumns } from '@/Sources/hooks/useFetchInfiniteSourceColumns';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Spin, Tooltip } from 'antd';
+import { Spin } from 'antd';
 import { useCallback } from 'react';
 
 export const SourceColumnsTabContent = ({

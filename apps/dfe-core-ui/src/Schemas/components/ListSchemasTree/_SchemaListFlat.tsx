@@ -1,9 +1,10 @@
+import { Tooltip } from '@/core/components/Tooltip';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
 import { IconStarFilled } from '@repo/dfe-icons';
-import { Spin, Tooltip, Tree, Typography } from 'antd';
+import { Spin, Tree, Typography } from 'antd';
 import { useMemo } from 'react';
 import Highlighter from 'react-highlight-words';
 

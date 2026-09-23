@@ -1,8 +1,9 @@
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { CreateUpdateRoleFormData } from '@/Settings/components/RoleManagement/CreateUpdateRoleForm';
 import { useCreateRole } from '@/Settings/hooks/roles/useCreateRole';
 import { IconCopy } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 import { CloneRoleForm } from './CloneRoleForm';
 

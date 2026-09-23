@@ -1,8 +1,9 @@
 import { Form } from '@/core/components/Form';
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { type CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormInstance, FormRule, Input, Select, Tooltip } from 'antd';
+import { Button, FormInstance, FormRule, Input, Select } from 'antd';
 import { MAX_VIEWS, STANDARD_OPTIONS } from './constants';
 import { FieldMapSelectCreate } from './FieldMapSelectCreate';
 export const ViewsTabContent = ({

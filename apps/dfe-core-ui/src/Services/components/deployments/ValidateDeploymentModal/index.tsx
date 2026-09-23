@@ -1,9 +1,11 @@
 import { useValidateDeployment } from '@/Services/hooks/deployments/useValidateDeployment';
 import { NotificationCard } from '@/core/components/NotificationCard';
 
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconBadge, IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
-import { App, Button, ButtonProps, Modal, Tooltip } from 'antd';
+import { App, Button, ButtonProps } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface ValidateDeploymentDrawerProps {

@@ -78,6 +78,16 @@ describe('MainSourcePromoteWizard', () => {
     expect(screen.getByText('BuildSourceStep')).toBeInTheDocument();
   });
 
+  it('reports uncommitted changes after a schema is created', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<MainSourcePromoteWizard onChange={onChange} />, { wrapper });
+
+    await user.click(screen.getByRole('button', { name: 'Finish schema' }));
+
+    expect(onChange).toHaveBeenCalledWith(true);
+  });
+
   it('links to the created schema without dropping query params', async () => {
     const user = userEvent.setup();
     render(<MainSourcePromoteWizard onSuccess={() => undefined} />, {

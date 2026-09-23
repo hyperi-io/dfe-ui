@@ -1,6 +1,7 @@
 import { TDeclaredValue } from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconLock } from '@repo/dfe-icons';
-import { Tag, Tooltip } from 'antd';
+import { Tag } from 'antd';
 
 export const TIER_DEFAULT_LABEL = 'tier default';
 

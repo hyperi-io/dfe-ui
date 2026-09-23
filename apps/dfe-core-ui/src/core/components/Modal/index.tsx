@@ -4,45 +4,47 @@ import {
   Button,
   type ModalProps as AntdModalProps,
 } from 'antd';
-import { useState } from 'react';
 
 interface ModalProps extends AntdModalProps {
   onClose?: () => void;
 }
 
 export const Modal = ({
-  open: openInitial,
+  open,
   onClose,
+  onCancel,
   children,
   className,
   ...props
 }: ModalProps) => {
-  const [open, setOpen] = useState(openInitial);
-
-  const closeModal = () => {
-    setOpen(false);
+  const handleClose: AntdModalProps['onCancel'] = (event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    onCancel?.(event);
     onClose?.();
-  };
-
-  const handleClose: AntdModalProps['onCancel'] = (e) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    closeModal();
   };
 
   return (
     <AntdModal
-      open={open}
-      onCancel={handleClose}
       footer={
-        <Button key="close" onClick={closeModal}>
+        <Button
+          key="close"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onCancel?.(event as never);
+            onClose?.();
+          }}
+        >
           Close
         </Button>
       }
       width={600}
       {...props}
+      open={open}
+      onCancel={handleClose}
     >
-      <div className={cn('flex items-center flex-col gap-y-2 mt-4', className)}>
+      <div className={cn('flex flex-start flex-col gap-y-2 mt-4', className)}>
         {children}
       </div>
     </AntdModal>

@@ -2,10 +2,11 @@ import { CloneSchemaModal } from '@/Schemas/components/CloneSchemaModal';
 import { DeleteSchemaModal } from '@/Schemas/components/DeleteSchemaModal';
 import { DeleteSchemaVersionModal } from '@/Schemas/components/DeleteSchemaVersionModal';
 import { TreeInteractiveLabel } from '@/Schemas/components/ListSchemasTree/TreeInteractiveLabel';
+import { Tooltip } from '@/core/components/Tooltip';
 import { resourceTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { IconFile, IconFolder, IconStarFilled } from '@repo/dfe-icons';
-import { notification, Tooltip, TreeDataNode } from 'antd';
+import { notification, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 

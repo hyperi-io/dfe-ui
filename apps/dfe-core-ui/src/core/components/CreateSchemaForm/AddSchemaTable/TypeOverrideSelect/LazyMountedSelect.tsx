@@ -2,10 +2,10 @@ import {
   ADVANCED_OPTIONS,
   TransformFunctionParams,
 } from '@/core/components/CreateSchemaForm/AddSchemaTable/fieldOptions.constants';
+import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import {
   Button,
-  Form,
   FormInstance,
   Input,
   InputNumber,

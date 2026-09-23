@@ -1,5 +1,6 @@
+import { Modal } from '@/core/components/Modal';
 import { useCreateAlert } from '@/Hunts/hooks/useCreateAlert';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 import {
   CreateUpdateAlertForm,

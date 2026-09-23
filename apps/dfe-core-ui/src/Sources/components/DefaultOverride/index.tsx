@@ -1,4 +1,5 @@
-import { Tag, Tooltip } from 'antd';
+import { Tooltip } from '@/core/components/Tooltip';
+import { Tag } from 'antd';
 import { ReactNode } from 'react';
 
 /** What a blank field resolves to, as a blank field shows it. */

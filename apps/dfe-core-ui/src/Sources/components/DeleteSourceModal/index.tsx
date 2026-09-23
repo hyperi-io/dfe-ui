@@ -1,9 +1,11 @@
 import { useDeleteSource } from '@/Sources/hooks/useDeleteSource';
 
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, ButtonProps, Modal, Tooltip } from 'antd';
+import { Button, ButtonProps } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteSourceModalProps {
@@ -93,19 +95,19 @@ export const DeleteSourceModal = ({
             <Button
               loading={isPending}
               disabled={isPending}
+              type="default"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              loading={isPending}
+              disabled={isPending}
               type="primary"
               danger
               onClick={handleDeleteSource}
             >
               Delete
-            </Button>
-            <Button
-              loading={isPending}
-              disabled={isPending}
-              type="default"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
             </Button>
           </>
         }

@@ -1,6 +1,8 @@
 import { Table, TableProps } from '@/core/components/Table';
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconEye, IconEyeOff, IconSearch } from '@repo/dfe-icons';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
+
 import uniq from 'lodash/uniq';
 import { useMemo, useState } from 'react';
 import { getColumnTitleText } from './SchemaTable.helpers';

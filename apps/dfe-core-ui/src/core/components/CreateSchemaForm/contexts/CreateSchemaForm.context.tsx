@@ -5,6 +5,7 @@ import {
 import { listItemFromPartial } from '@/core/components/CreateSchemaForm/AddSchemaTable/AddSchemaTable.helpers';
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { UploadedSchemaRow } from '@/core/components/CreateSchemaForm/types';
+import { Form } from '@/core/components/Form';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { rowSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSchemaTable.schema';
 import {
@@ -12,7 +13,6 @@ import {
   SchemaFormValidationErrors,
   type CreateSchemaFormData,
 } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
-import { Form } from 'antd';
 import {
   createContext,
   useCallback,

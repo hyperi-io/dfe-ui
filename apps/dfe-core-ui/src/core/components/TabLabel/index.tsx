@@ -1,6 +1,7 @@
+import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { IconAlertCircle } from '@repo/dfe-icons';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 
 export const TabLabel = ({
   label,

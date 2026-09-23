@@ -2,16 +2,18 @@ import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
 import { App, Tabs } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DiscoverJsonPathsDetails } from './DiscoverJsonPathsDetails';
 import { PromoteJsonPaths } from './PromoteJsonPathsDetails';
 
 type ActiveTab = 'discover' | 'review';
 
 export const NonMainSourcePromoteWizard = ({
+  onChange,
   onSuccess,
 }: {
   onSuccess?: (response?: TPromoteFieldResponse) => void;
+  onChange?: (isChanged: boolean) => void;
 }) => {
   const { selectedSourceName, selectedSourceVersion } = useListSourcesContext();
   const [attachedSchemaPath, setAttachedSchemaPath] = useState<string | null>(
@@ -36,6 +38,10 @@ export const NonMainSourcePromoteWizard = ({
 
     onSuccess?.();
   }, [onSuccess, notification]);
+
+  useEffect(() => {
+    onChange?.(!!promoteTestResponse);
+  }, [promoteTestResponse, onChange]);
 
   return (
     <Tabs
@@ -71,8 +77,8 @@ export const NonMainSourcePromoteWizard = ({
             <PromoteJsonPaths
               selectedSourceName={String(selectedSourceName)}
               selectedSourceVersion={String(selectedSourceVersion)}
-              data={promoteTestResponse}
               jsonPaths={jsonPaths}
+              data={promoteTestResponse}
               onSuccess={handleSuccess}
               attachedSchemaPath={attachedSchemaPath}
             />

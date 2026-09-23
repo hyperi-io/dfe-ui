@@ -1,12 +1,13 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
 import { useFetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { IconCheck, IconX } from '@repo/dfe-icons';
-import { Spin, Tooltip } from 'antd';
+import { Spin } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';

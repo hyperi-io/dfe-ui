@@ -1,8 +1,9 @@
 import { ContentCard } from '@/core/components/ContentCard';
+import { Form } from '@/core/components/Form';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { HuntSelect } from '@/Rules/components/HuntSelect';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
-import { Button, Form, FormRule, Input, Switch } from 'antd';
+import { Button, FormRule, Input, Switch } from 'antd';
 import { useState } from 'react';
 
 export const AdvancedSettings = ({

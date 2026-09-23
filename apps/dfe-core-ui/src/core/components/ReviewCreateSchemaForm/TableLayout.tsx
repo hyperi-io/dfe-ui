@@ -1,5 +1,6 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { SchemaTable } from '@/core/components/SchemaTable';
+import { Tooltip } from '@/core/components/Tooltip';
 import { YAML_POSTFIX } from '@/core/config/environmentVariables';
 import { fieldTypeIconSwitch } from '@/core/constants/resourceType.constants';
 import { useCreateSchemaReviewContext } from '@/core/contexts/CreateSchemaReviewContext';
@@ -8,7 +9,7 @@ import { useDebounce } from '@/core/hooks/useDebounce';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, Input, Select, Tooltip } from 'antd';
+import { Button, Input, Select } from 'antd';
 import { useMemo, useState } from 'react';
 
 interface TableLayoutProps {

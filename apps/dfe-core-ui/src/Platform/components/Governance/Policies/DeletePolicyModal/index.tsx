@@ -1,8 +1,9 @@
 import { FormNotification } from '@/core/components/FormNotification';
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useDeleteGovernancePolicy } from '@/Platform/hooks/governance/useDeleteGovernancePolicy';
 import { IconTrash } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
 interface DeletePolicyModalProps {
@@ -84,19 +85,19 @@ export const DeletePolicyModal = ({
           <Button
             loading={isPending}
             disabled={isPending}
+            type="default"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            loading={isPending}
+            disabled={isPending}
             type="primary"
             danger
             onClick={handleDeletePolicy}
           >
             Delete
-          </Button>
-          <Button
-            loading={isPending}
-            disabled={isPending}
-            type="default"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
           </Button>
         </div>
       </Modal>

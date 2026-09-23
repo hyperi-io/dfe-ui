@@ -1,8 +1,10 @@
 'use client';
 
+import { Tooltip } from '@/core/components/Tooltip';
 import { TAppConfigField } from '@/core/hooks/apps/config/useFetchAppConfig/types';
 import { IconLock } from '@repo/dfe-icons';
-import { Input, InputNumber, Select, Switch, Tag, Tooltip } from 'antd';
+import { Input, InputNumber, Select, Switch, Tag } from 'antd';
+
 import {
   fieldLabel,
   isChartSet,

@@ -1,6 +1,7 @@
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTestPipe } from '@repo/dfe-icons';
-import { Button, Modal } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 import { TestOidcProviderResponse } from './TestOidcProviderResponse';
 

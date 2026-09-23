@@ -1,5 +1,5 @@
+import { Tooltip } from '@/core/components/Tooltip';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Tooltip } from 'antd';
 
 export const ATTRIBUTE_OPTIONS = [
   { label: 'Low cardinality', value: 'lowcardinality' },

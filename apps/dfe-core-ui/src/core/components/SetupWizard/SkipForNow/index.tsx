@@ -1,4 +1,5 @@
-import { Button, Tooltip } from 'antd';
+import { Tooltip } from '@/core/components/Tooltip';
+import { Button } from 'antd';
 
 export const SkipForNow = ({
   goNext,

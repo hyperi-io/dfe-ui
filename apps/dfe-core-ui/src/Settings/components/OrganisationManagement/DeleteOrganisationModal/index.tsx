@@ -1,8 +1,9 @@
 import { useDeleteOrganisation } from '@/Settings/hooks/organisations/useDeleteOrganisation';
 
+import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconTrash } from '@repo/dfe-icons';
-import { App, Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 import {
   DeleteOrganisationForm,

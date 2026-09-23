@@ -1,5 +1,6 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { Tooltip } from '@/core/components/Tooltip';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import {
@@ -7,7 +8,7 @@ import {
   SchemaDetailColumnFilters,
 } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconLock } from '@repo/dfe-icons';
-import { notification, Spin, Tooltip } from 'antd';
+import { notification, Spin } from 'antd';
 import { useCallback, useState } from 'react';
 import { EmptyDetail } from './EmptyDetail';
 import { ViewSchemaDetails } from './ViewSchemaDetails';

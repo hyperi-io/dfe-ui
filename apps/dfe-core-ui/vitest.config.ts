@@ -22,7 +22,7 @@ export default defineConfig({
     // default of 5s kills the test before a backstop can fire.
     testTimeout: 20_000,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'eslint/**/*.test.{ts,tsx}'],
     env: {
       NEXT_PUBLIC_API_URL: 'http://localhost',
       NODE_ENV: 'test',
