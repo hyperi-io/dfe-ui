@@ -452,7 +452,7 @@ export const schemas = {
               status: 'ok',
               column_name: 'string',
               data_type: 'string',
-              index_type: 'string',
+              use_case: 'string',
               copy_cel: 'string',
               error: 'string',
             },

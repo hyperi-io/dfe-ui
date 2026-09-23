@@ -10,7 +10,7 @@ import { MainSourcePromoteWizard } from './MainSourcePromoteWizard';
 import { NonMainSourcePromoteWizard } from './NonMainSourcePromoteWizard';
 
 const UNCOMMITTED_CLOSE_MESSAGE =
-  'Field promotions have not been committed. Leave anyway an∂d discard your review?';
+  'Field promotions have not been committed. Leave anyway and discard your review?';
 export const DiscoverJsonPathsDrawer = () => {
   const { isMainSource } = useSourceDetailsContext();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
