@@ -29,13 +29,13 @@ describe('BackingServices', () => {
       API_CONFIG_MOCKS.backingServices.default.get.success({
         mockedResponse: [
           {
-            service: 'valkey',
-            chart: 'valkey',
-            overlay: 'valkey.yaml',
-            prefix: 'valkey',
+            service: 'minio',
+            chart: 'minio',
+            overlay: 'minio.yaml',
+            prefix: 'minio',
             mode: { value: null, source: null, protected: false },
             storage_model: { value: null, source: null, protected: false },
-            replicas: { value: 2, source: 'valkey', protected: false },
+            replicas: { value: 2, source: 'minio', protected: false },
             storage_size: { value: null, source: null, protected: false },
             storage_class: { value: null, source: null, protected: false },
             resources: {},
@@ -44,7 +44,7 @@ describe('BackingServices', () => {
       }),
     );
 
-    expect(await renderSection().findByText('valkey')).toBeInTheDocument();
+    expect(await renderSection().findByText('minio')).toBeInTheDocument();
   });
 
   it('names the data layer and its never-autoscaled constraint', async () => {
