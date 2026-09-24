@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.21.2"
+    "version": "1.22.0"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -393,6 +393,36 @@
             "description": "Search in username, name, or email"
           },
           {
+            "name": "blocked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by blocked status. Omitted returns every account.",
+              "title": "Blocked"
+            },
+            "description": "Filter by blocked status. Omitted returns every account."
+          },
+          {
+            "name": "include_core",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include the local admin and break-glass recovery accounts.",
+              "default": false,
+              "title": "Include Core"
+            },
+            "description": "Include the local admin and break-glass recovery accounts."
+          },
+          {
             "name": "sort_by",
             "in": "query",
             "required": false,
@@ -597,7 +627,7 @@
           "Accounts"
         ],
         "summary": "Update Account",
-        "description": "Update account groups, enabled status, or contact fields (admin only).",
+        "description": "Update account groups, enabled/blocked status, or contact fields (admin only).",
         "operationId": "update_account_api_v1_auth_accounts__username__put",
         "parameters": [
           {
@@ -694,7 +724,7 @@
           "Accounts"
         ],
         "summary": "Reset Current User Password",
-        "description": "Reset the authenticated user's password.\n\nThe username is taken from the session, not the request, so a caller cannot\nreset another account through this route. The live store takes the new\npassword immediately; the ``git`` block reports whether the durable mirror\nmerged, is pending review, or is a no-op for a non-git-backed account.",
+        "description": "Reset the authenticated user's password.\n\nThe username is taken from the session, not the request, so a caller cannot\nreset another account through this route. An IdP-owned (``external``)\naccount is refused: it has no local password. The live store takes the new\npassword immediately; the ``git`` block reports whether the durable mirror\nmerged, is pending review, or is a no-op for a non-git-backed account.",
         "operationId": "reset_current_user_password_api_v1_auth_accounts_reset_password_post",
         "requestBody": {
           "content": {
@@ -741,7 +771,7 @@
           "Accounts"
         ],
         "summary": "Reset Password",
-        "description": "Reset an account's password (admin only).\n\nThe live store takes the new password immediately (next login), and the change\nis mirrored into the durable deploy repo so it survives a rebuild. The ``git``\nblock reports whether that mirror merged straight away (dev/solo) or is a\npending review PR / CLI merge (production+team), or is a no-op file share.",
+        "description": "Reset an account's password (admin only).\n\nAn IdP-owned (``external``) account is refused: the password lives at the\nidentity provider. The live store takes the new password immediately (next\nlogin), and the change is mirrored into the durable deploy repo so it\nsurvives a rebuild. The ``git`` block reports whether that mirror merged\nstraight away (dev/solo) or is a pending review PR / CLI merge\n(production+team), or is a no-op file share.",
         "operationId": "reset_password_api_v1_auth_accounts__username__reset_password_post",
         "parameters": [
           {
@@ -3214,7 +3244,7 @@
           "Sources"
         ],
         "summary": "Create Source",
-        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).\n\n``header`` is optional: when omitted, no common-header profile is stored on the\nversion (DDL compose uses meta/derived columns only until a header is set).",
+        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).\n\n``header`` is optional: when omitted, no common-header profile is stored on the\nversion (DDL compose uses meta/derived columns only until a header is set).\n\nA schema pin naming a schema that does not exist is ACCEPTED here and REFUSED\nby ``/sources/import`` (#501), so the same stored document is valid or invalid\ndepending on how it arrived. That asymmetry is known and undecided -- #504.\nAuthoring a source before its schema is a real ordering, and making this path\nas strict as import forbids it.",
         "operationId": "create_source_api_v1_sources_post",
         "requestBody": {
           "required": true,
@@ -3917,7 +3947,7 @@
           "Sources"
         ],
         "summary": "Update Source",
-        "description": "Update a source from a flat revision body.\n\nBefore the first deploy, edits update the working version in place. After deploy, a new\nmajor version is created only when ``current`` equals ``deployed_version`` and schema pins\n(``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),\n``views``, or ``transform`` change. Draft versions (``current`` not deployed) update\nin place.\n\n``header`` is optional: when omitted, no header is stored on the written version snapshot\n(same as create). Send ``header`` explicitly to set or change it.",
+        "description": "Update a source from a flat revision body.\n\nBefore the first deploy, edits update the working version in place. After deploy, a new\nmajor version is created only when ``current`` equals ``deployed_version`` and schema pins\n(``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),\n``views``, or ``transform`` change. Draft versions (``current`` not deployed) update\nin place.\n\n``header`` is optional: when omitted, no header is stored on the written version snapshot\n(same as create). Send ``header`` explicitly to set or change it.\n\nA schema pin naming nothing is accepted here and refused by ``/sources/import``.\nSee ``create_source`` and #504; the asymmetry is known and undecided.",
         "operationId": "update_source_api_v1_sources__name__put",
         "parameters": [
           {
@@ -5615,7 +5645,7 @@
           "Deployments"
         ],
         "summary": "Apply Size",
-        "description": "Apply a t-shirt size to a deployment config.\n\nUpdates replicas, resources, and KEDA thresholds for the given size.\nReturns any service config overrides that should also be applied\n(e.g. buffer sizes) \u2014 the caller may optionally PUT these to\n/api/v1/services/{service}/{instance}.",
+        "description": "Apply a t-shirt size to a deployment config.\n\nSets the size and the CPU/memory requests and limits from the shared size table, and\nresets the KEDA min/max replicas to the service's defaults, which do not vary by size.\nScaling triggers are left alone. Returns the service's per-size config overrides\n(buffer, memory and batch sizes) -- the caller may optionally PUT these to\n/api/v1/services/{service}/{instance}.",
         "operationId": "apply_size_api_v1_deployments__service___instance__size__size__post",
         "parameters": [
           {
@@ -8794,6 +8824,313 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/schemas/definitions/derived": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "List Derived Schemas",
+        "description": "List every stored derived schema.",
+        "operationId": "list_derived_schemas_api_v1_schemas_definitions_derived_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search in path and base",
+              "title": "Search"
+            },
+            "description": "Search in path and base"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort field (path, base, current, updated_at)",
+              "title": "Sort By"
+            },
+            "description": "Sort field (path, base, current, updated_at)"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort order: asc/desc",
+              "default": "asc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order: asc/desc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_DerivedSchemaSummary_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/schemas/definitions/derived/{schema_path}": {
+      "get": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Get Derived Schema",
+        "description": "Read one derived schema by registry path (e.g. ``beats/filebeat_auth``).",
+        "operationId": "get_derived_schema_api_v1_schemas_definitions_derived__schema_path__get",
+        "parameters": [
+          {
+            "name": "schema_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schema Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedSchemaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Create Derived Schema",
+        "description": "Create a derived schema at the given registry path.",
+        "operationId": "create_derived_schema_api_v1_schemas_definitions_derived__schema_path__post",
+        "parameters": [
+          {
+            "name": "schema_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schema Path"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerivedSchemaWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedSchemaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Update Derived Schema",
+        "description": "Replace a derived schema. The body is the whole document, as on create.",
+        "operationId": "update_derived_schema_api_v1_schemas_definitions_derived__schema_path__put",
+        "parameters": [
+          {
+            "name": "schema_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schema Path"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerivedSchemaWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerivedSchemaResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "schemas"
+        ],
+        "summary": "Delete Derived Schema",
+        "description": "Delete a derived schema by registry path.",
+        "operationId": "delete_derived_schema_api_v1_schemas_definitions_derived__schema_path__delete",
+        "parameters": [
+          {
+            "name": "schema_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schema Path"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -13982,7 +14319,7 @@
           "App Management"
         ],
         "summary": "Write App File",
-        "description": "Add or replace a file the app consumes.",
+        "description": "Add or replace a file the app consumes, up to ``repository.max_object_bytes``.\n\nThe file lands in the deploy repo's history for good, so an oversized one is\nrefused before it is buffered rather than after it is committed.",
         "operationId": "write_app_file_api_v1_apps__service___instance__files__set_name___filename__put",
         "parameters": [
           {
@@ -14038,16 +14375,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FileWriteRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -14059,6 +14386,16 @@
               }
             }
           },
+          "413": {
+            "description": "The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -14066,6 +14403,26 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "content": {
+                    "title": "Content",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "title": "FileWriteRequest",
+                "type": "object"
               }
             }
           }
@@ -17396,6 +17753,20 @@
             "type": "boolean",
             "title": "Enabled"
           },
+          "blocked": {
+            "type": "boolean",
+            "title": "Blocked"
+          },
+          "disabled_at": {
+            "type": "string",
+            "title": "Disabled At",
+            "default": ""
+          },
+          "blocked_at": {
+            "type": "string",
+            "title": "Blocked At",
+            "default": ""
+          },
           "groups": {
             "items": {
               "type": "string"
@@ -17417,6 +17788,11 @@
             "title": "Name",
             "default": ""
           },
+          "external": {
+            "type": "boolean",
+            "title": "External",
+            "description": "True when the account authenticates through an identity provider"
+          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -17430,8 +17806,10 @@
         "required": [
           "username",
           "enabled",
+          "blocked",
           "groups",
           "email",
+          "external",
           "created_at",
           "updated_at"
         ],
@@ -20163,6 +20541,226 @@
         ],
         "title": "DeploymentSummary"
       },
+      "DerivedSchemaResponse": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Registry path (derived/<group>/<name>)"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base",
+            "description": "Meta-schema registry path the columns come from"
+          },
+          "base_version": {
+            "type": "string",
+            "title": "Base Version",
+            "description": "Version of the base meta schema"
+          },
+          "current": {
+            "type": "string",
+            "title": "Current",
+            "description": "Current version of this derived schema"
+          },
+          "versions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DerivedSchemaVersion"
+            },
+            "type": "object",
+            "title": "Versions",
+            "description": "Version id -> selection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "base",
+          "base_version",
+          "current",
+          "versions"
+        ],
+        "title": "DerivedSchemaResponse",
+        "description": "A stored derived schema, as the API hands it back."
+      },
+      "DerivedSchemaSummary": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Registry path (derived/<group>/<name>)"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base",
+            "description": "Meta-schema registry path the columns come from"
+          },
+          "base_version": {
+            "type": "string",
+            "title": "Base Version",
+            "description": "Version of the base meta schema"
+          },
+          "current": {
+            "type": "string",
+            "title": "Current",
+            "description": "Current version"
+          },
+          "versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Versions",
+            "description": "All version ids"
+          },
+          "column_count": {
+            "type": "integer",
+            "title": "Column Count",
+            "description": "Columns the current version selects"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At",
+            "description": "Last write to the stored document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "base",
+          "base_version",
+          "current",
+          "versions",
+          "column_count",
+          "updated_at"
+        ],
+        "title": "DerivedSchemaSummary",
+        "description": "One row of the derived-schema list."
+      },
+      "DerivedSchemaVersion": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Date",
+            "description": "ISO date the version was written"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "What this selection is for",
+            "default": ""
+          },
+          "capture_json": {
+            "type": "boolean",
+            "title": "Capture Json",
+            "description": "Whether dfe-loader populates _json for this table. The column and the common header stay in place either way, so the decision is reversible.",
+            "default": true
+          },
+          "capture_raw": {
+            "type": "boolean",
+            "title": "Capture Raw",
+            "description": "Whether dfe-loader populates _raw for this table",
+            "default": true
+          },
+          "select": {
+            "items": {
+              "$ref": "#/components/schemas/DerivedSelectEntry"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Select",
+            "description": "The complete, ordered column list of the result, after the common header"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "date",
+          "select"
+        ],
+        "title": "DerivedSchemaVersion",
+        "description": "One version: the ordered selection, plus the loader's catch-all switches."
+      },
+      "DerivedSchemaWriteRequest": {
+        "properties": {
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path",
+            "description": "Registry path (derived/<group>/<name>); must match the URL when set"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base",
+            "description": "Meta-schema registry path, extensionless (e.g. meta/beats/filebeat)"
+          },
+          "base_version": {
+            "type": "string",
+            "title": "Base Version",
+            "description": "Version of the base meta schema"
+          },
+          "current": {
+            "type": "string",
+            "title": "Current",
+            "description": "Version of this derived schema to make current"
+          },
+          "versions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DerivedSchemaVersion"
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Versions",
+            "description": "Version id -> selection"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "base",
+          "base_version",
+          "current",
+          "versions"
+        ],
+        "title": "DerivedSchemaWriteRequest",
+        "description": "Create or replace a derived schema.\n\n``path`` is optional and, when given, must equal the URL path -- the UI\nsends both and a disagreement between them is a bug worth reporting."
+      },
+      "DerivedSelectEntry": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Column name, as the base defines it"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index",
+            "description": "Index use case for this column, overriding the base column's. 'none' keeps the column and drops its index; omitting the key keeps the base column's use case."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DerivedSelectEntry",
+        "description": "One selected column, optionally re-answering the question it is asked."
+      },
       "DetachResponse": {
         "properties": {
           "deleted": {
@@ -20202,7 +20800,7 @@
             },
             "type": "array",
             "title": "Attribute",
-            "description": "ClickHouse storage attributes for the column (e.g. 'nullable', 'lowcardinality'). Empty for a plain column."
+            "description": "ClickHouse storage attributes for the column (e.g. 'nullable', 'not_null'). Empty for a plain column. How many distinct values the column holds is declared apart, as 'cardinality'."
           },
           "use_case": {
             "anyOf": [
@@ -20749,19 +21347,6 @@
           "size_bytes"
         ],
         "title": "FileSummary"
-      },
-      "FileWriteRequest": {
-        "properties": {
-          "content": {
-            "type": "string",
-            "title": "Content"
-          }
-        },
-        "type": "object",
-        "required": [
-          "content"
-        ],
-        "title": "FileWriteRequest"
       },
       "FilterTier": {
         "type": "string",
@@ -22380,6 +22965,11 @@
             "title": "Source Name",
             "description": "The source these paths were discovered for."
           },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Source version the discovery ran against. Compare it to the source's `current`: a version that is behind, or one not yet deployed, reads the landing table rather than the source's own, which is why an empty `paths` list can mean 'looked somewhere else' rather than 'nothing to promote'."
+          },
           "table": {
             "type": "string",
             "title": "Table",
@@ -22402,6 +22992,7 @@
         "type": "object",
         "required": [
           "source_name",
+          "version",
           "table",
           "json_column",
           "paths"
@@ -24571,6 +25162,72 @@
           "prev_page"
         ],
         "title": "PaginatedResponse[DeploymentSummary]"
+      },
+      "PaginatedResponse_DerivedSchemaSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DerivedSchemaSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total matching items across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "readOnly": true
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page",
+            "readOnly": true
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "total_pages",
+          "next_page",
+          "prev_page"
+        ],
+        "title": "PaginatedResponse[DerivedSchemaSummary]"
       },
       "PaginatedResponse_FieldMapSummary_": {
         "properties": {
@@ -28147,6 +28804,23 @@
             "title": "Attribute",
             "description": "Attributes of the column"
           },
+          "cardinality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "high",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cardinality",
+            "description": "How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured."
+          },
           "use_case": {
             "anyOf": [
               {
@@ -28286,6 +28960,23 @@
             ],
             "title": "Attribute",
             "description": "Attributes of the column"
+          },
+          "cardinality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "high",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cardinality",
+            "description": "How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured."
           },
           "use_case": {
             "anyOf": [
@@ -28454,6 +29145,14 @@
             "type": "array",
             "title": "Topics Failed",
             "description": "Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all."
+          },
+          "topics_stranded": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Stranded",
+            "description": "Topics on the broker this version has no consumer for. A ``_load`` topic left by a version that dropped its transform suppresses the source's ``_land`` topic in the loader, so the source silently stops loading. Reported, never deleted: records may still be in flight on it."
           },
           "apps_synced": {
             "items": {
@@ -28715,6 +29414,14 @@
             "type": "string",
             "title": "Topics Skipped",
             "description": "Why the topic set was skipped; empty when it was applied."
+          },
+          "topics_drift": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Drift",
+            "description": "Existing topics this pass could not confirm match the manifest, each named with what was found -- a shape difference, or that the shape was unreadable and so drift is unknown. A broker that answers a topic list but not a describe puts every existing topic here. Reported, never applied: the engine leaves an existing topic alone rather than altering a live broker on a deploy."
           }
         },
         "type": "object",
@@ -30074,7 +30781,7 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Config",
-            "description": "The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references"
+            "description": "The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be vault:, bao:, openbao:, env: or file: references"
           },
           "routes": {
             "items": {
@@ -30512,7 +31219,19 @@
               }
             ],
             "title": "Derived Schema",
-            "description": "Source-specific field overrides (optional YAML reference)"
+            "description": "Derived-schema registry path (e.g. derived/beats/filebeat_auth). It SELECTS from the meta schema: the table's columns become exactly the names it lists, in its order, after the common header. It is not an override layer -- everything but the column's index resolves from the base -- and it also carries the _json/_raw capture switches for this table"
+          },
+          "derived_schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Derived Schema Version",
+            "description": "Derived schema version (semver). Unset follows the derived schema's own 'current', so publishing a new selection changes this table"
           },
           "additional_fields": {
             "anyOf": [
@@ -32372,6 +33091,18 @@
             "title": "Enabled",
             "description": "Enable or disable the account"
           },
+          "blocked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked",
+            "description": "Block the account from holding a session"
+          },
           "email": {
             "anyOf": [
               {
@@ -32761,13 +33492,37 @@
             "type": "array",
             "title": "Org Ids",
             "description": "Orgs this user can browse in the data plane (HyperDX). Empty means no org-scoped data access."
+          },
+          "external": {
+            "type": "boolean",
+            "title": "External",
+            "description": "True when the account authenticates through an identity provider"
+          },
+          "blocked": {
+            "type": "boolean",
+            "title": "Blocked",
+            "description": "True when an operator has blocked this account from holding a session"
+          },
+          "disabled_at": {
+            "type": "string",
+            "title": "Disabled At",
+            "description": "When the account was disabled. Empty while it is enabled.",
+            "default": ""
+          },
+          "blocked_at": {
+            "type": "string",
+            "title": "Blocked At",
+            "description": "When the account was blocked. Empty while it is not blocked.",
+            "default": ""
           }
         },
         "type": "object",
         "required": [
           "org_id",
           "user_id",
-          "roles"
+          "roles",
+          "external",
+          "blocked"
         ],
         "title": "UserResponse"
       },
@@ -34220,6 +34975,23 @@
             ],
             "title": "Attribute",
             "description": "Attributes of the column"
+          },
+          "cardinality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "high",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cardinality",
+            "description": "How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured."
           },
           "use_case": {
             "anyOf": [

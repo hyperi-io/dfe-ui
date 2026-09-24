@@ -23,6 +23,10 @@ const accountDetail = (
 ): TAccountDetailResponse => ({
   username: OIDC_SUBJECT,
   enabled: true,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
+  external: false,
   groups: [],
   email: '',
   phone: '',

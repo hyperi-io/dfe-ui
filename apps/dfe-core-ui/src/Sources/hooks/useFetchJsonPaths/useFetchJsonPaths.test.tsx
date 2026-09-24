@@ -29,6 +29,7 @@ describe('.useFetchSampleRows', () => {
 
       const response: TJsonPathsResponse = {
         source_name: 'source',
+        version: 'string',
         table: 'string',
         json_column: 'string',
         paths: [

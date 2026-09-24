@@ -40,6 +40,10 @@ const accounts = (): TAccountsResponse => ({
     {
       username: 'admin',
       enabled: false,
+      blocked: false,
+      disabled_at: '',
+      blocked_at: '',
+      external: false,
       groups: ['dfe-admins'],
       created_at: 'string',
       updated_at: 'string',
@@ -50,6 +54,10 @@ const accounts = (): TAccountsResponse => ({
     {
       username: 'alice',
       enabled: true,
+      blocked: false,
+      disabled_at: '',
+      blocked_at: '',
+      external: false,
       groups: ['dfe-admins'],
       created_at: 'string',
       updated_at: 'string',
@@ -133,6 +141,10 @@ describe('AccountManagement', () => {
             {
               username: '00u15mxs3ecygt7oj698',
               enabled: true,
+              blocked: false,
+              disabled_at: '',
+              blocked_at: '',
+              external: false,
               groups: [],
               created_at: 'string',
               updated_at: 'string',
@@ -143,6 +155,10 @@ describe('AccountManagement', () => {
             {
               username: 'admin',
               enabled: true,
+              blocked: false,
+              disabled_at: '',
+              blocked_at: '',
+              external: false,
               groups: ['dfe-admins'],
               created_at: 'string',
               updated_at: 'string',

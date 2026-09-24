@@ -69,6 +69,10 @@ describe('useFetchInfiniteFilteredAccounts', () => {
       const responseItem: TAccountsItemSummary = {
         username: 'string',
         enabled: true,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
+        external: false,
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',
@@ -144,6 +148,10 @@ describe('useFetchInfiniteFilteredAccounts', () => {
       const responseItem: TAccountsItemSummary = {
         username: 'string',
         enabled: true,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
+        external: false,
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',
@@ -182,6 +190,10 @@ describe('useFetchInfiniteFilteredAccounts', () => {
       const responseItem: TAccountsItemSummary = {
         username: 'string',
         enabled: true,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
+        external: false,
         groups: ['string'],
         created_at: '2021-01-01',
         updated_at: '2021-01-01',

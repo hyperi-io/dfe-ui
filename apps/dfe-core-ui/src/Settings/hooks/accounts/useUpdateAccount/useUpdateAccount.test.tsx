@@ -50,6 +50,10 @@ describe('.useUpdateAccount', () => {
       const expectedResponse: TAccountUpdateResponse = {
         username: 'string',
         enabled: true,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
+        external: false,
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',

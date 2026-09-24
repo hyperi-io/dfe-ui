@@ -404,6 +404,7 @@ export const schemas = {
       success: ({
         mockedResponse = {
           source_name: 'source',
+          version: 'string',
           table: 'string',
           json_column: 'string',
           paths: [

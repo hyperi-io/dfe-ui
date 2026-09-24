@@ -47,6 +47,10 @@ describe('.useAuthMe', () => {
         roles: ['string'],
         permissions: ['string'],
         groups: ['string'],
+        external: false,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
       };
 
       await waitFor(() => {

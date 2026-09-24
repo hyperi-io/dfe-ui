@@ -42,6 +42,10 @@ const authMe = (userId: string): TAuthMeResponse => ({
   roles: ['viewer'],
   permissions: [],
   groups: [],
+  external: false,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
 });
 
 const account = (
@@ -49,6 +53,10 @@ const account = (
 ): TCurrentUserResponse => ({
   username: OIDC_SUBJECT,
   enabled: true,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
+  external: false,
   groups: [],
   email: '',
   phone: '',
