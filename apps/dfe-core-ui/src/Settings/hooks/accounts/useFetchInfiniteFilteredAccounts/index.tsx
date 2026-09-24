@@ -22,6 +22,8 @@ export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.infiniteFiltered;
  */
 export const useFetchInfiniteFilteredAccounts = ({
   search,
+  blocked,
+  include_core,
   sort_by,
   sort_order,
   page,
@@ -41,6 +43,8 @@ export const useFetchInfiniteFilteredAccounts = ({
   } = useInfiniteQuery({
     queryKey: ACCOUNTS_QUERY_KEY({
       search: debouncedSearch,
+      include_core,
+      blocked,
       sort_by,
       sort_order,
       page,
@@ -50,6 +54,8 @@ export const useFetchInfiniteFilteredAccounts = ({
       fetchAccounts({
         queryParams: {
           search: debouncedSearch || undefined,
+          blocked,
+          include_core: include_core || undefined,
           sort_by: sort_by || undefined,
           sort_order: sort_order || undefined,
           page: pageParam,

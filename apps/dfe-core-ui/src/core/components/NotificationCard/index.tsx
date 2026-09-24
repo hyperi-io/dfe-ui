@@ -38,19 +38,19 @@ export const NotificationCard = ({
   const displayType = {
     default: cn(
       // Card Border & Background
-      'border-foreground/30 bg-foreground/10 dark:border-dark-foreground dark:bg-dark-foreground',
+      'border-foreground/30 bg-foreground/10 dark:border-dark-foreground/30 dark:bg-dark-foreground/10',
     ),
     warning: cn(
       // Card Border & Background
-      'border-warning/30 bg-warning/10 dark:border-dark-warning dark:bg-dark-warning',
+      'border-warning/30 bg-warning/10 dark:border-dark-warning/25 dark:bg-dark-warning/25',
     ),
     error: cn(
       // Card Border & Background
-      'border-error/30 bg-error/10 dark:border-dark-error dark:bg-dark-error',
+      'border-error/30 bg-error/10 dark:border-dark-error/25 dark:bg-dark-error/25',
     ),
     info: cn(
       // Card Border & Background
-      'border-info/30 bg-info/10 dark:border-dark-info dark:bg-dark-info',
+      'border-info/30 bg-info/10 dark:border-dark-info/25 dark:bg-dark-info/25',
     ),
     action: cn(
       // Card Border & Background
@@ -58,7 +58,7 @@ export const NotificationCard = ({
     ),
     success: cn(
       // Card Border & Background
-      'border-success/50 bg-success/10 dark:border-dark-success dark:bg-dark-success',
+      'border-success/50 bg-success/10 dark:border-dark-success/25 dark:bg-dark-success/25',
     ),
   };
 

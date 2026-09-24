@@ -3,12 +3,12 @@ import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useCreateAccount } from '@/core/hooks/useCreateAccount';
 import { IconSend } from '@repo/dfe-icons';
-import { Button, notification } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
-export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
+export const InviteUserDrawer = () => {
   const [open, setOpen] = useState(false);
-  const [api, contextHolder] = notification.useNotification();
+  const { notification } = App.useApp();
 
   const {
     mutate: createAccount,
@@ -17,8 +17,7 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
   } = useCreateAccount({
     onSuccess: () => {
       setOpen(false);
-      refetch();
-      api.success({
+      notification.success({
         title: 'Account created successfully',
         placement: 'bottomLeft',
       });
@@ -27,7 +26,6 @@ export const InviteUserDrawer = ({ refetch }: { refetch: () => void }) => {
 
   return (
     <>
-      {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.account_write}>
         <RbacProtected.Unrestricted>
           <Button

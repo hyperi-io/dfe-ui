@@ -33,7 +33,7 @@ export const Logo = ({ collapsed, colorMode }: LogoProps) => {
         // The caption's box is the wordmark image's own rendered width (an
         // inline-block shrinks to its widest child, the img), so the text
         // below can never render wider than the wordmark above it.
-        <div className="mx-7 flex-start">
+        <div className="mx-8 flex-start">
           {/* Colour SVG wordmark (light = navy #000647, dark = white #FFFFFF): render
               as-is via <img>, not tinted through the currentColor icon components. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}

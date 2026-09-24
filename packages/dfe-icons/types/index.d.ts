@@ -4167,6 +4167,8 @@ export declare const IconNfcOff: IconComponent;
 export declare const IconNoCopyright: IconComponent;
 export declare const IconNoCreativeCommons: IconComponent;
 export declare const IconNoDerivatives: IconComponent;
+export declare const IconNoEntry: IconComponent;
+export declare const IconNoEntry2: IconComponent;
 export declare const IconNorthStar: IconComponent;
 export declare const IconNote: IconComponent;
 export declare const IconNoteOff: IconComponent;

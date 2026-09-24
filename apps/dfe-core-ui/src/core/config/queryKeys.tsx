@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-imports */
+import { useFetchInfiniteFilteredAccountsProps } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 
 export const QUERY_KEYS = {
@@ -22,19 +23,17 @@ export const QUERY_KEYS = {
     me: () => ['current-user', 'me'],
     infiniteFiltered: ({
       search,
+      blocked,
+      include_core,
       sort_by,
       sort_order,
       page,
       per_page,
-    }: {
-      search?: string;
-      sort_by?: 'created_at' | 'updated_at';
-      sort_order?: 'asc' | 'desc';
-      page?: number;
-      per_page?: number;
-    } = {}) => [
+    }: useFetchInfiniteFilteredAccountsProps = {}) => [
       'accounts',
       ...(search ? [search] : []),
+      ...(blocked !== undefined ? [blocked] : []),
+      ...(include_core ? [include_core] : []),
       ...(sort_by ? [sort_by] : []),
       ...(sort_order ? [sort_order] : []),
       ...(page ? [page] : []),

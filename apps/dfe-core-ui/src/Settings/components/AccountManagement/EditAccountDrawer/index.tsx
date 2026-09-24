@@ -1,7 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ResetAccountPassword } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPassword';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/UpdateAccountForm';
 import { ACCOUNT_DETAIL_QUERY_KEY } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -9,13 +8,14 @@ import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Divider, notification } from 'antd';
 import { useState } from 'react';
+import { ResetAccountPasswordProgressiveDisclosure } from './ResetAccountPasswordProgressiveDisclosure';
 
 export const EditAccountDrawer = ({
   username,
-  refetch,
+  isExternal,
 }: {
   username: string;
-  refetch: () => void;
+  isExternal: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -31,7 +31,7 @@ export const EditAccountDrawer = ({
     username,
     onSuccess: () => {
       setOpen(false);
-      refetch();
+
       api.success({
         title: 'Account updated successfully',
         placement: 'bottomLeft',
@@ -83,11 +83,24 @@ export const EditAccountDrawer = ({
             Set a new password for this account. This does not change group
             memberships.
           </p>
+
           <RbacProtected
             action={RbacProtected.rbacActions.accounts_reset_password}
           >
             <RbacProtected.Unrestricted>
-              <ResetAccountPassword username={username} />
+              {!isExternal && (
+                <ResetAccountPasswordProgressiveDisclosure
+                  username={username}
+                />
+              )}
+              {isExternal && (
+                <NotificationCard
+                  className="w-full"
+                  title="Cannot reset password for external users"
+                  description="Password is managed by the external OIDC provider"
+                  type="warning"
+                />
+              )}
             </RbacProtected.Unrestricted>
             <RbacProtected.Restricted>
               <NotificationCard

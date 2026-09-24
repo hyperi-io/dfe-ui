@@ -1,7 +1,8 @@
 import { Form } from '@/core/components/Form';
+import { Popover } from '@/core/components/Popover';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { Button, FormInstance, FormRule, Popover, Select } from 'antd';
+import { Button, FormInstance, FormRule, Select } from 'antd';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { DefaultsSection } from './DefaultsSection';

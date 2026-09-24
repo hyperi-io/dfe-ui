@@ -2,26 +2,27 @@ import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
-import { IconLock } from '@repo/dfe-icons';
+import { IconLock, IconNoEntry } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 
-export const DeReactivateAccount = ({
+export const BlockUnblockAccount = ({
   username,
-  isActive,
+  isBlocked = false,
 }: {
   username: string;
-  isActive: boolean;
+  isBlocked: boolean;
 }) => {
   const [isConfirming, setIsConfirming] = useState(false);
   const { notification } = App.useApp();
-  const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
+  const actionTitle = isBlocked ? 'Unblock Account' : 'Block Account';
+  const isEnabled = !isBlocked;
 
   const { mutate, isPending } = useUpdateAccount({
     username,
     onSuccess: () => {
       notification.success({
-        title: isActive ? 'Account deactivated' : 'Account activated',
+        title: isBlocked ? 'Account unblocked' : 'Account blocked',
         placement: 'bottomLeft',
       });
     },
@@ -30,11 +31,15 @@ export const DeReactivateAccount = ({
   const { data: { user_id: currentUsername } = {} } = useAuthMe();
   const isCurrentUser = currentUsername === username;
 
+  const handleBlockUnblockAccount = () => {
+    mutate({ blocked: !isBlocked, enabled: !isEnabled });
+  };
+
   const handleClick = () => {
     if (isCurrentUser) {
       setIsConfirming(true);
     } else {
-      mutate({ enabled: !isActive });
+      handleBlockUnblockAccount();
     }
   };
 
@@ -44,7 +49,7 @@ export const DeReactivateAccount = ({
         <Button
           aria-label={actionTitle}
           type="text"
-          icon={<IconLock />}
+          icon={<IconNoEntry />}
           loading={isPending}
           disabled={isPending}
           onClick={handleClick}
@@ -56,14 +61,18 @@ export const DeReactivateAccount = ({
           open={isConfirming}
           destroyOnHidden
           onCancel={() => setIsConfirming(false)}
-          onOk={() => mutate({ enabled: !isActive })}
-          okText="Deactivate"
-          okType="danger"
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => setIsConfirming(false)}>Cancel</Button>
+              <Button onClick={handleBlockUnblockAccount} type="primary" danger>
+                {actionTitle}
+              </Button>
+            </div>
+          }
         >
           <p>
-            You are trying to deactivate your own account, you will be logged
-            out and will lose access to your account. Are you sure you want to
-            continue?
+            You are trying to block your own account, you will be logged out and
+            will lose access to your account. Are you sure you want to continue?
           </p>
         </Modal>
       </RbacProtected.Unrestricted>
@@ -74,9 +83,6 @@ export const DeReactivateAccount = ({
           icon={<IconLock />}
           loading={isPending}
           disabled
-          onClick={() => {
-            mutate({ enabled: !isActive });
-          }}
         >
           {actionTitle}
         </Button>

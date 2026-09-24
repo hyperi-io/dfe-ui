@@ -1,7 +1,8 @@
+import { Popover } from '@/core/components/Popover';
 import { cn } from '@/core/utils/style';
 import { usePatchSource } from '@/Sources/hooks/usePatchSource';
 import { IconCapture, IconCaptureOff } from '@repo/dfe-icons';
-import { Alert, Button, Popover } from 'antd';
+import { Alert, Button } from 'antd';
 import { useState } from 'react';
 
 export const SourceEnabledTag = ({
