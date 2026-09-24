@@ -8,6 +8,10 @@ const ADMIN: TAuthMeResponse = {
   roles: ['admin'],
   permissions: ['*'],
   groups: ['group'],
+  external: false,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
 };
 
 const handlers = [
