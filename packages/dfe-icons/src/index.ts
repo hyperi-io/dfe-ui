@@ -4160,6 +4160,8 @@ export { default as IconNfcOff } from "./icons/IconNfcOff";
 export { default as IconNoCopyright } from "./icons/IconNoCopyright";
 export { default as IconNoCreativeCommons } from "./icons/IconNoCreativeCommons";
 export { default as IconNoDerivatives } from "./icons/IconNoDerivatives";
+export { default as IconNoEntry } from "./icons/IconNoEntry";
+export { default as IconNoEntry2 } from "./icons/IconNoEntry2";
 export { default as IconNorthStar } from "./icons/IconNorthStar";
 export { default as IconNote } from "./icons/IconNote";
 export { default as IconNoteOff } from "./icons/IconNoteOff";
