@@ -15,6 +15,7 @@ const WRAPPED_COMPONENTS = {
   Table: '@/core/components/Table',
   Modal: '@/core/components/Modal',
   Tooltip: '@/core/components/Tooltip',
+  Popover: '@/core/components/Popover',
 };
 
 const getImportedName = (specifier) => {

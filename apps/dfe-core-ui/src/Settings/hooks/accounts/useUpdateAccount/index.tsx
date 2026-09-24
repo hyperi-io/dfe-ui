@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAccount } from './api';
 import { TAccountUpdateRequestBody, TAccountUpdateResponse } from './types';
 
@@ -13,6 +14,8 @@ export const useUpdateAccount = ({
   onSuccess,
   onError,
 }: UseUpdateAccountProps) => {
+  const queryClient = useQueryClient();
+
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (account: TAccountUpdateRequestBody) =>
       updateAccount({
@@ -20,6 +23,9 @@ export const useUpdateAccount = ({
         pathParams: { username },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.accounts.infiniteFiltered(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

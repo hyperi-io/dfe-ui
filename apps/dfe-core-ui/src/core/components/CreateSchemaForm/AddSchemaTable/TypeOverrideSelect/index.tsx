@@ -1,5 +1,6 @@
+import { Popover } from '@/core/components/Popover';
 import { IconDots, IconX } from '@repo/dfe-icons';
-import { Button, FormInstance, Popover, SelectProps } from 'antd';
+import { Button, FormInstance, SelectProps } from 'antd';
 import { useState } from 'react';
 import { LazyMountedSelect } from './LazyMountedSelect';
 

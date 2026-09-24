@@ -1,8 +1,9 @@
+import { Popover } from '@/core/components/Popover';
 import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { IconCheck, IconDots, IconMinus, IconPlus } from '@repo/dfe-icons';
-import { Button, Popover } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 export const RecursiveRendererActionMenu = ({

@@ -5,6 +5,7 @@ import { TCurrentUserResponse } from '@/core/hooks/useFetchCurrentUser/types';
 import { TCurrentUserUpdateResponse } from '@/core/hooks/useUpdateCurrentUser/types';
 import { TAccountDetailResponse } from '@/Settings/hooks/accounts/useFetchAccountDetail/types';
 import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
+import { TRotatePasswordResponse } from '@/Settings/hooks/accounts/useRotatePassword/types';
 import { TAccountUpdateResponse } from '@/Settings/hooks/accounts/useUpdateAccount/types';
 import { http, HttpResponse } from 'msw';
 import {
@@ -211,6 +212,44 @@ export const accounts = {
       } = {}) => {
         return http.delete(
           accounts.account.mockedUrl.replace('{username}', username),
+          () => {
+            return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
+  rotatePassword: {
+    mockedUrl: '/api/v1/auth/accounts/{username}/rotate-password',
+    post: {
+      success: ({
+        mockedResponse = {
+          message: 'password rotated',
+          secret_path: 'string',
+        },
+        username = 'string',
+      }: {
+        mockedResponse?: TRotatePasswordResponse;
+        username?: string;
+      } = {}) => {
+        return http.post(
+          accounts.rotatePassword.mockedUrl.replace('{username}', username),
+          () => {
+            return HttpResponse.json(mockedResponse);
+          },
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+        username = 'string',
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+        username?: string;
+      } = {}) => {
+        return http.post(
+          accounts.rotatePassword.mockedUrl.replace('{username}', username),
           () => {
             return HttpResponse.json(mockedResponse, { status });
           },

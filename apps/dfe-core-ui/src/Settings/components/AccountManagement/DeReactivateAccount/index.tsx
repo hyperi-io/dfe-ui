@@ -9,11 +9,9 @@ import { useState } from 'react';
 export const DeReactivateAccount = ({
   username,
   isActive,
-  refetch,
 }: {
   username: string;
   isActive: boolean;
-  refetch: () => void;
 }) => {
   const [isConfirming, setIsConfirming] = useState(false);
   const { notification } = App.useApp();
@@ -22,7 +20,6 @@ export const DeReactivateAccount = ({
   const { mutate, isPending } = useUpdateAccount({
     username,
     onSuccess: () => {
-      refetch();
       notification.success({
         title: isActive ? 'Account deactivated' : 'Account activated',
         placement: 'bottomLeft',

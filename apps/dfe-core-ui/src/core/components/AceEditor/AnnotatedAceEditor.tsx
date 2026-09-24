@@ -1,4 +1,6 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { Popover } from '@/core/components/Popover';
+import { cn } from '@/core/utils/style';
 import {
   IconAlertCircle,
   IconChevronRight,
@@ -6,17 +8,14 @@ import {
   IconMenu,
 } from '@repo/dfe-icons';
 import { Ace } from 'ace-builds';
+import { Splitter as AntdSplitter, Button } from 'antd';
 import { useState } from 'react';
-
-import { cn } from '@/core/utils/style';
 
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-golang';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/mode-typescript';
-
-import { Splitter as AntdSplitter, Button, Popover } from 'antd';
 
 type Annotation = Ace.Annotation;
 

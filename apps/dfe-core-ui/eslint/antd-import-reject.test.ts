@@ -1,9 +1,18 @@
 /**
  * @vitest-environment node
  */
-import { describe, expect, test } from 'vitest';
 import { ESLint } from 'eslint';
+import { describe, expect, test } from 'vitest';
 import { antdImportRejectOverrides, RULE_ID } from './antd-import-reject.mjs';
+
+const COMPONENTS = [
+  'Drawer',
+  'Form',
+  'Table',
+  'Modal',
+  'Tooltip',
+  'Popover',
+] as const;
 
 const createLinter = async () => {
   const eslint = new ESLint({
@@ -46,22 +55,19 @@ const ruleErrors = (errors: Array<{ ruleId: string; message: string }>) =>
   errors.filter((error) => error.ruleId === RULE_ID);
 
 describe('antd-import-reject', () => {
-  test.each(['Drawer', 'Form', 'Table', 'Modal', 'Tooltip'] as const)(
-    'rejects importing %s from antd',
-    async (name) => {
-      const { errors } = await lint(
-        `import { ${name} } from 'antd';`,
-        'src/Sources/components/Bar.tsx',
-      );
+  test.each(COMPONENTS)('rejects importing %s from antd', async (name) => {
+    const { errors } = await lint(
+      `import { ${name} } from 'antd';`,
+      'src/Sources/components/Bar.tsx',
+    );
 
-      expect(ruleErrors(errors)).toContainEqual(
-        expect.objectContaining({
-          ruleId: RULE_ID,
-          message: expect.stringContaining(`@/core/components/${name}`),
-        }),
-      );
-    },
-  );
+    expect(ruleErrors(errors)).toContainEqual(
+      expect.objectContaining({
+        ruleId: RULE_ID,
+        message: expect.stringContaining(`@/core/components/${name}`),
+      }),
+    );
+  });
 
   test('rejects aliased wrapped imports from antd', async () => {
     const { errors } = await lint(
@@ -105,7 +111,7 @@ describe('antd-import-reject', () => {
     expect(ruleErrors(errors)).toHaveLength(0);
   });
 
-  test.each(['Drawer', 'Form', 'Table', 'Modal', 'Tooltip'] as const)(
+  test.each(COMPONENTS)(
     'allows %s to be imported from antd inside its wrapper',
     async (name) => {
       const { errors } = await lint(

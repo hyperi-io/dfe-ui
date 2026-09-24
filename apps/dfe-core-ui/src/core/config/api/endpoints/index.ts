@@ -88,6 +88,7 @@ export const API_CONFIG = Object.freeze({
   accounts: {
     default: '/api/v1/auth/accounts',
     account: '/api/v1/auth/accounts/{username}',
+    rotatePassword: '/api/v1/auth/accounts/{username}/rotate-password',
     resetPassword: '/api/v1/auth/accounts/{username}/reset-password',
     resetCurrentUserPassword: '/api/v1/auth/accounts/reset-password',
     me: '/api/v1/auth/accounts/me',
