@@ -79,10 +79,6 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
-        external: false,
-        blocked: false,
-        disabled_at: '',
-        blocked_at: '',
       };
 
       expect(result.current.data).toBeDefined();
@@ -162,10 +158,6 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
-        external: false,
-        blocked: false,
-        disabled_at: '',
-        blocked_at: '',
       };
 
       // Data should be flattened - 20 items total
@@ -208,10 +200,6 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
-        external: false,
-        blocked: false,
-        disabled_at: '',
-        blocked_at: '',
       };
 
       // Verify we have 20 items (pages 1 and 2)
