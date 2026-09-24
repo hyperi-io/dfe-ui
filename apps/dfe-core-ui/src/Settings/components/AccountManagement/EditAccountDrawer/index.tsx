@@ -1,7 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ResetAccountPassword } from '@/Settings/components/AccountManagement/EditAccountDrawer/ResetAccountPassword';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/UpdateAccountForm';
 import { ACCOUNT_DETAIL_QUERY_KEY } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -9,6 +8,7 @@ import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Divider, notification } from 'antd';
 import { useState } from 'react';
+import { ResetAccountPasswordProgressiveDisclosure } from './ResetAccountPasswordProgressiveDisclosure';
 
 export const EditAccountDrawer = ({
   username,
@@ -88,7 +88,11 @@ export const EditAccountDrawer = ({
             action={RbacProtected.rbacActions.accounts_reset_password}
           >
             <RbacProtected.Unrestricted>
-              {!isExternal && <ResetAccountPassword username={username} />}
+              {!isExternal && (
+                <ResetAccountPasswordProgressiveDisclosure
+                  username={username}
+                />
+              )}
               {isExternal && (
                 <NotificationCard
                   className="w-full"

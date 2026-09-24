@@ -11,7 +11,7 @@ export const SectionCard = ({
 }: {
   icon?: React.ReactNode;
   title?: React.ReactNode;
-  description?: string;
+  description?: string | React.ReactNode;
   rightTitleSlot?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
@@ -43,14 +43,14 @@ export const SectionCard = ({
               {title}
             </span>
             {description && (
-              <p
+              <div
                 className={cn(
                   'text-foreground/50 dark:text-dark-foreground/50 text-sm',
                   classNames?.description,
                 )}
               >
                 {description}
-              </p>
+              </div>
             )}
           </div>
         )}
