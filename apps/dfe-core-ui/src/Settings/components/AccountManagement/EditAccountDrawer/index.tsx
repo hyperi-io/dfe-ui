@@ -13,11 +13,9 @@ import { useState } from 'react';
 export const EditAccountDrawer = ({
   username,
   isExternal,
-  refetch,
 }: {
   username: string;
   isExternal: boolean;
-  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -33,7 +31,7 @@ export const EditAccountDrawer = ({
     username,
     onSuccess: () => {
       setOpen(false);
-      refetch();
+
       api.success({
         title: 'Account updated successfully',
         placement: 'bottomLeft',

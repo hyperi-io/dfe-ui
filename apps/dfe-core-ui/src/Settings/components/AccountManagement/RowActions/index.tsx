@@ -8,12 +8,10 @@ export const RowActions = ({
   username,
   isActive,
   isExternal,
-  refetch,
 }: {
   username: string;
   isActive: boolean;
   isExternal: boolean;
-  refetch: () => void;
 }) => {
   return (
     <PopoverMenu
@@ -22,20 +20,17 @@ export const RowActions = ({
         <EditAccountDrawer
           key="edit-user"
           username={username}
-          refetch={refetch}
           isExternal={isExternal}
         />,
         <DeReactivateAccount
           key="dereactivate-user"
           username={username}
           isActive={isActive}
-          refetch={refetch}
         />,
         <DeleteAccountDrawer
           key="delete-user"
           username={username}
           isActive={isActive}
-          refetch={refetch}
           isExternal={isExternal}
         />,
       ]}

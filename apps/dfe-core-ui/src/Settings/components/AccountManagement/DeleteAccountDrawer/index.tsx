@@ -10,12 +10,12 @@ import { DeleteAccountForm, DeleteAccountFormData } from './DeleteAccountForm';
 export const DeleteAccountDrawer = ({
   username,
   isActive,
-  refetch,
+
   isExternal,
 }: {
   username: string;
   isActive: boolean;
-  refetch: () => void;
+
   isExternal: boolean;
 }) => {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,6 @@ export const DeleteAccountDrawer = ({
         ),
         placement: 'bottomLeft',
       });
-      refetch();
     },
   });
 
