@@ -29,6 +29,10 @@ describe('.useFetchAccountDetail', () => {
       const response: TAccountDetailResponse = {
         username: 'string',
         enabled: true,
+        blocked: false,
+        disabled_at: '',
+        blocked_at: '',
+        external: false,
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',

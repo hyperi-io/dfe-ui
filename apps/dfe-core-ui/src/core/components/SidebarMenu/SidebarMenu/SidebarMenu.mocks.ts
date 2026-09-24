@@ -8,6 +8,10 @@ const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   roles: ['role'],
   permissions: ['*'],
   groups: ['group'],
+  external: false,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
 };
 
 const handlers = [

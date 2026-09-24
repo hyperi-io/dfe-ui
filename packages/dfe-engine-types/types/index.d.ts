@@ -250,7 +250,7 @@ export interface paths {
         get: operations["get_account_api_v1_auth_accounts__username__get"];
         /**
          * Update Account
-         * @description Update account groups, enabled status, or contact fields (admin only).
+         * @description Update account groups, enabled/blocked status, or contact fields (admin only).
          */
         put: operations["update_account_api_v1_auth_accounts__username__put"];
         post?: never;
@@ -278,7 +278,8 @@ export interface paths {
          * @description Reset the authenticated user's password.
          *
          *     The username is taken from the session, not the request, so a caller cannot
-         *     reset another account through this route. The live store takes the new
+         *     reset another account through this route. An IdP-owned (``external``)
+         *     account is refused: it has no local password. The live store takes the new
          *     password immediately; the ``git`` block reports whether the durable mirror
          *     merged, is pending review, or is a no-op for a non-git-backed account.
          */
@@ -302,10 +303,12 @@ export interface paths {
          * Reset Password
          * @description Reset an account's password (admin only).
          *
-         *     The live store takes the new password immediately (next login), and the change
-         *     is mirrored into the durable deploy repo so it survives a rebuild. The ``git``
-         *     block reports whether that mirror merged straight away (dev/solo) or is a
-         *     pending review PR / CLI merge (production+team), or is a no-op file share.
+         *     An IdP-owned (``external``) account is refused: the password lives at the
+         *     identity provider. The live store takes the new password immediately (next
+         *     login), and the change is mirrored into the durable deploy repo so it
+         *     survives a rebuild. The ``git`` block reports whether that mirror merged
+         *     straight away (dev/solo) or is a pending review PR / CLI merge
+         *     (production+team), or is a no-op file share.
          */
         post: operations["reset_password_api_v1_auth_accounts__username__reset_password_post"];
         delete?: never;
@@ -907,6 +910,12 @@ export interface paths {
          *
          *     ``header`` is optional: when omitted, no common-header profile is stored on the
          *     version (DDL compose uses meta/derived columns only until a header is set).
+         *
+         *     A schema pin naming a schema that does not exist is ACCEPTED here and REFUSED
+         *     by ``/sources/import`` (#501), so the same stored document is valid or invalid
+         *     depending on how it arrived. That asymmetry is known and undecided -- #504.
+         *     Authoring a source before its schema is a real ordering, and making this path
+         *     as strict as import forbids it.
          */
         post: operations["create_source_api_v1_sources_post"];
         delete?: never;
@@ -1117,6 +1126,9 @@ export interface paths {
          *
          *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
          *     (same as create). Send ``header`` explicitly to set or change it.
+         *
+         *     A schema pin naming nothing is accepted here and refused by ``/sources/import``.
+         *     See ``create_source`` and #504; the asymmetry is known and undecided.
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
@@ -1615,9 +1627,10 @@ export interface paths {
          * Apply Size
          * @description Apply a t-shirt size to a deployment config.
          *
-         *     Updates replicas, resources, and KEDA thresholds for the given size.
-         *     Returns any service config overrides that should also be applied
-         *     (e.g. buffer sizes) — the caller may optionally PUT these to
+         *     Sets the size and the CPU/memory requests and limits from the shared size table, and
+         *     resets the KEDA min/max replicas to the service's defaults, which do not vary by size.
+         *     Scaling triggers are left alone. Returns the service's per-size config overrides
+         *     (buffer, memory and batch sizes) -- the caller may optionally PUT these to
          *     /api/v1/services/{service}/{instance}.
          */
         post: operations["apply_size_api_v1_deployments__service___instance__size__size__post"];
@@ -2805,6 +2818,58 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/derived": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Derived Schemas
+         * @description List every stored derived schema.
+         */
+        get: operations["list_derived_schemas_api_v1_schemas_definitions_derived_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schemas/definitions/derived/{schema_path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Derived Schema
+         * @description Read one derived schema by registry path (e.g. ``beats/filebeat_auth``).
+         */
+        get: operations["get_derived_schema_api_v1_schemas_definitions_derived__schema_path__get"];
+        /**
+         * Update Derived Schema
+         * @description Replace a derived schema. The body is the whole document, as on create.
+         */
+        put: operations["update_derived_schema_api_v1_schemas_definitions_derived__schema_path__put"];
+        /**
+         * Create Derived Schema
+         * @description Create a derived schema at the given registry path.
+         */
+        post: operations["create_derived_schema_api_v1_schemas_definitions_derived__schema_path__post"];
+        /**
+         * Delete Derived Schema
+         * @description Delete a derived schema by registry path.
+         */
+        delete: operations["delete_derived_schema_api_v1_schemas_definitions_derived__schema_path__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4293,7 +4358,10 @@ export interface paths {
         get: operations["read_app_file_api_v1_apps__service___instance__files__set_name___filename__get"];
         /**
          * Write App File
-         * @description Add or replace a file the app consumes.
+         * @description Add or replace a file the app consumes, up to ``repository.max_object_bytes``.
+         *
+         *     The file lands in the deploy repo's history for good, so an oversized one is
+         *     refused before it is buffered rather than after it is committed.
          */
         put: operations["write_app_file_api_v1_apps__service___instance__files__set_name___filename__put"];
         post?: never;
@@ -5457,6 +5525,18 @@ export interface components {
             username: string;
             /** Enabled */
             enabled: boolean;
+            /** Blocked */
+            blocked: boolean;
+            /**
+             * Disabled At
+             * @default
+             */
+            disabled_at: string;
+            /**
+             * Blocked At
+             * @default
+             */
+            blocked_at: string;
             /** Groups */
             groups: string[];
             /** Email */
@@ -5471,6 +5551,11 @@ export interface components {
              * @default
              */
             name: string;
+            /**
+             * External
+             * @description True when the account authenticates through an identity provider
+             */
+            external: boolean;
             /** Created At */
             created_at: string;
             /** Updated At */
@@ -7092,6 +7177,166 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /**
+         * DerivedSchemaResponse
+         * @description A stored derived schema, as the API hands it back.
+         */
+        DerivedSchemaResponse: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>)
+             */
+            path: string;
+            /**
+             * Base
+             * @description Meta-schema registry path the columns come from
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Current version of this derived schema
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Version id -> selection
+             */
+            versions: {
+                [key: string]: components["schemas"]["DerivedSchemaVersion"];
+            };
+        };
+        /**
+         * DerivedSchemaSummary
+         * @description One row of the derived-schema list.
+         */
+        DerivedSchemaSummary: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>)
+             */
+            path: string;
+            /**
+             * Base
+             * @description Meta-schema registry path the columns come from
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Current version
+             */
+            current: string;
+            /**
+             * Versions
+             * @description All version ids
+             */
+            versions: string[];
+            /**
+             * Column Count
+             * @description Columns the current version selects
+             */
+            column_count: number;
+            /**
+             * Updated At
+             * @description Last write to the stored document
+             */
+            updated_at: string;
+        };
+        /**
+         * DerivedSchemaVersion
+         * @description One version: the ordered selection, plus the loader's catch-all switches.
+         */
+        DerivedSchemaVersion: {
+            /**
+             * Date
+             * @description ISO date the version was written
+             */
+            date: string;
+            /**
+             * Summary
+             * @description What this selection is for
+             * @default
+             */
+            summary: string;
+            /**
+             * Capture Json
+             * @description Whether dfe-loader populates _json for this table. The column and the common header stay in place either way, so the decision is reversible.
+             * @default true
+             */
+            capture_json: boolean;
+            /**
+             * Capture Raw
+             * @description Whether dfe-loader populates _raw for this table
+             * @default true
+             */
+            capture_raw: boolean;
+            /**
+             * Select
+             * @description The complete, ordered column list of the result, after the common header
+             */
+            select: components["schemas"]["DerivedSelectEntry"][];
+        };
+        /**
+         * DerivedSchemaWriteRequest
+         * @description Create or replace a derived schema.
+         *
+         *     ``path`` is optional and, when given, must equal the URL path -- the UI
+         *     sends both and a disagreement between them is a bug worth reporting.
+         */
+        DerivedSchemaWriteRequest: {
+            /**
+             * Path
+             * @description Registry path (derived/<group>/<name>); must match the URL when set
+             */
+            path?: string | null;
+            /**
+             * Base
+             * @description Meta-schema registry path, extensionless (e.g. meta/beats/filebeat)
+             */
+            base: string;
+            /**
+             * Base Version
+             * @description Version of the base meta schema
+             */
+            base_version: string;
+            /**
+             * Current
+             * @description Version of this derived schema to make current
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Version id -> selection
+             */
+            versions: {
+                [key: string]: components["schemas"]["DerivedSchemaVersion"];
+            };
+        };
+        /**
+         * DerivedSelectEntry
+         * @description One selected column, optionally re-answering the question it is asked.
+         */
+        DerivedSelectEntry: {
+            /**
+             * Name
+             * @description Column name, as the base defines it
+             */
+            name: string;
+            /**
+             * Index
+             * @description Index use case for this column, overriding the base column's. 'none' keeps the column and drops its index; omitting the key keeps the base column's use case.
+             */
+            index?: string | null;
+        };
         /** DetachResponse */
         DetachResponse: {
             /** Deleted */
@@ -7122,7 +7367,7 @@ export interface components {
             type: string;
             /**
              * Attribute
-             * @description ClickHouse storage attributes for the column (e.g. 'nullable', 'lowcardinality'). Empty for a plain column.
+             * @description ClickHouse storage attributes for the column (e.g. 'nullable', 'not_null'). Empty for a plain column. How many distinct values the column holds is declared apart, as 'cardinality'.
              */
             attribute?: string[];
             /**
@@ -7457,11 +7702,6 @@ export interface components {
             language: string;
             /** Size Bytes */
             size_bytes: number;
-        };
-        /** FileWriteRequest */
-        FileWriteRequest: {
-            /** Content */
-            content: string;
         };
         /**
          * FilterTier
@@ -8338,6 +8578,11 @@ export interface components {
              * @description The source these paths were discovered for.
              */
             source_name: string;
+            /**
+             * Version
+             * @description Source version the discovery ran against. Compare it to the source's `current`: a version that is behind, or one not yet deployed, reads the landing table rather than the source's own, which is why an empty `paths` list can mean 'looked somewhere else' rather than 'nothing to promote'.
+             */
+            version: string;
             /**
              * Table
              * @description Fully-qualified ClickHouse table actually queried ('db.table'). The source's own table when the selected version has a meta_schema, otherwise the shared catch-all landing table.
@@ -9517,6 +9762,32 @@ export interface components {
         PaginatedResponse_DeploymentSummary_: {
             /** Items */
             items: components["schemas"]["DeploymentSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[DerivedSchemaSummary] */
+        PaginatedResponse_DerivedSchemaSummary_: {
+            /** Items */
+            items: components["schemas"]["DerivedSchemaSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -11286,6 +11557,11 @@ export interface components {
              */
             attribute?: string[] | null;
             /**
+             * Cardinality
+             * @description How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured.
+             */
+            cardinality?: ("low" | "high" | "unknown") | null;
+            /**
              * Use Case
              * @description Use case of the column
              */
@@ -11351,6 +11627,11 @@ export interface components {
              * @description Attributes of the column
              */
             attribute?: string[] | null;
+            /**
+             * Cardinality
+             * @description How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured.
+             */
+            cardinality?: ("low" | "high" | "unknown") | null;
             /**
              * Use Case
              * @description Use case of the column
@@ -11448,6 +11729,11 @@ export interface components {
              * @description Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all.
              */
             topics_failed?: string[];
+            /**
+             * Topics Stranded
+             * @description Topics on the broker this version has no consumer for. A ``_load`` topic left by a version that dropped its transform suppresses the source's ``_land`` topic in the loader, so the source silently stops loading. Reported, never deleted: records may still be in flight on it.
+             */
+            topics_stranded?: string[];
             /**
              * Apps Synced
              * @description Deploy-repo writes this deploy made so the apps follow the sources: the receiver and loader routing, and a fetcher instance for a fetcher-based source (service/instance: action)
@@ -11617,6 +11903,11 @@ export interface components {
              * @description Why the topic set was skipped; empty when it was applied.
              */
             topics_skipped: string;
+            /**
+             * Topics Drift
+             * @description Existing topics this pass could not confirm match the manifest, each named with what was found -- a shape difference, or that the shape was unreadable and so drift is unknown. A broker that answers a topic list but not a describe puts every existing topic here. Reported, never applied: the engine leaves an existing topic alone rather than altering a live broker on a deploy.
+             */
+            topics_drift?: string[];
         };
         /** SchemaSuggestRequest */
         SchemaSuggestRequest: {
@@ -12430,7 +12721,7 @@ export interface components {
             topic: "own" | "main";
             /**
              * Config
-             * @description The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be env: or vault: references
+             * @description The fetcher's per-type stanza (services, connections, interval_secs, filter, credential references, ...). Credentials must be vault:, bao:, openbao:, env: or file: references
              */
             config?: {
                 [key: string]: unknown;
@@ -12684,9 +12975,14 @@ export interface components {
             meta_schema_version?: string | null;
             /**
              * Derived Schema
-             * @description Source-specific field overrides (optional YAML reference)
+             * @description Derived-schema registry path (e.g. derived/beats/filebeat_auth). It SELECTS from the meta schema: the table's columns become exactly the names it lists, in its order, after the common header. It is not an override layer -- everything but the column's index resolves from the base -- and it also carries the _json/_raw capture switches for this table
              */
             derived_schema?: string | null;
+            /**
+             * Derived Schema Version
+             * @description Derived schema version (semver). Unset follows the derived schema's own 'current', so publishing a new selection changes this table
+             */
+            derived_schema_version?: string | null;
             /**
              * Additional Fields
              * @description Extra fields/indexes (optional YAML reference)
@@ -13631,6 +13927,11 @@ export interface components {
              */
             enabled?: boolean | null;
             /**
+             * Blocked
+             * @description Block the account from holding a session
+             */
+            blocked?: boolean | null;
+            /**
              * Email
              * @description Contact email
              */
@@ -13791,6 +14092,28 @@ export interface components {
              * @description Orgs this user can browse in the data plane (HyperDX). Empty means no org-scoped data access.
              */
             org_ids?: string[];
+            /**
+             * External
+             * @description True when the account authenticates through an identity provider
+             */
+            external: boolean;
+            /**
+             * Blocked
+             * @description True when an operator has blocked this account from holding a session
+             */
+            blocked: boolean;
+            /**
+             * Disabled At
+             * @description When the account was disabled. Empty while it is enabled.
+             * @default
+             */
+            disabled_at: string;
+            /**
+             * Blocked At
+             * @description When the account was blocked. Empty while it is not blocked.
+             * @default
+             */
+            blocked_at: string;
         };
         /**
          * ValidateResponse
@@ -14524,6 +14847,11 @@ export interface components {
              */
             attribute?: string[] | null;
             /**
+             * Cardinality
+             * @description How many distinct values the column holds: low, high or unknown. 'low' is what adds the LowCardinality wrapper and what lets exact_match emit set(0) rather than a bloom filter. Absent means unknown, which is the honest answer where nothing was measured.
+             */
+            cardinality?: ("low" | "high" | "unknown") | null;
+            /**
              * Use Case
              * @description Use case of the column
              */
@@ -14797,6 +15125,10 @@ export interface operations {
             query?: {
                 /** @description Search in username, name, or email */
                 search?: string | null;
+                /** @description Filter by blocked status. Omitted returns every account. */
+                blocked?: boolean | null;
+                /** @description Include the local admin and break-glass recovery accounts. */
+                include_core?: boolean;
                 /** @description Sort field (username, created_at, updated_at) */
                 sort_by?: string | null;
                 /** @description Sort order: asc/desc */
@@ -19623,6 +19955,174 @@ export interface operations {
             };
         };
     };
+    list_derived_schemas_api_v1_schemas_definitions_derived_get: {
+        parameters: {
+            query?: {
+                /** @description Search in path and base */
+                search?: string | null;
+                /** @description Sort field (path, base, current, updated_at) */
+                sort_by?: string | null;
+                /** @description Sort order: asc/desc */
+                sort_order?: string;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DerivedSchemaSummary_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_derived_schema_api_v1_schemas_definitions_derived__schema_path__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_derived_schema_api_v1_schemas_definitions_derived__schema_path__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DerivedSchemaWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_derived_schema_api_v1_schemas_definitions_derived__schema_path__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DerivedSchemaWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DerivedSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_derived_schema_api_v1_schemas_definitions_derived__schema_path__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schema_path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_schemas_api_v1_schemas_get: {
         parameters: {
             query?: {
@@ -22452,7 +22952,10 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["FileWriteRequest"];
+                "application/json": {
+                    /** Content */
+                    content: string;
+                };
             };
         };
         responses: {
@@ -22463,6 +22966,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["dfe_engine__api__v1__apps__WriteResult"];
+                };
+            };
+            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation Error */
