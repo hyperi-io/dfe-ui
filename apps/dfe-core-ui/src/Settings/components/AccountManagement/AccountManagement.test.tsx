@@ -3,6 +3,7 @@ import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/type
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TAccountsResponse } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { render, screen, within } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -82,6 +83,15 @@ const accounts = (): TAccountsResponse => ({
   prev_page: 1,
 });
 
+// The page loads the open list and the blocked list from the same endpoint.
+// A blocked query is a different set of accounts, so it must not repeat the
+// open-list rows the assertions look up by name.
+const accountsHandler = (body: TAccountsResponse) =>
+  http.get(API_CONFIG_MOCKS.accounts.default.mockedUrl, ({ request }) => {
+    const blocked = new URL(request.url).searchParams.get('blocked') === 'true';
+    return HttpResponse.json(blocked ? { ...body, items: [], total: 0 } : body);
+  });
+
 const setupStatus = (
   overrides: Partial<TFetchSetupStatusResponse>,
 ): TFetchSetupStatusResponse => ({
@@ -109,9 +119,7 @@ const setupStatus = (
 describe('AccountManagement', () => {
   test('marks the retired bootstrap admin as retired, not merely inactive', async () => {
     server.use(
-      API_CONFIG_MOCKS.accounts.default.get.success({
-        mockedResponse: accounts(),
-      }),
+      accountsHandler(accounts()),
       API_CONFIG_MOCKS.auth.setupStatus.get.success({
         mockedResponse: setupStatus({ admin_retired: true }),
       }),
@@ -126,9 +134,7 @@ describe('AccountManagement', () => {
 
   test('a disabled account is only inactive while the admin is not retired', async () => {
     server.use(
-      API_CONFIG_MOCKS.accounts.default.get.success({
-        mockedResponse: accounts(),
-      }),
+      accountsHandler(accounts()),
       API_CONFIG_MOCKS.auth.setupStatus.get.success({
         mockedResponse: setupStatus({ admin_retired: false }),
       }),
@@ -142,50 +148,39 @@ describe('AccountManagement', () => {
 
   test('shows the name and email beside the username', async () => {
     server.use(
-      API_CONFIG_MOCKS.accounts.default.get.success({
-        mockedResponse: {
-          ...accounts(),
-          items: [
-            {
-              username: '00u15mxs3ecygt7oj698',
-              enabled: true,
-              blocked: false,
-              disabled_at: '',
-              blocked_at: '',
-              external: false,
-              groups: [],
-              created_at: 'string',
-              updated_at: 'string',
-              email: 'dfe-test@dfe-oidc.test',
-              phone: '',
-              name: 'DFE dfe-test',
+      accountsHandler({
+        ...accounts(),
+        items: [
+          {
+            username: '00u15mxs3ecygt7oj698',
+            enabled: true,
+            groups: [],
+            created_at: 'string',
+            updated_at: 'string',
+            email: 'dfe-test@dfe-oidc.test',
+            phone: '',
+            name: 'DFE dfe-test',
 
-              external: false,
-              blocked: false,
-              disabled_at: '',
-              blocked_at: '',
-            },
-            {
-              username: 'admin',
-              enabled: true,
-              blocked: false,
-              disabled_at: '',
-              blocked_at: '',
-              external: false,
-              groups: ['dfe-admins'],
-              created_at: 'string',
-              updated_at: 'string',
-              email: '',
-              phone: '',
-              name: '  ',
-
-              external: false,
-              blocked: false,
-              disabled_at: '',
-              blocked_at: '',
-            },
-          ],
-        },
+            external: false,
+            blocked: false,
+            disabled_at: '',
+            blocked_at: '',
+          },
+          {
+            username: 'admin',
+            enabled: true,
+            groups: ['dfe-admins'],
+            created_at: 'string',
+            updated_at: 'string',
+            email: '',
+            phone: '',
+            name: '',
+            external: false,
+            blocked: false,
+            disabled_at: '',
+            blocked_at: '',
+          },
+        ],
       }),
     );
 
