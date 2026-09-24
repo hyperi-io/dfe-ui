@@ -71,6 +71,7 @@ export const renderColumns = ({
         username={record.username}
         isActive={record.enabled}
         isExternal={record.external}
+        isBlocked={record.blocked}
       />
     ),
   },

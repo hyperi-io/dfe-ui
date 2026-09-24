@@ -21,7 +21,7 @@ export const ViewUserListSection = () => {
     hasNextPage,
     fetchNextPage,
     error,
-  } = useFetchInfiniteFilteredAccounts({ search });
+  } = useFetchInfiniteFilteredAccounts({ search, blocked: false });
 
   const { componentHeight } = useSetComponentHeight({
     offset: 350,

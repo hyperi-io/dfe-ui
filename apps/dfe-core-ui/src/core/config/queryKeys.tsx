@@ -32,7 +32,7 @@ export const QUERY_KEYS = {
     }: useFetchInfiniteFilteredAccountsProps = {}) => [
       'accounts',
       ...(search ? [search] : []),
-      ...(blocked ? [blocked] : []),
+      ...(blocked !== undefined ? [blocked] : []),
       ...(include_core ? [include_core] : []),
       ...(sort_by ? [sort_by] : []),
       ...(sort_order ? [sort_order] : []),

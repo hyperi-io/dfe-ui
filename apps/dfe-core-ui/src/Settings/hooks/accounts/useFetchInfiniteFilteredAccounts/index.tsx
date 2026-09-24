@@ -54,7 +54,7 @@ export const useFetchInfiniteFilteredAccounts = ({
       fetchAccounts({
         queryParams: {
           search: debouncedSearch || undefined,
-          blocked: blocked || undefined,
+          blocked,
           include_core: include_core || undefined,
           sort_by: sort_by || undefined,
           sort_order: sort_order || undefined,
