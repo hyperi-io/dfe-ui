@@ -163,7 +163,7 @@ test.beforeAll(async () => {
   await landRowsWithJson();
 });
 
-test('a discovered path is not promoted yet', async () => {
+test('a discovered path is not promoted yet @docker-only', async () => {
   const before = await discover(`${UI_PATH},${API_PATH}`);
   expect(before.paths.map((path) => path.path).sort()).toEqual(
     [API_PATH, UI_PATH].sort(),
@@ -180,7 +180,7 @@ test('a discovered path is not promoted yet', async () => {
   ).toBeUndefined();
 });
 
-test('a dry run returns the diff and writes nothing', async () => {
+test('a dry run returns the diff and writes nothing @docker-only', async () => {
   const preview = await engine<PromoteResponse>(
     'POST',
     `/api/v1/schemas/${SOURCE}/promote-field?dry_run=true`,
@@ -203,7 +203,7 @@ test('a dry run returns the diff and writes nothing', async () => {
   expect(pinned.meta_schema).toBe(BASE_SCHEMA);
 });
 
-test('the console promotes a path and the meta schema carries the column', async ({
+test('the console promotes a path and the meta schema carries the column @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
@@ -274,7 +274,7 @@ test('the console promotes a path and the meta schema carries the column', async
   ).toBeUndefined();
 });
 
-test('deploying the promoted version lands the column and discovery says so', async () => {
+test('deploying the promoted version lands the column and discovery says so @docker-only', async () => {
   // A promotion repins the source at a NEW version that is not deployed, and
   // discovery falls back to the landing table until it is -- so a re-discover
   // before the deploy answers `paths: []` and proves nothing.
@@ -292,7 +292,7 @@ test('deploying the promoted version lands the column and discovery says so', as
   expect(after.paths[0]?.promoted_to).toBe(UI_COLUMN);
 });
 
-test('a use case promoted with the path becomes an index on the table', async () => {
+test('a use case promoted with the path becomes an index on the table @docker-only', async () => {
   const before = await sourceSchemaPin();
 
   const promoted = await engine<PromoteResponse>(
