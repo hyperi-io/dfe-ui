@@ -69,7 +69,10 @@ test('User actions', async ({ page }) => {
 
   await page.getByRole('button', { name: 'User actions', exact: true }).click();
   await expect(page.getByText('User ID:')).toBeVisible();
-  await expect(page.getByText('dfe_admin')).toBeVisible();
+  /* Name also shows the username, so scope to the dd next to User ID */
+  await expect(page.locator('dt:text-is("User ID:") + dd')).toHaveText(
+    'dfe_admin',
+  );
   await expect(
     page.getByRole('button', { name: 'Logout', exact: true }),
   ).toBeVisible();

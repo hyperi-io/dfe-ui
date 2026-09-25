@@ -185,7 +185,7 @@ test.beforeAll(async () => {
   }
 });
 
-test('a source is created on the catalogue routing convention', async ({
+test('a source is created on the catalogue routing convention @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
@@ -205,7 +205,9 @@ test('a source is created on the catalogue routing convention', async ({
   }
 });
 
-test('deploying a source binds its own transform app', async ({ page }) => {
+test('deploying a source binds its own transform app @docker-only', async ({
+  page,
+}) => {
   await loginAs(page, 'initial_user');
   for (const { name } of SOURCES) {
     await buildAndDeploy(page, name);
@@ -250,7 +252,7 @@ const giveInstanceItsPipeline = async (
   await restartFor(hints);
 };
 
-test('each transform instance takes the bundled filebeat pipeline', async () => {
+test('each transform instance takes the bundled filebeat pipeline @docker-only', async () => {
   test.skip(
     !programsAvailable(),
     'the bundled pipelines are not named: set DFE_FILEBEAT_VRL_PROGRAM, DFE_FILEBEAT_VECTOR_PROGRAM and DFE_FILEBEAT_ENRICHMENT',
@@ -293,10 +295,10 @@ const landsOnItsOwnTable = async ({
   expect(await loaderFallbacks()).toBe(fallbacksBefore);
 };
 
-test('cisco-meraki: the corpus lands on its own table, not the catch-all', () =>
+test('cisco-meraki: the corpus lands on its own table, not the catch-all @docker-only', () =>
   landsOnItsOwnTable(SOURCES[0]));
 
-test('HyperDX carries the source, pointed at its own table', async ({
+test('HyperDX carries the source, pointed at its own table @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
@@ -330,7 +332,7 @@ test('HyperDX carries the source, pointed at its own table', async ({
   }
 });
 
-test('cisco-ios: the corpus lands on its own table, not the catch-all', () => {
+test('cisco-ios: the corpus lands on its own table, not the catch-all @docker-only', () => {
   // Expected to fail until dfe-transform-elastic frames its output the way
   // dfe-loader reads it: it writes a batch as one Kafka record of
   // newline-delimited JSON, and the loader parses a record as one JSON value.
@@ -338,7 +340,7 @@ test('cisco-ios: the corpus lands on its own table, not the catch-all', () => {
   return landsOnItsOwnTable(SOURCES[2]);
 });
 
-test('a source changes transform app and the data follows', async ({
+test('a source changes transform app and the data follows @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
@@ -407,7 +409,7 @@ test('a source changes transform app and the data follows', async ({
     .toBeGreaterThan(before);
 });
 
-test('cisco-umbrella: the corpus lands on its own table, not the catch-all', () => {
+test('cisco-umbrella: the corpus lands on its own table, not the catch-all @docker-only', () => {
   // Expected to fail until the dfe-transform-vector compose service mounts the
   // dfe-app-config volume and points --config at it, as vrl and elastic do.
   test.fail();
@@ -417,7 +419,7 @@ test('cisco-umbrella: the corpus lands on its own table, not the catch-all', () 
 /** A source whose schema config names a derived schema mounted on the engine. */
 const LEAN_SOURCE = 'cisco-ios-lean';
 
-test('a derived schema narrows its base on the deployed table', async () => {
+test('a derived schema narrows its base on the deployed table @docker-only', async () => {
   // A derived schema is a file in the engine's schemas tree, which the console
   // has no field for and this spec cannot write, so the source is a precondition.
   const lean = await tableColumns(LEAN_SOURCE);
