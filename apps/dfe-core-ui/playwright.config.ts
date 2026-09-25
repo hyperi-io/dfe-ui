@@ -10,13 +10,17 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
+ *
+ * A k8s run has no docker daemon to shell out to, so it excludes the two
+ * specs tagged @docker-only (filebeatDataPath.spec.ts, promoteJsonField.spec.ts):
+ * `npx playwright test --grep-invert @docker-only`.
  */
 export default defineConfig({
   testDir: './e2e',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retries hide flakes: a spec either passes or gets fixed. */
+  retries: 0,
   /*
    * All e2e specs share one dfe-engine and call reset_all in hooks. Parallel
    * workers race on seed-static and leave the DB/UI in inconsistent state
