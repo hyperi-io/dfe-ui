@@ -66,7 +66,7 @@ export const ChangePasswordScene = () => {
     error,
   } = useCurrentUserResetPassword({
     onSuccess: async (data) => {
-      // The session was issued without the account's standing; a refresh carries it.
+      // The session was issued without the account's standing, and a refresh carries it.
       try {
         await executeAccessTokenRefresh();
       } catch {

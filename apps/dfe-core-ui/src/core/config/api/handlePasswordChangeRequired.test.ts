@@ -6,9 +6,8 @@ const { navigateWithReload } = vi.hoisted(() => ({
 
 vi.mock('@/core/utils/navigation', () => ({ navigateWithReload }));
 
-const { handlePasswordChangeRequired } = await import(
-  './handlePasswordChangeRequired'
-);
+const { handlePasswordChangeRequired } =
+  await import('./handlePasswordChangeRequired');
 
 describe('handlePasswordChangeRequired', () => {
   beforeEach(() => {

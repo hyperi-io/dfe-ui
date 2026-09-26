@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation';
 // anonymous render of a page that must never be anonymous.
 export const dynamic = 'force-dynamic';
 
-// The route's only guard, since the proxy skips it; a session whose flag reads clear stays, because the API client sends a stale one here.
+// The route's only guard, since the proxy skips it, and it keeps a session whose flag reads clear because the API client sends a stale one here.
 export default async function ChangePasswordLayout({
   children,
 }: {

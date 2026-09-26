@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine \u2014 configuration, scheduling, and query API",
-    "version": "1.22.2"
+    "version": "1.22.4"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -33524,7 +33524,7 @@
           "password_change_required": {
             "type": "boolean",
             "title": "Password Change Required",
-            "description": "True until the account replaces an issued password; a console shows the change screen before anything else while it is set.",
+            "description": "True until the account replaces an issued password. A console shows the change screen before anything else while it is set.",
             "default": false
           }
         },

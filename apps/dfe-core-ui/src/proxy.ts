@@ -192,7 +192,7 @@ export const config = {
      * Match all paths under (auth) except static files and api routes.
      * (auth) group renders at / so we protect the root and its children.
      * /login, /setup and /change-password are excluded so auth redirects
-     * cannot loop; each guards itself in its own layout.
+     * cannot loop. Each guards itself in its own layout.
      *
      * The health trinity and /metrics are excluded too, and that is load-bearing
      * rather than cosmetic. kubelet probes and Prometheus scrapes carry no session,

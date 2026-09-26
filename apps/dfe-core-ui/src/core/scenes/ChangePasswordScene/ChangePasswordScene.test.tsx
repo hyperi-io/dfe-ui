@@ -64,7 +64,9 @@ describe('ChangePasswordScene', () => {
   });
 
   test('changes the password, renews the session, then enters the console', async () => {
-    server.use(API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success());
+    server.use(
+      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success(),
+    );
 
     await submit();
 
@@ -93,27 +95,30 @@ describe('ChangePasswordScene', () => {
     expect(
       await screen.findByText('Merge the review to keep this password'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open the review' })).toHaveAttribute(
-      'href',
-      'https://forge.example/pr/7',
-    );
+    expect(
+      screen.getByRole('link', { name: 'Open the review' }),
+    ).toHaveAttribute('href', 'https://forge.example/pr/7');
     expect(replace).not.toHaveBeenCalled();
 
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Continue' }));
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Continue' }));
     expect(replace).toHaveBeenCalledWith('/');
   });
 
   test('shows the engine refusal and stays put', async () => {
     server.use(
-      http.post(API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl, () =>
-        HttpResponse.json(
-          {
-            code: 'password_reused',
-            message: 'New password may not match any of the last 5 passwords',
-            errors: [],
-          },
-          { status: 400 },
-        ),
+      http.post(
+        API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
+        () =>
+          HttpResponse.json(
+            {
+              code: 'password_reused',
+              message: 'New password may not match any of the last 5 passwords',
+              errors: [],
+            },
+            { status: 400 },
+          ),
       ),
     );
 
@@ -131,12 +136,16 @@ describe('ChangePasswordScene', () => {
   test('refuses mismatched passwords before calling the engine', async () => {
     await submit(NEW_PASSWORD, `${NEW_PASSWORD}-typo`);
 
-    expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Passwords do not match'),
+    ).toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
 
   test('says how to recover when the session cannot be renewed', async () => {
-    server.use(API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success());
+    server.use(
+      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success(),
+    );
     executeAccessTokenRefresh.mockRejectedValue(new Error('500'));
 
     await submit();

@@ -14126,7 +14126,7 @@ export interface components {
             blocked_at: string;
             /**
              * Password Change Required
-             * @description True until the account replaces an issued password; a console shows the change screen before anything else while it is set.
+             * @description True until the account replaces an issued password. A console shows the change screen before anything else while it is set.
              * @default false
              */
             password_change_required: boolean;

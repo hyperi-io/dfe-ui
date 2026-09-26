@@ -3,7 +3,7 @@
 import { CHANGE_PASSWORD_PATH } from '@/core/config/authSession';
 import { navigateWithReload } from '@/core/utils/navigation';
 
-/** Send the browser to the change screen; the engine refuses everything else until then. */
+/** Send the browser to the change screen, since the engine refuses everything else until then. */
 export function handlePasswordChangeRequired(): void {
   if (typeof window === 'undefined') {
     return;
