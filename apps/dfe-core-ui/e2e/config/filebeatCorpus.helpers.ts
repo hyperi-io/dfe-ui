@@ -171,24 +171,79 @@ export const pushEnvelopes = async (events: unknown[]) => {
 };
 
 /**
- * Restart the containers a write said needed one.
- *
- * The engine reports `restart required: docker compose restart <service>` for
- * every app whose config it rewrote; on Compose nothing acts on that by itself,
- * so the test does what the operator would. Container names carry the stack's
- * own prefix, which is why it is a setting rather than a literal.
+ * Container names carry the stack's own prefix, which is why it is a setting
+ * rather than a literal.
  */
 export const CONTAINER_PREFIX = process.env.DFE_CONTAINER_PREFIX || 'e2e-';
 
+/**
+ * The dfe-docker checkout running the stack under test.
+ *
+ * `make apply` there re-resolves the stack, so it creates the container a new
+ * per-source instance has yet to get -- a service that exists only in the
+ * fragment `make` chains, so no plain `docker compose` call can name it.
+ * DFE_DOCKER_APPLY_ARGS adds make variables to that call: `DEV=1` for a stack
+ * `make dev` started, which otherwise has the named services recreated from the
+ * registry images.
+ */
+export const DOCKER_DIR = process.env.DFE_DOCKER_DIR;
+
+const APPLY_ARGS = (process.env.DFE_DOCKER_APPLY_ARGS ?? '')
+  .split(/\s+/)
+  .filter((arg) => !!arg);
+
+/**
+ * The compose service one hint names.
+ *
+ * The engine names it as `make apply SERVICES=<service>`; an engine image from
+ * before that names it at the end of a `docker compose` command.
+ */
+const serviceOf = (hint: string) =>
+  /SERVICES=(\S+)/.exec(hint)?.[1] ??
+  /docker compose (?:restart|up -d) (\S+)/.exec(hint)?.[1];
+
+const containerExists = (container: string) => {
+  try {
+    execFileSync('docker', ['inspect', '--format', '{{.Id}}', container], {
+      stdio: 'ignore',
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Apply what the engine's hints say a write needs, the way an operator would.
+ *
+ * On Compose nothing acts on a hint by itself. `make apply` creates a missing
+ * container and recreates one whose definition changed, but leaves the rest
+ * alone, and a mounted config is not part of the definition -- so every
+ * container that existed before the apply is restarted to read its new config.
+ */
 export const restartFor = async (hints: string[]) => {
   const services = [
     ...new Set(
-      hints
-        .map((hint) => hint.split('docker compose restart ')[1]?.trim())
-        .filter((service): service is string => !!service),
+      hints.map(serviceOf).filter((service): service is string => !!service),
     ),
   ];
-  for (const service of services) {
+  if (!services.length) {
+    return services;
+  }
+  if (!DOCKER_DIR) {
+    throw new Error(
+      `DFE_DOCKER_DIR is not set: name the dfe-docker checkout running the stack, so make apply can act on ${services.join(', ')}`,
+    );
+  }
+  const existing = services.filter((service) =>
+    containerExists(`${CONTAINER_PREFIX}${service}`),
+  );
+  execFileSync(
+    'make',
+    ['apply', `SERVICES=${services.join(' ')}`, ...APPLY_ARGS],
+    { cwd: DOCKER_DIR, encoding: 'utf8' },
+  );
+  for (const service of existing) {
     execFileSync('docker', ['restart', `${CONTAINER_PREFIX}${service}`], {
       stdio: 'ignore',
     });
