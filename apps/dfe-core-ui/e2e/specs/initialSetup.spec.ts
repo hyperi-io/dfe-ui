@@ -130,11 +130,15 @@ test('setup from start testing forward and back navigation', async ({
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
   ).toBeDisabled();
+  // The required marker is part of each label's accessible name.
   await page
-    .getByRole('textbox', { name: 'Username', exact: true })
+    .getByRole('textbox', { name: 'Username *', exact: true })
     .fill('test_username');
   await page
-    .getByRole('textbox', { name: 'Password', exact: true })
+    .getByRole('textbox', { name: 'Email *', exact: true })
+    .fill('test_username@example.com');
+  await page
+    .getByRole('textbox', { name: 'Password *', exact: true })
     .fill('test_password');
   await page
     .getByRole('button', { name: 'Create Account', exact: true })

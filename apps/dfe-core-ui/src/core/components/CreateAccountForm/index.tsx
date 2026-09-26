@@ -1,14 +1,15 @@
 import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { TAccountCreateRequestBody } from '@/core/hooks/useCreateAccount/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { newPasswordSchema } from '@/core/validationSchemas/password.schema';
 import { Button, Input } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
   username: z.string().min(1, { message: 'Username is required' }),
-  password: z.string().min(1, { message: 'Password is required' }),
+  password: newPasswordSchema,
   groups: z.array(z.string()).optional(),
   email: z.email({ message: 'Valid email is required' }),
   phone: z.string().optional().nullable(),
@@ -99,7 +100,10 @@ export const CreateAccountForm = ({
         label={<Form.Label required>Password</Form.Label>}
         rules={[formValidation]}
       >
-        <Input.Password placeholder="Enter password" />
+        <Input.Password
+          autoComplete="new-password"
+          placeholder="Enter password"
+        />
       </Form.Item>
 
       <Form.Item
@@ -112,7 +116,7 @@ export const CreateAccountForm = ({
 
       {error && (
         <Form.Item>
-          <FormNotification type="error" text={error.message} />
+          <ApiErrorNotification error={error} />
         </Form.Item>
       )}
 
