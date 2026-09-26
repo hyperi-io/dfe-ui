@@ -31,7 +31,7 @@ const PendingReview = ({
     <Alert
       type="warning"
       showIcon
-      message="Merge the review to keep this password"
+      title="Merge the review to keep this password"
       description="This deployment reviews account changes. The new password works now, but a restart before the review merges brings back the issued one."
     />
     {pending.pr_url && (
