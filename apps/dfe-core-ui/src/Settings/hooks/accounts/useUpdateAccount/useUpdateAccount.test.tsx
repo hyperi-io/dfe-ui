@@ -54,6 +54,7 @@ describe('.useUpdateAccount', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        password_change_required: false,
         groups: ['string'],
         created_at: 'string',
         updated_at: 'string',
