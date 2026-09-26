@@ -37,7 +37,9 @@ test('Pools', async ({ page }) => {
  * A Compose deployment has no KEDA, so the endpoint refuses the dials.
  * The Kubernetes form is covered by ScalingCard.test.tsx.
  */
-test('Scaling dials are refused on a Compose deployment', async ({ page }) => {
+test('Scaling dials are refused on a Compose deployment @docker-only', async ({
+  page,
+}) => {
   await openComponents(page);
 
   await expect(page.getByText('Scaling')).toBeVisible();
