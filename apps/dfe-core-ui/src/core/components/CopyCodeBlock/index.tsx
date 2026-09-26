@@ -2,6 +2,9 @@ import { cn } from '@/core/utils/style';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button } from 'antd';
 
+// A hyphen is a line-break point in plain text, so each token is its own inline-block and lines break only at whitespace.
+const tokensOf = (code: string) => code.split(/(\s+)/).filter(Boolean);
+
 export const CopyCodeBlock = ({
   code,
   className,
@@ -16,7 +19,17 @@ export const CopyCodeBlock = ({
         className,
       )}
     >
-      <code className="min-w-0 whitespace-pre-wrap wrap-anywhere">{code}</code>
+      <code className="min-w-0 whitespace-pre-wrap">
+        {tokensOf(code).map((part, index) =>
+          part.trim() === '' ? (
+            part
+          ) : (
+            <span key={index} className="inline-block max-w-full wrap-anywhere">
+              {part}
+            </span>
+          ),
+        )}
+      </code>
       <div className="flex gap-2">
         <Button
           type="default"
