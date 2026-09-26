@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useFeatureFlags } from './useFeatureFlags';
 
 describe('useFeatureFlags', () => {
@@ -7,6 +7,7 @@ describe('useFeatureFlags', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     window.localStorage.removeItem('featureFlags');
   });
 
@@ -20,5 +21,16 @@ describe('useFeatureFlags', () => {
     const { featureFlags, isFeatureEnabled } = useFeatureFlags();
     expect(featureFlags).toEqual(['NEW_VIEW']);
     expect(isFeatureEnabled('OLD_VIEW')).toBe(false);
+  });
+
+  it('reads as no flags when the browser blocks storage', () => {
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    });
+
+    const { featureFlags, isFeatureEnabled } = useFeatureFlags();
+
+    expect(featureFlags).toEqual([]);
+    expect(isFeatureEnabled('NEW_VIEW')).toBe(false);
   });
 });
