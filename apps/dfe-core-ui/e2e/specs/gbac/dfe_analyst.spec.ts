@@ -283,9 +283,10 @@ test.describe('Settings', () => {
       `${BASE_URL}/settings/admin/account-management`,
     );
 
+    /* Two cards read account_read: Manage existing accounts, Blocked accounts */
     await expect(
       page.getByText('You do not have sufficient permissions'),
-    ).toBeVisible();
+    ).toHaveCount(2);
     await expect(
       page.getByRole('button', {
         name: 'Invite New User',
