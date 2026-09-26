@@ -16,6 +16,7 @@ export const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   blocked: false,
   disabled_at: '',
   blocked_at: '',
+  password_change_required: false,
 };
 
 export const authHandler = API_CONFIG_MOCKS.auth.me.get.success({

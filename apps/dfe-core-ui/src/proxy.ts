@@ -1,3 +1,4 @@
+import { CHANGE_PASSWORD_PATH } from '@/core/config/authSession';
 import {
   LOGIN_CALLBACK_PATH_HEADER,
   pathWithSearch,
@@ -61,7 +62,8 @@ function cookieDomain(): string | undefined {
 
 // Mirror the session's engine access token into the dfe_token cookie so the
 // embedded HyperDX iframe authenticates as the same user. No-op when the request
-// carries no session token (e.g. the /login bounce).
+// carries no session token (e.g. the /login bounce), or when the account must
+// still change its issued password and so may use nothing yet.
 async function plantEngineTokenCookie(
   req: NextRequest,
   res: NextResponse,
@@ -72,6 +74,9 @@ async function plantEngineTokenCookie(
   });
   const accessToken = token?.accessToken;
   if (typeof accessToken !== 'string' || accessToken === '') {
+    return;
+  }
+  if (token?.passwordChangeRequired === true) {
     return;
   }
 
@@ -113,6 +118,14 @@ async function isInitialSetupIncomplete(): Promise<boolean> {
   }
 }
 
+async function isPasswordChangeRequired(req: NextRequest): Promise<boolean> {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  return token?.passwordChangeRequired === true;
+}
+
 function nextWithCallbackPath(req: NextRequest): NextResponse {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set(
@@ -149,6 +162,15 @@ export default async function proxy(
     return result;
   }
 
+  // Before the wizard and every page: the engine refuses an account on an issued
+  // password everything but the change, so the change comes first.
+  if (await isPasswordChangeRequired(req)) {
+    const url = req.nextUrl.clone();
+    url.pathname = CHANGE_PASSWORD_PATH;
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+
   // Authenticated from here, so the setup status is worth the engine round trip.
   if (await isInitialSetupIncomplete()) {
     const url = req.nextUrl.clone();
@@ -169,7 +191,8 @@ export const config = {
     /*
      * Match all paths under (auth) except static files and api routes.
      * (auth) group renders at / so we protect the root and its children.
-     * /login and /setup are excluded so auth redirects cannot loop.
+     * /login, /setup and /change-password are excluded so auth redirects
+     * cannot loop; each guards itself in its own layout.
      *
      * The health trinity and /metrics are excluded too, and that is load-bearing
      * rather than cosmetic. kubelet probes and Prometheus scrapes carry no session,
@@ -183,6 +206,6 @@ export const config = {
      * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
      * not an auth redirect on a health check.
      */
-    '/((?!login|setup|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
+    '/((?!login|setup|change-password|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
   ],
 };

@@ -36,6 +36,11 @@ export interface paths {
         /**
          * Seed Static
          * @description Run a named e2e seed script. Unauthenticated by design.
+         *
+         *     The script runs on a worker thread: it writes the deploy repo over the network,
+         *     and on the event loop every other request this process serves would wait for it.
+         *     It takes the same write turn as the product's own writes, so a seed never runs
+         *     beside one.
          */
         post: operations["seed_static_api_e2e_seed_static_post"];
         delete?: never;

@@ -16,6 +16,41 @@ export const adminPassword = (): string => {
   return password;
 };
 
+// A fresh deployment's admin must replace its issued password at first login,
+// and every spec that signs the admin in after that uses this one.
+export const newAdminPassword = (): string => {
+  const password = process.env.E2E_ADMIN_NEW_PASSWORD;
+  if (!password) {
+    throw new Error(
+      'E2E_ADMIN_NEW_PASSWORD is not set: the console forces the admin to ' +
+        'change its issued password at first login, and the suite needs the ' +
+        'password to change it to, at least 12 characters, in .env.local.',
+    );
+  }
+  return password;
+};
+
+export const CHANGE_PASSWORD_PATH = '/change-password';
+
+/** The console put the signed-in account on its forced password change. */
+export const expectForcedPasswordChange = (page: Page) =>
+  expect(page).toHaveURL((url) => url.pathname === CHANGE_PASSWORD_PATH);
+
+/** Replace the issued password from the forced change screen. */
+export const completeForcedPasswordChange = async (page: Page) => {
+  const password = newAdminPassword();
+  await page
+    .getByRole('textbox', { name: 'New Password', exact: true })
+    .fill(password);
+  await page
+    .getByRole('textbox', { name: 'Confirm Password', exact: true })
+    .fill(password);
+  await page.getByRole('button', { name: 'Set password', exact: true }).click();
+  await expect(page).not.toHaveURL(
+    (url) => url.pathname === CHANGE_PASSWORD_PATH,
+  );
+};
+
 /** A resolved OIDC fixture login for one provider. */
 export type OidcFixture = { user: string; password: string };
 
@@ -74,5 +109,13 @@ export const loginAs = async (page: Page, user: string) => {
     .getByRole('textbox', { name: 'Password', exact: true })
     .fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
+  // Either the console lands, or the account is on an issued password and must change it first.
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname === '/sources' || url.pathname === CHANGE_PASSWORD_PATH,
+  );
+  if (new URL(page.url()).pathname === CHANGE_PASSWORD_PATH) {
+    await completeForcedPasswordChange(page);
+  }
   await expectSourcesLanding(page);
 };

@@ -46,6 +46,7 @@ const authMe = (userId: string): TAuthMeResponse => ({
   blocked: false,
   disabled_at: '',
   blocked_at: '',
+  password_change_required: false,
 });
 
 const account = (

@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 
-const { authMiddleware, getSetupStatus } = vi.hoisted(() => ({
+const { authMiddleware, getSetupStatus, getToken } = vi.hoisted(() => ({
   authMiddleware: vi.fn(),
   getSetupStatus: vi.fn(),
+  getToken: vi.fn(),
 }));
 
 vi.mock('next-auth/middleware', () => ({
@@ -14,7 +15,7 @@ vi.mock('next-auth/middleware', () => ({
 }));
 
 vi.mock('next-auth/jwt', () => ({
-  getToken: vi.fn().mockResolvedValue(null),
+  getToken,
 }));
 
 vi.mock('@/core/server/actions/getSetupStatus', () => ({
@@ -53,6 +54,7 @@ describe('proxy (auth middleware)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.unstubAllEnvs();
+    getToken.mockResolvedValue(null);
     getSetupStatus.mockResolvedValue(setupStatus(true));
     authMiddleware.mockResolvedValue(
       NextResponse.redirect(new URL('http://localhost/login')),
@@ -99,5 +101,35 @@ describe('proxy (auth middleware)', () => {
     await proxy(request('/sources'), undefined as never);
 
     expect(authMiddleware).toHaveBeenCalled();
+  });
+
+  test('sends a session on an issued password to the change screen, ahead of the wizard', async () => {
+    getSetupStatus.mockResolvedValue(setupStatus(false));
+    authMiddleware.mockResolvedValue(NextResponse.next());
+    getToken.mockResolvedValue({
+      accessToken: 'engine-jwt',
+      passwordChangeRequired: true,
+    });
+
+    const response = await proxy(request('/sources'), undefined as never);
+
+    expect(response.headers.get('location')).toBe(
+      'http://localhost/change-password',
+    );
+    // The embedded data plane gets no token for an account that may use nothing yet.
+    expect(response.cookies.get('dfe_token')).toBeUndefined();
+  });
+
+  test('lets a session that has changed its password through', async () => {
+    authMiddleware.mockResolvedValue(NextResponse.next());
+    getToken.mockResolvedValue({
+      accessToken: 'engine-jwt',
+      passwordChangeRequired: false,
+    });
+
+    const response = await proxy(request('/sources'), undefined as never);
+
+    expect(response.headers.get('location')).toBeNull();
+    expect(response.cookies.get('dfe_token')?.value).toBe('engine-jwt');
   });
 });

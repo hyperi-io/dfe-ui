@@ -37,6 +37,7 @@ const credentialsProvider = CredentialsProvider({
     const tokenData = (await loginRes.json()) as {
       access_token: string;
       expires_in?: number;
+      password_change_required?: boolean;
     };
 
     const meRes = await fetch(`${baseUrl}${authMePath}`, {
@@ -56,6 +57,7 @@ const credentialsProvider = CredentialsProvider({
       accessToken: tokenData.access_token,
       expiresIn: tokenData.expires_in ?? 86400,
       roles,
+      passwordChangeRequired: tokenData.password_change_required === true,
     };
   },
 });
@@ -99,6 +101,7 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = (user as { accessToken?: string }).accessToken;
         token.accessTokenExpiresAt = Date.now() + expiresIn * 1000;
         token.roles = (user as { roles?: string[] }).roles ?? [];
+        token.passwordChangeRequired = user.passwordChangeRequired === true;
         delete token.error;
         return token;
       }
@@ -108,6 +111,7 @@ export const authOptions: NextAuthOptions = {
           accessToken?: string;
           expiresIn?: number;
           roles?: string[];
+          passwordChangeRequired?: boolean;
         };
         if (refresh.accessToken) {
           token.accessToken = refresh.accessToken;
@@ -117,6 +121,10 @@ export const authOptions: NextAuthOptions = {
             token.roles = refresh.roles;
           }
           delete token.error;
+        }
+        // The engine answers every refresh and every change with the live flag.
+        if (typeof refresh.passwordChangeRequired === 'boolean') {
+          token.passwordChangeRequired = refresh.passwordChangeRequired;
         }
         return token;
       }
@@ -146,6 +154,7 @@ export const authOptions: NextAuthOptions = {
         delete session.error;
       }
       session.accessTokenExpiresAt = token.accessTokenExpiresAt;
+      session.passwordChangeRequired = token.passwordChangeRequired === true;
       return session;
     },
   },

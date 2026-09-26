@@ -126,9 +126,9 @@ export interface paths {
          * Retire Bootstrap Admin
          * @description Retire the bootstrap admin: disable it and record the fact in the deploy repo.
          *
-         *     The deployment mints the admin password and the engine reasserts it on every
-         *     boot, so until it is retired the plaintext in the Secret or ``.env`` is a
-         *     working admin credential for anyone with cluster or host access. Retiring
+         *     The deployment mints the admin password and the engine reissues it whenever
+         *     the injected value changes, so until it is retired anyone able to write the
+         *     Secret or ``.env`` can issue themselves the admin at the next boot. Retiring
          *     ends the reseed: the account stays disabled, the password may be deleted, and
          *     ``breakglass`` is the recovery path.
          *
@@ -282,6 +282,9 @@ export interface paths {
          *     account is refused: it has no local password. The live store takes the new
          *     password immediately; the ``git`` block reports whether the durable mirror
          *     merged, is pending review, or is a no-op for a non-git-backed account.
+         *
+         *     An account on an issued password may call this and nothing else that
+         *     changes state, and the reset clears ``password_change_required``.
          */
         post: operations["reset_current_user_password_api_v1_auth_accounts_reset_password_post"];
         delete?: never;
@@ -332,9 +335,10 @@ export interface paths {
          *
          *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
          *     password, so the engine writes the new value through the scalo secrets seam
-         *     and never into its own YAML -- a YAML-only change is reverted by the next boot
-         *     reconcile. Returns 501 with the store command when the deployment has not
-         *     declared a secrets path for the password.
+         *     and never into its own YAML. The next boot reconcile issues the rotated value
+         *     to the admin, who must replace it at the following login. Returns 501 with the
+         *     store command when the deployment has not declared a secrets path for the
+         *     password.
          */
         post: operations["rotate_password_api_v1_auth_accounts__username__rotate_password_post"];
         delete?: never;
@@ -13772,6 +13776,12 @@ export interface components {
              * @default false
              */
             default_credentials: boolean;
+            /**
+             * Password Change Required
+             * @description True when the account is on an issued password -- the bootstrap admin the deployment minted. The token works, but every route answers 403 password_change_required until POST /api/v1/auth/accounts/reset-password.
+             * @default false
+             */
+            password_change_required: boolean;
         };
         /**
          * TopicEnsureResponse
@@ -14114,6 +14124,12 @@ export interface components {
              * @default
              */
             blocked_at: string;
+            /**
+             * Password Change Required
+             * @description True until the account replaces an issued password; a console shows the change screen before anything else while it is set.
+             * @default false
+             */
+            password_change_required: boolean;
         };
         /**
          * ValidateResponse
