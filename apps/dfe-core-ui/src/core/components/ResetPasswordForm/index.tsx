@@ -59,14 +59,14 @@ export const ResetPasswordForm = ({
         label="New Password"
         rules={[formValidation]}
       >
-        <Input.Password />
+        <Input.Password autoComplete="new-password" />
       </Form.Item>
       <Form.Item
         name="confirm_password"
         label="Confirm Password"
         rules={[formValidation]}
       >
-        <Input.Password />
+        <Input.Password autoComplete="new-password" />
       </Form.Item>
 
       {error && <FormNotification type="error" text={error.message} />}

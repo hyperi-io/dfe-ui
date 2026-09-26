@@ -60,6 +60,8 @@ describe('ChangePasswordScene', () => {
     expect(
       screen.getByRole('heading', { name: 'Set your own password' }),
     ).toBeInTheDocument();
+    // The rule is stated before the operator can break it.
+    expect(screen.getByText(/at least 12 characters/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Log out/ })).toBeInTheDocument();
   });
 
@@ -95,6 +97,11 @@ describe('ChangePasswordScene', () => {
     expect(
       await screen.findByText('Merge the review to keep this password'),
     ).toBeInTheDocument();
+    // The change is made by now, so the screen no longer asks for one.
+    expect(
+      screen.getByRole('heading', { name: 'Password set' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Choose your own/)).not.toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Open the review' }),
     ).toHaveAttribute('href', 'https://forge.example/pr/7');

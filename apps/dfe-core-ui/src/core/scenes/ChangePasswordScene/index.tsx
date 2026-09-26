@@ -110,18 +110,23 @@ export const ChangePasswordScene = () => {
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <div className="bg-background rounded-lg p-6 shadow-lg text-foreground w-full max-w-[28rem] flex flex-col items-center gap-4">
+      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground w-full max-w-[28rem] flex flex-col items-center gap-4">
         <IconPrimaryLogoFull
           className={cn('m-auto', 'text-brand-primary')}
           height={30}
           width={150}
         />
         <div className="w-full flex flex-col gap-1">
-          <h1 className="text-lg font-medium">Set your own password</h1>
-          <p className="text-sm text-foreground-muted">
-            You signed in with the password this deployment issued. Choose your
-            own to continue. The issued password stops working once you do.
-          </p>
+          <h1 className="text-lg font-medium">
+            {pending ? 'Password set' : 'Set your own password'}
+          </h1>
+          {!pending && (
+            <p className="text-sm text-foreground-muted">
+              You signed in with the password this deployment issued. Choose
+              your own, at least 12 characters, to continue. The issued password
+              stops working once you do.
+            </p>
+          )}
         </div>
 
         {pending ? (
