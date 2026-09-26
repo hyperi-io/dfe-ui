@@ -42,6 +42,9 @@ const signOut = vi.mocked((await import('next-auth/react')).signOut);
 const ADMIN = 'admin';
 const COMMAND =
   'git fetch && git switch main && git merge --no-ff dfe/governance/admin/1a2b3c4d && git push';
+// CopyCodeBlock renders each token in its own element, so match the whole block's text.
+const commandBlock = (_: string, element: Element | null) =>
+  element?.tagName === 'CODE' && element.textContent === COMMAND;
 const PR_URL = 'https://forge.example/pr/7';
 
 type TBreakGlass = NonNullable<TFetchSetupStatusResponse['break_glass']>;
@@ -241,7 +244,7 @@ describe('ChangePasswordScene', () => {
 
     await submit();
 
-    expect(await screen.findByText(COMMAND)).toBeInTheDocument();
+    expect(await screen.findByText(commandBlock)).toBeInTheDocument();
     const stored = window.localStorage.getItem(pendingReviewStorageKey(ADMIN));
     expect(stored).not.toContain(NEW_PASSWORD);
     expect(readPendingReview(ADMIN)).toEqual({
@@ -256,7 +259,7 @@ describe('ChangePasswordScene', () => {
 
     reload(UNMERGED);
 
-    expect(await screen.findByText(COMMAND)).toBeInTheDocument();
+    expect(await screen.findByText(commandBlock)).toBeInTheDocument();
     expect(
       screen.getByText('Merge the review to keep this password'),
     ).toBeInTheDocument();
@@ -319,7 +322,7 @@ describe('ChangePasswordScene', () => {
 
     await submit();
 
-    expect(await screen.findByText(COMMAND)).toBeInTheDocument();
+    expect(await screen.findByText(commandBlock)).toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -332,7 +335,7 @@ describe('ChangePasswordScene', () => {
     expect(
       await screen.findByRole('heading', { name: 'Set your own password' }),
     ).toBeInTheDocument();
-    expect(screen.queryByText(COMMAND)).not.toBeInTheDocument();
+    expect(screen.queryByText(commandBlock)).not.toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -347,7 +350,7 @@ describe('ChangePasswordScene', () => {
 
     render(<ChangePasswordScene />, { wrapper });
 
-    expect(await screen.findByText(COMMAND)).toBeInTheDocument();
+    expect(await screen.findByText(commandBlock)).toBeInTheDocument();
     expect(readPendingReview(ADMIN)).not.toBeNull();
     expect(replace).not.toHaveBeenCalled();
   });
