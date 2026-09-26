@@ -59,8 +59,8 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Keep a failed test's trace: with retries at 0, on-first-retry never records one. See https://playwright.dev/docs/trace-viewer */
+    trace: 'retain-on-failure',
 
     navigationTimeout: budgetMs('E2E_NAV_TIMEOUT_MS', 0),
 
