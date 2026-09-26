@@ -54,6 +54,9 @@ export interface paths {
         /**
          * Get Me
          * @description Get the current authenticated user's info.
+         *
+         *     A session on an issued password reports the flag and no roles, permissions,
+         *     groups or orgs, because its token carries none until the change.
          */
         get: operations["get_me_api_v1_auth_me_get"];
         put?: never;
@@ -219,6 +222,9 @@ export interface paths {
         /**
          * Get Current User Account
          * @description Return the authenticated user's account. No extra scope required.
+         *
+         *     An account on an issued password reads back with no groups: its session holds
+         *     no standing until the change, and a console copies this read into its session.
          */
         get: operations["get_current_user_account_api_v1_auth_accounts_me_get"];
         /**
@@ -3217,6 +3223,9 @@ export interface paths {
         /**
          * Create User
          * @description Provision a user. IdP-owned; local password is randomised when omitted.
+         *
+         *     A password the IdP does send is held to the same length floor as every other
+         *     password the API sets, and one under it is refused rather than replaced.
          */
         post: operations["create_user_api_v1_scim_v2_Users_post"];
         delete?: never;
@@ -5560,6 +5569,12 @@ export interface components {
              * @description True when the account authenticates through an identity provider
              */
             external: boolean;
+            /**
+             * Password Change Required
+             * @description True until the account replaces an issued password. The account's own read reports no groups while it is set, as its session holds none.
+             * @default false
+             */
+            password_change_required: boolean;
             /** Created At */
             created_at: string;
             /** Updated At */
@@ -6833,7 +6848,7 @@ export interface components {
             username: string;
             /**
              * Password
-             * @description Plaintext password (bcrypt-hashed before storage)
+             * @description Plaintext password (bcrypt-hashed before storage); at least 12 characters
              */
             password: string;
             /**
@@ -10792,7 +10807,7 @@ export interface components {
         ResetPasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password
+             * @description New plaintext password; at least 12 characters
              */
             new_password: string;
         };
@@ -12198,7 +12213,7 @@ export interface components {
              * @description The organisation registry. Empty once setup is complete.
              */
             organisations?: components["schemas"]["Org"][];
-            /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged, plus pending.pr_url/command/branch when a review PR or CLI merge is still outstanding. */
+            /** @description Durability of the LOCAL ADMIN account in the deploy repo (the field name predates the separate breakglass recovery account): enabled/auto_merge/committed/merged. pending is always null here: the review PR URL or CLI merge command comes only in the reset-password response. committed without merged means a change is still waiting on that merge. */
             break_glass?: components["schemas"]["AccountGitState"] | null;
             /**
              * Default Credentials
