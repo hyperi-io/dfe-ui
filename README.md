@@ -67,8 +67,8 @@ config repos. One artifact ships, the `ghcr.io/hyperi-io/dfe-ui` container.
 
 This repo and dfe-receiver are the two components in the suite that take
 untrusted input, so an advisory here is graded on reachability before
-severity. The exposure model is declared once, in dfe-infra
-`docs/THREAT-MODEL.md`.
+severity. The exposure model is declared once, in dfe-infra:
+https://github.com/hyperi-io/dfe-infra/blob/main/docs/THREAT-MODEL.md
 
 ### Where things live
 

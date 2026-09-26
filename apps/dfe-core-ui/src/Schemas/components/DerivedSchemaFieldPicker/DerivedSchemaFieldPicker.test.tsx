@@ -59,6 +59,8 @@ const Harness = ({
 
 const rowCheckbox = (columnName: string) =>
   within(
+    // The pattern is built from a column name literal this test passes in.
+    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
     screen.getByRole('row', { name: new RegExp(`\\b${columnName}\\b`) }),
   ).getByRole('checkbox');
 

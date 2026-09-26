@@ -30,10 +30,10 @@ const auditArgs = [
   ...args,
 ];
 
-const run = (command, commandArgs, options = {}) =>
-  spawnSync(command, commandArgs, { encoding: 'utf8', ...options });
+const yarn = (yarnArgs, options = {}) =>
+  spawnSync('yarn', yarnArgs, { encoding: 'utf8', ...options });
 
-const listed = run('yarn', ['workspaces', 'list', '--json']);
+const listed = yarn(['workspaces', 'list', '--json']);
 
 if (listed.error || listed.status !== 0) {
   console.error(listed.error ?? listed.stderr);
@@ -50,7 +50,7 @@ const results = [];
 for (const workspace of workspaces) {
   console.log(`\n=== ${workspace.name} (${workspace.location}) ===`);
 
-  const audit = run('yarn', ['workspace', workspace.name, ...auditArgs], {
+  const audit = yarn(['workspace', workspace.name, ...auditArgs], {
     stdio: 'inherit',
   });
 

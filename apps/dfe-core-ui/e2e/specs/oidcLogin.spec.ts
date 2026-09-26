@@ -48,6 +48,8 @@ test.describe('OIDC login', () => {
     // redirect=false: the client reads the login URL back, so this fetch fires
     // whether or not the IdP itself is reachable from the runner.
     const login = page.waitForRequest(
+      // The provider name comes from the stack under test, and the match runs in the test runner.
+      // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
       new RegExp(`/api/v1/auth/oidc/${provider.name}/login`),
     );
     await clickLogin(page);
