@@ -1,6 +1,7 @@
 import { createApiClient } from './client';
 import { getApiAuthHeaders } from './getApiAuthHeaders';
 import { handleApiUnauthorized } from './handleApiUnauthorized';
+import { handlePasswordChangeRequired } from './handlePasswordChangeRequired';
 
 export const apiClient = createApiClient({
   baseUrl:
@@ -11,4 +12,5 @@ export const apiClient = createApiClient({
     '',
   getAuthHeaders: getApiAuthHeaders,
   onUnauthorized: handleApiUnauthorized,
+  onPasswordChangeRequired: handlePasswordChangeRequired,
 });

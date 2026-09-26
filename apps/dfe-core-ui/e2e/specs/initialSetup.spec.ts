@@ -1,6 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { e2eClient } from '../config/e2e.client';
-import { adminPassword } from '../config/login.helpers';
+import {
+  adminPassword,
+  completeForcedPasswordChange,
+  expectForcedPasswordChange,
+} from '../config/login.helpers';
 
 import { BASE_URL } from '../config/e2e.client';
 
@@ -45,11 +49,26 @@ test.describe('redirect when setup is not complete', () => {
     await expect(page).toHaveURL(new RegExp(`^${loginPageUrl}`));
   });
 
+  test('the issued password is changed before the wizard, or anything else, opens', async ({
+    page,
+  }) => {
+    await page.goto(`${baseUrl}/sources`);
+    await login(page);
+
+    await expectForcedPasswordChange(page);
+    // Neither the wizard nor a console page renders around the change.
+    await page.goto(`${baseUrl}/setup`);
+    await expectForcedPasswordChange(page);
+    await page.goto(`${baseUrl}/sources`);
+    await expectForcedPasswordChange(page);
+  });
+
   // RED, and correctly so: the wizard lands on configureOrganisation because the
   // engine retired the admin_password step that used to map to welcome. dfe-ui#325.
   test('/sources lands on the wizard once signed in', async ({ page }) => {
     await page.goto(`${baseUrl}/sources`);
     await login(page);
+    await completeForcedPasswordChange(page);
 
     await expect(page).toHaveURL(welcomePageUrl);
   });
@@ -64,6 +83,10 @@ test('setup from start testing forward and back navigation', async ({
   await page.goto(baseUrl);
   await expect(page).toHaveURL(new RegExp(`^${loginPageUrl}`));
   await login(page);
+
+  /* FORCED PASSWORD CHANGE */
+  await expectForcedPasswordChange(page);
+  await completeForcedPasswordChange(page);
 
   /* WELCOME */
   await expect(page).toHaveURL(welcomePageUrl);

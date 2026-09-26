@@ -51,6 +51,7 @@ describe('.useAuthMe', () => {
         blocked: false,
         disabled_at: '',
         blocked_at: '',
+        password_change_required: false,
       };
 
       await waitFor(() => {

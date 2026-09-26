@@ -1,7 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { cn } from '@/core/utils/style';
 import { Button, FormProps, Input } from 'antd';
+import type { ReactNode } from 'react';
 import z from 'zod';
 
 const formSchema = z
@@ -23,6 +25,8 @@ interface ResetPasswordFormProps extends FormProps<TResetPasswordFormValues> {
   error?: Error | null;
   isPending?: boolean;
   submitText?: string;
+  /** Rendered at the start of the action row, opposite the submit button. */
+  secondaryAction?: ReactNode;
 }
 export const ResetPasswordForm = ({
   id = 'reset-password-form',
@@ -30,6 +34,7 @@ export const ResetPasswordForm = ({
   error,
   isPending,
   submitText = 'Reset Password',
+  secondaryAction,
   ...formProps
 }: ResetPasswordFormProps) => {
   const [form] = Form.useForm<TResetPasswordFormValues>();
@@ -54,19 +59,25 @@ export const ResetPasswordForm = ({
         label="New Password"
         rules={[formValidation]}
       >
-        <Input.Password />
+        <Input.Password autoComplete="new-password" />
       </Form.Item>
       <Form.Item
         name="confirm_password"
         label="Confirm Password"
         rules={[formValidation]}
       >
-        <Input.Password />
+        <Input.Password autoComplete="new-password" />
       </Form.Item>
 
       {error && <FormNotification type="error" text={error.message} />}
 
-      <div className="flex justify-end">
+      <div
+        className={cn(
+          'flex items-center',
+          secondaryAction ? 'justify-between' : 'justify-end',
+        )}
+      >
+        {secondaryAction}
         <Button type="primary" htmlType="submit" loading={isPending}>
           {submitText}
         </Button>

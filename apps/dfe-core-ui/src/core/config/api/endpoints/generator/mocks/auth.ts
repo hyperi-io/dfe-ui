@@ -22,6 +22,7 @@ export const auth = {
           user_id: 'string',
           roles: ['string'],
           default_credentials: false,
+          password_change_required: false,
         },
       }: {
         mockedResponse?: TLoginResponse;
@@ -42,6 +43,7 @@ export const auth = {
           user_id: 'string',
           roles: ['string'],
           default_credentials: false,
+          password_change_required: false,
         },
       }: {
         mockedResponse?: TRefreshTokenResponse;
@@ -76,6 +78,7 @@ export const auth = {
           blocked: false,
           disabled_at: '',
           blocked_at: '',
+          password_change_required: false,
         },
       }: {
         mockedResponse?: TAuthMeResponse;

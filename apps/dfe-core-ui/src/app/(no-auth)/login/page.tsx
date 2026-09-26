@@ -1,5 +1,9 @@
 import { authOptions } from '@/core/config/auth';
-import { isAppShellSession } from '@/core/config/authSession';
+import {
+  CHANGE_PASSWORD_PATH,
+  isAppShellSession,
+  isPasswordChangeRequired,
+} from '@/core/config/authSession';
 import { isProxyAuthMode } from '@/core/config/proxyTrust';
 import { LoginScene } from '@/core/scenes/LoginScene';
 import { ProxyTrustGate } from '@/core/scenes/LoginScene/ProxyTrustGate';
@@ -28,6 +32,9 @@ export default async function Login({
   const session = await getServerSession(authOptions);
   const { initial_setup } = await getSetupStatus();
 
+  if (isAppShellSession(session) && isPasswordChangeRequired(session)) {
+    redirect(CHANGE_PASSWORD_PATH);
+  }
   // isAppShellSession, not a bare truthy check: a session whose engine token is
   // missing or expired cannot run the wizard, so sending it there strands the
   // operator on a form that 401s with no way back to this page.

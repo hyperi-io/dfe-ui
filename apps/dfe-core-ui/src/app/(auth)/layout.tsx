@@ -1,6 +1,10 @@
 import { AppLayout } from '@/core/components/AppLayout';
 import { authOptions } from '@/core/config/auth';
 import {
+  CHANGE_PASSWORD_PATH,
+  isPasswordChangeRequired,
+} from '@/core/config/authSession';
+import {
   LOGIN_CALLBACK_PATH_HEADER,
   loginRedirectPath,
 } from '@/core/config/loginCallback';
@@ -47,6 +51,12 @@ export default async function RootLayout({
   // client refreshes before expiry.
   if (session?.error === 'AccessTokenExpired') {
     await redirectToLogin();
+  }
+
+  // The engine refuses an account on an issued password everything but the
+  // change, so no page renders until it is made.
+  if (isPasswordChangeRequired(session)) {
+    redirect(CHANGE_PASSWORD_PATH);
   }
 
   const { initial_setup } = await getSetupStatus();
