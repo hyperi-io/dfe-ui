@@ -64,6 +64,26 @@ describe('Layout (setup)', () => {
     expect(redirect).toHaveBeenCalledWith('/login?callbackUrl=%2Fsetup');
   });
 
+  test('sends a session on an issued password to the change screen first', async () => {
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'admin',
+        email: 'admin@example.com',
+        accessToken: 'valid-token',
+      },
+      expires: '2025-12-31',
+      passwordChangeRequired: true,
+    });
+
+    try {
+      await Layout({ children: <div>Wizard</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    expect(redirect).toHaveBeenCalledWith('/change-password');
+  });
+
   test('renders the wizard for an authenticated operator', async () => {
     getServerSession.mockResolvedValue({
       user: {

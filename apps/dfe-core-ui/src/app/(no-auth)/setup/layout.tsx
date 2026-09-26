@@ -1,5 +1,9 @@
 import { authOptions } from '@/core/config/auth';
-import { isAppShellSession } from '@/core/config/authSession';
+import {
+  CHANGE_PASSWORD_PATH,
+  isAppShellSession,
+  isPasswordChangeRequired,
+} from '@/core/config/authSession';
 import { loginRedirectPath } from '@/core/config/loginCallback';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
@@ -24,6 +28,11 @@ export default async function SetupLayout({
   const session = await getServerSession(authOptions);
   if (!isAppShellSession(session)) {
     redirect(loginRedirectPath('/setup'));
+  }
+  // The change comes before the wizard: every step posts as this account, and
+  // the engine refuses an issued password everything but the change.
+  if (isPasswordChangeRequired(session)) {
+    redirect(CHANGE_PASSWORD_PATH);
   }
 
   return children;

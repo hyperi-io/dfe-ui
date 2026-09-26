@@ -61,8 +61,13 @@ export type ApiClientConfig = {
   baseUrl: string;
   getAuthHeaders?: () => HeadersInit | Promise<HeadersInit>;
   onUnauthorized?: () => void | Promise<void>;
+  /** The engine refused the account until it changes an issued password. */
+  onPasswordChangeRequired?: () => void | Promise<void>;
   fetch?: typeof fetch;
 };
+
+/** The engine's code for an account refused until it changes an issued password. */
+export const PASSWORD_CHANGE_REQUIRED_CODE = 'password_change_required';
 
 /**
  * Type-safe API client for the DFE Engine API.
@@ -73,6 +78,7 @@ export function createApiClient(config: ApiClientConfig) {
     baseUrl,
     getAuthHeaders,
     onUnauthorized,
+    onPasswordChangeRequired,
     fetch: customFetch,
   } = config;
 
@@ -158,7 +164,15 @@ export function createApiClient(config: ApiClientConfig) {
         }
       }
 
-      throw new ApiError(res.status, res.statusText, detail);
+      const error = new ApiError(res.status, res.statusText, detail);
+      if (
+        res.status === 403 &&
+        getApiErrorResponseBody(error)?.code === PASSWORD_CHANGE_REQUIRED_CODE
+      ) {
+        await onPasswordChangeRequired?.();
+      }
+
+      throw error;
     }
 
     // The browser follows the proxy's login redirect itself, so a response that

@@ -47,6 +47,14 @@ export const SESSION_REFETCH_INTERVAL_SECONDS = parsePositiveInt(
 export const SESSION_AUTH_REFRESH_INTERVAL_MS =
   SESSION_REFETCH_INTERVAL_SECONDS * 1000;
 
+/** Where a session on an issued password is sent before anything else. */
+export const CHANGE_PASSWORD_PATH = '/change-password';
+
+/** The engine said this account must replace an issued password first. */
+export function isPasswordChangeRequired(session: Session | null): boolean {
+  return session?.passwordChangeRequired === true;
+}
+
 /** Matches (auth)/layout: session is present but not usable for the app shell. */
 export function isAppShellSession(session: Session | null): session is Session {
   if (!session) {

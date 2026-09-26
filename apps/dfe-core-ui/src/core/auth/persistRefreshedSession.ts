@@ -21,6 +21,7 @@ export async function persistRefreshedSession(
         accessToken: tokenResponse.access_token,
         expiresIn: tokenResponse.expires_in,
         roles: tokenResponse.roles,
+        passwordChangeRequired: tokenResponse.password_change_required,
       },
     }),
   });

@@ -12,11 +12,11 @@ export const CopyCodeBlock = ({
   return (
     <pre
       className={cn(
-        'flex justify-between bg-foreground-muted text-background-muted dark:bg-foreground-muted dark:text-background-muted p-2 rounded-md',
+        'flex items-start justify-between gap-2 bg-foreground-muted text-background-muted dark:bg-foreground-muted dark:text-background-muted p-2 rounded-md',
         className,
       )}
     >
-      <code>{code}</code>
+      <code className="min-w-0 whitespace-pre-wrap wrap-anywhere">{code}</code>
       <div className="flex gap-2">
         <Button
           type="default"

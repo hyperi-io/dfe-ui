@@ -56,6 +56,7 @@ describe('.useRefreshToken', () => {
         user_id: 'string',
         roles: ['string'],
         default_credentials: false,
+        password_change_required: false,
       };
 
       await waitFor(() => {

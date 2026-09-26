@@ -268,6 +268,46 @@ describe('createApiClient', () => {
     expect(onUnauthorized).not.toHaveBeenCalled();
   });
 
+  test('sends a refusal for an issued password to the change handler', async () => {
+    const onPasswordChangeRequired = vi.fn();
+    server.use(
+      http.get(`${BASE_URL}/api/v1/sources`, () =>
+        HttpResponse.json(
+          { code: 'password_change_required', message: 'Change it first' },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      onPasswordChangeRequired,
+    });
+
+    await expect(client.get('/api/v1/sources')).rejects.toThrow(ApiError);
+    expect(onPasswordChangeRequired).toHaveBeenCalledTimes(1);
+  });
+
+  test('leaves every other 403 to the caller', async () => {
+    const onPasswordChangeRequired = vi.fn();
+    server.use(
+      http.get(`${BASE_URL}/api/v1/sources`, () =>
+        HttpResponse.json(
+          { code: 'forbidden', message: 'No role for that' },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      onPasswordChangeRequired,
+    });
+
+    await expect(client.get('/api/v1/sources')).rejects.toThrow(ApiError);
+    expect(onPasswordChangeRequired).not.toHaveBeenCalled();
+  });
+
   test('ApiError message prefers message from JSON detail', async () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/auth/me`, () =>

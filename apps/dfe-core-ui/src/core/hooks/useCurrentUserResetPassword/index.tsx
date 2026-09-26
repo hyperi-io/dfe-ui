@@ -13,7 +13,7 @@ export const useCurrentUserResetPassword = ({
   onSuccess,
   onError,
 }: UseCurrentUserResetPasswordProps = {}) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, reset, isPending, error } = useMutation({
     mutationFn: (body: TCurrentUserResetPasswordRequestBody) =>
       resetCurrentUserPassword({
         body,
@@ -30,6 +30,7 @@ export const useCurrentUserResetPassword = ({
   return {
     data,
     mutate,
+    reset,
     isPending,
     error,
   };

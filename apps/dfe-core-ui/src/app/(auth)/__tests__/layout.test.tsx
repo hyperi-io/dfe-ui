@@ -202,6 +202,31 @@ describe('Layout (auth)', () => {
     expect(redirect).toHaveBeenCalledWith('/login?callbackUrl=%2F');
   });
 
+  test('redirects to the change screen, not the wizard, while the password is still the issued one', async () => {
+    getSetupStatus.mockResolvedValue({
+      ...setupComplete,
+      initial_setup: { ...setupComplete.initial_setup, complete: false },
+    });
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'admin',
+        email: 'admin@example.com',
+        accessToken: 'valid-token',
+      },
+      expires: '2025-12-31',
+      passwordChangeRequired: true,
+    });
+
+    try {
+      await Layout({ children: <div>Dashboard content</div> });
+    } catch {
+      // redirect() throws in Next.js - ignore
+    }
+
+    // The first call is the one that counts: the real redirect() stops the render there.
+    expect(redirect.mock.calls[0]).toEqual(['/change-password']);
+  });
+
   test('renders children when user is authenticated', async () => {
     getServerSession.mockResolvedValue({
       user: {
