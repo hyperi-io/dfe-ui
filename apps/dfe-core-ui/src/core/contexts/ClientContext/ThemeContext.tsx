@@ -1,5 +1,6 @@
 'use client';
 
+import { readStorageItem, writeStorageItem } from '@/core/utils/storage';
 import React, {
   createContext,
   startTransition,
@@ -19,14 +20,11 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Every page renders under this provider, so blocked storage must fall back to light, never throw.
+const COLOR_MODE_KEY = 'app-color-mode';
+
 const readSavedColorMode = (): ColorMode | null => {
-  try {
-    const saved = localStorage.getItem('app-color-mode');
-    return saved === 'light' || saved === 'dark' ? saved : null;
-  } catch {
-    return null;
-  }
+  const saved = readStorageItem(COLOR_MODE_KEY);
+  return saved === 'light' || saved === 'dark' ? saved : null;
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -44,11 +42,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('app-color-mode', colorMode);
-    } catch {
-      // Unsaved, the choice lasts until the next page load.
-    }
+    writeStorageItem(COLOR_MODE_KEY, colorMode);
 
     // Add/remove dark class for Tailwind dark mode
     if (colorMode === 'dark') {
