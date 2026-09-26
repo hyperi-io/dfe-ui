@@ -48,6 +48,7 @@ describe('.useAuthMe', () => {
         disabled_at: '',
         blocked_at: '',
         external: false,
+        password_change_required: false,
         groups: ['string'],
         email: 'string',
         phone: 'string',

@@ -27,6 +27,7 @@ const accountDetail = (
   disabled_at: '',
   blocked_at: '',
   external: false,
+  password_change_required: false,
   groups: [],
   email: '',
   phone: '',
