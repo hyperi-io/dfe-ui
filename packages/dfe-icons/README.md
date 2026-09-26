@@ -8,14 +8,14 @@ SVG files under `svg/` are the source of truth. The `scripts/generate.mjs` scrip
 
 Only the icons you actually import end up in your app bundle.
 
-Source directories are auto-discovered. The upstream Tabler icons live in `svg/outline/` and `svg/filled/`, while any additional directories (e.g. `svg/custom/`) are picked up automatically.
+Source directories are auto-discovered. The upstream Tabler icons live in `svg/third-party/tabler/outline/` and `svg/third-party/tabler/filled/`, while any additional directories (e.g. `svg/custom/`) are picked up automatically.
 
-| Directory      | Naming convention              | Example                                 |
-| -------------- | ------------------------------ | --------------------------------------- |
-| `svg/outline/` | `Icon` + PascalCase            | `zoom.svg` → `IconZoom`                 |
-| `svg/filled/`  | `Icon` + PascalCase + `Filled` | `alarm.svg` → `IconAlarmFilled`         |
-| `svg/custom/`  | `Icon` + PascalCase            | `file-type-yml.svg` → `IconFileTypeYml` |
-| `svg/<any>/`   | `Icon` + PascalCase            | (auto-discovered, no suffix)            |
+| Directory                         | Naming convention              | Example                                 |
+| --------------------------------- | ------------------------------ | --------------------------------------- |
+| `svg/third-party/tabler/outline/` | `Icon` + PascalCase            | `zoom.svg` → `IconZoom`                 |
+| `svg/third-party/tabler/filled/`  | `Icon` + PascalCase + `Filled` | `alarm.svg` → `IconAlarmFilled`         |
+| `svg/custom/`                     | `Icon` + PascalCase            | `file-type-yml.svg` → `IconFileTypeYml` |
+| `svg/<any>/`                      | `Icon` + PascalCase            | (auto-discovered, no suffix)            |
 
 ## Usage
 
@@ -75,7 +75,7 @@ The SVG should follow the same 24×24 viewBox convention used by Tabler:
 | `yarn generate`        | Transform SVGs into React components (run after SVG changes)     |
 | `yarn generate:check`  | Regenerate and fail if `src/` is out of date (CI / pre-push)     |
 | `yarn build`           | Typecheck only (`tsc --noEmit`)                                    |
-| `yarn storybook`       | Start Storybook dev server on port 6006                            |
+| `yarn storybook`       | Start Storybook dev server on port 6007                            |
 | `yarn build-storybook` | Build a static Storybook site                                      |
 | `yarn check-types`     | Run TypeScript type checking                                       |
 

@@ -17,6 +17,8 @@ FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 # Toolchain for any native (node-gyp) transitive deps. Builder-only; discarded.
+# Unpinned: Debian removes superseded versions from its archive, so a version pin breaks the build at the next point release.
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
@@ -54,6 +56,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/dfe-core-ui/.next/standalone
 COPY --from=builder --chown=nextjs:nodejs /app/apps/dfe-core-ui/.next/static ./apps/dfe-core-ui/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/dfe-core-ui/public ./apps/dfe-core-ui/public
 
-USER nextjs
+# Numeric, so a kubelet enforcing runAsNonRoot can verify it without reading /etc/passwd.
+USER 1001:1001
 EXPOSE 3000
 CMD ["node", "apps/dfe-core-ui/server.js"]
