@@ -14,9 +14,33 @@ import { defineConfig, devices } from '@playwright/test';
  * A k8s run has no docker daemon to shell out to, so it excludes the two
  * specs tagged @docker-only (filebeatDataPath.spec.ts, promoteJsonField.spec.ts):
  * `npx playwright test --grep-invert @docker-only`.
+ *
+ * The time budgets default to Playwright's own. A deployment that answers more
+ * slowly than the local docker stack raises them by environment:
+ *
+ * - E2E_TEST_TIMEOUT_MS: each test, its beforeEach and afterEach included (30000).
+ * - E2E_EXPECT_TIMEOUT_MS: each web-first assertion, toHaveURL included (5000).
+ * - E2E_NAV_TIMEOUT_MS: each page.goto and waitForURL; 0 is no limit inside the
+ *   test's own budget (0).
  */
+const budgetMs = (name: string, fallback: number): number => {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === '') {
+    return fallback;
+  }
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(
+      `${name} must be a whole number of milliseconds, not ${JSON.stringify(raw)}`,
+    );
+  }
+  return value;
+};
+
 export default defineConfig({
   testDir: './e2e',
+  timeout: budgetMs('E2E_TEST_TIMEOUT_MS', 30_000),
+  expect: { timeout: budgetMs('E2E_EXPECT_TIMEOUT_MS', 5_000) },
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retries hide flakes: a spec either passes or gets fixed. */
@@ -37,6 +61,8 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    navigationTimeout: budgetMs('E2E_NAV_TIMEOUT_MS', 0),
 
     // DFE serves edge TLS from a cluster CA regenerated on every rebuild.
     ignoreHTTPSErrors: true,
