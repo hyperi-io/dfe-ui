@@ -19,6 +19,16 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Every page renders under this provider, so blocked storage must fall back to light, never throw.
+const readSavedColorMode = (): ColorMode | null => {
+  try {
+    const saved = localStorage.getItem('app-color-mode');
+    return saved === 'light' || saved === 'dark' ? saved : null;
+  } catch {
+    return null;
+  }
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -27,14 +37,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Restore saved preference from localStorage after hydration (client-only)
   useEffect(() => {
-    const saved = localStorage.getItem('app-color-mode') as ColorMode | null;
-    if (saved && (saved === 'light' || saved === 'dark')) {
+    const saved = readSavedColorMode();
+    if (saved) {
       startTransition(() => setColorMode(saved));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('app-color-mode', colorMode);
+    try {
+      localStorage.setItem('app-color-mode', colorMode);
+    } catch {
+      // Unsaved, the choice lasts until the next page load.
+    }
 
     // Add/remove dark class for Tailwind dark mode
     if (colorMode === 'dark') {
