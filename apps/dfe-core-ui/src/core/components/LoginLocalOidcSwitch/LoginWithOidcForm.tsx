@@ -12,6 +12,25 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
+const REMEMBERED_PROVIDER_KEY = 'dfe_provider';
+
+// Blocked site data throws on any storage access, so the login falls back to the first provider.
+const readRememberedProvider = (): string | null => {
+  try {
+    return localStorage.getItem(REMEMBERED_PROVIDER_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const rememberProvider = (provider: string) => {
+  try {
+    localStorage.setItem(REMEMBERED_PROVIDER_KEY, provider);
+  } catch {
+    // Unsaved, the next visit offers the first provider again.
+  }
+};
+
 export const LoginWithOidcForm = ({
   oidc_providers,
   callbackUrl = '/',
@@ -23,7 +42,7 @@ export const LoginWithOidcForm = ({
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
-  const localSelectedProvider = localStorage.getItem('dfe_provider');
+  const localSelectedProvider = readRememberedProvider();
   const selectedProvider =
     localSelectedProvider &&
     oidc_providers?.find((provider) => provider.name === localSelectedProvider)
@@ -31,7 +50,7 @@ export const LoginWithOidcForm = ({
 
   const handleSubmit = (values: FormData) => {
     if (values.remember_selected_provider) {
-      localStorage.setItem('dfe_provider', values.provider);
+      rememberProvider(values.provider);
     }
     setShowOidcLoginPopup(true);
   };
