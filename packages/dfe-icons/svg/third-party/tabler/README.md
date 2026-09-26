@@ -1,6 +1,6 @@
 # Tabler Icons (vendored SVGs)
 
-Vendored copy of [Tabler Icons](https://tabler.io/icons) used as the upstream source for most `@repo/dfe-icons` React components. SVGs are committed here and transformed by `scripts/generate.mjs` (see the [package README](../../../README.md)).
+Vendored copy of [Tabler Icons](https://tabler.io/icons) used as the upstream source for most `@repo/dfe-icons` React components. SVGs are committed here and transformed by `packages/dfe-icons/scripts/generate.mjs` (see the [package README](../../../README.md)).
 
 ## License
 
