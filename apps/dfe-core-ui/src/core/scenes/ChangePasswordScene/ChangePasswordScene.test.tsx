@@ -29,6 +29,7 @@ vi.mock('@/core/auth/refreshAccessToken', () => ({
 }));
 
 const { ChangePasswordScene } = await import('.');
+const signOut = vi.mocked((await import('next-auth/react')).signOut);
 
 const server = setupServer();
 
@@ -48,6 +49,20 @@ const submit = async (password = NEW_PASSWORD, confirm = password) => {
   await user.click(screen.getByRole('button', { name: 'Set password' }));
 };
 
+const REUSED = 'New password may not match any of the last 5 passwords';
+
+const refuseAsReused = () =>
+  server.use(
+    http.post(
+      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
+      () =>
+        HttpResponse.json(
+          { code: 'password_reused', message: REUSED, errors: [] },
+          { status: 400 },
+        ),
+    ),
+  );
+
 describe('ChangePasswordScene', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -63,6 +78,16 @@ describe('ChangePasswordScene', () => {
     // The rule is stated before the operator can break it.
     expect(screen.getByText(/at least 12 characters/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Log out/ })).toBeInTheDocument();
+  });
+
+  test('logs out to the plain login, so a later sign-in is not sent back here', async () => {
+    render(<ChangePasswordScene />, { wrapper });
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: /Log out/ }));
+
+    expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/login' });
   });
 
   test('changes the password, renews the session, then enters the console', async () => {
@@ -114,31 +139,30 @@ describe('ChangePasswordScene', () => {
   });
 
   test('shows the engine refusal and stays put', async () => {
-    server.use(
-      http.post(
-        API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
-        () =>
-          HttpResponse.json(
-            {
-              code: 'password_reused',
-              message: 'New password may not match any of the last 5 passwords',
-              errors: [],
-            },
-            { status: 400 },
-          ),
-      ),
-    );
+    refuseAsReused();
 
     await submit();
 
-    expect(
-      await screen.findByText(
-        'New password may not match any of the last 5 passwords',
-      ),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(REUSED)).toBeInTheDocument();
     expect(executeAccessTokenRefresh).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
+
+  test.each(['New Password', 'Confirm Password'])(
+    'clears the engine refusal once %s is edited',
+    async (field) => {
+      refuseAsReused();
+
+      await submit();
+      expect(await screen.findByText(REUSED)).toBeInTheDocument();
+
+      await userEvent.setup().type(screen.getByLabelText(field), 'x');
+
+      await waitFor(() =>
+        expect(screen.queryByText(REUSED)).not.toBeInTheDocument(),
+      );
+    },
+  );
 
   test('refuses mismatched passwords before calling the engine', async () => {
     await submit(NEW_PASSWORD, `${NEW_PASSWORD}-typo`);

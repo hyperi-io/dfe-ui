@@ -51,7 +51,8 @@ const PendingReview = ({
 );
 
 export const ChangePasswordScene = () => {
-  const { handleLogout } = useLogout();
+  // The plain login, never back here: the flag brings a flagged sign-in to this screen, and an unflagged one must not land on it.
+  const { handleLogout } = useLogout({ callbackUrl: '/login' });
   const [pending, setPending] = useState<TPendingReview | null>(null);
   const [renewError, setRenewError] = useState<Error | null>(null);
 
@@ -62,6 +63,7 @@ export const ChangePasswordScene = () => {
 
   const {
     mutate: changePassword,
+    reset: clearChangeError,
     isPending,
     error,
   } = useCurrentUserResetPassword({
@@ -135,6 +137,7 @@ export const ChangePasswordScene = () => {
           <ResetPasswordForm
             id="change-password-form"
             onFinish={onFinish}
+            onValuesChange={() => clearChangeError()}
             error={error ?? renewError}
             isPending={isPending}
             submitText="Set password"
