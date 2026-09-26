@@ -1,4 +1,9 @@
 import type { TCurrentUserResetPasswordResponse } from '@/core/hooks/useCurrentUserResetPassword/types';
+import {
+  readStorageJson,
+  removeStorageItem,
+  writeStorageItem,
+} from '@/core/utils/storage';
 
 export type TPendingReview = NonNullable<
   TCurrentUserResetPasswordResponse['git']['pending']
@@ -12,29 +17,15 @@ export const pendingReviewStorageKey = (username: string) =>
 const nonEmpty = (value: unknown): string | null =>
   typeof value === 'string' && value !== '' ? value : null;
 
-// Every access is guarded: storage can be absent or throw (private windows, blocked site data), and the page must work without it.
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 /** The merge instruction a password change on this browser was given, or null. */
 export const readPendingReview = (username: string): TPendingReview | null => {
-  let raw: string | null;
-  try {
-    raw = window.localStorage.getItem(pendingReviewStorageKey(username));
-  } catch {
+  const record = readStorageJson(pendingReviewStorageKey(username), isRecord);
+  if (record === null) {
     return null;
   }
-  if (raw === null) {
-    return null;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-  if (typeof parsed !== 'object' || parsed === null) {
-    return null;
-  }
-  const record = parsed as Record<string, unknown>;
   const pending = {
     pr_url: nonEmpty(record.pr_url),
     command: nonEmpty(record.command),
@@ -53,17 +44,10 @@ export const savePendingReview = (
     command: nonEmpty(pending.command),
     branch: nonEmpty(pending.branch),
   });
-  try {
-    window.localStorage.setItem(pendingReviewStorageKey(username), value);
-  } catch {
-    // Unsaved, a reload shows the waiting state instead of the instruction.
-  }
+  // Where the write fails, a reload shows the waiting state instead of the instruction.
+  writeStorageItem(pendingReviewStorageKey(username), value);
 };
 
 export const clearPendingReview = (username: string): void => {
-  try {
-    window.localStorage.removeItem(pendingReviewStorageKey(username));
-  } catch {
-    // Storage that throws cannot be read back either, so nothing is left to show.
-  }
+  removeStorageItem(pendingReviewStorageKey(username));
 };
