@@ -1,19 +1,16 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { cn } from '@/core/utils/style';
+import { newPasswordSchema } from '@/core/validationSchemas/password.schema';
 import { Button, FormProps, Input } from 'antd';
 import type { ReactNode } from 'react';
 import z from 'zod';
 
 const formSchema = z
   .object({
-    new_password: z
-      .string()
-      .min(12, 'Password must contain at least 12 characters'),
-    confirm_password: z
-      .string()
-      .min(12, 'Password must contain at least 12 characters'),
+    new_password: newPasswordSchema,
+    confirm_password: newPasswordSchema,
   })
   .refine((data) => data.new_password === data.confirm_password, {
     path: ['confirm_password'],
@@ -69,7 +66,7 @@ export const ResetPasswordForm = ({
         <Input.Password autoComplete="new-password" />
       </Form.Item>
 
-      {error && <FormNotification type="error" text={error.message} />}
+      <ApiErrorNotification error={error} />
 
       <div
         className={cn(
