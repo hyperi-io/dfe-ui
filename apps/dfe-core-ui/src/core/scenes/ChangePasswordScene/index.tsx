@@ -6,43 +6,84 @@ import {
   ResetPasswordForm,
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
+import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
-import type { TCurrentUserResetPasswordResponse } from '@/core/hooks/useCurrentUserResetPassword/types';
+import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
+import type { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 import { useLogout } from '@/core/hooks/useLogout';
 import '@/core/scenes/LoginScene/Login.css';
 import { navigateWithReload } from '@/core/utils/navigation';
 import { cn } from '@/core/utils/style';
 import { IconLogout, IconPrimaryLogoFull } from '@repo/dfe-icons';
-import { Alert, Button } from 'antd';
-import { useState } from 'react';
+import { Alert, Button, Spin } from 'antd';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  clearPendingReview,
+  readPendingReview,
+  savePendingReview,
+  type TPendingReview,
+} from './pendingReviewStorage';
 
-type TPendingReview = NonNullable<
-  TCurrentUserResetPasswordResponse['git']['pending']
->;
+type TReviewState = 'unmerged' | 'settled' | 'unknown';
+
+// setup-status reports the local admin only, and never the merge instruction itself.
+const reviewStateFor = (
+  status: TFetchSetupStatusResponse | undefined,
+  username: string,
+): TReviewState => {
+  if (!status) {
+    return 'unknown';
+  }
+  const git = status.break_glass;
+  const unmerged =
+    status.admin_username === username &&
+    git?.enabled === true &&
+    git.committed &&
+    !git.merged;
+  return unmerged ? 'unmerged' : 'settled';
+};
+
+type TView =
+  | { kind: 'loading' }
+  | { kind: 'form' }
+  | { kind: 'review'; pending: TPendingReview | null }
+  | { kind: 'completed' };
 
 const PendingReview = ({
   pending,
   onContinue,
+  secondaryAction,
 }: {
-  pending: TPendingReview;
+  pending: TPendingReview | null;
   onContinue: () => void;
+  secondaryAction: ReactNode;
 }) => (
   <div className="flex flex-col gap-3 w-full">
-    <Alert
-      type="warning"
-      showIcon
-      title="Merge the review to keep this password"
-      description="This deployment reviews account changes. The new password works now, but a restart before the review merges brings back the issued one."
-    />
-    {pending.pr_url && (
+    {pending ? (
+      <Alert
+        type="warning"
+        showIcon
+        title="Merge the review to keep this password"
+        description="This deployment reviews account changes. The new password works now, but a restart before the review merges brings back the issued one."
+      />
+    ) : (
+      <Alert
+        type="warning"
+        showIcon
+        title="A merge is still needed to keep this password"
+        description="The new password works now, but the deploy repo has not merged it, and a restart before it does brings back the issued one. Run the merge command shown when the password was set, or ask whoever runs the deploy repo to merge the account review."
+      />
+    )}
+    {pending?.pr_url && (
       <a href={pending.pr_url} target="_blank" rel="noreferrer">
         Open the review
       </a>
     )}
-    {!pending.pr_url && pending.command && (
+    {pending && !pending.pr_url && pending.command && (
       <CopyCodeBlock code={pending.command} />
     )}
-    <div className="flex justify-end">
+    <div className="flex items-center justify-between">
+      {secondaryAction}
       <Button type="primary" onClick={onContinue}>
         Continue
       </Button>
@@ -55,6 +96,18 @@ export const ChangePasswordScene = () => {
   const { handleLogout } = useLogout({ callbackUrl: '/login' });
   const [pending, setPending] = useState<TPendingReview | null>(null);
   const [renewError, setRenewError] = useState<Error | null>(null);
+  const { data: me, isLoading: isLoadingMe } = useAuthMe();
+  const {
+    data: setupStatus,
+    isLoading: isLoadingStatus,
+    error: statusError,
+  } = useFetchSetupStatus();
+  const username = me?.user_id ?? '';
+  // Read once per account, so clearing it on the way out does not flash the form.
+  const stored = useMemo(
+    () => (username ? readPendingReview(username) : null),
+    [username],
+  );
 
   // A full load: a client navigation reached here through a redirect is deduped and never leaves.
   const enterConsole = () => {
@@ -80,12 +133,54 @@ export const ChangePasswordScene = () => {
         return;
       }
       if (!data.git.merged && data.git.pending) {
+        // setup-status cannot hand the instruction back after a reload, so this browser keeps it.
+        if (username) {
+          savePendingReview(username, data.git.pending);
+        }
         setPending(data.git.pending);
         return;
+      }
+      if (username) {
+        clearPendingReview(username);
       }
       enterConsole();
     },
   });
+
+  const resolveView = (): TView => {
+    if (pending) {
+      return { kind: 'review', pending };
+    }
+    if (isLoadingMe || isLoadingStatus) {
+      return { kind: 'loading' };
+    }
+    // An account the engine still holds to an issued password has one thing to do here.
+    if (!username || me?.password_change_required) {
+      return { kind: 'form' };
+    }
+    // A failed status call is not a merge, so a stored instruction stays on screen.
+    const review = statusError
+      ? 'unknown'
+      : reviewStateFor(setupStatus, username);
+    if (review === 'unmerged') {
+      return { kind: 'review', pending: stored };
+    }
+    if (stored) {
+      return review === 'unknown'
+        ? { kind: 'review', pending: stored }
+        : { kind: 'completed' };
+    }
+    return { kind: 'form' };
+  };
+  const view = resolveView();
+
+  useEffect(() => {
+    if (view.kind !== 'completed') {
+      return;
+    }
+    clearPendingReview(username);
+    navigateWithReload('/');
+  }, [view.kind, username]);
 
   const onFinish = ({ new_password }: TResetPasswordFormValues) => {
     changePassword({ new_password });
@@ -118,31 +213,43 @@ export const ChangePasswordScene = () => {
           height={30}
           width={150}
         />
-        <div className="w-full flex flex-col gap-1">
-          <h1 className="text-lg font-medium">
-            {pending ? 'Password set' : 'Set your own password'}
-          </h1>
-          {!pending && (
-            <p className="text-sm text-foreground-muted">
-              You signed in with the password this deployment issued. Choose
-              your own, at least 12 characters, to continue. The issued password
-              stops working once you do.
-            </p>
-          )}
-        </div>
-
-        {pending ? (
-          <PendingReview pending={pending} onContinue={enterConsole} />
+        {view.kind === 'loading' || view.kind === 'completed' ? (
+          <Spin />
         ) : (
-          <ResetPasswordForm
-            id="change-password-form"
-            onFinish={onFinish}
-            onValuesChange={() => clearChangeError()}
-            error={error ?? renewError}
-            isPending={isPending}
-            submitText="Set password"
-            secondaryAction={logout}
-          />
+          <>
+            <div className="w-full flex flex-col gap-1">
+              <h1 className="text-lg font-medium">
+                {view.kind === 'review'
+                  ? 'Password set'
+                  : 'Set your own password'}
+              </h1>
+              {view.kind === 'form' && (
+                <p className="text-sm text-foreground-muted">
+                  You signed in with the password this deployment issued. Choose
+                  your own, at least 12 characters, to continue. The issued
+                  password stops working once you do.
+                </p>
+              )}
+            </div>
+
+            {view.kind === 'review' ? (
+              <PendingReview
+                pending={view.pending}
+                onContinue={enterConsole}
+                secondaryAction={logout}
+              />
+            ) : (
+              <ResetPasswordForm
+                id="change-password-form"
+                onFinish={onFinish}
+                onValuesChange={() => clearChangeError()}
+                error={error ?? renewError}
+                isPending={isPending}
+                submitText="Set password"
+                secondaryAction={logout}
+              />
+            )}
+          </>
         )}
       </div>
     </main>
