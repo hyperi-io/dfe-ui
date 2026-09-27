@@ -73,6 +73,13 @@ export const appInstances = async (service: string) => {
 };
 
 /**
+ * Container names carry the stack's own prefix, which is why it is a setting
+ * rather than a literal. Set it empty for a stack whose containers are named
+ * after their compose services, as dfe-docker's are.
+ */
+export const CONTAINER_PREFIX = process.env.DFE_CONTAINER_PREFIX ?? 'e2e-';
+
+/**
  * ClickHouse, for the reads no product surface answers: the columns and the
  * data-skipping indices ON THE LIVE TABLE. Everything else goes through the engine.
  *
@@ -80,8 +87,7 @@ export const appInstances = async (service: string) => {
  * needs no warehouse credential of its own.
  */
 export const CLICKHOUSE_CONTAINER =
-  process.env.DFE_CLICKHOUSE_CONTAINER ||
-  `${process.env.DFE_CONTAINER_PREFIX || 'e2e-'}dfe-clickhouse`;
+  process.env.DFE_CLICKHOUSE_CONTAINER || `${CONTAINER_PREFIX}dfe-clickhouse`;
 
 export const clickhouse = async (query: string) =>
   execFileSync(
@@ -112,8 +118,7 @@ export const tableIndices = async (table: string) =>
   );
 
 export const ENGINE_CONTAINER =
-  process.env.DFE_ENGINE_CONTAINER ||
-  `${process.env.DFE_CONTAINER_PREFIX || 'e2e-'}dfe-engine`;
+  process.env.DFE_ENGINE_CONTAINER || `${CONTAINER_PREFIX}dfe-engine`;
 
 /**
  * Drop a source's build, plan and deploy records.

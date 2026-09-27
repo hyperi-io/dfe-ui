@@ -40,28 +40,27 @@ import {
  * One transform app per source, because Compose declares its services in a
  * committed file and creates none at run time -- so the deployment runs one of
  * each and the engine binds it to a single source.
- *
- * Two legs are RED against the stack as it ships, and correctly so.
- *
- * dfe-transform-vector: the compose service mounts its config from the repo and
- * neither mounts the dfe-app-config volume nor points --config at it, so the
- * engine renders an instance config the running container never reads.
- * dfe-transform-vrl (docker-compose.yml:892-931) and dfe-transform-elastic
- * (709-744) both take the volume and a DFE_TRANSFORM_*_CONFIG_FILE override;
- * giving dfe-transform-vector (797-832) the same two lines turns it green.
- *
- * dfe-transform-elastic: it writes a whole batch as ONE Kafka record of
- * newline-delimited JSON, and dfe-loader parses a record as a single JSON value
- * and rejects it -- 93 records in, one record out, nothing loaded.
  */
-const SOURCES: { name: string; module: CorpusModule; engine: string }[] = [
+const SOURCES: {
+  name: string;
+  module: CorpusModule;
+  engine: string;
+  variant?: string;
+}[] = [
   { name: 'cisco-meraki', module: 'cisco_meraki', engine: 'dfe-transform-vrl' },
   {
     name: 'cisco-umbrella',
     module: 'cisco_umbrella',
     engine: 'dfe-transform-vector',
   },
-  { name: 'cisco-ios', module: 'cisco_ios', engine: 'dfe-transform-elastic' },
+  // dfe-transform-elastic runs the compiled-in program the variant names, in the
+  // form the source catalogue writes it; with none it idles.
+  {
+    name: 'cisco-ios',
+    module: 'cisco_ios',
+    engine: 'dfe-transform-elastic',
+    variant: 'filebeat.cisco_ios.default',
+  },
 ];
 
 const META_SCHEMA = 'filebeat';
@@ -72,6 +71,9 @@ const DEFAULT_TABLE = 'main';
 
 /** Build and plan both reach ClickHouse, so they are slower than a UI action. */
 const PLAN_TIMEOUT = 30_000;
+
+/** The restart hints each source's deploy answered with, by source. */
+const deployHints = new Map<string, string[]>();
 
 test.skip(
   !corpusAvailable(),
@@ -153,11 +155,58 @@ const buildAndDeploy = async (page: Page, name: string) => {
   await expect(drawer.getByText('Review Deploy Plan')).toBeVisible({
     timeout: PLAN_TIMEOUT,
   });
+  const deployed = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === `/api/v1/sources/${name}/deploy` &&
+      new URL(response.url()).searchParams.get('dry_run') !== 'true',
+  );
   await drawer.getByRole('button', { name: 'Deploy' }).click();
   await expect(drawer.getByText('Successfully applied changes')).toBeVisible({
     timeout: PLAN_TIMEOUT,
   });
   await page.keyboard.press('Escape');
+  // The console does not show the restart hints, so they are read off its answer.
+  const { restart_required: hints = [] } = (await (await deployed).json()) as {
+    restart_required?: string[];
+  };
+  return hints;
+};
+
+/** The version fields a source write takes back; the rest of a read is refused. */
+const WRITABLE_VERSION_KEYS = [
+  'header',
+  'schema',
+  'views',
+  'fetcher',
+  'match',
+  'transform',
+  'transport',
+  'archive',
+];
+
+/**
+ * Name the program a transform runs, where the console offers no field for it.
+ *
+ * A source not yet deployed is edited in place, so the version stays 1.0.0.
+ */
+const nameVariant = async (name: string, variant: string) => {
+  const source = await engine<{
+    display_name: string | null;
+    description: string | null;
+    current: string;
+    versions: Record<string, Record<string, unknown>>;
+  }>('GET', `/api/v1/sources/${name}`);
+  const snapshot = source.versions[source.current];
+  await engine('PUT', `/api/v1/sources/${name}`, {
+    ...Object.fromEntries(
+      WRITABLE_VERSION_KEYS.map((key) => [key, snapshot[key]]),
+    ),
+    source: name,
+    display_name: source.display_name,
+    description: source.description,
+    transform: { ...(snapshot.transform as object), variant },
+  });
 };
 
 test.beforeAll(async () => {
@@ -178,10 +227,13 @@ test.beforeAll(async () => {
   }
   // The receiver and loader compile their routing from an instance overlay, so
   // without one they keep the committed defaults and no source rule is in force.
+  // A tier that seeds the overlay already has it, and reset_all keeps it.
   for (const service of ['dfe-receiver', 'dfe-loader']) {
-    await engine('POST', `/api/v1/apps/${service}/instances`, {
-      instance: 'default',
-    });
+    if (!(await appInstances(service)).includes('default')) {
+      await engine('POST', `/api/v1/apps/${service}/instances`, {
+        instance: 'default',
+      });
+    }
   }
 });
 
@@ -209,8 +261,11 @@ test('deploying a source binds its own transform app @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
-  for (const { name } of SOURCES) {
-    await buildAndDeploy(page, name);
+  for (const { name, variant } of SOURCES) {
+    if (variant) {
+      await nameVariant(name, variant);
+    }
+    deployHints.set(name, await buildAndDeploy(page, name));
   }
 
   // One instance per app, each named for the source it serves: this is what
@@ -224,17 +279,20 @@ test('deploying a source binds its own transform app @docker-only', async ({
  * Give one transform instance the bundled pipeline and restart it.
  *
  * A new instance starts with an empty file set, so the app idles with "no work
- * configured" until its program arrives.
+ * configured" until its program arrives. `pending` carries hints still to act
+ * on, applied in the same pass so no instance starts before its program is in.
  */
 const giveInstanceItsPipeline = async (
   transformEngine: string,
   name: string,
+  pending: string[] = [],
 ) => {
+  const hints = [...pending];
   const program = PROGRAMS[transformEngine];
   if (!program?.path) {
+    await restartFor(hints);
     return;
   }
-  const hints: string[] = [];
   const written = await engine<{ restart_required: string[] }>(
     'PUT',
     `/api/v1/apps/${transformEngine}/${name}/files/transforms/${program.file}`,
@@ -258,8 +316,14 @@ test('each transform instance takes the bundled filebeat pipeline @docker-only',
     'the bundled pipelines are not named: set DFE_FILEBEAT_VRL_PROGRAM, DFE_FILEBEAT_VECTOR_PROGRAM and DFE_FILEBEAT_ENRICHMENT',
   );
 
+  // Compose acts on no hint by itself, so the deploy's hints create each
+  // instance's container here, once its program is in place.
   for (const source of SOURCES) {
-    await giveInstanceItsPipeline(source.engine, source.name);
+    await giveInstanceItsPipeline(
+      source.engine,
+      source.name,
+      deployHints.get(source.name),
+    );
   }
 
   for (const { name, engine: transformEngine } of SOURCES) {
@@ -332,20 +396,14 @@ test('HyperDX carries the source, pointed at its own table @docker-only', async 
   }
 });
 
-test('cisco-ios: the corpus lands on its own table, not the catch-all @docker-only', () => {
-  // Expected to fail until dfe-transform-elastic frames its output the way
-  // dfe-loader reads it: it writes a batch as one Kafka record of
-  // newline-delimited JSON, and the loader parses a record as one JSON value.
-  test.fail();
-  return landsOnItsOwnTable(SOURCES[2]);
-});
+test('cisco-ios: the corpus lands on its own table, not the catch-all @docker-only', () =>
+  landsOnItsOwnTable(SOURCES[2]));
 
 test('a source changes transform app and the data follows @docker-only', async ({
   page,
 }) => {
   await loginAs(page, 'initial_user');
-  // cisco-ios is the one to move: it is the control for the elastic leg above,
-  // because the same corpus through vrl lands and through elastic does not.
+  // cisco-ios moves from elastic to vrl, onto an instance created by the switch.
   const moved = SOURCES[2];
   const freed = SOURCES[0];
   const before = await rowCount(moved.name);
@@ -409,12 +467,8 @@ test('a source changes transform app and the data follows @docker-only', async (
     .toBeGreaterThan(before);
 });
 
-test('cisco-umbrella: the corpus lands on its own table, not the catch-all @docker-only', () => {
-  // Expected to fail until the dfe-transform-vector compose service mounts the
-  // dfe-app-config volume and points --config at it, as vrl and elastic do.
-  test.fail();
-  return landsOnItsOwnTable(SOURCES[1]);
-});
+test('cisco-umbrella: the corpus lands on its own table, not the catch-all @docker-only', () =>
+  landsOnItsOwnTable(SOURCES[1]));
 
 /** A source whose schema config names a derived schema mounted on the engine. */
 const LEAN_SOURCE = 'cisco-ios-lean';

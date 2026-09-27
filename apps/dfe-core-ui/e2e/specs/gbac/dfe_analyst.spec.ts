@@ -19,8 +19,11 @@ test('Sidebar Navigation', async ({ page }) => {
   await expectSourcesLanding(page);
 
   /* Shows the correct sidebar navigation links */
+  /* The breadcrumb also links Sources, so that one is scoped to the sidebar */
   await expect(
-    page.getByRole('link', { name: 'Sources', exact: true }),
+    page
+      .getByRole('complementary')
+      .getByRole('link', { name: 'Sources', exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Meta Schemas', exact: true }),

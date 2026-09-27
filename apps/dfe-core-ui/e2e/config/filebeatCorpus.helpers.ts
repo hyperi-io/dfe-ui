@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { readFileSync } from 'node:fs';
 
+import { CONTAINER_PREFIX } from './engineApi.helpers';
+
 /**
  * The filebeat sample corpus, in the shape a real shipper sends.
  *
@@ -169,12 +171,6 @@ export const pushEnvelopes = async (events: unknown[]) => {
     );
   }
 };
-
-/**
- * Container names carry the stack's own prefix, which is why it is a setting
- * rather than a literal.
- */
-export const CONTAINER_PREFIX = process.env.DFE_CONTAINER_PREFIX || 'e2e-';
 
 /**
  * The dfe-docker checkout running the stack under test.
