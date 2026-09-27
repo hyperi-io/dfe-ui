@@ -23,7 +23,7 @@
 //
 // WHY THIS EXISTS: the dfe-ui chart probed paths the app did not serve -- every probe
 // 404'd, so readiness never passed and liveness restarted the pod forever (392 restarts
-// on the devex cluster). That also jammed `dfe-ops verify`, whose gate is
+// on one cluster). That also jammed `dfe-ops verify`, whose gate is
 // all-pods-Ready, and so blocked the default E2E acceptance for the whole deploy.
 //
 // Beware the near-miss that replaced it: once routes existed they sat behind the auth
