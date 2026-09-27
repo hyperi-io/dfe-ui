@@ -77,13 +77,10 @@ export const PromoteJsonPaths = ({
         )}
         <ul className="flex flex-col gap-y-2">
           {data?.results.map(
-            (result, index) =>
+            (result) =>
               result.status !== 'ok' && (
                 <li key={result.json_path}>
-                  <PromoteJsonPathsResultCard
-                    result={result}
-                    copyDirective={data?.diff?.copy_directives?.[index]}
-                  />
+                  <PromoteJsonPathsResultCard result={result} />
                 </li>
               ),
           )}

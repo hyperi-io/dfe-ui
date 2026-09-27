@@ -231,7 +231,15 @@ test('the console promotes a path and the meta schema carries the column @docker
   // Test Promote is the dry run; the Review tab only opens once it answers.
   await drawer.getByRole('button', { name: 'Test Promote' }).click();
   await expect(drawer.getByRole('tab', { name: 'Review' })).toBeVisible();
-  await expect(drawer.getByText('Copy Directive')).toBeVisible();
+  // The Review table lists the new column with the directive the loader fills it from.
+  await expect(
+    drawer
+      .getByRole('row')
+      .filter({
+        has: page.getByRole('cell', { name: UI_COLUMN, exact: true }),
+      })
+      .getByRole('cell', { name: `@source: ${UI_PATH}`, exact: true }),
+  ).toBeVisible();
 
   await drawer
     .getByRole('button', { name: 'Promote Fields', exact: true })
