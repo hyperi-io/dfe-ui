@@ -946,7 +946,7 @@ export interface paths {
          * @description List the sources the deployed transforms already handle.
          *
          *     Empty when no catalogue is mounted, which is a deployment without one rather
-         *     than an error: the catalogue is a release asset of the app that ships it.
+         *     than an error: the app that ships the catalogue prints it from its own image.
          */
         get: operations["list_catalogue_api_v1_sources_catalogue_get"];
         put?: never;
@@ -1457,12 +1457,18 @@ export interface paths {
         };
         /**
          * Get Service Config
-         * @description Get a full service config by service + instance.
+         * @description Get a full service config by service + instance, every credential masked.
          */
         get: operations["get_service_config_api_v1_services__service___instance__get"];
         /**
          * Save Service Config
          * @description Create or update a service config.
+         *
+         *     A read shows every set secret masked, so a masked value written back keeps the
+         *     secret stored there, matched as the app surface matches one. A mask with nothing
+         *     stored behind it, or in a list entry that cannot be told apart, is a 400
+         *     ``masked_value`` and nothing is saved. A mask beside a field of the same object
+         *     that changed is a 400 ``credential_reentry_required``: the secret is typed again.
          */
         put: operations["save_service_config_api_v1_services__service___instance__put"];
         post?: never;
@@ -3917,6 +3923,8 @@ export interface paths {
         /**
          * List Vars
          * @description Flattened dot-path vars for a resource, each marked protected or not.
+         *
+         *     Credentials come back masked, as the app surface's values route masks them.
          */
         get: operations["list_vars_api_v1_helm_files__name__vars_get"];
         put?: never;
@@ -4007,6 +4015,8 @@ export interface paths {
         /**
          * List Overlay Vars
          * @description Flattened dot-path vars for one overlay, each marked protected or not.
+         *
+         *     Credentials come back masked, as every other read of the deploy repo masks them.
          */
         get: operations["list_overlay_vars_api_v1_backing_services_overlays__name__vars_get"];
         put?: never;
@@ -4103,7 +4113,8 @@ export interface paths {
          * @description Deploy an instance by creating its values overlay.
          *
          *     The overlay's presence is what the layer2-apps ApplicationSet turns into an Argo
-         *     Application, so this is the whole deployment step.
+         *     Application, so this is the whole deployment step. A new instance stores nothing,
+         *     so a masked value copied from another instance's read is a 400 ``masked_value``.
          */
         post: operations["create_instance_api_v1_apps__service__instances_post"];
         delete?: never;
@@ -4168,7 +4179,10 @@ export interface paths {
         };
         /**
          * Get Values
-         * @description The instance's overlay document as stored, with the revision to write against.
+         * @description The instance's overlay document, credentials masked, with the revision to write against.
+         *
+         *     Masked as the config route hides them: by the app's own secret marker in its
+         *     schema, and by name wherever the schema says nothing.
          */
         get: operations["get_values_api_v1_apps__service___instance__values_get"];
         put?: never;
@@ -4205,7 +4219,11 @@ export interface paths {
          *     landing a commit an operator then has to revert.
          *
          *     A secret is written like any other option: it goes into the overlay as the rest
-         *     of this surface writes one, and the read route still never says what it is.
+         *     of this surface writes one, and neither this response nor a read route on this
+         *     surface says what it is. A masked value written back as it was read keeps the
+         *     stored credential; the mask where nothing is stored is a 400 ``masked_value``,
+         *     and the mask beside a changed field of the same entry is a 400
+         *     ``credential_reentry_required``.
          *
          *     409 where the deployment already decides the value: a config path the chart
          *     derives, or an `extraEnv` name the chart sets for this app.
@@ -4773,7 +4791,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Action */
+        /**
+         * Get Action
+         * @description One defined action; a credential a legacy definition still carries comes back masked.
+         */
         get: operations["get_action_api_v1_governance_actions__name__get"];
         put?: never;
         post?: never;
@@ -4875,7 +4896,13 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create Action */
+        /**
+         * Create Action
+         * @description Define or replace an action.
+         *
+         *     400 ``credential_in_action`` where a change targets a credential: the definition
+         *     is committed to the deploy repo, so a credential in it is plaintext in history.
+         */
         post: operations["create_action_api_v1_governance_admin_actions_post"];
         delete?: never;
         options?: never;
@@ -5034,7 +5061,8 @@ export interface paths {
          * List Class Resource Vars
          * @description Flattened dot-path vars of one resource - what VarChange.path may name.
          *
-         *     Values ride along so a select can show the current value beside each path.
+         *     Values ride along so a select can show the current value beside each path, with
+         *     credentials masked as every other read of the deploy repo masks them.
          */
         get: operations["list_class_resource_vars_api_v1_gitops_classes__cls__resources__name__vars_get"];
         put?: never;
@@ -5248,10 +5276,11 @@ export interface paths {
          * Hyperdx Connection
          * @description Return the caller's OWN org connection - never another org's.
          *
-         *     Unrestricted callers (any role beyond ``org_viewer``) get the platform reader;
-         *     a single-org caller gets its pinned ``dfe_org_<org>`` user; a caller that
-         *     resolves to zero or several separate orgs is refused (403) so isolation fails
-         *     closed rather than guessing.
+         *     A caller granted ``query:execute`` at system scope by a role other than
+         *     ``org_viewer`` gets the platform reader. Any other caller gets its org's pinned
+         *     ``dfe_org_<org>`` user, whatever roles it holds at that org's scope. A caller
+         *     that resolves to zero or several separate orgs is refused (403) so isolation
+         *     fails closed rather than guessing.
          */
         get: operations["hyperdx_connection_api_v1_hyperdx_connection_get"];
         put?: never;
@@ -12624,7 +12653,7 @@ export interface components {
         SourceDetailResponse: {
             /**
              * Source
-             * @description The _source label — immutable identifier
+             * @description The _source label -- immutable identifier
              */
             source: string;
             /**
@@ -12861,7 +12890,7 @@ export interface components {
         };
         /**
          * SourceMatch
-         * @description Receiver match rule — how the receiver identifies this source.
+         * @description Receiver match rule: how the receiver identifies this source.
          */
         SourceMatch: {
             /**
@@ -13745,18 +13774,6 @@ export interface components {
              * @description Sample input records
              */
             records: components["schemas"]["SampleRecord"][];
-            /**
-             * Source Format
-             * @default json
-             * @enum {string}
-             */
-            source_format: "json" | "msgpack";
-            /**
-             * Sink Format
-             * @default json
-             * @enum {string}
-             */
-            sink_format: "json" | "msgpack";
         };
         /** TokenResponse */
         TokenResponse: {
