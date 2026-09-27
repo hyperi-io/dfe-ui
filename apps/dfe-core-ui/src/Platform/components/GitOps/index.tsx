@@ -19,7 +19,8 @@ export const GitOps = () => {
       title="Git Operations: Auto Merge"
       rightTitleSlot={
         <EnableDisableAutoMergeButton
-          enabled={gitOpsAutoMerge?.allowed ?? false}
+          enabled={gitOpsAutoMerge?.stored ?? false}
+          allowed={gitOpsAutoMerge?.allowed ?? false}
         />
       }
     >
@@ -36,24 +37,12 @@ export const GitOps = () => {
           )}
           {gitOpsAutoMerge && (
             <dl className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-4 gap-y-2 text-xs">
-              {gitOpsAutoMerge.stored && (
-                <>
-                  <dt className={dataListTermStyle}>Stored</dt>
-                  <dd>{gitOpsAutoMerge.stored}</dd>
-                </>
-              )}
-              {gitOpsAutoMerge.effective && (
-                <>
-                  <dt className={dataListTermStyle}>Effective</dt>
-                  <dd>{gitOpsAutoMerge.effective}</dd>
-                </>
-              )}
-              {gitOpsAutoMerge.allowed && (
-                <>
-                  <dt className={dataListTermStyle}>Allowed</dt>
-                  <dd>{gitOpsAutoMerge.allowed ? 'Yes' : 'No'}</dd>
-                </>
-              )}
+              <dt className={dataListTermStyle}>Stored</dt>
+              <dd>{gitOpsAutoMerge.stored ? 'Yes' : 'No'}</dd>
+              <dt className={dataListTermStyle}>Effective</dt>
+              <dd>{gitOpsAutoMerge.effective ? 'Yes' : 'No'}</dd>
+              <dt className={dataListTermStyle}>Allowed</dt>
+              <dd>{gitOpsAutoMerge.allowed ? 'Yes' : 'No'}</dd>
               {gitOpsAutoMerge.reason && (
                 <>
                   <dt className={dataListTermStyle}>Reason</dt>

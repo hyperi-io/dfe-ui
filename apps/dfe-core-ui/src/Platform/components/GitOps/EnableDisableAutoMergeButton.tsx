@@ -5,9 +5,14 @@ import { Button } from 'antd';
 
 export const EnableDisableAutoMergeButton = ({
   enabled,
+  allowed,
 }: {
   enabled: boolean;
+  allowed: boolean;
 }) => {
+  // The engine refuses an enable the deployment gate does not allow, and always accepts a disable.
+  const canToggle = enabled || allowed;
+
   const {
     mutate: mutateGitOpsAutoMerge,
     isPending: isUpdateGitOpsAutoMergePending,
@@ -32,6 +37,7 @@ export const EnableDisableAutoMergeButton = ({
               )
             }
             loading={isUpdateGitOpsAutoMergePending}
+            disabled={!canToggle}
           >
             {enabled ? 'Disable Auto Merge' : 'Enable Auto Merge'}
           </Button>

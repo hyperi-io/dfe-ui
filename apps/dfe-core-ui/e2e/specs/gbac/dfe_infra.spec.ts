@@ -2,6 +2,10 @@ import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../../config/e2e.client';
 import {
+  expectAutoMergeToggle,
+  openGitOpsTab,
+} from '../../config/gitops.helpers';
+import {
   expectLoggedOut,
   expectSourcesLanding,
   loginAs,
@@ -363,18 +367,12 @@ test.describe('Platform', () => {
   });
 
   test('Git Operations', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Git Operations' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform/gitops`);
+    const autoMerge = await openGitOpsTab(page);
 
     await expect(
       page.getByText('You do not have sufficient permissions'),
     ).toBeHidden();
-    await expect(
-      page.getByRole('button', {
-        name: 'Enable Auto Merge',
-        exact: true,
-      }),
-    ).toBeEnabled();
+    await expectAutoMergeToggle(page, autoMerge);
   });
 
   test('Governance', async ({ page }) => {

@@ -1,0 +1,23 @@
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
+import { setupServer } from 'msw/node';
+
+export const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
+  org_id: 'string',
+  user_id: 'string',
+  roles: ['role'],
+  permissions: ['*'],
+  groups: ['group'],
+  external: false,
+  blocked: false,
+  disabled_at: '',
+  blocked_at: '',
+  password_change_required: false,
+};
+
+export const server = setupServer(
+  API_CONFIG_MOCKS.auth.me.get.success({
+    mockedResponse: ADMIN_MOCKED_RESPONSE,
+  }),
+  API_CONFIG_MOCKS.gitops.autoMerge.get.success(),
+);
