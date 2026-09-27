@@ -2,6 +2,7 @@ import { Page, expect, test } from '@playwright/test';
 
 import { seedAppManagement } from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
+import { appInstances, forgetEngineToken } from '../config/engineApi.helpers';
 import { loginAs } from '../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
@@ -22,10 +23,15 @@ const openComponents = async (page: Page) => {
 test('Pools', async ({ page }) => {
   await openComponents(page);
 
-  /* The seed deploys the receiver and the loader; the archiver has no instance */
+  /* The seed deploys the receiver and the loader */
   await expect(page.getByRole('tab', { name: /dfe-receiver/ })).toBeVisible();
   await expect(page.getByRole('tab', { name: /dfe-loader/ })).toBeVisible();
-  await expect(page.getByRole('tab', { name: /dfe-archiver/ })).toBeHidden();
+
+  /* reset_all keeps whatever archiver the tier seeded: one tab per instance */
+  forgetEngineToken();
+  await expect(page.getByRole('tab', { name: /dfe-archiver/ })).toHaveCount(
+    (await appInstances('dfe-archiver')).length,
+  );
 
   /* Per-source apps belong to their source, not to this page */
   await expect(
@@ -63,17 +69,21 @@ test('Scaling dials are refused on a Compose deployment @docker-only', async ({
 test('Backing services', async ({ page }) => {
   await openComponents(page);
 
-  await expect(page.getByText('Backing services')).toBeVisible();
-  await expect(page.getByText('clickhouse', { exact: true })).toBeVisible();
-  await expect(page.getByText('kafka', { exact: true })).toBeVisible();
+  /* Scoped: the selected pool's config form also heads a block "kafka" */
+  const backing = page.locator('section').filter({
+    has: page.getByRole('heading', { name: 'Backing services', exact: true }),
+  });
+  await expect(backing).toBeVisible();
+  await expect(backing.getByText('clickhouse', { exact: true })).toBeVisible();
+  await expect(backing.getByText('kafka', { exact: true })).toBeVisible();
 
   /* The deploy repo declares nothing, so every value is a tier default */
-  await expect(page.getByText('tier default').first()).toBeVisible();
+  await expect(backing.getByText('tier default').first()).toBeVisible();
 
   /* Storage is read-only, with the capacity remedy where a resize would be */
-  await expect(page.getByText('Storage is read-only')).toHaveCount(2);
+  await expect(backing.getByText('Storage is read-only')).toHaveCount(2);
   await expect(
-    page.getByText("Capacity is the storage model's job", { exact: false }),
+    backing.getByText("Capacity is the storage model's job", { exact: false }),
   ).toHaveCount(2);
 });
 
