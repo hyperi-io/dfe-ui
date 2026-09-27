@@ -27,7 +27,7 @@ const fetchReturning =
 describe('authorizeEngineToken', () => {
   test('asks /auth/me with the token and builds the session user from it', async () => {
     const exp = Math.floor(Date.now() / 1000) + 600;
-    const token = jwtWith({ sub: 'abc', email: 'dfe-test@ms.hyperi.io', exp });
+    const token = jwtWith({ sub: 'abc', email: 'dfe-test@example.com', exp });
     const seen: { url?: string; auth?: string | null } = {};
     const fetchImpl = fetchReturning(
       jsonResponse(200, { user_id: 'abc', roles: ['admin'] }),
@@ -40,8 +40,8 @@ describe('authorizeEngineToken', () => {
     expect(seen.auth).toBe(`Bearer ${token}`);
     expect(user).toMatchObject({
       id: 'abc',
-      name: 'dfe-test@ms.hyperi.io',
-      email: 'dfe-test@ms.hyperi.io',
+      name: 'dfe-test@example.com',
+      email: 'dfe-test@example.com',
       accessToken: token,
       roles: ['admin'],
     });
