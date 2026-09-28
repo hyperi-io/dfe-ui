@@ -122,7 +122,7 @@ export const ConfigureOIDCForm = ({
               name="client_secret_env"
               rules={[formValidation]}
             >
-              <Input.Password />
+              <Input />
             </Form.Item>
           </div>
         </div>
@@ -149,28 +149,31 @@ export const ConfigureOIDCForm = ({
                 <Switch />
               </Form.Item>
 
-              <Form.Item
-                label="Okta Domain"
-                name={[GROUPS_FORM_NAME, 'okta_domain']}
-                rules={[formValidation]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="API Token"
-                name={[GROUPS_FORM_NAME, 'api_token_env']}
-                rules={[formValidation]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="API Token"
-                name={[GROUPS_FORM_NAME, 'api_token']}
-                rules={[formValidation]}
-              >
-                <Input />
-              </Form.Item>
+              {typeWatch === 'okta' && (
+                <>
+                  <Form.Item
+                    label="Okta Domain"
+                    name={[GROUPS_FORM_NAME, 'okta_domain']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="API Token Environment Variable"
+                    name={[GROUPS_FORM_NAME, 'api_token_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="API Token"
+                    name={[GROUPS_FORM_NAME, 'api_token']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
 
               {typeWatch === 'google' && (
                 <>
@@ -205,30 +208,31 @@ export const ConfigureOIDCForm = ({
                 </>
               )}
 
-              <>
-                <Form.Item
-                  label="Tenant ID"
-                  name={[GROUPS_FORM_NAME, 'tenant_id_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  label="Client Secret ENV"
-                  name={[GROUPS_FORM_NAME, 'client_secret_env']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Client Secret"
-                  name={[GROUPS_FORM_NAME, 'client_secret']}
-                  rules={[formValidation]}
-                >
-                  <Input />
-                </Form.Item>
-              </>
+              {typeWatch === 'entra_id' && (
+                <>
+                  <Form.Item
+                    label="Tenant ID"
+                    name={[GROUPS_FORM_NAME, 'tenant_id_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Client Secret ENV"
+                    name={[GROUPS_FORM_NAME, 'client_secret_env']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    label="Client Secret"
+                    name={[GROUPS_FORM_NAME, 'client_secret']}
+                    rules={[formValidation]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </>
+              )}
 
               <Form.Item
                 label="Claim Name"
