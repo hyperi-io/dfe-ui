@@ -7,6 +7,7 @@ import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchIn
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
+import { toUpdateOidcProviderBody } from './helpers';
 
 export const UpdateOidcProviderDrawer = ({
   oidcProvider,
@@ -39,9 +40,7 @@ export const UpdateOidcProviderDrawer = ({
   const handleUpdateOidcProvider = (
     values: CreateUpdateOidcProviderFormData,
   ) => {
-    updateOidcProvider({
-      display_name: values.display_name,
-    });
+    updateOidcProvider(toUpdateOidcProviderBody(values, oidcProvider));
   };
   return (
     <>
@@ -75,7 +74,9 @@ export const UpdateOidcProviderDrawer = ({
           error={error}
           isPending={isPending}
           disabledFields={{
+            name: true,
             type: true,
+            issuer: true,
           }}
           hasReset={true}
           buttonLabel="Update"
