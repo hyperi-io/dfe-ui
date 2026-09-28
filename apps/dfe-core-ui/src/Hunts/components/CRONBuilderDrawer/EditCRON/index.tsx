@@ -12,6 +12,10 @@ import { Minutes } from './Minutes';
 import { Monthly } from './Monthly';
 import { Weekly } from './Weekly';
 
+const SectionLabel = ({ label }: { label: string }) => {
+  return <p className="text-sm text-gray-500">{label}</p>;
+};
+
 type TabKey = 'minutes' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'custom';
 export const EditCRON = ({
   onChange,
@@ -62,7 +66,9 @@ export const EditCRON = ({
             label: 'Daily',
             children: (
               <div className="flex flex-col gap-y-2">
+                <SectionLabel label="Start time" />
                 <Hourly />
+                <SectionLabel label="Frequency" />
                 <Daily />
               </div>
             ),
@@ -72,7 +78,9 @@ export const EditCRON = ({
             label: 'Weekly',
             children: (
               <div className="flex flex-col gap-y-2">
+                <SectionLabel label="Start time" />
                 <Hourly />
+                <SectionLabel label="Frequency" />
                 <Weekly />
               </div>
             ),
@@ -80,7 +88,14 @@ export const EditCRON = ({
           {
             key: 'monthly',
             label: 'Monthly',
-            children: <Monthly />,
+            children: (
+              <div className="flex flex-col gap-y-2">
+                <SectionLabel label="Start time" />
+                <Hourly />
+                <SectionLabel label="Frequency" />
+                <Monthly />
+              </div>
+            ),
           },
           {
             key: 'custom',

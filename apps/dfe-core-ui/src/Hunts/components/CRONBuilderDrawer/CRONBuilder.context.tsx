@@ -24,6 +24,7 @@ type AtomicCronExpression = {
   day?: string;
   month?: string;
   week?: string;
+  cmd?: string;
 };
 
 export interface CRONBuilderContextValue {
@@ -69,7 +70,14 @@ export const CRONBuilderProvider = ({
           ...parseCronExpression(cronExpression),
           ...changedAtomic,
         };
-        const cron = `${atomic.minute ?? '*'} ${atomic.hour ?? '*'} ${atomic.day ?? '*'} ${atomic.month ?? '*'} ${atomic.week ?? '*'}`;
+        const cron = [
+          atomic.minute ?? '*',
+          atomic.hour ?? '*',
+          atomic.day ?? '*',
+          atomic.month ?? '*',
+          atomic.week ?? '*',
+          ...(atomic.cmd ? [atomic.cmd] : []),
+        ].join(' ');
         setCronExpression(cron);
         const cronExplainer = explainCronExpression(cron);
         setCronExplainer(cronExplainer);

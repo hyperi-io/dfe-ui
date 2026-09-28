@@ -34,7 +34,9 @@ export const Daily = ({ onChange: _onChange, ..._props }: InputProps) => {
       </Radio.Group>
 
       <div className="flex flex-col gap-y-2">
-        <label htmlFor="day">Day Interval</label>
+        <label htmlFor="day">
+          Day {dailyType === 'every' ? 'interval' : 'of the month'}
+        </label>
         <InputNumber
           id="day"
           min={1}

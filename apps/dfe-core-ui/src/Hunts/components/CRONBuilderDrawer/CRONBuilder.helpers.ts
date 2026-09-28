@@ -41,10 +41,11 @@ export const resetCronExpression = (key: string) => {
     case 'hourly':
       return '0 */1 * * *';
     case 'daily':
-      return '0 0 */1 * *';
+      return '0 1 */1 * *';
     case 'weekly':
       return '0 1 * * MON,TUE,WED,THU,FRI';
     case 'monthly':
+      return '0 1 1 * *';
     case 'custom':
     default:
       return '* * * * *';
