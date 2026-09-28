@@ -5,8 +5,10 @@ import {
 } from '@/core/config/api/client.types';
 import { createAlertPath } from './api';
 
-export type TAlertCreateRequest = DfeClientRequestBody<
-  DfeClientOperationFor<typeof createAlertPath, 'post'>
+/** `url_scheme` is read-only: the engine derives it from the URL. */
+export type TAlertCreateRequest = Omit<
+  DfeClientRequestBody<DfeClientOperationFor<typeof createAlertPath, 'post'>>,
+  'url_scheme'
 >;
 
 export type TAlertCreateResponse = DfeClientSuccessResponseBody<

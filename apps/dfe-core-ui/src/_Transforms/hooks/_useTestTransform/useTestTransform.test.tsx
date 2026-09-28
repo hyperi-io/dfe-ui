@@ -38,8 +38,6 @@ describe('.useTestTransform', () => {
         },
       },
     ],
-    source_format: 'json',
-    sink_format: 'json',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
