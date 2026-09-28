@@ -56,7 +56,7 @@ export const Hourly = () => {
           }}
           placeholder="Hours"
         />
-        <span>hour(s) at minute</span>
+        <span>{hourlyType === 'every' ? 'hour(s)' : 'hour'} at minute</span>
         <InputNumber
           min={0}
           max={59}

@@ -22,9 +22,16 @@ export const parseCronExpression = (cronExpression: string) => {
 };
 
 export const explainCronExpression = (cronExpression: string) => {
-  const cronExplainer = cronstrue.toString(cronExpression);
+  try {
+    const cronExplainer = cronstrue.toString(cronExpression);
 
-  return `This hunt will run ${cronExplainer?.charAt(0).toLowerCase() + cronExplainer?.slice(1)}`;
+    return {
+      explainer: `This hunt will run ${cronExplainer.charAt(0).toLowerCase()}${cronExplainer.slice(1)}`,
+      error: null,
+    };
+  } catch (error) {
+    return { explainer: null, error: error as string };
+  }
 };
 
 export const resetCronExpression = (key: string) => {
@@ -34,9 +41,9 @@ export const resetCronExpression = (key: string) => {
     case 'hourly':
       return '0 */1 * * *';
     case 'daily':
-      return '0 0 1 * *';
+      return '0 0 */1 * *';
     case 'weekly':
-      return '0 0 0 * SUN-SAT';
+      return '0 1 * * MON,TUE,WED,THU,FRI';
     case 'monthly':
     case 'custom':
     default:

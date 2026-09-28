@@ -30,8 +30,11 @@ export const EditCRON = ({
     <div className={cn('flex flex-col gap-y-2', className, classNames?.root)}>
       <label htmlFor="cron-expression">Generated Expression</label>
       <Input value={cronExpression} readOnly className="w-full" disabled />
-      {cronExplainer && (
-        <NotificationCard description={cronExplainer} type="info" />
+      {(cronExplainer.explainer || cronExplainer.error) && (
+        <NotificationCard
+          description={cronExplainer.explainer || cronExplainer.error}
+          type={cronExplainer.error ? 'error' : 'info'}
+        />
       )}
       <Tabs
         classNames={classNames?.tabs}
@@ -57,12 +60,22 @@ export const EditCRON = ({
           {
             key: 'daily',
             label: 'Daily',
-            children: <Daily />,
+            children: (
+              <div className="flex flex-col gap-y-2">
+                <Hourly />
+                <Daily />
+              </div>
+            ),
           },
           {
             key: 'weekly',
             label: 'Weekly',
-            children: <Weekly />,
+            children: (
+              <div className="flex flex-col gap-y-2">
+                <Hourly />
+                <Weekly />
+              </div>
+            ),
           },
           {
             key: 'monthly',

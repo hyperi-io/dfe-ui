@@ -29,7 +29,10 @@ type AtomicCronExpression = {
 export interface CRONBuilderContextValue {
   cronExpression: string;
   updateCronExpression: ({ atomic, raw }: CronExpression) => void;
-  cronExplainer: string | null;
+  cronExplainer: {
+    explainer: string | null;
+    error: string | null;
+  };
 }
 
 const CRONBuilderContext = createContext<CRONBuilderContextValue | null>(null);
@@ -54,7 +57,10 @@ export const CRONBuilderProvider = ({
   children,
 }: CRONBuilderProviderProps) => {
   const [cronExpression, setCronExpression] = useState(formValue || '');
-  const [cronExplainer, setCronExplainer] = useState<string | null>(null);
+  const [cronExplainer, setCronExplainer] = useState<{
+    explainer: string | null;
+    error: string | null;
+  }>({ explainer: null, error: null });
 
   const handleUpdateCron = useCallback(
     ({ atomic: changedAtomic, raw }: CronExpression) => {
@@ -70,7 +76,9 @@ export const CRONBuilderProvider = ({
         return;
       }
       setCronExpression(raw || '');
-      setCronExplainer(raw ? explainCronExpression(raw) : null);
+      setCronExplainer(
+        raw ? explainCronExpression(raw) : { explainer: null, error: null },
+      );
     },
     [cronExpression],
   );
