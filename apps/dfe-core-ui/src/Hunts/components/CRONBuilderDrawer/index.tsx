@@ -5,6 +5,7 @@ import {
   CRONBuilderProvider,
   useCRONBuilderContext,
 } from './CRONBuilder.context';
+import { resetCronExpression } from './CRONBuilder.helpers';
 import { EditCRON } from './EditCRON';
 
 export interface CRONBuilderProps extends Omit<
@@ -23,7 +24,14 @@ export const CRONBuilderDrawerBase = ({
   ...props
 }: CRONBuilderProps) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const { cronExpression } = useCRONBuilderContext();
+  const { formValue, updateCronExpression } = useCRONBuilderContext();
+
+  const openDrawer = () => {
+    updateCronExpression({
+      raw: formValue || resetCronExpression('minutes'),
+    });
+    setIsDrawerVisible(true);
+  };
 
   const handleChange = (value: string) => {
     setIsDrawerVisible(false);
@@ -33,11 +41,8 @@ export const CRONBuilderDrawerBase = ({
     <>
       <Input
         {...props}
-        onClick={() => {
-          setIsDrawerVisible(true);
-        }}
+        onClick={openDrawer}
         readOnly
-        value={cronExpression}
       />
       <Drawer
         title="CRON Schedule Builder"

@@ -17,14 +17,26 @@ const SectionLabel = ({ label }: { label: string }) => {
 };
 
 type TabKey = 'minutes' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'custom';
+
+const tabForFormValue = (value: string): TabKey =>
+  value && value !== '* * * * *' ? 'custom' : 'minutes';
+
 export const EditCRON = ({
   onChange,
   className,
   classNames,
 }: CRONBuilderProps) => {
-  const [tabKey, setTabKey] = useState<TabKey>('minutes');
-  const { cronExpression, cronExplainer, updateCronExpression } =
+  const { cronExpression, cronExplainer, formValue, updateCronExpression } =
     useCRONBuilderContext();
+  const [tabKey, setTabKey] = useState<TabKey>(() =>
+    tabForFormValue(formValue),
+  );
+  const [seenFormValue, setSeenFormValue] = useState(formValue);
+
+  if (formValue !== seenFormValue) {
+    setSeenFormValue(formValue);
+    setTabKey(tabForFormValue(formValue));
+  }
 
   const handleChange = () => {
     onChange?.(cronExpression);
@@ -33,7 +45,13 @@ export const EditCRON = ({
   return (
     <div className={cn('flex flex-col gap-y-2', className, classNames?.root)}>
       <label htmlFor="cron-expression">Generated Expression</label>
-      <Input value={cronExpression} readOnly className="w-full" disabled />
+      <Input
+        id="cron-expression"
+        value={cronExpression}
+        readOnly
+        className="w-full"
+        disabled
+      />
       {(cronExplainer.explainer || cronExplainer.error) && (
         <NotificationCard
           description={cronExplainer.explainer || cronExplainer.error}
@@ -42,6 +60,7 @@ export const EditCRON = ({
       )}
       <Tabs
         classNames={classNames?.tabs}
+        activeKey={tabKey}
         onChange={(key) => {
           const nextTab = key as TabKey;
           setTabKey(nextTab);
@@ -111,7 +130,7 @@ export const EditCRON = ({
           htmlType="button"
           onClick={() => {
             updateCronExpression({
-              raw: resetCronExpression(tabKey),
+              raw: formValue || resetCronExpression(tabKey),
             });
           }}
         >

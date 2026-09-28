@@ -29,6 +29,7 @@ type AtomicCronExpression = {
 
 export interface CRONBuilderContextValue {
   cronExpression: string;
+  formValue: string;
   updateCronExpression: ({ atomic, raw }: CronExpression) => void;
   cronExplainer: {
     explainer: string | null;
@@ -53,15 +54,26 @@ export interface CRONBuilderProviderProps {
   value?: string;
 }
 
+const emptyExplainer = { explainer: null, error: null };
+
 export const CRONBuilderProvider = ({
-  value: formValue,
+  value: formValue = '',
   children,
 }: CRONBuilderProviderProps) => {
-  const [cronExpression, setCronExpression] = useState(formValue || '');
+  const [cronExpression, setCronExpression] = useState(formValue);
   const [cronExplainer, setCronExplainer] = useState<{
     explainer: string | null;
     error: string | null;
-  }>({ explainer: null, error: null });
+  }>(formValue ? explainCronExpression(formValue) : emptyExplainer);
+  const [seenFormValue, setSeenFormValue] = useState(formValue);
+
+  if (formValue !== seenFormValue) {
+    setSeenFormValue(formValue);
+    setCronExpression(formValue);
+    setCronExplainer(
+      formValue ? explainCronExpression(formValue) : emptyExplainer,
+    );
+  }
 
   const handleUpdateCron = useCallback(
     ({ atomic: changedAtomic, raw }: CronExpression) => {
@@ -94,10 +106,11 @@ export const CRONBuilderProvider = ({
   const value = useMemo<CRONBuilderContextValue>(
     () => ({
       cronExpression,
+      formValue,
       updateCronExpression: handleUpdateCron,
       cronExplainer,
     }),
-    [cronExpression, handleUpdateCron, cronExplainer],
+    [cronExpression, formValue, handleUpdateCron, cronExplainer],
   );
 
   return (
