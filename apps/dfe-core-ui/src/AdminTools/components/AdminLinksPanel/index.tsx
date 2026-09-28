@@ -51,7 +51,7 @@ export const AdminLinksPanel = () => {
         <NotificationCard
           type="info"
           title="No admin UIs are listed"
-          description="The deployer listed none in deployment.admin_links, so there is nothing to open here."
+          description="Nothing valid is set in deployment.admin_links. The engine logs each entry it drops."
         />
       )}
       {data && data.length > 0 && <AdminLinksTable links={data} />}
