@@ -97,13 +97,10 @@ export const CreateUpdateOidcProviderForm = ({
               label="Client Secret Environment Variable"
               name="client_secret_env"
             >
-              <Input.Password />
+              <Input />
             </Form.Item>
-            <Form.Item
-              label="Client Secret Environment Variable"
-              name="client_secret"
-            >
-              <Input.Password />
+            <Form.Item label="Client Secret" name="client_secret">
+              <Input.Password autoComplete="new-password" />
             </Form.Item>
           </div>
 

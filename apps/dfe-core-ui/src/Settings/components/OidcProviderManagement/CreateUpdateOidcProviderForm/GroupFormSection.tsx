@@ -41,7 +41,7 @@ export const GroupFormSection = ({
             <Input />
           </Form.Item>
           <Form.Item
-            label="API Token"
+            label="API Token Environment Variable"
             name={[GROUPS_FORM_NAME, 'api_token_env']}
           >
             <Input />
@@ -78,7 +78,7 @@ export const GroupFormSection = ({
             <Input />
           </Form.Item>
           <Form.Item
-            label="Client Secret"
+            label="Client Secret ENV"
             name={[GROUPS_FORM_NAME, 'client_secret_env']}
           >
             <Input />
