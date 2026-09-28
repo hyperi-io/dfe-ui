@@ -39,11 +39,7 @@ export const CRONBuilderDrawerBase = ({
   };
   return (
     <>
-      <Input
-        {...props}
-        onClick={openDrawer}
-        readOnly
-      />
+      <Input {...props} onClick={openDrawer} readOnly />
       <Drawer
         title="CRON Schedule Builder"
         size={600}

@@ -58,7 +58,9 @@ describe('CreateUpdateSourceForm assign schema', () => {
       { wrapper },
     );
 
-    await user.click(await screen.findByRole('tab', { name: 'Table Settings' }));
+    await user.click(
+      await screen.findByRole('tab', { name: 'Table Settings' }),
+    );
 
     expect(screen.getByRole('radio', { name: 'main' })).toBeChecked();
   });
