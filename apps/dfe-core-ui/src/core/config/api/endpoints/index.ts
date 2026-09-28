@@ -36,6 +36,9 @@ export const API_CONFIG = Object.freeze({
     surface: '/api/v1/service-surfaces/{name}',
     refreshMetrics: '/api/v1/service-surfaces/{name}/metrics/refresh',
   },
+  deployment: {
+    adminLinks: '/api/v1/deployment/admin-links',
+  },
   deployments: {
     default: '/api/v1/deployments',
     deployment: '/api/v1/deployments/{service}/{instance}',

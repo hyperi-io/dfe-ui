@@ -5,6 +5,7 @@ import { apps } from './mocks/apps';
 import { auth } from './mocks/auth';
 import { backingServices } from './mocks/backingServices';
 import { clientConfig } from './mocks/clientConfig';
+import { deployment } from './mocks/deployment';
 import { deployments } from './mocks/deployments';
 import { fieldMaps } from './mocks/fieldMaps';
 import { gitops } from './mocks/gitops';
@@ -35,6 +36,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   auth,
   backingServices,
   clientConfig,
+  deployment,
   deployments,
   fieldMaps,
   gitops,

@@ -44,6 +44,9 @@ test('Sidebar Navigation', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: 'Platform', exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Admin Tools', exact: true }),
+  ).toBeVisible();
 
   /* Does not show other sidebar navigation links */
   await expect(
