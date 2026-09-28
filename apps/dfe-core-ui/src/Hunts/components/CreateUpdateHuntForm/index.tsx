@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
 import z from 'zod';
@@ -129,10 +130,10 @@ export const CreateUpdateHuntForm = ({
 
       <Form.Item
         name="cron"
-        label={<Form.Label required>Cron</Form.Label>}
+        label={<Form.Label required>Cron Expression</Form.Label>}
         rules={[formValidation]}
       >
-        <Input placeholder="Enter cron expression" />
+        <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>
 
       {error && <ApiErrorNotification error={error} />}
