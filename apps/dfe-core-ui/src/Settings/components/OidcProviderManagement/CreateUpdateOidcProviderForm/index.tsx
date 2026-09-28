@@ -10,7 +10,9 @@ import { GroupFormSection } from './GroupFormSection';
 
 interface CreateUpdateOidcProviderFormProps extends FormProps {
   disabledFields?: {
+    name?: boolean;
     type?: boolean;
+    issuer?: boolean;
   };
   hasReset?: boolean;
   buttonLabel?: string;
@@ -75,14 +77,14 @@ export const CreateUpdateOidcProviderForm = ({
         <>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Name" name="name">
-              <Input />
+              <Input disabled={disabledFields?.name} />
             </Form.Item>
 
             <Form.Item label="Display Name" name="display_name">
               <Input />
             </Form.Item>
             <Form.Item label="Issuer" name="issuer">
-              <Input />
+              <Input disabled={disabledFields?.issuer} />
             </Form.Item>
             <Form.Item
               label="Client ID Environment Variable"

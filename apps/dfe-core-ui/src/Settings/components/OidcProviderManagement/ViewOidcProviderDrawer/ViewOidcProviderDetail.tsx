@@ -1,5 +1,4 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
-import { HiddenField } from '@/core/components/HiddenField';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { Tooltip } from '@/core/components/Tooltip';
 import {
@@ -12,6 +11,8 @@ import { IconCheck, IconX } from '@repo/dfe-icons';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
+// One label width for every section keeps the value column aligned.
+const dataListGridStyle = 'grid grid-cols-[180px_1fr] gap-x-6 gap-y-1';
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
@@ -59,7 +60,7 @@ export const ViewOidcProviderDetail = ({
           </p>
         </Tooltip>
       </div>
-      <dl className="grid grid-cols-[180px_1fr] gap-x-6 gap-y-1">
+      <dl className={dataListGridStyle}>
         <dt className={dataListTermStyle}>Name:</dt>
         <dd>{oidcProvider?.name}</dd>
         <dt className={dataListTermStyle}>Display Name:</dt>
@@ -68,7 +69,7 @@ export const ViewOidcProviderDetail = ({
         <dd>{oidcProvider?.type}</dd>
         <dt className={dataListTermStyle}>Issuer:</dt>
         <dd>{oidcProvider?.issuer}</dd>
-        <dt className={dataListTermStyle}>Client ID Environment:</dt>
+        <dt className={dataListTermStyle}>Client ID Environment Variable:</dt>
         <dd>
           {oidcProvider?.client_id_env ? (
             oidcProvider.client_id_env
@@ -76,9 +77,15 @@ export const ViewOidcProviderDetail = ({
             <EmptyData />
           )}
         </dd>
-        <dt className={dataListTermStyle}>Client Secret Environment:</dt>
+        <dt className={dataListTermStyle}>
+          Client Secret Environment Variable:
+        </dt>
         <dd>
-          <HiddenField value={oidcProvider?.client_secret_env} />
+          {oidcProvider?.client_secret_env ? (
+            oidcProvider.client_secret_env
+          ) : (
+            <EmptyData />
+          )}
         </dd>
       </dl>
 
@@ -87,7 +94,7 @@ export const ViewOidcProviderDetail = ({
         title="Groups"
         defaultOpen={true}
       >
-        <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
+        <dl className={dataListGridStyle}>
           <dt className={dataListTermStyle}>Mode:</dt>
           <dd>{oidcProvider?.groups?.mode}</dd>
           {oidcProvider?.groups?.claim_name && (
@@ -102,27 +109,25 @@ export const ViewOidcProviderDetail = ({
               <dd>{oidcProvider?.groups?.sync_interval} seconds</dd>
             </>
           )}
-          {oidcProvider?.groups?.enrich_on_login && (
-            <>
-              <dt className={dataListTermStyle}>Enrich on Login:</dt>
-              <dd className="flex items-center gap-2">
-                {oidcProvider?.groups?.enrich_on_login ? (
-                  <>
-                    <IconCheck />
-                    Yes
-                  </>
-                ) : (
-                  <>
-                    <IconX />
-                    No
-                  </>
-                )}
-              </dd>
-            </>
-          )}
+          <dt className={dataListTermStyle}>Enrich on Login:</dt>
+          <dd className="flex items-center gap-2">
+            {oidcProvider?.groups?.enrich_on_login ? (
+              <>
+                <IconCheck />
+                Yes
+              </>
+            ) : (
+              <>
+                <IconX />
+                No
+              </>
+            )}
+          </dd>
           {oidcProvider?.groups?.service_account_json_env && (
             <>
-              <dt className={dataListTermStyle}>Service Account JSON:</dt>
+              <dt className={dataListTermStyle}>
+                Service Account JSON Environment Variable:
+              </dt>
               <dd>{oidcProvider?.groups?.service_account_json_env}</dd>
             </>
           )}
@@ -140,19 +145,25 @@ export const ViewOidcProviderDetail = ({
           )}
           {oidcProvider?.groups?.tenant_id_env && (
             <>
-              <dt className={dataListTermStyle}>Tenant ID:</dt>
+              <dt className={dataListTermStyle}>
+                Tenant ID Environment Variable:
+              </dt>
               <dd>{oidcProvider?.groups?.tenant_id_env}</dd>
             </>
           )}
           {oidcProvider?.groups?.client_secret_env && (
             <>
-              <dt className={dataListTermStyle}>Client Secret:</dt>
+              <dt className={dataListTermStyle}>
+                Directory Client Secret Environment Variable:
+              </dt>
               <dd>{oidcProvider?.groups?.client_secret_env}</dd>
             </>
           )}
           {oidcProvider?.groups?.api_token_env && (
             <>
-              <dt className={dataListTermStyle}>API Token:</dt>
+              <dt className={dataListTermStyle}>
+                API Token Environment Variable:
+              </dt>
               <dd>{oidcProvider?.groups?.api_token_env}</dd>
             </>
           )}
@@ -168,7 +179,7 @@ export const ViewOidcProviderDetail = ({
       <dl
         className={cn(
           // Grid
-          'grid grid-cols-[160px_1fr] gap-x-6 gap-y-1',
+          dataListGridStyle,
           // Text
           'text-foreground/60 dark:text-dark-foreground/60',
           // Border & Spacing
