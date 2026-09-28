@@ -323,7 +323,9 @@ describe('AppConfigCard', () => {
     renderCard();
 
     expect(
-      await screen.findByText('Overlay keys the contract does not declare'),
+      await screen.findByText(
+        'Values in the deploy repo that the app does not declare',
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText('config.retired_option')).toBeInTheDocument();
   });
@@ -340,7 +342,7 @@ describe('AppConfigCard', () => {
     renderCard();
 
     expect(
-      await screen.findByText('No container contract is mounted'),
+      await screen.findByText('No options are declared for this app'),
     ).toBeInTheDocument();
     expect(screen.queryByText('Log level')).not.toBeInTheDocument();
   });

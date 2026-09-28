@@ -93,7 +93,7 @@ export const ClickhouseCloudStatus = () => {
               {!clickhouseStatus.configured && (
                 <NotificationCard
                   icon={<IconInfoCircle />}
-                  description="ClickHouse Cloud is not configured. A self-hosted ClickHouse is unaffected by this card."
+                  description="ClickHouse Cloud isn't configured. This doesn't affect a self-hosted ClickHouse."
                   type="default"
                 />
               )}

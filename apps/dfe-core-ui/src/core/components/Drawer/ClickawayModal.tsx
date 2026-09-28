@@ -4,7 +4,7 @@ export const ClickawayModal = ({
   onOk,
   onCancel,
   title = 'Potential data loss warning',
-  message = 'Closing this drawer may discard unsaved data.',
+  message = 'Closing now may discard unsaved data.',
 }: {
   onOk: () => void;
   onCancel: () => void;

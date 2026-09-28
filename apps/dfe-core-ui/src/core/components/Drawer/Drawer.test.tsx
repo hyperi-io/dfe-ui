@@ -50,7 +50,7 @@ describe('Drawer', () => {
 
     expect(onClose).not.toHaveBeenCalled();
     expect(
-      await screen.findByText('Closing this drawer may discard unsaved data.'),
+      await screen.findByText('Closing now may discard unsaved data.'),
     ).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe('Drawer', () => {
 
     expect(onClose).toHaveBeenCalled();
     expect(
-      screen.queryByText('Closing this drawer may discard unsaved data.'),
+      screen.queryByText('Closing now may discard unsaved data.'),
     ).not.toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe('Drawer', () => {
 
     expect(onClose).not.toHaveBeenCalled();
     expect(
-      await screen.findByText('Closing this drawer may discard unsaved data.'),
+      await screen.findByText('Closing now may discard unsaved data.'),
     ).toBeInTheDocument();
   });
 
@@ -128,7 +128,7 @@ describe('Drawer', () => {
 
     clickMask(baseElement);
     expect(
-      await screen.findByText('Closing this drawer may discard unsaved data.'),
+      await screen.findByText('Closing now may discard unsaved data.'),
     ).toBeInTheDocument();
 
     clickMask(baseElement);
@@ -136,7 +136,7 @@ describe('Drawer', () => {
     expect(onClose).toHaveBeenCalled();
     await waitFor(() => {
       expect(
-        screen.queryByText('Closing this drawer may discard unsaved data.'),
+        screen.queryByText('Closing now may discard unsaved data.'),
       ).not.toBeInTheDocument();
     });
   });
@@ -147,14 +147,14 @@ describe('Drawer', () => {
 
     clickMask(baseElement);
     expect(
-      await screen.findByText('Closing this drawer may discard unsaved data.'),
+      await screen.findByText('Closing now may discard unsaved data.'),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('body'));
 
     await waitFor(() => {
       expect(
-        screen.queryByText('Closing this drawer may discard unsaved data.'),
+        screen.queryByText('Closing now may discard unsaved data.'),
       ).not.toBeInTheDocument();
     });
     expect(onClose).not.toHaveBeenCalled();
