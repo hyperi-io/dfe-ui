@@ -112,6 +112,37 @@ describe('CompleteStep', () => {
     });
   });
 
+  test('offers Back while there is a step to go back to', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.setupStatus.get.success({
+        mockedResponse: status({}),
+      }),
+    );
+    const goPrevious = vi.fn();
+
+    render(<CompleteStep goPrevious={goPrevious} />, { wrapper });
+    await userEvent.click(await screen.findByRole('button', { name: /Back/ }));
+
+    expect(goPrevious).toHaveBeenCalledTimes(1);
+  });
+
+  test('offers no Back once the steps behind it are closed', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.setupStatus.get.success({
+        mockedResponse: status({}),
+      }),
+    );
+
+    render(<CompleteStep />, { wrapper });
+
+    expect(
+      await screen.findByRole('button', { name: /Get started/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Back/ }),
+    ).not.toBeInTheDocument();
+  });
+
   test('surfaces a refusal instead of claiming the admin is retired', async () => {
     server.use(
       API_CONFIG_MOCKS.auth.setupStatus.get.success({
