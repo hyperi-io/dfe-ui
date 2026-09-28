@@ -55,6 +55,7 @@ export const CRONBuilderProvider = ({
 }: CRONBuilderProviderProps) => {
   const [cronExpression, setCronExpression] = useState(formValue || '');
   const [cronExplainer, setCronExplainer] = useState<string | null>(null);
+
   const handleUpdateCron = useCallback(
     ({ atomic: changedAtomic, raw }: CronExpression) => {
       if (changedAtomic) {
@@ -69,6 +70,7 @@ export const CRONBuilderProvider = ({
         return;
       }
       setCronExpression(raw || '');
+      setCronExplainer(raw ? explainCronExpression(raw) : null);
     },
     [cronExpression],
   );

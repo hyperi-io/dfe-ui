@@ -4,12 +4,20 @@ import { InputNumber } from 'antd';
 
 export const Minutes = () => {
   const { cronExpression, updateCronExpression } = useCRONBuilderContext();
-
   const { minute } = parseCronExpression(cronExpression);
 
-  const handleChange = (val: number) => {
-    updateCronExpression({ atomic: { minute: val.toString() } });
+  const handleChange = (value: number | undefined) => {
+    if (!value) {
+      updateCronExpression({ atomic: { minute: '*' } });
+      return;
+    }
+    updateCronExpression({ atomic: { minute: `*/${value.toString()}` } });
   };
+
+  const value = minute?.includes('*')
+    ? Number(minute?.replace('*', '').replace('/', ''))
+    : (Number(minute) ?? undefined);
+
   return (
     <div className="flex flex-col gap-y-2">
       <label htmlFor="minutes">Every minute</label>
@@ -18,9 +26,9 @@ export const Minutes = () => {
         className="w-full"
         min={1}
         max={59}
-        value={Number(minute) ?? 1}
+        value={value}
         onChange={(val) => {
-          handleChange(Number(val) ?? 1);
+          handleChange(Number(val) ?? undefined);
         }}
       />
     </div>

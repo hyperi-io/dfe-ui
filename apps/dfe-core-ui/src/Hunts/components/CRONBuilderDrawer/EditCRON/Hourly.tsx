@@ -2,21 +2,23 @@ import { useCRONBuilderContext } from '@/Hunts/components/CRONBuilderDrawer/CRON
 import { parseCronExpression } from '@/Hunts/components/CRONBuilderDrawer/CRONBuilder.helpers';
 import { InputNumber, Radio } from 'antd';
 import { useState } from 'react';
-
-type HourlyType = 'every' | 'at';
+import { FrequencyType } from './types';
 
 export const Hourly = () => {
   const { cronExpression, updateCronExpression } = useCRONBuilderContext();
   const { hour, minute } = parseCronExpression(cronExpression);
 
-  const [hourlyType, setHourlyType] = useState<HourlyType>(
+  const [hourlyType, setHourlyType] = useState<FrequencyType>(
     hour?.includes('*/') ? 'every' : 'at',
   );
 
   const handleMinuteChange = (value: number | null) => {
     updateCronExpression({ atomic: { minute: value?.toString() ?? '*' } });
   };
-  const handleHourChange = (value: string, type: HourlyType = hourlyType) => {
+  const handleHourChange = (
+    value: string,
+    type: FrequencyType = hourlyType,
+  ) => {
     const hourlyPrefix = type === 'every' ? '*/' : '';
     const updateHourly = `${hourlyPrefix}${value.replace('*/', '')}`;
     const everyDay = '*/1';
@@ -35,7 +37,7 @@ export const Hourly = () => {
       <Radio.Group
         value={hourlyType}
         onChange={(e) => {
-          const nextType = e.target.value as HourlyType;
+          const nextType = e.target.value as FrequencyType;
           setHourlyType(nextType);
           handleHourChange(hour ?? '1', nextType);
         }}

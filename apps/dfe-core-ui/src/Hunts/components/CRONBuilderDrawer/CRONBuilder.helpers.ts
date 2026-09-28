@@ -1,3 +1,5 @@
+import cronstrue from 'cronstrue';
+
 export const getCronExpression = ({
   minute,
   hour,
@@ -19,27 +21,25 @@ export const parseCronExpression = (cronExpression: string) => {
   return { minute, hour, day, month, week };
 };
 
-const explanationFormatter = (value: string, unit: string) => {
-  return `every ${value} ${unit}${Number(value) > 1 ? 's' : ''}`;
-};
 export const explainCronExpression = (cronExpression: string) => {
-  const { minute, hour, day, month, week } =
-    parseCronExpression(cronExpression);
-  const explanation = [];
-  if (minute !== '*') {
-    explanation.push(explanationFormatter(minute, 'minute'));
+  const cronExplainer = cronstrue.toString(cronExpression);
+
+  return `This hunt will run ${cronExplainer?.charAt(0).toLowerCase() + cronExplainer?.slice(1)}`;
+};
+
+export const resetCronExpression = (key: string) => {
+  switch (key) {
+    case 'minutes':
+      return '*/1 * * * *';
+    case 'hourly':
+      return '0 */1 * * *';
+    case 'daily':
+      return '0 0 1 * *';
+    case 'weekly':
+      return '0 0 0 * SUN-SAT';
+    case 'monthly':
+    case 'custom':
+    default:
+      return '* * * * *';
   }
-  if (hour !== '*') {
-    explanation.push(explanationFormatter(hour, 'hour'));
-  }
-  if (day !== '*') {
-    explanation.push(explanationFormatter(day, 'day'));
-  }
-  if (month !== '*') {
-    explanation.push(explanationFormatter(month, 'month'));
-  }
-  if (week !== '*') {
-    explanation.push(explanationFormatter(week, 'week'));
-  }
-  return 'This hunt will run ' + explanation.join(', ');
 };

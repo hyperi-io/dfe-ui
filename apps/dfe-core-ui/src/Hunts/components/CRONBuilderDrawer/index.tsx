@@ -45,6 +45,9 @@ export const CRONBuilderDrawerBase = ({
         placement="right"
         onClose={() => setIsDrawerVisible(false)}
         open={isDrawerVisible}
+        preventClickaway={{
+          enabled: false,
+        }}
       >
         <EditCRON {...props} onChange={handleChange} />
       </Drawer>
