@@ -170,7 +170,7 @@ export const ConfigureOIDCForm = ({
                     name={[GROUPS_FORM_NAME, 'api_token']}
                     rules={[formValidation]}
                   >
-                    <Input />
+                    <Input.Password autoComplete="new-password" />
                   </Form.Item>
                 </>
               )}
@@ -203,7 +203,7 @@ export const ConfigureOIDCForm = ({
                     name={[GROUPS_FORM_NAME, 'service_account_json']}
                     rules={[formValidation]}
                   >
-                    <Input />
+                    <Input.Password autoComplete="new-password" />
                   </Form.Item>
                 </>
               )}
@@ -229,7 +229,7 @@ export const ConfigureOIDCForm = ({
                     name={[GROUPS_FORM_NAME, 'client_secret']}
                     rules={[formValidation]}
                   >
-                    <Input />
+                    <Input.Password autoComplete="new-password" />
                   </Form.Item>
                 </>
               )}

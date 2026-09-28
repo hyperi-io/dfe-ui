@@ -93,12 +93,29 @@ describe('ConfigureOIDCForm', () => {
     expectOnlyProviderFields('okta');
   });
 
-  test('the client secret variable name is a plain text input', () => {
-    render(<OidcForm type="google" />, { wrapper });
+  test.each([
+    ['google', 'Service Account JSON'],
+    ['entra_id', 'Client Secret'],
+    ['okta', 'API Token'],
+  ])('Type = %s masks the %s value', (type, label) => {
+    render(<OidcForm type={type} />, { wrapper });
 
-    expect(
-      screen.getByLabelText('Client Secret Environment Variable'),
-    ).toHaveAttribute('type', 'text');
+    const input = screen.getByLabelText(label);
+    expect(input).toHaveAttribute('type', 'password');
+    expect(input).toHaveAttribute('autocomplete', 'new-password');
+  });
+
+  test.each([
+    ['google', 'Client ID Environment Variable'],
+    ['google', 'Client Secret Environment Variable'],
+    ['google', 'Service Account JSON ENV'],
+    ['entra_id', 'Tenant ID'],
+    ['entra_id', 'Client Secret ENV'],
+    ['okta', 'API Token Environment Variable'],
+  ])('Type = %s keeps the %s name as plain text', (type, label) => {
+    render(<OidcForm type={type} />, { wrapper });
+
+    expect(screen.getByLabelText(label)).toHaveAttribute('type', 'text');
   });
 
   test('submits with the other providers fields hidden', async () => {
