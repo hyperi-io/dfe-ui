@@ -26,10 +26,10 @@ export const Hourly = () => {
   };
 
   const hourValue = hour?.includes('*')
-    ? Number(hour?.replace('*', '').replace('/', ''))
+    ? Number(hour?.replaceAll('*', '').replaceAll('/', ''))
     : (Number(hour) ?? undefined);
   const minuteValue = minute?.includes('*')
-    ? Number(minute?.replace('*', '').replace('/', ''))
+    ? Number(minute?.replaceAll('*', '').replaceAll('/', ''))
     : (Number(minute) ?? undefined);
 
   return (

@@ -3,7 +3,10 @@ import { CRONBuilderProvider } from '@/Hunts/components/CRONBuilderDrawer/CRONBu
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { Daily } from './Daily';
 import { EditCRON } from '.';
+import { Hourly } from './Hourly';
+import { Minutes } from './Minutes';
 
 const renderEditCron = ({
   value = '',
@@ -17,6 +20,16 @@ const renderEditCron = ({
   ));
 
   return render(<EditCRON onChange={onChange} />, { wrapper });
+};
+
+// Renders a frequency control directly, bypassing EditCRON's tab switcher --
+// a tab change always resets the expression to that tab's own default.
+const renderWithCron = (value: string, children: React.ReactNode) => {
+  const { wrapper } = buildTestWrapper().withWrapper(({ children }) => (
+    <CRONBuilderProvider value={value}>{children}</CRONBuilderProvider>
+  ));
+
+  return render(<>{children}</>, { wrapper });
 };
 
 const generatedExpression = () =>
@@ -140,6 +153,14 @@ describe('EditCron', () => {
       expect(generatedExpression()).toHaveValue('*/10 * * * *');
       expect(screen.getByText(/This hunt will run/)).toBeVisible();
     });
+
+    it('parses a minute field carrying more than one wildcard', () => {
+      renderWithCron('**/12 * * * *', <Minutes />);
+
+      expect(
+        screen.getByRole('spinbutton', { name: 'Every minute' }),
+      ).toHaveValue('12');
+    });
   });
 
   describe('Hourly', () => {
@@ -158,6 +179,12 @@ describe('EditCron', () => {
       await user.type(hours, '2');
 
       expect(generatedExpression()).toHaveValue('0 */2 */1 * *');
+    });
+
+    it('parses an hour field carrying more than one wildcard', () => {
+      renderWithCron('0 **/6 * * *', <Hourly />);
+
+      expect(screen.getByPlaceholderText('Hours')).toHaveValue('6');
     });
   });
 
@@ -178,6 +205,14 @@ describe('EditCron', () => {
       await user.type(day, '3');
 
       expect(generatedExpression()).toHaveValue('0 1 */3 * *');
+    });
+
+    it('parses a day field carrying more than one wildcard', () => {
+      renderWithCron('0 1 **/9 * *', <Daily />);
+
+      expect(
+        screen.getByRole('spinbutton', { name: 'Day interval' }),
+      ).toHaveValue('9');
     });
   });
 

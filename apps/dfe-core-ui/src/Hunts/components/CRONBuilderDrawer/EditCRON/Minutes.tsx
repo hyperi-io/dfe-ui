@@ -15,7 +15,7 @@ export const Minutes = () => {
   };
 
   const value = minute?.includes('*')
-    ? Number(minute?.replace('*', '').replace('/', ''))
+    ? Number(minute?.replaceAll('*', '').replaceAll('/', ''))
     : (Number(minute) ?? undefined);
 
   return (

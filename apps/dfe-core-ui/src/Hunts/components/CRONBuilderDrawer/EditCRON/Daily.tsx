@@ -15,7 +15,7 @@ export const Daily = ({ onChange: _onChange, ..._props }: InputProps) => {
   };
 
   const dayValue = day?.includes('*')
-    ? Number(day?.replace('*', '').replace('/', ''))
+    ? Number(day?.replaceAll('*', '').replaceAll('/', ''))
     : (Number(day) ?? undefined);
   return (
     <div className="flex flex-col gap-y-2">
