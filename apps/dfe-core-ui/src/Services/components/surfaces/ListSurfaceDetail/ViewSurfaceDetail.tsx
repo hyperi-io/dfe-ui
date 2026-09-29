@@ -1,5 +1,7 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { formatDateToString } from '@/core/helpers/date.helpers';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TServiceSurfaceDetailResponse } from '@/Services/hooks/serviceSurfaces/useFetchServiceSurfaceDetail/types';
 
@@ -20,8 +22,13 @@ export const ViewSurfaceDetail = (surface: TServiceSurfaceDetailResponse) => {
     config_surface,
     metrics_surface,
   } = surface;
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
-    <div className="flex flex-col gap-2 h-[calc(100vh-155px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-2">
       <dl className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-6 gap-y-1">
         <dt className={dataListTermStyle}> Service Name:</dt>
         <dd>{service || <EmptyData />}</dd>
@@ -55,6 +62,6 @@ export const ViewSurfaceDetail = (surface: TServiceSurfaceDetailResponse) => {
           />
         ))}
       </SimpleCollapse>
-    </div>
+    </CustomScrollbar>
   );
 };

@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
@@ -17,6 +19,10 @@ interface UpdateRuleFormProps {
 
 export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   const queryClient = useQueryClient();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 125,
+  });
 
   const {
     mutate: updateRule,
@@ -57,7 +63,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
     );
 
   return (
-    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+    <CustomScrollbar className="flex flex-col gap-4" height={componentHeight}>
       <CreateUpdateRuleForm
         key={rule.name ?? 'empty'}
         disabledFields={{
@@ -77,6 +83,6 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
         error={updateRuleError}
         buttonLabel="Update Rule"
       />
-    </div>
+    </CustomScrollbar>
   );
 };

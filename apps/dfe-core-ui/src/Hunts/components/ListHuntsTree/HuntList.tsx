@@ -1,5 +1,7 @@
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { THuntListItem } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -18,6 +20,10 @@ export const HuntList = ({ className }: { className?: string }) => {
     hasFilters,
     setFilters,
   } = useListHuntsContext();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
 
   if (isLoading && hunts.length === 0) {
     return (
@@ -46,33 +52,30 @@ export const HuntList = ({ className }: { className?: string }) => {
   }
 
   return (
-    <ul
-      className={cn(
-        'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-        className,
-      )}
-    >
-      {hunts.map((hunt: THuntListItem) => {
-        const isSelected = selectedHuntName === hunt.name;
-        return (
-          <li key={hunt.name} className="w-full">
-            <button
-              type="button"
-              className={cn(
-                'overflow-hidden',
-                'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
-                isSelected && 'bg-gray-200 dark:bg-gray-700',
-              )}
-              onClick={() => setSelectedHuntName(hunt.name)}
-            >
-              {hunt.display_name}
-            </button>
-          </li>
-        );
-      })}
-      <div ref={loadMoreRef} className="flex justify-center h-4">
-        {isFetchingNextPage && <Spin size="small" />}
-      </div>
-    </ul>
+    <CustomScrollbar height={componentHeight}>
+      <ul className={cn('h-full flex flex-col gap-2 pt-2', className)}>
+        {hunts.map((hunt: THuntListItem) => {
+          const isSelected = selectedHuntName === hunt.name;
+          return (
+            <li key={hunt.name} className="w-full">
+              <button
+                type="button"
+                className={cn(
+                  'overflow-hidden',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
+                  isSelected && 'bg-gray-200 dark:bg-gray-700',
+                )}
+                onClick={() => setSelectedHuntName(hunt.name)}
+              >
+                {hunt.display_name}
+              </button>
+            </li>
+          );
+        })}
+        <div ref={loadMoreRef} className="flex justify-center h-4">
+          {isFetchingNextPage && <Spin size="small" />}
+        </div>
+      </ul>
+    </CustomScrollbar>
   );
 };

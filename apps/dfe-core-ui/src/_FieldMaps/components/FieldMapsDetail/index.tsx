@@ -1,8 +1,10 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useFetchFieldMapDetail } from '@/core/hooks/useFetchFieldMapDetail';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { Spin } from 'antd';
 
 export const FieldMapsDetail = () => {
@@ -14,6 +16,10 @@ export const FieldMapsDetail = () => {
   } = useFetchFieldMapDetail({
     standard: selectedFieldMap?.map_standard ?? null,
     source: selectedFieldMap?.map_source ?? null,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 125,
   });
 
   if (isFetchingFieldMapDetail)
@@ -39,7 +45,7 @@ export const FieldMapsDetail = () => {
     );
   }
   return (
-    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4">
+    <CustomScrollbar height={componentHeight}>
       <div className="flex items-center justify-between mb-4 text-sm text-error border border-error rounded-md p-2">
         TODO: Add field map detail here
       </div>
@@ -48,6 +54,6 @@ export const FieldMapsDetail = () => {
         mode="json"
         height="70%"
       />
-    </div>
+    </CustomScrollbar>
   );
 };

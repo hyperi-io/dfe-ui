@@ -1,5 +1,7 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { TFieldMapSummary } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -17,6 +19,10 @@ export const FieldMapsList = ({ className }: { className?: string }) => {
     hasFilters,
     setFilters,
   } = useListFieldMapsContext();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
 
   if (fieldMaps.length === 0) {
     return (
@@ -37,51 +43,48 @@ export const FieldMapsList = ({ className }: { className?: string }) => {
   }
 
   return (
-    <ul
-      className={cn(
-        'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-        className,
-      )}
-    >
-      <>
-        {fieldMaps.map((fieldMap: TFieldMapSummary) => {
-          const isSelected =
-            selectedFieldMap?.map_source === fieldMap.source &&
-            selectedFieldMap?.map_standard === fieldMap.standard;
-          return (
-            <li
-              key={`${fieldMap.standard}-${fieldMap.source ?? '_default'}`}
-              className="w-full"
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  className={cn(
-                    'overflow-hidden',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex [&_span]:w-full px-2 py-0.5 hover:cursor-pointer rounded-md',
-                    isSelected && 'bg-gray-200 dark:bg-gray-700',
-                  )}
-                  onClick={() => {
-                    setSelectedFieldMap({
-                      map_source: fieldMap.source ?? null,
-                      map_standard: fieldMap.standard,
-                    });
-                  }}
-                >
-                  <dl>
-                    <dt className="truncate ellipsis">{fieldMap.standard}</dt>
-                    <dd className="text-sm text-gray-500 dark:text-gray-400 truncate ellipsis">
-                      {fieldMap.source ?? '_default'}
-                    </dd>
-                  </dl>
-                </button>
-              </div>
-            </li>
-          );
-        })}
-        <div ref={loadMoreRef} className="h-4 flex justify-center">
-          {isFetchingNextPage && <Spin size="small" />}
-        </div>
-      </>
-    </ul>
+    <CustomScrollbar height={componentHeight}>
+      <ul className={cn('flex flex-col gap-2 pt-2', className)}>
+        <>
+          {fieldMaps.map((fieldMap: TFieldMapSummary) => {
+            const isSelected =
+              selectedFieldMap?.map_source === fieldMap.source &&
+              selectedFieldMap?.map_standard === fieldMap.standard;
+            return (
+              <li
+                key={`${fieldMap.standard}-${fieldMap.source ?? '_default'}`}
+                className="w-full"
+              >
+                <div className="flex items-center gap-2">
+                  <button
+                    className={cn(
+                      'overflow-hidden',
+                      'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex [&_span]:w-full px-2 py-0.5 hover:cursor-pointer rounded-md',
+                      isSelected && 'bg-gray-200 dark:bg-gray-700',
+                    )}
+                    onClick={() => {
+                      setSelectedFieldMap({
+                        map_source: fieldMap.source ?? null,
+                        map_standard: fieldMap.standard,
+                      });
+                    }}
+                  >
+                    <dl>
+                      <dt className="truncate ellipsis">{fieldMap.standard}</dt>
+                      <dd className="text-sm text-gray-500 dark:text-gray-400 truncate ellipsis">
+                        {fieldMap.source ?? '_default'}
+                      </dd>
+                    </dl>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+          <div ref={loadMoreRef} className="h-4 flex justify-center">
+            {isFetchingNextPage && <Spin size="small" />}
+          </div>
+        </>
+      </ul>
+    </CustomScrollbar>
   );
 };

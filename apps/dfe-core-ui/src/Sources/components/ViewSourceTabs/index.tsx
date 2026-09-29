@@ -4,9 +4,11 @@ import { SourceTransformSelector } from '@/Sources/components/SourceTransformSel
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
 import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -92,156 +94,163 @@ export const ViewSourceDetailTabs = ({
     [refetchSources, setSelectedSource],
   );
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 150,
+  });
+
   return (
-    <Tabs
-      classNames={{
-        root: cn(
-          'flex min-h-0 flex-1 flex-col -mt-3',
-          '[&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:flex-1',
-          '[&_.ant-tabs-content]:h-full',
-        ),
-        content:
-          'h-full max-h-[calc(100vh-150px)] pb-8 min-h-0 overflow-y-auto css-custom-scrollbar',
-      }}
-      activeKey={activeTab}
-      onChange={handleTabChange}
-      items={[
-        {
-          key: 'flow',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['flow'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.source_read}>
-              <RbacProtected.Unrestricted>
-                <SourceFlowCard source={selectedSourceName} />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
+    <CustomScrollbar height={componentHeight}>
+      <Tabs
+        classNames={{
+          root: cn(
+            'flex min-h-0 flex-1 flex-col -mt-3',
+            '[&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:flex-1',
+            '[&_.ant-tabs-content]:h-full',
           ),
-        },
+          content: 'h-full pb-8 min-h-0',
+        }}
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        items={[
+          {
+            key: 'flow',
+            label: SOURCE_DETAIL_TAB_KEY_MAP['flow'],
+            children: (
+              <RbacProtected action={RbacProtected.rbacActions.source_read}>
+                <RbacProtected.Unrestricted>
+                  <SourceFlowCard source={selectedSourceName} />
+                </RbacProtected.Unrestricted>
+                <RbacProtected.Restricted className="h-full">
+                  <RbacProtected.RestrictedRoute />
+                </RbacProtected.Restricted>
+              </RbacProtected>
+            ),
+          },
 
-        {
-          key: 'configuration',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['configuration'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.source_read}>
-              <RbacProtected.Unrestricted>
-                <ConfigurationDetailsTabContent {...sourceDetailData} />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-
-        {
-          key: 'sample-events',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.schema_read}>
-              <RbacProtected.Unrestricted>
-                <PromoteRowsProvider
-                  source_name={selectedSourceName}
-                  version={selectedSourceVersion}
-                >
-                  <SampleEventsTabContent />
-                </PromoteRowsProvider>
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-
-        {
-          key: 'processing',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
-              <RbacProtected.Unrestricted>
-                <SourceProcessingTabContent
-                  source={selectedSourceName}
-                  transformSlot={
-                    <SourceTransformSelector
-                      // Keyed by source: a refusal is one deployment's answer
-                      // about one source, and it must not follow the reader to
-                      // the next one.
-                      key={selectedSourceName}
-                      source={selectedSourceName}
-                      sourceDetail={sourceDetailData}
-                      onSourceUpdated={handleSourceUpdated}
-                    />
-                  }
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
-
-        /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
-        ...(isMetaSchemaDefined
-          ? [
-              // {
-              //   key: 'table-stats',
-              //   label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
-              //   children: <TableStatsTabContent />,
-              // },
-              {
-                key: 'columns',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
-                children: (
-                  <RbacProtected action={RbacProtected.rbacActions.source_read}>
-                    <RbacProtected.Unrestricted>
-                      <SourceColumnsTabContent
-                        source_name={selectedSourceName}
+          {
+            key: 'configuration',
+            label: SOURCE_DETAIL_TAB_KEY_MAP['configuration'],
+            children: (
+              <RbacProtected action={RbacProtected.rbacActions.source_read}>
+                <RbacProtected.Unrestricted>
+                  <ConfigurationDetailsTabContent {...sourceDetailData} />
+                </RbacProtected.Unrestricted>
+                <RbacProtected.Restricted className="h-full">
+                  <RbacProtected.RestrictedRoute />
+                </RbacProtected.Restricted>
+              </RbacProtected>
+            ),
+          },
+          {
+            key: 'sample-events',
+            label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
+            children: (
+              <RbacProtected action={RbacProtected.rbacActions.schema_read}>
+                <RbacProtected.Unrestricted>
+                  <PromoteRowsProvider
+                    source_name={selectedSourceName}
+                    version={selectedSourceVersion}
+                  >
+                    <SampleEventsTabContent />
+                  </PromoteRowsProvider>
+                </RbacProtected.Unrestricted>
+                <RbacProtected.Restricted className="h-full">
+                  <RbacProtected.RestrictedRoute />
+                </RbacProtected.Restricted>
+              </RbacProtected>
+            ),
+          },
+          {
+            key: 'processing',
+            label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
+            children: (
+              <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
+                <RbacProtected.Unrestricted>
+                  <SourceProcessingTabContent
+                    source={selectedSourceName}
+                    transformSlot={
+                      <SourceTransformSelector
+                        // Keyed by source: a refusal is one deployment's answer
+                        // about one source, and it must not follow the reader to
+                        // the next one.
+                        key={selectedSourceName}
+                        source={selectedSourceName}
+                        sourceDetail={sourceDetailData}
+                        onSourceUpdated={handleSourceUpdated}
                       />
-                    </RbacProtected.Unrestricted>
-                    <RbacProtected.Restricted className="h-full">
-                      <RbacProtected.RestrictedRoute />
-                    </RbacProtected.Restricted>
-                  </RbacProtected>
-                ),
-              },
-              {
-                key: 'ddl-preview',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
-                children: (
-                  <RbacProtected action={RbacProtected.rbacActions.source_read}>
-                    <RbacProtected.Unrestricted>
-                      <SourceDdlPreviewTabContent
-                        source_name={selectedSourceName}
-                        source_version={selectedSourceVersion}
-                        build_result={sourceDetailData.version.source_build}
-                        deploy_result={
-                          sourceDetailData.version.source_deployment
-                        }
-                      />
-                    </RbacProtected.Unrestricted>
-                    <RbacProtected.Restricted className="h-full">
-                      <RbacProtected.RestrictedRoute />
-                    </RbacProtected.Restricted>
-                  </RbacProtected>
-                ),
-              },
-              // {
-              //   key: 'rules',
-              //   label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
-              //   children: <SourceRulesTabContent />,
-              // },
-              // {
-              //   key: 'hunts',
-              //   label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
-              //   children: <HuntsTabContent />,
-              // },
-            ]
-          : []),
-      ]}
-    />
+                    }
+                  />
+                </RbacProtected.Unrestricted>
+                <RbacProtected.Restricted className="h-full">
+                  <RbacProtected.RestrictedRoute />
+                </RbacProtected.Restricted>
+              </RbacProtected>
+            ),
+          },
+
+          /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
+          ...(isMetaSchemaDefined
+            ? [
+                // {
+                //   key: 'table-stats',
+                //   label: SOURCE_DETAIL_TAB_KEY_MAP['table-stats'],
+                //   children: <TableStatsTabContent />,
+                // },
+                {
+                  key: 'columns',
+                  label: SOURCE_DETAIL_TAB_KEY_MAP['columns'],
+                  children: (
+                    <RbacProtected
+                      action={RbacProtected.rbacActions.source_read}
+                    >
+                      <RbacProtected.Unrestricted>
+                        <SourceColumnsTabContent
+                          source_name={selectedSourceName}
+                        />
+                      </RbacProtected.Unrestricted>
+                      <RbacProtected.Restricted className="h-full">
+                        <RbacProtected.RestrictedRoute />
+                      </RbacProtected.Restricted>
+                    </RbacProtected>
+                  ),
+                },
+                {
+                  key: 'ddl-preview',
+                  label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
+                  children: (
+                    <RbacProtected
+                      action={RbacProtected.rbacActions.source_read}
+                    >
+                      <RbacProtected.Unrestricted>
+                        <SourceDdlPreviewTabContent
+                          source_name={selectedSourceName}
+                          source_version={selectedSourceVersion}
+                          build_result={sourceDetailData.version.source_build}
+                          deploy_result={
+                            sourceDetailData.version.source_deployment
+                          }
+                        />
+                      </RbacProtected.Unrestricted>
+                      <RbacProtected.Restricted className="h-full">
+                        <RbacProtected.RestrictedRoute />
+                      </RbacProtected.Restricted>
+                    </RbacProtected>
+                  ),
+                },
+                // {
+                //   key: 'rules',
+                //   label: SOURCE_DETAIL_TAB_KEY_MAP['rules'],
+                //   children: <SourceRulesTabContent />,
+                // },
+                // {
+                //   key: 'hunts',
+                //   label: SOURCE_DETAIL_TAB_KEY_MAP['hunts'],
+                //   children: <HuntsTabContent />,
+                // },
+              ]
+            : []),
+        ]}
+      />
+    </CustomScrollbar>
   );
 };

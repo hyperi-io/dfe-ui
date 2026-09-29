@@ -1,6 +1,8 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { formatDateToString } from '@/core/helpers/date.helpers';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchDeploymentHistory } from '@/Services/hooks/deployments/useFetchDeploymentHistory';
 import { Card, Spin } from 'antd';
 
@@ -19,6 +21,10 @@ export const ViewDeploymentHistory = ({
   const { data, isLoading, error } = useFetchDeploymentHistory({
     service_name: service,
     service_instance: instance,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
   });
 
   if (isLoading) {
@@ -43,7 +49,7 @@ export const ViewDeploymentHistory = ({
   }
 
   return (
-    <div className="h-[calc(100vh-215px)] css-custom-scrollbar flex flex-col gap-2">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-2">
       {data?.map((item) => (
         <Card size="small" key={item.commit}>
           <dl className="grid grid-cols-[auto_1fr] gap-2">
@@ -58,6 +64,6 @@ export const ViewDeploymentHistory = ({
           </dl>
         </Card>
       ))}
-    </div>
+    </CustomScrollbar>
   );
 };

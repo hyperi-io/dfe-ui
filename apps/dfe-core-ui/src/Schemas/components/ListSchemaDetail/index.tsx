@@ -1,7 +1,9 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import {
   SchemaDetailColumnFilterField,
@@ -21,6 +23,10 @@ export const ListSchemaDetail = () => {
     {},
   );
   const [columnFilterResetKey, setColumnFilterResetKey] = useState(0);
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
 
   const handleColumnFilterChange = useCallback(
     (filterKey: SchemaDetailColumnFilterField, value: string | undefined) => {
@@ -104,7 +110,7 @@ export const ListSchemaDetail = () => {
   return (
     <>
       {contextHolder}
-      <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
         <h4 className="text-lg font-medium flex items-center gap-2">
           <span className="text-foreground/50 dark:text-dark-foreground/50">
             Schema Configuration:
@@ -143,7 +149,7 @@ export const ListSchemaDetail = () => {
           isLoading={isFetchingSchemaDetail || isFetchingNextPageSchemaDetail}
           onScroll={handleScroll}
         />
-      </div>
+      </CustomScrollbar>
     </>
   );
 };

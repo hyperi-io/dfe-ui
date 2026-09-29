@@ -1,10 +1,12 @@
 'use client';
 
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchInfiniteFilteredGroups } from '@/core/hooks/useFetchInfiniteFilteredGroups';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateGroupDrawer } from '@/Settings/components/GroupManagement/CreateGroupDrawer';
 import { GroupCard } from '@/Settings/components/GroupManagement/GroupCard';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -26,8 +28,16 @@ export const UserGroups = () => {
     per_page: 12,
   });
 
+  const { componentHeight: outerComponentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
+  const { componentHeight: innerComponentHeight } = useSetComponentHeight({
+    offset: 295,
+  });
+
   return (
-    <div className="h-full css-custom-scrollbar">
+    <CustomScrollbar height={outerComponentHeight}>
       <SectionCard
         title="Configure a new group"
         description="Create a group and assign roles to its members."
@@ -69,7 +79,7 @@ export const UserGroups = () => {
               />
             )}
             {!isLoading && !error && groups.length > 0 && (
-              <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+              <CustomScrollbar height={innerComponentHeight}>
                 <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {groups.map((group) => (
                     <li key={group.name}>
@@ -80,7 +90,7 @@ export const UserGroups = () => {
                     {isFetchingNextPage && <Spin size="small" />}
                   </div>
                 </ul>
-              </div>
+              </CustomScrollbar>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>
@@ -93,6 +103,6 @@ export const UserGroups = () => {
           </RbacProtected.Restricted>
         </RbacProtected>
       </SectionCard>
-    </div>
+    </CustomScrollbar>
   );
 };

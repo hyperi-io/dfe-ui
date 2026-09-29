@@ -1,3 +1,5 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TFetchServiceConfigDetailResponse } from '@/Services/hooks/serviceConfigs/useFetchServiceConfigDetail/types';
 
@@ -14,8 +16,13 @@ export const ViewServiceConfigDetail = ({
     routing,
     compression,
   } = config;
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
-    <div className="flex flex-col gap-2 h-[calc(100vh-215px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-2">
       <SectionCollapse
         title="Metrics"
         data={metrics as Record<string, unknown>}
@@ -52,6 +59,6 @@ export const ViewServiceConfigDetail = ({
         title="Compression"
         data={compression as Record<string, unknown>}
       />
-    </div>
+    </CustomScrollbar>
   );
 };
