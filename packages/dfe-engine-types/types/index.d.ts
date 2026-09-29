@@ -5882,6 +5882,11 @@ export interface components {
         AppSummary: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Instance */
             instance: string;
             /** Telemetry Name */
@@ -6310,6 +6315,11 @@ export interface components {
         CatalogueEntry: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Scale Deployed */
             scale_deployed: boolean;
             /** Multiplicity */
