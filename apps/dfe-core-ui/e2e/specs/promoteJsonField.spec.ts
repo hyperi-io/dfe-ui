@@ -212,9 +212,7 @@ test('the console promotes a path and the meta schema carries the column @docker
   );
 
   // The sample row is the console's own read of `_json`, so the tick is taken on
-  // the rendered path rather than on a path this spec supplies. The event tree
-  // opens `_json` one level deep, so the path's parent is expanded first.
-  await page.getByRole('button', { name: '"client": {' }).first().click();
+  // the rendered path rather than on a path this spec supplies.
   await page
     .getByRole('button', { name: `Actions for _json.${UI_PATH}` })
     .first()

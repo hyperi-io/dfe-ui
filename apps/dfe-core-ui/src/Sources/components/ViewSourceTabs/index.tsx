@@ -143,7 +143,6 @@ export const ViewSourceDetailTabs = ({
             <RbacProtected action={RbacProtected.rbacActions.schema_read}>
               <RbacProtected.Unrestricted>
                 <PromoteRowsProvider
-                  key={selectedSourceName}
                   source_name={selectedSourceName}
                   version={selectedSourceVersion}
                 >
