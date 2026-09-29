@@ -24,8 +24,6 @@ export const MATCH_OPERATORS = [
 export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
 export type SourceOrigin = (typeof SOURCE_ORIGINS)[number];
 
-export const FETCHER_TOPICS = ['own', 'main'] as const;
-
 export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
   own: 'Own topic and table',
   main: 'Shared main table',
@@ -77,7 +75,7 @@ const originTabSchema = {
   fetcher: z
     .object({
       source_type: z.string().optional().nullable(),
-      topic: z.enum(FETCHER_TOPICS).optional().nullable(),
+      // No topic here: the request body derives it from _assignSchema.
       // YAML text in the form; an object on the wire.
       config: z.string().optional().nullable(),
     })
@@ -88,10 +86,13 @@ const originTabSchema = {
 const schemaConfigTabSchema = {
   schema: z
     .object({
-      meta_schema: z.string({ message: 'Meta schema is required' }),
-      meta_schema_version: z.string({
-        message: 'Meta schema version is required',
-      }),
+      // An edit of a schemaless source seeds these as '', which is no choice at all.
+      meta_schema: z
+        .string({ message: 'Meta schema is required' })
+        .min(1, { message: 'Meta schema is required' }),
+      meta_schema_version: z
+        .string({ message: 'Meta schema version is required' })
+        .min(1, { message: 'Meta schema version is required' }),
       ttl_days: z.number().optional().nullable(),
       // Blank follows the DFE default.
       engine: z.string().optional().nullable(),

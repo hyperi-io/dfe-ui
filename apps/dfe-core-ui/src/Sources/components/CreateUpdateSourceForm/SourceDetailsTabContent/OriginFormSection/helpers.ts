@@ -10,7 +10,6 @@ export const EMPTY_MATCH: NonNullable<CreateUpdateSourceFormData['match']> = {
 export const EMPTY_FETCHER: NonNullable<CreateUpdateSourceFormData['fetcher']> =
   {
     source_type: '',
-    topic: 'own',
     config: '',
   };
 

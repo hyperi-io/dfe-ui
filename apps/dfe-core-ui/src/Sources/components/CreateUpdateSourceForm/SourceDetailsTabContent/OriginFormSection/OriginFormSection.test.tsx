@@ -58,7 +58,7 @@ const Harness = ({
       initialValues={{
         origin: 'receiver',
         match: { field: '', operator: 'equals', value: '' },
-        fetcher: { source_type: '', topic: 'own', config: '' },
+        fetcher: { source_type: '', config: '' },
         ...initialValues,
       }}
     >
@@ -127,7 +127,6 @@ describe('OriginFormSection', () => {
           origin: 'fetcher',
           fetcher: {
             source_type: 'crates_io',
-            topic: 'main',
             config: 'crates:\n  - dfe-fetcher\n',
           },
         }}
@@ -169,7 +168,20 @@ describe('OriginFormSection', () => {
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(2));
     const asFetcher = onFinish.mock.calls[1][0] as CreateUpdateSourceFormData;
     expect(asFetcher.origin).toBe('fetcher');
-    expect(asFetcher.fetcher?.topic).toBe('own');
+    expect(asFetcher.fetcher?.source_type).toBe('');
     expect(asFetcher.match).toBeUndefined();
+  });
+
+  it('asks for no topic, since the Schema tab decides where records land', async () => {
+    const user = userEvent.setup();
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await user.click(await screen.findByRole('radio', { name: 'Fetcher' }));
+
+    expect(await screen.findByLabelText('Source type')).toBeInTheDocument();
+    expect(screen.queryByText('Topic')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('radio', { name: 'Own topic and table' }),
+    ).not.toBeInTheDocument();
   });
 });

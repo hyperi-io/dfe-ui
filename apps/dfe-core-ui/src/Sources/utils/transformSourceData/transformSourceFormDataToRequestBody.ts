@@ -15,7 +15,16 @@ import { objectArrayToObject, parseFetcherConfig } from './helpers';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): TSourceUpdateRequestBody => {
-  const { fetcher, match, origin, schema, views, transform, ...rest } = source;
+  const {
+    _assignSchema,
+    fetcher,
+    match,
+    origin,
+    schema,
+    views,
+    transform,
+    ...rest
+  } = source;
 
   const isFetcherOrigin = origin === 'fetcher';
 
@@ -23,7 +32,11 @@ export const transformSourceFormDataToRequestBody = (
   const apiFetcher: TSourceUpdateRequestBody['fetcher'] = isFetcherOrigin
     ? {
         source_type: fetcher?.source_type ?? '',
-        topic: fetcher?.topic ?? 'own',
+        // A defined schema is the source's own table; without one the engine can only deploy it onto main.
+        topic:
+          _assignSchema === 'define_schema' && schema?.meta_schema
+            ? 'own'
+            : 'main',
         config: parsedConfig.ok ? parsedConfig.config : {},
       }
     : null;
@@ -36,9 +49,7 @@ export const transformSourceFormDataToRequestBody = (
         value: match?.value ?? '',
       };
 
-  const transformedSource: TSourceUpdateRequestBody & {
-    _assignSchema?: string;
-  } = {
+  const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
     // An empty engine is how the API is told to follow the DFE default.
     ...(schema != null
@@ -63,7 +74,6 @@ export const transformSourceFormDataToRequestBody = (
       ? { transform: { ...transform, env: objectArrayToObject(transform.env) } }
       : {}),
     fetcher: apiFetcher,
-    _assignSchema: undefined,
   };
   return transformedSource;
 };

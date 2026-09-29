@@ -35,6 +35,36 @@ describe('formSchema source details', () => {
   });
 });
 
+describe('formSchema schema', () => {
+  test('a defined schema with no meta schema picked is refused', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      _assignSchema: 'define_schema',
+      origin: 'receiver',
+      match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
+      schema: { meta_schema: '', meta_schema_version: '' },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
+      'Meta schema version is required',
+    ]);
+  });
+
+  test('main sends no schema block, so nothing in it is checked', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      _assignSchema: 'default',
+      origin: 'receiver',
+      match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
+    };
+
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+});
+
 describe('formSchema origin', () => {
   test('a receiver source needs its match rule and ignores the fetcher block', () => {
     const data: CreateUpdateSourceFormData = {
@@ -42,7 +72,7 @@ describe('formSchema origin', () => {
       _assignSchema: 'default',
       origin: 'receiver',
       match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
-      fetcher: { source_type: '', topic: 'own', config: '' },
+      fetcher: { source_type: '', config: '' },
     };
 
     expect(formSchema.safeParse(data).success).toBe(true);
@@ -89,7 +119,6 @@ describe('formSchema origin', () => {
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
-        topic: 'own',
         config: 'crates:\n  - dfe-fetcher\n',
       },
     };
@@ -102,7 +131,7 @@ describe('formSchema origin', () => {
       ...BASE,
       _assignSchema: 'default',
       origin: 'fetcher',
-      fetcher: { source_type: '', topic: 'own', config: '' },
+      fetcher: { source_type: '', config: '' },
     };
 
     expect(messagesAt(data, ['fetcher', 'source_type'])).toEqual([
@@ -117,7 +146,6 @@ describe('formSchema origin', () => {
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
-        topic: 'own',
         config: 'crates: [unterminated',
       },
     };
@@ -132,7 +160,6 @@ describe('formSchema origin', () => {
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
-        topic: 'own',
         config: '- one\n- two\n',
       },
     };
@@ -149,7 +176,6 @@ describe('formSchema origin', () => {
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
-        topic: 'own',
         config: 'enabled: true\ntopic: elsewhere\n',
       },
     };

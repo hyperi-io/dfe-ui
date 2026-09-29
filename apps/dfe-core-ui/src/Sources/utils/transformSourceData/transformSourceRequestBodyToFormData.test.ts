@@ -29,9 +29,9 @@ describe('transformSourceRequestBodyToFormData', () => {
     expect(result.origin).toBe('fetcher');
     expect(result.fetcher).toEqual({
       source_type: 'crates_io',
-      topic: 'main',
       config: 'crates:\n  - dfe-fetcher\ninterval_secs: 3600\n',
     });
+    expect(result._assignSchema).toBe('default');
     expect(result.source).toBe('source');
     expect(result.display_name).toBe('display name');
     expect(result.enabled).toBe(false);
@@ -64,17 +64,16 @@ describe('transformSourceRequestBodyToFormData', () => {
     });
   });
 
-  test('a fetcher stanza survives the round trip back to the API shape', () => {
-    const fetcher = {
-      source_type: 'okta',
-      topic: 'own' as const,
-      config: {
-        connections: [
-          { domain: 'example.okta.com', token: 'vault:okta:token' },
-        ],
-        interval_secs: 300,
-      },
-    };
+  const oktaFetcher = {
+    source_type: 'okta',
+    topic: 'own' as const,
+    config: {
+      connections: [{ domain: 'example.okta.com', token: 'vault:okta:token' }],
+      interval_secs: 300,
+    },
+  };
+
+  test('a fetcher source with a meta schema keeps its own topic through an edit', () => {
     const source: TSourceVersionDetail = {
       source: 'source',
       resource_type: 'custom',
@@ -83,13 +82,42 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['1.0.0'],
       selected: '1.0.0',
       state: 'active',
-      version: { date_time: 'string', archive: false, fetcher },
+      version: {
+        date_time: 'string',
+        archive: false,
+        fetcher: oktaFetcher,
+        schema: {
+          meta_schema: 'meta/okta',
+          meta_schema_version: '1.0.0',
+          engine: '',
+        },
+      },
     };
 
     const formData = transformSourceRequestBodyToFormData(source);
     const requestBody = transformSourceFormDataToRequestBody(formData);
 
-    expect(requestBody.fetcher).toEqual(fetcher);
+    expect(formData._assignSchema).toBe('define_schema');
+    expect(requestBody.fetcher).toEqual(oktaFetcher);
+  });
+
+  test('a fetcher source with no schema is moved onto main by an edit', () => {
+    const source: TSourceVersionDetail = {
+      source: 'source',
+      resource_type: 'custom',
+      enabled: true,
+      current: '1.0.0',
+      versions: ['1.0.0'],
+      selected: '1.0.0',
+      state: 'active',
+      version: { date_time: 'string', archive: false, fetcher: oktaFetcher },
+    };
+
+    const formData = transformSourceRequestBodyToFormData(source);
+    const requestBody = transformSourceFormDataToRequestBody(formData);
+
+    expect(formData._assignSchema).toBe('default');
+    expect(requestBody.fetcher).toEqual({ ...oktaFetcher, topic: 'main' });
   });
 
   test('when the version has no origin at all, it falls back to receiver', () => {

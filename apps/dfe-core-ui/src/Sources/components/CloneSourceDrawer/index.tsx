@@ -196,7 +196,6 @@ export const CloneSourceDrawer = ({
               fetcher: clonedFetcher
                 ? {
                     source_type: clonedFetcher.source_type ?? '',
-                    topic: clonedFetcher.topic ?? 'own',
                     config: stringifyFetcherConfig(clonedFetcher.config),
                   }
                 : null,

@@ -2,9 +2,8 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
-import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { FormRule, Radio, Select } from 'antd';
+import { FormRule, Select } from 'antd';
 import { getFetcherSourceTypes } from './helpers';
 
 export const FetcherFormSection = ({
@@ -42,19 +41,6 @@ export const FetcherFormSection = ({
             label: sourceType,
             value: sourceType,
           }))}
-        />
-      </Form.Item>
-
-      <Form.Item
-        name={['fetcher', 'topic']}
-        label="Topic"
-        rules={[formValidation]}
-        help="Its own topic gives this source its own table; main sends it to the shared main table."
-      >
-        <Radio.Group
-          options={Object.entries(FETCHER_TOPIC_LABELS).map(
-            ([value, label]) => ({ label, value }),
-          )}
         />
       </Form.Item>
 

@@ -1,4 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import { getInitialAssignSchema } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/SchemaConfigTabContent.helpers';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
 import { objectToObjectArray, stringifyFetcherConfig } from './helpers';
@@ -25,7 +26,9 @@ export const transformSourceRequestBodyToFormData = (
     // not the same as a choice: null puts it back on the deployment default.
     transport: source?.version?.transport ?? null,
     archive: source?.version?.archive ?? false,
-    _assignSchema: 'default',
+    _assignSchema: getInitialAssignSchema({
+      meta_schema: source?.version?.schema?.meta_schema ?? null,
+    }),
     header: source?.version?.header
       ? {
           ...source?.version?.header,
@@ -54,7 +57,6 @@ export const transformSourceRequestBodyToFormData = (
     fetcher: hasFetcher
       ? {
           source_type: fetcher?.source_type ?? '',
-          topic: fetcher?.topic ?? 'own',
           config: stringifyFetcherConfig(fetcher?.config),
         }
       : null,

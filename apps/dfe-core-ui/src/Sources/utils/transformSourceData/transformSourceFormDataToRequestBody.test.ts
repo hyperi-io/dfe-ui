@@ -13,7 +13,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       origin: 'receiver',
       _assignSchema: 'default',
       match: { field: 'field', value: 'value', operator: 'equals' },
-      fetcher: { source_type: 'crates_io', topic: 'own', config: 'crates: []' },
+      fetcher: { source_type: 'crates_io', config: 'crates: []' },
     };
 
     const result = transformSourceFormDataToRequestBody(source);
@@ -59,7 +59,6 @@ describe('transformSourceFormDataToRequestBody', () => {
       match: { field: 'field', value: 'value', operator: 'equals' },
       fetcher: {
         source_type: 'crates_io',
-        topic: 'main',
         config: 'crates:\n  - dfe-fetcher\ninterval_secs: 3600\n',
       },
     };
@@ -81,30 +80,77 @@ describe('transformSourceFormDataToRequestBody', () => {
       enabled: true,
       archive: false,
       origin: 'fetcher',
-      fetcher: { source_type: 'okta', topic: 'own', config: '' },
+      fetcher: { source_type: 'okta', config: '' },
     };
 
     const result = transformSourceFormDataToRequestBody(source);
 
     expect(result.fetcher).toEqual({
       source_type: 'okta',
-      topic: 'own',
+      topic: 'main',
       config: {},
     });
   });
 
-  test('topic falls back to own when the form never set it', () => {
+  test('choosing main on the Schema tab lands a fetcher source on main', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
       enabled: true,
       archive: false,
       origin: 'fetcher',
       _assignSchema: 'default',
-      fetcher: { source_type: 'okta' },
+      fetcher: { source_type: 'aws' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source).fetcher?.topic).toBe(
+      'main',
+    );
+  });
+
+  test('a defined schema gives a fetcher source its own topic and table', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'fetcher',
+      _assignSchema: 'define_schema',
+      schema: { meta_schema: 'meta/aws', meta_schema_version: '1.0.0' },
+      fetcher: { source_type: 'aws' },
     };
 
     expect(transformSourceFormDataToRequestBody(source).fetcher?.topic).toBe(
       'own',
+    );
+  });
+
+  test('Define Schema with no meta schema sent still lands on main', () => {
+    // The shape a user without schema read access submits: the schema fields never render.
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'fetcher',
+      _assignSchema: 'define_schema',
+      fetcher: { source_type: 'aws' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source).fetcher?.topic).toBe(
+      'main',
+    );
+  });
+
+  test('the schema choice never reaches the request body', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      _assignSchema: 'define_schema',
+      match: { field: 'field', operator: 'exists' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source)).not.toHaveProperty(
+      '_assignSchema',
     );
   });
 
