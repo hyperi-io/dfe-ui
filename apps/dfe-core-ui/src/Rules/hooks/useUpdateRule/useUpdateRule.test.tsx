@@ -78,8 +78,10 @@ describe('.useUpdateRule', () => {
         ],
         cost_estimate: {
           estimated_rows: 0,
-          explain_plan: 'string',
-          explain_duration_ms: 0,
+          rows_in_window: 0,
+          projected_per_day: 0,
+          match_ratio: 0,
+          band: 'ok',
           window_minutes: 60,
           warnings: ['string'],
         },
