@@ -162,7 +162,7 @@ const sourceSummaryToTreeData = ({
             title={
               <span className="flex gap-2 items-center">
                 {mainSource.name.split('/').pop() ?? ''}
-                <Tooltip destroyOnHidden title="_main_land">
+                <Tooltip destroyOnHidden title="Lands in the shared main table">
                   <IconBucket className="opacity-80" />
                 </Tooltip>
 
@@ -256,7 +256,10 @@ const sourceSummaryToTreeData = ({
                 )}
 
                 {!isDeployed && (
-                  <Tooltip destroyOnHidden title="_main_land">
+                  <Tooltip
+                    destroyOnHidden
+                    title="Lands in the shared main table"
+                  >
                     <IconBucket className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
