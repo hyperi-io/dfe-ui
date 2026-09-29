@@ -11,6 +11,8 @@ export const SetupWizard = ({
   oidcProvider,
   organisation,
   userCreated,
+  firstPendingStep,
+  setupComplete,
 }: TSetupWizardProps) => {
   // No auto-login here. The operator signs in on /login with the password their
   // deployment minted, and the route's layout guard is what guarantees this
@@ -20,15 +22,7 @@ export const SetupWizard = ({
   return (
     <>
       {currentStep === 'welcome' && (
-        <WelcomeStep
-          goNext={() =>
-            navigateToStep(
-              SETUP_WIZARD_STEPS[
-                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) + 1
-              ],
-            )
-          }
-        />
+        <WelcomeStep goNext={() => navigateToStep(firstPendingStep)} />
       )}
       {currentStep === 'configureLogin' && (
         <ConfigureOidcStep
@@ -90,12 +84,17 @@ export const SetupWizard = ({
       )}
       {currentStep === 'complete' && (
         <CompleteStep
-          goPrevious={() =>
-            navigateToStep(
-              SETUP_WIZARD_STEPS[
-                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) - 1
-              ],
-            )
+          goPrevious={
+            setupComplete
+              ? undefined
+              : () =>
+                  navigateToStep(
+                    SETUP_WIZARD_STEPS[
+                      SETUP_WIZARD_STEPS.findIndex(
+                        (step) => step === currentStep,
+                      ) - 1
+                    ],
+                  )
           }
         />
       )}

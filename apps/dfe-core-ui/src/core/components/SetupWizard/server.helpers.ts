@@ -12,15 +12,14 @@ export const SETUP_WIZARD_STEPS: TSetupWizardStep[] = [
 export const isSetupWizardStep = (value: string): value is TSetupWizardStep =>
   SETUP_WIZARD_STEPS.includes(value as TSetupWizardStep);
 
+type TPendingSteps =
+  TFetchSetupStatusResponse['initial_setup']['pending_steps'];
+
 // The cases are the engine's own step ids (state_machines/setup.py::STEP_*), so
 // a rename there has to be mirrored here.
 export const getSetupWizardStepFromStateStep = (
-  stateStep?:
-    | NonNullable<
-        TFetchSetupStatusResponse['initial_setup']['pending_steps']
-      >[number]
-    | null,
-) => {
+  stateStep?: NonNullable<TPendingSteps>[number] | null,
+): TSetupWizardStep => {
   switch (stateStep) {
     case 'organisations':
       return 'configureOrganisation';
@@ -29,4 +28,13 @@ export const getSetupWizardStepFromStateStep = (
     default:
       return 'welcome';
   }
+};
+
+// Welcome's Next target. A step id this build does not know maps to welcome, so
+// it falls back to the screen after welcome rather than looping on it.
+export const getFirstPendingWizardStep = (
+  pendingSteps?: TPendingSteps | null,
+): TSetupWizardStep => {
+  const step = getSetupWizardStepFromStateStep(pendingSteps?.[0]);
+  return step === 'welcome' ? 'configureOrganisation' : step;
 };

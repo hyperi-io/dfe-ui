@@ -4,6 +4,7 @@ import {
   adminPassword,
   completeForcedPasswordChange,
   expectForcedPasswordChange,
+  expectSourcesLanding,
 } from '../config/login.helpers';
 
 import { BASE_URL } from '../config/e2e.client';
@@ -63,8 +64,6 @@ test.describe('redirect when setup is not complete', () => {
     await expectForcedPasswordChange(page);
   });
 
-  // RED, and correctly so: the wizard lands on configureOrganisation because the
-  // engine retired the admin_password step that used to map to welcome. dfe-ui#325.
   test('/sources lands on the wizard once signed in', async ({ page }) => {
     await page.goto(`${baseUrl}/sources`);
     await login(page);
@@ -74,8 +73,6 @@ test.describe('redirect when setup is not complete', () => {
   });
 });
 
-// Blocked behind the same landing defect, dfe-ui#325: the file is mode 'serial',
-// so the failure above skips this, and it opens on the same welcome assertion.
 test('setup from start testing forward and back navigation', async ({
   page,
 }) => {
@@ -101,17 +98,25 @@ test('setup from start testing forward and back navigation', async ({
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
   ).toBeDisabled();
+  // The required marker is part of each label's accessible name.
   await page
-    .getByRole('textbox', { name: 'Name', exact: true })
+    .getByRole('textbox', { name: 'Name *', exact: true })
     .fill('test_organisation');
   await page
-    .getByRole('textbox', { name: 'Display Name', exact: true })
+    .getByRole('textbox', { name: 'Display Name *', exact: true })
     .fill('Test Organisation');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page).toHaveURL(configureLoginPageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page).toHaveURL(configureOrganisationPageUrl);
-  await expect(page.getByText('Primary organisation configured'));
+  await expect(page.getByText('Primary organisation configured')).toBeVisible();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page).toHaveURL(configureLoginPageUrl);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(configureOrganisationPageUrl);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(welcomePageUrl);
+  // The organisation exists now, so welcome's Next skips past it.
   await page.getByRole('button', { name: 'Next', exact: true }).click();
 
   /* CONFIGURE LOGIN (OIDC) */
@@ -143,14 +148,16 @@ test('setup from start testing forward and back navigation', async ({
   await page
     .getByRole('button', { name: 'Create Account', exact: true })
     .click();
-  await expect(page).toHaveURL(completePageUrl);
-  await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page).toHaveURL(configureUserPageUrl);
-  await expect(page.getByText('Account Created'));
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
 
-  /* COMPLETE -- already signed in, so it lands in the app, not back on login */
+  /* COMPLETE -- the account completed setup, so the steps behind it are closed */
   await expect(page).toHaveURL(completePageUrl);
+  await expect(
+    page.getByRole('heading', { name: 'Complete', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Back', exact: true }),
+  ).toHaveCount(0);
+  // Already signed in, so it lands in the app, not back on login.
   await page.getByRole('button', { name: 'Get started', exact: true }).click();
-  await expect(page).toHaveURL(`${baseUrl}/sources`);
+  await expectSourcesLanding(page);
 });

@@ -85,3 +85,23 @@ describe('getSetupWizardStepFromStateStep', () => {
     expect(getSetupWizardStepFromStateStep('admin_password')).toBe('welcome');
   });
 });
+
+describe('getFirstPendingWizardStep', () => {
+  it('is the screen for the first step the engine still needs', async () => {
+    const { getFirstPendingWizardStep } = await import('./server.helpers');
+    expect(getFirstPendingWizardStep(['organisations', 'first_user'])).toBe(
+      'configureOrganisation',
+    );
+    expect(getFirstPendingWizardStep(['first_user'])).toBe('configureLogin');
+  });
+
+  it('never sends Next from welcome back to welcome', async () => {
+    const { getFirstPendingWizardStep } = await import('./server.helpers');
+    expect(getFirstPendingWizardStep([])).toBe('configureOrganisation');
+    expect(getFirstPendingWizardStep(undefined)).toBe('configureOrganisation');
+    expect(getFirstPendingWizardStep(null)).toBe('configureOrganisation');
+    expect(getFirstPendingWizardStep(['a_step_this_build_lacks'])).toBe(
+      'configureOrganisation',
+    );
+  });
+});
