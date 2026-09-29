@@ -74,7 +74,7 @@ export const OidcCallbackGate = ({
           setError('The identity provider did not hand back a login token.');
         } else if (!startedHere) {
           setError(
-            'This sign-in was not started from this browser tab, so it was not accepted. Start it again from the login page.',
+            'This sign-in was not started from this browser tab, so it was not accepted. Sign in again below.',
           );
         } else {
           setError('The engine did not accept the login token.');
