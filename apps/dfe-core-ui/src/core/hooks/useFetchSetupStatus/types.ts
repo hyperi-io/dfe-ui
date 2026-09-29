@@ -2,6 +2,7 @@ import {
   DfeClientOperationFor,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
+import { TSetupWizardStep } from '@/core/components/SetupWizard/types';
 import { fetchSetupStatusPath } from './api';
 
 export type TFetchSetupStatusResponse = DfeClientSuccessResponseBody<
@@ -18,4 +19,6 @@ export type TSetupWizardProps = {
   oidcProvider: TOidcProvider;
   organisation: TOrganisation;
   userCreated: boolean;
+  firstPendingStep: TSetupWizardStep;
+  setupComplete: boolean;
 };

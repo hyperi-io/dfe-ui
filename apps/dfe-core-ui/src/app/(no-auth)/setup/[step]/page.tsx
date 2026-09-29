@@ -1,4 +1,7 @@
-import { isSetupWizardStep } from '@/core/components/SetupWizard/server.helpers';
+import {
+  getFirstPendingWizardStep,
+  isSetupWizardStep,
+} from '@/core/components/SetupWizard/server.helpers';
 import { SetupScene } from '@/core/scenes/SetupScene';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { notFound, redirect } from 'next/navigation';
@@ -23,7 +26,9 @@ export default async function SetupStepPage({
 
   const { initial_setup, oidc_providers, organisations } =
     await getSetupStatus();
-  if (initial_setup.complete) {
+  // The last step completes setup, so Complete has to outlive it. The others
+  // close: a completed status redacts the registries they would render.
+  if (initial_setup.complete && step !== 'complete') {
     redirect('/');
   }
 
@@ -35,6 +40,8 @@ export default async function SetupStepPage({
       oidcProvider={oidc_providers?.[0] || null}
       organisation={organisations?.[0] || null}
       userCreated={userCreated}
+      firstPendingStep={getFirstPendingWizardStep(initial_setup.pending_steps)}
+      setupComplete={initial_setup.complete}
     />
   );
 }

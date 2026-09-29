@@ -5,7 +5,8 @@ import { IconArrowLeft, IconArrowRight, IconLockCheck } from '@repo/dfe-icons';
 import { Alert, Button } from 'antd';
 import { useRouter } from 'next/navigation';
 
-export const CompleteStep = ({ goPrevious }: { goPrevious: () => void }) => {
+// No goPrevious once setup is complete: every step behind this one is closed.
+export const CompleteStep = ({ goPrevious }: { goPrevious?: () => void }) => {
   const router = useRouter();
   // Fetched here rather than passed in: the last step created the first user, so
   // the props this wizard was rendered with predate the answer.
@@ -28,7 +29,7 @@ export const CompleteStep = ({ goPrevious }: { goPrevious: () => void }) => {
             the <span className="font-normal">{adminName}</span> account it was
             given at install. Retire it and the engine stops recreating it on
             every start, which is what lets you delete the password your deploy
-            minted -- the Secret key in Kubernetes, or the .env key with
+            minted &mdash; the Secret key in Kubernetes, or the .env key with
             Compose. The break-glass account remains your way back in.
           </p>
           <Button
@@ -60,17 +61,19 @@ export const CompleteStep = ({ goPrevious }: { goPrevious: () => void }) => {
       )}
 
       <div className="flex flex-row justify-between mt-10">
-        <Button
-          type="text"
-          className="text-white text-light p-0"
-          onClick={goPrevious}
-        >
-          <IconArrowLeft /> Back
-        </Button>
+        {goPrevious && (
+          <Button
+            type="text"
+            className="text-white text-light p-0"
+            onClick={goPrevious}
+          >
+            <IconArrowLeft /> Back
+          </Button>
+        )}
 
         <Button
           type="text"
-          className="text-white text-light p-0"
+          className="text-white text-light p-0 ml-auto"
           onClick={() => router.push('/')}
         >
           Get started <IconArrowRight />
