@@ -51,7 +51,7 @@ const createApiKeyFormSchema = z.object({
         (date) =>
           date === undefined ||
           !dayjs.utc(date).startOf('day').isBefore(dayjs.utc().startOf('day')),
-        { message: 'expires_at cannot be less than today' },
+        { message: 'The expiry date cannot be in the past' },
       ),
   ),
 });

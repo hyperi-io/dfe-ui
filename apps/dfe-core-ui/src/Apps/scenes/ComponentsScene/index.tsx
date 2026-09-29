@@ -64,7 +64,7 @@ export const ComponentsScene = () => {
         <NotificationCard
           type="info"
           title="No components are deployed"
-          description="A component appears here once its values overlay exists in the deploy repo."
+          description="A component appears here once the deploy repo holds its values."
         />
         <div className="mt-6">
           <BackingServices />

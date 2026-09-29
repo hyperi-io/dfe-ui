@@ -67,8 +67,8 @@ export const CustomEnvEditor = ({
     <div className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold">Custom environment</h3>
       <p className="text-foreground/60 dark:text-dark-foreground/60 text-xs">
-        Keys the app&apos;s contract does not declare. The deployment refuses a
-        name its own chart already sets.
+        Keys the app does not declare. The deployment refuses a name its own
+        chart already sets.
       </p>
 
       {rows.map((row) => {

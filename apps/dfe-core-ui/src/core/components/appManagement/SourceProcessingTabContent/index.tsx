@@ -76,7 +76,7 @@ export const SourceProcessingTabContent = ({
           type="info"
           variant="subtle"
           title="No per-source apps are available"
-          description="The app manifest declares none, so there is nothing to deploy against this source."
+          description="This deployment offers none, so there is nothing to deploy against this source."
         />
       )}
     </div>

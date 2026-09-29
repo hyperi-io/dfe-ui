@@ -32,7 +32,7 @@ export const Drawer = ({
   children,
   preventClickaway = {
     enabled: true,
-    message: 'Closing this drawer may discard unsaved data.',
+    message: 'Closing now may discard unsaved data.',
     title: 'Potential data loss warning',
   },
   onClose,
