@@ -65,7 +65,7 @@ export const RoleCard = ({
               title={
                 <>
                   <p className="font-semibold mb-1">
-                    You can&apos;t mutate core roles.
+                    You can&apos;t edit core roles.
                   </p>
                   <p>Clone a core role to create a custom editable role.</p>
                 </>

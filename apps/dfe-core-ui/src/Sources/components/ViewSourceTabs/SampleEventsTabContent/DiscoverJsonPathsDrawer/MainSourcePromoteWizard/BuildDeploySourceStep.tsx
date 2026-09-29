@@ -34,7 +34,7 @@ export const BuildDeploySourceStep = ({
   if (errorSourceDetail) {
     return (
       <NotificationCard
-        title="Unexpect error fetching source detail"
+        title="Unexpected error fetching source detail"
         description={errorSourceDetail.message}
         type="error"
       />

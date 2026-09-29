@@ -22,8 +22,7 @@ export const ADMIN_TAB_DETAILS = Object.freeze({
   'account-management': {
     key: 'account-management',
     label: 'Account Management',
-    description:
-      'Manage accounts, link LDAP accounts and configure account default settings.',
+    description: 'Manage accounts and their default settings.',
   },
   'oidc-provider-management': {
     key: 'oidc-provider-management',

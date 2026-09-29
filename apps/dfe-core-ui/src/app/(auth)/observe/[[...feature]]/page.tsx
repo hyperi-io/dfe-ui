@@ -89,7 +89,7 @@ export default function ObservePage() {
             title: 'dark:text-dark-background',
             description: 'dark:text-dark-background',
           }}
-          title="HyperDX is not configured for this deployment."
+          title="Search is not configured for this deployment."
           type="warning"
         />
       </div>

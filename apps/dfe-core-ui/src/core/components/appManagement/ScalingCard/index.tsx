@@ -166,7 +166,7 @@ export const ScalingCard = ({
               <Form.Item
                 name="min_replicas"
                 label="Minimum replicas"
-                help="At least 1 - scaling to zero needs an idle replica count this surface does not set."
+                help="At least 1 - scaling to zero needs an idle replica count, which can't be set here."
               >
                 <InputNumber
                   min={1}
@@ -189,7 +189,7 @@ export const ScalingCard = ({
             <Form.Item
               name="replica_count"
               label="Fixed replica count"
-              help="Applies with KEDA off, and is submitted together with the switch. The ScaledObject owns the count while KEDA is on."
+              help="Applies with KEDA off, and is saved together with the KEDA setting. The ScaledObject owns the count while KEDA is on."
             >
               <InputNumber
                 min={0}

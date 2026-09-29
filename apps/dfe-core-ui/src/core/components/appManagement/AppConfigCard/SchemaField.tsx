@@ -44,7 +44,7 @@ const Provenance = ({ field }: { field: TAppConfigField }) => {
   }
   if (isChartSet(field)) {
     return (
-      <Tooltip title="The deployment derives this value, and it is rendered after the overlay, so a write here would not change it.">
+      <Tooltip title="The deployment sets this value itself, so a change here would not take effect.">
         <Tag color="purple" variant="filled">
           {CHART_LABEL}
         </Tag>

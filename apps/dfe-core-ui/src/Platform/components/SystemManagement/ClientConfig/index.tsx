@@ -32,13 +32,13 @@ export const ClientConfig = () => {
             )}
             {clientConfig.hyperdx.enabled && (
               <>
-                <dt className={dataListTermStyle}>HyperDX</dt>
+                <dt className={dataListTermStyle}>Search</dt>
                 <dd>{clientConfig.hyperdx.enabled ? 'Enabled' : 'Disabled'}</dd>
               </>
             )}
             {clientConfig.hyperdx.url && (
               <>
-                <dt className={dataListTermStyle}>HyperDX URL</dt>
+                <dt className={dataListTermStyle}>Search URL</dt>
                 <dd>{clientConfig.hyperdx.url}</dd>
               </>
             )}

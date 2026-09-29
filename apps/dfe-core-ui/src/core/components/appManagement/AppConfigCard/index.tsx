@@ -25,9 +25,9 @@ import {
   TFieldError,
 } from './appConfig';
 
-export const NO_CONTRACT_TITLE = 'No container contract is mounted';
+export const NO_CONTRACT_TITLE = 'No options are declared for this app';
 export const NO_CONTRACT_BODY =
-  'This deployment ships no contract for the app, so there are no declared options to show. The engine reports the app as having none rather than an empty list.';
+  'This deployment ships no list of options for the app, so there is nothing to show.';
 
 /**
  * Every `config.*` option an app declares, for one instance.
@@ -218,7 +218,7 @@ export const AppConfigCard = ({
               <NotificationCard
                 type="warning"
                 icon={<IconAlertTriangle />}
-                title="Overlay keys the contract does not declare"
+                title="Values in the deploy repo that the app does not declare"
                 description={config.unknown
                   .map((entry) => entry.path)
                   .join(', ')}
