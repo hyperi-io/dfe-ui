@@ -4,9 +4,8 @@ import {
   isAppShellSession,
   isPasswordChangeRequired,
 } from '@/core/config/authSession';
-import { isProxyAuthMode } from '@/core/config/proxyTrust';
+import { safeRedirectPath } from '@/core/config/loginCallback';
 import { LoginScene } from '@/core/scenes/LoginScene';
-import { ProxyTrustGate } from '@/core/scenes/LoginScene/ProxyTrustGate';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
@@ -21,10 +20,11 @@ export default async function Login({
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
   const params = await searchParams;
-  const callbackUrl =
-    (typeof params?.callbackUrl === 'string'
+  const callbackUrl = safeRedirectPath(
+    typeof params?.callbackUrl === 'string'
       ? params.callbackUrl
-      : params?.callbackUrl?.[0]) ?? '/';
+      : params?.callbackUrl?.[0],
+  );
 
   // The wizard needs an authenticated session, so the form must stay
   // reachable while setup is incomplete -- only signed-in users are
@@ -43,11 +43,6 @@ export default async function Login({
   }
   if (isAppShellSession(session)) {
     redirect(callbackUrl);
-  }
-  // Behind the proxy: auto-establish the session from the forwarded engine
-  // token instead of showing the password form (falls back to it on failure).
-  if (isProxyAuthMode()) {
-    return <ProxyTrustGate callbackUrl={callbackUrl} />;
   }
 
   return <LoginScene callbackUrl={callbackUrl} />;

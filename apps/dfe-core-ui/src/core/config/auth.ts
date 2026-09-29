@@ -1,10 +1,6 @@
 import { oidcTokenProvider } from '@/core/auth/oidcTokenProvider';
-import {
-  PROXY_TRUST_PROVIDER_ID,
-  extractEngineToken,
-  isProxyAuthMode,
-  verifyEngineToken,
-} from '@/core/config/proxyTrust';
+import { renewEngineSession } from '@/core/auth/renewEngineSession';
+import { safeRedirectPath } from '@/core/config/loginCallback';
 import { authMePath } from '@/core/hooks/useAuthMe/api';
 import { loginPath } from '@/core/hooks/useLogin/api';
 import type { NextAuthOptions } from 'next-auth';
@@ -13,21 +9,32 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 const baseUrl =
   process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
 
-/**
- * Default password flow: POST /auth/login then GET /me for roles. This is the
- * local-dev path when there is no proxy in front of the app.
- */
+/** The browser's X-Forwarded-For chain, so the engine's login audit can name the client rather than this pod. */
+export function forwardedForHeader(
+  headers: Record<string, unknown> | undefined,
+): Record<string, string> {
+  const value = headers?.['x-forwarded-for'];
+  const chain = Array.isArray(value) ? value.join(', ') : value;
+  return typeof chain === 'string' && chain.trim() !== ''
+    ? { 'X-Forwarded-For': chain.trim() }
+    : {};
+}
+
+/** Local-account flow: POST /auth/login then GET /me for roles. */
 const credentialsProvider = CredentialsProvider({
   name: 'Credentials',
   credentials: {
     username: { label: 'Username', type: 'text' },
     password: { label: 'Password', type: 'password' },
   },
-  async authorize(credentials) {
+  async authorize(credentials, req) {
     if (!credentials?.username || !credentials?.password) return null;
     const loginRes = await fetch(`${baseUrl}${loginPath}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...forwardedForHeader(req?.headers),
+      },
       body: JSON.stringify({
         username: credentials.username,
         password: credentials.password,
@@ -62,40 +69,11 @@ const credentialsProvider = CredentialsProvider({
   },
 });
 
-/**
- * Proxy-trust flow (DFE_AUTH_MODE=proxy): no username/password. Reads the
- * engine ES384 token forwarded by Envoy (dfe_token cookie or Bearer header),
- * re-verifies it against the engine JWKS, and mints a session from its claims.
- * Same-origin engine calls still carry the token as Bearer via session.accessToken.
- */
-const proxyTrustProvider = CredentialsProvider({
-  id: PROXY_TRUST_PROVIDER_ID,
-  name: 'Proxy Trust',
-  credentials: {},
-  async authorize(credentials, req) {
-    const token = extractEngineToken(req, credentials ?? undefined);
-    if (!token) return null;
-    const user = await verifyEngineToken(token);
-    if (!user) return null;
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      accessToken: user.accessToken,
-      expiresIn: user.expiresIn,
-      roles: user.roles,
-    };
-  },
-});
-
-// The OIDC hand-back provider is registered in every mode: an external IdP
-// login lands on /login/oidc with an engine token whichever way the app is fronted.
+// The OIDC hand-back provider: an external IdP login lands on /login/oidc with an engine token.
 export const authOptions: NextAuthOptions = {
-  providers: isProxyAuthMode()
-    ? [proxyTrustProvider, credentialsProvider, oidcTokenProvider(baseUrl)]
-    : [credentialsProvider, oidcTokenProvider(baseUrl)],
+  providers: [credentialsProvider, oidcTokenProvider(baseUrl)],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         const expiresIn = (user as { expiresIn?: number }).expiresIn ?? 86400;
         token.accessToken = (user as { accessToken?: string }).accessToken;
@@ -106,27 +84,9 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
 
-      if (trigger === 'update' && session) {
-        const refresh = session as {
-          accessToken?: string;
-          expiresIn?: number;
-          roles?: string[];
-          passwordChangeRequired?: boolean;
-        };
-        if (refresh.accessToken) {
-          token.accessToken = refresh.accessToken;
-          token.accessTokenExpiresAt =
-            Date.now() + (refresh.expiresIn ?? 86400) * 1000;
-          if (refresh.roles) {
-            token.roles = refresh.roles;
-          }
-          delete token.error;
-        }
-        // The engine answers every refresh and every change with the live flag.
-        if (typeof refresh.passwordChangeRequired === 'boolean') {
-          token.passwordChangeRequired = refresh.passwordChangeRequired;
-        }
-        return token;
+      // An update carries no trusted data: the engine renews what the session already holds.
+      if (trigger === 'update') {
+        return renewEngineSession(token, baseUrl);
       }
 
       if (
@@ -156,6 +116,9 @@ export const authOptions: NextAuthOptions = {
       session.accessTokenExpiresAt = token.accessTokenExpiresAt;
       session.passwordChangeRequired = token.passwordChangeRequired === true;
       return session;
+    },
+    async redirect({ url, baseUrl: origin }) {
+      return `${origin}${safeRedirectPath(url, origin)}`;
     },
   },
   session: { strategy: 'jwt' },

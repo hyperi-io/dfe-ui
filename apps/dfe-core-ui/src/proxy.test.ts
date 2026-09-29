@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
+import { expiredEngineTokenCookies } from '@/core/config/engineTokenCookie';
 
 const { authMiddleware, getSetupStatus, getToken } = vi.hoisted(() => ({
   authMiddleware: vi.fn(),
@@ -83,18 +84,14 @@ describe('proxy (auth middleware)', () => {
     expect(response.headers.get('location')).toBe('http://localhost/setup');
   });
 
-  test('bounces a proxy-trust arrival to /login so the gate can mint its session', async () => {
-    vi.stubEnv('DFE_AUTH_MODE', 'proxy');
-    getSetupStatus.mockResolvedValue(setupStatus(false));
-
+  test('a leftover dfe_token without a session is not a sign-in', async () => {
     const response = await proxy(
-      request('/', 'dfe_token=engine-jwt'),
+      request('/sources', 'dfe_token=engine-jwt'),
       undefined as never,
     );
 
-    expect(response.headers.get('location')).toBe(
-      'http://localhost/login?callbackUrl=%2F',
-    );
+    expect(authMiddleware).toHaveBeenCalled();
+    expect(response.headers.get('location')).toBe('http://localhost/login');
   });
 
   test('defers to withAuth when initial setup is complete', async () => {
@@ -131,5 +128,24 @@ describe('proxy (auth middleware)', () => {
 
     expect(response.headers.get('location')).toBeNull();
     expect(response.cookies.get('dfe_token')?.value).toBe('engine-jwt');
+  });
+
+  test('plants dfe_token on the Domain and Path sign-out expires it with', async () => {
+    vi.stubEnv('DFE_COOKIE_DOMAIN', 'example.com');
+    authMiddleware.mockResolvedValue(NextResponse.next());
+    getToken.mockResolvedValue({
+      accessToken: 'engine-jwt',
+      passwordChangeRequired: false,
+    });
+
+    const response = await proxy(request('/sources'), undefined as never);
+
+    expect(response.cookies.get('dfe_token')).toMatchObject({
+      domain: 'example.com',
+      path: '/',
+    });
+    expect(expiredEngineTokenCookies(false)[0]).toMatch(
+      /^dfe_token=; Domain=example\.com; Path=\/;/,
+    );
   });
 });

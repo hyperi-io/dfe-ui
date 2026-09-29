@@ -101,6 +101,37 @@ describe('.useLogin', () => {
     });
   });
 
+  test.each(['/\\evil.example', '//evil.example', 'https://evil.example/x'])(
+    'a callbackUrl of %j lands on the console home, not another site',
+    async (callbackUrl) => {
+      mockSignIn.mockResolvedValueOnce({ url: null, error: null });
+      searchParamsRef.current = new URLSearchParams({ callbackUrl });
+
+      const { result } = renderHook(() => useLogin(), { wrapper });
+
+      result.current.mutate({ username: 'admin', password: 'password' });
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/');
+      });
+    },
+  );
+
+  test('a NextAuth URL whose path reads as another host lands on the console home', async () => {
+    mockSignIn.mockResolvedValueOnce({
+      url: 'http://localhost//evil.example',
+      error: null,
+    });
+
+    const { result } = renderHook(() => useLogin(), { wrapper });
+
+    result.current.mutate({ username: 'admin', password: 'password' });
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/');
+    });
+  });
+
   test('when redirectOnSuccess is false, it refreshes without navigating', async () => {
     mockSignIn.mockResolvedValueOnce({ url: '/dashboard', error: null });
 

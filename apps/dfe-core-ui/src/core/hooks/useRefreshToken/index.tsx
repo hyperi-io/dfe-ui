@@ -2,10 +2,10 @@
 
 import { executeAccessTokenRefresh } from '@/core/auth/refreshAccessToken';
 import { useMutation } from '@tanstack/react-query';
-import { TRefreshTokenResponse } from './types';
+import type { Session } from 'next-auth';
 
 interface UseRefreshTokenProps {
-  onSuccess?: (data: TRefreshTokenResponse) => void;
+  onSuccess?: (session: Session) => void;
   onError?: (error: Error) => void;
 }
 
@@ -15,8 +15,8 @@ export const useRefreshToken = ({
 }: UseRefreshTokenProps = {}) => {
   const { data, mutate, mutateAsync, isPending, error } = useMutation({
     mutationFn: () => executeAccessTokenRefresh(),
-    onSuccess: (tokenResponse) => {
-      onSuccess?.(tokenResponse);
+    onSuccess: (session) => {
+      onSuccess?.(session);
     },
     onError: (mutationError) => {
       onError?.(mutationError);

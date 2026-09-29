@@ -1,5 +1,9 @@
 import { CHANGE_PASSWORD_PATH } from '@/core/config/authSession';
 import {
+  DFE_TOKEN_COOKIE,
+  engineTokenCookieDomain,
+} from '@/core/config/engineTokenCookie';
+import {
   LOGIN_CALLBACK_PATH_HEADER,
   pathWithSearch,
 } from '@/core/config/loginCallback';
@@ -20,12 +24,6 @@ import { NextResponse, type NextRequest } from 'next/server';
  * anonymous visitor the wizard produces a form that 401s on submit. Anonymous →
  * /login, authenticated + incomplete → /setup.
  *
- * Proxy-trust addition (DFE_AUTH_MODE=proxy, single origin behind Envoy): when
- * the engine has forwarded its ES384 token (dfe_token cookie) but NextAuth has
- * no session yet, bounce to /login where the proxy-trust auto-trigger runs the
- * CSRF-safe NextAuth callback (which re-verifies the token against the engine
- * JWKS) and then returns the browser to where it was headed. No password form.
- *
  * Embedded-HyperDX addition: HyperDX runs on its own subdomain and is embedded
  * as an iframe. The fork verifies the engine's ES384 token from a `dfe_token`
  * cookie, so we mirror the session's access token into that cookie scoped to the
@@ -34,31 +32,6 @@ import { NextResponse, type NextRequest } from 'next/server';
  * the user - no second login. This is auth-method agnostic: it works the same
  * whether the session came from local login or an external OIDC provider.
  */
-
-// Cookie the single-origin proxy sets carrying the engine ES384 JWT. Kept
-// inline so this middleware bundle does not pull in jose - the verification
-// path lives in src/core/config/proxyTrust.ts.
-const DFE_TOKEN_COOKIE = 'dfe_token';
-
-// NextAuth session cookie names (dev + __Secure variant behind TLS).
-const SESSION_COOKIES = [
-  'next-auth.session-token',
-  '__Secure-next-auth.session-token',
-];
-
-function isProxyAuthMode(): boolean {
-  const mode =
-    process.env.DFE_AUTH_MODE ?? process.env.NEXT_PUBLIC_DFE_AUTH_MODE;
-  return mode === 'proxy';
-}
-
-// Parent domain the dfe_token cookie is scoped to so it reaches the HyperDX
-// iframe subdomain. A deployment parameter: empty leaves the cookie host-only
-// (single-origin / docker), which is correct when HyperDX shares the UI host.
-function cookieDomain(): string | undefined {
-  const domain = process.env.DFE_COOKIE_DOMAIN;
-  return domain && domain.trim() !== '' ? domain.trim() : undefined;
-}
 
 // Mirror the session's engine access token into the dfe_token cookie so the
 // embedded HyperDX iframe authenticates as the same user. No-op when the request
@@ -90,7 +63,7 @@ async function plantEngineTokenCookie(
       : undefined;
 
   res.cookies.set(DFE_TOKEN_COOKIE, accessToken, {
-    domain: cookieDomain(),
+    domain: engineTokenCookieDomain(),
     path: '/',
     httpOnly: true,
     secure: req.nextUrl.protocol === 'https:',
@@ -139,18 +112,6 @@ export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
-  if (isProxyAuthMode()) {
-    const hasSession = SESSION_COOKIES.some((name) => req.cookies.has(name));
-    const hasEngineToken = req.cookies.has(DFE_TOKEN_COOKIE);
-    if (hasEngineToken && !hasSession) {
-      const callbackUrl = `${req.nextUrl.pathname}${req.nextUrl.search}`;
-      const url = req.nextUrl.clone();
-      url.pathname = '/login';
-      url.search = `callbackUrl=${encodeURIComponent(callbackUrl)}`;
-      return NextResponse.redirect(url);
-    }
-  }
-
   const result = await authMiddleware(
     req as Parameters<typeof authMiddleware>[0],
     event,

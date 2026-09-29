@@ -13,7 +13,7 @@ import { describe, expect, test } from 'vitest';
  *
  * Guards one direction only: every name .env.example advertises must be read
  * somewhere in src/ or e2e/. The reverse would fail on every optional deployment
- * var the file deliberately omits (DFE_AUTH_MODE, GIT_COMMIT, NODE_ENV).
+ * var the file deliberately omits (GIT_COMMIT, NODE_ENV).
  */
 
 const APP_ROOT = join(import.meta.dirname, '..', '..', '..');
