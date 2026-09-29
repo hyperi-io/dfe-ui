@@ -28,7 +28,13 @@ describe('RetentionCard', () => {
   it('shows a default of 0 as kept forever', async () => {
     server.use(
       API_CONFIG_MOCKS.system.retention.get.success({
-        mockedResponse: { default_ttl_days: 0 },
+        mockedResponse: {
+          default_ttl_days: 0,
+          stored: null,
+          origin: 'deployment',
+          deployment_default: 0,
+          editable: true,
+        },
       }),
     );
 

@@ -21,6 +21,10 @@ describe('.useFetchRetention', () => {
 
     const response: TSystemRetentionResponse = {
       default_ttl_days: 90,
+      stored: null,
+      origin: 'deployment',
+      deployment_default: 90,
+      editable: true,
     };
 
     await waitFor(() => {
