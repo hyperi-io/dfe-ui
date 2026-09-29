@@ -12,8 +12,11 @@
 # traced workspace deps. yarn 4 (berry, node-modules linker) via corepack; turbo
 # builds the app + its @repo/* workspace packages.
 
+# Trixie by name: the bare node:24-slim tag is still Debian 12. Renovate moves the digest.
+ARG NODE_IMAGE=node:24-trixie-slim@sha256:8ec5d7557396cfe32d21c3f9c13072355ceab22b584578ca4bb28af31120cffe
+
 # --- Builder ---
-FROM node:24-bookworm-slim AS builder
+FROM ${NODE_IMAGE} AS builder
 WORKDIR /app
 
 # Toolchain for any native (node-gyp) transitive deps. Builder-only; discarded.
@@ -40,7 +43,7 @@ RUN --mount=type=bind,source=.,target=/src \
 RUN yarn build
 
 # --- Runtime (Next.js standalone) ---
-FROM node:24-bookworm-slim AS runner
+FROM ${NODE_IMAGE} AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
