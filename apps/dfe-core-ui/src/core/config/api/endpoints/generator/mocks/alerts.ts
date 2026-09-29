@@ -55,6 +55,7 @@ export const alerts = {
           url: 'string',
           description: 'string',
           enabled: true,
+          url_scheme: '',
         },
       }: {
         mockedResponse?: TAlertCreateResponse;
@@ -85,6 +86,7 @@ export const alerts = {
           url: 'string',
           description: 'string',
           enabled: true,
+          url_scheme: '',
         },
         name = 'name',
       }: {
@@ -122,6 +124,7 @@ export const alerts = {
           url: 'string',
           description: 'string',
           enabled: true,
+          url_scheme: '',
         },
         name = 'alert_name',
       }: {

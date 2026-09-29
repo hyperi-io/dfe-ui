@@ -10,7 +10,9 @@ export const useCreateAlert = ({
   onError?: (error: Error) => void;
 } = {}) => {
   const { data, mutate, isPending, error } = useMutation({
-    mutationFn: (alert: TAlertCreateRequest) => createAlert({ body: alert }),
+    // The engine ignores a written url_scheme, so the empty default is sent.
+    mutationFn: (alert: TAlertCreateRequest) =>
+      createAlert({ body: { ...alert, url_scheme: '' } }),
     onSuccess: (data) => {
       onSuccess?.(data);
     },

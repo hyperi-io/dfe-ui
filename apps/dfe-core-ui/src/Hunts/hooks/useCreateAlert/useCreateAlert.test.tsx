@@ -54,6 +54,7 @@ describe('.useCreateAlert', () => {
         url: 'string',
         description: 'string',
         enabled: true,
+        url_scheme: '',
       };
 
       await waitFor(() => {
