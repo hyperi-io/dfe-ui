@@ -12,9 +12,10 @@ export const useUpdateAlert = ({
   name: string;
 }) => {
   const { data, mutate, isPending, error } = useMutation({
+    // The engine ignores a written url_scheme, so the empty default is sent.
     mutationFn: (alert: TAlertUpdateRequest) =>
       updateAlert({
-        body: alert,
+        body: { ...alert, url_scheme: '' },
         pathParams: { name },
       }),
     onSuccess: (data) => {

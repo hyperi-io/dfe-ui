@@ -31,6 +31,7 @@ describe('.useFetchAlertDetail', () => {
         url: 'string',
         description: 'string',
         enabled: true,
+        url_scheme: '',
       };
 
       await waitFor(() => {

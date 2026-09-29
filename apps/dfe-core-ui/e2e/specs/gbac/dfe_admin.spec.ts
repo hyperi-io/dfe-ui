@@ -65,6 +65,9 @@ test('Sidebar Navigation', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: 'Platform', exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Admin Tools', exact: true }),
+  ).toBeVisible();
 });
 
 test('User actions', async ({ page }) => {

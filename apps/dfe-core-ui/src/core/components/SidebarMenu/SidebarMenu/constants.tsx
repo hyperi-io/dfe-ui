@@ -14,6 +14,7 @@ import {
   IconStack2,
   IconTable,
   IconTargetArrow,
+  IconTool,
   IconUsersGroup,
   type IconComponent,
 } from '@repo/dfe-icons';
@@ -193,6 +194,12 @@ export const buildSidebarMenuGroups = (
           rbacActions.governance_read,
           rbacActions.governance_write,
         ],
+      },
+      {
+        key: '/admin-tools',
+        label: 'Admin Tools',
+        icon: <IconTool />,
+        actions: [rbacActions.deployment_admin_links_read],
       },
     ],
   },

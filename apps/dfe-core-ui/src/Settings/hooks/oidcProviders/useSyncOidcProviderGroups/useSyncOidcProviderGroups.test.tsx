@@ -48,6 +48,7 @@ describe('.useSyncOidcProviderGroups', () => {
         created: 1,
         updated: 1,
         total: 1,
+        groups_skipped: 0,
         error: null,
       };
 

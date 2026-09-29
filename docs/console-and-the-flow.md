@@ -27,7 +27,7 @@ destination under it is the signed-in user's.
 | Observe | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | look at the data | `dashboard_read` |
 | Data flow | Sources, Meta Schemas, Library | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*` |
 | Detect | Rules, Hunts | define what to look for | `rule_*`, `hunt_*` |
-| Stack | Components, Services, Platform | see and tune what is running | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
+| Stack | Components, Services, Platform, Admin Tools | see and tune what is running | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
 | Access | Settings | who may do what | `org_*`, `account_*`, `role_*`, `group_*`, `oidc_*`, `api_key_*` |
 
 The Observe destinations are HyperDX embeds and appear only once a HyperDX URL

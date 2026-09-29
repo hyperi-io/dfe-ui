@@ -1,3 +1,6 @@
+import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -5,6 +8,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildSidebarMenuGroups, sidebarMenuItems } from './constants';
 import { SidebarMenu } from './index';
 import { server } from './SidebarMenu.mocks';
+
+const meWithPermissions = (permissions: string[]) => ({
+  ...ADMIN_MOCKED_RESPONSE,
+  permissions,
+});
 
 const { wrapper } = buildTestWrapper()
   .withTheme()
@@ -16,7 +24,10 @@ beforeAll(() =>
     onUnhandledRequest: 'error',
   }),
 );
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  useAuthStore.getState().reset();
+});
 afterAll(() => server.close());
 
 describe('SidebarMenu', () => {
@@ -47,9 +58,45 @@ describe('SidebarMenu', () => {
         'Components',
         'Services',
         'Platform',
+        'Admin Tools',
         // Access
         'Settings',
       ]);
+    });
+
+    it('shows Admin Tools to a role holding deployment:*', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions(['deployment:*']),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Admin Tools' }),
+      ).toHaveAttribute('href', '/admin-tools');
+    });
+
+    it('never shows Admin Tools to a role that only reads deployments', async () => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: meWithPermissions([
+            'deployment:read',
+            'service:read',
+            'dashboard:read',
+          ]),
+        }),
+      );
+
+      render(<SidebarMenu collapsed={false} />, { wrapper });
+
+      expect(
+        await screen.findByRole('link', { name: 'Services' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('link', { name: 'Admin Tools' }),
+      ).not.toBeInTheDocument();
     });
 
     it('should group the destinations in the order a record travels', async () => {
