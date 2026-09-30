@@ -16,6 +16,10 @@ export interface paths {
         /**
          * Login
          * @description Authenticate with local credentials and receive a JWT token.
+         *
+         *     The password check runs off the event loop. Failed attempts back off per
+         *     username and per client address (``auth.login_throttle``); a waiting attempt is
+         *     refused with 429 before the password is checked.
          */
         post: operations["login_api_v1_auth_login_post"];
         delete?: never;
@@ -36,8 +40,35 @@ export interface paths {
         /**
          * Refresh Token
          * @description Refresh the current JWT token. Requires a valid existing token.
+         *
+         *     The new token keeps the session's sign-in time, so a session renews only until
+         *     it is ``api.max_session_minutes`` old, and no token outlives that.
          */
         post: operations["refresh_token_api_v1_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout
+         * @description End every session of the caller's account, on every device.
+         *
+         *     Each token minted for the account before this call is refused from now on,
+         *     this one included, and the engine's login cookie is cleared. A peer that
+         *     verifies engine tokens by signature alone still accepts one until it expires.
+         */
+        post: operations["logout_api_v1_auth_logout_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -281,13 +312,17 @@ export interface paths {
         put?: never;
         /**
          * Reset Current User Password
-         * @description Reset the authenticated user's password.
+         * @description Change the authenticated user's own password, given the current one.
          *
          *     The username is taken from the session, not the request, so a caller cannot
-         *     reset another account through this route. An IdP-owned (``external``)
+         *     reset another account through this route. ``current_password`` must be the
+         *     account's password, so a stolen session token cannot take the account over;
+         *     wrong guesses back off as sign-in failures do. An IdP-owned (``external``)
          *     account is refused: it has no local password. The live store takes the new
-         *     password immediately; the ``git`` block reports whether the durable mirror
-         *     merged, is pending review, or is a no-op for a non-git-backed account.
+         *     password immediately and every session the account held ends, this one
+         *     included, so the owner signs in again. The ``git`` block reports whether the
+         *     durable mirror merged, is pending review, or is a no-op for a non-git-backed
+         *     account.
          *
          *     An account on an issued password may call this and nothing else that
          *     changes state, and the reset clears ``password_change_required``.
@@ -6547,6 +6582,22 @@ export interface components {
              * @description Config key that must be enabled for this expression's tier (Tier 2/3)
              */
             opt_in_required?: string | null;
+        };
+        /**
+         * ChangeOwnPasswordRequest
+         * @description The owner's own change, which proves the password as well as the session.
+         */
+        ChangeOwnPasswordRequest: {
+            /**
+             * New Password
+             * @description New plaintext password; at least 12 characters
+             */
+            new_password: string;
+            /**
+             * Current Password
+             * @description The account's password now. A session token alone cannot change it.
+             */
+            current_password: string;
         };
         /**
          * ClassInfo
@@ -15252,6 +15303,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Too many failed sign-ins for this username or from this address; Retry-After gives the seconds to wait */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     refresh_token_api_v1_auth_refresh_post: {
@@ -15271,6 +15331,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TokenResponse"];
                 };
+            };
+            /** @description The session is older than api.max_session_minutes (session_expired), has ended, or no account backs it */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
             401: {
@@ -15865,7 +15961,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ResetPasswordRequest"];
+                "application/json": components["schemas"]["ChangeOwnPasswordRequest"];
             };
         };
         responses: {
@@ -15887,7 +15983,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description current_password is not the account's password (invalid_current_password) */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -15903,6 +15999,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Too many wrong current passwords; Retry-After gives the seconds to wait */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

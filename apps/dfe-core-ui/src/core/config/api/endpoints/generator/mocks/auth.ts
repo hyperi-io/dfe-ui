@@ -64,6 +64,26 @@ export const auth = {
       },
     },
   },
+  logout: {
+    mockedUrl: '/api/v1/auth/logout',
+    post: {
+      success: () =>
+        http.post(auth.logout.mockedUrl, () => {
+          return new HttpResponse(null, { status: 204 });
+        }),
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 401,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(auth.logout.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
   me: {
     mockedUrl: '/api/v1/auth/me',
     get: {

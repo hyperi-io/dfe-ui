@@ -1,11 +1,20 @@
 'use client';
 
 import { LoginLocalOidcSwitch } from '@/core/components/LoginLocalOidcSwitch';
+import { loginNotice } from '@/core/config/loginNotice';
 import { cn } from '@/core/utils/style';
 import { IconPrimaryLogoFull } from '@repo/dfe-icons';
+import { Alert } from 'antd';
 import './Login.css';
 
-const Login = ({ callbackUrl }: { callbackUrl: string }) => {
+const Login = ({
+  callbackUrl,
+  notice,
+}: {
+  callbackUrl: string;
+  notice?: string;
+}) => {
+  const shown = loginNotice(notice);
   return (
     <main
       className={cn(
@@ -22,12 +31,28 @@ const Login = ({ callbackUrl }: { callbackUrl: string }) => {
           height={30}
           width={150}
         />
+        {shown && (
+          <Alert
+            className="w-full"
+            type="success"
+            showIcon
+            title={shown.title}
+            description={shown.description}
+          />
+        )}
         <LoginLocalOidcSwitch callbackUrl={callbackUrl} />
       </div>
     </main>
   );
 };
 
-export const LoginScene = ({ callbackUrl = '/' }: { callbackUrl?: string }) => {
-  return <Login callbackUrl={callbackUrl} />;
+export const LoginScene = ({
+  callbackUrl = '/',
+  notice,
+}: {
+  callbackUrl?: string;
+  /** A LOGIN_NOTICE_PARAM value; anything unknown shows nothing. */
+  notice?: string;
+}) => {
+  return <Login callbackUrl={callbackUrl} notice={notice} />;
 };

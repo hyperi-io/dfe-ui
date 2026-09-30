@@ -1,4 +1,7 @@
-import { clientNavigationPathFromAuthUrl } from '@/core/config/loginCallback';
+import {
+  clientNavigationPathFromAuthUrl,
+  safeRedirectPath,
+} from '@/core/config/loginCallback';
 import { useMutation } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -39,8 +42,11 @@ export const useLogin = ({
         return;
       }
 
-      const url = result?.url ?? callbackUrl;
-      router.push(clientNavigationPathFromAuthUrl(url));
+      // NextAuth builds its URL on NEXTAUTH_URL, which can differ from the browser's origin.
+      const target = result?.url
+        ? clientNavigationPathFromAuthUrl(result.url)
+        : callbackUrl;
+      router.push(safeRedirectPath(target, window.location.origin));
     },
   });
 

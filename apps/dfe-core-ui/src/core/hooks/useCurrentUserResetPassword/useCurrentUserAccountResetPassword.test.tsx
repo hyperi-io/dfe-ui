@@ -30,6 +30,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useAccountResetPassword', () => {
   const requestBody: TCurrentUserResetPasswordRequestBody = {
+    current_password: 'the-password-now',
     new_password: 'string',
   };
   describe('onSuccess', () => {

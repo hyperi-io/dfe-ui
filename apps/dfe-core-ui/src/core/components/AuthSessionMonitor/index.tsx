@@ -90,8 +90,8 @@ const AuthSessionMonitorInner = () => {
     lastRefreshAttemptAt.current = Date.now();
 
     void refreshToken()
-      .then((tokenResponse) => {
-        knownExpiresAt.current = Date.now() + tokenResponse.expires_in * 1000;
+      .then((renewed) => {
+        knownExpiresAt.current = renewed.accessTokenExpiresAt;
       })
       .catch(() => {
         if (signingOut.current) {

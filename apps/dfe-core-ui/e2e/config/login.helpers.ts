@@ -36,9 +36,18 @@ export const CHANGE_PASSWORD_PATH = '/change-password';
 export const expectForcedPasswordChange = (page: Page) =>
   expect(page).toHaveURL((url) => url.pathname === CHANGE_PASSWORD_PATH);
 
-/** Replace the issued password from the forced change screen. */
-export const completeForcedPasswordChange = async (page: Page) => {
+/**
+ * Replace the issued password from the forced change screen. The change ends
+ * every session of the account, so it signs in again with the new password.
+ */
+export const completeForcedPasswordChange = async (
+  page: Page,
+  user = 'admin',
+) => {
   const password = newAdminPassword();
+  await page
+    .getByRole('textbox', { name: 'Current Password', exact: true })
+    .fill(adminPassword());
   await page
     .getByRole('textbox', { name: 'New Password', exact: true })
     .fill(password);
@@ -46,8 +55,16 @@ export const completeForcedPasswordChange = async (page: Page) => {
     .getByRole('textbox', { name: 'Confirm Password', exact: true })
     .fill(password);
   await page.getByRole('button', { name: 'Set password', exact: true }).click();
+  await expect(page).toHaveURL((url) => url.pathname === '/login');
+  await expect(page.getByText('Password changed')).toBeVisible();
+
+  await page.getByRole('textbox', { name: 'Username', exact: true }).fill(user);
+  await page
+    .getByRole('textbox', { name: 'Password', exact: true })
+    .fill(password);
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
   await expect(page).not.toHaveURL(
-    (url) => url.pathname === CHANGE_PASSWORD_PATH,
+    (url) => url.pathname === '/login' || url.pathname === CHANGE_PASSWORD_PATH,
   );
 };
 
@@ -115,7 +132,7 @@ export const loginAs = async (page: Page, user: string) => {
       url.pathname === '/sources' || url.pathname === CHANGE_PASSWORD_PATH,
   );
   if (new URL(page.url()).pathname === CHANGE_PASSWORD_PATH) {
-    await completeForcedPasswordChange(page);
+    await completeForcedPasswordChange(page, user);
   }
   await expectSourcesLanding(page);
 };

@@ -23,17 +23,12 @@ import {
   savePendingReview,
 } from './pendingReviewStorage';
 
-const { replace, executeAccessTokenRefresh } = vi.hoisted(() => ({
+const { replace } = vi.hoisted(() => ({
   replace: vi.fn(),
-  executeAccessTokenRefresh: vi.fn(),
 }));
 
 vi.mock('@/core/utils/navigation', () => ({
   navigateWithReload: replace,
-}));
-
-vi.mock('@/core/auth/refreshAccessToken', () => ({
-  executeAccessTokenRefresh,
 }));
 
 const { ChangePasswordScene } = await import('.');
@@ -112,15 +107,56 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
+const ISSUED_PASSWORD = 'the-password-issued';
 const NEW_PASSWORD = 'a-password-of-my-own';
+const SIGN_IN_AGAIN = { callbackUrl: '/login?notice=password-changed' };
 
 const submit = async (password = NEW_PASSWORD, confirm = password) => {
   const user = userEvent.setup();
   render(<ChangePasswordScene />, { wrapper });
-  await user.type(await screen.findByLabelText('New Password'), password);
+  await user.type(
+    await screen.findByLabelText('Current Password'),
+    ISSUED_PASSWORD,
+  );
+  await user.type(screen.getByLabelText('New Password'), password);
   await user.type(screen.getByLabelText('Confirm Password'), confirm);
   await user.click(screen.getByRole('button', { name: 'Set password' }));
 };
+
+// Answers the change and keeps the body the console sent.
+const recordChange = (sent: { body?: unknown }) =>
+  server.use(
+    http.post(
+      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
+      async ({ request }) => {
+        sent.body = await request.json();
+        return HttpResponse.json({
+          message: 'password reset',
+          git: {
+            enabled: false,
+            committed: false,
+            auto_merge: false,
+            merged: false,
+          },
+        });
+      },
+    ),
+  );
+
+const refuseCurrentPassword = () =>
+  server.use(
+    http.post(
+      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.mockedUrl,
+      () =>
+        HttpResponse.json(
+          {
+            code: 'invalid_current_password',
+            message: "current_password is not this account's password",
+          },
+          { status: 403 },
+        ),
+    ),
+  );
 
 // The screen as it loads again after the change, with the account no longer flagged.
 const reload = (breakGlass: TBreakGlass) => {
@@ -177,7 +213,6 @@ const expectNoForm = () => {
 describe('ChangePasswordScene', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    executeAccessTokenRefresh.mockResolvedValue({});
     useAuthStore.getState().reset();
     window.localStorage.clear();
   });
@@ -203,19 +238,37 @@ describe('ChangePasswordScene', () => {
     expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/login' });
   });
 
-  test('changes the password, renews the session, then enters the console', async () => {
-    server.use(
-      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success(),
-    );
+  test('changes the password with the issued one as current, then signs out to sign in again', async () => {
+    const sent: { body?: unknown } = {};
+    recordChange(sent);
 
     await submit();
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/'));
-    expect(executeAccessTokenRefresh).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(signOut).toHaveBeenCalledWith(SIGN_IN_AGAIN));
+    expect(sent.body).toEqual({
+      current_password: ISSUED_PASSWORD,
+      new_password: NEW_PASSWORD,
+    });
+    // The change ended this session, so nothing tries to enter the console on it.
+    expect(replace).not.toHaveBeenCalled();
     expect(readPendingReview(ADMIN)).toBeNull();
   });
 
-  test('holds on the pending review before entering', async () => {
+  test('a wrong current password is marked on that field, and nothing signs out', async () => {
+    refuseCurrentPassword();
+
+    await submit();
+
+    expect(
+      await screen.findByText('That is not your current password.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("current_password is not this account's password"),
+    ).not.toBeInTheDocument();
+    expect(signOut).not.toHaveBeenCalled();
+  });
+
+  test('holds on the pending review before signing in again', async () => {
     answerWithReview({ pr_url: PR_URL });
 
     await submit();
@@ -232,11 +285,13 @@ describe('ChangePasswordScene', () => {
       screen.getByRole('link', { name: 'Open the review' }),
     ).toHaveAttribute('href', PR_URL);
     expect(replace).not.toHaveBeenCalled();
+    expect(signOut).not.toHaveBeenCalled();
 
     await userEvent
       .setup()
       .click(screen.getByRole('button', { name: 'Continue' }));
-    expect(replace).toHaveBeenCalledWith('/');
+    expect(signOut).toHaveBeenCalledWith(SIGN_IN_AGAIN);
+    expect(replace).not.toHaveBeenCalled();
   });
 
   test('keeps the merge command for a reload, and never the password', async () => {
@@ -361,11 +416,11 @@ describe('ChangePasswordScene', () => {
     await submit();
 
     expect(await screen.findByText(REUSED)).toBeInTheDocument();
-    expect(executeAccessTokenRefresh).not.toHaveBeenCalled();
+    expect(signOut).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
 
-  test.each(['New Password', 'Confirm Password'])(
+  test.each(['Current Password', 'New Password', 'Confirm Password'])(
     'clears the engine refusal once %s is edited',
     async (field) => {
       refuseAsReused();
@@ -390,17 +445,22 @@ describe('ChangePasswordScene', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  test('says how to recover when the session cannot be renewed', async () => {
-    server.use(
-      API_CONFIG_MOCKS.accounts.resetCurrentUserPassword.post.success(),
-    );
-    executeAccessTokenRefresh.mockRejectedValue(new Error('500'));
+  test('the wrong-password mark clears once the current password is edited', async () => {
+    refuseCurrentPassword();
 
     await submit();
-
     expect(
-      await screen.findByText(/this session could not be renewed/),
+      await screen.findByText('That is not your current password.'),
     ).toBeInTheDocument();
-    expect(replace).not.toHaveBeenCalled();
+
+    await userEvent
+      .setup()
+      .type(screen.getByLabelText('Current Password'), 'x');
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText('That is not your current password.'),
+      ).not.toBeInTheDocument(),
+    );
   });
 });

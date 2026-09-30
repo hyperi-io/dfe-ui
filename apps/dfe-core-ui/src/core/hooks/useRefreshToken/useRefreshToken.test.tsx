@@ -1,90 +1,57 @@
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import type { Session } from 'next-auth';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useRefreshToken } from '.';
-import { TRefreshTokenResponse } from './types';
-import { server } from './useRefreshToken.mocks';
 
-const persistRefreshedSessionMock = vi.fn().mockResolvedValue(undefined);
+const renewSessionMock = vi.fn();
 
-vi.mock('@/core/auth/persistRefreshedSession', () => ({
-  persistRefreshedSession: (...args: unknown[]) =>
-    persistRefreshedSessionMock(...args),
+vi.mock('@/core/auth/renewSession', () => ({
+  renewSession: () => renewSessionMock(),
 }));
 
-vi.mock('next-auth/react', () => ({
-  getSession: vi.fn().mockResolvedValue({
-    user: { id: 'test-user', accessToken: 'refreshed-token' },
-    expires: '2099-01-01',
-  }),
-}));
-
-beforeAll(() =>
-  server.listen({
-    onUnhandledRequest: 'error',
-  }),
-);
 afterEach(() => {
-  server.resetHandlers();
-  persistRefreshedSessionMock.mockClear();
+  renewSessionMock.mockReset();
 });
-afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
+const RENEWED: Session = {
+  user: {
+    id: 'admin',
+    name: 'admin',
+    accessToken: 'renewed-token',
+    roles: ['admin'],
+  },
+  expires: '2099-01-01',
+  accessTokenExpiresAt: 4_102_444_800_000,
+};
+
 describe('.useRefreshToken', () => {
-  describe('onSuccess', () => {
-    test('refreshes token and persists session', async () => {
-      const { result } = renderHook(() => useRefreshToken(), { wrapper });
+  test('resolves to the session the server renewed', async () => {
+    renewSessionMock.mockResolvedValue(RENEWED);
+    const { result } = renderHook(() => useRefreshToken(), { wrapper });
 
-      result.current.mutate();
+    result.current.mutate();
 
-      const expectedResponse: TRefreshTokenResponse = {
-        access_token: 'refreshed-token',
-        token_type: 'bearer',
-        expires_in: 3600,
-        user_id: 'string',
-        roles: ['string'],
-        default_credentials: false,
-        password_change_required: false,
-      };
-
-      await waitFor(() => {
-        expect(result.current.isPending).toBe(false);
-        expect(result.current.data).toEqual(expectedResponse);
-      });
-
-      expect(persistRefreshedSessionMock).toHaveBeenCalledWith(
-        expectedResponse,
-      );
+    await waitFor(() => {
+      expect(result.current.data).toEqual(RENEWED);
     });
+    expect(renewSessionMock).toHaveBeenCalledTimes(1);
   });
 
-  describe('onError', () => {
-    beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.auth.refresh.post.error());
-    });
+  test('surfaces a renewal the engine refused', async () => {
+    renewSessionMock.mockRejectedValue(
+      new Error('The engine did not renew the session'),
+    );
+    const { result } = renderHook(() => useRefreshToken(), { wrapper });
 
-    test('should return error', async () => {
-      const { result } = renderHook(() => useRefreshToken(), { wrapper });
+    result.current.mutate();
 
-      result.current.mutate();
-
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-      });
-
-      expect(persistRefreshedSessionMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(result.current.error?.message).toBe(
+        'The engine did not renew the session',
+      );
     });
   });
 });

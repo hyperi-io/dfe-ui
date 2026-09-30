@@ -4,9 +4,9 @@ import {
   isAppShellSession,
   isPasswordChangeRequired,
 } from '@/core/config/authSession';
-import { isProxyAuthMode } from '@/core/config/proxyTrust';
+import { safeRedirectPath } from '@/core/config/loginCallback';
+import { LOGIN_NOTICE_PARAM } from '@/core/config/loginNotice';
 import { LoginScene } from '@/core/scenes/LoginScene';
-import { ProxyTrustGate } from '@/core/scenes/LoginScene/ProxyTrustGate';
 import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
@@ -15,16 +15,16 @@ import { redirect } from 'next/navigation';
 // prerender has no env and fails the build.
 export const dynamic = 'force-dynamic';
 
+const first = (value: string | string[] | undefined): string | undefined =>
+  typeof value === 'string' ? value : value?.[0];
+
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const callbackUrl =
-    (typeof params?.callbackUrl === 'string'
-      ? params.callbackUrl
-      : params?.callbackUrl?.[0]) ?? '/';
+  const callbackUrl = safeRedirectPath(first(params?.callbackUrl));
 
   // The wizard needs an authenticated session, so the form must stay
   // reachable while setup is incomplete -- only signed-in users are
@@ -44,11 +44,11 @@ export default async function Login({
   if (isAppShellSession(session)) {
     redirect(callbackUrl);
   }
-  // Behind the proxy: auto-establish the session from the forwarded engine
-  // token instead of showing the password form (falls back to it on failure).
-  if (isProxyAuthMode()) {
-    return <ProxyTrustGate callbackUrl={callbackUrl} />;
-  }
 
-  return <LoginScene callbackUrl={callbackUrl} />;
+  return (
+    <LoginScene
+      callbackUrl={callbackUrl}
+      notice={first(params?.[LOGIN_NOTICE_PARAM])}
+    />
+  );
 }
