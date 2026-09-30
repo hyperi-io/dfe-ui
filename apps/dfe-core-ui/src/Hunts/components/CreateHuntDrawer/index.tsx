@@ -93,7 +93,7 @@ export const CreateHuntDrawer = ({
             name: '',
             customers: [],
             rules: [],
-            cron: '* * * * *',
+            cron: '*/15 * * * *',
             log_buffer: 60,
             display_name: '',
             global_target_table_name: '',

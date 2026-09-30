@@ -80,8 +80,7 @@ export const MainSourcePromoteWizard = ({
     },
     {
       key: STEP_INDEX_MAP.createAssign.key,
-      title: 'Create & Assign to Source',
-      subTitle: '(Optional)',
+      title: 'Create & Assign to Source (Optional)',
       disabled: !createdSchema,
       status: getStepStatus({
         stepKey: 'create-source',
@@ -182,11 +181,10 @@ export const MainSourcePromoteWizard = ({
               )}
             </div>
           }
-          type="success"
+          type="default"
           action={
             <Button
-              type="primary"
-              className="bg-green-500 text-white hover:bg-green-600"
+              type="default"
               htmlType="button"
               onClick={() => {
                 onFinalSuccess?.();

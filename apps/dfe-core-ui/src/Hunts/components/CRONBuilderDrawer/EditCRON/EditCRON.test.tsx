@@ -3,8 +3,8 @@ import { CRONBuilderProvider } from '@/Hunts/components/CRONBuilderDrawer/CRONBu
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { Daily } from './Daily';
 import { EditCRON } from '.';
+import { Daily } from './Daily';
 import { Hourly } from './Hourly';
 import { Minutes } from './Minutes';
 
@@ -63,7 +63,7 @@ describe('EditCron', () => {
   });
 
   it('opens on Minutes when the form value is empty or the default cron', () => {
-    renderEditCron({ value: '* * * * *' });
+    renderEditCron({ value: '*/15 * * * *' });
 
     expect(screen.getByRole('tab', { name: 'Minutes' })).toHaveAttribute(
       'aria-selected',
@@ -97,12 +97,28 @@ describe('EditCron', () => {
     expect(generatedExpression()).toHaveValue('0 */1 * * *');
   });
 
+  it('keeps the current expression when switching to Custom', async () => {
+    const user = userEvent.setup();
+    renderEditCron({ value: '*/15 * * * *' });
+
+    await user.click(screen.getByRole('tab', { name: 'Daily' }));
+    expect(generatedExpression()).toHaveValue('0 1 */1 * *');
+
+    await user.click(screen.getByRole('tab', { name: 'Custom' }));
+
+    expect(screen.getByRole('tab', { name: 'Custom' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(generatedExpression()).toHaveValue('0 1 */1 * *');
+  });
+
   it('restores the form value on Reset when one exists', async () => {
     const user = userEvent.setup();
     renderEditCron({ value: '0 * * * *' });
 
     await user.click(screen.getByRole('tab', { name: 'Minutes' }));
-    expect(generatedExpression()).toHaveValue('*/1 * * * *');
+    expect(generatedExpression()).toHaveValue('*/15 * * * *');
 
     await user.click(screen.getByRole('button', { name: 'Reset' }));
     expect(generatedExpression()).toHaveValue('0 * * * *');
@@ -271,7 +287,7 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Custom' }));
 
-      expect(generatedExpression()).toHaveValue('* * * * *');
+      expect(generatedExpression()).toHaveValue('');
 
       const customInput = screen
         .getAllByRole('textbox')
