@@ -181,11 +181,10 @@ export const MainSourcePromoteWizard = ({
               )}
             </div>
           }
-          type="success"
+          type="default"
           action={
             <Button
-              type="primary"
-              className="bg-green-500 text-white hover:bg-green-600"
+              type="default"
               htmlType="button"
               onClick={() => {
                 onFinalSuccess?.();

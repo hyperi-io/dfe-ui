@@ -52,6 +52,7 @@ export const BuildDeploySourceStep = ({
 
   return (
     <SourceBuildDeployTabContent
+      className="pr-0"
       source_name={createdSource}
       source_version="1.0.0"
       build_result={sourceDetailData?.version.source_build}

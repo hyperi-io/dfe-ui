@@ -1,5 +1,6 @@
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { cn } from '@/core/utils/style';
 import { DeploySourceDrawer } from '@/Sources/components/DeploySourceDrawer';
 import { ViewDeployedSourceDrawer } from '@/Sources/components/ViewDeployedSourceDrawer';
 import { useBuildSource } from '@/Sources/hooks/useBuildSource';
@@ -16,6 +17,7 @@ export const SourceBuildDeployTabContent = ({
   build_result: buildResult,
   deploy_result: deployResult,
   onSuccess,
+  className,
 }: {
   source_name: string;
   source_version: string;
@@ -24,6 +26,7 @@ export const SourceBuildDeployTabContent = ({
   onSuccess?: {
     onDeploySuccess?: () => void;
   };
+  className?: string;
 }) => {
   const {
     mutate: buildSourceMutation,
@@ -37,7 +40,7 @@ export const SourceBuildDeployTabContent = ({
   }, [source_name, source_version, resetBuildSource]);
 
   return (
-    <div className="pr-4 flex flex-col gap-4">
+    <div className={cn('pr-4 flex flex-col gap-4', className)}>
       {!buildResult && (
         <NotificationCard
           title="Build Source"
