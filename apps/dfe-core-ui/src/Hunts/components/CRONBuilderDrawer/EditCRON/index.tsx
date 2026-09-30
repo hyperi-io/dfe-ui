@@ -19,7 +19,7 @@ const SectionLabel = ({ label }: { label: string }) => {
 type TabKey = 'minutes' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'custom';
 
 const tabForFormValue = (value: string): TabKey =>
-  value && value !== '* * * * *' ? 'custom' : 'minutes';
+  value && value !== '*/15 * * * *' ? 'custom' : 'minutes';
 
 export const EditCRON = ({
   onChange,

@@ -37,7 +37,7 @@ export const explainCronExpression = (cronExpression: string) => {
 export const resetCronExpression = (key: string) => {
   switch (key) {
     case 'minutes':
-      return '*/1 * * * *';
+      return '*/15 * * * *';
     case 'hourly':
       return '0 */1 * * *';
     case 'daily':
@@ -48,6 +48,6 @@ export const resetCronExpression = (key: string) => {
       return '0 1 1 * *';
     case 'custom':
     default:
-      return '* * * * *';
+      return '*/15 * * * *';
   }
 };
