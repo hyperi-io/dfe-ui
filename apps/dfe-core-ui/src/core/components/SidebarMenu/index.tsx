@@ -8,9 +8,11 @@ import {
 import { Button, Layout } from 'antd';
 import { useState } from 'react';
 
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { ThemeToggle } from '@/core/components/ThemeToggle';
 import { UserActionsButton } from '@/core/components/UserActionsButton';
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Logo } from './Logo';
 import { SidebarMenu } from './SidebarMenu';
@@ -21,6 +23,10 @@ const { Sider } = Layout;
 export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 130,
+  });
   return (
     <Sider
       className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
@@ -56,10 +62,9 @@ export const Sidebar = () => {
             }
             onClick={() => setCollapsed(!collapsed)}
           />
-          <SidebarMenu
-            className="h-full max-h-[calc(100vh-130px)] css-custom-scrollbar"
-            collapsed={collapsed}
-          />
+          <CustomScrollbar innerPadding={false} height={componentHeight}>
+            <SidebarMenu className="h-full" collapsed={collapsed} />
+          </CustomScrollbar>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background">

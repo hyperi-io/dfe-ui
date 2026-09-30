@@ -1,3 +1,5 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SECURITY_LOGS_DATA } from '@/Settings/mocks/securityLogs.data';
 import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
 import { Button, DatePicker, Input, Select, type GetProps } from 'antd';
@@ -39,6 +41,11 @@ export const SecurityEvents = () => {
 
     return matchesSearch && inDateRange && matchesSeverity;
   });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2 ml-auto">
@@ -97,40 +104,42 @@ export const SecurityEvents = () => {
           {sort === 'asc' ? 'Newest first' : 'Oldest first'}
         </Button>
       </div>
-      <ul className="flex flex-col gap-y-2 h-[calc(100vh-250px)] css-custom-scrollbar">
-        {filteredSecurityLogs.map((securityLog) => (
-          <li
-            className="border-b border-foreground/20 pb-2"
-            key={securityLog.id}
-          >
-            <div className="flex justify-between items-center ">
-              <div className="flex flex-col gap-y-1">
-                <span className="text-sm font-medium flex items-center gap-x-1">
-                  <span className="inline-flex items-center gap-x-1">
-                    {securityLog.severity === 'info' && (
-                      <IconInfoCircle className="hover:text-info" />
-                    )}
-                    {securityLog.severity === 'warning' && (
-                      <IconAlertCircle className="hover:text-warning" />
-                    )}
-                    {securityLog.severity === 'error' && (
-                      <IconAlertCircle className="hover:text-error" />
-                    )}
-                    [{securityLog.severity}]
+      <CustomScrollbar height={componentHeight}>
+        <ul className="flex flex-col gap-y-2 h-[calc(100vh-250px)] css-custom-scrollbar">
+          {filteredSecurityLogs.map((securityLog) => (
+            <li
+              className="border-b border-foreground/20 pb-2"
+              key={securityLog.id}
+            >
+              <div className="flex justify-between items-center ">
+                <div className="flex flex-col gap-y-1">
+                  <span className="text-sm font-medium flex items-center gap-x-1">
+                    <span className="inline-flex items-center gap-x-1">
+                      {securityLog.severity === 'info' && (
+                        <IconInfoCircle className="hover:text-info" />
+                      )}
+                      {securityLog.severity === 'warning' && (
+                        <IconAlertCircle className="hover:text-warning" />
+                      )}
+                      {securityLog.severity === 'error' && (
+                        <IconAlertCircle className="hover:text-error" />
+                      )}
+                      [{securityLog.severity}]
+                    </span>
+                    - {securityLog.user}
                   </span>
-                  - {securityLog.user}
-                </span>
-                <span className="text-sm text-foreground/50">
-                  {securityLog.detail}
+                  <span className="text-sm text-foreground/50">
+                    {securityLog.detail}
+                  </span>
+                </div>
+                <span>
+                  {dayjs(securityLog.timestamp).format('YYYY-MM-DD HH:mm:ss')}
                 </span>
               </div>
-              <span>
-                {dayjs(securityLog.timestamp).format('YYYY-MM-DD HH:mm:ss')}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </CustomScrollbar>
     </div>
   );
 };

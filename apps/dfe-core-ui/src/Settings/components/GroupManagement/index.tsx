@@ -1,10 +1,15 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { UserGroups } from './UserGroups';
 
 /** Tab shell for future organisation-scoped groups; mirrors RoleManagement layout. */
 export const GroupManagement = () => {
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
   return (
-    <div className="min-w-0 h-[calc(100vh-100px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight}>
       <UserGroups />
-    </div>
+    </CustomScrollbar>
   );
 };

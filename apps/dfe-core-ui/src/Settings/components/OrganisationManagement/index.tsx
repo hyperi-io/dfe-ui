@@ -1,10 +1,12 @@
 'use client';
 
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateOrganisationDrawer } from '@/Settings/components/OrganisationManagement/CreateOrganisationDrawer';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Input, Spin } from 'antd';
@@ -21,9 +23,16 @@ export const OrganisationManagement = () => {
     error,
     refetch,
   } = useFetchInfiniteFilteredOrganisations({ search, per_page: 12 });
+  const { componentHeight: outerComponentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
+  const { componentHeight: innerComponentHeight } = useSetComponentHeight({
+    offset: 295,
+  });
 
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
+    <CustomScrollbar height={outerComponentHeight}>
       <SectionCard
         title="Configure a new organisation"
         description="Create and configure a new organisation and manage user, role defaults and more."
@@ -66,7 +75,7 @@ export const OrganisationManagement = () => {
               />
             )}
             {organisations && organisations?.length > 0 && (
-              <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+              <CustomScrollbar height={innerComponentHeight}>
                 <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {organisations?.map((organisation) => (
                     <li key={organisation.name}>
@@ -81,7 +90,7 @@ export const OrganisationManagement = () => {
                     {isFetchingNextPage && <Spin size="small" />}
                   </div>
                 </ul>
-              </div>
+              </CustomScrollbar>
             )}
           </RbacProtected.Unrestricted>
           <RbacProtected.Restricted>
@@ -108,6 +117,6 @@ export const OrganisationManagement = () => {
       >
         <SpendLimitsContent />
       </SectionCard> */}
-    </div>
+    </CustomScrollbar>
   );
 };
