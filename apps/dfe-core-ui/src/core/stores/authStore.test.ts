@@ -3,7 +3,15 @@ import { SESSION_AUTH_REFRESH_INTERVAL_MS } from '@/core/config/authSession';
 import { server } from '@/core/hooks/useAuthMe/useAuthMe.mocks';
 import { useAuthStore } from '@/core/stores/authStore';
 import { http, HttpResponse } from 'msw';
-import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 const defaultMeResponse = {
   org_id: 'string',
@@ -28,6 +36,7 @@ afterEach(() => {
   useAuthStore.getState().reset();
   vi.useRealTimers();
 });
+afterAll(() => server.close());
 
 describe('useAuthStore', () => {
   test('refreshAuth fetches me once when called in parallel', async () => {
