@@ -10718,7 +10718,7 @@
           "queries"
         ],
         "summary": "Execute Raw Query",
-        "description": "Execute a raw query against a registered datasource adapter.\n\nThis is the lower-level query path -- for ad-hoc queries against\ndatasource adapters rather than parameterized views. Requires\n``query:execute`` permission.",
+        "description": "Execute a raw query against a registered datasource adapter.\n\nThis is the lower-level query path -- for ad-hoc queries against\ndatasource adapters rather than parameterized views. The SQL runs as the\nengine's own ClickHouse user, so it requires ``raw_query:execute``, which no\nbuilt-in role but ``admin`` holds, and ClickHouse runs it read-only.",
         "operationId": "execute_raw_query_api_v1_queries_raw_post",
         "requestBody": {
           "content": {
@@ -24370,6 +24370,18 @@
             "type": "string",
             "title": "Service"
           },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id."
+          },
           "instance": {
             "type": "string",
             "title": "Instance"
@@ -25125,6 +25137,18 @@
           "service": {
             "type": "string",
             "title": "Service"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name",
+            "description": "The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id."
           },
           "scale_deployed": {
             "type": "boolean",

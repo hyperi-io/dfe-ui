@@ -2502,8 +2502,9 @@ export interface paths {
          * @description Execute a raw query against a registered datasource adapter.
          *
          *     This is the lower-level query path -- for ad-hoc queries against
-         *     datasource adapters rather than parameterized views. Requires
-         *     ``query:execute`` permission.
+         *     datasource adapters rather than parameterized views. The SQL runs as the
+         *     engine's own ClickHouse user, so it requires ``raw_query:execute``, which no
+         *     built-in role but ``admin`` holds, and ClickHouse runs it read-only.
          */
         post: operations["execute_raw_query_api_v1_queries_raw_post"];
         delete?: never;
@@ -5882,6 +5883,11 @@ export interface components {
         AppSummary: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Instance */
             instance: string;
             /** Telemetry Name */
@@ -6310,6 +6316,11 @@ export interface components {
         CatalogueEntry: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Scale Deployed */
             scale_deployed: boolean;
             /** Multiplicity */
