@@ -12,7 +12,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 describe('RetentionCard', () => {
-  it('shows the environment default and offers no way to change it', async () => {
+  it('shows the environment default, with the editor closed', async () => {
     render(<RetentionCard />, { wrapper });
 
     expect(
@@ -21,7 +21,9 @@ describe('RetentionCard', () => {
     expect(
       screen.getByText(/Set by DFE_CLICKHOUSE_DEFAULT_TTL_DAYS/),
     ).toBeInTheDocument();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Edit retention' }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
   });
 
