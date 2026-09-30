@@ -1,6 +1,7 @@
 import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
+import { TUpdateRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
@@ -86,6 +87,35 @@ export const system = {
       }: { mockedResponse?: TSystemRetentionResponse } = {}) => {
         return http.get(system.retention.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+    put: {
+      success: ({
+        mockedResponse = {
+          default_ttl_days: 90,
+          stored: null,
+          origin: 'deployment',
+          deployment_default: 90,
+          editable: true,
+          reconcile: {
+            core_tables_altered: [],
+            source_tables_altered: [],
+            sources_reconciled: 0,
+            sources_skipped: 0,
+          },
+        },
+      }: { mockedResponse?: TUpdateRetentionResponse } = {}) => {
+        return http.put(system.retention.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.put(system.retention.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
         });
       },
     },
