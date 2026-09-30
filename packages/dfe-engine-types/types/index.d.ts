@@ -5366,7 +5366,10 @@ export interface paths {
         };
         /**
          * Client Config
-         * @description Runtime config for the web UI (no secrets).
+         * @description Runtime config for the web UI.
+         *
+         *     Authenticated but ungated: every console pane may read it, and the HyperDX URL
+         *     it returns is internal to the deployment.
          */
         get: operations["client_config_api_v1_config_client_get"];
         put?: never;
@@ -6650,7 +6653,7 @@ export interface components {
             hyperdx: components["schemas"]["HyperDXConfig"];
             /**
              * Auth Mode
-             * @description 'oidc' when an enabled OIDC provider is registered, so the UI offers the SSO button; 'jwt' otherwise. Local login stays available in both.
+             * @description 'oidc' when an enabled OIDC provider is registered, 'jwt' otherwise; shown on the System Management page. Local login stays available in both.
              * @default jwt
              */
             auth_mode: string;
@@ -30381,6 +30384,24 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
