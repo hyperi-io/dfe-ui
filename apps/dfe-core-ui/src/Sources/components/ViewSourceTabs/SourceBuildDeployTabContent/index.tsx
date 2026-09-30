@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { GeneratedDdlTabContent } from './GeneratedDdlTabContent';
 import { GeneratedViewsTabContent } from './GeneratedViewsTabContent';
 
-export const SourceDdlPreviewTabContent = ({
+export const SourceBuildDeployTabContent = ({
   source_name,
   source_version,
   build_result: buildResult,

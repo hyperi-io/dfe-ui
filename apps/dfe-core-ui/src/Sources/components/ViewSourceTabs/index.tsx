@@ -13,8 +13,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
 import { SampleEventsTabContent } from './SampleEventsTabContent';
+import { SourceBuildDeployTabContent } from './SourceBuildDeployTabContent';
 import { SourceColumnsTabContent } from './SourceColumnsTabContent';
-import { SourceDdlPreviewTabContent } from './SourceDdlPreviewTabContent';
 import { PromoteRowsProvider } from './contexts/PromoteRows.context';
 
 const SOURCE_DETAIL_TAB_KEY_MAP = {
@@ -24,7 +24,7 @@ const SOURCE_DETAIL_TAB_KEY_MAP = {
   processing: 'Processing',
   'table-stats': 'Table Statistics',
   columns: 'Columns',
-  'ddl-preview': 'Build & Deploy',
+  buildDeploy: 'Build & Deploy',
   hunts: 'Hunts',
   rules: 'Rules',
 } as const;
@@ -209,12 +209,12 @@ export const ViewSourceDetailTabs = ({
                 ),
               },
               {
-                key: 'ddl-preview',
-                label: SOURCE_DETAIL_TAB_KEY_MAP['ddl-preview'],
+                key: 'buildDeploy',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['buildDeploy'],
                 children: (
                   <RbacProtected action={RbacProtected.rbacActions.source_read}>
                     <RbacProtected.Unrestricted>
-                      <SourceDdlPreviewTabContent
+                      <SourceBuildDeployTabContent
                         source_name={selectedSourceName}
                         source_version={selectedSourceVersion}
                         build_result={sourceDetailData.version.source_build}

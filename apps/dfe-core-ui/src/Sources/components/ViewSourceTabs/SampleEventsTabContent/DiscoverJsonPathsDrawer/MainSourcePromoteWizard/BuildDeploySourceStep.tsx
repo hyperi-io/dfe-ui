@@ -1,5 +1,5 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { SourceDdlPreviewTabContent } from '@/Sources/components/ViewSourceTabs/SourceDdlPreviewTabContent';
+import { SourceBuildDeployTabContent } from '@/Sources/components/ViewSourceTabs/SourceBuildDeployTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { App, Spin } from 'antd';
@@ -51,7 +51,7 @@ export const BuildDeploySourceStep = ({
   };
 
   return (
-    <SourceDdlPreviewTabContent
+    <SourceBuildDeployTabContent
       source_name={createdSource}
       source_version="1.0.0"
       build_result={sourceDetailData?.version.source_build}
