@@ -11,6 +11,8 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/mode-yaml';
+// Registered here so enableSnippets never fetches them from a page-relative path.
+import 'ace-builds/src-noconflict/snippets/sql';
 import 'ace-builds/src-noconflict/theme-github_dark';
 import 'ace-builds/src-noconflict/theme-github_light_default';
 const SUPPORTED_ACE_BEAUTIFY_MODES = new Set([

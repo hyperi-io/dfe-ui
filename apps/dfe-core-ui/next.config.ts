@@ -18,6 +18,20 @@ const nextConfig: NextConfig = {
   // deps (@repo/*); the Dockerfile copies .next/standalone + .next/static.
   output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
+  poweredByHeader: false,
+  // Every response, static assets included; the per-request CSP is set in src/proxy.ts.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

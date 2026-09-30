@@ -1,5 +1,11 @@
 import { CHANGE_PASSWORD_PATH } from '@/core/config/authSession';
 import {
+  CSP_REQUEST_HEADER,
+  contentSecurityPolicy,
+  createNonce,
+  cspSources,
+} from '@/core/config/contentSecurityPolicy';
+import {
   DFE_TOKEN_COOKIE,
   engineTokenCookieDomain,
 } from '@/core/config/engineTokenCookie';
@@ -31,6 +37,9 @@ import { NextResponse, type NextRequest } from 'next/server';
  * with the UI, so the cookie rides the iframe request and the fork authenticates
  * the user - no second login. This is auth-method agnostic: it works the same
  * whether the session came from local login or an external OIDC provider.
+ *
+ * Every page, the self-guarded ones included, leaves here carrying a fresh
+ * Content-Security-Policy nonce (src/core/config/contentSecurityPolicy.ts).
  */
 
 // Mirror the session's engine access token into the dfe_token cookie so the
@@ -99,19 +108,58 @@ async function isPasswordChangeRequired(req: NextRequest): Promise<boolean> {
   return token?.passwordChangeRequired === true;
 }
 
-function nextWithCallbackPath(req: NextRequest): NextResponse {
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set(
-    LOGIN_CALLBACK_PATH_HEADER,
-    pathWithSearch(req.nextUrl.pathname, req.nextUrl.search),
+// Pages that guard themselves in their own layout, so the proxy only adds the policy.
+function isSelfGuardedPage(pathname: string): boolean {
+  return ['/login', '/setup', '/change-password'].some((prefix) =>
+    pathname.startsWith(prefix),
   );
-  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+// Next stamps the nonce onto its scripts only when the forwarded request carries the policy too.
+function nextWithPolicy(
+  req: NextRequest,
+  extraRequestHeaders: Record<string, string> = {},
+): NextResponse {
+  const policy = contentSecurityPolicy({
+    nonce: createNonce(),
+    dev: process.env.NODE_ENV === 'development',
+    sources: cspSources({
+      apiUrl: process.env.NEXT_PUBLIC_API_URL,
+      hyperdxUrl: process.env.HYPERDX_URL,
+      hyperdxPort: process.env.HYPERDX_PORT,
+      requestHost:
+        req.headers.get('x-forwarded-host')?.split(',')[0]?.trim() ||
+        req.headers.get('host') ||
+        req.nextUrl.host,
+    }),
+  });
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set(CSP_REQUEST_HEADER, policy);
+  for (const [name, value] of Object.entries(extraRequestHeaders)) {
+    requestHeaders.set(name, value);
+  }
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('Content-Security-Policy', policy);
+  return response;
+}
+
+function nextWithCallbackPath(req: NextRequest): NextResponse {
+  return nextWithPolicy(req, {
+    [LOGIN_CALLBACK_PATH_HEADER]: pathWithSearch(
+      req.nextUrl.pathname,
+      req.nextUrl.search,
+    ),
+  });
 }
 
 export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
+  if (isSelfGuardedPage(req.nextUrl.pathname)) {
+    return nextWithPolicy(req);
+  }
+
   const result = await authMiddleware(
     req as Parameters<typeof authMiddleware>[0],
     event,
@@ -150,10 +198,11 @@ export default async function proxy(
 export const config = {
   matcher: [
     /*
-     * Match all paths under (auth) except static files and api routes.
+     * Match every page except static files and the NextAuth API routes.
      * (auth) group renders at / so we protect the root and its children.
-     * /login, /setup and /change-password are excluded so auth redirects
-     * cannot loop. Each guards itself in its own layout.
+     * /login, /setup and /change-password are matched for the security policy
+     * only (isSelfGuardedPage), so auth redirects cannot loop. Each guards
+     * itself in its own layout.
      *
      * The health trinity and /metrics are excluded too, and that is load-bearing
      * rather than cosmetic. kubelet probes and Prometheus scrapes carry no session,
@@ -167,6 +216,6 @@ export const config = {
      * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
      * not an auth redirect on a health check.
      */
-    '/((?!login|setup|change-password|api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
   ],
 };

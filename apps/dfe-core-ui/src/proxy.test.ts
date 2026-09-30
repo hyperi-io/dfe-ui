@@ -46,10 +46,24 @@ const setupStatus = (complete: boolean): TFetchSetupStatusResponse => ({
   retire_admin_available: false,
 });
 
-const request = (path: string, cookie?: string) =>
+const request = (
+  path: string,
+  cookie?: string,
+  headers: Record<string, string> = {},
+) =>
   new NextRequest(`http://localhost${path}`, {
-    headers: cookie ? { cookie } : undefined,
+    headers: cookie ? { ...headers, cookie } : headers,
   });
+
+const policyOf = (response: Response) =>
+  response.headers.get('content-security-policy');
+
+// NextResponse.next carries the rewritten request headers under this prefix.
+const forwardedPolicyOf = (response: Response) =>
+  response.headers.get('x-middleware-request-content-security-policy');
+
+const nonceOf = (policy: string | null) =>
+  policy?.match(/'nonce-([^']+)'/)?.[1];
 
 describe('proxy (auth middleware)', () => {
   beforeEach(() => {
@@ -146,6 +160,72 @@ describe('proxy (auth middleware)', () => {
     });
     expect(expiredEngineTokenCookies(false)[0]).toMatch(
       /^dfe_token=; Domain=example\.com; Path=\/;/,
+    );
+  });
+});
+
+describe('proxy (content security policy)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    getToken.mockResolvedValue({
+      accessToken: 'engine-jwt',
+      passwordChangeRequired: false,
+    });
+    getSetupStatus.mockResolvedValue(setupStatus(true));
+    authMiddleware.mockResolvedValue(NextResponse.next());
+  });
+
+  test.each(['/login', '/login/oidc', '/setup/welcome', '/change-password'])(
+    '%s gets the policy without an auth check',
+    async (path) => {
+      const response = await proxy(request(path), undefined as never);
+
+      expect(authMiddleware).not.toHaveBeenCalled();
+      expect(response.headers.get('location')).toBeNull();
+      expect(policyOf(response)).toMatch(
+        /script-src 'self' 'nonce-[^']+' 'strict-dynamic'/,
+      );
+    },
+  );
+
+  test('the page and the renderer see the same nonce, so Next can stamp its scripts', async () => {
+    const response = await proxy(request('/sources'), undefined as never);
+
+    const policy = policyOf(response);
+    expect(nonceOf(policy)).toBeTruthy();
+    expect(forwardedPolicyOf(response)).toBe(policy);
+    // The login callback path still reaches the (auth) layout alongside it.
+    expect(
+      response.headers.get('x-middleware-request-x-dfe-callback-path'),
+    ).toBe('/sources');
+  });
+
+  test('every response gets its own nonce', async () => {
+    const first = await proxy(request('/sources'), undefined as never);
+    const second = await proxy(request('/sources'), undefined as never);
+
+    expect(nonceOf(policyOf(first))).not.toBe(nonceOf(policyOf(second)));
+  });
+
+  test('the HyperDX embed on another port is framed from the host the browser used', async () => {
+    vi.stubEnv('HYPERDX_PORT', '8091');
+
+    const response = await proxy(
+      request('/observe', undefined, { 'x-forwarded-host': 'dfe.lan:3000' }),
+      undefined as never,
+    );
+
+    expect(policyOf(response)).toContain('frame-src dfe.lan:8091');
+  });
+
+  test('an own-hostname HyperDX is framed by its origin', async () => {
+    vi.stubEnv('HYPERDX_URL', 'https://hyperdx.example.com');
+
+    const response = await proxy(request('/observe'), undefined as never);
+
+    expect(policyOf(response)).toContain(
+      'frame-src https://hyperdx.example.com',
     );
   });
 });
