@@ -2,27 +2,25 @@
 // Initialize ACE global before any ACE imports
 import ace from 'ace-builds/src-noconflict/ace';
 
-// Keep in sync with apps/dfe-core-ui/package.json "ace-builds" version.
-const ACE_BUILDS_CDN_BASE =
-  'https://cdn.jsdelivr.net/npm/ace-builds@1.43.6/src-noconflict';
-
 // Make ace available globally
 if (typeof window !== 'undefined') {
   (window as any).ace = ace;
 
-  // Workers must be absolute URLs; otherwise Ace resolves worker-*.js relative to the page
-  // (e.g. /settings/worker-javascript.js) and the request fails.
+  // The bundler emits the installed ace-builds workers as same-origin assets, so
+  // they load straight from this origin under the CSP's worker-src 'self'.
+  ace.config.set('loadWorkerFromBlob', false);
   ace.config.setModuleUrl(
     'ace/mode/json_worker',
-    `${ACE_BUILDS_CDN_BASE}/worker-json.js`,
+    new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).href,
   );
   ace.config.setModuleUrl(
     'ace/mode/javascript_worker',
-    `${ACE_BUILDS_CDN_BASE}/worker-javascript.js`,
+    new URL('ace-builds/src-noconflict/worker-javascript.js', import.meta.url)
+      .href,
   );
   ace.config.setModuleUrl(
     'ace/mode/yaml_worker',
-    `${ACE_BUILDS_CDN_BASE}/worker-yaml.js`,
+    new URL('ace-builds/src-noconflict/worker-yaml.js', import.meta.url).href,
   );
 }
 

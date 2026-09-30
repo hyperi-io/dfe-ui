@@ -16,6 +16,8 @@ import 'ace-builds/src-noconflict/mode-golang';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-rust';
 import 'ace-builds/src-noconflict/mode-typescript';
+// The javascript and typescript modes both use these; registered so they are never fetched.
+import 'ace-builds/src-noconflict/snippets/javascript';
 
 type Annotation = Ace.Annotation;
 

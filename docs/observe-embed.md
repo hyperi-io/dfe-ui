@@ -32,6 +32,8 @@ The origin check is an exact string compare against `event.origin`, so
 `HYPERDX_URL` must be a bare origin -- no trailing slash, no path -- or
 rule-create messages from the iframe are silently dropped.
 
+The console's Content-Security-Policy frames nothing but this HyperDX: `frame-src` is `HYPERDX_URL`'s origin, or the host the browser used on `HYPERDX_PORT`. A HyperDX reached any other way is blocked in the browser.
+
 ## Rule-create round trip
 
 HyperDX search -> `CREATE_RULE_FROM_SEARCH` postMessage -> dfe-ui listener

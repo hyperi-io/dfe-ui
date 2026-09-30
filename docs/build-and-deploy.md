@@ -25,3 +25,4 @@ flowchart LR
   hand-bump.
 - **Deploy:** dfe-infra's dfe-ui chart + the engine-authored overlay values
   (the suite deployment model - see dfe-engine `docs/deployment/index.md`).
+- **Headers:** every page leaves `src/proxy.ts` with a Content-Security-Policy carrying a fresh script nonce, which is why no page is prerendered. `next.config.ts` adds `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` and `X-Frame-Options: DENY` to every response and drops `X-Powered-By`. A proxy in front must pass these through rather than set its own.
