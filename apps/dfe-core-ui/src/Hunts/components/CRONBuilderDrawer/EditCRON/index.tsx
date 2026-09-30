@@ -64,6 +64,11 @@ export const EditCRON = ({
         onChange={(key) => {
           const nextTab = key as TabKey;
           setTabKey(nextTab);
+
+          // Prevents resetting the cron expression when the user is moving to the custom tab
+          if (nextTab === 'custom') {
+            return;
+          }
           const nextCron = resetCronExpression(nextTab);
           if (nextCron) {
             updateCronExpression({ raw: nextCron });

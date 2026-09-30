@@ -97,12 +97,28 @@ describe('EditCron', () => {
     expect(generatedExpression()).toHaveValue('0 */1 * * *');
   });
 
+  it('keeps the current expression when switching to Custom', async () => {
+    const user = userEvent.setup();
+    renderEditCron({ value: '*/15 * * * *' });
+
+    await user.click(screen.getByRole('tab', { name: 'Daily' }));
+    expect(generatedExpression()).toHaveValue('0 1 */1 * *');
+
+    await user.click(screen.getByRole('tab', { name: 'Custom' }));
+
+    expect(screen.getByRole('tab', { name: 'Custom' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(generatedExpression()).toHaveValue('0 1 */1 * *');
+  });
+
   it('restores the form value on Reset when one exists', async () => {
     const user = userEvent.setup();
     renderEditCron({ value: '0 * * * *' });
 
     await user.click(screen.getByRole('tab', { name: 'Minutes' }));
-    expect(generatedExpression()).toHaveValue('*/1 * * * *');
+    expect(generatedExpression()).toHaveValue('*/15 * * * *');
 
     await user.click(screen.getByRole('button', { name: 'Reset' }));
     expect(generatedExpression()).toHaveValue('0 * * * *');
@@ -271,7 +287,7 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Custom' }));
 
-      expect(generatedExpression()).toHaveValue('*/15 * * * *');
+      expect(generatedExpression()).toHaveValue('');
 
       const customInput = screen
         .getAllByRole('textbox')
