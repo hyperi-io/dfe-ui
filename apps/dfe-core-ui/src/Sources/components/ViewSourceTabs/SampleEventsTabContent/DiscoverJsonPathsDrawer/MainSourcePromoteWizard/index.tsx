@@ -80,8 +80,7 @@ export const MainSourcePromoteWizard = ({
     },
     {
       key: STEP_INDEX_MAP.createAssign.key,
-      title: 'Create & Assign to Source',
-      subTitle: '(Optional)',
+      title: 'Create & Assign to Source (Optional)',
       disabled: !createdSchema,
       status: getStepStatus({
         stepKey: 'create-source',
