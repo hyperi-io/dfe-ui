@@ -1,5 +1,6 @@
 'use client';
 
+import '@/core/config/zodJitless';
 import { AuthSessionMonitor } from '@/core/components/AuthSessionMonitor';
 import { AuthStoreSync } from '@/core/components/AuthStoreSync';
 import { SessionAuthBridge } from '@/core/components/SessionAuthBridge';
