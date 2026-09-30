@@ -4,10 +4,12 @@ import {
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
 import { Tooltip } from '@/core/components/Tooltip';
+import { loginWithNotice } from '@/core/config/loginNotice';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 
-import { App, Button } from 'antd';
+import { Button } from 'antd';
+import { signOut } from 'next-auth/react';
 import { useState } from 'react';
 
 export const ResetPasswordDrawer = () => {
@@ -18,22 +20,24 @@ export const ResetPasswordDrawer = () => {
     error,
   } = useFetchCurrentUser();
 
-  const { notification } = App.useApp();
   const {
     mutate: resetPassword,
+    reset: clearResetError,
     isPending: isResetPasswordPending,
     error: resetPasswordError,
   } = useCurrentUserResetPassword({
+    // The engine ends every session of the account on a change, this one included.
     onSuccess: () => {
-      notification.success({
-        title: 'Password reset successfully',
-        placement: 'bottomLeft',
-      });
+      void signOut({ callbackUrl: loginWithNotice('password-changed') });
     },
   });
 
-  const onFinish = ({ new_password }: TResetPasswordFormValues) => {
+  const onFinish = ({
+    current_password = '',
+    new_password,
+  }: TResetPasswordFormValues) => {
     resetPassword({
+      current_password,
       new_password,
     });
   };
@@ -63,7 +67,9 @@ export const ResetPasswordDrawer = () => {
 
       <Drawer title="Reset Password" open={open} onClose={() => setOpen(false)}>
         <ResetPasswordForm
+          askCurrentPassword
           onFinish={onFinish}
+          onValuesChange={() => clearResetError()}
           error={resetPasswordError}
           isPending={isResetPasswordPending}
           submitText="Reset Password"

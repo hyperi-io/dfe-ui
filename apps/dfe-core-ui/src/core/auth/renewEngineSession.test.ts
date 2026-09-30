@@ -116,6 +116,11 @@ describe('renewEngineSession', () => {
 
   test.each([
     ['refuses the token', jsonResponse(401, { code: 'unauthorized' })],
+    ['has ended the session', jsonResponse(401, { code: 'session_ended' })],
+    [
+      'finds the session past its maximum age',
+      jsonResponse(401, { code: 'session_expired' }),
+    ],
     ['answers without a token', jsonResponse(200, { expires_in: 3600 })],
     ['is unreachable', new TypeError('fetch failed')],
   ])('marks the session expired when the engine %s', async (_why, refresh) => {

@@ -6,8 +6,10 @@ import { loginPath } from '@/core/hooks/useLogin/api';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-const baseUrl =
+/** The engine as the server reaches it; every server-side engine call starts here. */
+export const engineBaseUrl =
   process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
+const baseUrl = engineBaseUrl;
 
 /** The browser's X-Forwarded-For chain, so the engine's login audit can name the client rather than this pod. */
 export function forwardedForHeader(

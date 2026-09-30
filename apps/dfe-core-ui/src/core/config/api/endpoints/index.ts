@@ -6,6 +6,7 @@ export const API_CONFIG = Object.freeze({
     setupStatus: '/api/v1/auth/setup-status',
     retireAdmin: '/api/v1/auth/setup/retire-admin',
     refresh: '/api/v1/auth/refresh',
+    logout: '/api/v1/auth/logout',
     me: '/api/v1/auth/me',
     permissions: '/api/v1/auth/permissions',
   },
