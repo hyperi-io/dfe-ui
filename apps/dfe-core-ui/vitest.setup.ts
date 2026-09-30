@@ -4,7 +4,8 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
+import './src/core/config/zodJitless';
 
 // jsdom does not provide ResizeObserver - required by Ant Design
 class ResizeObserverMock {
@@ -51,6 +52,7 @@ vi.mock('next-auth', () => ({
 }));
 vi.mock('next-auth/react', () => ({
   getSession: vi.fn().mockResolvedValue(null),
+  getCsrfToken: vi.fn().mockResolvedValue('csrf'),
   signIn: vi.fn(),
   signOut: vi.fn(),
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -61,6 +63,49 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(),
 }));
 
-afterEach(() => {
+// Workers reuse a process. Module isolation does not reset process.env or
+// the singletons below, and file order changes as soon as more than one
+// worker is running.
+let envSnapshot: NodeJS.ProcessEnv = { ...process.env };
+
+beforeEach(() => {
+  envSnapshot = { ...process.env };
+});
+
+afterEach(async () => {
   cleanup();
+  vi.useRealTimers();
+  vi.unstubAllEnvs();
+
+  // Loaded after the test file so its vi.mock calls win. A partial next-auth
+  // mock can make this import throw; that file keeps its own module graph.
+  try {
+    const [
+      { resetCachedSession },
+      { useAuthStore },
+      { useSystemDefaultsStore },
+    ] = await Promise.all([
+      import('./src/core/auth/cachedSession'),
+      import('./src/core/stores/authStore'),
+      import('./src/core/stores/systemDefaultsStore'),
+    ]);
+    useAuthStore.getState().reset();
+    useSystemDefaultsStore.getState().reset();
+    resetCachedSession();
+  } catch {
+    // The file replaced a dependency this graph imports. Nothing shared to reset.
+  }
+
+  for (const key of Object.keys(process.env)) {
+    if (!(key in envSnapshot)) {
+      delete process.env[key];
+    }
+  }
+  for (const [key, value] of Object.entries(envSnapshot)) {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
 });
