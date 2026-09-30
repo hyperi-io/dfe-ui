@@ -1,5 +1,7 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { JsonPromoteColumnsTable } from '@/Sources/components/ViewSourceTabs/SampleEventsTabContent/DiscoverJsonPathsDrawer/JsonPromoteColumnsTable';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
@@ -57,9 +59,16 @@ export const PromoteJsonPaths = ({
     );
   }, [data?.diff?.new_columns]);
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 230,
+  });
+
   return (
     <div className="flex flex-col gap-y-4">
-      <div className="flex flex-col gap-y-4 max-h-[calc(100vh-230px)] css-custom-scrollbar">
+      <CustomScrollbar
+        height={componentHeight}
+        className="flex flex-col gap-y-4"
+      >
         {tableValues.length > 0 ? (
           <JsonPromoteColumnsTable
             tableValues={tableValues}
@@ -92,7 +101,7 @@ export const PromoteJsonPaths = ({
             type="error"
           />
         )}
-      </div>
+      </CustomScrollbar>
 
       <Button
         className="ml-auto"

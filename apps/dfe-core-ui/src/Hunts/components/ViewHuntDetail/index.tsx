@@ -1,5 +1,7 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { ViewHuntDetailTabs } from '@/Hunts/components/ViewHuntTabs';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useFetchHuntDetail } from '@/Hunts/hooks/useFetchHuntDetail';
@@ -15,6 +17,10 @@ export const ViewHuntDetail = () => {
     error,
   } = useFetchHuntDetail({
     name: selectedHuntName,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
   });
 
   if (isLoading) {
@@ -44,7 +50,7 @@ export const ViewHuntDetail = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h4 className="flex items-center w-full gap-2 text-lg font-medium">
           <span className="text-foreground/50 dark:text-dark-foreground/50">
@@ -59,6 +65,6 @@ export const ViewHuntDetail = () => {
       </div>
 
       <ViewHuntDetailTabs selectedHuntName={selectedHuntName} {...huntDetail} />
-    </div>
+    </CustomScrollbar>
   );
 };

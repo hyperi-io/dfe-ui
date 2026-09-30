@@ -100,8 +100,7 @@ export const ViewSourceDetailTabs = ({
           '[&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:flex-1',
           '[&_.ant-tabs-content]:h-full',
         ),
-        content:
-          'h-full max-h-[calc(100vh-150px)] pb-8 min-h-0 overflow-y-auto css-custom-scrollbar',
+        content: 'h-full pb-8 min-h-0',
       }}
       activeKey={activeTab}
       onChange={handleTabChange}
@@ -135,7 +134,6 @@ export const ViewSourceDetailTabs = ({
             </RbacProtected>
           ),
         },
-
         {
           key: 'sample-events',
           label: SOURCE_DETAIL_TAB_KEY_MAP['sample-events'],
@@ -155,7 +153,6 @@ export const ViewSourceDetailTabs = ({
             </RbacProtected>
           ),
         },
-
         {
           key: 'processing',
           label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],

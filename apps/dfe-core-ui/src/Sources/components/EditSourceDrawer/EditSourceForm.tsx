@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateSourceForm,
   CreateUpdateSourceFormData,
@@ -18,6 +20,9 @@ interface EditSourceFormProps {
 }
 
 export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
+  const { componentHeight } = useSetComponentHeight({
+    offset: 125,
+  });
   const queryClient = useQueryClient();
   const {
     selectedSourceName: source_name,
@@ -71,7 +76,7 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
 
   const initialValues = transformSourceRequestBodyToFormData(sourceDetailData);
   return (
-    <div className="h-[calc(100vh-125px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
       <CreateUpdateSourceForm
         key={source_name ?? 'empty'}
         disabledFields={{
@@ -85,6 +90,6 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
         buttonLabel="Update Source"
         hasReset={true}
       />
-    </div>
+    </CustomScrollbar>
   );
 };

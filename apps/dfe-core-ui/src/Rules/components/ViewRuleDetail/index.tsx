@@ -1,7 +1,9 @@
 import { AceEditor } from '@/core/components/AceEditor';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useFetchRuleDetail } from '@/Rules/hooks/useFetchRuleDetail';
 import { IconAlertCircle } from '@repo/dfe-icons';
@@ -21,6 +23,10 @@ export const ViewRuleDetail = () => {
     error,
   } = useFetchRuleDetail({
     name: selectedRuleName,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
   });
 
   if (isLoading) {
@@ -50,7 +56,7 @@ export const ViewRuleDetail = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h4 className="flex items-center w-full gap-2 text-lg font-medium">
           <span className="text-foreground/50 dark:text-dark-foreground/50">
@@ -126,6 +132,6 @@ export const ViewRuleDetail = () => {
         height="300px"
         readOnly
       />
-    </div>
+    </CustomScrollbar>
   );
 };

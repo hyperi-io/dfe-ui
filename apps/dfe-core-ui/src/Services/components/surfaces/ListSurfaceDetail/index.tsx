@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { RefreshMetricsButton } from '@/Services/components/surfaces/RefreshMetricsButton';
 import { useListSurfacesContext } from '@/Services/contexts/ListSurfacesContext';
 import { useFetchServiceSurfaceDetail } from '@/Services/hooks/serviceSurfaces/useFetchServiceSurfaceDetail';
@@ -15,6 +17,10 @@ export const ListSurfaceDetail = () => {
     error: fetchSurfaceDetailError,
   } = useFetchServiceSurfaceDetail({
     name: selectedService,
+  });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
   });
 
   if (!selectedService) {
@@ -41,7 +47,7 @@ export const ListSurfaceDetail = () => {
 
   return (
     <>
-      <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
         <div className="flex shrink-0 items-center justify-between">
           <h4 className="flex items-center w-full gap-2 text-lg font-medium">
             <span className="text-foreground/50 dark:text-dark-foreground/50">
@@ -52,7 +58,7 @@ export const ListSurfaceDetail = () => {
           <RefreshMetricsButton serviceName={selectedService} />
         </div>
         <ViewSurfaceDetail {...surfaceDetailData} />
-      </div>
+      </CustomScrollbar>
     </>
   );
 };

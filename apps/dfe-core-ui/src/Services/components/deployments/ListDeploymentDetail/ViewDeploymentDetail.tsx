@@ -1,3 +1,5 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SectionCollapse } from '@/Services/components/SectionCollapse';
 import { TDeploymentDetailResponse } from '@/Services/hooks/deployments/useFetchDeploymentDetail/types';
 import { Tag } from 'antd';
@@ -17,8 +19,13 @@ export const ViewDeploymentDetail = ({ config }: TDeploymentDetailResponse) => {
     config_secret,
     extra_env,
   } = config;
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
-    <div className="flex flex-col gap-2 h-[calc(100vh-215px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight} className="flex flex-col gap-2">
       <span className="flex gap-2">
         <Tag color="blue" variant="solid">
           <span className="font-semibold">Size: </span>
@@ -53,6 +60,6 @@ export const ViewDeploymentDetail = ({ config }: TDeploymentDetailResponse) => {
         title="Extra Env"
         data={extra_env as Record<string, unknown>}
       />
-    </div>
+    </CustomScrollbar>
   );
 };

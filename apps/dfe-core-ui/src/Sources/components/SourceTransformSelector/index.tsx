@@ -1,18 +1,20 @@
 'use client';
 
 import { AppInstancePanels } from '@/core/components/appManagement/AppInstancePanels';
-import { NotificationCard } from '@/core/components/NotificationCard';
-import { RbacProtected } from '@/core/components/RbacProtected';
-import { SectionCard } from '@/core/components/SectionCard';
 import {
   buildTransformOptions,
   TransformOption,
 } from '@/core/components/appManagement/transformApps';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { NotificationCard } from '@/core/components/NotificationCard';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { SectionCard } from '@/core/components/SectionCard';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import {
   APPS_QUERY_KEY,
   useFetchApps,
 } from '@/core/hooks/apps/instances/useFetchApps';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
@@ -129,6 +131,10 @@ export const SourceTransformSelector = ({
     },
   });
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
+
   const closeModal = () => {
     setPendingEngine(null);
     reset();
@@ -172,110 +178,112 @@ export const SourceTransformSelector = ({
   if (options.length === 0) return null;
 
   return (
-    <SectionCard
-      title={
-        <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
-          Transform
-        </h2>
-      }
-      description={
-        engineOwned
-          ? 'One transform per source. This source is engine-owned, so its choice is read-only here.'
-          : 'One transform per source. Choosing another replaces the one that runs here.'
-      }
-    >
-      <Radio.Group
-        value={engine}
-        disabled={switchDisabled}
-        onChange={(event) => setPendingEngine(event.target.value)}
-        className="w-full"
+    <CustomScrollbar height={componentHeight}>
+      <SectionCard
+        title={
+          <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
+            Transform
+          </h2>
+        }
+        description={
+          engineOwned
+            ? 'One transform per source. This source is engine-owned, so its choice is read-only here.'
+            : 'One transform per source. Choosing another replaces the one that runs here.'
+        }
       >
-        <div className="flex w-full flex-col gap-2">
-          {options.map((option) => {
-            const refusal = refusals[option.engine];
-            const state = optionState(option, {
-              refusal,
-              chosen: selected !== undefined,
-            });
-            return (
-              <div
-                key={option.service}
-                className={cn(
-                  'rounded-md border px-3 py-2',
-                  option.selected && 'border-success/50 bg-success/10',
-                  !option.selected &&
-                    refusal &&
-                    'border-error/50 bg-error/10 dark:border-dark-error',
-                  !option.selected &&
-                    !refusal &&
-                    'border-foreground/20 dark:border-dark-foreground/20',
-                )}
-              >
-                <Radio
-                  value={option.engine}
-                  disabled={
-                    switchDisabled ||
-                    option.unavailable !== null ||
-                    refusal !== undefined
-                  }
+        <Radio.Group
+          value={engine}
+          disabled={switchDisabled}
+          onChange={(event) => setPendingEngine(event.target.value)}
+          className="w-full"
+        >
+          <div className="flex w-full flex-col gap-2">
+            {options.map((option) => {
+              const refusal = refusals[option.engine];
+              const state = optionState(option, {
+                refusal,
+                chosen: selected !== undefined,
+              });
+              return (
+                <div
+                  key={option.service}
                   className={cn(
-                    'm-0 flex w-full items-start',
-                    '[&>span:last-child]:min-w-0 [&>span:last-child]:flex-1',
+                    'rounded-md border px-3 py-2',
+                    option.selected && 'border-success/50 bg-success/10',
+                    !option.selected &&
+                      refusal &&
+                      'border-error/50 bg-error/10 dark:border-dark-error',
+                    !option.selected &&
+                      !refusal &&
+                      'border-foreground/20 dark:border-dark-foreground/20',
                   )}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                    <span className="break-all font-medium">
-                      {option.service}
-                    </span>
-                    <Tag color={state.colour} className="m-0">
-                      {state.label}
-                    </Tag>
-                  </div>
-                  {/* Clamped: an engine refusal runs to four lines, and one row
+                  <Radio
+                    value={option.engine}
+                    disabled={
+                      switchDisabled ||
+                      option.unavailable !== null ||
+                      refusal !== undefined
+                    }
+                    className={cn(
+                      'm-0 flex w-full items-start',
+                      '[&>span:last-child]:min-w-0 [&>span:last-child]:flex-1',
+                    )}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                      <span className="break-all font-medium">
+                        {option.service}
+                      </span>
+                      <Tag color={state.colour} className="m-0">
+                        {state.label}
+                      </Tag>
+                    </div>
+                    {/* Clamped: an engine refusal runs to four lines, and one row
                       three times the height of its neighbours is what makes a
                       list of options read as a pile. The whole message is on
                       the element, and the dialog carries it in full. */}
-                  <p
-                    title={refusal}
-                    className="text-foreground/60 dark:text-dark-foreground/60 mt-1 line-clamp-2 text-xs"
-                  >
-                    {state.note}
-                  </p>
-                </Radio>
-              </div>
-            );
-          })}
-        </div>
-      </Radio.Group>
+                    <p
+                      title={refusal}
+                      className="text-foreground/60 dark:text-dark-foreground/60 mt-1 line-clamp-2 text-xs"
+                    >
+                      {state.note}
+                    </p>
+                  </Radio>
+                </div>
+              );
+            })}
+          </div>
+        </Radio.Group>
 
-      {!engine && (
-        <NotificationCard
-          type="info"
-          variant="subtle"
-          title="This source has no transform"
-          description="Records reach the loader as they arrived. Choose an engine to transform them first."
-        />
-      )}
+        {!engine && (
+          <NotificationCard
+            type="info"
+            variant="subtle"
+            title="This source has no transform"
+            description="Records reach the loader as they arrived. Choose an engine to transform them first."
+          />
+        )}
 
-      {/* The instance that EXISTS, which is the selected engine's once the two
+        {/* The instance that EXISTS, which is the selected engine's once the two
           agree. Until they do -- a switch not yet deployed, or a deployment
           holding an instance the source does not name -- the outgoing app is
           the one still carrying records, so its files and health stay here. */}
-      {running && <AppInstancePanels app={running.app} instance={source} />}
+        {running && <AppInstancePanels app={running.app} instance={source} />}
 
-      <SwitchTransformModal
-        open={pending !== undefined}
-        source={source}
-        from={selected?.service ?? null}
-        to={pending?.service ?? null}
-        isPending={isPending}
-        // Once the deployment has refused this engine, repeating the write only
-        // repeats the refusal.
-        refused={pendingEngine !== null && pendingEngine in refusals}
-        error={getApiErrorResponseBody(error)?.message ?? error?.message}
-        onConfirm={confirmSwitch}
-        onCancel={closeModal}
-      />
-    </SectionCard>
+        <SwitchTransformModal
+          open={pending !== undefined}
+          source={source}
+          from={selected?.service ?? null}
+          to={pending?.service ?? null}
+          isPending={isPending}
+          // Once the deployment has refused this engine, repeating the write only
+          // repeats the refusal.
+          refused={pendingEngine !== null && pendingEngine in refusals}
+          error={getApiErrorResponseBody(error)?.message ?? error?.message}
+          onConfirm={confirmSwitch}
+          onCancel={closeModal}
+        />
+      </SectionCard>
+    </CustomScrollbar>
   );
 };

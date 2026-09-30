@@ -1,5 +1,7 @@
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { TRuleListItem } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
@@ -18,6 +20,10 @@ export const RulesList = ({ className }: { className?: string }) => {
     hasFilters,
     setFilters,
   } = useListRulesContext();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
 
   if (isLoading && rules.length === 0) {
     return (
@@ -47,41 +53,38 @@ export const RulesList = ({ className }: { className?: string }) => {
   }
 
   return (
-    <ul
-      className={cn(
-        'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-        className,
-      )}
-    >
-      {rules.map((rule: TRuleListItem) => {
-        const isSelected = selectedRuleName === rule.name;
-        return (
-          <li key={rule.name} className="w-full">
-            <button
-              type="button"
-              className={cn(
-                'overflow-hidden',
-                'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
-                isSelected && 'bg-gray-200 dark:bg-gray-700',
-              )}
-              onClick={() => setSelectedRuleName(rule.name)}
-            >
-              <dl className="w-full min-w-0">
-                <dt className="font-medium truncate">
-                  {rule.display_name ?? rule.name}
-                </dt>
-                <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
-                  {rule.severity}
-                  {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}
-                </dd>
-              </dl>
-            </button>
-          </li>
-        );
-      })}
-      <div ref={loadMoreRef} className="flex justify-center h-4">
-        {isFetchingNextPage && <Spin size="small" />}
-      </div>
-    </ul>
+    <CustomScrollbar height={componentHeight}>
+      <ul className={cn('flex flex-col gap-2 pt-2', className)}>
+        {rules.map((rule: TRuleListItem) => {
+          const isSelected = selectedRuleName === rule.name;
+          return (
+            <li key={rule.name} className="w-full">
+              <button
+                type="button"
+                className={cn(
+                  'overflow-hidden',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left items-center flex px-2 py-1 hover:cursor-pointer rounded-md',
+                  isSelected && 'bg-gray-200 dark:bg-gray-700',
+                )}
+                onClick={() => setSelectedRuleName(rule.name)}
+              >
+                <dl className="w-full min-w-0">
+                  <dt className="font-medium truncate">
+                    {rule.display_name ?? rule.name}
+                  </dt>
+                  <dd className="text-sm text-gray-500 capitalize truncate dark:text-gray-400">
+                    {rule.severity}
+                    {rule.hunt_name ? ` · ${rule.hunt_name}` : ''}
+                  </dd>
+                </dl>
+              </button>
+            </li>
+          );
+        })}
+        <div ref={loadMoreRef} className="flex justify-center h-4">
+          {isFetchingNextPage && <Spin size="small" />}
+        </div>
+      </ul>
+    </CustomScrollbar>
   );
 };

@@ -1,5 +1,7 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -15,20 +17,26 @@ export const SampleEventsTabContent = () => {
 
   const { fieldsToPromote } = usePromoteRowsContext();
 
-  if (isLoadingSampleRows)
+  const { componentHeight } = useSetComponentHeight({
+    offset: 200,
+  });
+
+  if (isLoadingSampleRows) {
     return (
       <div className="flex items-center justify-center h-full">
         <Spin />
         <p className="sr-only">Loading events</p>
       </div>
     );
-  if (errorSampleRows)
+  }
+  if (errorSampleRows) {
     return (
       <GenericErrorCard
         title="Error fetching sample events"
         description={errorSampleRows.message}
       />
     );
+  }
 
   return (
     <>
@@ -63,13 +71,15 @@ export const SampleEventsTabContent = () => {
           />
         )}
 
-        <ul className="flex flex-col gap-y-3 mt-2 max-h-[calc(100vh-400px)] pb-4 css-custom-scrollbar">
-          {sampleRows?.rows.map((row) => (
-            <li key={row._uuid as string}>
-              <SampleRowsCard row={row} />
-            </li>
-          ))}
-        </ul>
+        <CustomScrollbar height={componentHeight}>
+          <ul className="flex flex-col gap-y-3 mt-2 pb-4">
+            {sampleRows?.rows.map((row) => (
+              <li key={row._uuid as string}>
+                <SampleRowsCard row={row} />
+              </li>
+            ))}
+          </ul>
+        </CustomScrollbar>
       </div>
     </>
   );

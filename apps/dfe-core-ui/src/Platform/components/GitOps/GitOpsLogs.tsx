@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useFetchGitOpsLog } from '@/Platform/hooks/gitops/useFetchGitOpsLog';
 import { Spin } from 'antd';
 import { GitOpsLogsCard } from './GitOpsLogsCard';
@@ -12,24 +14,27 @@ export const GitOpsLogs = () => {
     loadMoreRef,
   } = useFetchGitOpsLog();
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 280,
+  });
+
   return (
-    <SectionCard
-      title="Git Operations: Log"
-      className="border-none max-h-[calc(100vh-250px)] css-custom-scrollbar overflow-x-hidden"
-    >
-      {isGitOpsLogLoading && (
-        <>
-          <Spin /> <span className="sr-only">Loading GitOps Log...</span>
-        </>
-      )}
-      {gitOpsLogError && <div>Error: {gitOpsLogError.message}</div>}
-      {!isGitOpsLogLoading &&
-        entries.map((item) => (
-          <GitOpsLogsCard key={item.sha} dataItem={item} />
-        ))}
-      <div ref={loadMoreRef} className="h-4 flex justify-center">
-        {isFetchingNextPage && <Spin size="small" />}
-      </div>
-    </SectionCard>
+    <CustomScrollbar height={componentHeight}>
+      <SectionCard title="Git Operations: Log" className="border-none">
+        {isGitOpsLogLoading && (
+          <>
+            <Spin /> <span className="sr-only">Loading GitOps Log...</span>
+          </>
+        )}
+        {gitOpsLogError && <div>Error: {gitOpsLogError.message}</div>}
+        {!isGitOpsLogLoading &&
+          entries.map((item) => (
+            <GitOpsLogsCard key={item.sha} dataItem={item} />
+          ))}
+        <div ref={loadMoreRef} className="h-4 flex justify-center">
+          {isFetchingNextPage && <Spin size="small" />}
+        </div>
+      </SectionCard>
+    </CustomScrollbar>
   );
 };

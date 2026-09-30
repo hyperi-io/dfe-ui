@@ -1,3 +1,5 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Sources/components/ListSourcesTree/EmptyList';
 import { ErrorList } from '@/Sources/components/ListSourcesTree/ErrorList';
@@ -7,6 +9,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTransformSourceToTree } from './hooks/useTransformSourceToTree';
 
 export const SourceList = ({ className }: { className?: string }) => {
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
   const {
     data: { items: sources, objects: sourceObjects },
     error,
@@ -63,11 +68,9 @@ export const SourceList = ({ className }: { className?: string }) => {
   return (
     <>
       {notificationContextHolder}
-      <div
-        className={cn(
-          'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-          className,
-        )}
+      <CustomScrollbar
+        height={componentHeight}
+        className={cn('flex flex-col gap-2 pt-2', className)}
       >
         <Tree
           blockNode
@@ -84,7 +87,7 @@ export const SourceList = ({ className }: { className?: string }) => {
         <div ref={loadMoreRef} className="h-4 flex justify-center">
           {isFetchingNextPage && <Spin size="small" />}
         </div>
-      </div>
+      </CustomScrollbar>
     </>
   );
 };

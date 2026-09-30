@@ -1,13 +1,18 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { CreateOidcProviderDrawer } from './CreateOidcProviderDrawer';
 import { OidcProviderList } from './OidcProviderList';
 
 export const OidcProviderManagement = () => {
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight}>
       <SectionCard
         title="Configure a new OIDC provider"
         description="Create and configure a new OIDC provider and manage OIDC provider specific configurations and defaults."
@@ -33,6 +38,6 @@ export const OidcProviderManagement = () => {
           </RbacProtected.Restricted>
         </RbacProtected>
       </SectionCard>
-    </div>
+    </CustomScrollbar>
   );
 };

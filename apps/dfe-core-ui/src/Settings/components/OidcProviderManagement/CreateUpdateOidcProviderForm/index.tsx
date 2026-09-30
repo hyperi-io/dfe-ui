@@ -37,9 +37,6 @@ export const CreateUpdateOidcProviderForm = ({
     onFinish?.(values);
   };
 
-  const typeWatch = Form.useWatch('type', form);
-  const modeWatch = Form.useWatch(['groups', 'mode'], form);
-
   return (
     <Form
       form={form}
@@ -73,42 +70,40 @@ export const CreateUpdateOidcProviderForm = ({
         </Form.Item>
       </div>
 
-      {typeWatch && (
-        <>
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="Name" name="name">
-              <Input disabled={disabledFields?.name} />
-            </Form.Item>
+      <>
+        <div className="grid grid-cols-2 gap-4">
+          <Form.Item label="Name" name="name">
+            <Input disabled={disabledFields?.name} />
+          </Form.Item>
 
-            <Form.Item label="Display Name" name="display_name">
-              <Input />
-            </Form.Item>
-            <Form.Item label="Issuer" name="issuer">
-              <Input disabled={disabledFields?.issuer} />
-            </Form.Item>
-            <Form.Item
-              label="Client ID Environment Variable"
-              name="client_id_env"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item label="Client ID" name="client_id">
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Client Secret Environment Variable"
-              name="client_secret_env"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item label="Client Secret" name="client_secret">
-              <Input.Password autoComplete="new-password" />
-            </Form.Item>
-          </div>
+          <Form.Item label="Display Name" name="display_name">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Issuer" name="issuer">
+            <Input disabled={disabledFields?.issuer} />
+          </Form.Item>
+          <Form.Item
+            label="Client ID Environment Variable"
+            name="client_id_env"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Client ID" name="client_id">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Client Secret Environment Variable"
+            name="client_secret_env"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Client Secret" name="client_secret">
+            <Input.Password autoComplete="new-password" />
+          </Form.Item>
+        </div>
 
-          <GroupFormSection type={typeWatch} mode={modeWatch} />
-        </>
-      )}
+        <GroupFormSection />
+      </>
 
       {error && <ApiErrorNotification error={error} />}
 

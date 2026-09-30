@@ -1,3 +1,5 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { AUDIT_LOGS_DATA } from '@/Settings/mocks/auditLogs.data';
 import { Button, DatePicker, Input, type GetProps } from 'antd';
 import dayjs from 'dayjs';
@@ -34,6 +36,11 @@ export const AuditLogs = () => {
 
     return matchesSearch && inDateRange;
   });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2 ml-auto">
@@ -79,23 +86,28 @@ export const AuditLogs = () => {
           {sort === 'asc' ? 'Newest first' : 'Oldest first'}
         </Button>
       </div>
-      <ul className="flex flex-col gap-y-2 h-[calc(100vh-250px)] css-custom-scrollbar">
-        {filteredAuditLogs.map((auditLog) => (
-          <li className="border-b border-foreground/20 pb-2" key={auditLog.id}>
-            <div className="flex justify-between items-center ">
-              <div className="flex flex-col gap-y-1">
-                <span className="text-sm font-medium">{auditLog.action}</span>
-                <span className="text-sm text-foreground/50">
-                  {auditLog.user}
+      <CustomScrollbar height={componentHeight}>
+        <ul className="flex flex-col gap-y-2">
+          {filteredAuditLogs.map((auditLog) => (
+            <li
+              className="border-b border-foreground/20 pb-2"
+              key={auditLog.id}
+            >
+              <div className="flex justify-between items-center ">
+                <div className="flex flex-col gap-y-1">
+                  <span className="text-sm font-medium">{auditLog.action}</span>
+                  <span className="text-sm text-foreground/50">
+                    {auditLog.user}
+                  </span>
+                </div>
+                <span>
+                  {dayjs(auditLog.timestamp).format('YYYY-MM-DD HH:mm:ss')}
                 </span>
               </div>
-              <span>
-                {dayjs(auditLog.timestamp).format('YYYY-MM-DD HH:mm:ss')}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </CustomScrollbar>
     </div>
   );
 };

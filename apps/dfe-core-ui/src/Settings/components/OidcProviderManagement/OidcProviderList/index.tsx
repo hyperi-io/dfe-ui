@@ -1,5 +1,7 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { OidcProviderCard } from '@/Settings/components/OidcProviderManagement/OidcProviderCard';
 import { useFetchInfiniteFilteredOidcProviders } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { IconInfoCircle } from '@repo/dfe-icons';
@@ -13,6 +15,10 @@ export const OidcProviderList = () => {
     isLoading,
     error,
   } = useFetchInfiniteFilteredOidcProviders();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 295,
+  });
   return (
     <div>
       {isLoading && (
@@ -36,7 +42,7 @@ export const OidcProviderList = () => {
         />
       )}
       {oidcProviders && oidcProviders?.length > 0 && (
-        <div className="h-[calc(100vh-295px)] overflow-y-auto css-custom-scrollbar">
+        <CustomScrollbar height={componentHeight}>
           <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {oidcProviders?.map((oidcProvider) => (
               <li key={oidcProvider.name}>
@@ -50,7 +56,7 @@ export const OidcProviderList = () => {
               {isFetchingNextPage && <Spin size="small" />}
             </div>
           </ul>
-        </div>
+        </CustomScrollbar>
       )}
     </div>
   );

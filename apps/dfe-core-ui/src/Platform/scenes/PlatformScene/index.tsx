@@ -1,7 +1,9 @@
 'use client';
 
 import { MainContentCard } from '@/core/components/ContentCard';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { GitOps } from '@/Platform/components/GitOps';
 import { Governance } from '@/Platform/components/Governance';
 import { Helm } from '@/Platform/components/Helm';
@@ -37,82 +39,87 @@ export const PlatformScene = () => {
     [router],
   );
 
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
+
   return (
     <MainContentCard className="pl-0">
-      <Tabs
-        className="h-full min-h-0"
-        tabPlacement="start"
-        activeKey={activeTab}
-        onChange={handleTabChange}
-        classNames={{
-          root: 'min-h-0',
-          header:
-            'w-full max-w-68 shrink-0 h-full max-h-[calc(100vh-100px)] css-custom-scrollbar',
-          content: 'min-w-0 flex-1 pl-6',
-        }}
-        items={[
-          {
-            key: PLATFORM_TAB_DETAILS.system.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.system.label}
-                description={PLATFORM_TAB_DETAILS.system.description}
-              />
-            ),
-            children: <SystemManagement />,
-          },
-          {
-            key: PLATFORM_TAB_DETAILS.gitops.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.gitops.label}
-                description={PLATFORM_TAB_DETAILS.gitops.description}
-              />
-            ),
-            children: <GitOps />,
-          },
-          {
-            key: PLATFORM_TAB_DETAILS.governance.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.governance.label}
-                description={PLATFORM_TAB_DETAILS.governance.description}
-              />
-            ),
-            children: <Governance />,
-          },
-          {
-            key: PLATFORM_TAB_DETAILS.lifecycle.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.lifecycle.label}
-                description={PLATFORM_TAB_DETAILS.lifecycle.description}
-              />
-            ),
-            children: <Lifecycle />,
-          },
-          {
-            key: PLATFORM_TAB_DETAILS.repository.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.repository.label}
-                description={PLATFORM_TAB_DETAILS.repository.description}
-              />
-            ),
-            children: <Repository />,
-          },
-          {
-            key: PLATFORM_TAB_DETAILS.helm.key,
-            label: (
-              <NavigationTabLabel
-                label={PLATFORM_TAB_DETAILS.helm.label}
-                description={PLATFORM_TAB_DETAILS.helm.description}
-              />
-            ),
-            children: <Helm />,
-          },
-        ]}
-      />
+      <CustomScrollbar height={componentHeight}>
+        <Tabs
+          className="h-full min-h-0"
+          tabPlacement="start"
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          classNames={{
+            root: 'min-h-0',
+            header: 'w-full max-w-68 shrink-0 h-full',
+            content: 'min-w-0 flex-1 pl-6',
+          }}
+          items={[
+            {
+              key: PLATFORM_TAB_DETAILS.system.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.system.label}
+                  description={PLATFORM_TAB_DETAILS.system.description}
+                />
+              ),
+              children: <SystemManagement />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.gitops.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.gitops.label}
+                  description={PLATFORM_TAB_DETAILS.gitops.description}
+                />
+              ),
+              children: <GitOps />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.governance.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.governance.label}
+                  description={PLATFORM_TAB_DETAILS.governance.description}
+                />
+              ),
+              children: <Governance />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.lifecycle.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.lifecycle.label}
+                  description={PLATFORM_TAB_DETAILS.lifecycle.description}
+                />
+              ),
+              children: <Lifecycle />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.repository.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.repository.label}
+                  description={PLATFORM_TAB_DETAILS.repository.description}
+                />
+              ),
+              children: <Repository />,
+            },
+            {
+              key: PLATFORM_TAB_DETAILS.helm.key,
+              label: (
+                <NavigationTabLabel
+                  label={PLATFORM_TAB_DETAILS.helm.label}
+                  description={PLATFORM_TAB_DETAILS.helm.description}
+                />
+              ),
+              children: <Helm />,
+            },
+          ]}
+        />
+      </CustomScrollbar>
     </MainContentCard>
   );
 };

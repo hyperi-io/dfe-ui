@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { DeploymentActionMenu } from '@/Services/components/deployments/DeploymentActionMenu';
 import { useListDeploymentsContext } from '@/Services/contexts/ListDeploymentsContext';
 import { useFetchDeploymentDetail } from '@/Services/hooks/deployments/useFetchDeploymentDetail';
@@ -14,6 +16,10 @@ export const ListDeploymentDetail = () => {
       service_instance: serviceInstanceName,
     },
   } = useListDeploymentsContext();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
 
   const {
     data: deploymentDetailData,
@@ -48,7 +54,7 @@ export const ListDeploymentDetail = () => {
 
   return (
     <>
-      <div className="h-[calc(100vh-100px)] css-custom-scrollbar pr-4 flex flex-col gap-4">
+      <CustomScrollbar height={componentHeight} className="flex flex-col gap-4">
         <div className="flex shrink-0 items-center justify-between">
           <h4 className="flex items-center w-full gap-2 text-lg font-medium">
             <span className="text-foreground/50 dark:text-dark-foreground/50">
@@ -77,7 +83,7 @@ export const ListDeploymentDetail = () => {
             },
           ]}
         />
-      </div>
+      </CustomScrollbar>
     </>
   );
 };

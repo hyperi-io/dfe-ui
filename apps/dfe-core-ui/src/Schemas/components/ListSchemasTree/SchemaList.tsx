@@ -1,4 +1,6 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Schemas/components/ListSchemasTree/EmptyList';
 import { ErrorList } from '@/Schemas/components/ListSchemasTree/ErrorList';
@@ -24,6 +26,10 @@ export const SchemaList = ({ className }: { className?: string }) => {
     setFilters,
     schemaTypesScope,
   } = useListSchemasContext();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 175,
+  });
 
   const hasOnlyMetaSchemas =
     schemaTypesScope?.length === 1 && schemaTypesScope[0] === 'meta';
@@ -89,11 +95,9 @@ export const SchemaList = ({ className }: { className?: string }) => {
   return (
     <>
       {notificationContextHolder}
-      <div
-        className={cn(
-          'h-[calc(100vh-175px)] css-custom-scrollbar flex flex-col gap-2 pt-2',
-          className,
-        )}
+      <CustomScrollbar
+        height={componentHeight}
+        className={cn('flex flex-col gap-2 pt-2', className)}
       >
         <Tree
           blockNode
@@ -111,7 +115,7 @@ export const SchemaList = ({ className }: { className?: string }) => {
         <div ref={loadMoreRef} className="h-4 flex justify-center">
           {isFetchingNextPage && <Spin size="small" />}
         </div>
-      </div>
+      </CustomScrollbar>
     </>
   );
 };

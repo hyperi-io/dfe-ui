@@ -1,8 +1,10 @@
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { CreateRoleDrawer } from '@/Settings/components/RoleManagement/CreateRoleDrawer';
 import { useFetchInfiniteFilteredRoles } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
@@ -37,8 +39,12 @@ export const RoleManagement = () => {
     per_page: ROLE_LIMIT,
     search: coreRoleSearch,
   });
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 100,
+  });
   return (
-    <div className="h-[calc(100vh-100px)] css-custom-scrollbar">
+    <CustomScrollbar height={componentHeight}>
       <SectionCard
         title="Configure a custom role"
         description="Configure a custom role and its permissions."
@@ -196,6 +202,6 @@ export const RoleManagement = () => {
           </RbacProtected.Restricted>
         </RbacProtected>
       </SectionCard>
-    </div>
+    </CustomScrollbar>
   );
 };
