@@ -71,7 +71,6 @@ The fork iframe is optional for console work. Wiring it up is covered in
 | `NEXT_PUBLIC_API_URL`                    | build-time inlined | engine base URL for browser-side fetches                                                    |
 | `INTERNAL_API_URL`                       | runtime            | engine base URL for server-side fetches (middleware, NextAuth)                              |
 | `NEXTAUTH_URL` / `NEXTAUTH_SECRET`       | runtime            | NextAuth session config -- any non-empty secret works for dev                               |
-| `DFE_AUTH_MODE`                          | runtime            | unset = credentials login form; `proxy` = proxy-trust ([authentication.md](authentication.md)) |
 | `DFE_COOKIE_DOMAIN`                      | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                             |
 | `HYPERDX_URL` / `HYPERDX_PORT`           | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                    |
 

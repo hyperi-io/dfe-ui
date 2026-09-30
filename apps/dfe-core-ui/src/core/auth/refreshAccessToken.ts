@@ -1,32 +1,30 @@
 'use client';
 
-import { refreshToken } from '@/core/hooks/useRefreshToken/api';
-import type { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { useAuthStore } from '@/core/stores/authStore';
+import type { Session } from 'next-auth';
 import {
   getAccessTokenRefreshInFlight,
   trackAccessTokenRefresh,
 } from './accessTokenRefreshFlight';
-import { loadSession } from './cachedSession';
-import { persistRefreshedSession } from './persistRefreshedSession';
+import { setCachedSession } from './cachedSession';
+import { renewSession } from './renewSession';
 
-/** Single deduped refresh: engine token → NextAuth JWT → client caches. */
-export function executeAccessTokenRefresh(): Promise<TRefreshTokenResponse> {
+/** Single deduped renewal: the server refreshes the engine token into the NextAuth JWT, then client caches follow. */
+export function executeAccessTokenRefresh(): Promise<Session> {
   const inFlight = getAccessTokenRefreshInFlight();
   if (inFlight) {
-    return inFlight as Promise<TRefreshTokenResponse>;
+    return inFlight as Promise<Session>;
   }
 
   return trackAccessTokenRefresh(
-    (async (): Promise<TRefreshTokenResponse> => {
-      const tokenResponse = await refreshToken();
-      await persistRefreshedSession(tokenResponse);
-      const session = await loadSession({ force: true });
+    (async (): Promise<Session> => {
+      const session = await renewSession();
+      setCachedSession(session);
       useAuthStore.setState({
         session,
         sessionLastFetchedAt: Date.now(),
       });
-      return tokenResponse;
+      return session;
     })(),
   );
 }

@@ -51,4 +51,4 @@ The packages are build-time dependencies.
   ([engine-api-client.md](engine-api-client.md)) - no raw fetch in feature
   code (the only raw fetch sites are the NextAuth server-side callbacks).
 - `/observe` iframes the HyperDX fork ([observe-embed.md](observe-embed.md)).
-- Auth is NextAuth with two modes ([authentication.md](authentication.md)).
+- Auth is NextAuth over local accounts and the engine's OIDC hand-back ([authentication.md](authentication.md)).

@@ -1,11 +1,11 @@
 'use client';
 
-import { executeAccessTokenRefresh } from '@/core/auth/refreshAccessToken';
 import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
 import {
   ResetPasswordForm,
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
+import { loginWithNotice } from '@/core/config/loginNotice';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
@@ -16,6 +16,7 @@ import { navigateWithReload } from '@/core/utils/navigation';
 import { cn } from '@/core/utils/style';
 import { IconLogout, IconPrimaryLogoFull } from '@repo/dfe-icons';
 import { Alert, Button, Spin } from 'antd';
+import { signOut } from 'next-auth/react';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   clearPendingReview,
@@ -95,7 +96,6 @@ export const ChangePasswordScene = () => {
   // The plain login, never back here: the flag brings a flagged sign-in to this screen, and an unflagged one must not land on it.
   const { handleLogout } = useLogout({ callbackUrl: '/login' });
   const [pending, setPending] = useState<TPendingReview | null>(null);
-  const [renewError, setRenewError] = useState<Error | null>(null);
   const { data: me, isLoading: isLoadingMe } = useAuthMe();
   const {
     data: setupStatus,
@@ -114,24 +114,18 @@ export const ChangePasswordScene = () => {
     navigateWithReload('/');
   };
 
+  // The engine ends every session of the account on a change, this one included.
+  const signInAgain = () => {
+    void signOut({ callbackUrl: loginWithNotice('password-changed') });
+  };
+
   const {
     mutate: changePassword,
     reset: clearChangeError,
     isPending,
     error,
   } = useCurrentUserResetPassword({
-    onSuccess: async (data) => {
-      // The session was issued without the account's standing, and a refresh carries it.
-      try {
-        await executeAccessTokenRefresh();
-      } catch {
-        setRenewError(
-          new Error(
-            'Your password is changed, but this session could not be renewed. Log out and sign in with the new password.',
-          ),
-        );
-        return;
-      }
+    onSuccess: (data) => {
       if (!data.git.merged && data.git.pending) {
         // setup-status cannot hand the instruction back after a reload, so this browser keeps it.
         if (username) {
@@ -143,7 +137,7 @@ export const ChangePasswordScene = () => {
       if (username) {
         clearPendingReview(username);
       }
-      enterConsole();
+      signInAgain();
     },
   });
 
@@ -182,8 +176,11 @@ export const ChangePasswordScene = () => {
     navigateWithReload('/');
   }, [view.kind, username]);
 
-  const onFinish = ({ new_password }: TResetPasswordFormValues) => {
-    changePassword({ new_password });
+  const onFinish = ({
+    current_password = '',
+    new_password,
+  }: TResetPasswordFormValues) => {
+    changePassword({ current_password, new_password });
   };
 
   const logout = (
@@ -225,9 +222,10 @@ export const ChangePasswordScene = () => {
               </h1>
               {view.kind === 'form' && (
                 <p className="text-sm text-foreground-muted">
-                  You signed in with the password this deployment issued. Choose
-                  your own, at least 12 characters, to continue. The issued
-                  password stops working once you do.
+                  You signed in with the password this deployment issued. Enter
+                  it as your current password, then choose your own, at least 12
+                  characters. The issued password stops working once you do, and
+                  you sign in again with the new one.
                 </p>
               )}
             </div>
@@ -235,15 +233,17 @@ export const ChangePasswordScene = () => {
             {view.kind === 'review' ? (
               <PendingReview
                 pending={view.pending}
-                onContinue={enterConsole}
+                // A review shown right after the change: that change ended this session.
+                onContinue={pending ? signInAgain : enterConsole}
                 secondaryAction={logout}
               />
             ) : (
               <ResetPasswordForm
                 id="change-password-form"
+                askCurrentPassword
                 onFinish={onFinish}
                 onValuesChange={() => clearChangeError()}
-                error={error ?? renewError}
+                error={error}
                 isPending={isPending}
                 submitText="Set password"
                 secondaryAction={logout}

@@ -9,13 +9,8 @@ export const OIDC_TOKEN_PROVIDER_ID = 'oidc-token';
 /** Console route the engine's OIDC callback returns the browser to. */
 export const OIDC_CONSOLE_CALLBACK_PATH = '/login/oidc';
 
-/** A callbackUrl is only ever a path on this console, never another origin. */
-export function safeCallbackPath(candidate: string | undefined): string {
-  if (!candidate || !candidate.startsWith('/') || candidate.startsWith('//')) {
-    return '/';
-  }
-  return candidate;
-}
+/** Query parameter on the return URL that carries this browser's login nonce. */
+export const OIDC_LOGIN_NONCE_PARAM = 'login_nonce';
 
 /** The engine token the callback put in the URL fragment, read once. */
 export function readTokenFragment(hash: string): {
