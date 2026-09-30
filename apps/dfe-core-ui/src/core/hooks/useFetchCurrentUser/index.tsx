@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCurrentUser } from './api';
 
