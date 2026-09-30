@@ -13,6 +13,8 @@ const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   disabled_at: '',
   blocked_at: '',
   password_change_required: false,
+  hyperdx_role: 'string',
+  hyperdx_identity: 'string',
 };
 
 export const server = setupServer(

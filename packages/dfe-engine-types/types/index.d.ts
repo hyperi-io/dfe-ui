@@ -88,6 +88,10 @@ export interface paths {
          *
          *     A session on an issued password reports the flag and no roles, permissions,
          *     groups or orgs, because its token carries none until the change.
+         *
+         *     ``hyperdx_role`` and ``hyperdx_identity`` are what dfe-hyperdx takes a
+         *     session's dashboard role and team from; it caches this answer for 30 seconds,
+         *     so a group change reaches HyperDX in that window rather than at token expiry.
          */
         get: operations["get_me_api_v1_auth_me_get"];
         put?: never;
@@ -2537,8 +2541,9 @@ export interface paths {
          * @description Execute a raw query against a registered datasource adapter.
          *
          *     This is the lower-level query path -- for ad-hoc queries against
-         *     datasource adapters rather than parameterized views. Requires
-         *     ``query:execute`` permission.
+         *     datasource adapters rather than parameterized views. The SQL runs as the
+         *     engine's own ClickHouse user, so it requires ``raw_query:execute``, which no
+         *     built-in role but ``admin`` holds, and ClickHouse runs it read-only.
          */
         post: operations["execute_raw_query_api_v1_queries_raw_post"];
         delete?: never;
@@ -5688,7 +5693,7 @@ export interface components {
             blocked_at: string;
             /**
              * Groups
-             * @description Groups the account holds: those whose group file lists it, plus the groups its identity provider asserts when one owns it.
+             * @description Names of the groups the account holds: those whose group file lists it, plus, when an identity provider owns it, the groups the provider's asserted ids are linked to by source_id.
              */
             groups: string[];
             /** Email */
@@ -5917,6 +5922,11 @@ export interface components {
         AppSummary: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Instance */
             instance: string;
             /** Telemetry Name */
@@ -6345,6 +6355,11 @@ export interface components {
         CatalogueEntry: {
             /** Service */
             service: string;
+            /**
+             * Display Name
+             * @description The name a console shows a person for this app, from the app manifest. Null when the manifest names none, and the service id is the label. A label only: routes, charts and telemetry keep the service id.
+             */
+            display_name?: string | null;
             /** Scale Deployed */
             scale_deployed: boolean;
             /** Multiplicity */
@@ -7042,7 +7057,7 @@ export interface components {
             description: string;
             /**
              * Expires At
-             * @description Optional ISO-8601 expiry (UTC if no offset given); omit for a key that never expires
+             * @description Optional ISO-8601 expiry (UTC if no offset given). Omitted, the key expires after auth.api_key_default_ttl_days (90 unless configured; 0 there means it never expires).
              */
             expires_at?: string | null;
         };
@@ -8731,7 +8746,7 @@ export interface components {
             team: string;
             /**
              * Team Name
-             * @description HyperDX team name; the caller's OIDC group
+             * @description HyperDX team name: the ClickHouse user its members read as
              */
             team_name: string;
             /** Sources */
@@ -14490,6 +14505,18 @@ export interface components {
              * @default false
              */
             password_change_required: boolean;
+            /**
+             * Hyperdx Role
+             * @description The role dfe-hyperdx gates team-wide dashboard changes on, resolved from the account's groups at this request: 'admin' for a system-scope admin or infra_admin, else 'member'.
+             * @default
+             */
+            hyperdx_role: string;
+            /**
+             * Hyperdx Identity
+             * @description The ClickHouse username GET /api/v1/hyperdx/connection hands this session, without its password. dfe-hyperdx names the session's team after it. Empty when that read would refuse the session.
+             * @default
+             */
+            hyperdx_identity: string;
         };
         /**
          * ValidateResponse

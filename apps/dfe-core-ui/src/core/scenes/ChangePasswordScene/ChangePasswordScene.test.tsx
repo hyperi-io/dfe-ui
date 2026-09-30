@@ -67,6 +67,8 @@ const me = (passwordChangeRequired: boolean) =>
       disabled_at: '',
       blocked_at: '',
       password_change_required: passwordChangeRequired,
+      hyperdx_role: 'string',
+      hyperdx_identity: 'string',
     } satisfies TAuthMeResponse,
   });
 
