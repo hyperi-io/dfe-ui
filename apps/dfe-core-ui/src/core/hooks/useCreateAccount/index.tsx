@@ -21,7 +21,7 @@ export const useCreateAccount = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.accounts.infiniteFiltered(),
+        queryKey: QUERY_KEYS.accounts.default(),
       });
       onSuccess?.(data);
     },

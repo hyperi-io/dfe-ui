@@ -7,7 +7,7 @@ import { useFetchInfiniteFilteredAccountsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.infiniteFiltered;
+export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.default;
 
 /** useFetchInfiniteFilteredAccounts props */
 /**

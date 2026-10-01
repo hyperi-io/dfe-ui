@@ -24,7 +24,7 @@ export const useCreateOidcProvider = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.oidcProviders.infiniteFiltered(),
+        queryKey: QUERY_KEYS.oidcProviders.default(),
       });
       onSuccess?.(data);
     },

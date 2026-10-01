@@ -17,7 +17,7 @@ export const useDeleteAccount = ({
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.accounts.infiniteFiltered(),
+        queryKey: QUERY_KEYS.accounts.default(),
       });
       onSuccess?.();
     },
