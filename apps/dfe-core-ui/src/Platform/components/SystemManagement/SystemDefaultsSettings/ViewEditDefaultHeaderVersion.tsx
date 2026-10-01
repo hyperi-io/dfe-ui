@@ -1,10 +1,9 @@
+import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
-// eslint-disable-next-line no-restricted-imports
-import { CommonHeaderSelect } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/CommonHeaderSelect';
 import { IconEdit, IconX } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
@@ -71,7 +70,9 @@ export const ViewEditDefaultHeaderVersion = ({
               type="text"
               size="small"
               shape="circle"
-              aria-label={isEditing ? 'Cancel' : 'Edit retention'}
+              aria-label={
+                isEditing ? 'Cancel' : 'Edit default header & version'
+              }
               onClick={() => setIsEditing(!isEditing)}
             />
           </RbacProtected.Unrestricted>

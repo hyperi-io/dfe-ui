@@ -1,9 +1,9 @@
+import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
 import { cn } from '@/core/utils/style';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { CommonHeaderSelect } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/CommonHeaderSelect';
 import {
   engineArgumentsError,
   TableEngineInput,

@@ -1,10 +1,10 @@
-import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import {
   getSchemaLeafName,
   getSchemaPathPrefix,
   isSelectableSchemaOptionValue,
   schemasToGroupedSelectOptions,
-} from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/helpers/schemaSelectOptions';
+} from '@/core/helpers/schemaSelectOptions';
+import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 

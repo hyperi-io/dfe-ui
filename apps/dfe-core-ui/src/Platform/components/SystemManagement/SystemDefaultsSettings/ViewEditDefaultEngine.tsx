@@ -3,19 +3,14 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { SourceEngineSelect } from '@/core/components/SourceEngineSelect';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { useUpdateRetention } from '@/Platform/hooks/system/useUpdateRetention';
+import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
 import { IconEdit, IconX } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
-  default_ttl_days: z
-    .number()
-    .min(0)
-    .refine((val) => Number.isInteger(val), {
-      message: 'Default TTL Days must be a whole number',
-    }),
+  engine: z.string(),
 });
 type TFormSchema = z.infer<typeof formSchema>;
 
@@ -28,30 +23,29 @@ export const ViewEditDefaultEngine = ({
 
   const { notification } = App.useApp();
 
-  const { mutate: updateRetention, isPending: isUpdating } = useUpdateRetention(
-    {
+  const { mutate: updateDefaultEngine, isPending: isUpdating } =
+    useUpdateSystemDefaults({
       onSuccess: () => {
         setIsEditing(false);
         notification.success({
-          title: 'Retention updated successfully',
+          title: 'Default engine updated successfully',
           placement: 'bottomLeft',
         });
       },
       onError: (error) => {
         notification.error({
-          title: 'Error updating retention',
+          title: 'Error updating default engine',
           description: error instanceof Error ? error.message : 'Unknown error',
           placement: 'bottomLeft',
         });
       },
-    },
-  );
+    });
 
   const [form] = Form.useForm<TFormSchema>();
   const formValidation = useAntdZodResolver(formSchema);
 
   const handleFinish = (values: TFormSchema) => {
-    updateRetention(values);
+    updateDefaultEngine(values);
   };
   return (
     <div className="flex items-center gap-2">
@@ -72,7 +66,7 @@ export const ViewEditDefaultEngine = ({
               type="text"
               size="small"
               shape="circle"
-              aria-label={isEditing ? 'Cancel' : 'Edit retention'}
+              aria-label={isEditing ? 'Cancel' : 'Edit default engine'}
               onClick={() => setIsEditing(!isEditing)}
             />
           </RbacProtected.Unrestricted>
@@ -88,7 +82,7 @@ export const ViewEditDefaultEngine = ({
               default_engine: defaultEngine,
             }}
           >
-            <Form.Item name="default_engine" rules={[formValidation]}>
+            <Form.Item name="engine" rules={[formValidation]}>
               <SourceEngineSelect size="small" />
             </Form.Item>
 
