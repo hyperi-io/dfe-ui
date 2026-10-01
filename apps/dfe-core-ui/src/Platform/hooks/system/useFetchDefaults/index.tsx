@@ -1,7 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchSystemDefaultsApi } from './api';
-
-export const SYSTEM_DEFAULTS_QUERY_KEY = () => ['system', 'defaults'];
+import { fetchSystemDefaultsApi, SYSTEM_DEFAULTS_QUERY_KEY } from './api';
 
 export const useFetchDefaults = () => {
   const { data, isLoading, error } = useQuery({
