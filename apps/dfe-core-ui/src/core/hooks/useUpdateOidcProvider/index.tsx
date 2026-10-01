@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/core/hooks/useFetchOidcProviderDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProvider } from './api';

@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateCurrentUser } from './api';
 import {
