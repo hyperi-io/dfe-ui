@@ -16,6 +16,7 @@ export const groupResolutionRequestSchema = z.object({
   service_account_json: z.string(),
   client_secret: z.string(),
   api_token: z.string(),
+  tenant_id: z.string(),
 });
 
 export const DEFAULT_GROUP_RESOLUTION: z.infer<
@@ -35,6 +36,7 @@ export const DEFAULT_GROUP_RESOLUTION: z.infer<
   service_account_json: '',
   client_secret: '',
   api_token: '',
+  tenant_id: '',
 };
 
 export const createUpdateOidcProviderSchema = z.object({

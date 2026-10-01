@@ -32,6 +32,7 @@ describe('.useCreateOidcProvider', () => {
   const requestBody: TCreateOidcProviderRequest = {
     name: 'string',
     type: 'generic',
+    enabled: true,
     display_name: 'string',
     issuer: 'string',
     client_id_env: 'string',
@@ -53,6 +54,7 @@ describe('.useCreateOidcProvider', () => {
       service_account_json: 'string',
       client_secret: 'string',
       api_token: 'string',
+      tenant_id: 'tenant_id',
     },
   };
   describe('onSuccess', () => {
@@ -96,6 +98,7 @@ describe('.useCreateOidcProvider', () => {
           service_account_json_path: 'service_account_json_path',
           client_secret_path: 'client_secret_path',
           api_token_path: 'api_token_path',
+          tenant_id: 'tenant_id',
         },
       };
 

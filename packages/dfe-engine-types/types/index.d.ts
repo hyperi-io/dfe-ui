@@ -744,9 +744,7 @@ export interface paths {
          * Create Provider
          * @description Create a new OIDC provider configuration (admin only).
          *
-         *     Secret values in the body are written to the secret store before the YAML is
-         *     written, so nothing is stored against a name that already belongs to someone
-         *     else's provider.
+         *     Secret values in the body are written to the secret store before the YAML, and only once the name is free and the provider passes the field rules for its type and mode, so a refused provider leaves nothing behind.
          */
         post: operations["create_provider_api_v1_auth_oidc_providers_post"];
         delete?: never;
@@ -771,8 +769,7 @@ export interface paths {
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits keeps the path the provider already holds, so an
-         *     update that only flips ``enabled`` does not strand a stored credential.
+         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
@@ -5366,7 +5363,10 @@ export interface paths {
         };
         /**
          * Client Config
-         * @description Runtime config for the web UI (no secrets).
+         * @description Runtime config for the web UI.
+         *
+         *     Authenticated but ungated: every console pane may read it, and the HyperDX URL
+         *     it returns is internal to the deployment.
          */
         get: operations["client_config_api_v1_config_client_get"];
         put?: never;
@@ -6650,7 +6650,7 @@ export interface components {
             hyperdx: components["schemas"]["HyperDXConfig"];
             /**
              * Auth Mode
-             * @description 'oidc' when an enabled OIDC provider is registered, so the UI offers the SSO button; 'jwt' otherwise. Local login stays available in both.
+             * @description 'oidc' when an enabled OIDC provider is registered, 'jwt' otherwise; shown on the System Management page. Local login stays available in both.
              * @default jwt
              */
             auth_mode: string;
@@ -7213,6 +7213,12 @@ export interface components {
              * @enum {string}
              */
             type: "generic" | "google" | "entra_id" | "okta";
+            /**
+             * Enabled
+             * @description Whether the provider serves logins
+             * @default true
+             */
+            enabled: boolean;
             /**
              * Display Name
              * @description Human-readable label
@@ -8141,7 +8147,7 @@ export interface components {
         GroupResolutionConfig: {
             /**
              * Mode
-             * @default manual
+             * @default token_claim
              * @enum {string}
              */
             mode: "manual" | "token_claim" | "api";
@@ -8192,6 +8198,11 @@ export interface components {
              */
             domain: string;
             /**
+             * Tenant Id
+             * @default
+             */
+            tenant_id: string;
+            /**
              * Tenant Id Env
              * @default
              */
@@ -8227,7 +8238,7 @@ export interface components {
             /**
              * Mode
              * @description Group resolution mode: manual, token_claim, api
-             * @default manual
+             * @default token_claim
              * @enum {string}
              */
             mode: "manual" | "token_claim" | "api";
@@ -8274,14 +8285,20 @@ export interface components {
              */
             domain: string;
             /**
+             * Tenant Id
+             * @description Entra ID tenant ID. Not a secret, so it is stored in config.
+             * @default
+             */
+            tenant_id: string;
+            /**
              * Tenant Id Env
-             * @description Env var for Entra ID tenant ID
+             * @description Env var for Entra ID tenant ID, read when tenant_id is empty
              * @default
              */
             tenant_id_env: string;
             /**
              * Client Secret
-             * @description Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config.
+             * @description Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config. When neither this nor client_secret_env is set, the login client secret is used.
              * @default
              */
             client_secret: string;
@@ -8328,6 +8345,8 @@ export interface components {
             admin_email: string;
             /** Domain */
             domain: string;
+            /** Tenant Id */
+            tenant_id: string;
             /** Tenant Id Env */
             tenant_id_env: string;
             /** Client Secret Env */
@@ -10919,27 +10938,28 @@ export interface components {
          *
          *     Pagination modes:
          *     - Offset-based: Use `limit` and `offset` for simple pagination
-         *     - Cursor-based: Use `cursor` for efficient pagination on large datasets
-         *     - Keyset: Use `after_key` with an order column for stable pagination
+         *     - Keyset: Use `order_by` with `after_key` (and `tiebreak_by` with
+         *       `after_tiebreak` when the key is not unique) for stable pagination
+         *
+         *     A view that declares its own `limit` parameter caps its rows before any outer
+         *     paging applies, so `order_by`, `after_key` and `offset` are refused on it.
          */
         QueryOptions: {
             /** Limit */
             limit?: number | null;
-            /** Offset */
+            /**
+             * Offset
+             * @description Not combinable with after_key
+             */
             offset?: number | null;
             /**
-             * Cursor
-             * @description Opaque cursor for cursor-based pagination (from previous response)
-             */
-            cursor?: string | null;
-            /**
              * After Key
-             * @description Value to paginate after (requires order_by in query)
+             * @description order_by value of the previous page's last row (a string or a number); requires order_by. A timestamp is sent as e.g. '2024-01-15T12:00:00'
              */
             after_key?: unknown | null;
             /**
              * Order By
-             * @description Column to order by for keyset pagination
+             * @description Column to order and page by. Rows whose key is NULL are never returned by keyset paging, and without tiebreak_by the key must be unique: rows tying with the cursor are skipped
              */
             order_by?: string | null;
             /**
@@ -10949,6 +10969,16 @@ export interface components {
              * @enum {string}
              */
             order_dir: "asc" | "desc";
+            /**
+             * Tiebreak By
+             * @description Second, unique, non-NULL column that orders rows tying on order_by
+             */
+            tiebreak_by?: string | null;
+            /**
+             * After Tiebreak
+             * @description tiebreak_by value of the previous page's last row; sent with after_key
+             */
+            after_tiebreak?: unknown | null;
             /**
              * Time From
              * @description ISO8601 datetime
@@ -10961,16 +10991,6 @@ export interface components {
             time_to?: string | null;
             /** Timeout Seconds */
             timeout_seconds?: number | null;
-            /**
-             * Include Explain
-             * @default false
-             */
-            include_explain: boolean;
-            /**
-             * Explain Parallel
-             * @default true
-             */
-            explain_parallel: boolean;
             /**
              * Cache
              * @description Allow cached results
@@ -30381,6 +30401,24 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
