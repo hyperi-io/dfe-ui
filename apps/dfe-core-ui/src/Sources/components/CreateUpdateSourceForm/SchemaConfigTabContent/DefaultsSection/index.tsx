@@ -1,19 +1,19 @@
 import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
-import { cn } from '@/core/utils/style';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import {
   engineArgumentsError,
   TableEngineInput,
-} from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/TableEngineInput';
+} from '@/core/components/TableEngineSelect';
+import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
+import { useFetchTableEngines } from '@/core/hooks/useFetchTableEngines';
+import { cn } from '@/core/utils/style';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import {
   dfeDefaultText,
   OverrideTag,
   ttlDaysText,
 } from '@/Sources/components/DefaultOverride';
-import { useFetchTableEngines } from '@/Sources/hooks/useFetchTableEngines';
 import { Button, FormInstance, InputNumber, Select } from 'antd';
 import { Rule } from 'antd/es/form';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
