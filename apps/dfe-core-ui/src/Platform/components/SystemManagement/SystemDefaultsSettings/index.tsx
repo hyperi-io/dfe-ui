@@ -1,6 +1,7 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { ApplyDefaultsDrawer } from '@/Platform/components/SystemManagement/ApplyDefaultsDrawer';
 import { useFetchDefaults } from '@/Platform/hooks/system/useFetchDefaults';
 import { ViewEditDefaultEngine } from './ViewEditDefaultEngine';
 import { ViewEditDefaultHeaderVersion } from './ViewEditDefaultHeaderVersion';
@@ -12,7 +13,10 @@ export const SystemDefaultsSettings = () => {
   const { data: defaults, error } = useFetchDefaults();
 
   return (
-    <SectionCard title="System Defaults">
+    <SectionCard
+      title="System Defaults"
+      rightTitleSlot={<ApplyDefaultsDrawer />}
+    >
       <RbacProtected action={RbacProtected.rbacActions.system_read}>
         <RbacProtected.Unrestricted>
           <>
