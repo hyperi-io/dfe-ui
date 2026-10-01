@@ -54,7 +54,13 @@ export const GroupFormSection = () => {
       </>
 
       <>
-        <Form.Item label="Tenant ID" name={[GROUPS_FORM_NAME, 'tenant_id_env']}>
+        <Form.Item label="Tenant ID" name={[GROUPS_FORM_NAME, 'tenant_id']}>
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Tenant ID Environment Variable"
+          name={[GROUPS_FORM_NAME, 'tenant_id_env']}
+        >
           <Input />
         </Form.Item>
         <Form.Item

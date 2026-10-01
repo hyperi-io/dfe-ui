@@ -82,9 +82,6 @@ export const CreateUpdateOidcProviderForm = ({
           <Form.Item label="Issuer" name="issuer">
             <Input disabled={disabledFields?.issuer} />
           </Form.Item>
-          <Form.Item label="Tenant ID" name="tenant_id">
-            <Input />
-          </Form.Item>
           <Form.Item
             label="Client ID Environment Variable"
             name="client_id_env"

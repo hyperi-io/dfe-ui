@@ -226,6 +226,7 @@ describe('UpdateOidcProviderDrawer', () => {
     const body = await submitAndReadBody(user);
     expect(body.groups).toEqual({
       ...groupsRequest(OKTA.groups),
+      tenant_id: '',
       enrich_on_login: true,
       okta_domain: 'corp.okta.com',
       api_token_env: 'OKTA_DIRECTORY_TOKEN',
@@ -245,6 +246,7 @@ describe('UpdateOidcProviderDrawer', () => {
     const body = await submitAndReadBody(user);
     expect(body.groups).toEqual({
       ...groupsRequest(GOOGLE.groups),
+      tenant_id: '',
       mode: 'token_claim',
       claim_name: 'roles',
       admin_email: 'it@example.com',
@@ -265,6 +267,7 @@ describe('UpdateOidcProviderDrawer', () => {
       ...groupsRequest(ENTRA_ID.groups),
       mode: 'manual',
       tenant_id_env: 'ENTRA_DIRECTORY_TENANT',
+      tenant_id: '',
       client_secret_env: 'ENTRA_DIRECTORY_SECRET',
     });
     expect(body.groups.sync_interval).toBe(900);

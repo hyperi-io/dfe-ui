@@ -25,6 +25,7 @@ const toGroupsRequest = (
       form.service_account_json_env ?? stored.service_account_json_env,
     admin_email: form.admin_email ?? stored.admin_email,
     domain: form.domain ?? stored.domain,
+    tenant_id: form.tenant_id ?? stored.tenant_id,
     tenant_id_env: form.tenant_id_env ?? stored.tenant_id_env,
     client_secret_env: form.client_secret_env ?? stored.client_secret_env,
     api_token_env: form.api_token_env ?? stored.api_token_env,
