@@ -33,7 +33,8 @@ export const DefaultsSection = ({
   className?: string;
 }) => {
   const { data: defaults, isLoading, error } = useFetchSystemDefaults();
-  const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
+  const { data: { items: engines } = {}, isLoading: isLoadingEngines } =
+    useFetchTableEngines();
   const defaultsAppliedRef = useRef(false);
 
   const headerType = Form.useWatch(['header', 'type'], form);
@@ -232,7 +233,7 @@ export const DefaultsSection = ({
                 formValidation,
                 {
                   validator: async (_, value?: string | null) => {
-                    const message = engineArgumentsError(value, engines);
+                    const message = engineArgumentsError(value, engines ?? []);
                     if (message) {
                       throw new Error(message);
                     }
@@ -241,7 +242,7 @@ export const DefaultsSection = ({
               ]}
             >
               <TableEngineInput
-                engines={engines}
+                engines={engines ?? []}
                 loading={isLoadingEngines}
                 placeholder={dfeDefaultText(defaults?.default_engine)}
               />

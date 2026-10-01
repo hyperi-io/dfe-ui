@@ -17,7 +17,7 @@ export const useFetchTableEngines = () => {
   });
 
   return {
-    engines: data?.items ?? [],
+    data,
     isLoading,
     isError,
   };
