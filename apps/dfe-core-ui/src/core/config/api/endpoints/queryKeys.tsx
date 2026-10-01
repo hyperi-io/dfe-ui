@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-imports */
+import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
-import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Sources/hooks/useFetchInifniteDefaultDriftSources/types';
 
 export const QUERY_KEYS = Object.freeze({
   auth: {
