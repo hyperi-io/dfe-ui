@@ -4,6 +4,8 @@ import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetc
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { TUpdateRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
+import { TApplyDefaultsResponse } from '@/Sources/hooks/useApplyDefaults/types';
+import { TDefaultDriftSources } from '@/Sources/hooks/useFetchDefaultDriftSources/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
@@ -274,6 +276,60 @@ export const system = {
         return http.patch(system.defaults.mockedUrl, () =>
           HttpResponse.json(mockedResponse, { status }),
         );
+      },
+    },
+  },
+  defaultsDrift: {
+    mockedUrl: '/api/v1/system/defaults/drift',
+    get: {
+      success: ({
+        mockedResponse = {
+          sources: [
+            {
+              source: 'string',
+              core: true,
+              drifted: ['string'],
+              ttl_days: { stored: 'string', default: 'string' },
+              common_header_type: { stored: 'string', default: 'string' },
+              common_header_version: { stored: 'string', default: 'string' },
+              engine: { stored: 'string', default: 'string' },
+            },
+          ],
+        },
+      }: {
+        mockedResponse?: TDefaultDriftSources;
+      } = {}) => {
+        return http.get(system.defaultsDrift.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+  },
+  applyDefaults: {
+    mockedUrl: '/api/v1/system/defaults/apply',
+    post: {
+      success: ({
+        mockedResponse = {
+          updated: ['source1', 'source2'],
+          unchanged: [],
+        },
+      }: {
+        mockedResponse?: TApplyDefaultsResponse;
+      } = {}) => {
+        return http.post(system.applyDefaults.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(system.applyDefaults.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },
