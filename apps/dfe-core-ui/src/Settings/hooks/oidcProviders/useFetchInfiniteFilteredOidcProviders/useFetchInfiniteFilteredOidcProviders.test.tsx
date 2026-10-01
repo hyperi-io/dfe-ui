@@ -101,6 +101,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
           service_account_json_path: 'string',
           client_secret_path: 'string',
           api_token_path: 'string',
+          tenant_id: 'string',
         },
       };
 
