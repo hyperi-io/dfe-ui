@@ -2,8 +2,8 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { RetentionCard } from '.';
-import { server } from './RetentionCard.mocks';
+import { SystemDefaultsSettings } from '.';
+import { server } from './SystemDefaultSettings.mocks';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
@@ -11,9 +11,9 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-describe('RetentionCard', () => {
+describe('SystemDefaultsSettings', () => {
   it('shows the environment default, with the editor closed', async () => {
-    render(<RetentionCard />, { wrapper });
+    render(<SystemDefaultsSettings />, { wrapper });
 
     expect(
       await screen.findByText('90 days', {}, { timeout: 15000 }),
@@ -40,7 +40,7 @@ describe('RetentionCard', () => {
       }),
     );
 
-    render(<RetentionCard />, { wrapper });
+    render(<SystemDefaultsSettings />, { wrapper });
 
     expect(
       await screen.findByText('none (kept forever)', {}, { timeout: 15000 }),
