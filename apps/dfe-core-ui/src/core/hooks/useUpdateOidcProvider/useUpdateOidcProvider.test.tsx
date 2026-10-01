@@ -75,6 +75,7 @@ describe('.useUpdateOidcProvider', () => {
           service_account_json_path: 'service_account_json_path',
           client_secret_path: 'client_secret_path',
           api_token_path: 'api_token_path',
+          tenant_id: 'tenant_id',
         },
         created_at: 'created_at',
         last_sync_at: 'last_sync_at',

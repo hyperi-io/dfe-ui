@@ -34,6 +34,7 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
   api_token_env: '',
   api_token_path: '',
   okta_domain: '',
+  tenant_id: '',
 };
 
 const OKTA: TOidcProviderListItem = {
