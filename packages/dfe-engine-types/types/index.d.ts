@@ -5366,7 +5366,10 @@ export interface paths {
         };
         /**
          * Client Config
-         * @description Runtime config for the web UI (no secrets).
+         * @description Runtime config for the web UI.
+         *
+         *     Authenticated but ungated: every console pane may read it, and the HyperDX URL
+         *     it returns is internal to the deployment.
          */
         get: operations["client_config_api_v1_config_client_get"];
         put?: never;
@@ -6650,7 +6653,7 @@ export interface components {
             hyperdx: components["schemas"]["HyperDXConfig"];
             /**
              * Auth Mode
-             * @description 'oidc' when an enabled OIDC provider is registered, so the UI offers the SSO button; 'jwt' otherwise. Local login stays available in both.
+             * @description 'oidc' when an enabled OIDC provider is registered, 'jwt' otherwise; shown on the System Management page. Local login stays available in both.
              * @default jwt
              */
             auth_mode: string;
@@ -10919,27 +10922,28 @@ export interface components {
          *
          *     Pagination modes:
          *     - Offset-based: Use `limit` and `offset` for simple pagination
-         *     - Cursor-based: Use `cursor` for efficient pagination on large datasets
-         *     - Keyset: Use `after_key` with an order column for stable pagination
+         *     - Keyset: Use `order_by` with `after_key` (and `tiebreak_by` with
+         *       `after_tiebreak` when the key is not unique) for stable pagination
+         *
+         *     A view that declares its own `limit` parameter caps its rows before any outer
+         *     paging applies, so `order_by`, `after_key` and `offset` are refused on it.
          */
         QueryOptions: {
             /** Limit */
             limit?: number | null;
-            /** Offset */
+            /**
+             * Offset
+             * @description Not combinable with after_key
+             */
             offset?: number | null;
             /**
-             * Cursor
-             * @description Opaque cursor for cursor-based pagination (from previous response)
-             */
-            cursor?: string | null;
-            /**
              * After Key
-             * @description Value to paginate after (requires order_by in query)
+             * @description order_by value of the previous page's last row (a string or a number); requires order_by. A timestamp is sent as e.g. '2024-01-15T12:00:00'
              */
             after_key?: unknown | null;
             /**
              * Order By
-             * @description Column to order by for keyset pagination
+             * @description Column to order and page by. Rows whose key is NULL are never returned by keyset paging, and without tiebreak_by the key must be unique: rows tying with the cursor are skipped
              */
             order_by?: string | null;
             /**
@@ -10949,6 +10953,16 @@ export interface components {
              * @enum {string}
              */
             order_dir: "asc" | "desc";
+            /**
+             * Tiebreak By
+             * @description Second, unique, non-NULL column that orders rows tying on order_by
+             */
+            tiebreak_by?: string | null;
+            /**
+             * After Tiebreak
+             * @description tiebreak_by value of the previous page's last row; sent with after_key
+             */
+            after_tiebreak?: unknown | null;
             /**
              * Time From
              * @description ISO8601 datetime
@@ -10961,16 +10975,6 @@ export interface components {
             time_to?: string | null;
             /** Timeout Seconds */
             timeout_seconds?: number | null;
-            /**
-             * Include Explain
-             * @default false
-             */
-            include_explain: boolean;
-            /**
-             * Explain Parallel
-             * @default true
-             */
-            explain_parallel: boolean;
             /**
              * Cache
              * @description Allow cached results
@@ -30381,6 +30385,24 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientConfig"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
