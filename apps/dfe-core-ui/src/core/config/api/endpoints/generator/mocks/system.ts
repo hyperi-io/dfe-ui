@@ -1,6 +1,8 @@
+import { TSystemDefaultsResponse } from '@/Platform/hooks/system/useFetchDefaults/types';
 import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
+import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { TUpdateRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
@@ -191,6 +193,87 @@ export const system = {
         return http.post(system.clickhouseCloudStop.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
         });
+      },
+    },
+  },
+  defaults: {
+    mockedUrl: '/api/v1/system/defaults',
+    get: {
+      success: ({
+        mockedResponse = {
+          ttl_days: {
+            effective: 90,
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 90,
+          },
+          common_header_type: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          common_header_version: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          engine: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          editable: true,
+        },
+      }: { mockedResponse?: TSystemDefaultsResponse } = {}) => {
+        return http.get(system.defaults.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+    },
+    patch: {
+      success: ({
+        mockedResponse = {
+          ttl_days: {
+            effective: 90,
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 90,
+          },
+          common_header_type: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          common_header_version: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          engine: {
+            effective: 'string',
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 'string',
+          },
+          editable: true,
+        },
+      }: { mockedResponse?: TUpdateSystemDefaultsResponse } = {}) => {
+        return http.patch(system.defaults.mockedUrl, () =>
+          HttpResponse.json(mockedResponse),
+        );
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.patch(system.defaults.mockedUrl, () =>
+          HttpResponse.json(mockedResponse, { status }),
+        );
       },
     },
   },
