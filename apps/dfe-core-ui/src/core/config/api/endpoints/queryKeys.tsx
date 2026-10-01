@@ -303,6 +303,8 @@ export const QUERY_KEYS = Object.freeze({
     clickhouseCloudStart: () => ['system', 'clickhouse-cloud', 'start'],
     clickhouseCloudStop: () => ['system', 'clickhouse-cloud', 'stop'],
     defaults: () => ['system', 'defaults'],
+    defaultsDrift: () => ['system', 'defaults', 'drift'],
+    applyDefaults: () => ['system', 'defaults', 'apply'],
   },
   apiKeys: {
     default: () => ['auth', 'api-keys'],
