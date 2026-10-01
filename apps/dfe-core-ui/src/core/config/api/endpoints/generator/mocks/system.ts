@@ -5,7 +5,7 @@ import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system
 import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { TUpdateRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
 import { TApplyDefaultsResponse } from '@/Sources/hooks/useApplyDefaults/types';
-import { TDefaultDriftSources } from '@/Sources/hooks/useFetchDefaultDriftSources/types';
+import { TDefaultsDriftSourcesResponse } from '@/Sources/hooks/useFetchInifniteDefaultDriftSources/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
@@ -284,7 +284,7 @@ export const system = {
     get: {
       success: ({
         mockedResponse = {
-          sources: [
+          items: [
             {
               source: 'string',
               core: true,
@@ -295,12 +295,26 @@ export const system = {
               engine: { stored: 'string', default: 'string' },
             },
           ],
+          total: 10,
+          page: 1,
+          per_page: 10,
+          total_pages: 1,
+          next_page: 2,
+          prev_page: 0,
         },
       }: {
-        mockedResponse?: TDefaultDriftSources;
+        mockedResponse?: TDefaultsDriftSourcesResponse;
       } = {}) => {
         return http.get(system.defaultsDrift.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.get(system.defaultsDrift.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
         });
       },
     },

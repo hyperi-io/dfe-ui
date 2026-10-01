@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-imports */
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
+import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Sources/hooks/useFetchInifniteDefaultDriftSources/types';
 
 export const QUERY_KEYS = Object.freeze({
   auth: {
@@ -303,7 +304,18 @@ export const QUERY_KEYS = Object.freeze({
     clickhouseCloudStart: () => ['system', 'clickhouse-cloud', 'start'],
     clickhouseCloudStop: () => ['system', 'clickhouse-cloud', 'stop'],
     defaults: () => ['system', 'defaults'],
-    defaultsDrift: () => ['system', 'defaults', 'drift'],
+    defaultsDrift: ({
+      search,
+      page,
+      per_page,
+    }: UseFetchInfiniteDefaultsDriftSourcesProps = {}) => [
+      'system',
+      'defaults',
+      'drift',
+      ...(search ? ['search', search] : []),
+      ...(page ? ['page', page] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
     applyDefaults: () => ['system', 'defaults', 'apply'],
   },
   apiKeys: {
