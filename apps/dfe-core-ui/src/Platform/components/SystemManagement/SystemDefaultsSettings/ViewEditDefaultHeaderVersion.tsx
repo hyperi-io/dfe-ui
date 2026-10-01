@@ -5,8 +5,8 @@ import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
 import { IconEdit, IconX } from '@repo/dfe-icons';
-import { App, Button } from 'antd';
-import { useState } from 'react';
+import { App, Button, Select } from 'antd';
+import { useCallback, useMemo, useState } from 'react';
 import z from 'zod';
 
 const formSchema = z.object({
@@ -51,6 +51,39 @@ export const ViewEditDefaultHeaderVersion = ({
     updateSystemDefaults(values);
   };
 
+  const [commonHeaderVersions, setCommonHeaderVersions] = useState<string[]>(
+    [],
+  );
+  const handleChangeCommonHeader = useCallback(
+    (
+      value: string | null,
+      commonHeader?: { versions: string[] },
+      action_type?: string,
+    ) => {
+      if (value) {
+        setCommonHeaderVersions(commonHeader?.versions ?? []);
+
+        if (action_type === '_select') {
+          form.setFieldsValue({
+            common_header_version:
+              commonHeader?.versions?.length === 1
+                ? commonHeader?.versions?.[0]
+                : undefined,
+          });
+        }
+      }
+    },
+    [form],
+  );
+  const commonHeaderVersionsOptions = useMemo(() => {
+    return (
+      commonHeaderVersions?.map((version) => ({
+        label: version,
+        value: version,
+      })) ?? []
+    );
+  }, [commonHeaderVersions]);
+
   return (
     <div className="flex items-center gap-2">
       <>
@@ -86,11 +119,33 @@ export const ViewEditDefaultHeaderVersion = ({
             onFinish={handleFinish}
             initialValues={{
               common_header_version: defaultHeaderVersion,
-              common_header_type: defaultHeader,
+              common_header_type: `common-header/${defaultHeader}`,
             }}
           >
-            <Form.Item name="common_header_type" rules={[formValidation]}>
-              <CommonHeaderSelect size="small" />
+            <Form.Item
+              label="Common Header"
+              layout="horizontal"
+              name="common_header_type"
+              rules={[formValidation]}
+            >
+              <CommonHeaderSelect
+                className="min-w-60"
+                onChange={handleChangeCommonHeader}
+                size="small"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Version"
+              layout="horizontal"
+              name="common_header_version"
+              rules={[formValidation]}
+            >
+              <Select
+                className="min-w-32"
+                options={commonHeaderVersionsOptions}
+                size="small"
+              />
             </Form.Item>
 
             <div className="flex gap-2 justify-end">

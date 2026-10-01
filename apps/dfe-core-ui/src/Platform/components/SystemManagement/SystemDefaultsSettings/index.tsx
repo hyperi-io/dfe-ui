@@ -26,18 +26,16 @@ export const SystemDefaultsSettings = () => {
               <dt className={dataListTermStyle}>Default Engine</dt>
               <dd>
                 <ViewEditDefaultEngine
-                  defaultEngine={defaults?.engine?.deployment_default ?? ''}
+                  defaultEngine={defaults?.engine?.effective ?? ''}
                 />
               </dd>
               <dt className={dataListTermStyle}>Default Header & Version</dt>
               <dd className="max-[1452px]:col-span-1 col-span-3">
                 <ViewEditDefaultHeaderVersion
                   defaultHeaderVersion={
-                    defaults?.common_header_version?.deployment_default ?? ''
+                    defaults?.common_header_version?.effective ?? ''
                   }
-                  defaultHeader={
-                    defaults?.common_header_type?.deployment_default ?? ''
-                  }
+                  defaultHeader={defaults?.common_header_type?.effective ?? ''}
                 />
               </dd>
             </dl>

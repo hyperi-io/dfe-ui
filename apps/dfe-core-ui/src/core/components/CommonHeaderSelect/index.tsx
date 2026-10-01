@@ -5,6 +5,7 @@ import {
   schemasToGroupedSelectOptions,
 } from '@/core/helpers/schemaSelectOptions';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { cn } from '@/core/utils/style';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -40,6 +41,7 @@ export const CommonHeaderSelect = ({
   value,
   onChange,
   onOpenChange,
+  className,
   ...props
 }: CommonHeaderSelectProps) => {
   const [commonHeaderValue, setCommonHeaderValue] = useState<string | null>(
@@ -179,27 +181,25 @@ export const CommonHeaderSelect = ({
   }, [commonHeaderValue, showSelectedLabel]);
 
   return (
-    <div className="flex min-w-0 flex-1 gap-2">
-      <Select
-        {...props}
-        className="min-w-0 flex-1"
-        loading={isLoading}
-        options={commonHeaderSelectOptions}
-        placeholder="Select common header"
-        showSearch={{
-          onSearch: setSearchValue,
-          searchValue,
-          autoClearSearchValue: false,
-        }}
-        virtual={false}
-        value={commonHeaderValue ?? undefined}
-        labelRender={() => selectedLabel}
-        onOpenChange={handleOpenChange}
-        onSelect={handleSelectFromDropdown}
-        onPopupScroll={handlePopupScroll}
-        allowClear={searchValue !== ''}
-        onClear={handleSearchClear}
-      />
-    </div>
+    <Select
+      {...props}
+      className={cn('min-w-0 flex-1', className)}
+      loading={isLoading}
+      options={commonHeaderSelectOptions}
+      placeholder="Select common header"
+      showSearch={{
+        onSearch: setSearchValue,
+        searchValue,
+        autoClearSearchValue: false,
+      }}
+      virtual={false}
+      value={commonHeaderValue ?? undefined}
+      labelRender={() => selectedLabel}
+      onOpenChange={handleOpenChange}
+      onSelect={handleSelectFromDropdown}
+      onPopupScroll={handlePopupScroll}
+      allowClear={searchValue !== ''}
+      onClear={handleSearchClear}
+    />
   );
 };
