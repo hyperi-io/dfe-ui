@@ -20,10 +20,15 @@ const DriftTag = ({
   current: string | number | null;
   defaultValue: string | number | null;
 }) => {
+  const isDrifted = current?.toString() !== defaultValue?.toString();
+  if (!isDrifted) {
+    return <NoDriftTag />;
+  }
   return (
     <span className="flex items-center gap-2">
       <Tag color="warning">Drift</Tag>
-      Current: {current} | Default: {defaultValue}
+      Current: {current?.toString().replace('common-header/', '')} | Default:{' '}
+      {defaultValue?.toString().replace('common-header/', '')}
     </span>
   );
 };
@@ -88,18 +93,8 @@ export const ApplyDefaultsContent = () => {
         stored: string | number | null;
         default: string | number | null;
       }) => {
-        if (ttl_days.stored === ttl_days.default) {
-          return <NoDriftTag />;
-        }
         return (
-          <Tooltip
-            title={`Current TTL days on source is ${ttl_days.stored} and default is ${ttl_days.default}`}
-          >
-            <DriftTag
-              current={ttl_days.stored}
-              defaultValue={ttl_days.default}
-            />
-          </Tooltip>
+          <DriftTag current={ttl_days.stored} defaultValue={ttl_days.default} />
         );
       },
     },
@@ -110,15 +105,8 @@ export const ApplyDefaultsContent = () => {
         stored: string | number | null;
         default: string | number | null;
       }) => {
-        if (engine.stored === engine.default) {
-          return <NoDriftTag />;
-        }
         return (
-          <Tooltip
-            title={`Current engine on source is ${engine.stored} and default is ${engine.default}`}
-          >
-            <DriftTag current={engine.stored} defaultValue={engine.default} />
-          </Tooltip>
+          <DriftTag current={engine.stored} defaultValue={engine.default} />
         );
       },
     },
@@ -129,18 +117,11 @@ export const ApplyDefaultsContent = () => {
         stored: string | number | null;
         default: string | number | null;
       }) => {
-        if (common_header_type.stored === common_header_type.default) {
-          return <NoDriftTag />;
-        }
         return (
-          <Tooltip
-            title={`Current common header type on source is ${common_header_type.stored} and default is ${common_header_type.default}`}
-          >
-            <DriftTag
-              current={common_header_type.stored}
-              defaultValue={common_header_type.default}
-            />
-          </Tooltip>
+          <DriftTag
+            current={common_header_type.stored}
+            defaultValue={common_header_type.default}
+          />
         );
       },
     },
@@ -151,18 +132,11 @@ export const ApplyDefaultsContent = () => {
         stored: string | number | null;
         default: string | number | null;
       }) => {
-        if (common_header_version.stored === common_header_version.default) {
-          return <NoDriftTag />;
-        }
         return (
-          <Tooltip
-            title={`Current common header version on source is ${common_header_version.stored} and default is ${common_header_version.default}`}
-          >
-            <DriftTag
-              current={common_header_version.stored}
-              defaultValue={common_header_version.default}
-            />
-          </Tooltip>
+          <DriftTag
+            current={common_header_version.stored}
+            defaultValue={common_header_version.default}
+          />
         );
       },
     },
