@@ -1,8 +1,12 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
+import { useApplyDefaults } from '@/Platform/hooks/system/useApplyDefaults';
 import { useFetchInfiniteDefaultsDriftSources } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources';
-import { Checkbox, Tag } from 'antd';
+import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
+import { App, Button, Tag } from 'antd';
+import { useState } from 'react';
 
 const NoDriftTag = () => {
   return (
@@ -23,23 +27,59 @@ const DriftTag = ({
     </span>
   );
 };
+const appliedDefaultsMessage = (updated: string[], unchanged: string[]) => {
+  if (updated.length === 0) {
+    return 'Selected sources already match the defaults';
+  }
+
+  const updatedLabel = `Applied defaults to ${updated.length} source${updated.length === 1 ? '' : 's'}`;
+  if (unchanged.length === 0) {
+    return updatedLabel;
+  }
+
+  return `${updatedLabel}. ${unchanged.length} already matched`;
+};
+
 export const ApplyDefaultsContent = () => {
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const { notification } = App.useApp();
   const {
     data: { items: defaultsDriftSources } = {},
     isLoading,
     error,
   } = useFetchInfiniteDefaultsDriftSources();
+  const {
+    mutate: applyDefaults,
+    isPending,
+    error: applyError,
+  } = useApplyDefaults({
+    onSuccess: ({ updated, unchanged }) => {
+      setSelectedSources([]);
+      notification.success({
+        title: appliedDefaultsMessage(updated, unchanged),
+        placement: 'bottomLeft',
+      });
+    },
+  });
 
   const columns = [
     {
-      dataIndex: 'selected',
-      render: (selected: boolean) => {
-        return <Checkbox checked={selected} />;
-      },
-    },
-    {
       title: 'Source',
       dataIndex: 'source',
+      render: (source: string, record: TDefaultsDriftSourceItem) => {
+        if (!record.core) {
+          return source;
+        }
+
+        return (
+          <span className="flex items-center gap-2">
+            {source}
+            <Tooltip title="Engine-owned sources cannot have defaults applied">
+              <Tag>Core</Tag>
+            </Tooltip>
+          </span>
+        );
+      },
     },
     {
       title: 'TTL Days',
@@ -131,12 +171,44 @@ export const ApplyDefaultsContent = () => {
   if (error) {
     return <NotificationCard type="error" title={error.message} />;
   }
+
   return (
-    <Table
-      rowKey="source"
-      dataSource={defaultsDriftSources}
-      loading={isLoading}
-      columns={columns}
-    />
+    <div className="flex flex-col gap-4">
+      <ApiErrorNotification error={applyError} />
+      <Table<TDefaultsDriftSourceItem>
+        rowKey="source"
+        dataSource={defaultsDriftSources}
+        loading={isLoading}
+        columns={columns}
+        rowSelection={{
+          selectedRowKeys: selectedSources,
+          preserveSelectedRowKeys: true,
+          getCheckboxProps: (record) => ({ disabled: record.core }),
+          onChange: (keys) => {
+            const coreSources = new Set(
+              (defaultsDriftSources ?? [])
+                .filter((item) => item.core)
+                .map((item) => item.source),
+            );
+            setSelectedSources(
+              keys.map(String).filter((key) => !coreSources.has(key)),
+            );
+          },
+        }}
+      />
+      <div className="flex items-center justify-end gap-3">
+        <span className="text-xs text-foreground/50 dark:text-foreground/50">
+          {selectedSources.length} selected
+        </span>
+        <Button
+          type="primary"
+          loading={isPending}
+          disabled={selectedSources.length === 0}
+          onClick={() => applyDefaults({ sources: selectedSources })}
+        >
+          Apply Defaults
+        </Button>
+      </div>
+    </div>
   );
 };
