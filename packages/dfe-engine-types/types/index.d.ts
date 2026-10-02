@@ -2212,6 +2212,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Defaults
+         * @description The TTL, common header and merge engine a source inherits when it sets none.
+         */
+        get: operations["get_defaults_api_v1_system_defaults_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Patch Defaults
+         * @description Store the named defaults. Only ttl_days is applied to live tables.
+         *
+         *     Omitted fields are left alone. null clears that override. Common-header type,
+         *     version and engine are what a source inherits the next time it is deployed;
+         *     this request does not rewrite them onto live tables. A patch that names
+         *     ttl_days stores it and then runs the same reconcile as PUT /retention.
+         */
+        patch: operations["patch_defaults_api_v1_system_defaults_patch"];
+        trace?: never;
+    };
+    "/api/v1/system/defaults/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Defaults
+         * @description Pin the current TTL, common header and merge engine onto the named sources.
+         *
+         *     Sources that are not in the list are left alone. A source that already stores
+         *     these values is unchanged. Nothing is deployed: the next deploy of a source
+         *     is what brings its table to the pinned values. A missing or engine-owned
+         *     name fails the request before any source is written.
+         */
+        post: operations["apply_defaults_api_v1_system_defaults_apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/system/defaults/drift": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Default Drift
+         * @description Sources whose current version stores a header, TTL or engine other than the default.
+         *
+         *     A field the source leaves unset inherits the default on its next deploy, so
+         *     it is not drift. A stored value that already equals the default is not drift
+         *     either. ``core`` is true for an engine-owned source, which the apply endpoint
+         *     will refuse. The landing source is never listed. ``search`` matches the source
+         *     name, a drifted field name, or a stored value. ``per_page=-1`` returns every match.
+         */
+        get: operations["get_default_drift_api_v1_system_defaults_drift_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/system/clickhouse-cloud": {
         parameters: {
             query?: never;
@@ -5971,6 +6051,27 @@ export interface components {
             file_sets: components["schemas"]["FileSetSummary"][];
         };
         /**
+         * ApplyDefaultsRequest
+         * @description The sources to pin to the current table defaults.
+         */
+        ApplyDefaultsRequest: {
+            /**
+             * Sources
+             * @description Source names. Only these are written.
+             */
+            sources: string[];
+        };
+        /**
+         * ApplyDefaultsResponse
+         * @description Which named sources were pinned, and which already had these defaults.
+         */
+        ApplyDefaultsResponse: {
+            /** Updated */
+            updated: string[];
+            /** Unchanged */
+            unchanged: string[];
+        };
+        /**
          * AppsReconcileResponse
          * @description What the reconcile wrote into the deploy repo.
          */
@@ -7355,6 +7456,16 @@ export interface components {
              * @default false
              */
             protected: boolean;
+        };
+        /**
+         * DefaultComparison
+         * @description A stored source value beside the default it is measured against.
+         */
+        DefaultComparison: {
+            /** Stored */
+            stored: string | number | null;
+            /** Default */
+            default: string | number | null;
         };
         /**
          * DegradedCondition
@@ -8806,6 +8917,26 @@ export interface components {
              * @description Per-step title, description, required and complete flags.
              */
             step_details?: components["schemas"]["SetupStep"][];
+        };
+        /**
+         * IntDefault
+         * @description One integer default: the value in force, and where it came from.
+         */
+        IntDefault: {
+            /** Effective */
+            effective: number;
+            /**
+             * Stored
+             * @description The admin's override; null when none is stored.
+             */
+            stored: number | null;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "override" | "deployment";
+            /** Deployment Default */
+            deployment_default: number;
         };
         /**
          * InvokeRequest
@@ -10342,6 +10473,32 @@ export interface components {
         PaginatedResponse_SigmaViewSummary_: {
             /** Items */
             items: components["schemas"]["SigmaViewSummary"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /** Total Pages */
+            readonly total_pages: number;
+            /** Next Page */
+            readonly next_page: number | null;
+            /** Prev Page */
+            readonly prev_page: number | null;
+        };
+        /** PaginatedResponse[SourceDefaultDrift] */
+        PaginatedResponse_SourceDefaultDrift_: {
+            /** Items */
+            items: components["schemas"]["SourceDefaultDrift"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -12993,6 +13150,22 @@ export interface components {
             views?: components["schemas"]["SourceView"][];
         };
         /**
+         * SourceDefaultDrift
+         * @description One source whose current version stores a value other than the default.
+         */
+        SourceDefaultDrift: {
+            /** Source */
+            source: string;
+            /** Core */
+            core: boolean;
+            /** Drifted */
+            drifted: string[];
+            ttl_days: components["schemas"]["DefaultComparison"];
+            common_header_type: components["schemas"]["DefaultComparison"];
+            common_header_version: components["schemas"]["DefaultComparison"];
+            engine: components["schemas"]["DefaultComparison"];
+        };
+        /**
          * SourceDetailResponse
          * @description Full source definition with per-version build/plan/deploy status.
          */
@@ -13844,6 +14017,26 @@ export interface components {
             uptime_seconds?: number | null;
         };
         /**
+         * StrDefault
+         * @description One string default: the value in force, and where it came from.
+         */
+        StrDefault: {
+            /** Effective */
+            effective: string;
+            /**
+             * Stored
+             * @description The admin's override; null when none is stored.
+             */
+            stored: string | null;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "override" | "deployment";
+            /** Deployment Default */
+            deployment_default: string;
+        };
+        /**
          * StreamRequest
          * @description Background stream request - posts generated events to an HTTP ingest URL.
          */
@@ -13997,6 +14190,65 @@ export interface components {
             commit_sha?: string | null;
             /** Warnings */
             warnings?: string[];
+        };
+        /**
+         * SystemDefaults
+         * @description What a source inherits when it leaves TTL, header or engine unset.
+         */
+        SystemDefaults: {
+            ttl_days: components["schemas"]["IntDefault"];
+            common_header_type: components["schemas"]["StrDefault"];
+            common_header_version: components["schemas"]["StrDefault"];
+            /** @description MergeTree-family variant, without a topology prefix. */
+            engine: components["schemas"]["StrDefault"];
+            /**
+             * Editable
+             * @description Whether this deployment can store an override. False without gitops.
+             */
+            editable: boolean;
+        };
+        /**
+         * SystemDefaultsPatch
+         * @description A partial change. Omitted fields stay as they are; null clears that override.
+         */
+        SystemDefaultsPatch: {
+            /**
+             * Ttl Days
+             * @description Retention in days; 0 keeps rows forever. null clears the override.
+             */
+            ttl_days?: number | null;
+            /**
+             * Common Header Type
+             * @description Common-header profile name, such as timeseries or minimal. null clears it.
+             */
+            common_header_type?: string | null;
+            /**
+             * Common Header Version
+             * @description Common-header profile version. null clears it.
+             */
+            common_header_version?: string | null;
+            /**
+             * Engine
+             * @description MergeTree-family variant. null clears it, so the deployment engine applies.
+             */
+            engine?: string | null;
+        };
+        /**
+         * SystemDefaultsUpdate
+         * @description The defaults after the patch. reconcile is set only when ttl_days was named.
+         */
+        SystemDefaultsUpdate: {
+            ttl_days: components["schemas"]["IntDefault"];
+            common_header_type: components["schemas"]["StrDefault"];
+            common_header_version: components["schemas"]["StrDefault"];
+            /** @description MergeTree-family variant, without a topology prefix. */
+            engine: components["schemas"]["StrDefault"];
+            /**
+             * Editable
+             * @description Whether this deployment can store an override. False without gitops.
+             */
+            editable: boolean;
+            reconcile?: components["schemas"]["RetentionReconcileSummary"] | null;
         };
         /**
          * SystemStatusResponse
@@ -21620,6 +21872,234 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_defaults_api_v1_system_defaults_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemDefaults"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    patch_defaults_api_v1_system_defaults_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SystemDefaultsPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemDefaultsUpdate"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description validation_error: a named value cannot be stored */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description reconcile_failed: ttl_days is stored, and applying it to ClickHouse failed; sending the same value again applies it */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_configured: gitops is off, so there is nowhere to store the value */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    apply_defaults_api_v1_system_defaults_apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyDefaultsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyDefaultsResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found: a named source does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict: a named source is engine-owned and cannot be edited */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_default_drift_api_v1_system_defaults_drift_get: {
+        parameters: {
+            query?: {
+                /** @description Search in source name, drifted field, and stored value */
+                search?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_SourceDefaultDrift_"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
