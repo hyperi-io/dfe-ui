@@ -29,12 +29,32 @@ describe('SystemDefaultsSettings', () => {
 
   it('shows a default of 0 as kept forever', async () => {
     server.use(
-      API_CONFIG_MOCKS.system.retention.get.success({
+      API_CONFIG_MOCKS.system.defaults.get.success({
         mockedResponse: {
-          default_ttl_days: 0,
-          stored: null,
-          origin: 'deployment',
-          deployment_default: 0,
+          ttl_days: {
+            effective: 0,
+            stored: null,
+            origin: 'deployment',
+            deployment_default: 0,
+          },
+          common_header_type: {
+            effective: 'common-header/timeseries',
+            stored: 'common-header/timeseries',
+            origin: 'deployment',
+            deployment_default: 'common-header/timeseries',
+          },
+          common_header_version: {
+            effective: '1.0.1',
+            stored: '1.0.1',
+            origin: 'deployment',
+            deployment_default: '1.0.1',
+          },
+          engine: {
+            effective: 'MergeTree',
+            stored: 'MergeTree',
+            origin: 'deployment',
+            deployment_default: 'MergeTree',
+          },
           editable: true,
         },
       }),
