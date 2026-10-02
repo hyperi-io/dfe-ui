@@ -3,8 +3,8 @@
 import { SourceAppInstance } from '@/core/components/appManagement/SourceAppInstance';
 import { SourceRoutingCard } from '@/core/components/appManagement/SourceRoutingCard';
 import { isTransformApp } from '@/core/components/appManagement/transformApps';
-import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { Spin } from 'antd';
 import { ReactNode } from 'react';
 
@@ -65,7 +65,7 @@ export const SourceProcessingTabContent = ({
         )),
       )}
 
-      {transformSlot}
+      {source !== 'main' && transformSlot}
 
       {standaloneApps.map((app) => (
         <SourceAppInstance key={app.service} app={app} source={source} />
