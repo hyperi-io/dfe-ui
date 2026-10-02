@@ -1,10 +1,6 @@
-import { TTableEngine } from '@/Sources/hooks/useFetchTableEngines/types';
+import { TTableEngine } from '@/core/hooks/useFetchTableEngines/types';
 import { describe, expect, it } from 'vitest';
-import {
-  composeEngine,
-  engineArgumentsError,
-  splitEngine,
-} from './TableEngineInput';
+import { composeEngine, engineArgumentsError, splitEngine } from '.';
 
 const ENGINES: TTableEngine[] = [
   {

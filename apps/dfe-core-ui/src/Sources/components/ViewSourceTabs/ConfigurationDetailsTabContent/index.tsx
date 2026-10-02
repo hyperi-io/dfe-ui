@@ -1,7 +1,7 @@
 import { AceEditor } from '@/core/components/AceEditor';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { YAML_POSTFIX } from '@/core/config/environmentVariables';
-import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
+import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
 import { cn } from '@/core/utils/style';
 import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import {
@@ -81,7 +81,8 @@ export const ConfigurationDetailsTabContent = ({
   const originLabel = isFetcherOrigin ? 'Fetcher' : receiverOrNone;
   const hasViews = views && views.length > 0;
   const fetcherConfig = stringifyFetcherConfig(fetcher?.config);
-  const { data: setupStatus } = useFetchSetupStatus();
+
+  const { data: systemDefaults } = useFetchSystemDefaults();
 
   const isMainSource = sourceName === 'main';
 
@@ -178,14 +179,14 @@ export const ConfigurationDetailsTabContent = ({
             <dt className={dataListTermStyle}>Engine:</dt>
             <dd>
               <DefaultOrOverride
-                defaultValue={setupStatus?.default_engine}
+                defaultValue={systemDefaults?.default_engine}
                 value={schema?.engine}
               />
             </dd>
             <dt className={dataListTermStyle}>TTL Days:</dt>
             <dd>
               <DefaultOrOverride
-                defaultValue={ttlDaysText(setupStatus?.default_ttl_days)}
+                defaultValue={ttlDaysText(systemDefaults?.default_ttl_days)}
                 value={ttlDaysText(schema?.ttl_days)}
               />
             </dd>

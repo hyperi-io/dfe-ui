@@ -1,13 +1,13 @@
 import { CreateSchemaDrawer } from '@/core/components/CreateSchemaDrawer';
 import { ListSchemasProvider } from '@/core/contexts/ListSchemasContext';
-import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import {
   getSchemaLeafName,
   getSchemaPathPrefix,
   isSelectableSchemaOptionValue,
   schemasToGroupedSelectOptions,
   versionsFromMetaSchemaOutput,
-} from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/helpers/schemaSelectOptions';
+} from '@/core/helpers/schemaSelectOptions';
+import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { Select, SelectProps, Spin } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 

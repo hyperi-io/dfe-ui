@@ -10,7 +10,7 @@ export type TAccountsResponse = DfeClientSuccessResponseBody<
 
 export type TAccountsItemSummary = TAccountsResponse['items'][number];
 
-export interface useFetchInfiniteFilteredAccountsProps {
+export type TFetchAccountsQueryParams = {
   search?: string;
   blocked?: boolean;
   include_core?: boolean;
@@ -18,4 +18,5 @@ export interface useFetchInfiniteFilteredAccountsProps {
   sort_order?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
-}
+};
+export type useFetchInfiniteFilteredAccountsProps = TFetchAccountsQueryParams;

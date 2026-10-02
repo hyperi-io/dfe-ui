@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -7,7 +7,7 @@ import { useFetchInfiniteFilteredAccountsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.infiniteFiltered;
+export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.default;
 
 /** useFetchInfiniteFilteredAccounts props */
 /**

@@ -1,4 +1,4 @@
-import { TTableEngine } from '@/Sources/hooks/useFetchTableEngines/types';
+import { TTableEngine } from '@/core/hooks/useFetchTableEngines/types';
 import { Input, Select } from 'antd';
 
 /** An engine string split into its variant and the text inside its parentheses. */

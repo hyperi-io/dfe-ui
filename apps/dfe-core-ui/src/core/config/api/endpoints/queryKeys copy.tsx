@@ -41,7 +41,9 @@ export const QUERY_KEYS = {
     ],
   },
   system: {
-    retention: () => ['system-retention'],
+    retention: () => ['system', 'retention'],
+    settings: () => ['system', 'settings'],
+    defaults: () => ['system', 'defaults'],
   },
 };
 /* eslint-enable no-restricted-imports */

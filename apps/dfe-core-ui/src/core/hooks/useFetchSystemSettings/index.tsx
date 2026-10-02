@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSystemSettingsApi } from './api';
-
-export const SYSTEM_SETTINGS_QUERY_KEY = () => ['systemSettings'];
 
 export const useFetchSystemSettings = ({
   queryEnabled = true,
@@ -9,7 +8,7 @@ export const useFetchSystemSettings = ({
   queryEnabled?: boolean;
 } = {}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SYSTEM_SETTINGS_QUERY_KEY(),
+    queryKey: QUERY_KEYS.system.settings(),
     queryFn: () => fetchSystemSettingsApi(),
     enabled: queryEnabled,
   });

@@ -72,7 +72,7 @@ describe('.useFetchSystemDefaults', () => {
 
   describe('onError', () => {
     beforeEach(() => {
-      server.use(API_CONFIG_MOCKS.system.settings.get.error());
+      server.use(API_CONFIG_MOCKS.system.defaults.get.error());
     });
 
     test('should return error', async () => {

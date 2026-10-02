@@ -23,5 +23,5 @@ export const authHandler = API_CONFIG_MOCKS.auth.me.get.success({
 
 export const server = setupServer(
   authHandler,
-  API_CONFIG_MOCKS.system.retention.get.success(),
+  API_CONFIG_MOCKS.system.defaults.get.success(),
 );
