@@ -1,6 +1,6 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   afterAll,
   afterEach,
@@ -41,28 +41,36 @@ const rowValue = (term: string) => screen.getByText(term).nextElementSibling;
 const header = { type: 'timeseries', version: '1.0.0' };
 
 describe('ConfigurationDetailsTabContent defaults', () => {
-  it('shows the DFE default for an engine and TTL the source leaves blank', () => {
+  it('shows the DFE default for an engine and TTL the source leaves blank', async () => {
     renderDetails({ header, schema: { engine: '' } });
 
-    expect(rowValue('Engine:')).toHaveTextContent('MergeTree (DFE default)');
+    await waitFor(() => {
+      expect(rowValue('Engine:')).toHaveTextContent('MergeTree (DFE default)');
+    });
     expect(rowValue('TTL Days:')).toHaveTextContent('90 (DFE default)');
     expect(screen.queryByText('Override')).not.toBeInTheDocument();
   });
 
-  it('marks an engine and TTL the source sets as overrides', () => {
+  it('marks an engine and TTL the source sets as overrides', async () => {
     renderDetails({
       header,
       schema: { engine: 'ReplacingMergeTree', ttl_days: 7 },
     });
 
-    expect(rowValue('Engine:')).toHaveTextContent('ReplacingMergeTreeOverride');
+    await waitFor(() => {
+      expect(rowValue('Engine:')).toHaveTextContent(
+        'ReplacingMergeTreeOverride',
+      );
+    });
     expect(rowValue('TTL Days:')).toHaveTextContent('7Override');
   });
 
-  it('shows a TTL of 0 as kept forever', () => {
+  it('shows a TTL of 0 as kept forever', async () => {
     renderDetails({ header, schema: { engine: '', ttl_days: 0 } });
 
-    expect(rowValue('TTL Days:')).toHaveTextContent('ForeverOverride');
+    await waitFor(() => {
+      expect(rowValue('TTL Days:')).toHaveTextContent('ForeverOverride');
+    });
   });
 });
 

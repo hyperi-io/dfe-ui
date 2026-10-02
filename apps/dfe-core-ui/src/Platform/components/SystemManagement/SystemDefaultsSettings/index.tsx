@@ -24,7 +24,9 @@ export const SystemDefaultsSettings = () => {
             <dl className="grid grid-rows-[34px] max-[1452px]:grid-cols-[150px_1fr] grid-cols-[150px_1fr_100px_1fr] gap-x-4 gap-y-1 text-xs items-center">
               <dt className={dataListTermStyle}>Default Retention</dt>
               <dd>
-                <ViewEditDefaultRetention />
+                <ViewEditDefaultRetention
+                  defaultRetention={defaults?.ttl_days?.effective ?? 0}
+                />
               </dd>
 
               <dt className={dataListTermStyle}>Default Engine</dt>

@@ -31,22 +31,21 @@ export const DefaultOrOverride = ({
   value: ReactNode;
 }) => {
   const isSet = value !== undefined && value !== null && value !== '';
-  if (!isSet) return null;
+  const followsDefault = !isSet || value === defaultValue;
+  if (!isSet && defaultValue === undefined) return null;
 
-  const isDefault = value === defaultValue;
-
-  if (isDefault || !defaultValue) {
+  if (!followsDefault) {
     return (
-      <span className="text-foreground/40 dark:text-dark-foreground/40">
-        {dfeDefaultText(defaultValue) ?? 'DFE default'}
+      <span className="flex items-center gap-2">
+        {value}
+        <OverrideTag />
       </span>
     );
   }
 
   return (
-    <span className="flex items-center gap-2">
-      {value}
-      <OverrideTag />
+    <span className="text-foreground/40 dark:text-dark-foreground/40">
+      {dfeDefaultText(defaultValue) ?? 'DFE default'}
     </span>
   );
 };
