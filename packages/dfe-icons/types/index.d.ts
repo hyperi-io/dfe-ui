@@ -3721,6 +3721,7 @@ export declare const IconLogout2: IconComponent;
 export declare const IconLogs: IconComponent;
 export declare const IconLollipop: IconComponent;
 export declare const IconLollipopOff: IconComponent;
+export declare const IconLongArrowRight: IconComponent;
 export declare const IconLuggage: IconComponent;
 export declare const IconLuggageOff: IconComponent;
 export declare const IconLungs: IconComponent;
