@@ -1,20 +1,28 @@
+import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { ConfigurationDetailsTabContent } from '.';
+import { server } from './ConfigurationDetailsTabContent.mocks';
 
 // AceEditor needs a global `ace` that ClientContext sets.
 vi.mock('@/core/components/AceEditor', () => ({
   AceEditor: () => null,
 }));
 
-// The defaults come from setup status; the rows that read them are what is under test.
-vi.mock('@/core/hooks/useFetchSetupStatus', () => ({
-  useFetchSetupStatus: () => ({
-    data: { default_engine: 'MergeTree', default_ttl_days: 90 },
-  }),
-}));
+const { wrapper } = buildTestWrapper().withReactQuery();
 
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 const renderDetails = (version: Partial<TSourceVersionDetail['version']>) =>
   render(
     <ConfigurationDetailsTabContent
@@ -25,6 +33,7 @@ const renderDetails = (version: Partial<TSourceVersionDetail['version']>) =>
         version,
       } as TSourceVersionDetail)}
     />,
+    { wrapper },
   );
 
 const originValue = () => screen.getByText('Origin:').nextElementSibling;

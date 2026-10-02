@@ -234,6 +234,14 @@ export const system = {
           return HttpResponse.json(mockedResponse);
         });
       },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: { mockedResponse?: TValidationError; status?: number } = {}) => {
+        return http.get(system.defaults.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
+      },
     },
     patch: {
       success: ({

@@ -35,18 +35,18 @@ export const DefaultOrOverride = ({
 
   const isDefault = value === defaultValue;
 
-  if (!isDefault) {
+  if (isDefault || !defaultValue) {
     return (
-      <span className="flex items-center gap-2">
-        {value}
-        <OverrideTag />
+      <span className="text-foreground/40 dark:text-dark-foreground/40">
+        {dfeDefaultText(defaultValue) ?? 'DFE default'}
       </span>
     );
   }
 
   return (
-    <span className="text-foreground/40 dark:text-dark-foreground/40">
-      {dfeDefaultText(defaultValue) ?? 'DFE default'}
+    <span className="flex items-center gap-2">
+      {value}
+      <OverrideTag />
     </span>
   );
 };
