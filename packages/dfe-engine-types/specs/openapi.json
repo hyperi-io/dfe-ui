@@ -9933,15 +9933,56 @@
           "System"
         ],
         "summary": "Get Default Drift",
-        "description": "Sources whose current version stores a header, TTL or engine other than the default.\n\nA field the source leaves unset inherits the default on its next deploy, so\nit is not drift. A stored value that already equals the default is not drift\neither. ``core`` is true for an engine-owned source, which the apply endpoint\nwill refuse.",
+        "description": "Sources whose current version stores a header, TTL or engine other than the default.\n\nA field the source leaves unset inherits the default on its next deploy, so\nit is not drift. A stored value that already equals the default is not drift\neither. ``core`` is true for an engine-owned source, which the apply endpoint\nwill refuse. The landing source is never listed. ``search`` matches the source\nname, a drifted field name, or a stored value. ``per_page=-1`` returns every match.",
         "operationId": "get_default_drift_api_v1_system_defaults_drift_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search in source name, drifted field, and stored value",
+              "title": "Search"
+            },
+            "description": "Search in source name, drifted field, and stored value"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefaultDriftResponse"
+                  "$ref": "#/components/schemas/PaginatedResponse_SourceDefaultDrift_"
                 }
               }
             }
@@ -9962,6 +10003,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -27202,23 +27253,6 @@
         "title": "DefaultComparison",
         "description": "A stored source value beside the default it is measured against."
       },
-      "DefaultDriftResponse": {
-        "properties": {
-          "sources": {
-            "items": {
-              "$ref": "#/components/schemas/SourceDefaultDrift"
-            },
-            "type": "array",
-            "title": "Sources"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sources"
-        ],
-        "title": "DefaultDriftResponse",
-        "description": "Sources that store a header, TTL or engine other than the current defaults."
-      },
       "DegradedCondition": {
         "properties": {
           "kind": {
@@ -33783,7 +33817,7 @@
           "name"
         ],
         "title": "ProtectedPolicy",
-        "description": "Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.\n\ne.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.\nA protected var can only be changed by a caller holding the override grant."
+        "description": "Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.\n\ne.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.\nA protected var can only be changed by a caller holding the override grant, and\na write at its parent or below it counts as changing it."
       },
       "ProviderAuth": {
         "properties": {
@@ -35423,7 +35457,7 @@
               }
             ],
             "title": "Filter",
-            "description": "Trusted SQL WHERE predicate (ClickHouse backend only)"
+            "description": "One ClickHouse condition over the sampled table's columns (ClickHouse backend only). No subquery, alias, query parameter, table function, or dictionary, Join table or file read."
           },
           "since": {
             "anyOf": [
@@ -35489,7 +35523,7 @@
         },
         "type": "object",
         "title": "SampleRequest",
-        "description": "A request to sample a source.\n\nProvide EITHER a registered ``source`` (its CH table / land topic are\nresolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source\nthat is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL\npredicate (ClickHouse backend only), consistent with the query-authoring\nsurface - callers already hold the sampler scope."
+        "description": "A request to sample a source.\n\nProvide EITHER a registered ``source`` (its CH table / land topic are\nresolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source\nthat is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse\nbackend only) must be one condition over the sampled table's columns; it is\nreplaced by the condition rendered from its parse tree, and anything else is\nrefused when the request is built."
       },
       "SampleResult": {
         "properties": {

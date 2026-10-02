@@ -10962,7 +10962,8 @@ export interface components {
          * @description Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.
          *
          *     e.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.
-         *     A protected var can only be changed by a caller holding the override grant.
+         *     A protected var can only be changed by a caller holding the override grant, and
+         *     a write at its parent or below it counts as changing it.
          */
         ProtectedPolicy: {
             /** Name */
@@ -11828,9 +11829,10 @@ export interface components {
          *
          *     Provide EITHER a registered ``source`` (its CH table / land topic are
          *     resolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source
-         *     that is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL
-         *     predicate (ClickHouse backend only), consistent with the query-authoring
-         *     surface - callers already hold the sampler scope.
+         *     that is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse
+         *     backend only) must be one condition over the sampled table's columns; it is
+         *     replaced by the condition rendered from its parse tree, and anything else is
+         *     refused when the request is built.
          */
         SampleRequest: {
             /** @default smart */
@@ -11859,7 +11861,7 @@ export interface components {
             topic?: string | null;
             /**
              * Filter
-             * @description Trusted SQL WHERE predicate (ClickHouse backend only)
+             * @description One ClickHouse condition over the sampled table's columns (ClickHouse backend only). No subquery, alias, query parameter, table function, or dictionary, Join table or file read.
              */
             filter?: string | null;
             /**
