@@ -6,25 +6,25 @@ const handlers = [
     mockedResponse: {
       ttl_days: {
         effective: 90,
-        stored: null,
+        stored: 90,
         origin: 'deployment',
         deployment_default: 90,
       },
       common_header_type: {
         effective: 'common-header/timeseries',
-        stored: null,
+        stored: 'common-header/timeseries',
         origin: 'deployment',
         deployment_default: 'common-header/timeseries',
       },
       common_header_version: {
         effective: '1.0.1',
-        stored: null,
+        stored: '1.0.1',
         origin: 'deployment',
         deployment_default: '1.0.1',
       },
       engine: {
         effective: 'MergeTree',
-        stored: null,
+        stored: 'MergeTree',
         origin: 'deployment',
         deployment_default: 'MergeTree',
       },

@@ -1,36 +1,23 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { useDebounce } from '@/core/hooks/useDebounce';
-import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { fetchAccounts } from './api';
-import { useFetchInfiniteFilteredAccountsProps } from './types';
+import { defaultsDriftSources } from './api';
+import { UseFetchInfiniteDefaultsDriftSourcesProps } from './types';
 
-const SEARCH_DEBOUNCE_MS = 300;
-
-export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.default;
-
-/** useFetchInfiniteFilteredAccounts props */
+/** useFetchInfiniteDefaultsDriftSources props */
 /**
- * @param search - The search query to filter the accounts.
- * @param sort_by - The field to sort the accounts by.
- * @param sort_order - The order to sort the accounts by.
+ * @param search - The search query to filter the defaults drift sources.
  * @param page - The page number to fetch.
- * @param per_page - The number of accounts to fetch per page.
+ * @param per_page - The number of defaults drift sources to fetch per page.
  */
 /**
- * @returns A list of accounts.
+ * @returns A list of defaults drift sources.
  */
-export const useFetchInfiniteFilteredAccounts = ({
+export const useFetchInfiniteDefaultsDriftSources = ({
   search,
-  blocked,
-  include_core,
-  sort_by,
-  sort_order,
-  page,
-  per_page,
-}: useFetchInfiniteFilteredAccountsProps = {}) => {
-  const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
-
+  per_page = 10,
+  page = 1,
+}: UseFetchInfiniteDefaultsDriftSourcesProps = {}) => {
   const {
     data,
     isLoading,
@@ -41,36 +28,17 @@ export const useFetchInfiniteFilteredAccounts = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ACCOUNTS_QUERY_KEY({
-      search: debouncedSearch,
-      include_core,
-      blocked,
-      sort_by,
-      sort_order,
-      page,
-      per_page,
-    }),
+    queryKey: QUERY_KEYS.system.defaultsDrift({ search, page, per_page }),
     queryFn: async ({ pageParam = 1, signal }) =>
-      fetchAccounts({
-        queryParams: {
-          search: debouncedSearch || undefined,
-          blocked,
-          include_core: include_core || undefined,
-          sort_by: sort_by || undefined,
-          sort_order: sort_order || undefined,
-          page: pageParam,
-          per_page,
-        },
+      defaultsDriftSources({
+        queryParams: { page: pageParam, per_page, search },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.next_page;
+      return nextPage != null && nextPage > 0 ? nextPage : undefined;
     },
     initialPageParam: 1,
-    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

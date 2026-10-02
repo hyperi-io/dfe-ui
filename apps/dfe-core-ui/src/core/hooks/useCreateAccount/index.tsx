@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createAccount } from './api';
 import { TAccountCreateRequestBody, TAccountCreateResponse } from './types';
@@ -21,7 +21,7 @@ export const useCreateAccount = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.accounts.infiniteFiltered(),
+        queryKey: QUERY_KEYS.accounts.default(),
       });
       onSuccess?.(data);
     },

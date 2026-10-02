@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOidcProviderApi } from './api';
 import {
@@ -24,7 +24,7 @@ export const useCreateOidcProvider = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.oidcProviders.infiniteFiltered(),
+        queryKey: QUERY_KEYS.oidcProviders.default(),
       });
       onSuccess?.(data);
     },

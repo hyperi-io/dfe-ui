@@ -1,19 +1,19 @@
+import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
-import { cn } from '@/core/utils/style';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { CommonHeaderSelect } from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/CommonHeaderSelect';
 import {
   engineArgumentsError,
   TableEngineInput,
-} from '@/Sources/components/CreateUpdateSourceForm/SchemaConfigTabContent/TableEngineInput';
+} from '@/core/components/TableEngineSelect';
+import { useFetchSystemDefaults } from '@/core/hooks/useFetchSystemDefaults';
+import { useFetchTableEngines } from '@/core/hooks/useFetchTableEngines';
+import { cn } from '@/core/utils/style';
+import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import {
   dfeDefaultText,
   OverrideTag,
   ttlDaysText,
 } from '@/Sources/components/DefaultOverride';
-import { useFetchTableEngines } from '@/Sources/hooks/useFetchTableEngines';
 import { Button, FormInstance, InputNumber, Select } from 'antd';
 import { Rule } from 'antd/es/form';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -33,7 +33,8 @@ export const DefaultsSection = ({
   className?: string;
 }) => {
   const { data: defaults, isLoading, error } = useFetchSystemDefaults();
-  const { engines, isLoading: isLoadingEngines } = useFetchTableEngines();
+  const { data: { items: engines } = {}, isLoading: isLoadingEngines } =
+    useFetchTableEngines();
   const defaultsAppliedRef = useRef(false);
 
   const headerType = Form.useWatch(['header', 'type'], form);
@@ -232,7 +233,7 @@ export const DefaultsSection = ({
                 formValidation,
                 {
                   validator: async (_, value?: string | null) => {
-                    const message = engineArgumentsError(value, engines);
+                    const message = engineArgumentsError(value, engines ?? []);
                     if (message) {
                       throw new Error(message);
                     }
@@ -241,7 +242,7 @@ export const DefaultsSection = ({
               ]}
             >
               <TableEngineInput
-                engines={engines}
+                engines={engines ?? []}
                 loading={isLoadingEngines}
                 placeholder={dfeDefaultText(defaults?.default_engine)}
               />

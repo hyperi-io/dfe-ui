@@ -31,7 +31,10 @@ export const DefaultOrOverride = ({
   value: ReactNode;
 }) => {
   const isSet = value !== undefined && value !== null && value !== '';
-  if (isSet) {
+  const followsDefault = !isSet || value === defaultValue;
+  if (!isSet && defaultValue === undefined) return null;
+
+  if (!followsDefault) {
     return (
       <span className="flex items-center gap-2">
         {value}
@@ -39,6 +42,7 @@ export const DefaultOrOverride = ({
       </span>
     );
   }
+
   return (
     <span className="text-foreground/40 dark:text-dark-foreground/40">
       {dfeDefaultText(defaultValue) ?? 'DFE default'}

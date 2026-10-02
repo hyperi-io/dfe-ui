@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/queryKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -7,7 +7,7 @@ import { UseFetchInfiniteFilteredOidcProvidersProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 export const QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS =
-  QUERY_KEYS.oidcProviders.infiniteFiltered;
+  QUERY_KEYS.oidcProviders.default;
 /** useFetchInfiniteFilteredOidcProviders props */
 /**
  * @param search - The search query to filter the oidc providers by name and description.
