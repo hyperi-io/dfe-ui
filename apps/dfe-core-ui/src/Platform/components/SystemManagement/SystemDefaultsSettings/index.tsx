@@ -1,8 +1,8 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { useFetchDefaults } from '@/core/hooks/useFetchDefaults';
 import { ApplyDefaultsDrawer } from '@/Platform/components/SystemManagement/ApplyDefaultsDrawer';
-import { useFetchDefaults } from '@/Platform/hooks/system/useFetchDefaults';
 import { ViewEditDefaultEngine } from './ViewEditDefaultEngine';
 import { ViewEditDefaultHeaderVersion } from './ViewEditDefaultHeaderVersion';
 import { ViewEditDefaultRetention } from './ViewEditDefaultRetention';

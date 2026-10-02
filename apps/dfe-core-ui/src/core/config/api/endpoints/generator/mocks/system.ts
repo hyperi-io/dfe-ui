@@ -1,11 +1,11 @@
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
-import { TSystemDefaultsResponse } from '@/Platform/hooks/system/useFetchDefaults/types';
 import { TDefaultsDriftSourcesResponse } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TSystemRetentionResponse } from '@/Platform/hooks/system/useFetchRetention/types';
 import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetchSystemClickhouseStatus/types';
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { TUpdateRetentionResponse } from '@/Platform/hooks/system/useUpdateRetention/types';
+import { TSystemDefaultsResponse } from '@/core/hooks/useFetchDefaults/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
