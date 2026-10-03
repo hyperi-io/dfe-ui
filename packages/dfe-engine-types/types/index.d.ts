@@ -2703,6 +2703,9 @@ export interface paths {
         /**
          * Get Sample
          * @description Poll a sample task's status and result.
+         *
+         *     A caller held to its orgs gets 404 for a task not held to them, as for one that
+         *     does not exist.
          */
         get: operations["get_sample_api_v1_samples__task_id__get"];
         put?: never;
@@ -2722,7 +2725,7 @@ export interface paths {
         };
         /**
          * List Samples
-         * @description List recent sample tasks (most recent first).
+         * @description List recent sample tasks (most recent first); a caller held to its orgs sees only theirs.
          */
         get: operations["list_samples_api_v1_samples_get"];
         put?: never;
@@ -4247,7 +4250,8 @@ export interface paths {
          *     403 with the policy that blocked it when the var is protected - the storage
          *     model, the data-layer modes and the disk size are decided at deploy, and moving
          *     one on a live deployment is a data migration. 400 when the value would lower a
-         *     declared node or broker count, which loses data rather than capacity.
+         *     declared node or broker count, or leave it undeclared (a parent map that omits
+         *     it), which loses data rather than capacity; helmvars:override does not lift it.
          */
         put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
         post?: never;
@@ -4255,8 +4259,10 @@ export interface paths {
          * Delete Overlay Var
          * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
          *
-         *     Not guarded up-only: reverting a count hands it back to the chart or profile
-         *     default, which the engine cannot read, so there is no after-value to compare.
+         *     400 when the revert would lower a declared node or broker count, or leave it
+         *     undeclared, unless the caller holds helmvars:override. An undeclared count falls
+         *     to the chart or profile default, which the engine cannot read, so a revert that
+         *     leaves one undeclared is refused whatever that default is.
          */
         delete: operations["delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete"];
         options?: never;
@@ -10962,7 +10968,13 @@ export interface components {
          * @description Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.
          *
          *     e.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.
-         *     A protected var can only be changed by a caller holding the override grant.
+         *     A protected var can only be changed by a caller holding the override grant, and
+         *     a write at its parent or below it counts as changing it.
+         *
+         *     Patterns bind the API's var and document writes in the ``helmvars``,
+         *     ``infravars`` and ``library`` classes, and every defined action. They do not
+         *     bind the governance classes (``gov_settings`` included), a whole-resource
+         *     delete, an overlay the engine derives from the sources, or the break-glass CLI.
          */
         ProtectedPolicy: {
             /** Name */
@@ -11828,9 +11840,10 @@ export interface components {
          *
          *     Provide EITHER a registered ``source`` (its CH table / land topic are
          *     resolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source
-         *     that is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL
-         *     predicate (ClickHouse backend only), consistent with the query-authoring
-         *     surface - callers already hold the sampler scope.
+         *     that is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse
+         *     backend only) must be one condition over the sampled table's columns; it is
+         *     replaced by the condition rendered from its parse tree, and anything else is
+         *     refused when the request is built.
          */
         SampleRequest: {
             /** @default smart */
@@ -11859,7 +11872,7 @@ export interface components {
             topic?: string | null;
             /**
              * Filter
-             * @description Trusted SQL WHERE predicate (ClickHouse backend only)
+             * @description One ClickHouse condition over the sampled table's columns (ClickHouse backend only). No subquery, alias, query parameter, table function, or dictionary, Join table or file read.
              */
             filter?: string | null;
             /**
@@ -12036,7 +12049,7 @@ export interface components {
         ScalingRequest: {
             /**
              * Replica Count
-             * @description Fixed pod count, for a deployment with KEDA off. Refused while KEDA is explicitly enabled, because the chart omits `replicas` and the ScaledObject owns the count.
+             * @description Fixed pod count, for a deployment with KEDA off. Refused unless `keda_enabled` is false in this request or already in the overlay: the chart omits `replicas` while KEDA is on, which it is by default, and the ScaledObject owns the count.
              */
             replica_count?: number | null;
             /** Min Replicas */
@@ -20923,7 +20936,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -20974,7 +20987,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -21127,7 +21140,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
