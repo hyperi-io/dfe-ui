@@ -1026,9 +1026,12 @@ export interface paths {
          * Create Source From Catalogue
          * @description Create a source from a catalogue entry, on the intake it arrives by.
          *
-         *     The entry supplies the match rule or the fetcher family, the transform
-         *     variant and the shipped meta schema; everything after that is the ordinary
-         *     create, so the source is indistinguishable from a hand-written one.
+         *     The entry supplies the match rule or the fetcher family and the transform
+         *     variant. Its table's schema layers are the ones the app manifest names,
+         *     bound only when the entry's derived schema resolves over the manifest's
+         *     meta schema; otherwise the source carries no schema. Everything after that
+         *     is the ordinary create, so the source is indistinguishable from a
+         *     hand-written one.
          */
         post: operations["create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post"];
         delete?: never;
@@ -2703,6 +2706,9 @@ export interface paths {
         /**
          * Get Sample
          * @description Poll a sample task's status and result.
+         *
+         *     A caller held to its orgs gets 404 for a task not held to them, as for one that
+         *     does not exist.
          */
         get: operations["get_sample_api_v1_samples__task_id__get"];
         put?: never;
@@ -2722,7 +2728,7 @@ export interface paths {
         };
         /**
          * List Samples
-         * @description List recent sample tasks (most recent first).
+         * @description List recent sample tasks (most recent first); a caller held to its orgs sees only theirs.
          */
         get: operations["list_samples_api_v1_samples_get"];
         put?: never;
@@ -2911,7 +2917,7 @@ export interface paths {
         };
         /**
          * List Tasks
-         * @description List all tasks, optionally filtered by kind.
+         * @description List the tasks the caller may see, optionally filtered by kind.
          */
         get: operations["list_tasks_api_v1_tasks_get"];
         put?: never;
@@ -3329,6 +3335,9 @@ export interface paths {
          *     Returns one record per path with observed types, a suggested column name,
          *     and whether the path is already promoted. ``?samples=N`` adds random
          *     distinct example values; ``?stats=true`` adds coverage + distinct counts.
+         *
+         *     A caller without a platform grant holding ``schema:read`` reads only its own
+         *     orgs' rows, as the sampler holds it, and a table it cannot be held on is 403.
          */
         get: operations["discover_json_paths_api_v1_schemas__source_name__json_paths_get"];
         put?: never;
@@ -3358,6 +3367,9 @@ export interface paths {
          *     Intended for inspecting real data while authoring a match condition or CEL
          *     before promoting any JSON path -- a row-level companion to the per-path
          *     ``?samples=N`` on ``/json-paths``.
+         *
+         *     A caller without a platform grant holding ``schema:read`` reads only its own
+         *     orgs' rows, as the sampler holds it, and a table it cannot be held on is 403.
          */
         get: operations["sample_source_rows_api_v1_schemas__source_name__sample_rows_get"];
         put?: never;
@@ -3609,6 +3621,9 @@ export interface paths {
         /**
          * Generate All Sigma Views
          * @description Generate Sigma view DDL for all sources (stored definitions win over field maps).
+         *
+         *     Defaults to the data database, since that is where a propagated hunt reads
+         *     the view from (``{source}_sigma``); an explicit ``database`` still overrides it.
          */
         post: operations["generate_all_sigma_views_api_v1_sigma_views_post"];
         delete?: never;
@@ -3642,6 +3657,9 @@ export interface paths {
          *     columns - when one exists; otherwise falls back to the static field maps via
          *     the source mapper. Returns the DDL string; does NOT execute it against
          *     ClickHouse.
+         *
+         *     Defaults to the data database, since that is where a propagated hunt reads
+         *     the view from (``{source}_sigma``); an explicit ``database`` still overrides it.
          */
         post: operations["generate_sigma_view_api_v1_sigma_views__source_name__post"];
         /**
@@ -4247,7 +4265,8 @@ export interface paths {
          *     403 with the policy that blocked it when the var is protected - the storage
          *     model, the data-layer modes and the disk size are decided at deploy, and moving
          *     one on a live deployment is a data migration. 400 when the value would lower a
-         *     declared node or broker count, which loses data rather than capacity.
+         *     declared node or broker count, or leave it undeclared (a parent map that omits
+         *     it), which loses data rather than capacity; helmvars:override does not lift it.
          */
         put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
         post?: never;
@@ -4255,8 +4274,10 @@ export interface paths {
          * Delete Overlay Var
          * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
          *
-         *     Not guarded up-only: reverting a count hands it back to the chart or profile
-         *     default, which the engine cannot read, so there is no after-value to compare.
+         *     400 when the revert would lower a declared node or broker count, or leave it
+         *     undeclared, unless the caller holds helmvars:override. An undeclared count falls
+         *     to the chart or profile default, which the engine cannot read, so a revert that
+         *     leaves one undeclared is refused whatever that default is.
          */
         delete: operations["delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete"];
         options?: never;
@@ -5041,9 +5062,10 @@ export interface paths {
          * @description Invoke a defined action - gated on the action's OWN required_action.
          *
          *     ``body.params`` supplies values for the action's declared params (422 on a
-         *     constraint violation; omitted params take their defaults). Direct commit in
-         *     dev/solo; a production+team invoke is routed to a review PR (or 409
-         *     ``review_required`` when no forge is configured).
+         *     constraint violation; omitted params take their defaults). A hunt or rule
+         *     document the action would leave invalid is 422 ``invalid_document``, with the
+         *     hunts API's own message. Direct commit in dev/solo; a production+team invoke is
+         *     routed to a review PR (or 409 ``review_required`` when no forge is configured).
          */
         post: operations["invoke_action_api_v1_governance_actions__name__invoke_post"];
         delete?: never;
@@ -5468,8 +5490,8 @@ export interface paths {
          * Hyperdx Connection
          * @description Return the caller's OWN org connection - never another org's.
          *
-         *     A caller granted ``query:execute`` at system scope by a role other than
-         *     ``org_viewer`` gets the platform reader. Any other caller gets its org's pinned
+         *     A caller granted ``query:execute`` at system scope by a declared, unscoped role
+         *     other than ``org_viewer`` gets the platform reader. Any other caller gets its org's pinned
          *     ``dfe_org_<org>`` user, whatever roles it holds at that org's scope. A caller
          *     that resolves to zero or several separate orgs is refused (403) so isolation
          *     fails closed rather than guessing.
@@ -7627,6 +7649,12 @@ export interface components {
             versions: {
                 [key: string]: components["schemas"]["DerivedSchemaVersion"];
             };
+            /**
+             * Origin
+             * @description deploy when the deploy repo holds it, shipped when only the release does
+             * @enum {string}
+             */
+            origin: "deploy" | "shipped";
         };
         /**
          * DerivedSchemaSummary
@@ -7668,6 +7696,12 @@ export interface components {
              * @description Last write to the stored document
              */
             updated_at: string;
+            /**
+             * Origin
+             * @description deploy when the deploy repo holds it, shipped when only the release does
+             * @enum {string}
+             */
+            origin: "deploy" | "shipped";
         };
         /**
          * DerivedSchemaVersion
@@ -8556,7 +8590,7 @@ export interface components {
             explain_queries?: boolean | null;
             /**
              * Rules
-             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             * @description Rule names, each the ``{name}.yaml`` rule file the hunt runner reads
              */
             rules: string[];
             /**
@@ -8802,7 +8836,7 @@ export interface components {
             explain_queries?: boolean | null;
             /**
              * Rules
-             * @description Hunt rule template names (``{name}.jinja2`` under the rule repo)
+             * @description Rule names, each the ``{name}.yaml`` rule file the hunt runner reads
              */
             rules: string[];
         };
@@ -10962,7 +10996,13 @@ export interface components {
          * @description Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.
          *
          *     e.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.
-         *     A protected var can only be changed by a caller holding the override grant.
+         *     A protected var can only be changed by a caller holding the override grant, and
+         *     a write at its parent or below it counts as changing it.
+         *
+         *     Patterns bind the API's var and document writes in the ``helmvars``,
+         *     ``infravars`` and ``library`` classes, and every defined action. They do not
+         *     bind the governance classes (``gov_settings`` included), a whole-resource
+         *     delete, an overlay the engine derives from the sources, or the break-glass CLI.
          */
         ProtectedPolicy: {
             /** Name */
@@ -11828,9 +11868,10 @@ export interface components {
          *
          *     Provide EITHER a registered ``source`` (its CH table / land topic are
          *     resolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source
-         *     that is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL
-         *     predicate (ClickHouse backend only), consistent with the query-authoring
-         *     surface - callers already hold the sampler scope.
+         *     that is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse
+         *     backend only) must be one condition over the sampled table's columns; it is
+         *     replaced by the condition rendered from its parse tree, and anything else is
+         *     refused when the request is built.
          */
         SampleRequest: {
             /** @default smart */
@@ -11859,7 +11900,7 @@ export interface components {
             topic?: string | null;
             /**
              * Filter
-             * @description Trusted SQL WHERE predicate (ClickHouse backend only)
+             * @description One ClickHouse condition over the sampled table's columns (ClickHouse backend only). No subquery, alias, query parameter, table function, or dictionary, Join table or file read.
              */
             filter?: string | null;
             /**
@@ -12036,7 +12077,7 @@ export interface components {
         ScalingRequest: {
             /**
              * Replica Count
-             * @description Fixed pod count, for a deployment with KEDA off. Refused while KEDA is explicitly enabled, because the chart omits `replicas` and the ScaledObject owns the count.
+             * @description Fixed pod count, for a deployment with KEDA off. Refused unless `keda_enabled` is false in this request or already in the overlay: the chart omits `replicas` while KEDA is on, which it is by default, and the ScaledObject owns the count.
              */
             replica_count?: number | null;
             /** Min Replicas */
@@ -20923,7 +20964,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -20974,7 +21015,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -21127,7 +21168,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -25671,8 +25712,8 @@ export interface operations {
     generate_all_sigma_views_api_v1_sigma_views_post: {
         parameters: {
             query?: {
-                /** @description Target database */
-                database?: string;
+                /** @description Target database; defaults to the data database */
+                database?: string | null;
                 /** @description Only generate for enabled sources */
                 enabled_only?: boolean;
             };
@@ -25825,8 +25866,8 @@ export interface operations {
     generate_sigma_view_api_v1_sigma_views__source_name__post: {
         parameters: {
             query?: {
-                /** @description Target database */
-                database?: string;
+                /** @description Target database; defaults to the data database */
+                database?: string | null;
             };
             header?: never;
             path: {
