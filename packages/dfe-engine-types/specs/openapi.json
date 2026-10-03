@@ -4668,7 +4668,7 @@
           "Sources"
         ],
         "summary": "Create Source From Catalogue",
-        "description": "Create a source from a catalogue entry, on the intake it arrives by.\n\nThe entry supplies the match rule or the fetcher family, the transform\nvariant and the shipped meta schema; everything after that is the ordinary\ncreate, so the source is indistinguishable from a hand-written one.",
+        "description": "Create a source from a catalogue entry, on the intake it arrives by.\n\nThe entry supplies the match rule or the fetcher family and the transform\nvariant. Its table's schema layers are the ones the app manifest names,\nbound only when the entry's derived schema resolves over the manifest's\nmeta schema; otherwise the source carries no schema. Everything after that\nis the ordinary create, so the source is indistinguishable from a\nhand-written one.",
         "operationId": "create_source_from_catalogue_api_v1_sources_from_catalogue__entry__post",
         "parameters": [
           {
@@ -8386,7 +8386,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8453,7 +8453,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8664,7 +8664,7 @@
             }
           },
           "422": {
-            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, or has no WHERE to detect with (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
+            "description": "Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9933,15 +9933,56 @@
           "System"
         ],
         "summary": "Get Default Drift",
-        "description": "Sources whose current version stores a header, TTL or engine other than the default.\n\nA field the source leaves unset inherits the default on its next deploy, so\nit is not drift. A stored value that already equals the default is not drift\neither. ``core`` is true for an engine-owned source, which the apply endpoint\nwill refuse.",
+        "description": "Sources whose current version stores a header, TTL or engine other than the default.\n\nA field the source leaves unset inherits the default on its next deploy, so\nit is not drift. A stored value that already equals the default is not drift\neither. ``core`` is true for an engine-owned source, which the apply endpoint\nwill refuse. The landing source is never listed. ``search`` matches the source\nname, a drifted field name, or a stored value. ``per_page=-1`` returns every match.",
         "operationId": "get_default_drift_api_v1_system_defaults_drift_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search in source name, drifted field, and stored value",
+              "title": "Search"
+            },
+            "description": "Search in source name, drifted field, and stored value"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DefaultDriftResponse"
+                  "$ref": "#/components/schemas/PaginatedResponse_SourceDefaultDrift_"
                 }
               }
             }
@@ -9962,6 +10003,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -11359,7 +11410,7 @@
           "sampler"
         ],
         "summary": "Get Sample",
-        "description": "Poll a sample task's status and result.",
+        "description": "Poll a sample task's status and result.\n\nA caller held to its orgs gets 404 for a task not held to them, as for one that\ndoes not exist.",
         "operationId": "get_sample_api_v1_samples__task_id__get",
         "parameters": [
           {
@@ -11427,7 +11478,7 @@
           "sampler"
         ],
         "summary": "List Samples",
-        "description": "List recent sample tasks (most recent first).",
+        "description": "List recent sample tasks (most recent first); a caller held to its orgs sees only theirs.",
         "operationId": "list_samples_api_v1_samples_get",
         "responses": {
           "200": {
@@ -12033,7 +12084,7 @@
           "tasks"
         ],
         "summary": "List Tasks",
-        "description": "List all tasks, optionally filtered by kind.",
+        "description": "List the tasks the caller may see, optionally filtered by kind.",
         "operationId": "list_tasks_api_v1_tasks_get",
         "parameters": [
           {
@@ -14097,7 +14148,7 @@
           "schemas"
         ],
         "summary": "Discover Json Paths",
-        "description": "Discover JSON paths inside a source's ``_json`` column.\n\nResolves the requested ``version`` (or the source's current version). If that\nversion defines a ``meta_schema`` it uses ``db.<source>`` only after deploy;\nuntil then discovery runs on ``db.<landing>`` filtered by the version's\nmatch rule. Versions without ``meta_schema`` always use the landing table.\n\nReturns one record per path with observed types, a suggested column name,\nand whether the path is already promoted. ``?samples=N`` adds random\ndistinct example values; ``?stats=true`` adds coverage + distinct counts.",
+        "description": "Discover JSON paths inside a source's ``_json`` column.\n\nResolves the requested ``version`` (or the source's current version). If that\nversion defines a ``meta_schema`` it uses ``db.<source>`` only after deploy;\nuntil then discovery runs on ``db.<landing>`` filtered by the version's\nmatch rule. Versions without ``meta_schema`` always use the landing table.\n\nReturns one record per path with observed types, a suggested column name,\nand whether the path is already promoted. ``?samples=N`` adds random\ndistinct example values; ``?stats=true`` adds coverage + distinct counts.\n\nA caller without a platform grant holding ``schema:read`` reads only its own\norgs' rows, as the sampler holds it, and a table it cannot be held on is 403.",
         "operationId": "discover_json_paths_api_v1_schemas__source_name__json_paths_get",
         "parameters": [
           {
@@ -14233,7 +14284,7 @@
           "schemas"
         ],
         "summary": "Sample Source Rows",
-        "description": "Return random sample rows for a source, scoped to its match rule.\n\nResolves the requested ``version`` (or the source's current version). A\nversion with a ``meta_schema`` uses ``db.<source>`` only after that version\nis deployed and the table exists; otherwise rows are read from\n``db.<landing>`` filtered by the version's match rule.\n\nIntended for inspecting real data while authoring a match condition or CEL\nbefore promoting any JSON path -- a row-level companion to the per-path\n``?samples=N`` on ``/json-paths``.",
+        "description": "Return random sample rows for a source, scoped to its match rule.\n\nResolves the requested ``version`` (or the source's current version). A\nversion with a ``meta_schema`` uses ``db.<source>`` only after that version\nis deployed and the table exists; otherwise rows are read from\n``db.<landing>`` filtered by the version's match rule.\n\nIntended for inspecting real data while authoring a match condition or CEL\nbefore promoting any JSON path -- a row-level companion to the per-path\n``?samples=N`` on ``/json-paths``.\n\nA caller without a platform grant holding ``schema:read`` reads only its own\norgs' rows, as the sampler holds it, and a table it cannot be held on is 403.",
         "operationId": "sample_source_rows_api_v1_schemas__source_name__sample_rows_get",
         "parameters": [
           {
@@ -18125,7 +18176,7 @@
           "Governed Ops: Backing Services"
         ],
         "summary": "Set Overlay Var",
-        "description": "Set a substrate/platform value.\n\n403 with the policy that blocked it when the var is protected - the storage\nmodel, the data-layer modes and the disk size are decided at deploy, and moving\none on a live deployment is a data migration. 400 when the value would lower a\ndeclared node or broker count, which loses data rather than capacity.",
+        "description": "Set a substrate/platform value.\n\n403 with the policy that blocked it when the var is protected - the storage\nmodel, the data-layer modes and the disk size are decided at deploy, and moving\none on a live deployment is a data migration. 400 when the value would lower a\ndeclared node or broker count, or leave it undeclared (a parent map that omits\nit), which loses data rather than capacity; helmvars:override does not lift it.",
         "operationId": "set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put",
         "parameters": [
           {
@@ -18226,7 +18277,7 @@
           "Governed Ops: Backing Services"
         ],
         "summary": "Delete Overlay Var",
-        "description": "Revert a substrate/platform value to its chart default. Protected vars refuse.\n\nNot guarded up-only: reverting a count hands it back to the chart or profile\ndefault, which the engine cannot read, so there is no after-value to compare.",
+        "description": "Revert a substrate/platform value to its chart default. Protected vars refuse.\n\n400 when the revert would lower a declared node or broker count, or leave it\nundeclared, unless the caller holds helmvars:override. An undeclared count falls\nto the chart or profile default, which the engine cannot read, so a revert that\nleaves one undeclared is refused whatever that default is.",
         "operationId": "delete_overlay_var_api_v1_backing_services_overlays__name__vars__path__delete",
         "parameters": [
           {
@@ -21941,7 +21992,7 @@
           "Governed Ops: Actions"
         ],
         "summary": "Invoke Action",
-        "description": "Invoke a defined action - gated on the action's OWN required_action.\n\n``body.params`` supplies values for the action's declared params (422 on a\nconstraint violation; omitted params take their defaults). Direct commit in\ndev/solo; a production+team invoke is routed to a review PR (or 409\n``review_required`` when no forge is configured).",
+        "description": "Invoke a defined action - gated on the action's OWN required_action.\n\n``body.params`` supplies values for the action's declared params (422 on a\nconstraint violation; omitted params take their defaults). A hunt or rule\ndocument the action would leave invalid is 422 ``invalid_document``, with the\nhunts API's own message. Direct commit in dev/solo; a production+team invoke is\nrouted to a review PR (or 409 ``review_required`` when no forge is configured).",
         "operationId": "invoke_action_api_v1_governance_actions__name__invoke_post",
         "parameters": [
           {
@@ -23432,7 +23483,7 @@
           "HyperDX"
         ],
         "summary": "Hyperdx Connection",
-        "description": "Return the caller's OWN org connection - never another org's.\n\nA caller granted ``query:execute`` at system scope by a role other than\n``org_viewer`` gets the platform reader. Any other caller gets its org's pinned\n``dfe_org_<org>`` user, whatever roles it holds at that org's scope. A caller\nthat resolves to zero or several separate orgs is refused (403) so isolation\nfails closed rather than guessing.",
+        "description": "Return the caller's OWN org connection - never another org's.\n\nA caller granted ``query:execute`` at system scope by a declared, unscoped role\nother than ``org_viewer`` gets the platform reader. Any other caller gets its org's pinned\n``dfe_org_<org>`` user, whatever roles it holds at that org's scope. A caller\nthat resolves to zero or several separate orgs is refused (403) so isolation\nfails closed rather than guessing.",
         "operationId": "hyperdx_connection_api_v1_hyperdx_connection_get",
         "responses": {
           "200": {
@@ -27202,23 +27253,6 @@
         "title": "DefaultComparison",
         "description": "A stored source value beside the default it is measured against."
       },
-      "DefaultDriftResponse": {
-        "properties": {
-          "sources": {
-            "items": {
-              "$ref": "#/components/schemas/SourceDefaultDrift"
-            },
-            "type": "array",
-            "title": "Sources"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sources"
-        ],
-        "title": "DefaultDriftResponse",
-        "description": "Sources that store a header, TTL or engine other than the current defaults."
-      },
       "DegradedCondition": {
         "properties": {
           "kind": {
@@ -27491,6 +27525,15 @@
             "type": "object",
             "title": "Versions",
             "description": "Version id -> selection"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "deploy",
+              "shipped"
+            ],
+            "title": "Origin",
+            "description": "deploy when the deploy repo holds it, shipped when only the release does"
           }
         },
         "type": "object",
@@ -27499,7 +27542,8 @@
           "base",
           "base_version",
           "current",
-          "versions"
+          "versions",
+          "origin"
         ],
         "title": "DerivedSchemaResponse",
         "description": "A stored derived schema, as the API hands it back."
@@ -27543,6 +27587,15 @@
             "type": "string",
             "title": "Updated At",
             "description": "Last write to the stored document"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "deploy",
+              "shipped"
+            ],
+            "title": "Origin",
+            "description": "deploy when the deploy repo holds it, shipped when only the release does"
           }
         },
         "type": "object",
@@ -27553,7 +27606,8 @@
           "current",
           "versions",
           "column_count",
-          "updated_at"
+          "updated_at",
+          "origin"
         ],
         "title": "DerivedSchemaSummary",
         "description": "One row of the derived-schema list."
@@ -29031,7 +29085,7 @@
             "type": "array",
             "minItems": 1,
             "title": "Rules",
-            "description": "Hunt rule template names (``{name}.jinja2`` under the rule repo)"
+            "description": "Rule names, each the ``{name}.yaml`` rule file the hunt runner reads"
           },
           "name": {
             "type": "string",
@@ -29551,7 +29605,7 @@
             "type": "array",
             "minItems": 1,
             "title": "Rules",
-            "description": "Hunt rule template names (``{name}.jinja2`` under the rule repo)"
+            "description": "Rule names, each the ``{name}.yaml`` rule file the hunt runner reads"
           }
         },
         "type": "object",
@@ -33783,7 +33837,7 @@
           "name"
         ],
         "title": "ProtectedPolicy",
-        "description": "Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.\n\ne.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.\nA protected var can only be changed by a caller holding the override grant."
+        "description": "Vars locked to default. Patterns match ``cls:name:path`` via fnmatch.\n\ne.g. ``helmvars:*:replicaCount`` or ``helmvars:receiver-default:config.kafka.*``.\nA protected var can only be changed by a caller holding the override grant, and\na write at its parent or below it counts as changing it.\n\nPatterns bind the API's var and document writes in the ``helmvars``,\n``infravars`` and ``library`` classes, and every defined action. They do not\nbind the governance classes (``gov_settings`` included), a whole-resource\ndelete, an overlay the engine derives from the sources, or the break-glass CLI."
       },
       "ProviderAuth": {
         "properties": {
@@ -35423,7 +35477,7 @@
               }
             ],
             "title": "Filter",
-            "description": "Trusted SQL WHERE predicate (ClickHouse backend only)"
+            "description": "One ClickHouse condition over the sampled table's columns (ClickHouse backend only). No subquery, alias, query parameter, table function, or dictionary, Join table or file read."
           },
           "since": {
             "anyOf": [
@@ -35489,7 +35543,7 @@
         },
         "type": "object",
         "title": "SampleRequest",
-        "description": "A request to sample a source.\n\nProvide EITHER a registered ``source`` (its CH table / land topic are\nresolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source\nthat is not registered yet, e.g. AI onboarding). ``filter`` is a trusted SQL\npredicate (ClickHouse backend only), consistent with the query-authoring\nsurface - callers already hold the sampler scope."
+        "description": "A request to sample a source.\n\nProvide EITHER a registered ``source`` (its CH table / land topic are\nresolved for you) OR an explicit ``table``/``topic`` (ad-hoc - for a source\nthat is not registered yet, e.g. AI onboarding). ``filter`` (ClickHouse\nbackend only) must be one condition over the sampled table's columns; it is\nreplaced by the condition rendered from its parse tree, and anything else is\nrefused when the request is built."
       },
       "SampleResult": {
         "properties": {
@@ -35760,7 +35814,7 @@
               }
             ],
             "title": "Replica Count",
-            "description": "Fixed pod count, for a deployment with KEDA off. Refused while KEDA is explicitly enabled, because the chart omits `replicas` and the ScaledObject owns the count."
+            "description": "Fixed pod count, for a deployment with KEDA off. Refused unless `keda_enabled` is false in this request or already in the overlay: the chart omits `replicas` while KEDA is on, which it is by default, and the ScaledObject owns the count."
           },
           "min_replicas": {
             "anyOf": [
