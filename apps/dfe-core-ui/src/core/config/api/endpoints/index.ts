@@ -25,28 +25,8 @@ export const API_CONFIG = Object.freeze({
     fromCatalogue: '/api/v1/sources/from-catalogue/{entry}',
     engines: '/api/v1/sources/engines',
   },
-  serviceConfigs: {
-    default: '/api/v1/services',
-    instance: '/api/v1/services/{service}/{instance}',
-    validate: '/api/v1/services/{service}/{instance}/validate',
-    history: '/api/v1/services/{service}/{instance}/history',
-    seed: '/api/v1/services/seed',
-  },
-  serviceSurfaces: {
-    default: '/api/v1/service-surfaces',
-    surface: '/api/v1/service-surfaces/{name}',
-    refreshMetrics: '/api/v1/service-surfaces/{name}/metrics/refresh',
-  },
   deployment: {
     adminLinks: '/api/v1/deployment/admin-links',
-  },
-  deployments: {
-    default: '/api/v1/deployments',
-    deployment: '/api/v1/deployments/{service}/{instance}',
-    validate: '/api/v1/deployments/{service}/{instance}/validate',
-    history: '/api/v1/deployments/{service}/{instance}/history',
-    applySize: '/api/v1/deployments/{service}/{instance}/size/{size}',
-    seed: '/api/v1/deployments/seed',
   },
   fieldMaps: {
     default: '/api/v1/field-maps',

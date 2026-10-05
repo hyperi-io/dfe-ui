@@ -27,34 +27,8 @@ export const QUERY_KEYS = Object.freeze({
     fromCatalogue: () => ['sources', 'from-catalogue', '{entry}'],
     engines: () => ['sources', 'engines'],
   },
-  serviceConfigs: {
-    default: () => ['services'],
-    instance: () => ['services', '{service}', '{instance}'],
-    validate: () => ['services', '{service}', '{instance}', 'validate'],
-    history: () => ['services', '{service}', '{instance}', 'history'],
-    seed: () => ['services', 'seed'],
-  },
-  serviceSurfaces: {
-    default: () => ['service-surfaces'],
-    surface: () => ['service-surfaces', '{name}'],
-    refreshMetrics: () => ['service-surfaces', '{name}', 'metrics', 'refresh'],
-  },
   deployment: {
     adminLinks: () => ['deployment', 'admin-links'],
-  },
-  deployments: {
-    default: () => ['deployments'],
-    deployment: () => ['deployments', '{service}', '{instance}'],
-    validate: () => ['deployments', '{service}', '{instance}', 'validate'],
-    history: () => ['deployments', '{service}', '{instance}', 'history'],
-    applySize: () => [
-      'deployments',
-      '{service}',
-      '{instance}',
-      'size',
-      '{size}',
-    ],
-    seed: () => ['deployments', 'seed'],
   },
   fieldMaps: {
     default: () => ['field-maps'],

@@ -99,6 +99,78 @@ make check                           # hyperi-ci check, what CI runs
 yarn workspace dfe-core-ui test:e2e  # Playwright, needs a console and an engine up
 ```
 
+### Running the e2e suite locally
+
+Playwright drives a console that is already up, against an engine that is
+already up. `playwright.config.ts` starts neither process, and `yarn test`
+does not run these specs.
+
+```bash
+yarn workspace dfe-core-ui test:e2e:install          # Chromium, once
+yarn workspace dfe-core-ui test:e2e                  # the folder, one worker
+yarn workspace dfe-core-ui test:e2e --grep-invert @docker-only
+```
+
+Bring the console up the same way as
+[local development](docs/local-development.md), on port 3000, with
+`NEXT_PUBLIC_API_URL` and `INTERNAL_API_URL` pointed at the engine and
+`NEXTAUTH_URL` matching the console. The suite defaults to
+`http://localhost:3000` and `http://localhost:8003`. `BASE_URL` overrides the
+console; `NEXT_PUBLIC_API_URL` or `INTERNAL_API_URL` overrides the engine. Port
+3000 is on the engine's default CORS allowlist, so login on another port fails
+until that list is extended.
+
+#### Engine: `make e2e-server`
+
+The specs call helpers that only the e2e server mounts. From a dfe-engine
+checkout:
+
+```bash
+cp .env.example .env     # once, if you have no .env yet
+cp .env .env.e2e         # once; set DFE_ENV=test in .env.e2e
+make e2e-server          # http://localhost:8003, DFE_E2E_SERVER=true
+```
+
+Each start wipes `tmp/e2e` and every ClickHouse database named `dfe_e2e*`,
+then serves. `./config` and a dev stack's own databases stay put.
+`E2E_KEEP=1 make e2e-server` reuses the last workspace. `make e2e-clean`
+removes it and drops those databases.
+
+ClickHouse has to answer the wipe. `.env.e2e` supplies
+`DFE_CLICKHOUSE_USERNAME` and `DFE_CLICKHOUSE_PASSWORD` (the same password as
+dfe-docker's `CLICKHOUSE_PASSWORD`; an empty one is refused). If port 8003 is
+already taken, usually by a `dfe-engine` container, stop that listener or run
+`E2E_PORT=8004 make e2e-server` and point the console and the suite at that
+port.
+
+`GET /api/e2e/status` confirms the helpers. Every spec then POSTs
+`/api/e2e/seed-static` with no auth, and the hooks call `reset_all`, which
+wipes the seeded state. The engine's ready check is `GET /readyz`.
+
+The suite loads `apps/dfe-core-ui/.env.local`, then `.env`, and leaves any name
+the shell already set alone. Put the acceptance-test names in `.env.local`.
+They are listed in `apps/dfe-core-ui/.env.example`.
+
+| Name                                                                 | Required for the folder                                                                                      |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `E2E_ADMIN_PASSWORD`                                                 | the password this engine minted for `admin`. There is no default.                                            |
+| `E2E_ADMIN_NEW_PASSWORD`                                             | the password the suite changes that issued one to. At least 12 characters, or the engine refuses the change. |
+| `DFE_OIDC_FIXTURE_PASSWORD`                                          | OIDC login only. A provider with no password is skipped. The user defaults to `dfe-test@dfe-oidc.test`.      |
+| `E2E_TEST_TIMEOUT_MS`, `E2E_EXPECT_TIMEOUT_MS`, `E2E_NAV_TIMEOUT_MS` | optional. Unset keeps Playwright's 30000, 5000 and 0. Raise them when the stack is slower than local docker. |
+
+Specs tagged `@docker-only` (`filebeatDataPath.spec.ts`,
+`promoteJsonField.spec.ts`, and the Compose scaling case in
+`components.spec.ts`) shell out to `docker`. They need a docker daemon and the
+stack's containers. `DFE_CONTAINER_PREFIX` defaults to `e2e-`; a dfe-docker
+checkout names containers after their compose services, so set the prefix
+empty there. `DFE_DOCKER_DIR` is that checkout, so `make apply` can create a
+container the suite just asked for. `DFE_FILEBEAT_CORPUS` is the filebeat
+archive; those corpus cases skip when it is unset. `library.spec.ts` and
+`sourcesProcessing.spec.ts` are refused by a docker-slim engine that does not
+offer `dfe-fetcher`.
+
+Leave `fullyParallel: false` and `workers: 1`. The specs share one engine.
+
 Four ways green lies here:
 
 - `yarn test` never runs the Playwright specs. vitest's `include` is

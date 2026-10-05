@@ -61,9 +61,6 @@ test('Sidebar Navigation', async ({ page }) => {
     page.getByRole('link', { name: 'Library', exact: true }),
   ).toBeHidden();
   await expect(
-    page.getByRole('link', { name: 'Services', exact: true }),
-  ).toBeHidden();
-  await expect(
     page.getByRole('link', { name: 'Platform', exact: true }),
   ).toBeHidden();
 });
@@ -159,35 +156,6 @@ test('Hunts', async ({ page }) => {
   ).toHaveCount(2);
   await expect(page.getByText('No hunts found')).toBeVisible();
   await expect(page.getByText('No hunt selected')).toBeVisible();
-});
-
-test('Services', async ({ page }) => {
-  await page.goto(`${BASE_URL}/services`);
-
-  await expect(
-    page.getByRole('link', { name: 'Service Configurations', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Seed Service Configs', exact: true }),
-  ).toBeDisabled();
-
-  await page.getByRole('link', { name: 'Deployments', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/services/deployments`);
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Seed Deployments', exact: true }),
-  ).toBeDisabled();
-
-  await page.getByRole('link', { name: 'Surfaces', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/services/surfaces`);
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
 });
 
 test.describe('Settings', () => {
