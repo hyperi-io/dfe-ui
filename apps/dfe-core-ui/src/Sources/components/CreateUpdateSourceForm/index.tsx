@@ -103,6 +103,11 @@ export const CreateUpdateSourceFormBase = ({
   const metaSchema = Form.useWatch(['schema'], form);
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
+  const watchFetcherTopic = Form.useWatch(['fetcher', 'topic'], form);
+  const watchOrigin = Form.useWatch(['origin'], form);
+  const isFetcherTopicOwn = watchFetcherTopic === 'own';
+  const isOriginReceiver = watchOrigin === 'receiver';
+
   const tabItems = [
     {
       key: 'sourceDetails',
@@ -121,19 +126,29 @@ export const CreateUpdateSourceFormBase = ({
         />
       ),
     },
-    {
-      key: 'schemaConfig',
-      label: (
-        <TabLabel
-          label={TAB_LABEL_MAP['schemaConfig']}
-          validationErrors={getTabErrors(validationErrors, 'schemaConfig')}
-        />
-      ),
-      forceRender: true,
-      children: (
-        <SchemaConfigTabContent formValidation={formValidation} form={form} />
-      ),
-    },
+    ...(isOriginReceiver || isFetcherTopicOwn
+      ? [
+          {
+            key: 'schemaConfig',
+            label: (
+              <TabLabel
+                label={TAB_LABEL_MAP['schemaConfig']}
+                validationErrors={getTabErrors(
+                  validationErrors,
+                  'schemaConfig',
+                )}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SchemaConfigTabContent
+                formValidation={formValidation}
+                form={form}
+              />
+            ),
+          },
+        ]
+      : []),
 
     ...(isMetaSchemaFormValueDefined
       ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
