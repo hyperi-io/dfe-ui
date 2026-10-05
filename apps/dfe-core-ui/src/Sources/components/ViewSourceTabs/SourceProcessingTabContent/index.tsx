@@ -5,6 +5,7 @@ import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { SourceAppInstance } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceAppInstance';
 import { SourceRoutingCard } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceRoutingCard';
 import { isTransformApp } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { ReactNode } from 'react';
 
@@ -30,6 +31,7 @@ export const SourceProcessingTabContent = ({
   transformSlot?: ReactNode;
 }) => {
   const { data: apps, isLoading, error } = useFetchApps();
+  const { originType } = useSourceDetailsContext();
 
   if (isLoading) return <Spin size="small" />;
 
@@ -49,7 +51,9 @@ export const SourceProcessingTabContent = ({
   const perSourceApps = apps.filter((app) => app.multiplicity === 'per_config');
   // The transforms are one choice, not several deployments, so they are lifted
   // out of the per-app list into the control that writes that choice.
-  const standaloneApps = perSourceApps.filter((app) => !isTransformApp(app));
+  const standaloneApps = perSourceApps.filter(
+    (app) => !isTransformApp(app) && app.service.includes(originType ?? ''),
+  );
 
   return (
     <div className="flex flex-col">

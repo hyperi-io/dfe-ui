@@ -131,7 +131,7 @@ export const ConfigurationDetailsTabContent = ({
             <dd>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas/other-schemas?schema_path=${isMainSource ? 'common-header/' : ''}${header?.type}&schema_version=${header?.version}`}
+                href={`/schemas/other-schemas?schema_path=${isMainSource ? 'common-header/' : ''}${header?.type.replace('common-header/', '')}&schema_version=${header?.version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 <span className="text-foreground/40 dark:text-dark-foreground/40">

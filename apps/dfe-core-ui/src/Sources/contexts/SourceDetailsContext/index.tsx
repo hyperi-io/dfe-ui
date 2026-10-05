@@ -12,6 +12,7 @@ export interface SourceDetailsContextValue {
   errorSourceDetail: Error | null | undefined;
   isMetaSchemaDefined: boolean;
   isMainSource: boolean;
+  originType: 'fetcher' | 'receiver' | undefined | null;
 }
 
 const SourceDetailsContext = createContext<SourceDetailsContextValue | null>(
@@ -47,8 +48,13 @@ export const SourceDetailsProvider = ({
     );
   }, [sourceDetail]);
 
+  const originType = useMemo(() => {
+    return sourceDetail?.version?.origin;
+  }, [sourceDetail]);
+
   const value = useMemo<SourceDetailsContextValue>(
     () => ({
+      originType,
       sourceDetail,
       isLoadingSourceDetail,
       errorSourceDetail,
@@ -56,6 +62,7 @@ export const SourceDetailsProvider = ({
       isMainSource,
     }),
     [
+      originType,
       sourceDetail,
       isLoadingSourceDetail,
       errorSourceDetail,
