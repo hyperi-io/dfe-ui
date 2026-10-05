@@ -13845,6 +13845,14 @@ export interface components {
             source_build?: components["schemas"]["dfe_engine__api__v1__sources__SchemaBuildResult"] | null;
             /** @description Last deploy run for this version (source-deploys) */
             source_deployment?: components["schemas"]["SchemaDeployResult"] | null;
+            /**
+             * Origin
+             * @description Which way this version's data enters the platform, or None when nothing selects it.
+             *
+             *     Serialized on API responses (source detail ``versions`` and the single-version
+             *     GET). Derived from ``match`` / ``fetcher``, never stored in YAML.
+             */
+            readonly origin: ("receiver" | "fetcher") | null;
         };
         /**
          * SourceVersionGetDetailResponse
