@@ -22,6 +22,7 @@ describe('transformSourceRequestBodyToFormData', () => {
           topic: 'main',
           config: { crates: ['dfe-fetcher'], interval_secs: 3600 },
         },
+        origin: 'fetcher',
       },
     };
     const result = transformSourceRequestBodyToFormData(source);
@@ -51,6 +52,7 @@ describe('transformSourceRequestBodyToFormData', () => {
         date_time: 'string',
         archive: false,
         match: { field: 'field', value: 'value', operator: 'equals' },
+        origin: 'receiver',
       },
     };
     const result = transformSourceRequestBodyToFormData(source);
@@ -83,7 +85,12 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['1.0.0'],
       selected: '1.0.0',
       state: 'active',
-      version: { date_time: 'string', archive: false, fetcher },
+      version: {
+        date_time: 'string',
+        archive: false,
+        fetcher,
+        origin: 'fetcher',
+      },
     };
 
     const formData = transformSourceRequestBodyToFormData(source);
@@ -106,6 +113,7 @@ describe('transformSourceRequestBodyToFormData', () => {
         date_time: 'string',
         archive: false,
         header: { type: 'string', version: 'string' },
+        origin: 'receiver',
       },
     };
     const result = transformSourceRequestBodyToFormData(source);

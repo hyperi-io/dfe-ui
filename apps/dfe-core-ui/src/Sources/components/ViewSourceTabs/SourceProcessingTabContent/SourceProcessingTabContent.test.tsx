@@ -1,4 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { SourceDetailsProvider } from '@/Sources/contexts/SourceDetailsContext';
 import { render, screen } from '@testing-library/react';
 import {
   afterAll,
@@ -17,11 +18,25 @@ vi.mock('@/core/components/AceEditor/AnnotatedAceEditor', () => ({
   AnnotatedAceEditor: () => <textarea aria-label="editor" />,
 }));
 
+// The sources list behind the tab pages on one; jsdom has none.
+class MockIntersectionObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+const { wrapper } = buildTestWrapper()
+  .withTheme()
+  .withReactQuery()
+  .withListSourcesProvider({})
+  .withWrapper(({ children }) => (
+    <SourceDetailsProvider>{children}</SourceDetailsProvider>
+  ));
 
 const renderTab = () =>
   render(

@@ -26,4 +26,6 @@ export const server = setupServer(
     service: 'dfe-receiver',
     instance: 'default',
   }),
+  // ListSourcesProvider loads the source list as soon as the tab renders.
+  API_CONFIG_MOCKS.sources.default.get.success(),
 );
