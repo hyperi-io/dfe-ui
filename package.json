@@ -5,6 +5,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "audit": "node scripts/audit.mjs",
+    "import-scope-drift": "node scripts/import-scope-drift.mjs",
     "build": "turbo run build",
     "start": "yarn workspace dfe-core-ui start",
     "dev": "turbo run dev",
