@@ -56,7 +56,6 @@ describe('SidebarMenu', () => {
         'Hunts',
         // Stack
         'Components',
-        'Services',
         'Platform',
         'Admin Tools',
         // Access
@@ -92,7 +91,7 @@ describe('SidebarMenu', () => {
       render(<SidebarMenu collapsed={false} />, { wrapper });
 
       expect(
-        await screen.findByRole('link', { name: 'Services' }),
+        await screen.findByRole('link', { name: 'Components' }),
       ).toBeInTheDocument();
       expect(
         screen.queryByRole('link', { name: 'Admin Tools' }),
