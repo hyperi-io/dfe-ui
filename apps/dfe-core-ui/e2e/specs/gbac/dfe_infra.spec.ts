@@ -36,9 +36,6 @@ test('Sidebar Navigation', async ({ page }) => {
     page.getByRole('link', { name: 'Library', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Services', exact: true }),
-  ).toBeVisible();
-  await expect(
     page.getByRole('link', { name: 'Settings', exact: true }),
   ).toBeVisible();
   await expect(
@@ -158,39 +155,6 @@ test('Hunts', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: 'Add Hunt', exact: true }),
   ).toBeDisabled();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-});
-
-test('Services', async ({ page }) => {
-  await page.goto(`${BASE_URL}/services`);
-
-  await expect(
-    page.getByRole('link', { name: 'Service Configurations', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Seed Service Configs', exact: true }),
-  ).toBeDisabled();
-
-  await page.getByRole('link', { name: 'Deployments', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/services/deployments`);
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeHidden();
-  await expect(
-    page.getByText('No deployments match your filters'),
-  ).toBeVisible();
-  await expect(page.getByText('No deployment selected')).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Seed Deployments', exact: true }),
-  ).toBeEnabled();
-
-  await page.getByRole('link', { name: 'Surfaces', exact: true }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/services/surfaces`);
   await expect(
     page.getByText('You do not have sufficient permissions'),
   ).toBeVisible();

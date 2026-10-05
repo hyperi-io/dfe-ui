@@ -1,12 +1,16 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+// Same files as next dev. A name already set in the shell or CI stays; .env.local
+// fills anything still unset, then .env fills the rest. loadEnvFile never overrides.
+const configDir = path.dirname(__filename);
+for (const name of ['.env.local', '.env']) {
+  const file = path.join(configDir, name);
+  if (fs.existsSync(file)) {
+    process.loadEnvFile(file);
+  }
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.

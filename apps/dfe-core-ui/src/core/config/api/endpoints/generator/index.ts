@@ -6,7 +6,6 @@ import { auth } from './mocks/auth';
 import { backingServices } from './mocks/backingServices';
 import { clientConfig } from './mocks/clientConfig';
 import { deployment } from './mocks/deployment';
-import { deployments } from './mocks/deployments';
 import { fieldMaps } from './mocks/fieldMaps';
 import { gitops } from './mocks/gitops';
 import { governance } from './mocks/governance';
@@ -22,8 +21,6 @@ import { repository } from './mocks/repository';
 import { roles } from './mocks/roles';
 import { rules } from './mocks/rules';
 import { schemas } from './mocks/schemas';
-import { serviceConfigs } from './mocks/serviceConfigs';
-import { serviceSurfaces } from './mocks/serviceSurfaces';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
 import { transforms } from './mocks/transforms';
@@ -37,7 +34,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
   backingServices,
   clientConfig,
   deployment,
-  deployments,
   fieldMaps,
   gitops,
   governance,
@@ -53,8 +49,6 @@ export const API_CONFIG_MOCKS = Object.freeze({
   roles,
   rules,
   schemas,
-  serviceConfigs,
-  serviceSurfaces,
   sources,
   system,
   transforms,
