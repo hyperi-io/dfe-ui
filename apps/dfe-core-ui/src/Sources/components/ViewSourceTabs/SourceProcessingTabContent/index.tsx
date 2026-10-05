@@ -69,7 +69,7 @@ export const SourceProcessingTabContent = ({
         )),
       )}
 
-      {source !== 'main' && transformSlot}
+      {transformSlot}
 
       {standaloneApps.map((app) => (
         <SourceAppInstance key={app.service} app={app} source={source} />

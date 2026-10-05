@@ -92,6 +92,8 @@ export const ViewSourceDetailTabs = ({
     [refetchSources, setSelectedSource],
   );
 
+  const isMainSource = selectedSourceName === 'main';
+
   return (
     <Tabs
       classNames={{
@@ -153,33 +155,39 @@ export const ViewSourceDetailTabs = ({
             </RbacProtected>
           ),
         },
-        {
-          key: 'processing',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
-              <RbacProtected.Unrestricted>
-                <SourceProcessingTabContent
-                  source={selectedSourceName}
-                  transformSlot={
-                    <SourceTransformSelector
-                      // Keyed by source: a refusal is one deployment's answer
-                      // about one source, and it must not follow the reader to
-                      // the next one.
-                      key={selectedSourceName}
-                      source={selectedSourceName}
-                      sourceDetail={sourceDetailData}
-                      onSourceUpdated={handleSourceUpdated}
-                    />
-                  }
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
+        ...(!isMainSource
+          ? [
+              {
+                key: 'processing',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
+                children: (
+                  <RbacProtected
+                    action={RbacProtected.rbacActions.deployment_read}
+                  >
+                    <RbacProtected.Unrestricted>
+                      <SourceProcessingTabContent
+                        source={selectedSourceName}
+                        transformSlot={
+                          <SourceTransformSelector
+                            // Keyed by source: a refusal is one deployment's answer
+                            // about one source, and it must not follow the reader to
+                            // the next one.
+                            key={selectedSourceName}
+                            source={selectedSourceName}
+                            sourceDetail={sourceDetailData}
+                            onSourceUpdated={handleSourceUpdated}
+                          />
+                        }
+                      />
+                    </RbacProtected.Unrestricted>
+                    <RbacProtected.Restricted className="h-full">
+                      <RbacProtected.RestrictedRoute />
+                    </RbacProtected.Restricted>
+                  </RbacProtected>
+                ),
+              },
+            ]
+          : []),
 
         /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
         ...(isMetaSchemaDefined
