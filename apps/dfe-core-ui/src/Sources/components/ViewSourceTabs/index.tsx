@@ -1,11 +1,11 @@
 'use client';
 
 import { SourceTransformSelector } from '@/Sources/components/SourceTransformSelector';
+import { SourceProcessingTabContent } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
 import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';

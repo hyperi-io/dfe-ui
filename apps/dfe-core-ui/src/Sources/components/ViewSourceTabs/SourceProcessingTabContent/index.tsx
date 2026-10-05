@@ -1,10 +1,10 @@
 'use client';
 
-import { SourceAppInstance } from '@/core/components/appManagement/SourceAppInstance';
-import { SourceRoutingCard } from '@/core/components/appManagement/SourceRoutingCard';
-import { isTransformApp } from '@/core/components/appManagement/transformApps';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
+import { SourceAppInstance } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceAppInstance';
+import { SourceRoutingCard } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceRoutingCard';
+import { isTransformApp } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
 import { Spin } from 'antd';
 import { ReactNode } from 'react';
 
