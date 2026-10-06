@@ -33,7 +33,10 @@ export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
 
 export const RECEIVER_TABLES = ['own', 'main'] as const;
 
-export const RECEIVER_TABLE_LABELS: Record<TSourceFetcher['topic'], string> = {
+export const RECEIVER_TABLE_LABELS: Record<
+  (typeof RECEIVER_TABLES)[number],
+  string
+> = {
   own: 'Own table',
   main: 'Shared main table',
 };
@@ -89,7 +92,7 @@ const originTabSchema = {
     .nullable(),
   receiver_ui_config: z
     .object({
-      table: z.enum(FETCHER_TOPICS).optional().nullable(),
+      table: z.enum(RECEIVER_TABLES).optional().nullable(),
     })
     .optional()
     .nullable(),

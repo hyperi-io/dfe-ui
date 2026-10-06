@@ -19,6 +19,7 @@ import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   EMPTY_FETCHER,
   EMPTY_MATCH,
+  EMPTY_RECEIVER_UI_CONFIG,
 } from './SourceDetailsTabContent/OriginFormSection/helpers';
 import {
   formSchema,
@@ -103,9 +104,12 @@ export const CreateUpdateSourceFormBase = ({
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
   const watchFetcherTopic = Form.useWatch(['fetcher', 'topic'], form);
-  const watchOrigin = Form.useWatch(['receiver_ui_config', 'table'], form);
+  const watchReceiverTable = Form.useWatch(
+    ['receiver_ui_config', 'table'],
+    form,
+  );
   const isFetcherTopicOwn = watchFetcherTopic === 'own';
-  const isReceiverTableOwn = watchOrigin === 'own';
+  const isReceiverTableOwn = watchReceiverTable === 'own';
 
   const tabItems = [
     {
@@ -209,6 +213,10 @@ export const CreateUpdateSourceFormBase = ({
         // Both blocks are seeded so switching origin lands on a usable form.
         match: { ...EMPTY_MATCH, ...initialValues?.match },
         fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
+        receiver_ui_config: {
+          ...EMPTY_RECEIVER_UI_CONFIG,
+          ...initialValues?.receiver_ui_config,
+        },
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}

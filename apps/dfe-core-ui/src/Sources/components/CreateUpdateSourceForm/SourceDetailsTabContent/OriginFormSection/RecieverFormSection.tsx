@@ -2,8 +2,8 @@ import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import {
-  FETCHER_TOPIC_LABELS,
   MATCH_OPERATORS,
+  RECEIVER_TABLE_LABELS,
 } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormInstance, FormRule, Input, Radio, Select } from 'antd';
@@ -77,7 +77,7 @@ export const ReceiverFormSection = ({
         help="You can either share main table or add your own table. You will need to deploy the source if own table is selected."
       >
         <Radio.Group
-          options={Object.entries(FETCHER_TOPIC_LABELS).map(
+          options={Object.entries(RECEIVER_TABLE_LABELS).map(
             ([value, label]) => ({ label, value }),
           )}
         />

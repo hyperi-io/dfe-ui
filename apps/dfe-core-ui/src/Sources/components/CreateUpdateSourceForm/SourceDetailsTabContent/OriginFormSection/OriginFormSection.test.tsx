@@ -59,6 +59,7 @@ const Harness = ({
         origin: 'receiver',
         match: { field: '', operator: 'equals', value: '' },
         fetcher: { source_type: '', topic: 'own', config: '' },
+        receiver_ui_config: { table: 'own' },
         ...initialValues,
       }}
     >
@@ -74,6 +75,9 @@ describe('OriginFormSection', () => {
 
     expect(await screen.findByLabelText(/^Field/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Source type')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: 'Shared main table' }),
+    ).toBeChecked();
   });
 
   it('swaps the match fields for the fetcher fields', async () => {

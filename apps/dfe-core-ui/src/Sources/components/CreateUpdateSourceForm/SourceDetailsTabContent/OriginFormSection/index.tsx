@@ -4,7 +4,7 @@ import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSou
 import { SourceOrigin } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { FormInstance, FormRule, Radio } from 'antd';
 import { FetcherFormSection } from './FetcherFormSection';
-import { EMPTY_FETCHER, EMPTY_MATCH } from './helpers';
+import { EMPTY_FETCHER, EMPTY_MATCH, EMPTY_RECEIVER_UI_CONFIG } from './helpers';
 import { ReceiverFormSection } from './RecieverFormSection';
 
 export const OriginFormSection = ({
@@ -23,8 +23,14 @@ export const OriginFormSection = ({
   const handleOriginChange = (nextOrigin: SourceOrigin) => {
     form.setFieldsValue(
       nextOrigin === 'fetcher'
-        ? { match: { ...EMPTY_MATCH } }
-        : { fetcher: { ...EMPTY_FETCHER } },
+        ? {
+            match: { ...EMPTY_MATCH },
+            receiver_ui_config: { ...EMPTY_RECEIVER_UI_CONFIG },
+          }
+        : {
+            fetcher: { ...EMPTY_FETCHER },
+            receiver_ui_config: { ...EMPTY_RECEIVER_UI_CONFIG },
+          },
     );
   };
 
