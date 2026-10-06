@@ -59,7 +59,7 @@ const Harness = ({
         origin: 'receiver',
         match: { field: '', operator: 'equals', value: '' },
         fetcher: { source_type: '', topic: 'own', config: '' },
-        receiver_ui_config: { table: 'own' },
+        receiver_ui_config: { table: 'main' },
         ...initialValues,
       }}
     >
