@@ -75,9 +75,7 @@ describe('OriginFormSection', () => {
 
     expect(await screen.findByLabelText(/^Field/)).toBeInTheDocument();
     expect(screen.queryByLabelText('Source type')).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('radio', { name: 'Shared main table' }),
-    ).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Shared table' })).toBeChecked();
   });
 
   it('swaps the match fields for the fetcher fields', async () => {

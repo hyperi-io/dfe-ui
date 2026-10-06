@@ -49,7 +49,7 @@ export const FetcherFormSection = ({
         name={['fetcher', 'topic']}
         label="Topic"
         rules={[formValidation]}
-        help="Its own topic gives this source its own table; main sends it to the shared main table."
+        help="Its own topic gives this source its own table; main sends it to the shared table."
       >
         <Radio.Group
           options={Object.entries(FETCHER_TOPIC_LABELS).map(

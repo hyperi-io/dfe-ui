@@ -74,7 +74,7 @@ export const ReceiverFormSection = ({
         name={['receiver_ui_config', 'table']}
         label="Table"
         rules={[formValidation]}
-        help="You can either share main table or add your own table. You will need to deploy the source if own table is selected."
+        help="You can either use the shared table or add your own table. You will need to deploy the source if own table is selected."
       >
         <Radio.Group
           options={Object.entries(RECEIVER_TABLE_LABELS).map(

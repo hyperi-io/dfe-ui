@@ -67,7 +67,7 @@ export const SampleEventsTabContent = () => {
                   ? 'Source is sampled from'
                   : 'This source has no meta schema defined. Results will be sent to'}
                 <span className="font-semibold">
-                  {sampleRows?.table ?? 'the shared main table'}.
+                  {sampleRows?.table ?? 'the shared table'}.
                 </span>
               </p>
             }

@@ -28,7 +28,7 @@ export const FETCHER_TOPICS = ['own', 'main'] as const;
 
 export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
   own: 'Own topic and table',
-  main: 'Shared main table',
+  main: 'Shared table',
 };
 
 export const RECEIVER_TABLES = ['own', 'main'] as const;
@@ -38,7 +38,7 @@ export const RECEIVER_TABLE_LABELS: Record<
   string
 > = {
   own: 'Own table',
-  main: 'Shared main table',
+  main: 'Shared table',
 };
 
 /** Which of a deployment's two transports carries this source's records. */
