@@ -15,7 +15,6 @@ import {
   type SourceFormTab,
 } from './helpers';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
-import { getInitialAssignSchema } from './SchemaConfigTabContent/SchemaConfigTabContent.helpers';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   EMPTY_FETCHER,
@@ -104,9 +103,9 @@ export const CreateUpdateSourceFormBase = ({
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
   const watchFetcherTopic = Form.useWatch(['fetcher', 'topic'], form);
-  const watchOrigin = Form.useWatch(['origin'], form);
+  const watchOrigin = Form.useWatch(['receiver_ui_config', 'table'], form);
   const isFetcherTopicOwn = watchFetcherTopic === 'own';
-  const isOriginReceiver = watchOrigin === 'receiver';
+  const isReceiverTableOwn = watchOrigin === 'own';
 
   const tabItems = [
     {
@@ -126,7 +125,7 @@ export const CreateUpdateSourceFormBase = ({
         />
       ),
     },
-    ...(isOriginReceiver || isFetcherTopicOwn
+    ...(isReceiverTableOwn || isFetcherTopicOwn
       ? [
           {
             key: 'schemaConfig',
@@ -210,12 +209,6 @@ export const CreateUpdateSourceFormBase = ({
         // Both blocks are seeded so switching origin lands on a usable form.
         match: { ...EMPTY_MATCH, ...initialValues?.match },
         fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
-        // Empty creates have no schema yet, so the radio starts on main.
-        _assignSchema:
-          initialValues?._assignSchema ??
-          getInitialAssignSchema({
-            meta_schema: initialValues?.schema?.meta_schema ?? null,
-          }),
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}

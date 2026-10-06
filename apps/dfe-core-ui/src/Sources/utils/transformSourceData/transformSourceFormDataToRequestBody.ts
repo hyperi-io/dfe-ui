@@ -36,9 +36,7 @@ export const transformSourceFormDataToRequestBody = (
         value: match?.value ?? '',
       };
 
-  const transformedSource: TSourceUpdateRequestBody & {
-    _assignSchema?: string;
-  } = {
+  const transformedSource: TSourceUpdateRequestBody = {
     ...rest,
     // An empty engine is how the API is told to follow the DFE default.
     ...(schema != null
@@ -63,7 +61,6 @@ export const transformSourceFormDataToRequestBody = (
       ? { transform: { ...transform, env: objectArrayToObject(transform.env) } }
       : {}),
     fetcher: apiFetcher,
-    _assignSchema: undefined,
   };
   return transformedSource;
 };

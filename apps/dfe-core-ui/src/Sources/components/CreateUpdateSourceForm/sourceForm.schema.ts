@@ -31,6 +31,13 @@ export const FETCHER_TOPIC_LABELS: Record<TSourceFetcher['topic'], string> = {
   main: 'Shared main table',
 };
 
+export const RECEIVER_TABLES = ['own', 'main'] as const;
+
+export const RECEIVER_TABLE_LABELS: Record<TSourceFetcher['topic'], string> = {
+  own: 'Own table',
+  main: 'Shared main table',
+};
+
 /** Which of a deployment's two transports carries this source's records. */
 export const SOURCE_TRANSPORTS = ['bus', 'direct'] as const;
 
@@ -52,10 +59,6 @@ const sourceDetailsTabSchema = {
   transport: z.enum(SOURCE_TRANSPORTS).optional().nullable(),
   // Required, so a form that lost the value is refused rather than sending none.
   archive: z.boolean({ message: 'Archive is required' }),
-  // For form control only, not validation.
-  _assignSchema: z.enum(['default', 'define_schema'], {
-    message: 'Assign schema is required',
-  }),
 };
 
 /**
@@ -64,6 +67,7 @@ const sourceDetailsTabSchema = {
  */
 const originTabSchema = {
   origin: z.enum(SOURCE_ORIGINS, { message: 'Origin is required' }),
+
   match: z
     .object({
       field: z
@@ -80,6 +84,12 @@ const originTabSchema = {
       topic: z.enum(FETCHER_TOPICS).optional().nullable(),
       // YAML text in the form; an object on the wire.
       config: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  receiver_ui_config: z
+    .object({
+      table: z.enum(FETCHER_TOPICS).optional().nullable(),
     })
     .optional()
     .nullable(),
