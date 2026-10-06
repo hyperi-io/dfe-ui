@@ -4,7 +4,11 @@ import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSou
 import { SourceOrigin } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { FormInstance, FormRule, Radio } from 'antd';
 import { FetcherFormSection } from './FetcherFormSection';
-import { EMPTY_FETCHER, EMPTY_MATCH, EMPTY_RECEIVER_UI_CONFIG } from './helpers';
+import {
+  EMPTY_FETCHER,
+  EMPTY_MATCH,
+  EMPTY_RECEIVER_UI_CONFIG,
+} from './helpers';
 import { ReceiverFormSection } from './RecieverFormSection';
 
 export const OriginFormSection = ({
