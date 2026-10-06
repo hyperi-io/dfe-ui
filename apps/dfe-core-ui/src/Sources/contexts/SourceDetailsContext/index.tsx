@@ -2,6 +2,7 @@
 
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 
+import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
@@ -13,6 +14,7 @@ export interface SourceDetailsContextValue {
   isMetaSchemaDefined: boolean;
   isMainSource: boolean;
   originType: 'fetcher' | 'receiver' | undefined | null;
+  canPromoteFields: boolean;
 }
 
 const SourceDetailsContext = createContext<SourceDetailsContextValue | null>(
@@ -52,8 +54,13 @@ export const SourceDetailsProvider = ({
     return sourceDetail?.version?.origin;
   }, [sourceDetail]);
 
+  // The engine refuses promote-field on a core source, and main is the core landing source.
+  const canPromoteFields =
+    !isMainSource && sourceDetail?.resource_type !== RESOURCE_TYPES.CORE;
+
   const value = useMemo<SourceDetailsContextValue>(
     () => ({
+      canPromoteFields,
       originType,
       sourceDetail,
       isLoadingSourceDetail,
@@ -62,6 +69,7 @@ export const SourceDetailsProvider = ({
       isMainSource,
     }),
     [
+      canPromoteFields,
       originType,
       sourceDetail,
       isLoadingSourceDetail,

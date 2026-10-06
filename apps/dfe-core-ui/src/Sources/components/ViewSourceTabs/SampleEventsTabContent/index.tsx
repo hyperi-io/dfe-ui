@@ -10,7 +10,8 @@ import { FieldPromoteBanner } from './FieldPromoteBanner';
 import { SampleRowsCard } from './SampleRowsCard';
 
 export const SampleEventsTabContent = () => {
-  const { isMetaSchemaDefined, isMainSource } = useSourceDetailsContext();
+  const { isMetaSchemaDefined, isMainSource, canPromoteFields } =
+    useSourceDetailsContext();
 
   const { sampleRows, isLoadingSampleRows, errorSampleRows } =
     usePromoteRowsContext();
@@ -40,7 +41,7 @@ export const SampleEventsTabContent = () => {
 
   return (
     <>
-      {fieldsToPromote.size > 0 && (
+      {canPromoteFields && fieldsToPromote.size > 0 && (
         <div className="relative mb-4">
           <FieldPromoteBanner
             classNames={{
@@ -52,8 +53,8 @@ export const SampleEventsTabContent = () => {
       <div className="flex flex-col gap-y-3">
         {sampleRows?.rows.length === 0 && (
           <NotificationCard
-            title="No fields to promote"
-            description="Sample rows have been analysed and no fields were found for promotion."
+            title="No sample events"
+            description="No records match this source yet."
           />
         )}
 
@@ -65,7 +66,9 @@ export const SampleEventsTabContent = () => {
                 {isMainSource
                   ? 'Source is sampled from'
                   : 'This source has no meta schema defined. Results will be sent to'}
-                <span className="font-semibold">_main_land.</span>
+                <span className="font-semibold">
+                  {sampleRows?.table ?? 'the shared main table'}.
+                </span>
               </p>
             }
           />
