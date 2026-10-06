@@ -38,6 +38,7 @@ const baseSource = (
   has_fetcher: false,
   origin: 'receiver',
   state: 'active',
+  current_table_topic_type: 'own',
   ...overrides,
 });
 

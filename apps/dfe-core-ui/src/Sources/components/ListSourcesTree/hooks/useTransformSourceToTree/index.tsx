@@ -232,6 +232,7 @@ const sourceSummaryToTreeData = ({
       key: sourceTreeKey(source.name),
       title: () => {
         const isDeployed = source.deployed_version;
+        const isSharedTable = source.current_table_topic_type === 'main';
         return (
           <TreeInteractiveLabel
             icon={fileIcon}
@@ -257,7 +258,13 @@ const sourceSummaryToTreeData = ({
                   </Tag>
                 )}
 
-                {!isDeployed && (
+                {isSharedTable && (
+                  <Tooltip destroyOnHidden title="Lands in the shared table">
+                    <IconBucket className="opacity-80 shrink-0" />
+                  </Tooltip>
+                )}
+
+                {!isDeployed && !isSharedTable && (
                   <Tooltip
                     destroyOnHidden
                     title="Shared table will be used until source is deployed"
