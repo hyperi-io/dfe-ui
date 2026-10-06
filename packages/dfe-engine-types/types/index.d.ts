@@ -1586,140 +1586,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/deployments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Deployments
-         * @description List deployment configs with optional filtering.
-         */
-        get: operations["list_deployments_api_v1_deployments_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/deployments/{service}/{instance}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Deployment
-         * @description Get a full deployment config by service + instance.
-         */
-        get: operations["get_deployment_api_v1_deployments__service___instance__get"];
-        /**
-         * Save Deployment
-         * @description Create or update a deployment config.
-         */
-        put: operations["save_deployment_api_v1_deployments__service___instance__put"];
-        post?: never;
-        /**
-         * Delete Deployment
-         * @description Delete a deployment config.
-         */
-        delete: operations["delete_deployment_api_v1_deployments__service___instance__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/deployments/{service}/{instance}/validate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Validate Deployment
-         * @description Dry-run validate a deployment config without saving.
-         */
-        post: operations["validate_deployment_api_v1_deployments__service___instance__validate_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/deployments/{service}/{instance}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Deployment History
-         * @description Get git history for a deployment config.
-         */
-        get: operations["get_deployment_history_api_v1_deployments__service___instance__history_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/deployments/{service}/{instance}/size/{size}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Apply Size
-         * @description Apply a t-shirt size to a deployment config.
-         *
-         *     Sets the size and the CPU/memory requests and limits from the shared size table, and
-         *     resets the KEDA min/max replicas to the service's defaults, which do not vary by size.
-         *     Scaling triggers are left alone. Returns the service's per-size config overrides
-         *     (buffer, memory and batch sizes) -- the caller may optionally PUT these to
-         *     /api/v1/services/{service}/{instance}.
-         */
-        post: operations["apply_size_api_v1_deployments__service___instance__size__size__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/deployments/seed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Seed Deployments
-         * @description Seed built-in default deployment configs. Non-destructive.
-         */
-        post: operations["seed_deployments_api_v1_deployments_seed_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/deployment/admin-links": {
         parameters: {
             query?: never;
@@ -2000,70 +1866,6 @@ export interface paths {
          * @description Delete an alert destination.
          */
         delete: operations["delete_destination_api_v1_alerts_destinations__name__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/service-surfaces": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Service Surfaces
-         * @description List all known service surfaces.
-         */
-        get: operations["list_service_surfaces_api_v1_service_surfaces_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/service-surfaces/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Service Surface
-         * @description Get the full surface definition for a single service.
-         */
-        get: operations["get_service_surface_api_v1_service_surfaces__name__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/service-surfaces/{name}/metrics/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refresh Service Manifest
-         * @description Re-fetch the metrics manifest from a running service.
-         *
-         *     Contacts the service's ``manifest_url`` to update its metrics_surface.
-         *     Returns the refresh result.  Does not fail if the service is unreachable
-         *     -- returns ``refreshed=false`` instead.
-         */
-        post: operations["refresh_service_manifest_api_v1_service_surfaces__name__metrics_refresh_post"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3655,8 +3457,8 @@ export interface paths {
          *
          *     A stored view definition drives generation - including its JSON-derived
          *     columns - when one exists; otherwise falls back to the static field maps via
-         *     the source mapper. Returns the DDL string; does NOT execute it against
-         *     ClickHouse.
+         *     the source mapper, keeping only the mappings whose column the source's table
+         *     carries. Returns the DDL string; does NOT execute it against ClickHouse.
          *
          *     Defaults to the data database, since that is where a propagated hunt reads
          *     the view from (``{source}_sigma``); an explicit ``database`` still overrides it.
@@ -6942,24 +6744,6 @@ export interface components {
             date: string;
         };
         /**
-         * ConfigSurfaceEntry
-         * @description A single configurable setting for a Rust service.
-         */
-        ConfigSurfaceEntry: {
-            /**
-             * Type
-             * @default string
-             */
-            type: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /** Default */
-            default?: unknown;
-        };
-        /**
          * ConfigWriteRequest
          * @description Changes to one instance's config, each keyed by the path the GET reports.
          */
@@ -7523,40 +7307,6 @@ export interface components {
             since: string;
         };
         /**
-         * DeploymentConfigDetail
-         * @description Full deployment config. Inner config is dynamic (schema-less mode).
-         */
-        DeploymentConfigDetail: {
-            /**
-             * Service
-             * @description Service type
-             */
-            service: string;
-            /**
-             * Instance
-             * @description Instance name
-             */
-            instance: string;
-            /**
-             * Config
-             * @description Deployment-specific configuration (resources, KEDA, etc.)
-             */
-            config: {
-                [key: string]: unknown;
-            };
-        };
-        /** DeploymentHistoryEntry */
-        DeploymentHistoryEntry: {
-            /** Commit */
-            commit: string;
-            /** Message */
-            message: string;
-            /** Author */
-            author: string;
-            /** Date */
-            date: string;
-        };
-        /**
          * DeploymentResponse
          * @description What this deployment IS, so a console never has to guess at it.
          */
@@ -7601,21 +7351,6 @@ export interface components {
              * @enum {string}
              */
             source: "deploy-repo" | "deployment" | "engine";
-        };
-        /** DeploymentSummary */
-        DeploymentSummary: {
-            /** Service */
-            service: string;
-            /** Instance */
-            instance: string;
-            /** Size */
-            size?: string | null;
-            /** Replicas */
-            replicas?: number | null;
-            /** Keda Enabled */
-            keda_enabled?: boolean | null;
-            /** Updated At */
-            updated_at?: string | null;
         };
         /**
          * DerivedSchemaResponse
@@ -9380,26 +9115,6 @@ export interface components {
             mark_synthetic: boolean;
         };
         /**
-         * ManifestRefreshResponse
-         * @description Result of a manifest refresh attempt.
-         */
-        ManifestRefreshResponse: {
-            /** Service */
-            service: string;
-            /** Refreshed */
-            refreshed: boolean;
-            /**
-             * Discovered At
-             * @default
-             */
-            discovered_at: string;
-            /**
-             * Metrics Count
-             * @default 0
-             */
-            metrics_count: number;
-        };
-        /**
          * MatchConflictContext
          * @description Structured context for duplicate receiver match (field + value).
          */
@@ -9724,33 +9439,6 @@ export interface components {
              * @description All version ids on this schema
              */
             versions: string[];
-        };
-        /**
-         * MetricEntry
-         * @description A single metric from the service's manifest.
-         */
-        MetricEntry: {
-            /** Name */
-            name: string;
-            /** Type */
-            type: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /**
-             * Unit
-             * @default
-             */
-            unit: string;
-            /** Labels */
-            labels?: string[];
-            /**
-             * Group
-             * @default
-             */
-            group: string;
         };
         /** MetricsResponse */
         MetricsResponse: {
@@ -10221,32 +9909,6 @@ export interface components {
         PaginatedResponse_CatalogueEntryObject_: {
             /** Items */
             items: components["schemas"]["CatalogueEntryObject"][];
-            /**
-             * Total
-             * @description Total matching items across all pages
-             */
-            total: number;
-            /**
-             * Page
-             * @description Current page number (1-based)
-             */
-            page: number;
-            /**
-             * Per Page
-             * @description Items per page
-             */
-            per_page: number;
-            /** Total Pages */
-            readonly total_pages: number;
-            /** Next Page */
-            readonly next_page: number | null;
-            /** Prev Page */
-            readonly prev_page: number | null;
-        };
-        /** PaginatedResponse[DeploymentSummary] */
-        PaginatedResponse_DeploymentSummary_: {
-            /** Items */
-            items: components["schemas"]["DeploymentSummary"][];
             /**
              * Total
              * @description Total matching items across all pages
@@ -12695,38 +12357,6 @@ export interface components {
             /** State */
             state: string;
         };
-        /**
-         * ServiceSurface
-         * @description Complete surface definition for a Rust service.
-         *
-         *     Loaded from YAML files in the service-surfaces config directory.
-         *     One file per service (e.g. ``dfe-receiver.yaml``).
-         */
-        ServiceSurface: {
-            /** Service */
-            service: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /** Config Surface */
-            config_surface?: {
-                [key: string]: components["schemas"]["ConfigSurfaceEntry"];
-            };
-            /** Metrics Surface */
-            metrics_surface?: components["schemas"]["MetricEntry"][];
-            /**
-             * Manifest Url
-             * @default
-             */
-            manifest_url: string;
-            /**
-             * Discovered At
-             * @default
-             */
-            discovered_at: string;
-        };
         /** SetVarRequest */
         SetVarRequest: {
             /** Value */
@@ -12995,22 +12625,6 @@ export interface components {
              * @default true
              */
             include_source_columns: boolean;
-        };
-        /** SizeResponse */
-        SizeResponse: {
-            /** Service */
-            service: string;
-            /** Instance */
-            instance: string;
-            /** Size */
-            size: string;
-            /**
-             * Service Config Overrides
-             * @description Service config overrides to apply (e.g. buffer sizes for this size)
-             */
-            service_config_overrides?: {
-                [key: string]: unknown;
-            };
         };
         /**
          * SourceBundle
@@ -13767,6 +13381,12 @@ export interface components {
              */
             origin?: ("receiver" | "fetcher") | null;
             /**
+             * Current Table Topic Type
+             * @description Where records land: ``own`` when a meta schema pins a per-source table, ``main`` when there is none and records share the landing table
+             * @enum {string}
+             */
+            current_table_topic_type: "own" | "main";
+            /**
              * Views
              * @description Naming-standard views on the deployed version (standard names)
              */
@@ -14189,34 +13809,6 @@ export interface components {
              * @description Present on failure
              */
             error?: string | null;
-        };
-        /**
-         * SurfaceSummary
-         * @description Compact summary for list endpoint.
-         */
-        SurfaceSummary: {
-            /** Service */
-            service: string;
-            /**
-             * Description
-             * @default
-             */
-            description: string;
-            /**
-             * Config Count
-             * @default 0
-             */
-            config_count: number;
-            /**
-             * Metrics Count
-             * @default 0
-             */
-            metrics_count: number;
-            /**
-             * Manifest Url
-             * @default
-             */
-            manifest_url: string;
         };
         /**
          * SyncReportModel
@@ -14888,6 +14480,13 @@ export interface components {
             /** Errors */
             errors?: string[];
         };
+        /** ValidationResult */
+        ValidationResult: {
+            /** Valid */
+            valid: boolean;
+            /** Errors */
+            errors?: string[];
+        };
         /**
          * ValuesResponse
          * @description The overlay document, wrapped so the revision has somewhere to live.
@@ -15294,20 +14893,6 @@ export interface components {
             restart_required?: string[];
         };
         /** SeedResponse */
-        dfe_engine__api__v1__deployments__SeedResponse: {
-            /** Seeded */
-            seeded: number;
-        };
-        /** ValidationResult */
-        dfe_engine__api__v1__deployments__ValidationResult: {
-            /** Valid */
-            valid: boolean;
-            /** Errors */
-            errors?: string[];
-            /** Warnings */
-            warnings?: string[];
-        };
-        /** SeedResponse */
         dfe_engine__api__v1__fieldmaps__SeedResponse: {
             /** Seeded */
             seeded: number;
@@ -15427,13 +15012,6 @@ export interface components {
         dfe_engine__api__v1__services__SeedResponse: {
             /** Seeded */
             seeded: number;
-        };
-        /** ValidationResult */
-        dfe_engine__api__v1__services__ValidationResult: {
-            /** Valid */
-            valid: boolean;
-            /** Errors */
-            errors?: string[];
         };
         /**
          * SyncResponse
@@ -20011,7 +19589,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__services__ValidationResult"];
+                    "application/json": components["schemas"]["ValidationResult"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -20111,415 +19689,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["dfe_engine__api__v1__services__SeedResponse"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_deployments_api_v1_deployments_get: {
-        parameters: {
-            query?: {
-                /** @description Filter by service type */
-                service?: string | null;
-                /** @description Search in service/instance names */
-                search?: string | null;
-                /** @description Sort field (service, instance, updated_at) */
-                sort_by?: string | null;
-                /** @description Sort order: asc/desc */
-                sort_order?: string;
-                page?: number;
-                per_page?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DeploymentSummary_"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_deployment_api_v1_deployments__service___instance__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeploymentConfigDetail"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    save_deployment_api_v1_deployments__service___instance__put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_deployment_api_v1_deployments__service___instance__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    validate_deployment_api_v1_deployments__service___instance__validate_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__deployments__ValidationResult"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_deployment_history_api_v1_deployments__service___instance__history_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeploymentHistoryEntry"][];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    apply_size_api_v1_deployments__service___instance__size__size__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                service: string;
-                instance: string;
-                size: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SizeResponse"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    seed_deployments_api_v1_deployments_seed_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["dfe_engine__api__v1__deployments__SeedResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -21464,142 +20633,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_service_surfaces_api_v1_service_surfaces_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SurfaceSummary"][];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_service_surface_api_v1_service_surfaces__name__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ServiceSurface"];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    refresh_service_manifest_api_v1_service_surfaces__name__metrics_refresh_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ManifestRefreshResponse"];
-                };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
             401: {
