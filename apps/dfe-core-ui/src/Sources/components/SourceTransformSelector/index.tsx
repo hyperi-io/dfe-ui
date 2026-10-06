@@ -1,10 +1,5 @@
 'use client';
 
-import { AppInstancePanels } from '@/core/components/appManagement/AppInstancePanels';
-import {
-  buildTransformOptions,
-  TransformOption,
-} from '@/core/components/appManagement/transformApps';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
@@ -16,6 +11,11 @@ import {
 } from '@/core/hooks/apps/instances/useFetchApps';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
+import { AppInstancePanels } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppInstancePanels';
+import {
+  buildTransformOptions,
+  TransformOption,
+} from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';

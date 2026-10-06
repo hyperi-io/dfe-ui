@@ -36,10 +36,12 @@ export const transformSourceFormDataToRequestBody = (
         value: match?.value ?? '',
       };
 
-  const transformedSource: TSourceUpdateRequestBody & {
-    _assignSchema?: string;
-  } = {
-    ...rest,
+  // Form-only: which table choice drives progressive disclosure. The engine
+  // never sees it.
+  const { receiver_ui_config: _receiverUiConfig, ...apiRest } = rest;
+
+  const transformedSource: TSourceUpdateRequestBody = {
+    ...apiRest,
     // An empty engine is how the API is told to follow the DFE default.
     ...(schema != null
       ? { schema: { ...schema, engine: schema.engine ?? '' } }
@@ -63,7 +65,6 @@ export const transformSourceFormDataToRequestBody = (
       ? { transform: { ...transform, env: objectArrayToObject(transform.env) } }
       : {}),
     fetcher: apiFetcher,
-    _assignSchema: undefined,
   };
   return transformedSource;
 };

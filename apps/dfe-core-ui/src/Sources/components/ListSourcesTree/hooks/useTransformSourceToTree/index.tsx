@@ -7,6 +7,7 @@ import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/typ
 import { cn } from '@/core/utils/style';
 import {
   IconBucket,
+  IconBucketDroplet,
   IconCapture,
   IconCaptureOff,
   IconFile,
@@ -162,7 +163,7 @@ const sourceSummaryToTreeData = ({
             title={
               <span className="flex gap-2 items-center">
                 {mainSource.name.split('/').pop() ?? ''}
-                <Tooltip destroyOnHidden title="_main_land">
+                <Tooltip destroyOnHidden title="Lands in the shared table">
                   <IconBucket className="opacity-80" />
                 </Tooltip>
 
@@ -226,10 +227,12 @@ const sourceSummaryToTreeData = ({
       expandTreeNode,
     );
     const sourceIsLeaf = versionChildren.length === 0;
+
     out.push({
       key: sourceTreeKey(source.name),
       title: () => {
         const isDeployed = source.deployed_version;
+        const isSharedTable = source.current_table_topic_type === 'main';
         return (
           <TreeInteractiveLabel
             icon={fileIcon}
@@ -255,9 +258,18 @@ const sourceSummaryToTreeData = ({
                   </Tag>
                 )}
 
-                {!isDeployed && (
-                  <Tooltip destroyOnHidden title="_main_land">
+                {isSharedTable && (
+                  <Tooltip destroyOnHidden title="Lands in the shared table">
                     <IconBucket className="opacity-80 shrink-0" />
+                  </Tooltip>
+                )}
+
+                {!isDeployed && !isSharedTable && (
+                  <Tooltip
+                    destroyOnHidden
+                    title="Shared table will be used until source is deployed"
+                  >
+                    <IconBucketDroplet className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
                 {isDeployed && (

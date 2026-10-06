@@ -196,15 +196,23 @@ export const ListSourcesProvider = ({
       source_name: string | null;
       source_version: string | null;
     }) => {
+      const sourceChanged = source_name !== selectedSourceName;
       setSelectedSourceName(source_name);
       setSelectedSourceVersion(source_version);
+      const keep = new URLSearchParams(searchParams.toString());
+      // Processing and the later tabs are not on every source. Keeping a stale
+      // tab when the source changes leaves the URL pointing at a strip that is
+      // no longer rendered. Version switches of the same source keep the tab.
+      if (sourceChanged) {
+        keep.delete('tab');
+      }
       const query = filtersToSearchString(
         {
           ...filters,
           source_name: source_name ?? '',
           source_version: source_version ?? '',
         },
-        new URLSearchParams(searchParams.toString()),
+        keep,
       );
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
@@ -213,6 +221,7 @@ export const ListSourcesProvider = ({
       pathname,
       filters,
       searchParams,
+      selectedSourceName,
       setSelectedSourceName,
       setSelectedSourceVersion,
     ],

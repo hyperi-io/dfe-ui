@@ -15,11 +15,11 @@ import {
   type SourceFormTab,
 } from './helpers';
 import { SchemaConfigTabContent } from './SchemaConfigTabContent';
-import { getInitialAssignSchema } from './SchemaConfigTabContent/SchemaConfigTabContent.helpers';
 import { SourceDetailsTabContent } from './SourceDetailsTabContent';
 import {
   EMPTY_FETCHER,
   EMPTY_MATCH,
+  EMPTY_RECEIVER_UI_CONFIG,
 } from './SourceDetailsTabContent/OriginFormSection/helpers';
 import {
   formSchema,
@@ -103,6 +103,14 @@ export const CreateUpdateSourceFormBase = ({
   const metaSchema = Form.useWatch(['schema'], form);
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
 
+  const watchFetcherTopic = Form.useWatch(['fetcher', 'topic'], form);
+  const watchReceiverTable = Form.useWatch(
+    ['receiver_ui_config', 'table'],
+    form,
+  );
+  const isFetcherTopicOwn = watchFetcherTopic === 'own';
+  const isReceiverTableOwn = watchReceiverTable === 'own';
+
   const tabItems = [
     {
       key: 'sourceDetails',
@@ -121,19 +129,29 @@ export const CreateUpdateSourceFormBase = ({
         />
       ),
     },
-    {
-      key: 'schemaConfig',
-      label: (
-        <TabLabel
-          label={TAB_LABEL_MAP['schemaConfig']}
-          validationErrors={getTabErrors(validationErrors, 'schemaConfig')}
-        />
-      ),
-      forceRender: true,
-      children: (
-        <SchemaConfigTabContent formValidation={formValidation} form={form} />
-      ),
-    },
+    ...(isReceiverTableOwn || isFetcherTopicOwn
+      ? [
+          {
+            key: 'schemaConfig',
+            label: (
+              <TabLabel
+                label={TAB_LABEL_MAP['schemaConfig']}
+                validationErrors={getTabErrors(
+                  validationErrors,
+                  'schemaConfig',
+                )}
+              />
+            ),
+            forceRender: true,
+            children: (
+              <SchemaConfigTabContent
+                formValidation={formValidation}
+                form={form}
+              />
+            ),
+          },
+        ]
+      : []),
 
     ...(isMetaSchemaFormValueDefined
       ? /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
@@ -195,12 +213,10 @@ export const CreateUpdateSourceFormBase = ({
         // Both blocks are seeded so switching origin lands on a usable form.
         match: { ...EMPTY_MATCH, ...initialValues?.match },
         fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
-        // Empty creates have no schema yet, so the radio starts on main.
-        _assignSchema:
-          initialValues?._assignSchema ??
-          getInitialAssignSchema({
-            meta_schema: initialValues?.schema?.meta_schema ?? null,
-          }),
+        receiver_ui_config: {
+          ...EMPTY_RECEIVER_UI_CONFIG,
+          ...initialValues?.receiver_ui_config,
+        },
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}

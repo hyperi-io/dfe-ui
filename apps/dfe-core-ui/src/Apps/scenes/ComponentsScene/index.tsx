@@ -5,11 +5,11 @@ import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
 import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
-import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { MainContentCard } from '@/core/components/ContentCard';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { Spin, Tabs } from 'antd';
 
 /**
