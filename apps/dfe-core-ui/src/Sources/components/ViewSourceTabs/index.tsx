@@ -75,7 +75,7 @@ export const ViewSourceDetailTabs = ({
     [pathname, router, searchParams],
   );
 
-  const { isMetaSchemaDefined } = useSourceDetailsContext();
+  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
   const { setSelectedSource, refetch: refetchSources } =
     useListSourcesContext();
 
@@ -155,7 +155,7 @@ export const ViewSourceDetailTabs = ({
             </RbacProtected>
           ),
         },
-        ...(!isMainSource
+        ...(!isMainSource && isMetaSchemaDefined && isDeployed
           ? [
               {
                 key: 'processing',

@@ -15,6 +15,7 @@ export interface SourceDetailsContextValue {
   isMainSource: boolean;
   originType: 'fetcher' | 'receiver' | undefined | null;
   canPromoteFields: boolean;
+  isDeployed: boolean;
 }
 
 const SourceDetailsContext = createContext<SourceDetailsContextValue | null>(
@@ -58,8 +59,11 @@ export const SourceDetailsProvider = ({
   const canPromoteFields =
     !isMainSource && sourceDetail?.resource_type !== RESOURCE_TYPES.CORE;
 
+  const isDeployed = sourceDetail?.deployed_version !== null;
+
   const value = useMemo<SourceDetailsContextValue>(
     () => ({
+      isDeployed,
       canPromoteFields,
       originType,
       sourceDetail,
@@ -69,6 +73,7 @@ export const SourceDetailsProvider = ({
       isMainSource,
     }),
     [
+      isDeployed,
       canPromoteFields,
       originType,
       sourceDetail,
