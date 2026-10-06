@@ -56,10 +56,35 @@ export const ViewSourceDetailTabs = ({
   const router = useRouter();
   const pathname = usePathname();
 
+  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
+  const { setSelectedSource, refetch: refetchSources } =
+    useListSourcesContext();
+
+  const isMainSource = selectedSourceName === 'main';
+
+  // Same gates as the strip below: a URL tab that is not on screen falls back
+  // to Flow. Clearing that param is the list's job when the source changes.
+  const availableTabKeys = useMemo((): SourceDetailTabKey[] => {
+    const keys: SourceDetailTabKey[] = [
+      'flow',
+      'configuration',
+      'sample-events',
+    ];
+    if (!isMainSource && isMetaSchemaDefined && isDeployed) {
+      keys.push('processing');
+    }
+    if (isMetaSchemaDefined) {
+      keys.push('columns', 'buildDeploy');
+    }
+    return keys;
+  }, [isDeployed, isMainSource, isMetaSchemaDefined]);
+
   const activeTab = useMemo(() => {
     const tab = searchParams.get('tab');
-    return isSourceDetailTabKey(tab) ? tab : DEFAULT_SOURCE_DETAIL_TAB;
-  }, [searchParams]);
+    return isSourceDetailTabKey(tab) && availableTabKeys.includes(tab)
+      ? tab
+      : DEFAULT_SOURCE_DETAIL_TAB;
+  }, [availableTabKeys, searchParams]);
 
   const handleTabChange = useCallback(
     (key: string) => {
@@ -75,10 +100,6 @@ export const ViewSourceDetailTabs = ({
     [pathname, router, searchParams],
   );
 
-  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
-  const { setSelectedSource, refetch: refetchSources } =
-    useListSourcesContext();
-
   // A transform switch is a source write, and on a deployed source it lands on
   // a new version: without following it the page keeps reading the old one.
   const handleSourceUpdated = useCallback(
@@ -91,8 +112,6 @@ export const ViewSourceDetailTabs = ({
     },
     [refetchSources, setSelectedSource],
   );
-
-  const isMainSource = selectedSourceName === 'main';
 
   return (
     <Tabs

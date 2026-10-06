@@ -261,5 +261,51 @@ describe('ListSourcesContext', () => {
 
       expect(mockReplace).toHaveBeenCalledWith('/sources');
     });
+
+    it('drops the detail tab when the selected source changes', async () => {
+      searchParamsRef.current = new URLSearchParams(
+        'source_name=syslog&source_version=1.0.0&tab=processing',
+      );
+
+      const { result } = renderHook(() => useListSourcesContext(), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.selectedSourceName).toBe('syslog');
+      });
+
+      result.current.setSelectedSource({
+        source_name: 'main',
+        source_version: '1.0.0',
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith(
+        '/sources?source_name=main&source_version=1.0.0',
+      );
+    });
+
+    it('keeps the detail tab when only the version of the same source changes', async () => {
+      searchParamsRef.current = new URLSearchParams(
+        'source_name=syslog&source_version=1.0.0&tab=configuration',
+      );
+
+      const { result } = renderHook(() => useListSourcesContext(), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.selectedSourceName).toBe('syslog');
+      });
+
+      result.current.setSelectedSource({
+        source_name: 'syslog',
+        source_version: '1.0.1',
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith(
+        '/sources?tab=configuration&source_name=syslog&source_version=1.0.1',
+      );
+    });
   });
 });
