@@ -1,14 +1,14 @@
 'use client';
 
-import { AppInstancePanels } from '@/core/components/appManagement/AppInstancePanels';
-import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
-import { useCreateAppInstance } from '@/core/hooks/apps/instances/useCreateAppInstance';
-import { useDeleteAppInstance } from '@/core/hooks/apps/instances/useDeleteAppInstance';
-import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
+import { AppInstancePanels } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppInstancePanels';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
+import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { useCreateAppInstance } from '@/core/hooks/apps/instances/useCreateAppInstance';
+import { useDeleteAppInstance } from '@/core/hooks/apps/instances/useDeleteAppInstance';
+import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';
 

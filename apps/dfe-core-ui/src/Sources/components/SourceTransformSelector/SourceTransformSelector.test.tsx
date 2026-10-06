@@ -16,9 +16,12 @@ import { server, SYSLOG_ON_VRL } from './SourceTransformSelector.mocks';
 
 // The deployed instance's own panels are covered where they live; this is about
 // the choice above them, and rendering them here would pull in four more calls.
-vi.mock('@/core/components/appManagement/AppInstancePanels', () => ({
-  AppInstancePanels: () => <div data-testid="instance-panels" />,
-}));
+vi.mock(
+  '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppInstancePanels',
+  () => ({
+    AppInstancePanels: () => <div data-testid="instance-panels" />,
+  }),
+);
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());

@@ -2,7 +2,7 @@
 
 import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
-import { IconArrowRight, IconLock } from '@repo/dfe-icons';
+import { IconLock, IconLongArrowRight } from '@repo/dfe-icons';
 import { Tag } from 'antd';
 import Link from 'next/link';
 
@@ -112,9 +112,8 @@ export const FlowArrow = ({ label }: { label?: string }) => (
     title={label}
   >
     {/* The stages stack below the container width, so the edge turns with them. */}
-    <span className="flex rotate-90 items-center @2xl:rotate-0">
-      <span className="bg-foreground/25 dark:bg-dark-foreground/25 h-px w-6" />
-      <IconArrowRight className="text-foreground/40 dark:text-dark-foreground/40 -ml-1.5" />
+    <span className="flex rotate-90 items-center @2xl:rotate-0 opacity-40">
+      <IconLongArrowRight className="w-7 text-foreground dark:text-dark-foreground right-0" />
     </span>
   </div>
 );

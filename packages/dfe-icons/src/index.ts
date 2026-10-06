@@ -3714,6 +3714,7 @@ export { default as IconLogout2 } from "./icons/IconLogout2";
 export { default as IconLogs } from "./icons/IconLogs";
 export { default as IconLollipop } from "./icons/IconLollipop";
 export { default as IconLollipopOff } from "./icons/IconLollipopOff";
+export { default as IconLongArrowRight } from "./icons/IconLongArrowRight";
 export { default as IconLuggage } from "./icons/IconLuggage";
 export { default as IconLuggageOff } from "./icons/IconLuggageOff";
 export { default as IconLungs } from "./icons/IconLungs";

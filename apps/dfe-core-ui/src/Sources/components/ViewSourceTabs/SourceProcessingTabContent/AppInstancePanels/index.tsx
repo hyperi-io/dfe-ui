@@ -1,10 +1,10 @@
 'use client';
 
 import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
-import { AppFileSets } from '@/core/components/appManagement/AppFileSets';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
+import { AppFileSets } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppFileSets';
 import { Collapse } from 'antd';
 
 /**

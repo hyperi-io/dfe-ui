@@ -40,6 +40,7 @@ export const sources = {
               has_fetcher: false,
               origin: 'receiver',
               state: 'active',
+              current_table_topic_type: 'own',
             },
           ],
           objects: {
@@ -241,6 +242,7 @@ export const sources = {
           previous_deployed_versions: ['1.0.0'],
           state: 'active',
           version: {
+            origin: 'receiver',
             date_time: 'string',
             archive: false,
             header: {
@@ -568,6 +570,7 @@ export const sources = {
           versions: ['string'],
           state: 'active',
           version: {
+            origin: 'receiver',
             date_time: 'string',
             archive: false,
             header: {

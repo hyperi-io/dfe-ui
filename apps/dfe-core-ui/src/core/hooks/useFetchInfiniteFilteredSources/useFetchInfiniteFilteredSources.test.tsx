@@ -82,6 +82,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         origin: 'receiver',
         state: 'active',
         deployed_version: 'string',
+        current_table_topic_type: 'own',
       };
       expect(result.current.data).toBeDefined();
       expect(result.current.data.items).toHaveLength(10);

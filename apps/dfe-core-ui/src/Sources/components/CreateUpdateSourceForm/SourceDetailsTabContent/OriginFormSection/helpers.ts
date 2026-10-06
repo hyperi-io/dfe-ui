@@ -14,6 +14,12 @@ export const EMPTY_FETCHER: NonNullable<CreateUpdateSourceFormData['fetcher']> =
     config: '',
   };
 
+export const EMPTY_RECEIVER_UI_CONFIG: NonNullable<
+  CreateUpdateSourceFormData['receiver_ui_config']
+> = {
+  table: 'own',
+};
+
 /**
  * The fetcher families the deployed stack accepts.
  *

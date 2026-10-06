@@ -39,6 +39,7 @@ describe('.useFetchSourceDetail', () => {
         selected: 'string',
         state: 'active',
         version: {
+          origin: 'receiver',
           date_time: 'string',
           archive: false,
           header: {

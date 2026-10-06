@@ -16,6 +16,7 @@ const SOURCE_ITEM: TSourceListSummary = {
   has_fetcher: false,
   origin: 'receiver',
   state: 'active',
+  current_table_topic_type: 'own',
 };
 
 const TOTAL_ITEMS = 25;

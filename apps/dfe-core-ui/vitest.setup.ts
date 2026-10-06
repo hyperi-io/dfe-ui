@@ -60,7 +60,15 @@ vi.mock('next-auth/react', () => ({
 }));
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
-  usePathname: vi.fn(),
+  usePathname: vi.fn(() => '/'),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    back: vi.fn(),
+    prefetch: vi.fn(),
+  })),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
 }));
 
 // Workers reuse a process. Module isolation does not reset process.env or

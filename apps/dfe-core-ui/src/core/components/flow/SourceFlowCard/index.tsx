@@ -72,7 +72,12 @@ export const SourceFlowCard = ({
     );
   }
 
-  const { stages, arrows } = flowStages(flow);
+  const { stages: rawStages, arrows } = flowStages(flow);
+
+  const stages =
+    source === 'main'
+      ? rawStages.filter((stage) => stage.stage !== 'Transform')
+      : rawStages;
 
   return (
     <SectionCard title={<Heading title={title} />} description={description}>

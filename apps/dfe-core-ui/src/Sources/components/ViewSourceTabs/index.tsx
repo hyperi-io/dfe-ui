@@ -1,11 +1,11 @@
 'use client';
 
 import { SourceTransformSelector } from '@/Sources/components/SourceTransformSelector';
+import { SourceProcessingTabContent } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SourceProcessingTabContent } from '@/core/components/appManagement/SourceProcessingTabContent';
 import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
@@ -56,10 +56,35 @@ export const ViewSourceDetailTabs = ({
   const router = useRouter();
   const pathname = usePathname();
 
+  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
+  const { setSelectedSource, refetch: refetchSources } =
+    useListSourcesContext();
+
+  const isMainSource = selectedSourceName === 'main';
+
+  // Same gates as the strip below: a URL tab that is not on screen falls back
+  // to Flow. Clearing that param is the list's job when the source changes.
+  const availableTabKeys = useMemo((): SourceDetailTabKey[] => {
+    const keys: SourceDetailTabKey[] = [
+      'flow',
+      'configuration',
+      'sample-events',
+    ];
+    if (!isMainSource && isMetaSchemaDefined && isDeployed) {
+      keys.push('processing');
+    }
+    if (isMetaSchemaDefined) {
+      keys.push('columns', 'buildDeploy');
+    }
+    return keys;
+  }, [isDeployed, isMainSource, isMetaSchemaDefined]);
+
   const activeTab = useMemo(() => {
     const tab = searchParams.get('tab');
-    return isSourceDetailTabKey(tab) ? tab : DEFAULT_SOURCE_DETAIL_TAB;
-  }, [searchParams]);
+    return isSourceDetailTabKey(tab) && availableTabKeys.includes(tab)
+      ? tab
+      : DEFAULT_SOURCE_DETAIL_TAB;
+  }, [availableTabKeys, searchParams]);
 
   const handleTabChange = useCallback(
     (key: string) => {
@@ -74,10 +99,6 @@ export const ViewSourceDetailTabs = ({
     },
     [pathname, router, searchParams],
   );
-
-  const { isMetaSchemaDefined } = useSourceDetailsContext();
-  const { setSelectedSource, refetch: refetchSources } =
-    useListSourcesContext();
 
   // A transform switch is a source write, and on a deployed source it lands on
   // a new version: without following it the page keeps reading the old one.
@@ -153,33 +174,39 @@ export const ViewSourceDetailTabs = ({
             </RbacProtected>
           ),
         },
-        {
-          key: 'processing',
-          label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
-          children: (
-            <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
-              <RbacProtected.Unrestricted>
-                <SourceProcessingTabContent
-                  source={selectedSourceName}
-                  transformSlot={
-                    <SourceTransformSelector
-                      // Keyed by source: a refusal is one deployment's answer
-                      // about one source, and it must not follow the reader to
-                      // the next one.
-                      key={selectedSourceName}
-                      source={selectedSourceName}
-                      sourceDetail={sourceDetailData}
-                      onSourceUpdated={handleSourceUpdated}
-                    />
-                  }
-                />
-              </RbacProtected.Unrestricted>
-              <RbacProtected.Restricted className="h-full">
-                <RbacProtected.RestrictedRoute />
-              </RbacProtected.Restricted>
-            </RbacProtected>
-          ),
-        },
+        ...(!isMainSource && isMetaSchemaDefined && isDeployed
+          ? [
+              {
+                key: 'processing',
+                label: SOURCE_DETAIL_TAB_KEY_MAP['processing'],
+                children: (
+                  <RbacProtected
+                    action={RbacProtected.rbacActions.deployment_read}
+                  >
+                    <RbacProtected.Unrestricted>
+                      <SourceProcessingTabContent
+                        source={selectedSourceName}
+                        transformSlot={
+                          <SourceTransformSelector
+                            // Keyed by source: a refusal is one deployment's answer
+                            // about one source, and it must not follow the reader to
+                            // the next one.
+                            key={selectedSourceName}
+                            source={selectedSourceName}
+                            sourceDetail={sourceDetailData}
+                            onSourceUpdated={handleSourceUpdated}
+                          />
+                        }
+                      />
+                    </RbacProtected.Unrestricted>
+                    <RbacProtected.Restricted className="h-full">
+                      <RbacProtected.RestrictedRoute />
+                    </RbacProtected.Restricted>
+                  </RbacProtected>
+                ),
+              },
+            ]
+          : []),
 
         /* Progressive disclosure - the next tab Items are hidden until meta schema is defined */
         ...(isMetaSchemaDefined

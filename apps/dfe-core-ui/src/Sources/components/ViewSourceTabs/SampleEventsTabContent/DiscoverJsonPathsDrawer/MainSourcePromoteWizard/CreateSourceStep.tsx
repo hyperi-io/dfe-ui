@@ -47,7 +47,6 @@ export const CreateSourceStep = ({
           meta_schema: schemaPath,
           meta_schema_version: '1.0.0',
         },
-        _assignSchema: 'define_schema',
       }}
     />
   );

@@ -169,9 +169,6 @@ export const CloneSourceDrawer = ({
             error={error}
             buttonLabel={title}
             initialValues={{
-              _assignSchema: sourceDetail.version?.schema?.meta_schema
-                ? 'define_schema'
-                : 'default',
               schema: {
                 ...sourceDetail.version?.schema,
                 meta_schema: sourceDetail.version?.schema?.meta_schema ?? '',
@@ -204,6 +201,9 @@ export const CloneSourceDrawer = ({
                 field: '',
                 operator: 'equals',
                 value: '',
+              },
+              receiver_ui_config: {
+                table: 'main',
               },
             }}
           />

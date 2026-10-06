@@ -11,7 +11,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       enabled: true,
       archive: false,
       origin: 'receiver',
-      _assignSchema: 'default',
+
       match: { field: 'field', value: 'value', operator: 'equals' },
       fetcher: { source_type: 'crates_io', topic: 'own', config: 'crates: []' },
     };
@@ -32,7 +32,7 @@ describe('transformSourceFormDataToRequestBody', () => {
   test('a blank engine is sent empty, which follows the DFE default', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
-      _assignSchema: 'default',
+
       enabled: true,
       archive: false,
       origin: 'receiver',
@@ -55,7 +55,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       enabled: true,
       archive: false,
       origin: 'fetcher',
-      _assignSchema: 'default',
+
       match: { field: 'field', value: 'value', operator: 'equals' },
       fetcher: {
         source_type: 'crates_io',
@@ -77,7 +77,7 @@ describe('transformSourceFormDataToRequestBody', () => {
   test('an empty config is an empty stanza, not a missing one', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
-      _assignSchema: 'default',
+
       enabled: true,
       archive: false,
       origin: 'fetcher',
@@ -99,7 +99,7 @@ describe('transformSourceFormDataToRequestBody', () => {
       enabled: true,
       archive: false,
       origin: 'fetcher',
-      _assignSchema: 'default',
+
       fetcher: { source_type: 'okta' },
     };
 
@@ -111,7 +111,6 @@ describe('transformSourceFormDataToRequestBody', () => {
   test('maps view custom_mappings from form tuples to API record', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
-      _assignSchema: 'default',
       enabled: true,
       archive: false,
       origin: 'receiver',

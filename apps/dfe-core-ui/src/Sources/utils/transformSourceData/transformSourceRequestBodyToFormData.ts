@@ -15,6 +15,7 @@ export const transformSourceRequestBodyToFormData = (
 ): CreateUpdateSourceFormData => {
   const fetcher = source?.version?.fetcher;
   const hasFetcher = Object.keys(fetcher ?? {}).length > 0;
+  const hasMetaSchema = !!source?.version?.schema?.meta_schema;
 
   const transformedSource: CreateUpdateSourceFormData = {
     ...source,
@@ -25,7 +26,6 @@ export const transformSourceRequestBodyToFormData = (
     // not the same as a choice: null puts it back on the deployment default.
     transport: source?.version?.transport ?? null,
     archive: source?.version?.archive ?? false,
-    _assignSchema: 'default',
     header: source?.version?.header
       ? {
           ...source?.version?.header,
@@ -69,6 +69,13 @@ export const transformSourceRequestBodyToFormData = (
         ...(formCustomMappings ? { custom_mappings: formCustomMappings } : {}),
       };
     }),
+    ...(!hasFetcher
+      ? {
+          receiver_ui_config: {
+            table: hasMetaSchema ? 'own' : 'main',
+          },
+        }
+      : {}),
   };
   return transformedSource;
 };

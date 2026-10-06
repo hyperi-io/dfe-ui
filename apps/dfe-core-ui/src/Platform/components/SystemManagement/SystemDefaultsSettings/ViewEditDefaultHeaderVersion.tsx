@@ -119,7 +119,7 @@ export const ViewEditDefaultHeaderVersion = ({
             onFinish={handleFinish}
             initialValues={{
               common_header_version: defaultHeaderVersion,
-              common_header_type: `common-header/${defaultHeader}`,
+              common_header_type: `common-header/${defaultHeader.replace('common-header/', '')}`,
             }}
           >
             <Form.Item
