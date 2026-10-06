@@ -7,6 +7,7 @@ import { TSourceSummary } from '@/core/hooks/useFetchInfiniteFilteredSources/typ
 import { cn } from '@/core/utils/style';
 import {
   IconBucket,
+  IconBucketDroplet,
   IconCapture,
   IconCaptureOff,
   IconFile,
@@ -258,9 +259,9 @@ const sourceSummaryToTreeData = ({
                 {!isDeployed && (
                   <Tooltip
                     destroyOnHidden
-                    title="Lands in the shared main table"
+                    title="Shared main table will be used until source is deployed"
                   >
-                    <IconBucket className="opacity-80 shrink-0" />
+                    <IconBucketDroplet className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
                 {isDeployed && (
