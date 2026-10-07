@@ -32,6 +32,8 @@ describe('.useCreateGroup', () => {
     roles: ['string'],
     members: [],
     scope: 'string',
+    source_id: 'string',
+    source_provider: 'string',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -51,6 +53,8 @@ describe('.useCreateGroup', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       await waitFor(() => {
@@ -58,6 +62,7 @@ describe('.useCreateGroup', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
           data: expectedResponse,
         });
       });

@@ -2,6 +2,7 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import {
   CreateUpdateGroupForm,
   CreateUpdateGroupFormData,
+  GroupSourceLink,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm';
 import { updateGroupTransformFormDataToRequest } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupFormDataToRequest';
 import { createUpdateGroupRequestToFormData } from '@/Settings/helpers/createUpdateGroupTransforms/createUpdateGroupRequestToFormData';
@@ -28,8 +29,11 @@ export const UpdateGroupForm = ({
     error: fetchGroupDetailError,
   } = useFetchGroupDetail({ group_name });
 
-  const handleFinish = (values: CreateUpdateGroupFormData) => {
-    onFinish(updateGroupTransformFormDataToRequest(values));
+  const handleFinish = (
+    values: CreateUpdateGroupFormData,
+    stored: GroupSourceLink,
+  ) => {
+    onFinish(updateGroupTransformFormDataToRequest(values, stored));
   };
 
   if (isFetchingGroupDetail) {

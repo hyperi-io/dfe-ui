@@ -14,6 +14,7 @@ export const QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS =
  * @param sort_by - The field to sort the oidc providers by.
  * @param sort_order - The order to sort the oidc providers by.
  * @param per_page - The number of oidc providers to fetch per page.
+ * @param enabled - Whether to fetch at all, for a caller whose user may not read providers.
  */
 /**
  * @returns A list of oidc providers.
@@ -24,6 +25,7 @@ export const useFetchInfiniteFilteredOidcProviders = ({
   sort_order,
   page,
   per_page,
+  enabled = true,
 }: UseFetchInfiniteFilteredOidcProvidersProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
@@ -63,6 +65,7 @@ export const useFetchInfiniteFilteredOidcProviders = ({
       return hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
+    enabled,
   });
 
   const flattenedData = useMemo(() => {

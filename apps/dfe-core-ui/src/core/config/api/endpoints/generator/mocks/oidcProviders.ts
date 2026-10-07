@@ -298,6 +298,7 @@ export const oidcProviders = {
           total: 1,
           groups_skipped: 0,
           error: null,
+          skipped: null,
         },
         name = 'name',
       }: {

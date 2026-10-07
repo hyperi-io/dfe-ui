@@ -50,6 +50,7 @@ describe('.useSyncOidcProviderGroups', () => {
         total: 1,
         groups_skipped: 0,
         error: null,
+        skipped: null,
       };
 
       await waitFor(() => {
@@ -68,6 +69,40 @@ describe('.useSyncOidcProviderGroups', () => {
       await waitFor(() => {
         expect(onError).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('a skipped sync', () => {
+    test('passes the reason through', async () => {
+      const skipped =
+        "groups mode is 'manual': group membership is managed in DFE, so there is no directory to sync";
+      server.use(
+        API_CONFIG_MOCKS.oidcProviders.syncGroups.post.success({
+          mockedResponse: {
+            created: 0,
+            updated: 0,
+            total: 0,
+            groups_skipped: 0,
+            error: null,
+            skipped,
+          },
+        }),
+      );
+      const onSuccess = vi.fn();
+
+      const { result } = renderHook(
+        () => useSyncOidcProviderGroups({ name, onSuccess }),
+        { wrapper },
+      );
+
+      result.current.mutate();
+
+      await waitFor(() => {
+        expect(result.current.data?.skipped).toBe(skipped);
+      });
+      expect(onSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ skipped }),
+      );
     });
   });
 

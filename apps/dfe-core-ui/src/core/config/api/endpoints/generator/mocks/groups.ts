@@ -23,6 +23,8 @@ export const groups = {
               roles: ['string'],
               members: ['string'],
               scope: 'string',
+              source_id: 'string',
+              source_provider: 'string',
             },
           ],
           total: 25,
@@ -59,6 +61,8 @@ export const groups = {
           roles: ['string'],
           members: ['string'],
           scope: 'string',
+          source_id: 'string',
+          source_provider: 'string',
         },
       }: {
         mockedResponse?: TGroupCreateResponse;
@@ -90,6 +94,8 @@ export const groups = {
           roles: ['string'],
           members: ['string'],
           scope: 'string',
+          source_id: 'string',
+          source_provider: 'string',
         },
         group_name = 'group_name',
       }: {
@@ -128,6 +134,8 @@ export const groups = {
           roles: ['string'],
           members: ['string'],
           scope: 'string',
+          source_id: 'string',
+          source_provider: 'string',
         },
         group_name = 'group_name',
       }: {
@@ -203,6 +211,8 @@ export const groups = {
           roles: ['string'],
           members: ['string'],
           scope: 'string',
+          source_id: 'string',
+          source_provider: 'string',
         },
         group_name = 'group_name',
       }: {
@@ -249,6 +259,8 @@ export const groups = {
           roles: ['string'],
           members: ['string'],
           scope: 'string',
+          source_id: 'string',
+          source_provider: 'string',
         },
         group_name = 'group_name',
         username = 'string',

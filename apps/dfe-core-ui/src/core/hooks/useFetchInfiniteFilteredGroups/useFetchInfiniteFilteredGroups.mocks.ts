@@ -9,6 +9,8 @@ const GROUP_ITEM: TGroupsItemSummary = {
   roles: ['string'],
   members: ['string'],
   scope: 'string',
+  source_id: 'string',
+  source_provider: 'string',
 };
 
 const TOTAL_ITEMS = 25;

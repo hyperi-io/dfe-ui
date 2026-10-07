@@ -29,7 +29,7 @@ export const OidcProviderCard = ({
           />,
           <SyncOidcProviderGroupsDrawer
             key="sync-oidc-provider-groups"
-            oidcProviderName={oidcProvider.name}
+            oidcProvider={oidcProvider}
           />,
           <UpdateOidcProviderDrawer
             key="edit-oidc-provider"

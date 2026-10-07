@@ -2,37 +2,21 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
+import { GroupSourceProviderInput } from '@/Settings/components/GroupManagement/GroupSourceProviderInput';
 import { Button, Input, Select } from 'antd';
-import z from 'zod';
+import { useMemo, useState } from 'react';
+import {
+  createGroupFormSchema,
+  CreateUpdateGroupFormData,
+  GroupSourceLink,
+} from './groupForm.schema';
 
-const formSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, { message: 'Name is required' })
-      .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-        message: DB_NAME_VALIDATOR.message('Name'),
-      }),
-    description: z.string(),
-    roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
-    members: z.array(z.string()).optional(),
-    scope: z.enum(['org', 'system']),
-    organisation: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.scope === 'org' && !data.organisation?.trim()) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Organisation is required',
-        path: ['organisation'],
-      });
-    }
-  });
-
-export type CreateUpdateGroupFormData = z.infer<typeof formSchema>;
+export type {
+  CreateUpdateGroupFormData,
+  GroupSourceLink,
+} from './groupForm.schema';
 
 export const CreateUpdateGroupForm = ({
   name,
@@ -47,12 +31,17 @@ export const CreateUpdateGroupForm = ({
     members: [],
     scope: 'system',
     organisation: '',
+    source_id: '',
+    source_provider: '',
   },
   disabledFields,
   showMembersField = false,
 }: {
   name: string;
-  onFinish: (values: CreateUpdateGroupFormData) => void;
+  onFinish: (
+    values: CreateUpdateGroupFormData,
+    stored: GroupSourceLink,
+  ) => void;
   error: Error | null;
   isPending: boolean;
   buttonLabel?: string;
@@ -65,6 +54,12 @@ export const CreateUpdateGroupForm = ({
   showMembersField?: boolean;
 }) => {
   const [form] = Form.useForm<CreateUpdateGroupFormData>();
+  // antd reads initialValues only at mount, so the link an edit is judged against is fixed then too.
+  const [stored] = useState<GroupSourceLink>(() => ({
+    source_id: initialValues.source_id,
+    source_provider: initialValues.source_provider,
+  }));
+  const formSchema = useMemo(() => createGroupFormSchema(stored), [stored]);
   const formValidation =
     useAntdZodResolver<CreateUpdateGroupFormData>(formSchema);
 
@@ -75,7 +70,7 @@ export const CreateUpdateGroupForm = ({
     <Form
       name={name}
       form={form}
-      onFinish={onFinish}
+      onFinish={(values) => onFinish(values, stored)}
       initialValues={initialValues}
     >
       <Form.Item
@@ -126,6 +121,25 @@ export const CreateUpdateGroupForm = ({
           <OrganisationSelect disabled={disabledFields?.organisation} />
         </Form.Item>
       )}
+
+      <Form.Item
+        name="source_id"
+        label="Source ID"
+        extra="The identifier your identity provider sends for this group in its tokens: the group name for Okta, dex and Keycloak, the object ID for Entra. Leave empty for a group managed only in DFE."
+        rules={[formValidation]}
+      >
+        <Input placeholder="Enter source ID" />
+      </Form.Item>
+
+      <Form.Item
+        name="source_provider"
+        label="Source Provider"
+        extra="The identity provider whose logins this link answers: an OIDC provider name or scim for SCIM-provisioned groups. Required with a source ID."
+        dependencies={['source_id']}
+        rules={[formValidation]}
+      >
+        <GroupSourceProviderInput />
+      </Form.Item>
 
       {showMembersField && (
         <Form.Item name="members" label="Members" rules={[formValidation]}>
