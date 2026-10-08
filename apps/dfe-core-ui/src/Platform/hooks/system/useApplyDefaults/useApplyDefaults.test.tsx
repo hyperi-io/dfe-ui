@@ -44,6 +44,7 @@ describe('.useApplyDefaults', () => {
       const expectedResponse: TApplyDefaultsResponse = {
         updated: ['source1', 'source2'],
         unchanged: [],
+        live: [],
       };
 
       await waitFor(() => {

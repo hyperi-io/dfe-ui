@@ -1140,9 +1140,10 @@ export interface paths {
          *
          *     Runs the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard
          *     views) and validation errors are returned for review WITHOUT touching
-         *     ClickHouse. In deploy mode the DDL is applied - it is idempotent (CREATE ... IF
-         *     NOT EXISTS) so a re-deploy is a no-op. A schema that failed validation is never
-         *     deployed.
+         *     ClickHouse. In deploy mode the DDL is applied: an absent table is created, and
+         *     an existing one gains the columns it lacks and moves to the version's TTL, so a
+         *     re-deploy changes only what differs. The engine and the type of an existing
+         *     column are left as created. A schema that failed validation is never deployed.
          */
         post: operations["deploy_source_schema_api_v1_sources__name__deploy_post"];
         delete?: never;
@@ -2057,12 +2058,20 @@ export interface paths {
         put?: never;
         /**
          * Apply Defaults
-         * @description Pin the current TTL, common header and merge engine onto the named sources.
+         * @description Pin the current TTL, common header and merge engine onto the named sources and their tables.
          *
          *     Sources that are not in the list are left alone. A source that already stores
-         *     these values is unchanged. Nothing is deployed: the next deploy of a source
-         *     is what brings its table to the pinned values. A missing or engine-owned
-         *     name fails the request before any source is written.
+         *     these values is unchanged in the deploy repo. A missing or engine-owned name
+         *     fails the request before any source is written.
+         *
+         *     Then every named source whose current version is the deployed one, pinned now
+         *     or earlier, has its table brought to the pinned values in this request: the
+         *     TTL moves and the header's missing columns are added. The engine of an
+         *     existing table needs a rebuild, so it reaches new tables only, and existing
+         *     columns keep their type. ``live`` reports each source: what reached the table,
+         *     what did not and why. A source with no table for the pinned version takes the
+         *     values on its next deploy. A ClickHouse failure is reported on that source,
+         *     and the pin stays committed.
          */
         post: operations["apply_defaults_api_v1_system_defaults_apply_post"];
         delete?: never;
@@ -2080,13 +2089,20 @@ export interface paths {
         };
         /**
          * Get Default Drift
-         * @description Sources whose current version stores a header, TTL or engine other than the default.
+         * @description Sources whose table or current version runs a header, TTL or engine other than the default.
          *
-         *     A field the source leaves unset inherits the default on its next deploy, so
-         *     it is not drift. A stored value that already equals the default is not drift
-         *     either. ``core`` is true for an engine-owned source, which the apply endpoint
-         *     will refuse. The landing source is never listed. ``search`` matches the source
-         *     name, a drifted field name, or a stored value. ``per_page=-1`` returns every match.
+         *     TTL and engine are measured on a deployed source's table, read from ClickHouse,
+         *     so a value pinned in the source that the table never took is still drift. An
+         *     engine change persists as drift until the table is rebuilt. For a source with
+         *     no deployed table, and for the header, the stored value is measured: a field
+         *     the source leaves unset inherits the default on its next deploy and is not
+         *     drift, nor is a stored value equal to the default. Header types compare as
+         *     bare profile names, so ``common-header/timeseries`` is ``timeseries``.
+         *
+         *     ``core`` is true for an engine-owned source, which the apply endpoint will
+         *     refuse. The landing source is never listed. ``search`` matches the source
+         *     name, a drifted field name, or a stored or live value. ``per_page=-1``
+         *     returns every match.
          */
         get: operations["get_default_drift_api_v1_system_defaults_drift_get"];
         put?: never;
@@ -5887,13 +5903,18 @@ export interface components {
         };
         /**
          * ApplyDefaultsResponse
-         * @description Which named sources were pinned, and which already had these defaults.
+         * @description Which named sources were pinned, which already had these defaults, and their tables.
          */
         ApplyDefaultsResponse: {
             /** Updated */
             updated: string[];
             /** Unchanged */
             unchanged: string[];
+            /**
+             * Live
+             * @description One entry per named source, in request order: what reached its table.
+             */
+            live: components["schemas"]["SourceLiveApply"][];
         };
         /**
          * AppsReconcileResponse
@@ -7265,13 +7286,18 @@ export interface components {
         };
         /**
          * DefaultComparison
-         * @description A stored source value beside the default it is measured against.
+         * @description A stored source value, and its table's value, beside the default it is measured against.
          */
         DefaultComparison: {
             /** Stored */
             stored: string | number | null;
             /** Default */
             default: string | number | null;
+            /**
+             * Live
+             * @description The deployed table's value: TTL in days (0 for none) or the engine variant. null for the header, and when the source has no deployed table.
+             */
+            live?: string | number | null;
         };
         /**
          * DegradedCondition
@@ -7851,6 +7877,19 @@ export interface components {
             sigma_field: string;
             /** Column Name */
             column_name: string;
+        };
+        /**
+         * FieldNotApplied
+         * @description A pinned value the deployed table did not take.
+         */
+        FieldNotApplied: {
+            /**
+             * Field
+             * @enum {string}
+             */
+            field: "ttl_days" | "common_header_type" | "common_header_version" | "engine";
+            /** Reason */
+            reason: string;
         };
         /** FileDetail */
         FileDetail: {
@@ -12013,6 +12052,13 @@ export interface components {
              * @description One command per app whose running process cannot take this deploy's config change where it stands. Empty where every write was hot, or where a GitOps controller rolls the pod itself.
              */
             restart_required?: string[];
+            /** @description The TTL move this deploy makes (or, on a dry run, would make) on the table it already has; null when the TTL does not move */
+            ttl_change?: components["schemas"]["TtlChange"] | null;
+            /**
+             * Live Table Error
+             * @description On a dry run, why the deployed table could not be read; its TTL move is then unknown. Null otherwise.
+             */
+            live_table_error?: string | null;
         };
         /**
          * SchemaDiff
@@ -12806,7 +12852,7 @@ export interface components {
         };
         /**
          * SourceDefaultDrift
-         * @description One source whose current version stores a value other than the default.
+         * @description One source whose deployed table or stored values differ from the defaults.
          */
         SourceDefaultDrift: {
             /** Source */
@@ -13053,6 +13099,45 @@ export interface components {
             restart_required?: string[];
         };
         /**
+         * SourceLiveApply
+         * @description What applying the defaults did to one named source's deployed table.
+         */
+        SourceLiveApply: {
+            /** Source */
+            source: string;
+            /**
+             * Status
+             * @description altered or unchanged once the table was brought to the pinned values; not_deployed when no table runs the pinned version; failed when ClickHouse or the schema build refused
+             * @enum {string}
+             */
+            status: "altered" | "unchanged" | "not_deployed" | "failed";
+            /**
+             * Table
+             * @description database.table; null when the source has never been deployed.
+             */
+            table: string | null;
+            /**
+             * Ttl
+             * @description The TTL move in days, such as '90 -> 91'; null when it did not move.
+             */
+            ttl: string | null;
+            /**
+             * Columns Added
+             * @description Columns the pinned version declares that the table lacked: the pinned header's, and any other the version's schema adds.
+             */
+            columns_added: string[];
+            /**
+             * Not Applied
+             * @description Pinned values the table did not take, each with the reason.
+             */
+            not_applied: components["schemas"]["FieldNotApplied"][];
+            /**
+             * Reason
+             * @description Why nothing reached the table, for not_deployed and failed; else null.
+             */
+            reason: string | null;
+        };
+        /**
          * SourceMappingSummary
          * @description Sigma mapping summary for a source.
          */
@@ -13138,6 +13223,8 @@ export interface components {
              * @description Why the plan is or is not ready to deploy
              */
             ready_reason?: string | null;
+            /** @description The TTL move among the statements, on a table that already exists; null when the TTL does not move */
+            ttl_change?: components["schemas"]["TtlChange"] | null;
         };
         /**
          * SourceResponse
@@ -14203,6 +14290,27 @@ export interface components {
              * @description Every transport a source may name here. One entry: a deployment binds its stages to a single transport, and a source on the other is refused at save.
              */
             available: string[];
+        };
+        /**
+         * TtlChange
+         * @description The TTL move a deploy makes on a table that already exists.
+         */
+        TtlChange: {
+            /**
+             * Move
+             * @description <live> -> <declared>: whole days as a number, 'none' for no TTL, or the live interval as ClickHouse prints it when it is not whole days
+             */
+            move: string;
+            /**
+             * Expires Rows
+             * @description True when the move deletes rows the table keeps today: the new TTL is shorter, the table had none, or its live TTL is not whole days
+             */
+            expires_rows: boolean;
+            /**
+             * Statement
+             * @description The ALTER TABLE that makes the move
+             */
+            statement: string;
         };
         /**
          * UnknownFieldModel
@@ -21139,7 +21247,7 @@ export interface operations {
     get_default_drift_api_v1_system_defaults_drift_get: {
         parameters: {
             query?: {
-                /** @description Search in source name, drifted field, and stored value */
+                /** @description Search in source name, drifted field, and stored or live value */
                 search?: string | null;
                 page?: number;
                 per_page?: number;
@@ -21184,6 +21292,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description clickhouse_unavailable: a source is deployed and its table could not be read */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

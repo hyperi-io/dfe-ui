@@ -298,6 +298,7 @@ export const system = {
         mockedResponse = {
           updated: ['source1', 'source2'],
           unchanged: [],
+          live: [],
         },
       }: {
         mockedResponse?: TApplyDefaultsResponse;
