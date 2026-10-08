@@ -32,5 +32,3 @@ release:
   container:
     enabled: true
     dockerfile: Dockerfile
-typescript:
-  package_manager: auto
