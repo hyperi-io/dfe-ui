@@ -1169,10 +1169,14 @@ export interface paths {
          * @description Update a source from a flat revision body.
          *
          *     Before the first deploy, edits update the working version in place. After deploy, a new
-         *     major version is created only when ``current`` equals ``deployed_version`` and schema pins
-         *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
-         *     ``views``, or ``transform`` change. Draft versions (``current`` not deployed) update
-         *     in place.
+         *     major version is created only when ``current`` equals ``deployed_version`` and a
+         *     table-shaping field changes: schema pins (``meta_schema``, ``meta_schema_version``,
+         *     ``derived_schema``, ``additional_fields``), ``ttl_days``, ``engine``, common-header
+         *     type/version, ``views``, or ``transform``. Draft versions (``current`` not deployed)
+         *     update in place.
+         *
+         *     Origin (receiver vs fetcher) cannot change, and a pinned ``meta_schema`` cannot be
+         *     cleared: once a source owns its own table it cannot move back onto ``main``.
          *
          *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
          *     (same as create). Send ``header`` explicitly to set or change it.
@@ -13469,7 +13473,7 @@ export interface components {
             origin?: ("receiver" | "fetcher") | null;
             /**
              * Current Table Topic Type
-             * @description Where records land: ``own`` when a meta schema pins a per-source table, ``main`` when there is none and records share the landing table
+             * @description Where the working ``current`` version lands: ``own`` when that version pins a meta schema, ``main`` when it does not (even if a deployed older version still has its own table)
              * @enum {string}
              */
             current_table_topic_type: "own" | "main";
@@ -13626,6 +13630,12 @@ export interface components {
              * @description Version ids with a successful deploy in source-deploys history, excluding the live deployed_version
              */
             previous_deployed_versions?: string[];
+            /**
+             * Current Table Topic Type
+             * @description Where the working ``current`` version lands: ``own`` when that version pins a meta schema, ``main`` when it does not (even if a deployed older version still has its own table)
+             * @enum {string}
+             */
+            current_table_topic_type: "own" | "main";
             /** @description Configuration snapshot for ``selected`` plus pipeline artifacts */
             version: components["schemas"]["SourceVersionDetail"];
         };
