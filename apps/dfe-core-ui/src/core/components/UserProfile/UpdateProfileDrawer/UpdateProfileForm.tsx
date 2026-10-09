@@ -79,25 +79,17 @@ export const UpdateProfileForm = ({
     >
       <Form.Item
         name="email"
-        label={<Form.Label required>Email</Form.Label>}
-        rules={[formValidation]}
+        label="Email"
+        rules={[{ required: true }, formValidation]}
       >
         <Input type="email" placeholder="Enter email" />
       </Form.Item>
 
-      <Form.Item
-        name="name"
-        label={<Form.Label>Name</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" />
       </Form.Item>
 
-      <Form.Item
-        name="phone"
-        label={<Form.Label>Phone</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="phone" label="Phone" rules={[formValidation]}>
         <Input placeholder="Enter phone" />
       </Form.Item>
 

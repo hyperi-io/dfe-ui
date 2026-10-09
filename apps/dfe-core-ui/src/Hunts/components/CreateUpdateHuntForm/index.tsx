@@ -84,8 +84,8 @@ export const CreateUpdateHuntForm = ({
     >
       <Form.Item
         name="name"
-        label={<Form.Label required>Name</Form.Label>}
-        rules={[formValidation]}
+        label="Name"
+        rules={[{ required: true }, formValidation]}
       >
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
@@ -98,8 +98,8 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="customers"
-        label={<Form.Label required>Organisations</Form.Label>}
-        rules={[formValidation]}
+        label="Organisations"
+        rules={[{ required: true }, formValidation]}
       >
         <OrganisationSelect
           mode="multiple"
@@ -108,30 +108,30 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="global_source_table_name"
-        label={<Form.Label required>Source Table</Form.Label>}
-        rules={[formValidation]}
+        label="Source Table"
+        rules={[{ required: true }, formValidation]}
       >
         <SourceSelect placeholder="Select source" />
       </Form.Item>
       <Form.Item
         name="global_target_table_name"
-        label={<Form.Label required>Target Table</Form.Label>}
-        rules={[formValidation]}
+        label="Target Table"
+        rules={[{ required: true }, formValidation]}
       >
         <Input placeholder="Enter target table" />
       </Form.Item>
       <Form.Item
         name="rules"
-        label={<Form.Label required>Rules</Form.Label>}
-        rules={[formValidation]}
+        label="Rules"
+        rules={[{ required: true }, formValidation]}
       >
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
       <Form.Item
         name="cron"
-        label={<Form.Label required>Cron Expression</Form.Label>}
-        rules={[formValidation]}
+        label="Cron Expression"
+        rules={[{ required: true }, formValidation]}
       >
         <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>

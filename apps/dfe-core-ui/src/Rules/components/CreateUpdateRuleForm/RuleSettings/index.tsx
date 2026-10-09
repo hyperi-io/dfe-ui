@@ -28,10 +28,10 @@ export const RuleSettings = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
+            label="Name"
             className="m-0! grow text-sm w-full"
             layout="vertical"
-            rules={[formValidation]}
+            rules={[{ required: true }, formValidation]}
           >
             <Input disabled={disabledFields?.name} className="w-full" />
           </Form.Item>

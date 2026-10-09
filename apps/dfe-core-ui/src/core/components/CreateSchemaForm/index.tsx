@@ -156,8 +156,8 @@ const CreateSchemaFormBase = ({
           <Form.Item
             className="w-96"
             name="schema_type"
-            label={<Form.Label required>Schema Type</Form.Label>}
-            rules={[formValidation]}
+            label="Schema Type"
+            rules={[{ required: true }, formValidation]}
           >
             <Select
               disabled={isMetaSchemaScope}
@@ -181,8 +181,8 @@ const CreateSchemaFormBase = ({
           <Form.Item
             className="w-full"
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
-            rules={[formValidation]}
+            label="Name"
+            rules={[{ required: true }, formValidation]}
           >
             <Input placeholder="Enter name" disabled={disabledFields?.name} />
           </Form.Item>
@@ -191,8 +191,8 @@ const CreateSchemaFormBase = ({
           <Form.Item
             className="w-full"
             name="type"
-            label={<Form.Label required>Type</Form.Label>}
-            rules={[formValidation]}
+            label="Type"
+            rules={[{ required: true }, formValidation]}
           >
             <Select
               options={TYPE_OPTIONS}
@@ -215,8 +215,8 @@ const CreateSchemaFormBase = ({
 
         <Form.Item
           name="description"
-          label={<Form.Label required>Description</Form.Label>}
-          rules={[formValidation]}
+          label="Description"
+          rules={[{ required: true }, formValidation]}
         >
           <Input.TextArea
             placeholder="Enter description"

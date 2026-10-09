@@ -1,7 +1,6 @@
 import { cn } from '@/core/utils/style';
 import { Form as AntdForm, type FormItemProps, type FormProps } from 'antd';
 import type { ReactNode } from 'react';
-import { FormLabel } from './FormLabel';
 
 const FormItem = ({
   children,
@@ -37,5 +36,4 @@ const FormWrapper = ({
 export const Form = Object.assign(FormWrapper, {
   ...AntdForm,
   Item: FormItem,
-  Label: FormLabel,
-}) as AntdFormType & { Label: typeof FormLabel };
+}) as AntdFormType;

@@ -56,7 +56,7 @@ export const MetaSchemaForm = ({
          */
         validateTrigger={['onBlur']}
         label={
-          <Form.Label required>
+          <p>
             Meta Schema{' '}
             <Popover
               destroyOnHidden
@@ -79,17 +79,17 @@ export const MetaSchemaForm = ({
                 icon={<IconInfoCircle />}
               />
             </Popover>
-          </Form.Label>
+          </p>
         }
-        rules={[formValidation]}
+        rules={[{ required: true }, formValidation]}
       >
         <MetaSchemaSelectCreate onChange={handleChangeMetaSchema} />
       </Form.Item>
       <Form.Item
         className="w-full"
         name={['schema', 'meta_schema_version']}
-        label={<Form.Label required>Meta Schema Version</Form.Label>}
-        rules={[formValidation]}
+        label="Meta Schema Version"
+        rules={[{ required: true }, formValidation]}
       >
         <Select
           options={metaSchemaVersionsOptions}

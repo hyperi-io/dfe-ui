@@ -149,8 +149,8 @@ export const CloneRuleModal = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
-            rules={[formValidation]}
+            label="Name"
+            rules={[{ required: true }, formValidation]}
             className="w-full mb-2"
           >
             <Input placeholder={`${rule.name}_copy`} />

@@ -203,7 +203,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: <Form.Label required>Name</Form.Label>,
+            title: <p>Name (required)</p>,
             dataIndex: 'name',
             key: 'name',
             render: (_: unknown, record: SchemaColumnListRow) => {
@@ -212,7 +212,7 @@ export const AddSchemaTable = ({
                 <Form.Item
                   {...restField}
                   name={[rowIndex, 'name']}
-                  rules={[formValidation]}
+                  rules={[{ required: true }, formValidation]}
                 >
                   <InlineEditInput
                     classNames={{
@@ -229,7 +229,7 @@ export const AddSchemaTable = ({
             },
           },
           {
-            title: <Form.Label required>Type</Form.Label>,
+            title: <p>Type (required)</p>,
             dataIndex: 'type',
             key: 'type',
             width: 250,
@@ -243,7 +243,7 @@ export const AddSchemaTable = ({
                   <Form.Item
                     {...restField}
                     name={typeFormName}
-                    rules={[formValidation]}
+                    rules={[{ required: true }, formValidation]}
                     getValueFromEvent={(event) => {
                       const nextType =
                         event && typeof event === 'object' && 'target' in event

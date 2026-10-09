@@ -124,8 +124,8 @@ export const ArtifactVersions = ({
           >
             <Form.Item
               name="content"
-              label={<Form.Label required>Publish a new version</Form.Label>}
-              rules={[formValidation]}
+              label="Publish a new version"
+              rules={[{ required: true }, formValidation]}
             >
               <Input.TextArea rows={10} className="font-mono" />
             </Form.Item>

@@ -92,8 +92,8 @@ export const ViewsTabContent = ({
                     {...restField}
                     className="col-span-2"
                     name={[name, 'standard']}
-                    label={<Form.Label required>Standard</Form.Label>}
-                    rules={[formValidation]}
+                    label="Standard"
+                    rules={[{ required: true }, formValidation]}
                   >
                     <Select
                       options={standardsOptions}

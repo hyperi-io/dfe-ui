@@ -28,8 +28,8 @@ export const ReceiverFormSection = ({
         <Form.Item
           className="w-full"
           name={['match', 'field']}
-          label={<Form.Label required>Field</Form.Label>}
-          rules={[formValidation]}
+          label="Field"
+          rules={[{ required: true }, formValidation]}
         >
           <Input placeholder="Enter field" />
         </Form.Item>
@@ -62,10 +62,8 @@ export const ReceiverFormSection = ({
         <Form.Item
           className="w-full"
           name={['match', 'value']}
-          label={
-            <Form.Label required={operationType !== 'exists'}>Value</Form.Label>
-          }
-          rules={[formValidation]}
+          label="Value"
+          rules={[{ required: true }, formValidation]}
         >
           <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
         </Form.Item>

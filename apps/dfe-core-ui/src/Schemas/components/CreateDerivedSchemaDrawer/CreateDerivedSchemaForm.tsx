@@ -71,22 +71,22 @@ export const CreateDerivedSchemaForm = ({
         </Form.Item>
         <Form.Item
           name="name"
-          label={<Form.Label required>Name</Form.Label>}
-          rules={[formValidation]}
+          label="Name"
+          rules={[{ required: true }, formValidation]}
         >
           <Input placeholder="Enter name" />
         </Form.Item>
         <Form.Item
           name="base"
-          label={<Form.Label required>Base Meta Schema</Form.Label>}
-          rules={[formValidation]}
+          label="Base Meta Schema"
+          rules={[{ required: true }, formValidation]}
         >
           <BaseMetaSchemaSelect onChange={handleBaseChange} />
         </Form.Item>
         <Form.Item
           name="base_version"
-          label={<Form.Label required>Base Version</Form.Label>}
-          rules={[formValidation]}
+          label="Base Version"
+          rules={[{ required: true }, formValidation]}
         >
           <Select
             options={baseVersionOptions}
@@ -101,8 +101,8 @@ export const CreateDerivedSchemaForm = ({
         </Form.Item>
         <Form.Item
           name="version"
-          label={<Form.Label required>Version</Form.Label>}
-          rules={[formValidation]}
+          label="Version"
+          rules={[{ required: true }, formValidation]}
         >
           <Input />
         </Form.Item>
@@ -110,16 +110,16 @@ export const CreateDerivedSchemaForm = ({
 
       <Form.Item
         name="description"
-        label={<Form.Label required>Description</Form.Label>}
-        rules={[formValidation]}
+        label="Description"
+        rules={[{ required: true }, formValidation]}
       >
         <Input.TextArea placeholder="Enter description" />
       </Form.Item>
 
       <Form.Item
         name="select"
-        label={<Form.Label required>Columns</Form.Label>}
-        rules={[formValidation]}
+        label="Columns"
+        rules={[{ required: true }, formValidation]}
       >
         <DerivedSchemaFieldPicker
           basePath={base ?? null}

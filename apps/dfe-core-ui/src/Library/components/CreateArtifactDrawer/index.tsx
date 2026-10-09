@@ -84,16 +84,16 @@ export const CreateArtifactDrawer = () => {
         <Form form={form} onFinish={handleFinish}>
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
-            rules={[formValidation]}
+            label="Name"
+            rules={[{ required: true }, formValidation]}
           >
             <Input placeholder="syslog-parse" />
           </Form.Item>
 
           <Form.Item
             name="kind"
-            label={<Form.Label required>Kind</Form.Label>}
-            rules={[formValidation]}
+            label="Kind"
+            rules={[{ required: true }, formValidation]}
           >
             <Select
               placeholder="Select a kind"

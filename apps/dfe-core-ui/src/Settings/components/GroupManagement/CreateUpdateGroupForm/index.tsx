@@ -80,8 +80,8 @@ export const CreateUpdateGroupForm = ({
     >
       <Form.Item
         name="name"
-        label={<Form.Label required>Name</Form.Label>}
-        rules={[formValidation]}
+        label="Name"
+        rules={[{ required: true }, formValidation]}
       >
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
@@ -96,8 +96,8 @@ export const CreateUpdateGroupForm = ({
 
       <Form.Item
         name="roles"
-        label={<Form.Label required>Roles</Form.Label>}
-        rules={[formValidation]}
+        label="Roles"
+        rules={[{ required: true }, formValidation]}
       >
         <GroupRoleSelect />
       </Form.Item>
@@ -120,8 +120,8 @@ export const CreateUpdateGroupForm = ({
       {isScopeOrg && (
         <Form.Item
           name="organisation"
-          label={<Form.Label required>Organisation</Form.Label>}
-          rules={[formValidation]}
+          label="Organisation"
+          rules={[{ required: true }, formValidation]}
         >
           <OrganisationSelect disabled={disabledFields?.organisation} />
         </Form.Item>

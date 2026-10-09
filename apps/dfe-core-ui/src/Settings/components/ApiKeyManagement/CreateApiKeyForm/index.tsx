@@ -147,15 +147,15 @@ export const CreateApiKeyForm = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
-            rules={[formValidation]}
+            label="Name"
+            rules={[{ required: true }, formValidation]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="description"
-            label={<Form.Label required>Description</Form.Label>}
-            rules={[formValidation]}
+            label="Description"
+            rules={[{ required: true }, formValidation]}
           >
             <Input.TextArea />
           </Form.Item>

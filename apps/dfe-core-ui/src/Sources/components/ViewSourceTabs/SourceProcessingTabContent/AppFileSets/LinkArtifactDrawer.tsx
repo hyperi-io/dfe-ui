@@ -102,17 +102,17 @@ export const LinkArtifactDrawer = ({
         <Form form={form} onFinish={handleFinish}>
           <Form.Item
             name="name"
-            label={<Form.Label required>Filename</Form.Label>}
+            label="Filename"
             help={`Must end in one of ${suffixes.join(', ')}`}
-            rules={[formValidation]}
+            rules={[{ required: true }, formValidation]}
           >
             <Input placeholder={`my-file${suffixes[0] ?? ''}`} />
           </Form.Item>
 
           <Form.Item
             name="artifact"
-            label={<Form.Label required>Artefact</Form.Label>}
-            rules={[formValidation]}
+            label="Artefact"
+            rules={[{ required: true }, formValidation]}
           >
             <Select
               options={artifactOptions}

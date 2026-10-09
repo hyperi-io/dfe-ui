@@ -26,7 +26,7 @@ export const FetcherFormSection = ({
       <Form.Item
         name={['fetcher', 'source_type']}
         label="Source type"
-        rules={[formValidation]}
+        rules={[{ required: true }, formValidation]}
         help={
           hasSourceTypes
             ? undefined

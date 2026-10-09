@@ -158,15 +158,15 @@ export const DefaultsSection = ({
                */
               validateTrigger={['onBlur']}
               label={
-                <Form.Label required>
+                <p>
                   Header Type{' '}
                   {isDefaultOveridden(
                     headerType,
                     defaults?.default_header_type,
                   ) && <OverrideTag />}
-                </Form.Label>
+                </p>
               }
-              rules={[formValidation]}
+              rules={[{ required: true }, formValidation]}
             >
               <CommonHeaderSelect onChange={handleChangeCommonHeader} />
             </Form.Item>
@@ -175,15 +175,15 @@ export const DefaultsSection = ({
               className="w-full"
               name={['header', 'version']}
               label={
-                <Form.Label required>
+                <p>
                   Header Version{' '}
                   {isDefaultOveridden(
                     headerVersion,
                     defaults?.default_header_version,
                   ) && <OverrideTag />}
-                </Form.Label>
+                </p>
               }
-              rules={[formValidation]}
+              rules={[{ required: true }, formValidation]}
             >
               <Select
                 options={commonHeaderVersionsOptions}

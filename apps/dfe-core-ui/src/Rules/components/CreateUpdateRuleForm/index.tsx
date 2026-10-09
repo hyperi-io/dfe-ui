@@ -119,9 +119,9 @@ const CreateUpdateRuleFormBase = ({
       <ContentCard className="flex flex-col gap-y-2">
         <Form.Item
           name="user_sql"
-          label={<Form.Label required>User SQL</Form.Label>}
+          label="User SQL"
           className="m-0! grow"
-          rules={[formValidation]}
+          rules={[{ required: true }, formValidation]}
         >
           <AceEditor
             value={initialValues?.user_sql}

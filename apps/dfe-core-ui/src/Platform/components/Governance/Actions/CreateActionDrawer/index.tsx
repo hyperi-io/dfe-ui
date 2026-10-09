@@ -102,9 +102,9 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
           }}
         >
           <Form.Item
-            label={<Form.Label required>Name</Form.Label>}
+            label="Name"
             name="name"
-            rules={[formValidation]}
+            rules={[{ required: true }, formValidation]}
           >
             <Input />
           </Form.Item>
@@ -112,9 +112,9 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
             <Input.TextArea />
           </Form.Item>
           <Form.Item
-            label={<Form.Label required>Required Action</Form.Label>}
+            label="Required Action"
             name="required_action"
-            rules={[formValidation]}
+            rules={[{ required: true }, formValidation]}
           >
             <Input />
           </Form.Item>
