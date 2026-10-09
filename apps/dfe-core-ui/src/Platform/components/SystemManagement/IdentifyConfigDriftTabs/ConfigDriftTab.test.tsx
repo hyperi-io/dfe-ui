@@ -16,7 +16,7 @@ import {
   test,
   vi,
 } from 'vitest';
-import { ApplyDefaultsContent } from './ApplyDefaultsContent';
+import { ConfigDriftTab } from './ConfigDriftTab';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -82,7 +82,7 @@ const { wrapper } = buildTestWrapper()
 describe('ApplyDefaultsContent', () => {
   test('applies defaults to the selected sources and skips engine-owned ones', async () => {
     const user = userEvent.setup();
-    render(<ApplyDefaultsContent />, { wrapper });
+    render(<ConfigDriftTab />, { wrapper });
 
     const applyButton = await screen.findByRole('button', {
       name: 'Apply Defaults',

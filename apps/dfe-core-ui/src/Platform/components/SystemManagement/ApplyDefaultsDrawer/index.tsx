@@ -1,8 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { IdentifyConfigDriftTabs } from '@/Platform/components/SystemManagement//IdentifyConfigDriftTabs';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { ApplyDefaultsContent } from './ApplyDefaultsContent';
 
 export const ApplyDefaultsDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,7 @@ export const ApplyDefaultsDrawer = () => {
       <RbacProtected action={RbacProtected.rbacActions.system_write}>
         <RbacProtected.Unrestricted>
           <Button size="small" onClick={() => setIsOpen(true)}>
-            Apply Defaults
+            Identify Config Drift
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
@@ -20,17 +20,20 @@ export const ApplyDefaultsDrawer = () => {
           }}
         >
           <Button size="small" disabled>
-            Apply Defaults
+            Identify Config Drift
           </Button>
         </RbacProtected.Restricted>
       </RbacProtected>
       <Drawer
-        title="Apply Defaults"
+        title="Identify Config Drift"
         open={isOpen}
+        classNames={{
+          body: 'pt-2',
+        }}
         onClose={() => setIsOpen(false)}
         size="80%"
       >
-        <ApplyDefaultsContent />
+        <IdentifyConfigDriftTabs />
       </Drawer>
     </>
   );

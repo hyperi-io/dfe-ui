@@ -45,7 +45,11 @@ const appliedDefaultsMessage = (updated: string[], unchanged: string[]) => {
   return `${updatedLabel}. ${unchanged.length} already matched`;
 };
 
-export const ApplyDefaultsContent = () => {
+export const ConfigDriftTab = ({
+  onSuccess,
+}: {
+  onSuccess?: (sources: string[]) => void;
+}) => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const { notification } = App.useApp();
   const {
@@ -60,6 +64,7 @@ export const ApplyDefaultsContent = () => {
   } = useApplyDefaults({
     onSuccess: ({ updated, unchanged }) => {
       setSelectedSources([]);
+      onSuccess?.(updated);
       notification.success({
         title: appliedDefaultsMessage(
           updated.map((item) => item.source),
@@ -183,7 +188,7 @@ export const ApplyDefaultsContent = () => {
           disabled={selectedSources.length === 0}
           onClick={() => applyDefaults({ sources: selectedSources })}
         >
-          Apply Defaults
+          Update Configurations
         </Button>
       </div>
     </div>
