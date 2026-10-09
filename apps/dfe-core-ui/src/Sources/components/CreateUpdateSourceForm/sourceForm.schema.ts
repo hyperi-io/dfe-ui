@@ -83,7 +83,9 @@ const originTabSchema = {
     .nullable(),
   fetcher: z
     .object({
-      source_type: z.string().optional().nullable(),
+      source_type: z
+        .string({ message: 'Source type is required' })
+        .min(1, { message: 'Source type is required' }),
       topic: z.enum(FETCHER_TOPICS).optional().nullable(),
       // YAML text in the form; an object on the wire.
       config: z.string().optional().nullable(),
