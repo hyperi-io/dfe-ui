@@ -36,4 +36,4 @@ release:
   helm:
     enabled: true
     contract: deploy/contract.json
-    library: "2.14.4"
+    library: '2.14.4'
