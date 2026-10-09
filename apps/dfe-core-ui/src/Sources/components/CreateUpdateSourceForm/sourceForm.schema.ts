@@ -73,9 +73,9 @@ const originTabSchema = {
 
   match: z
     .object({
-      field: z
-        .string({ message: 'Field is required' })
-        .min(1, { message: 'Field is required' }),
+      // Empties are fine here: the origin refinement below refuses a blank
+      // match only when this source is a receiver.
+      field: z.string().optional().nullable(),
       operator: z.enum(MATCH_OPERATORS).optional().nullable(),
       value: z.string().optional().nullable(),
     })
@@ -83,9 +83,8 @@ const originTabSchema = {
     .nullable(),
   fetcher: z
     .object({
-      source_type: z
-        .string({ message: 'Source type is required' })
-        .min(1, { message: 'Source type is required' }),
+      // Same as match: a blank source_type is only refused for fetchers.
+      source_type: z.string().optional().nullable(),
       topic: z.enum(FETCHER_TOPICS).optional().nullable(),
       // YAML text in the form; an object on the wire.
       config: z.string().optional().nullable(),
