@@ -249,7 +249,10 @@ const sourceSummaryToTreeData = ({
       key: sourceTreeKey(source.name),
       title: () => {
         const isDeployed = source.deployed_version;
-        const isSharedTable = source.current_table_topic_type === 'main';
+        const isCurrentDeployed = source.current === source.deployed_version;
+        const isCurrentSharedTable = source.current_table_topic_type === 'main';
+        const isActiveChanges = isDeployed && !isCurrentDeployed;
+        const isMainSource = source.name === 'main';
         return (
           <TreeInteractiveLabel
             icon={originTooltipTag(source.origin ?? '')}
@@ -266,13 +269,13 @@ const sourceSummaryToTreeData = ({
                   {source.name.split('/').pop() ?? ''}
                 </span>
 
-                {isSharedTable && (
+                {isCurrentSharedTable && (
                   <Tooltip destroyOnHidden title="Lands in the shared table">
                     <IconBucket className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
 
-                {!isDeployed && !isSharedTable && (
+                {!isDeployed && !isCurrentSharedTable && (
                   <Tooltip
                     destroyOnHidden
                     title="Shared table will be used until source is deployed"
@@ -297,31 +300,31 @@ const sourceSummaryToTreeData = ({
             selected={selectedSourceName === source.name}
             actions={
               <div className="flex gap-1">
-                {((!isDeployed && !isSharedTable) ||
-                  (isDeployed &&
-                    source.current !== source.deployed_version)) && (
-                  <Tooltip
-                    destroyOnHidden
-                    title="There are undeployed changes on the working branch"
-                  >
-                    <Button
-                      type="default"
-                      shape="circle"
-                      size="small"
-                      className="p-0.5"
-                      icon={<IconRocketOff />}
-                      onClick={() => {
-                        // Working-branch changes are resolved on Build & Deploy.
-                        setSelectedSource({
-                          source_name: source.name,
-                          source_version: source.current,
-                          tab: 'buildDeploy',
-                        });
-                      }}
-                      danger
-                    />
-                  </Tooltip>
-                )}
+                {((!isDeployed && !isCurrentSharedTable) ||
+                  (isActiveChanges && !isCurrentSharedTable)) &&
+                  !isMainSource && (
+                    <Tooltip
+                      destroyOnHidden
+                      title="There are undeployed changes on the working branch"
+                    >
+                      <Button
+                        type="default"
+                        shape="circle"
+                        size="small"
+                        className="p-0.5"
+                        icon={<IconRocketOff />}
+                        onClick={() => {
+                          // Working-branch changes are resolved on Build & Deploy.
+                          setSelectedSource({
+                            source_name: source.name,
+                            source_version: source.current,
+                            tab: 'buildDeploy',
+                          });
+                        }}
+                        danger
+                      />
+                    </Tooltip>
+                  )}
                 <Tooltip
                   destroyOnHidden
                   title={
