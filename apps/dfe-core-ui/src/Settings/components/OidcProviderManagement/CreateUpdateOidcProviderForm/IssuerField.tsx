@@ -149,7 +149,7 @@ export const IssuerField = ({
         <Select
           id={`${id}-mode`}
           aria-label="Issuer mode"
-          className="w-28 shrink-0"
+          className="w-32 shrink-0"
           options={issuerModeOptions({ type })}
           value={builder.mode}
           onChange={(mode) => builder.changeMode({ mode, type })}

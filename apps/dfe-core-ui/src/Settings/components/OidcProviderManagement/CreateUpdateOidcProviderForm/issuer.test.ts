@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest';
 import {
   buildEntraIssuer,
   buildOktaIssuer,
+  entraTenantFromIssuer,
   issuerOnTypeChange,
+  oktaDomainFromIssuer,
   TEntraIssuerParts,
   TIssuerMode,
   TOktaIssuerParts,
@@ -48,6 +50,28 @@ describe('buildOktaIssuer', () => {
     },
   ])('$name', ({ expected, parts }) => {
     expect(buildOktaIssuer(parts)).toBe(expected);
+  });
+});
+
+describe('oktaDomainFromIssuer', () => {
+  test.each([
+    ['https://dev-123.okta.com', 'dev-123.okta.com'],
+    ['https://dev-123.okta.com/oauth2/default', 'dev-123.okta.com'],
+    [' HTTPS://id.example.com/ ', 'id.example.com'],
+    ['', ''],
+  ])('issuer "%s"', (issuer, expected) => {
+    expect(oktaDomainFromIssuer({ issuer })).toBe(expected);
+  });
+});
+
+describe('entraTenantFromIssuer', () => {
+  test.each([
+    ['https://login.microsoftonline.com/tenant-guid/v2.0', 'tenant-guid'],
+    ['https://tenant-guid.ciamlogin.com/tenant-guid/v2.0', 'tenant-guid'],
+    ['https://login.microsoftonline.com', ''],
+    ['', ''],
+  ])('issuer "%s"', (issuer, expected) => {
+    expect(entraTenantFromIssuer({ issuer })).toBe(expected);
   });
 });
 

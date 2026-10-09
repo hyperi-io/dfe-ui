@@ -123,10 +123,12 @@ describe(
   'CreateOidcProviderDrawer',
   { timeout: SOURCE_SWITCH_TEST_TIMEOUT_MS },
   () => {
-    test("the preset's client env vars are sent without values", async () => {
+    test("Google is sent with the preset's client env vars and API groups", async () => {
       const user = await openCreateDrawer();
 
       const body = await submitAndReadBody(user);
+      expect(body.groups.mode).toBe('api');
+      expect(body.groups.enrich_on_login).toBe(true);
       expect(body.client_id_env).toBe('DFE_OIDC_GOOGLE_CLIENT_ID');
       expect(body.client_secret_env).toBe('DFE_OIDC_GOOGLE_CLIENT_SECRET');
       expect(body).not.toHaveProperty('client_id');
@@ -153,7 +155,8 @@ describe(
     test('the Entra tenant and directory secret are sent from their sources', async () => {
       const user = await openCreateDrawer();
 
-      await fillField(user, 'Tenant ID', 'tenant-guid');
+      await chooseType(user, 'Entra ID');
+      await fillField(user, 'Directory (Tenant) ID', 'tenant-guid');
       await chooseCredentialSource(user, 'Directory Client Secret', 'Env Var');
       await fillField(
         user,
@@ -170,20 +173,36 @@ describe(
       expect(body.groups).not.toHaveProperty('client_secret');
     });
 
-    test('the Okta token and Google service account are sent from their sources', async () => {
+    test('the Google service account is sent from its source', async () => {
       const user = await openCreateDrawer();
 
-      await fillField(user, 'API Token', 'okta-token');
       await chooseCredentialSource(user, 'Service Account JSON', 'Env Var');
       await fillField(user, 'Service Account JSON', 'GOOGLE_SA_JSON');
 
       const body = await submitAndReadBody(user);
-      expect(body.groups).toMatchObject({
-        api_token: 'okta-token',
-        service_account_json_env: 'GOOGLE_SA_JSON',
-      });
-      expect(body.groups).not.toHaveProperty('api_token_env');
+      expect(body.groups.service_account_json_env).toBe('GOOGLE_SA_JSON');
       expect(body.groups).not.toHaveProperty('service_account_json');
+    });
+
+    test('the Okta token is sent from its source', async () => {
+      const user = await openCreateDrawer();
+
+      await chooseType(user, 'Okta');
+      await fillField(user, 'API Token', 'okta-token');
+
+      const body = await submitAndReadBody(user);
+      expect(body.groups.api_token).toBe('okta-token');
+      expect(body.groups).not.toHaveProperty('api_token_env');
+    });
+
+    test('a custom provider is sent with token claim groups and no enrichment', async () => {
+      const user = await openCreateDrawer();
+
+      await chooseType(user, 'Custom OIDC Provider');
+
+      const body = await submitAndReadBody(user);
+      expect(body.groups.mode).toBe('token_claim');
+      expect(body.groups.enrich_on_login).toBe(false);
     });
 
     test.each<{

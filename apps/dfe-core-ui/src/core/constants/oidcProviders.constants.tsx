@@ -20,7 +20,7 @@ export const PROVIDERS: readonly {
       issuer: 'https://accounts.google.com',
       client_id_env: 'DFE_OIDC_GOOGLE_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_GOOGLE_CLIENT_SECRET',
-      groups: DEFAULT_GROUP_RESOLUTION,
+      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
     },
   },
   {
@@ -34,7 +34,7 @@ export const PROVIDERS: readonly {
       issuer: '',
       client_id_env: 'DFE_OIDC_ENTRA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_ENTRA_CLIENT_SECRET',
-      groups: DEFAULT_GROUP_RESOLUTION,
+      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
     },
   },
   {
@@ -48,7 +48,7 @@ export const PROVIDERS: readonly {
       issuer: '',
       client_id_env: 'DFE_OIDC_OKTA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_OKTA_CLIENT_SECRET',
-      groups: DEFAULT_GROUP_RESOLUTION,
+      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
     },
   },
   {
@@ -62,7 +62,7 @@ export const PROVIDERS: readonly {
       issuer: 'https://your-custom-oidc-provider.com',
       client_id_env: 'DFE_OIDC_CUSTOM_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_CUSTOM_CLIENT_SECRET',
-      groups: DEFAULT_GROUP_RESOLUTION,
+      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'token_claim' },
     },
   },
 ]);
@@ -77,10 +77,25 @@ export const PROVIDERS_MAP = Object.freeze(
   ),
 );
 
-export const GROUP_MODE_OPTIONS = [
+type TGroupMode = (typeof DEFAULT_GROUP_RESOLUTION)['mode'];
+
+export const GROUP_MODE_OPTIONS: {
+  label: string;
+  value: TGroupMode;
+}[] = [
   { label: 'Manual', value: 'manual' },
   { label: 'Token Claim', value: 'token_claim' },
   { label: 'API', value: 'api' },
 ];
+
+/** The group modes the engine accepts for each provider type. */
+export const GROUP_MODES_BY_TYPE: Readonly<
+  Record<string, readonly TGroupMode[]>
+> = Object.freeze({
+  entra_id: ['manual', 'token_claim', 'api'],
+  generic: ['manual', 'token_claim'],
+  google: ['api'],
+  okta: ['manual', 'token_claim', 'api'],
+});
 
 export const GROUPS_FORM_NAME = 'groups';

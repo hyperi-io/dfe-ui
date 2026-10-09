@@ -1,12 +1,15 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
+import { EnrichOnLoginField } from '@/core/components/EnrichOnLoginField';
 import { Form } from '@/core/components/Form';
 import {
-  GROUP_MODE_OPTIONS,
   GROUPS_FORM_NAME,
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
-import { presetFieldsForType } from '@/core/utils/oidcProviderPresets';
+import {
+  groupModeOptionsForType,
+  presetFieldsForType,
+} from '@/core/utils/oidcProviderPresets';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   CreateUpdateOidcProviderFormData,
@@ -45,6 +48,7 @@ export const ConfigureOIDCForm = ({
 }: ConfigureOidcProviderFormProps) => {
   const formValidation = useAntdZodResolver(createUpdateOidcProviderSchema);
   const typeWatch = Form.useWatch('type', form);
+  const modeOptions = groupModeOptionsForType({ type: typeWatch });
   // Uncomment this when we have a way to handle the mode watch
   // for different field per oidc provider type
   // const modeWatch = Form.useWatch(['groups', 'mode'], form);
@@ -142,16 +146,13 @@ export const ConfigureOIDCForm = ({
                 name={[GROUPS_FORM_NAME, 'mode']}
                 rules={[formValidation]}
               >
-                <Select options={GROUP_MODE_OPTIONS} />
+                <Select
+                  disabled={modeOptions.length === 1}
+                  options={modeOptions}
+                />
               </Form.Item>
 
-              <Form.Item
-                label="Enrich on Login"
-                name={[GROUPS_FORM_NAME, 'enrich_on_login']}
-                rules={[formValidation]}
-              >
-                <Switch />
-              </Form.Item>
+              <EnrichOnLoginField />
 
               {typeWatch === 'okta' && (
                 <>

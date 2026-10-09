@@ -74,6 +74,8 @@ const GOOGLE: TOidcProviderListItem = {
   client_secret_env: 'GOOGLE_CLIENT_SECRET',
   groups: {
     ...NO_GROUPS,
+    mode: 'api',
+    enrich_on_login: true,
     service_account_json_env: 'GOOGLE_SA_JSON',
     admin_email: 'admin@example.com',
     domain: 'example.com',
@@ -188,7 +190,6 @@ const CREDENTIALS = [
     value: 'new-client-secret',
     env: 'OKTA_WORKFORCE_SECRET',
   },
-  { label: 'Tenant ID', value: 'tenant-guid', env: 'ENTRA_TENANT_ID' },
   {
     label: 'Directory Client Secret',
     value: 'directory-secret',
@@ -211,7 +212,10 @@ const setCredentials = async (
     if (!labels.includes(label)) {
       continue;
     }
-    if (source === 'Env Var') {
+    const shown = screen
+      .getByLabelText(`${label} source`)
+      .closest('.ant-select')?.textContent;
+    if (!shown?.includes(source)) {
       await chooseCredentialSource(user, label, source);
     }
     await retype(
@@ -251,33 +255,54 @@ describe(
       });
     });
 
-    // Every credential opens on Value for OKTA.
-    test('each credential typed as a value is sent with its env var blanked', async () => {
-      const user = await openEditDrawer(OKTA);
-
-      await setCredentials(
-        user,
-        'Value',
-        CREDENTIALS.map(({ label }) => label),
-      );
-
-      expect(await submitAndReadBody(user)).toMatchObject({
-        client_id: 'rotated-client-id',
-        client_id_env: '',
-        client_secret: 'new-client-secret',
-        client_secret_env: '',
-        groups: {
-          tenant_id: 'tenant-guid',
-          tenant_id_env: '',
-          client_secret: 'directory-secret',
+    test.each<{
+      expected: Record<string, unknown>;
+      labels: string[];
+      provider: TOidcProviderListItem;
+    }>([
+      {
+        provider: OKTA,
+        labels: ['Client ID', 'Client Secret', 'API Token'],
+        expected: {
+          client_id: 'rotated-client-id',
+          client_id_env: '',
+          client_secret: 'new-client-secret',
           client_secret_env: '',
-          api_token: 'new-api-token',
-          api_token_env: '',
-          service_account_json: '{"type":"service_account"}',
-          service_account_json_env: '',
+          groups: { api_token: 'new-api-token', api_token_env: '' },
         },
-      });
-    });
+      },
+      {
+        provider: ENTRA_ID,
+        labels: ['Directory Client Secret'],
+        expected: {
+          groups: {
+            tenant_id: 'tenant',
+            tenant_id_env: '',
+            client_secret: 'directory-secret',
+            client_secret_env: '',
+          },
+        },
+      },
+      {
+        provider: GOOGLE,
+        labels: ['Service Account JSON'],
+        expected: {
+          groups: {
+            service_account_json: '{"type":"service_account"}',
+            service_account_json_env: '',
+          },
+        },
+      },
+    ])(
+      '$provider.display_name credentials typed as values are sent with their env vars blanked',
+      async ({ expected, labels, provider }) => {
+        const user = await openEditDrawer(provider);
+
+        await setCredentials(user, 'Value', labels);
+
+        expect(await submitAndReadBody(user)).toMatchObject(expected);
+      },
+    );
 
     test('the client ID and secret set by env var send a blank client ID and no secret', async () => {
       const user = await openEditDrawer(OKTA);
@@ -293,38 +318,28 @@ describe(
       expect(body).not.toHaveProperty('client_secret');
     });
 
-    test('the Entra tenant and directory secret set by env var send a blank tenant and no secret', async () => {
-      const user = await openEditDrawer(OKTA);
+    test('the Entra directory secret set by env var sends no secret and the tenant comes from the issuer', async () => {
+      const user = await openEditDrawer(ENTRA_ID);
 
-      await setCredentials(user, 'Env Var', [
-        'Tenant ID',
-        'Directory Client Secret',
-      ]);
+      await setCredentials(user, 'Env Var', ['Directory Client Secret']);
 
       const body = await submitAndReadBody(user);
       expect(body.groups).toMatchObject({
-        tenant_id: '',
-        tenant_id_env: 'ENTRA_TENANT_ID',
+        tenant_id: 'tenant',
+        tenant_id_env: '',
         client_secret_env: 'ENTRA_DIRECTORY_SECRET',
       });
       expect(body.groups).not.toHaveProperty('client_secret');
     });
 
-    test('the Okta token and Google service account set by env var send no secret', async () => {
+    test('the Okta token set by env var sends no secret', async () => {
       const user = await openEditDrawer(OKTA);
 
-      await setCredentials(user, 'Env Var', [
-        'API Token',
-        'Service Account JSON',
-      ]);
+      await setCredentials(user, 'Env Var', ['API Token']);
 
       const body = await submitAndReadBody(user);
-      expect(body.groups).toMatchObject({
-        api_token_env: 'OKTA_DIRECTORY_TOKEN',
-        service_account_json_env: 'GOOGLE_SA_JSON',
-      });
+      expect(body.groups.api_token_env).toBe('OKTA_DIRECTORY_TOKEN');
       expect(body.groups).not.toHaveProperty('api_token');
-      expect(body.groups).not.toHaveProperty('service_account_json');
     });
 
     test.each([
@@ -343,19 +358,19 @@ describe(
     );
 
     test('a stored secret is hinted at and an absent one is not', async () => {
-      await openEditDrawer(OKTA);
+      await openEditDrawer({
+        ...OKTA,
+        groups: { ...OKTA.groups, api_token_env: '', api_token_path: '' },
+      });
 
       expect(screen.getByLabelText('Client Secret')).toHaveAttribute(
         'placeholder',
         STORED_SECRET_HINT,
       );
-      expect(screen.getByLabelText('API Token')).toHaveAttribute(
+      expect(screen.getByLabelText('API Token')).not.toHaveAttribute(
         'placeholder',
         STORED_SECRET_HINT,
       );
-      expect(
-        screen.getByLabelText('Directory Client Secret'),
-      ).not.toHaveAttribute('placeholder', STORED_SECRET_HINT);
     });
 
     test('a credential set only by env var opens on its env var', async () => {
@@ -374,7 +389,6 @@ describe(
       const user = await openEditDrawer(OKTA);
 
       await user.click(field('groups_enrich_on_login'));
-      await retype(user, field('groups_okta_domain'), 'corp.okta.com');
       await chooseCredentialSource(user, 'API Token', 'Env Var');
       await retype(user, screen.getByLabelText('API Token'), 'OKTA_DIR_TOKEN');
       await retype(user, field('groups_sync_interval'), '600');
@@ -383,13 +397,12 @@ describe(
       expect(body.groups).toEqual({
         ...groupsRequest(OKTA.groups),
         enrich_on_login: true,
-        okta_domain: 'corp.okta.com',
         api_token_env: 'OKTA_DIR_TOKEN',
         sync_interval: 600,
       });
     });
 
-    test('Google group edits and a token-claim mode reach the PUT body', async () => {
+    test('Google group edits reach the PUT body with the mode locked to API', async () => {
       const user = await openEditDrawer(GOOGLE);
 
       await retype(user, field('groups_admin_email'), 'it@example.com');
@@ -399,14 +412,11 @@ describe(
         screen.getByLabelText('Service Account JSON'),
         'GOOGLE_DIR_SA',
       );
-      await chooseGroupMode(user, 'Token Claim');
-      await retype(user, field('groups_claim_name'), 'roles');
+      expect(field('groups_mode')).toBeDisabled();
 
       const body = await submitAndReadBody(user);
       expect(body.groups).toEqual({
         ...groupsRequest(GOOGLE.groups),
-        mode: 'token_claim',
-        claim_name: 'roles',
         admin_email: 'it@example.com',
         domain: 'corp.example.com',
         service_account_json_env: 'GOOGLE_DIR_SA',
@@ -416,25 +426,20 @@ describe(
     test('Entra ID group edits reach the PUT body and a hidden setting is kept', async () => {
       const user = await openEditDrawer(ENTRA_ID);
 
-      await retype(
-        user,
-        screen.getByLabelText('Tenant ID'),
-        'ENTRA_DIRECTORY_TENANT',
-      );
       await chooseCredentialSource(user, 'Directory Client Secret', 'Env Var');
       await retype(
         user,
         screen.getByLabelText('Directory Client Secret'),
         'ENTRA_DIRECTORY_SECRET',
       );
-      await chooseGroupMode(user, 'Manual');
+      await chooseGroupMode(user, 'Token Claim');
 
       const body = await submitAndReadBody(user);
       expect(body.groups).toEqual({
         ...groupsRequest(ENTRA_ID.groups),
-        mode: 'manual',
-        tenant_id_env: 'ENTRA_DIRECTORY_TENANT',
-        tenant_id: '',
+        mode: 'token_claim',
+        tenant_id_env: '',
+        tenant_id: 'tenant',
         client_secret_env: 'ENTRA_DIRECTORY_SECRET',
       });
       expect(body.groups.sync_interval).toBe(900);

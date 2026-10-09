@@ -19,7 +19,7 @@ export const issuerModeOptions = ({
 }: {
   type: 'okta' | 'entra_id';
 }): { label: string; value: TIssuerMode }[] => [
-  { label: type === 'okta' ? 'Org Domain' : 'Tenant ID', value: 'guided' },
+  { label: type === 'okta' ? 'Domain' : 'Tenant ID', value: 'guided' },
   { label: 'Full URL', value: 'manual' },
 ];
 
@@ -45,6 +45,20 @@ export const buildOktaIssuer = ({ domain }: TOktaIssuerParts) => {
     .replace(/\/+$/, '');
   return host === '' ? '' : `https://${host}`;
 };
+
+/** The host of an issuer URL, where the Okta API is called, or '' when there is no issuer. */
+export const oktaDomainFromIssuer = ({ issuer }: { issuer: string }) =>
+  issuer
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .split('/')[0] ?? '';
+
+/** The tenant an Entra ID issuer URL names in its first path segment, or '' when there is none. */
+export const entraTenantFromIssuer = ({ issuer }: { issuer: string }) =>
+  issuer
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .split('/')[1] ?? '';
 
 /** The v2.0 issuer of an Entra ID tenant in the global cloud, '' until the tenant ID is filled in. */
 export const buildEntraIssuer = ({ tenantId }: TEntraIssuerParts) => {

@@ -37,6 +37,7 @@ interface CredentialFieldProps {
   secret?: boolean;
   /** The stored secret's path, non-empty when a blank value keeps it. */
   storedName?: TNamePath;
+  tooltip?: string;
 }
 
 /** A credential set as a value or as the name of the env var holding it; only the selected member is a mounted form field, so a submit carries that member alone. */
@@ -45,6 +46,7 @@ export const CredentialField = ({
   label,
   secret = false,
   storedName,
+  tooltip,
   valueName,
 }: CredentialFieldProps) => {
   const form = Form.useFormInstance();
@@ -61,7 +63,7 @@ export const CredentialField = ({
   const inputId = `${id}-${source}`;
 
   return (
-    <Form.Item label={label} htmlFor={inputId}>
+    <Form.Item label={label} htmlFor={inputId} tooltip={tooltip}>
       <Space.Compact block>
         <Select
           id={`${id}-source`}
