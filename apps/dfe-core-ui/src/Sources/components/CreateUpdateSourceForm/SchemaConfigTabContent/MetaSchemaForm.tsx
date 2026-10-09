@@ -81,7 +81,7 @@ export const MetaSchemaForm = ({
             </Popover>
           </p>
         }
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <MetaSchemaSelectCreate onChange={handleChangeMetaSchema} />
       </Form.Item>
@@ -89,7 +89,7 @@ export const MetaSchemaForm = ({
         className="w-full"
         name={['schema', 'meta_schema_version']}
         label="Meta Schema Version"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <Select
           options={metaSchemaVersionsOptions}

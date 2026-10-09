@@ -93,7 +93,7 @@ export const ViewsTabContent = ({
                     className="col-span-2"
                     name={[name, 'standard']}
                     label="Standard"
-                    rules={[{ required: true }, formValidation]}
+                    rules={[formValidation]}
                   >
                     <Select
                       options={standardsOptions}

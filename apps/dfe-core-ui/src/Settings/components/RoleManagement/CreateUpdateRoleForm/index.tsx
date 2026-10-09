@@ -63,18 +63,14 @@ export const CreateUpdateRoleForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item
-        name="name"
-        label="Name"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
 
       <Form.Item
         name="description"
         label="Description"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <Input.TextArea placeholder="Enter description" />
       </Form.Item>
@@ -82,7 +78,7 @@ export const CreateUpdateRoleForm = ({
       <Form.Item
         name="permissions"
         label="Permissions"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <RoleScopeSelect />
       </Form.Item>

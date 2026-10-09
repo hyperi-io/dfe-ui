@@ -121,7 +121,7 @@ const CreateUpdateRuleFormBase = ({
           name="user_sql"
           label="User SQL"
           className="m-0! grow"
-          rules={[{ required: true }, formValidation]}
+          rules={[formValidation]}
         >
           <AceEditor
             value={initialValues?.user_sql}

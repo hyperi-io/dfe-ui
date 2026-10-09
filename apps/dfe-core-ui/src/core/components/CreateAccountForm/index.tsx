@@ -63,19 +63,11 @@ export const CreateAccountForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item
-        name="username"
-        label="Username"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="username" label="Username" rules={[formValidation]}>
         <Input placeholder="Enter username" />
       </Form.Item>
 
-      <Form.Item
-        name="email"
-        label="Email"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="email" label="Email" rules={[formValidation]}>
         <Input type="email" placeholder="Enter email" />
       </Form.Item>
 
@@ -87,22 +79,14 @@ export const CreateAccountForm = ({
         <Input placeholder="Enter phone" />
       </Form.Item>
 
-      <Form.Item
-        name="password"
-        label="Password"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="password" label="Password" rules={[formValidation]}>
         <Input.Password
           autoComplete="new-password"
           placeholder="Enter password"
         />
       </Form.Item>
 
-      <Form.Item
-        name="groups"
-        label="Groups"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
         <AccountGroupSelect disabled={disabledFields?.groups} />
       </Form.Item>
 

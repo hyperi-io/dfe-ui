@@ -87,11 +87,7 @@ export const CreatePolicyDrawer = ({ trigger }: CreatePolicyDrawerProps) => {
             protected: [],
           }}
         >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true }, formValidation]}
-          >
+          <Form.Item label="Name" name="name" rules={[formValidation]}>
             <Input />
           </Form.Item>
           <Form.Item label="Description" name="description">
@@ -100,7 +96,7 @@ export const CreatePolicyDrawer = ({ trigger }: CreatePolicyDrawerProps) => {
           <Form.Item
             label="Protected"
             name="protected"
-            rules={[{ required: true }, formValidation]}
+            rules={[formValidation]}
           >
             <Select
               mode="multiple"

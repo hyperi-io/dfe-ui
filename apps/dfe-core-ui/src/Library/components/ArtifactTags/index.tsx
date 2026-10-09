@@ -93,17 +93,13 @@ export const ArtifactTags = ({
             }}
           >
             <div className="grid grid-cols-2 gap-3">
-              <Form.Item
-                name="tag"
-                label="Tag"
-                rules={[{ required: true }, formValidation]}
-              >
+              <Form.Item name="tag" label="Tag" rules={[formValidation]}>
                 <Input placeholder="stable" />
               </Form.Item>
               <Form.Item
                 name="version"
                 label="Points at version"
-                rules={[{ required: true }, formValidation]}
+                rules={[formValidation]}
               >
                 {(artifact.versions ?? []).length > 0 ? (
                   <Select

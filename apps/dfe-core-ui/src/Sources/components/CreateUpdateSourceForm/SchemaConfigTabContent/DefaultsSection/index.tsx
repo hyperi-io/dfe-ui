@@ -166,7 +166,7 @@ export const DefaultsSection = ({
                   ) && <OverrideTag />}
                 </p>
               }
-              rules={[{ required: true }, formValidation]}
+              rules={[formValidation]}
             >
               <CommonHeaderSelect onChange={handleChangeCommonHeader} />
             </Form.Item>
@@ -183,7 +183,7 @@ export const DefaultsSection = ({
                   ) && <OverrideTag />}
                 </p>
               }
-              rules={[{ required: true }, formValidation]}
+              rules={[formValidation]}
             >
               <Select
                 options={commonHeaderVersionsOptions}

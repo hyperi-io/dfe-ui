@@ -77,11 +77,7 @@ export const UpdateProfileForm = ({
       onFinish={handleFinish}
       initialValues={{ ...accountDetail }}
     >
-      <Form.Item
-        name="email"
-        label="Email"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="email" label="Email" rules={[formValidation]}>
         <Input type="email" placeholder="Enter email" />
       </Form.Item>
 

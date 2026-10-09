@@ -29,7 +29,7 @@ export const ReceiverFormSection = ({
           className="w-full"
           name={['match', 'field']}
           label="Field"
-          rules={[{ required: true }, formValidation]}
+          rules={[formValidation]}
         >
           <Input placeholder="Enter field" />
         </Form.Item>
@@ -63,7 +63,7 @@ export const ReceiverFormSection = ({
           className="w-full"
           name={['match', 'value']}
           label="Value"
-          rules={[{ required: true }, formValidation]}
+          rules={[formValidation]}
         >
           <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
         </Form.Item>

@@ -212,7 +212,7 @@ export const AddSchemaTable = ({
                 <Form.Item
                   {...restField}
                   name={[rowIndex, 'name']}
-                  rules={[{ required: true }, formValidation]}
+                  rules={[formValidation]}
                 >
                   <InlineEditInput
                     classNames={{
@@ -243,7 +243,7 @@ export const AddSchemaTable = ({
                   <Form.Item
                     {...restField}
                     name={typeFormName}
-                    rules={[{ required: true }, formValidation]}
+                    rules={[formValidation]}
                     getValueFromEvent={(event) => {
                       const nextType =
                         event && typeof event === 'object' && 'target' in event

@@ -78,11 +78,7 @@ export const CreateUpdateGroupForm = ({
       onFinish={onFinish}
       initialValues={initialValues}
     >
-      <Form.Item
-        name="name"
-        label="Name"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
 
@@ -94,11 +90,7 @@ export const CreateUpdateGroupForm = ({
         <Input.TextArea placeholder="Enter description" />
       </Form.Item>
 
-      <Form.Item
-        name="roles"
-        label="Roles"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="roles" label="Roles" rules={[formValidation]}>
         <GroupRoleSelect />
       </Form.Item>
 
@@ -121,7 +113,7 @@ export const CreateUpdateGroupForm = ({
         <Form.Item
           name="organisation"
           label="Organisation"
-          rules={[{ required: true }, formValidation]}
+          rules={[formValidation]}
         >
           <OrganisationSelect disabled={disabledFields?.organisation} />
         </Form.Item>

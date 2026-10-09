@@ -145,7 +145,7 @@ export const CloneSchemaModal = ({
             <Form.Item
               name="name"
               label="Name"
-              rules={[{ required: true }, formValidation]}
+              rules={[formValidation]}
               className="w-full mb-2"
             >
               <Input placeholder={`${name}`} />
@@ -155,7 +155,7 @@ export const CloneSchemaModal = ({
           <Form.Item
             name="version"
             label="Version"
-            rules={[{ required: true }, formValidation]}
+            rules={[formValidation]}
             className="w-full mb-2"
           >
             <Select
@@ -169,7 +169,7 @@ export const CloneSchemaModal = ({
           <Form.Item
             name="description"
             label="Description"
-            rules={[{ required: true }, formValidation]}
+            rules={[formValidation]}
             className="w-full mb-2"
           >
             <Input.TextArea placeholder="Enter description" />

@@ -73,11 +73,7 @@ export const UpdateAccountForm = ({
       onFinish={handleFinish}
       initialValues={{ ...accountDetail }}
     >
-      <Form.Item
-        name="email"
-        label="Email"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="email" label="Email" rules={[formValidation]}>
         <Input type="email" placeholder="Enter email" />
       </Form.Item>
 
@@ -89,11 +85,7 @@ export const UpdateAccountForm = ({
         <Input placeholder="Enter phone" />
       </Form.Item>
 
-      <Form.Item
-        name="groups"
-        label="Groups"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
         <AccountGroupSelect />
       </Form.Item>
 

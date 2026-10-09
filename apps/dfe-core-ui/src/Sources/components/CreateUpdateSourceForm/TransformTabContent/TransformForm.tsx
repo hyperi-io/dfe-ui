@@ -19,7 +19,7 @@ export const TransformForm = ({
         <Form.Item
           name={['transform', 'engine']}
           label="Transform Engine"
-          rules={[{ required: true }, formValidation]}
+          rules={[formValidation]}
           help={
             hasEngines
               ? undefined

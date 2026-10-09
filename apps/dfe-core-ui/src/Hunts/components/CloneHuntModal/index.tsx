@@ -150,7 +150,7 @@ export const CloneHuntModal = ({
           <Form.Item
             name="name"
             label="Name"
-            rules={[{ required: true }, formValidation]}
+            rules={[formValidation]}
             className="w-full mb-2"
           >
             <Input placeholder={`${hunt.name}_copy`} />

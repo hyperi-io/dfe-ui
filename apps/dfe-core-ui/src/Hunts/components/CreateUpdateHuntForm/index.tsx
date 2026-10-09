@@ -82,11 +82,7 @@ export const CreateUpdateHuntForm = ({
       initialValues={initialValues}
       {...props}
     >
-      <Form.Item
-        name="name"
-        label="Name"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
       <Form.Item
@@ -99,7 +95,7 @@ export const CreateUpdateHuntForm = ({
       <Form.Item
         name="customers"
         label="Organisations"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <OrganisationSelect
           mode="multiple"
@@ -109,30 +105,22 @@ export const CreateUpdateHuntForm = ({
       <Form.Item
         name="global_source_table_name"
         label="Source Table"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <SourceSelect placeholder="Select source" />
       </Form.Item>
       <Form.Item
         name="global_target_table_name"
         label="Target Table"
-        rules={[{ required: true }, formValidation]}
+        rules={[formValidation]}
       >
         <Input placeholder="Enter target table" />
       </Form.Item>
-      <Form.Item
-        name="rules"
-        label="Rules"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="rules" label="Rules" rules={[formValidation]}>
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
-      <Form.Item
-        name="cron"
-        label="Cron Expression"
-        rules={[{ required: true }, formValidation]}
-      >
+      <Form.Item name="cron" label="Cron Expression" rules={[formValidation]}>
         <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>
 
