@@ -1,6 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { cn } from '@/core/utils/style';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import {
+  CreateUpdateSourceFormData,
+  DisabledFields,
+} from '@/Sources/components/CreateUpdateSourceForm';
 import { SourceOrigin } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { FormInstance, FormRule, Radio } from 'antd';
 import { FetcherFormSection } from './FetcherFormSection';
@@ -15,10 +18,12 @@ export const OriginFormSection = ({
   formValidation,
   form,
   className,
+  disabledFields,
 }: {
   formValidation: FormRule;
   form: FormInstance<CreateUpdateSourceFormData>;
   className?: string;
+  disabledFields?: DisabledFields;
 }) => {
   const origin = Form.useWatch('origin', form);
 
@@ -42,6 +47,7 @@ export const OriginFormSection = ({
     <div className={cn('flex flex-col gap-2', className)}>
       <Form.Item name="origin" label="Origin" rules={[formValidation]}>
         <Radio.Group
+          disabled={disabledFields?.origin}
           onChange={(event) =>
             handleOriginChange(event.target.value as SourceOrigin)
           }
@@ -53,10 +59,17 @@ export const OriginFormSection = ({
       </Form.Item>
 
       {origin === 'fetcher' && (
-        <FetcherFormSection formValidation={formValidation} />
+        <FetcherFormSection
+          disabledFields={disabledFields}
+          formValidation={formValidation}
+        />
       )}
       {origin === 'receiver' && (
-        <ReceiverFormSection formValidation={formValidation} form={form} />
+        <ReceiverFormSection
+          disabledFields={disabledFields}
+          formValidation={formValidation}
+          form={form}
+        />
       )}
     </div>
   );

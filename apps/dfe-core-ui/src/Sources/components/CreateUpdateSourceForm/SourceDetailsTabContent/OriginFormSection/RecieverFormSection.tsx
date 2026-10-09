@@ -1,6 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import {
+  CreateUpdateSourceFormData,
+  DisabledFields,
+} from '@/Sources/components/CreateUpdateSourceForm';
 import {
   MATCH_OPERATORS,
   RECEIVER_TABLE_LABELS,
@@ -11,9 +14,11 @@ import { FormInstance, FormRule, Input, Radio, Select } from 'antd';
 export const ReceiverFormSection = ({
   formValidation,
   form,
+  disabledFields,
 }: {
   formValidation: FormRule;
   form: FormInstance<CreateUpdateSourceFormData>;
+  disabledFields?: DisabledFields;
 }) => {
   const operationType = Form.useWatch(['match', 'operator'], form);
   const isMatchValueDisabled = operationType === 'exists';
@@ -75,6 +80,7 @@ export const ReceiverFormSection = ({
         help="You can either use the shared table or add your own table. You will need to deploy the source if own table is selected."
       >
         <Radio.Group
+          disabled={disabledFields?.receiver_ui_config?.table}
           options={Object.entries(RECEIVER_TABLE_LABELS).map(
             ([value, label]) => ({ label, value }),
           )}

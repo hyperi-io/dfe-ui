@@ -79,6 +79,7 @@ export const SourceDetailsTabContent = ({
       formValidation={formValidation}
       form={form}
       className="mt-2"
+      disabledFields={disabledFields}
     />
   </div>
 );
