@@ -32,3 +32,8 @@ release:
   container:
     enabled: true
     dockerfile: Dockerfile
+  # The contract is committed because a TypeScript app has no binary to emit one.
+  helm:
+    enabled: true
+    contract: deploy/contract.json
+    library: '2.14.4'
