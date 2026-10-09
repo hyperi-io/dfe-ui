@@ -22,6 +22,7 @@ export const accounts = {
           items: [
             {
               username: 'string',
+              oidc_id: 'string',
               enabled: true,
               blocked: false,
               disabled_at: '',
@@ -66,6 +67,7 @@ export const accounts = {
       success: ({
         mockedResponse = {
           username: 'string',
+          oidc_id: 'string',
           enabled: true,
           blocked: false,
           disabled_at: '',
@@ -105,6 +107,7 @@ export const accounts = {
       success: ({
         mockedResponse = {
           username: 'string',
+          oidc_id: 'string',
           enabled: true,
           blocked: false,
           disabled_at: '',
@@ -151,6 +154,7 @@ export const accounts = {
       success: ({
         mockedResponse = {
           username: 'string',
+          oidc_id: 'string',
           enabled: true,
           blocked: false,
           disabled_at: '',
@@ -343,6 +347,7 @@ export const accounts = {
       success: ({
         mockedResponse = {
           username: 'string',
+          oidc_id: 'string',
           enabled: true,
           blocked: false,
           disabled_at: '',
@@ -379,6 +384,7 @@ export const accounts = {
       success: ({
         mockedResponse = {
           username: 'string',
+          oidc_id: 'string',
           enabled: true,
           blocked: false,
           disabled_at: '',
