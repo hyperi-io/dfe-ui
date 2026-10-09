@@ -14,6 +14,7 @@ import {
   IconLock,
   IconQuestionMark,
   IconRocket,
+  IconRocketOff,
   IconStarFilled,
 } from '@repo/dfe-icons';
 import { Button, notification, Tag, TreeDataNode } from 'antd';
@@ -65,15 +66,19 @@ export const sourceTreeTestId = (sourcePath: string) =>
 export const versionTreeKey = (sourcePath: string, version: string) =>
   `${sourceTreeKey(sourcePath)}@${version}`;
 
+type SelectSource = ({
+  source_name,
+  source_version,
+  tab,
+}: {
+  source_name: string;
+  source_version: string;
+  tab?: string;
+}) => void;
+
 const buildVersionChildren = (
   source: NonNullable<TSourceSummary['items']>[number],
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void,
+  setSelectedSource: SelectSource,
   selectedSourcePath: string | null,
   selectedSourceVersion: string | null,
   expandTreeNode: (key: string) => void,
@@ -149,13 +154,7 @@ const sourceSummaryToTreeData = ({
 }: {
   node: TSourceSummary;
   pathSegments: string[];
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void;
+  setSelectedSource: SelectSource;
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   apiNotification: NotificationInstance;
@@ -297,7 +296,32 @@ const sourceSummaryToTreeData = ({
             }}
             selected={selectedSourceName === source.name}
             actions={
-              <>
+              <div className="flex gap-1">
+                {((!isDeployed && !isSharedTable) ||
+                  (isDeployed &&
+                    source.current !== source.deployed_version)) && (
+                  <Tooltip
+                    destroyOnHidden
+                    title="There are undeployed changes on the working branch"
+                  >
+                    <Button
+                      type="default"
+                      shape="circle"
+                      size="small"
+                      className="p-0.5"
+                      icon={<IconRocketOff />}
+                      onClick={() => {
+                        // Working-branch changes are resolved on Build & Deploy.
+                        setSelectedSource({
+                          source_name: source.name,
+                          source_version: source.current,
+                          tab: 'buildDeploy',
+                        });
+                      }}
+                      danger
+                    />
+                  </Tooltip>
+                )}
                 <Tooltip
                   destroyOnHidden
                   title={
@@ -318,7 +342,7 @@ const sourceSummaryToTreeData = ({
                     icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
                   />
                 </Tooltip>
-              </>
+              </div>
             }
             hoverActions={
               <>
@@ -395,13 +419,7 @@ export const useTransformSourceToTree = ({
   refetchSources,
 }: {
   sourceObjects: TSourceSummary;
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void;
+  setSelectedSource: SelectSource;
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   expandTreeNode: (key: string) => void;
