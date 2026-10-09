@@ -28,7 +28,10 @@ const toFieldPath = (name: NamePath): FieldPath =>
 const schemaByResolver = new WeakMap<object, z.ZodType>();
 
 export const getZodSchemaForRule = (rule: unknown): z.ZodType | undefined => {
-  if (typeof rule === 'function' || (typeof rule === 'object' && rule !== null)) {
+  if (
+    typeof rule === 'function' ||
+    (typeof rule === 'object' && rule !== null)
+  ) {
     return schemaByResolver.get(rule);
   }
   return undefined;
