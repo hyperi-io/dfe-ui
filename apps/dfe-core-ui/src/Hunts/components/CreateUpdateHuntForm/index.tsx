@@ -82,11 +82,7 @@ export const CreateUpdateHuntForm = ({
       initialValues={initialValues}
       {...props}
     >
-      <Form.Item
-        name="name"
-        label={<Form.Label required>Name</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
       <Form.Item
@@ -98,7 +94,7 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="customers"
-        label={<Form.Label required>Organisations</Form.Label>}
+        label="Organisations"
         rules={[formValidation]}
       >
         <OrganisationSelect
@@ -108,31 +104,23 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="global_source_table_name"
-        label={<Form.Label required>Source Table</Form.Label>}
+        label="Source Table"
         rules={[formValidation]}
       >
         <SourceSelect placeholder="Select source" />
       </Form.Item>
       <Form.Item
         name="global_target_table_name"
-        label={<Form.Label required>Target Table</Form.Label>}
+        label="Target Table"
         rules={[formValidation]}
       >
         <Input placeholder="Enter target table" />
       </Form.Item>
-      <Form.Item
-        name="rules"
-        label={<Form.Label required>Rules</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="rules" label="Rules" rules={[formValidation]}>
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
-      <Form.Item
-        name="cron"
-        label={<Form.Label required>Cron Expression</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="cron" label="Cron Expression" rules={[formValidation]}>
         <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>
 

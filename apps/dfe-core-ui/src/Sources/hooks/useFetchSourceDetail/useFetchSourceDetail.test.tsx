@@ -38,6 +38,7 @@ describe('.useFetchSourceDetail', () => {
         deployed_version: 'string',
         selected: 'string',
         state: 'active',
+        current_table_topic_type: 'own',
         version: {
           origin: 'receiver',
           date_time: 'string',

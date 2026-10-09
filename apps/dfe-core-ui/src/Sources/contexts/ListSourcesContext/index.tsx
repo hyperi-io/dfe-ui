@@ -101,9 +101,15 @@ export interface ListSourcesContextValue {
   setSelectedSource: ({
     source_name,
     source_version,
+    tab,
   }: {
     source_name: string | null;
     source_version: string | null;
+    /**
+     * Detail tab to land on. Omit to clear the tab when the source changes
+     * (row clicks); pass a key to open that tab (e.g. undeployed → buildDeploy).
+     */
+    tab?: string;
   }) => void;
 }
 
@@ -192,9 +198,11 @@ export const ListSourcesProvider = ({
     ({
       source_name,
       source_version,
+      tab,
     }: {
       source_name: string | null;
       source_version: string | null;
+      tab?: string;
     }) => {
       const sourceChanged = source_name !== selectedSourceName;
       setSelectedSourceName(source_name);
@@ -203,7 +211,10 @@ export const ListSourcesProvider = ({
       // Processing and the later tabs are not on every source. Keeping a stale
       // tab when the source changes leaves the URL pointing at a strip that is
       // no longer rendered. Version switches of the same source keep the tab.
-      if (sourceChanged) {
+      // An explicit tab (undeployed → buildDeploy) wins over either default.
+      if (tab !== undefined) {
+        keep.set('tab', tab);
+      } else if (sourceChanged) {
         keep.delete('tab');
       }
       const query = filtersToSearchString(
