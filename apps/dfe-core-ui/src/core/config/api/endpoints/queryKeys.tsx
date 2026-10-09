@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-imports */
 import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
+import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 
 export const QUERY_KEYS = Object.freeze({
   auth: {
@@ -129,7 +130,21 @@ export const QUERY_KEYS = Object.freeze({
     callback: () => ['auth', 'oidc', '{provider}', 'callback'],
   },
   oidcProviders: {
-    default: () => ['auth', 'oidc-providers'],
+    default: ({
+      search,
+      sort_by,
+      sort_order,
+      page,
+      per_page,
+    }: UseFetchInfiniteFilteredOidcProvidersProps = {}) => [
+      'auth',
+      'oidc-providers',
+      ...(search ? ['search', search] : []),
+      ...(sort_by ? ['sort_by', sort_by] : []),
+      ...(sort_order ? ['sort_order', sort_order] : []),
+      ...(page ? ['page', page] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
     provider: () => ['auth', 'oidc-providers', '{name}'],
     syncGroups: () => ['auth', 'oidc-providers', '{name}', 'sync'],
     test: () => ['auth', 'oidc-providers', '{name}', 'test'],
