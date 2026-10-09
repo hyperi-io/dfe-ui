@@ -287,6 +287,8 @@ export interface paths {
         /**
          * Get Account
          * @description Get a single account by username (admin only).
+         *
+         *     Soft-deleted (anonymized) accounts answer 404 the same as a missing name.
          */
         get: operations["get_account_api_v1_auth_accounts__username__get"];
         /**
@@ -426,12 +428,12 @@ export interface paths {
         };
         /**
          * Get Account Attributes
-         * @description Read an account's non-sensitive attribute blob (404 if the account is missing).
+         * @description Read an account's non-sensitive attribute blob (404 if missing or soft-deleted).
          */
         get: operations["get_account_attributes_api_v1_auth_accounts__username__attributes_get"];
         /**
          * Put Account Attributes
-         * @description Full-replace an account's non-sensitive attribute blob (404 if missing).
+         * @description Full-replace an account's non-sensitive attribute blob (404 if missing or soft-deleted).
          */
         put: operations["put_account_attributes_api_v1_auth_accounts__username__attributes_put"];
         post?: never;
@@ -453,12 +455,13 @@ export interface paths {
          * @description Read an account's SENSITIVE attribute blob from the separate keyed store.
          *
          *     The account must exist first (404 otherwise), so a sensitive read cannot be
-         *     used to probe for accounts that are not there.
+         *     used to probe for accounts that are not there. Soft-deleted accounts answer
+         *     the same way.
          */
         get: operations["get_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_get"];
         /**
          * Put Account Sensitive Attributes
-         * @description Full-replace an account's SENSITIVE attribute blob (404 if the account is missing).
+         * @description Full-replace an account's SENSITIVE attribute blob (404 if missing or soft-deleted).
          */
         put: operations["put_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_put"];
         post?: never;
@@ -775,11 +778,14 @@ export interface paths {
         post?: never;
         /**
          * Delete Provider
-         * @description Detach an OIDC provider and report orphaned groups (admin only).
+         * @description Detach an OIDC provider and soft-delete its accounts (admin only).
          *
          *     Does NOT delete groups -- they become orphaned with their source_provider
-         *     still set to the deleted provider name. The provider's stored credentials
-         *     ARE removed: nothing is left that can authenticate as a detached provider.
+         *     still set to the deleted provider name. Accounts owned by the provider
+         *     (``source_provider``) or last logged in through it (``oidc_id``) are
+         *     soft-deleted: disabled and renamed to ``{uuid}-deleted`` with contact fields
+         *     cleared. The provider's stored credentials ARE removed: nothing is left that
+         *     can authenticate as a detached provider.
          */
         delete: operations["delete_provider_api_v1_auth_oidc_providers__name__delete"];
         options?: never;
@@ -5638,6 +5644,12 @@ export interface components {
              */
             external: boolean;
             /**
+             * Oidc Id
+             * @description OIDC provider name last used to log this account in, empty if none
+             * @default
+             */
+            oidc_id: string;
+            /**
              * Password Change Required
              * @description True until the account replaces an issued password. The account's own read reports no groups while it is set, as its session holds none.
              * @default false
@@ -7560,6 +7572,37 @@ export interface components {
             deleted: string;
             /** Orphaned Groups */
             orphaned_groups: components["schemas"]["OrphanedGroupInfo"][];
+            /**
+             * Disabled Accounts
+             * @description Accounts soft-disabled and renamed to ``{uuid}-deleted`` because they were owned by or last logged in through the detached provider. Already-disabled and protected recovery accounts are left alone.
+             */
+            disabled_accounts?: components["schemas"]["DisabledAccountInfo"][];
+        };
+        /**
+         * DisabledAccountInfo
+         * @description An account soft-disabled and anonymized because its OIDC provider was detached.
+         */
+        DisabledAccountInfo: {
+            /**
+             * Username
+             * @description Anonymized account id (``{uuid}-deleted``)
+             */
+            username: string;
+            /**
+             * Previous Username
+             * @description Account id before anonymization
+             */
+            previous_username: string;
+            /**
+             * Source Provider
+             * @description Ownership stamp on the account (OIDC provider name, scim, or empty)
+             */
+            source_provider: string;
+            /**
+             * Oidc Id
+             * @description OIDC provider name last used to log this account in
+             */
+            oidc_id: string;
         };
         /**
          * DraftColumn
@@ -15654,6 +15697,8 @@ export interface operations {
             query?: {
                 /** @description Search in username, name, or email */
                 search?: string | null;
+                /** @description Exact match on the OIDC provider name last used to log the account in */
+                oidc_id?: string | null;
                 /** @description Filter by blocked status. Omitted returns every account. */
                 blocked?: boolean | null;
                 /** @description Include the local admin and break-glass recovery accounts. */
