@@ -3,6 +3,15 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.7](https://github.com/hyperi-io/dfe-ui/compare/v1.7.6...v1.7.7) (2026-10-09)
+
+### Bug Fixes
+
+* clear next, sharp and source-map-js security advisories ([#502](https://github.com/hyperi-io/dfe-ui/issues/502)) ([a82a9d0](https://github.com/hyperi-io/dfe-ui/commit/a82a9d09f0978dcc3a6680e17648067d57b0934e))
+* commit dfe-ui's deployment contract ([#501](https://github.com/hyperi-io/dfe-ui/issues/501)) ([4e2118c](https://github.com/hyperi-io/dfe-ui/commit/4e2118c17a5aec55f573d522dd0897e0cb9e5fd2))
+* fix OIDC delete and soft delete users ([#507](https://github.com/hyperi-io/dfe-ui/issues/507)) ([2fdf52c](https://github.com/hyperi-io/dfe-ui/commit/2fdf52ce42e2f5f116b06d2dedf4fec5c59ef8e4))
+* high priority issues asst ([#505](https://github.com/hyperi-io/dfe-ui/issues/505)) ([1125181](https://github.com/hyperi-io/dfe-ui/commit/11251811dc0df0262aa28f6254c89aa9ab904da6))
+
 ## [1.4.0](https://github.com/hyperi-io/dfe-ui/compare/v1.3.9...v1.4.0) (2026-08-31)
 
 ### Features
