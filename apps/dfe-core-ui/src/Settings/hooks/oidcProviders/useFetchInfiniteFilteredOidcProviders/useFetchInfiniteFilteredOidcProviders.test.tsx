@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -10,7 +11,10 @@ import {
   it,
   vi,
 } from 'vitest';
-import { useFetchInfiniteFilteredOidcProviders } from '.';
+import {
+  QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS,
+  useFetchInfiniteFilteredOidcProviders,
+} from '.';
 import { TOidcProviderListItem } from './types';
 import { server } from './useFetchInfiniteFilteredOidcProviders.mocks';
 
@@ -513,6 +517,38 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
 
       // The query should still be using the old keyword initially
       expect(result.current.data.items).toBeDefined();
+    });
+  });
+
+  describe('cache key', () => {
+    it('refetches when a provider write invalidates the shared key', async () => {
+      let listRequests = 0;
+      server.use(
+        http.get(API_CONFIG_MOCKS.oidcProviders.default.mockedUrl, () => {
+          listRequests += 1;
+          return HttpResponse.json({
+            items: [],
+            total: 0,
+            page: 1,
+            per_page: 10,
+            total_pages: 0,
+            next_page: 0,
+            prev_page: 0,
+          });
+        }),
+      );
+      const testWrapper = buildTestWrapper().withReactQuery();
+      const { result } = renderHook(
+        () => useFetchInfiniteFilteredOidcProviders(),
+        { wrapper: testWrapper.wrapper },
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      await testWrapper.queryClient?.invalidateQueries({
+        queryKey: QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS(),
+      });
+
+      await waitFor(() => expect(listRequests).toBe(2));
     });
   });
 });

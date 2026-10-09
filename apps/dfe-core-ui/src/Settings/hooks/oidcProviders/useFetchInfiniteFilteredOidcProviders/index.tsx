@@ -39,8 +39,9 @@ export const useFetchInfiniteFilteredOidcProviders = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
+    // Writes invalidate QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS, so the list must sit under it to refetch.
     queryKey: [
-      'oidc-providers',
+      ...QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS(),
       debouncedSearch,
       sort_by,
       sort_order,

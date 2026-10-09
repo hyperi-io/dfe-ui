@@ -769,7 +769,7 @@ export interface paths {
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written.
+         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. A secret the body names an env var for and sends no value for loses its stored copy once the update is saved, so the env var is read instead. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written or deleted.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
@@ -8199,7 +8199,7 @@ export interface components {
             service_account_json: string;
             /**
              * Service Account Json Env
-             * @description Env var for Google SA JSON
+             * @description Env var for Google SA JSON. On an update, setting it without service_account_json drops the stored JSON, so the env var is used.
              * @default
              */
             service_account_json_env: string;
@@ -8235,7 +8235,7 @@ export interface components {
             client_secret: string;
             /**
              * Client Secret Env
-             * @description Env var for Entra ID client secret
+             * @description Env var for Entra ID client secret. On an update, setting it without client_secret drops the stored secret, so the env var is used.
              * @default
              */
             client_secret_env: string;
@@ -8247,7 +8247,7 @@ export interface components {
             api_token: string;
             /**
              * Api Token Env
-             * @description Env var for Okta API token
+             * @description Env var for Okta API token. On an update, setting it without api_token drops the stored token, so the env var is used.
              * @default
              */
             api_token_env: string;
@@ -14467,7 +14467,7 @@ export interface components {
             client_secret?: string | null;
             /**
              * Client Secret Env
-             * @description Env var name for the RP client secret
+             * @description Env var name for the RP client secret. Setting it without client_secret drops the stored secret, so the env var is used.
              */
             client_secret_env?: string | null;
             /** @description Group resolution config */

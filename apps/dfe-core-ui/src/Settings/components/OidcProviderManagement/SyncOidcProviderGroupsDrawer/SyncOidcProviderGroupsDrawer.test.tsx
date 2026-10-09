@@ -135,40 +135,25 @@ describe('SyncOidcProviderGroupsDrawer', () => {
     expect(screen.queryByText('Groups Created')).not.toBeInTheDocument();
   });
 
-  test.each([
-    [
-      'a token-claim provider',
-      {
-        ...API_PROVIDER,
-        groups: { ...API_PROVIDER.groups, mode: 'token_claim' },
-      },
-      "Groups come from each login's token, so there is no directory to sync. Link a DFE group to an IdP group by its source ID.",
-    ],
-    [
-      'a manual provider',
-      { ...API_PROVIDER, groups: { ...API_PROVIDER.groups, mode: 'manual' } },
-      'Group membership is managed in DFE, so there is no directory to sync.',
-    ],
-    [
-      'a disabled provider',
-      { ...API_PROVIDER, enabled: false },
-      'This provider is disabled, so there is nothing to sync.',
-    ],
-  ])(
-    '%s says why it cannot sync instead of offering to',
-    async (_label, oidcProvider, reason) => {
-      const user = userEvent.setup();
-      render(<SyncOidcProviderGroupsDrawer oidcProvider={oidcProvider} />, {
-        wrapper,
-      });
+  test('a disabled provider says why it cannot sync instead of offering to', async () => {
+    const user = userEvent.setup();
+    render(
+      <SyncOidcProviderGroupsDrawer
+        oidcProvider={{ ...API_PROVIDER, enabled: false }}
+      />,
+      { wrapper },
+    );
 
-      const button = await findSyncButton();
-      expect(button).toBeDisabled();
-      await user.hover(button);
+    const button = await findSyncButton();
+    expect(button).toBeDisabled();
+    await user.hover(button);
 
-      expect(
-        await screen.findByText(reason, {}, { timeout: 15_000 }),
-      ).toBeInTheDocument();
-    },
-  );
+    expect(
+      await screen.findByText(
+        'This provider is disabled, so there is nothing to sync.',
+        {},
+        { timeout: 15_000 },
+      ),
+    ).toBeInTheDocument();
+  });
 });

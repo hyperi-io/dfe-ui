@@ -6,6 +6,7 @@ import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import { presetFieldsForType } from '@/core/utils/oidcProviderPresets';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   CreateUpdateOidcProviderFormData,
@@ -76,9 +77,12 @@ export const ConfigureOIDCForm = ({
                   value: provider.key,
                 }))}
                 onChange={(value) => {
-                  form.setFieldsValue({
-                    ...PROVIDERS_MAP[value]?.initialValues,
-                  });
+                  form.setFieldsValue(
+                    presetFieldsForType({
+                      current: form.getFieldsValue(true),
+                      type: value,
+                    }),
+                  );
                 }}
               />
             </Form.Item>

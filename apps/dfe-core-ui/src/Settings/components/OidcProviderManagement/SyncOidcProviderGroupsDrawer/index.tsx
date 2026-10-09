@@ -13,19 +13,9 @@ import { useState } from 'react';
 const dataListTermStyle =
   'text-sm font-medium text-gray-500 dark:text-gray-400';
 
-// The engine syncs only an enabled provider in api mode, so the other cases are explained before the click.
-const syncUnavailableReason = ({ enabled, groups }: TOidcProviderListItem) => {
-  if (!enabled) {
-    return 'This provider is disabled, so there is nothing to sync.';
-  }
-  if (groups.mode === 'token_claim') {
-    return "Groups come from each login's token, so there is no directory to sync. Link a DFE group to an IdP group by its source ID.";
-  }
-  if (groups.mode === 'manual') {
-    return 'Group membership is managed in DFE, so there is no directory to sync.';
-  }
-  return null;
-};
+// The engine skips a disabled provider, so the reason is shown before the click.
+const DISABLED_REASON =
+  'This provider is disabled, so there is nothing to sync.';
 
 const SyncResult = ({
   result,
@@ -86,8 +76,6 @@ export const SyncOidcProviderGroupsDrawer = ({
     name: oidcProvider.name,
   });
 
-  const unavailableReason = syncUnavailableReason(oidcProvider);
-
   const handleSyncOidcProvider = () => {
     syncOidcProvider();
     setOpen(true);
@@ -97,13 +85,7 @@ export const SyncOidcProviderGroupsDrawer = ({
     <>
       <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
         <RbacProtected.Unrestricted>
-          {unavailableReason ? (
-            <Tooltip title={unavailableReason}>
-              <Button type="text" icon={<IconArrowMergeAltRight />} disabled>
-                Sync OIDC Provider Groups
-              </Button>
-            </Tooltip>
-          ) : (
+          {oidcProvider.enabled ? (
             <Button
               type="text"
               icon={<IconArrowMergeAltRight />}
@@ -113,6 +95,12 @@ export const SyncOidcProviderGroupsDrawer = ({
             >
               Sync OIDC Provider Groups
             </Button>
+          ) : (
+            <Tooltip title={DISABLED_REASON}>
+              <Button type="text" icon={<IconArrowMergeAltRight />} disabled>
+                Sync OIDC Provider Groups
+              </Button>
+            </Tooltip>
           )}
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>

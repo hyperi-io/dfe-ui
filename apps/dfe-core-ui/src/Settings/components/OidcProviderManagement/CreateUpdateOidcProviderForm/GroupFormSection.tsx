@@ -1,3 +1,4 @@
+import { CredentialField } from '@/core/components/CredentialField';
 import { Form } from '@/core/components/Form';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import {
@@ -30,12 +31,13 @@ export const GroupFormSection = () => {
         <Form.Item label="Okta Domain" name={[GROUPS_FORM_NAME, 'okta_domain']}>
           <Input />
         </Form.Item>
-        <Form.Item
-          label="API Token Environment Variable"
-          name={[GROUPS_FORM_NAME, 'api_token_env']}
-        >
-          <Input />
-        </Form.Item>
+        <CredentialField
+          label="API Token"
+          valueName={[GROUPS_FORM_NAME, 'api_token']}
+          envName={[GROUPS_FORM_NAME, 'api_token_env']}
+          storedName={[GROUPS_FORM_NAME, 'api_token_path']}
+          secret
+        />
       </>
 
       <>
@@ -45,30 +47,28 @@ export const GroupFormSection = () => {
         <Form.Item label="Domain" name={[GROUPS_FORM_NAME, 'domain']}>
           <Input />
         </Form.Item>
-        <Form.Item
-          label="Service Account JSON ENV"
-          name={[GROUPS_FORM_NAME, 'service_account_json_env']}
-        >
-          <Input />
-        </Form.Item>
+        <CredentialField
+          label="Service Account JSON"
+          valueName={[GROUPS_FORM_NAME, 'service_account_json']}
+          envName={[GROUPS_FORM_NAME, 'service_account_json_env']}
+          storedName={[GROUPS_FORM_NAME, 'service_account_json_path']}
+          secret
+        />
       </>
 
       <>
-        <Form.Item label="Tenant ID" name={[GROUPS_FORM_NAME, 'tenant_id']}>
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Tenant ID Environment Variable"
-          name={[GROUPS_FORM_NAME, 'tenant_id_env']}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Client Secret ENV"
-          name={[GROUPS_FORM_NAME, 'client_secret_env']}
-        >
-          <Input />
-        </Form.Item>
+        <CredentialField
+          label="Tenant ID"
+          valueName={[GROUPS_FORM_NAME, 'tenant_id']}
+          envName={[GROUPS_FORM_NAME, 'tenant_id_env']}
+        />
+        <CredentialField
+          label="Directory Client Secret"
+          valueName={[GROUPS_FORM_NAME, 'client_secret']}
+          envName={[GROUPS_FORM_NAME, 'client_secret_env']}
+          storedName={[GROUPS_FORM_NAME, 'client_secret_path']}
+          secret
+        />
       </>
 
       <>
