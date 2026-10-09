@@ -10,9 +10,8 @@ import {
   IconBucketDroplet,
   IconCapture,
   IconCaptureOff,
-  IconFile,
-  IconFolder,
   IconLock,
+  IconQuestionMark,
   IconRocket,
   IconStarFilled,
 } from '@repo/dfe-icons';
@@ -20,18 +19,34 @@ import { Button, notification, Tag, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
-const folderIcon = <IconFolder className="shrink-0" />;
-const fileIcon = <IconFile className="shrink-0" />;
-
-const originTagColour = (origin: string) => {
-  switch (origin) {
-    case 'fetcher':
-      return 'purple';
+const baseStyle =
+  'rounded-sm p-2 h-2 w-2 flex items-center justify-center text-xs font-semibold';
+const typeTagIcon = (type: string) => {
+  switch (type) {
     case 'receiver':
-      return 'blue';
+      return (
+        <span className={cn(baseStyle, 'text-blue-500 bg-blue-500/10')}>R</span>
+      );
+    case 'fetcher':
+      return (
+        <span className={cn(baseStyle, 'text-purple-500 bg-purple-500/10')}>
+          F
+        </span>
+      );
     default:
-      return 'default';
+      return (
+        <span className={cn(baseStyle, 'text-gray-500 bg-gray-500/10')}>
+          <IconQuestionMark />
+        </span>
+      );
   }
+};
+const typeTooltipTag = (type: string) => {
+  return (
+    <Tooltip destroyOnHidden title={type}>
+      {typeTagIcon(type)}
+    </Tooltip>
+  );
 };
 
 /** Ant Design Tree keys must be globally unique; folder and source paths can share the same string. */
@@ -235,7 +250,7 @@ const sourceSummaryToTreeData = ({
         const isSharedTable = source.current_table_topic_type === 'main';
         return (
           <TreeInteractiveLabel
-            icon={fileIcon}
+            icon={typeTooltipTag(source.origin ?? '')}
             title={
               /* The row carries badges beside the name, so its text is not a stable locator; address it by the full source path. */
               <span
@@ -248,15 +263,6 @@ const sourceSummaryToTreeData = ({
                 <span className="min-w-0 truncate">
                   {source.name.split('/').pop() ?? ''}
                 </span>
-
-                {source.origin && (
-                  <Tag
-                    className="m-0 shrink-0"
-                    color={originTagColour(source.origin)}
-                  >
-                    {source.origin}
-                  </Tag>
-                )}
 
                 {isSharedTable && (
                   <Tooltip destroyOnHidden title="Lands in the shared table">
@@ -365,7 +371,7 @@ const sourceSummaryToTreeData = ({
       key: folderKey,
       title: (
         <TreeInteractiveLabel
-          icon={folderIcon}
+          icon={typeTooltipTag(segment)}
           title={segment}
           onClick={() => expandTreeNode(folderKey)}
         />
