@@ -1,6 +1,6 @@
-import type { FormControlAria } from '@/core/components/Form/formControlAria';
 import { TTableEngine } from '@/core/hooks/useFetchTableEngines/types';
-import { Input, Select } from 'antd';
+import { cn } from '@/core/utils/style';
+import { Input, Select, SelectProps } from 'antd';
 
 /** An engine string split into its variant and the text inside its parentheses. */
 export const splitEngine = (engine: string | null | undefined) => {
@@ -43,11 +43,18 @@ export const engineArgumentsError = (
   return undefined;
 };
 
+interface TableEngineInputProps extends SelectProps {
+  engines: TTableEngine[];
+  loading: boolean;
+  placeholder?: string;
+}
+
 /**
  * A table engine picked from the registry, plus its arguments when the variant takes them.
  *
  * With no registry to offer (an engine that predates the endpoint), it falls back to free text.
  */
+
 export const TableEngineInput = ({
   id,
   value,
@@ -58,14 +65,9 @@ export const TableEngineInput = ({
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
-}: FormControlAria & {
-  id?: string;
-  value?: string | null;
-  onChange?: (value: string | undefined) => void;
-  engines: TTableEngine[];
-  loading: boolean;
-  placeholder?: string;
-}) => {
+  className,
+  size,
+}: TableEngineInputProps) => {
   // The error is about the field, and either box may be the one to fix.
   const fieldAria = {
     'aria-describedby': ariaDescribedBy,
@@ -75,6 +77,8 @@ export const TableEngineInput = ({
   if (!loading && engines.length === 0) {
     return (
       <Input
+        size={size}
+        className={className}
         id={id}
         {...fieldAria}
         aria-required={ariaRequired}
@@ -96,8 +100,9 @@ export const TableEngineInput = ({
     : undefined;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2', className)}>
       <Select
+        size={size}
         id={id}
         {...fieldAria}
         aria-required={ariaRequired}

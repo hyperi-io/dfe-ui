@@ -1,29 +1,21 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { TableEngineInput } from '@/core/components/TableEngineSelect';
 import { useFetchTableEngines } from '@/core/hooks/useFetchTableEngines';
-import { cn } from '@/core/utils/style';
-import { Select, SelectProps } from 'antd';
-import { useMemo } from 'react';
+import { SelectProps } from 'antd';
 
-export const SourceEngineSelect = ({ className, ...props }: SelectProps) => {
-  const { data: { items: engines } = {}, isLoading } = useFetchTableEngines();
+export const SourceEngineSelect = ({ className }: SelectProps) => {
+  const { data: { items: engines } = {}, isLoading: isLoadingEngines } =
+    useFetchTableEngines();
 
-  const options = useMemo(
-    () =>
-      engines?.map((engine) => ({
-        label: engine.name,
-        value: engine.name,
-      })),
-    [engines],
-  );
   return (
     <RbacProtected action={RbacProtected.rbacActions.source_read}>
       <RbacProtected.Unrestricted>
-        <Select
-          className={cn(className, 'min-w-60')}
-          options={options}
-          loading={isLoading}
-          {...props}
+        <TableEngineInput
+          size="small"
+          className={className}
+          engines={engines ?? []}
+          loading={isLoadingEngines}
         />
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted>
