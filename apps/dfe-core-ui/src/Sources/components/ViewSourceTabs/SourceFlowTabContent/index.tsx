@@ -4,6 +4,7 @@ import { FlowArrow, FlowStage } from '@/core/components/flow/FlowStage';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow';
+import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { Fragment } from 'react';
 import { flowStages } from './flowStages';
@@ -21,7 +22,7 @@ const Heading = ({ title }: { title: string }) => (
  * resolver is what the compilers write the deployed config from, so this is the
  * same answer the running stack was configured with.
  */
-export const SourceFlowCard = ({
+export const SourceFlowTabContent = ({
   source,
   title = 'Flow',
   description,
@@ -36,6 +37,8 @@ export const SourceFlowCard = ({
     refusal,
     error,
   } = useFetchSourceFlow({ source });
+
+  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
 
   if (isLoading) {
     return (
@@ -74,8 +77,10 @@ export const SourceFlowCard = ({
 
   const { stages: rawStages, arrows } = flowStages(flow);
 
+  const isMainSource = source === 'main';
+
   const stages =
-    source === 'main'
+    isMainSource || (isMetaSchemaDefined && !isDeployed) || !isMetaSchemaDefined
       ? rawStages.filter((stage) => stage.stage !== 'Transform')
       : rawStages;
 

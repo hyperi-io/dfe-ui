@@ -24,7 +24,7 @@ export const SourceDetailsTabContent = ({
       <Form.Item
         className="w-full"
         name="source"
-        label={<Form.Label required>Source Name</Form.Label>}
+        label="Source Name"
         rules={[formValidation]}
       >
         <Input placeholder="Enter source" disabled={!!disabledFields?.source} />
@@ -79,6 +79,7 @@ export const SourceDetailsTabContent = ({
       formValidation={formValidation}
       form={form}
       className="mt-2"
+      disabledFields={disabledFields}
     />
   </div>
 );

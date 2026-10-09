@@ -169,7 +169,9 @@ describe('SchemaUploadCollapse', () => {
     expect(
       screen.getByTestId('schema-upload-file-section'),
     ).toBeInTheDocument();
-    expect(screen.getByTestId('tab-label-Schema-Columns')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('tab-label-Schema-Columns-(required)'),
+    ).toBeInTheDocument();
     expect(screen.getByTestId('add-schema-table')).toHaveAttribute(
       'data-name',
       'schemaColumns',
@@ -248,7 +250,7 @@ describe('SchemaUploadCollapse', () => {
     renderSchemaUploadCollapse();
 
     expect(
-      screen.queryByTestId('tab-label-Schema-Columns'),
+      screen.queryByTestId('tab-label-Schema-Columns-(required)'),
     ).not.toBeInTheDocument();
     expect(
       screen.getByTestId('tab-label-Uploaded-Columns'),

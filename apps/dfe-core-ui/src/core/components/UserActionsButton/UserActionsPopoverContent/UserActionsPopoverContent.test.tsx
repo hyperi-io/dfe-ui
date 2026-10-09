@@ -55,6 +55,7 @@ const account = (
   overrides: Partial<TCurrentUserResponse>,
 ): TCurrentUserResponse => ({
   username: OIDC_SUBJECT,
+  oidc_id: 'string',
   enabled: true,
   blocked: false,
   disabled_at: '',

@@ -1,7 +1,9 @@
 'use client';
 
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SourceAppInstance } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceAppInstance';
 import { SourceRoutingCard } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceRoutingCard';
 import { isTransformApp } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
@@ -33,6 +35,12 @@ export const SourceProcessingTabContent = ({
   const { data: apps, isLoading, error } = useFetchApps();
   const { originType } = useSourceDetailsContext();
 
+  // Source detail chrome (title, highlight, tab strip, panel padding) sits
+  // above this scrollport; keep the box inside the clipped panel.
+  const { componentHeight } = useSetComponentHeight({
+    offset: 200,
+  });
+
   if (isLoading) return <Spin size="small" />;
 
   if (error || !apps) {
@@ -56,7 +64,7 @@ export const SourceProcessingTabContent = ({
   );
 
   return (
-    <div className="flex flex-col">
+    <CustomScrollbar height={componentHeight} className="flex flex-col">
       {singleApps.flatMap((app) =>
         app.instances.map((instance) => (
           <SourceRoutingCard
@@ -83,6 +91,6 @@ export const SourceProcessingTabContent = ({
           description="This deployment offers none, so there is nothing to deploy against this source."
         />
       )}
-    </div>
+    </CustomScrollbar>
   );
 };

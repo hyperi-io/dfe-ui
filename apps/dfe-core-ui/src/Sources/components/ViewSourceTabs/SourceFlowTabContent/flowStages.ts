@@ -68,7 +68,7 @@ export const flowStages = (
     stage: 'Output',
     title: flow.table,
     details: [
-      { label: 'Loader', value: flow.outputs.loader, code: true },
+      { label: 'Loaded from', value: flow.outputs.loader, code: true },
       { label: 'Archive', value: flow.outputs.archive ? 'kept' : 'not kept' },
     ],
   };

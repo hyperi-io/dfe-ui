@@ -10,10 +10,11 @@ import {
   IconBucketDroplet,
   IconCapture,
   IconCaptureOff,
-  IconFile,
   IconFolder,
   IconLock,
+  IconQuestionMark,
   IconRocket,
+  IconRocketOff,
   IconStarFilled,
 } from '@repo/dfe-icons';
 import { Button, notification, Tag, TreeDataNode } from 'antd';
@@ -21,17 +22,35 @@ import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
 const folderIcon = <IconFolder className="shrink-0" />;
-const fileIcon = <IconFile className="shrink-0" />;
 
-const originTagColour = (origin: string) => {
+const baseStyle =
+  'rounded-sm p-2 h-2 w-2 flex items-center justify-center text-xs font-semibold';
+const originTagIcon = (origin: string) => {
   switch (origin) {
-    case 'fetcher':
-      return 'purple';
     case 'receiver':
-      return 'blue';
+      return (
+        <span className={cn(baseStyle, 'text-blue-500 bg-blue-500/10')}>R</span>
+      );
+    case 'fetcher':
+      return (
+        <span className={cn(baseStyle, 'text-purple-500 bg-purple-500/10')}>
+          F
+        </span>
+      );
     default:
-      return 'default';
+      return (
+        <span className={cn(baseStyle, 'text-gray-500 bg-gray-500/10')}>
+          <IconQuestionMark />
+        </span>
+      );
   }
+};
+const originTooltipTag = (origin: string) => {
+  return (
+    <Tooltip destroyOnHidden title={origin}>
+      {originTagIcon(origin)}
+    </Tooltip>
+  );
 };
 
 /** Ant Design Tree keys must be globally unique; folder and source paths can share the same string. */
@@ -47,15 +66,19 @@ export const sourceTreeTestId = (sourcePath: string) =>
 export const versionTreeKey = (sourcePath: string, version: string) =>
   `${sourceTreeKey(sourcePath)}@${version}`;
 
+type SelectSource = ({
+  source_name,
+  source_version,
+  tab,
+}: {
+  source_name: string;
+  source_version: string;
+  tab?: string;
+}) => void;
+
 const buildVersionChildren = (
   source: NonNullable<TSourceSummary['items']>[number],
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void,
+  setSelectedSource: SelectSource,
   selectedSourcePath: string | null,
   selectedSourceVersion: string | null,
   expandTreeNode: (key: string) => void,
@@ -131,13 +154,7 @@ const sourceSummaryToTreeData = ({
 }: {
   node: TSourceSummary;
   pathSegments: string[];
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void;
+  setSelectedSource: SelectSource;
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   apiNotification: NotificationInstance;
@@ -232,10 +249,13 @@ const sourceSummaryToTreeData = ({
       key: sourceTreeKey(source.name),
       title: () => {
         const isDeployed = source.deployed_version;
-        const isSharedTable = source.current_table_topic_type === 'main';
+        const isCurrentDeployed = source.current === source.deployed_version;
+        const isCurrentSharedTable = source.current_table_topic_type === 'main';
+        const isActiveChanges = isDeployed && !isCurrentDeployed;
+        const isMainSource = source.name === 'main';
         return (
           <TreeInteractiveLabel
-            icon={fileIcon}
+            icon={originTooltipTag(source.origin ?? '')}
             title={
               /* The row carries badges beside the name, so its text is not a stable locator; address it by the full source path. */
               <span
@@ -249,22 +269,13 @@ const sourceSummaryToTreeData = ({
                   {source.name.split('/').pop() ?? ''}
                 </span>
 
-                {source.origin && (
-                  <Tag
-                    className="m-0 shrink-0"
-                    color={originTagColour(source.origin)}
-                  >
-                    {source.origin}
-                  </Tag>
-                )}
-
-                {isSharedTable && (
+                {isCurrentSharedTable && (
                   <Tooltip destroyOnHidden title="Lands in the shared table">
                     <IconBucket className="opacity-80 shrink-0" />
                   </Tooltip>
                 )}
 
-                {!isDeployed && !isSharedTable && (
+                {!isDeployed && !isCurrentSharedTable && (
                   <Tooltip
                     destroyOnHidden
                     title="Shared table will be used until source is deployed"
@@ -288,7 +299,32 @@ const sourceSummaryToTreeData = ({
             }}
             selected={selectedSourceName === source.name}
             actions={
-              <>
+              <div className="flex gap-1">
+                {((!isDeployed && !isCurrentSharedTable) ||
+                  (isActiveChanges && !isCurrentSharedTable)) &&
+                  !isMainSource && (
+                    <Tooltip
+                      destroyOnHidden
+                      title="There are undeployed changes on the working branch"
+                    >
+                      <Button
+                        type="default"
+                        shape="circle"
+                        size="small"
+                        className="p-0.5"
+                        icon={<IconRocketOff />}
+                        onClick={() => {
+                          // Working-branch changes are resolved on Build & Deploy.
+                          setSelectedSource({
+                            source_name: source.name,
+                            source_version: source.current,
+                            tab: 'buildDeploy',
+                          });
+                        }}
+                        danger
+                      />
+                    </Tooltip>
+                  )}
                 <Tooltip
                   destroyOnHidden
                   title={
@@ -309,7 +345,7 @@ const sourceSummaryToTreeData = ({
                     icon={source.enabled ? <IconCapture /> : <IconCaptureOff />}
                   />
                 </Tooltip>
-              </>
+              </div>
             }
             hoverActions={
               <>
@@ -386,13 +422,7 @@ export const useTransformSourceToTree = ({
   refetchSources,
 }: {
   sourceObjects: TSourceSummary;
-  setSelectedSource: ({
-    source_name,
-    source_version,
-  }: {
-    source_name: string;
-    source_version: string;
-  }) => void;
+  setSelectedSource: SelectSource;
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   expandTreeNode: (key: string) => void;
