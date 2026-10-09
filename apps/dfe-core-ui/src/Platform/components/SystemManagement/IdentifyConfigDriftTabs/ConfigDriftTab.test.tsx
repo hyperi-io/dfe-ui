@@ -85,7 +85,7 @@ describe('ApplyDefaultsContent', () => {
     render(<ConfigDriftTab />, { wrapper });
 
     const applyButton = await screen.findByRole('button', {
-      name: 'Apply Defaults',
+      name: 'Update Configurations',
     });
     expect(applyButton).toBeDisabled();
     expect(screen.getByText('0 selected')).toBeInTheDocument();
