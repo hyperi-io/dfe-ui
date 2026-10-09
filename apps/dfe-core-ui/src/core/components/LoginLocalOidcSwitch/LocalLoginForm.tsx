@@ -1,6 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useLogin } from '@/core/hooks/useLogin';
+import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { Button, Input } from 'antd';
 import z from 'zod';
@@ -11,7 +12,13 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
-export const LocalLoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
+export const LocalLoginForm = ({
+  callbackUrl,
+  className,
+}: {
+  callbackUrl: string;
+  className?: string;
+}) => {
   const [form] = Form.useForm<FormData>();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
@@ -28,6 +35,7 @@ export const LocalLoginForm = ({ callbackUrl }: { callbackUrl: string }) => {
 
   return (
     <Form
+      className={cn('w-full', className)}
       initialValues={{ username: '', password: '' }}
       form={form}
       onFinish={onSubmit}

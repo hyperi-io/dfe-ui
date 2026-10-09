@@ -307,5 +307,29 @@ describe('ListSourcesContext', () => {
         '/sources?tab=configuration&source_name=syslog&source_version=1.0.1',
       );
     });
+
+    it('opens an explicit detail tab when selecting a source', async () => {
+      searchParamsRef.current = new URLSearchParams(
+        'source_name=syslog&source_version=1.0.0&tab=processing',
+      );
+
+      const { result } = renderHook(() => useListSourcesContext(), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.selectedSourceName).toBe('syslog');
+      });
+
+      result.current.setSelectedSource({
+        source_name: 'azure',
+        source_version: '2.0.0',
+        tab: 'buildDeploy',
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith(
+        '/sources?tab=buildDeploy&source_name=azure&source_version=2.0.0',
+      );
+    });
   });
 });

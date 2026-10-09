@@ -1,6 +1,5 @@
 'use client';
 
-import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
@@ -9,7 +8,6 @@ import {
   APPS_QUERY_KEY,
   useFetchApps,
 } from '@/core/hooks/apps/instances/useFetchApps';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { AppInstancePanels } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppInstancePanels';
 import {
@@ -131,10 +129,6 @@ export const SourceTransformSelector = ({
     },
   });
 
-  const { componentHeight } = useSetComponentHeight({
-    offset: 175,
-  });
-
   const closeModal = () => {
     setPendingEngine(null);
     reset();
@@ -178,7 +172,7 @@ export const SourceTransformSelector = ({
   if (options.length === 0) return null;
 
   return (
-    <CustomScrollbar height={componentHeight}>
+    <>
       <SectionCard
         title={
           <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
@@ -284,6 +278,6 @@ export const SourceTransformSelector = ({
           onCancel={closeModal}
         />
       </SectionCard>
-    </CustomScrollbar>
+    </>
   );
 };

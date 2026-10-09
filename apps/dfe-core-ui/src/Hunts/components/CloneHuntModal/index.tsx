@@ -149,7 +149,7 @@ export const CloneHuntModal = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
+            label="Name"
             rules={[formValidation]}
             className="w-full mb-2"
           >

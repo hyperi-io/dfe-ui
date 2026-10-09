@@ -1,16 +1,16 @@
 'use client';
 
 import { SourceTransformSelector } from '@/Sources/components/SourceTransformSelector';
+import { SourceFlowTabContent } from '@/Sources/components/ViewSourceTabs/SourceFlowTabContent';
 import { SourceProcessingTabContent } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { ConfigurationDetailsTabContent } from './ConfigurationDetailsTabContent';
 import { SampleEventsTabContent } from './SampleEventsTabContent';
 import { SourceBuildDeployTabContent } from './SourceBuildDeployTabContent';
@@ -86,10 +86,35 @@ export const ViewSourceDetailTabs = ({
       : DEFAULT_SOURCE_DETAIL_TAB;
   }, [availableTabKeys, searchParams]);
 
+  // Ant Design Tabs calls onChange(firstItem) when `items` resettles after a
+  // source/version change. That echoed "flow" was deleting tab=buildDeploy
+  // from the URL the moment the undeployed control landed on it.
+  const acceptTabChangeRef = useRef(false);
+  useLayoutEffect(() => {
+    acceptTabChangeRef.current = false;
+    const id = requestAnimationFrame(() => {
+      acceptTabChangeRef.current = true;
+    });
+    return () => cancelAnimationFrame(id);
+  }, [availableTabKeys, selectedSourceName, selectedSourceVersion]);
+
   const handleTabChange = useCallback(
     (key: string) => {
+      if (!acceptTabChangeRef.current) {
+        return;
+      }
       const params = new URLSearchParams(searchParams.toString());
       if (key === DEFAULT_SOURCE_DETAIL_TAB) {
+        const urlTab = searchParams.get('tab');
+        // URL still names a gated tab (e.g. buildDeploy while meta schema is
+        // settling). Ant Design falls back to flow and must not erase it.
+        if (
+          isSourceDetailTabKey(urlTab) &&
+          urlTab !== DEFAULT_SOURCE_DETAIL_TAB &&
+          !availableTabKeys.includes(urlTab)
+        ) {
+          return;
+        }
         params.delete('tab');
       } else if (isSourceDetailTabKey(key)) {
         params.set('tab', key);
@@ -97,7 +122,7 @@ export const ViewSourceDetailTabs = ({
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname);
     },
-    [pathname, router, searchParams],
+    [availableTabKeys, pathname, router, searchParams],
   );
 
   // A transform switch is a source write, and on a deployed source it lands on
@@ -132,7 +157,7 @@ export const ViewSourceDetailTabs = ({
           children: (
             <RbacProtected action={RbacProtected.rbacActions.source_read}>
               <RbacProtected.Unrestricted>
-                <SourceFlowCard source={selectedSourceName} />
+                <SourceFlowTabContent source={selectedSourceName} />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="h-full">
                 <RbacProtected.RestrictedRoute />

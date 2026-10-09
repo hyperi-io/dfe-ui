@@ -1,9 +1,24 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { SourceFlowCard } from '.';
-import { server } from './SourceFlowCard.mocks';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import { SourceFlowTabContent } from '.';
+import { server } from './SourceFlowTabContent.mocks';
+
+vi.mock('@/Sources/contexts/SourceDetailsContext', () => ({
+  useSourceDetailsContext: () => ({
+    isMetaSchemaDefined: true,
+    isDeployed: true,
+  }),
+}));
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
@@ -11,9 +26,9 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-describe('SourceFlowCard', () => {
+describe('SourceFlowTabContent', () => {
   it('draws the three stages a record travels', async () => {
-    render(<SourceFlowCard source="source" />, { wrapper });
+    render(<SourceFlowTabContent source="source" />, { wrapper });
 
     expect(await screen.findByText('Input')).toBeInTheDocument();
     expect(screen.getByText('Transform')).toBeInTheDocument();
@@ -25,7 +40,7 @@ describe('SourceFlowCard', () => {
   });
 
   it('names what carries records on the edge rather than in the gap', async () => {
-    render(<SourceFlowCard source="source" />, { wrapper });
+    render(<SourceFlowTabContent source="source" />, { wrapper });
 
     expect(
       await screen.findByRole('img', { name: 'Carried on kafka source_land' }),
@@ -37,7 +52,7 @@ describe('SourceFlowCard', () => {
   });
 
   it('shows the engine as the owner of a derived stage', async () => {
-    render(<SourceFlowCard source="source" />, { wrapper });
+    render(<SourceFlowTabContent source="source" />, { wrapper });
 
     expect(await screen.findByText('engine-owned')).toBeInTheDocument();
   });
@@ -53,7 +68,7 @@ describe('SourceFlowCard', () => {
       }),
     );
 
-    render(<SourceFlowCard source="source" />, { wrapper });
+    render(<SourceFlowTabContent source="source" />, { wrapper });
 
     expect(
       await screen.findByText(/dfe-archiver carries only bus/),

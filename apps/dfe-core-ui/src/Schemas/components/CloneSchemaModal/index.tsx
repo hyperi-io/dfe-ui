@@ -144,7 +144,7 @@ export const CloneSchemaModal = ({
             </Form.Item>
             <Form.Item
               name="name"
-              label={<Form.Label required>Name</Form.Label>}
+              label="Name"
               rules={[formValidation]}
               className="w-full mb-2"
             >
@@ -154,7 +154,7 @@ export const CloneSchemaModal = ({
 
           <Form.Item
             name="version"
-            label={<Form.Label required>Version</Form.Label>}
+            label="Version"
             rules={[formValidation]}
             className="w-full mb-2"
           >
@@ -168,7 +168,7 @@ export const CloneSchemaModal = ({
           </Form.Item>
           <Form.Item
             name="description"
-            label={<Form.Label required>Description</Form.Label>}
+            label="Description"
             rules={[formValidation]}
             className="w-full mb-2"
           >

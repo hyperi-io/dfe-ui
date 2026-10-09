@@ -14,6 +14,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['string'],
       selected: 'string',
       state: 'active',
+      current_table_topic_type: 'own',
       version: {
         date_time: 'string',
         archive: false,
@@ -48,6 +49,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['string'],
       selected: 'string',
       state: 'active',
+      current_table_topic_type: 'own',
       version: {
         date_time: 'string',
         archive: false,
@@ -85,6 +87,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['1.0.0'],
       selected: '1.0.0',
       state: 'active',
+      current_table_topic_type: 'own',
       version: {
         date_time: 'string',
         archive: false,
@@ -109,6 +112,7 @@ describe('transformSourceRequestBodyToFormData', () => {
       versions: ['string'],
       selected: 'string',
       state: 'active',
+      current_table_topic_type: 'own',
       version: {
         date_time: 'string',
         archive: false,

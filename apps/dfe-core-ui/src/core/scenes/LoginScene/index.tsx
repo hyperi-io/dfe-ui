@@ -40,7 +40,7 @@ const Login = ({
             description={shown.description}
           />
         )}
-        <LoginLocalOidcSwitch callbackUrl={callbackUrl} />
+        <LoginLocalOidcSwitch callbackUrl={callbackUrl} className="min-h-45" />
       </div>
     </main>
   );

@@ -18,7 +18,7 @@ export const TransformForm = ({
       <div className="grid grid-cols-2 gap-2">
         <Form.Item
           name={['transform', 'engine']}
-          label={<Form.Label required>Transform Engine</Form.Label>}
+          label="Transform Engine"
           rules={[formValidation]}
           help={
             hasEngines

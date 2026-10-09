@@ -58,6 +58,7 @@ export const SYSLOG_ON_VRL: TSourceVersionDetail = {
   selected: '1.0.0',
   versions: ['1.0.0'],
   state: 'active',
+  current_table_topic_type: 'own',
   version: {
     origin: 'receiver',
     date_time: '2026-09-01',

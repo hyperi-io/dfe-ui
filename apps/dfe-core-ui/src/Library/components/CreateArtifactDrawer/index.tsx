@@ -82,19 +82,11 @@ export const CreateArtifactDrawer = () => {
         onClose={() => setIsOpen(false)}
       >
         <Form form={form} onFinish={handleFinish}>
-          <Form.Item
-            name="name"
-            label={<Form.Label required>Name</Form.Label>}
-            rules={[formValidation]}
-          >
+          <Form.Item name="name" label="Name" rules={[formValidation]}>
             <Input placeholder="syslog-parse" />
           </Form.Item>
 
-          <Form.Item
-            name="kind"
-            label={<Form.Label required>Kind</Form.Label>}
-            rules={[formValidation]}
-          >
+          <Form.Item name="kind" label="Kind" rules={[formValidation]}>
             <Select
               placeholder="Select a kind"
               options={(kinds ?? []).map((kind) => ({
