@@ -43,6 +43,7 @@ describe('.useAuthMe', () => {
 
       const expectedResponse: TCurrentUserResponse = {
         username: 'string',
+        oidc_id: 'string',
         enabled: true,
         blocked: false,
         disabled_at: '',

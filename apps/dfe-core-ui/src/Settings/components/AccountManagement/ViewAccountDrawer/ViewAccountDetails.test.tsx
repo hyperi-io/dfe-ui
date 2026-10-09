@@ -22,6 +22,7 @@ const accountDetail = (
   overrides: Partial<TAccountDetailResponse>,
 ): TAccountDetailResponse => ({
   username: OIDC_SUBJECT,
+  oidc_id: 'string',
   enabled: true,
   blocked: false,
   disabled_at: '',

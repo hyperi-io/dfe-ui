@@ -53,6 +53,7 @@ const accounts = (): TAccountsResponse => ({
       email: 'dfe-test@dfe-oidc.test',
       phone: '',
       name: 'DFE dfe-test',
+      oidc_id: 'string',
     },
     {
       username: 'admin',
@@ -68,6 +69,7 @@ const accounts = (): TAccountsResponse => ({
       email: '',
       phone: '',
       name: '',
+      oidc_id: 'string',
     },
   ],
   total: 2,

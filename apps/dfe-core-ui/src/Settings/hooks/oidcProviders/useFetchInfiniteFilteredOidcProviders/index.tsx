@@ -37,14 +37,14 @@ export const useFetchInfiniteFilteredOidcProviders = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [
-      'oidc-providers',
-      debouncedSearch,
-      sort_by,
-      sort_order,
-      page,
+    queryKey: QUERY_KEYS.oidcProviders.default({
+      search: debouncedSearch || undefined,
+      sort_by: sort_by as 'name' | 'type' | 'created_at',
+      sort_order: sort_order as 'asc' | 'desc',
+      page: page,
       per_page,
-    ],
+    }),
+
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredOidcProvidersApi({
         queryParams: {
