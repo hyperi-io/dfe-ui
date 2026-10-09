@@ -4,7 +4,7 @@ import { TableEngineInput } from '@/core/components/TableEngineSelect';
 import { useFetchTableEngines } from '@/core/hooks/useFetchTableEngines';
 import { SelectProps } from 'antd';
 
-export const SourceEngineSelect = ({ className }: SelectProps) => {
+export const SourceEngineSelect = ({ className, ...props }: SelectProps) => {
   const { data: { items: engines } = {}, isLoading: isLoadingEngines } =
     useFetchTableEngines();
 
@@ -12,6 +12,8 @@ export const SourceEngineSelect = ({ className }: SelectProps) => {
     <RbacProtected action={RbacProtected.rbacActions.source_read}>
       <RbacProtected.Unrestricted>
         <TableEngineInput
+          {...props}
+          placeholder={undefined}
           size="small"
           className={className}
           engines={engines ?? []}

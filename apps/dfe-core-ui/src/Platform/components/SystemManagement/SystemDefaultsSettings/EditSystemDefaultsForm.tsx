@@ -1,5 +1,6 @@
 import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
 import { SourceEngineSelect } from '@/core/components/SourceEngineSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
@@ -28,16 +29,19 @@ export const EditSystemDefaultsForm = ({
 }) => {
   const { notification } = App.useApp();
 
-  const { mutate: updateSystemDefaults, isPending: isUpdating } =
-    useUpdateSystemDefaults({
-      onSuccess: () => {
-        onSuccess?.();
-        notification.success({
-          title: 'Common header defaults updated successfully',
-          placement: 'bottomLeft',
-        });
-      },
-    });
+  const {
+    mutate: updateSystemDefaults,
+    isPending: isUpdating,
+    error,
+  } = useUpdateSystemDefaults({
+    onSuccess: () => {
+      onSuccess?.();
+      notification.success({
+        title: 'Common header defaults updated successfully',
+        placement: 'bottomLeft',
+      });
+    },
+  });
 
   const [form] = Form.useForm<TFormValues>();
   const formValidation = useAntdZodResolver(formSchema);
@@ -146,6 +150,8 @@ export const EditSystemDefaultsForm = ({
           size="small"
         />
       </Form.Item>
+
+      {error && <FormNotification text={error.message} type="error" />}
 
       <div className="flex gap-2 justify-end col-span-2">
         <Button type="default" onClick={onClose}>

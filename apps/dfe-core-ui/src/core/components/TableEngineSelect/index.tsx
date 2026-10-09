@@ -67,6 +67,7 @@ export const TableEngineInput = ({
   'aria-required': ariaRequired,
   className,
   size,
+  ...props
 }: TableEngineInputProps) => {
   // The error is about the field, and either box may be the one to fix.
   const fieldAria = {
@@ -102,6 +103,7 @@ export const TableEngineInput = ({
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <Select
+        {...props}
         size={size}
         id={id}
         {...fieldAria}
@@ -121,6 +123,7 @@ export const TableEngineInput = ({
       {showArguments && (
         <Input
           {...fieldAria}
+          size={size}
           aria-label={`${variant} arguments`}
           placeholder={argumentsPlaceholder}
           value={args}
