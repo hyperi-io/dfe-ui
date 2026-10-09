@@ -243,7 +243,7 @@ describe('useTransformSourceToTree', () => {
     );
 
     const { getByText } = renderSourceNodeTitle(result.current.tree[0]);
-    expect(getByText('receiver')).toBeInTheDocument();
+    expect(getByText('R')).toBeInTheDocument();
   });
 
   it('addresses a source row by its full path, which the origin tag does not disturb', () => {
@@ -262,13 +262,16 @@ describe('useTransformSourceToTree', () => {
       }),
     );
 
-    const { getByTestId } = renderSourceNodeTitle(
+    const { getByTestId, getByText } = renderSourceNodeTitle(
       result.current.tree[0].children![0],
     );
+    // The origin mark sits in the row icon, outside this locator, so the path
+    // address stays the leaf name alone.
     const row = getByTestId('source-tree-item-azure/syslog');
 
     expect(row).toHaveTextContent('syslog');
-    expect(row).toHaveTextContent('receiver');
+    expect(row).not.toHaveTextContent('R');
+    expect(getByText('R')).toBeInTheDocument();
   });
 
   it('highlights the source row when its deployed version is selected', () => {

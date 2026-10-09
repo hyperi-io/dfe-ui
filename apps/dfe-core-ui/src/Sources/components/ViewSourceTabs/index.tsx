@@ -1,12 +1,12 @@
 'use client';
 
 import { SourceTransformSelector } from '@/Sources/components/SourceTransformSelector';
+import { SourceFlowTabContent } from '@/Sources/components/ViewSourceTabs/SourceFlowTabContent';
 import { SourceProcessingTabContent } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { SourceFlowCard } from '@/core/components/flow/SourceFlowCard';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -132,7 +132,7 @@ export const ViewSourceDetailTabs = ({
           children: (
             <RbacProtected action={RbacProtected.rbacActions.source_read}>
               <RbacProtected.Unrestricted>
-                <SourceFlowCard source={selectedSourceName} />
+                <SourceFlowTabContent source={selectedSourceName} />
               </RbacProtected.Unrestricted>
               <RbacProtected.Restricted className="h-full">
                 <RbacProtected.RestrictedRoute />

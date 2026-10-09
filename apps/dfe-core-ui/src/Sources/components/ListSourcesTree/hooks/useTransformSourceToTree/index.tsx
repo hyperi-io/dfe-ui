@@ -10,6 +10,7 @@ import {
   IconBucketDroplet,
   IconCapture,
   IconCaptureOff,
+  IconFolder,
   IconLock,
   IconQuestionMark,
   IconRocket,
@@ -19,10 +20,12 @@ import { Button, notification, Tag, TreeDataNode } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useMemo } from 'react';
 
+const folderIcon = <IconFolder className="shrink-0" />;
+
 const baseStyle =
   'rounded-sm p-2 h-2 w-2 flex items-center justify-center text-xs font-semibold';
-const typeTagIcon = (type: string) => {
-  switch (type) {
+const originTagIcon = (origin: string) => {
+  switch (origin) {
     case 'receiver':
       return (
         <span className={cn(baseStyle, 'text-blue-500 bg-blue-500/10')}>R</span>
@@ -41,10 +44,10 @@ const typeTagIcon = (type: string) => {
       );
   }
 };
-const typeTooltipTag = (type: string) => {
+const originTooltipTag = (origin: string) => {
   return (
-    <Tooltip destroyOnHidden title={type}>
-      {typeTagIcon(type)}
+    <Tooltip destroyOnHidden title={origin}>
+      {originTagIcon(origin)}
     </Tooltip>
   );
 };
@@ -250,7 +253,7 @@ const sourceSummaryToTreeData = ({
         const isSharedTable = source.current_table_topic_type === 'main';
         return (
           <TreeInteractiveLabel
-            icon={typeTooltipTag(source.origin ?? '')}
+            icon={originTooltipTag(source.origin ?? '')}
             title={
               /* The row carries badges beside the name, so its text is not a stable locator; address it by the full source path. */
               <span
@@ -371,7 +374,7 @@ const sourceSummaryToTreeData = ({
       key: folderKey,
       title: (
         <TreeInteractiveLabel
-          icon={typeTooltipTag(segment)}
+          icon={folderIcon}
           title={segment}
           onClick={() => expandTreeNode(folderKey)}
         />
