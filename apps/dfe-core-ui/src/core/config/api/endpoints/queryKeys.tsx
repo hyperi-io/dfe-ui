@@ -91,6 +91,7 @@ export const QUERY_KEYS = Object.freeze({
   accounts: {
     default: ({
       search,
+      oidc_id,
       include_core,
       blocked,
       sort_by,
@@ -101,6 +102,7 @@ export const QUERY_KEYS = Object.freeze({
       'auth',
       'accounts',
       ...(search ? ['search', search] : []),
+      ...(oidc_id ? ['oidc_id', oidc_id] : []),
       ...(include_core ? ['include_core', include_core] : []),
       ...(blocked ? ['blocked', blocked] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),

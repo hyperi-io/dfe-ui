@@ -9,8 +9,10 @@ const EmptyText = () => (
 
 export const renderColumns = ({
   isRetiredAdmin,
+  renderActions = true,
 }: {
   isRetiredAdmin: (record: TAccountsItemSummary) => boolean;
+  renderActions?: boolean;
 }) => [
   {
     title: 'Name',
@@ -61,18 +63,22 @@ export const renderColumns = ({
         </Tooltip>
       ) : null,
   },
-  {
-    title: 'Actions',
-    key: 'actions',
-    width: 85,
-    align: 'center' as const,
-    render: (_: unknown, record: TAccountsItemSummary) => (
-      <RowActions
-        username={record.username}
-        isActive={record.enabled}
-        isExternal={record.external}
-        isBlocked={record.blocked}
-      />
-    ),
-  },
+  ...(renderActions
+    ? [
+        {
+          title: 'Actions',
+          key: 'actions',
+          width: 85,
+          align: 'center' as const,
+          render: (_: unknown, record: TAccountsItemSummary) => (
+            <RowActions
+              username={record.username}
+              isActive={record.enabled}
+              isExternal={record.external}
+              isBlocked={record.blocked}
+            />
+          ),
+        },
+      ]
+    : []),
 ];
