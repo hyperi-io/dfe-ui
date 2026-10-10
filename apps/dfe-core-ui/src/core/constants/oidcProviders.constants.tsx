@@ -19,7 +19,8 @@ export const PROVIDERS: readonly {
       display_name: 'Google',
       issuer: 'https://accounts.google.com',
       client_id_env: 'GOOGLE_CLIENT_ID',
-      groups: DEFAULT_GROUP_RESOLUTION,
+      // The engine accepts a Google provider in api mode only.
+      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
     },
   },
   {
@@ -80,3 +81,8 @@ export const GROUP_MODE_OPTIONS = [
 ];
 
 export const GROUPS_FORM_NAME = 'groups';
+
+export const GOOGLE_SERVICE_ACCOUNT_HINT =
+  'Optional. For the group sync, and for logins whose own token cannot read their groups.';
+
+export const SCOPES_PLACEHOLDER = 'Provider type default';

@@ -1,10 +1,12 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import {
+  GOOGLE_SERVICE_ACCOUNT_HINT,
   GROUP_MODE_OPTIONS,
   GROUPS_FORM_NAME,
   PROVIDERS,
   PROVIDERS_MAP,
+  SCOPES_PLACEHOLDER,
 } from '@/core/constants/oidcProviders.constants';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
@@ -108,7 +110,16 @@ export const ConfigureOIDCForm = ({
               <Input />
             </Form.Item>
             <Form.Item label="Scopes" name="scopes" rules={[formValidation]}>
-              <Input />
+              <Select
+                mode="tags"
+                // An emptied update keeps the stored scopes: no default hint.
+                placeholder={
+                  initialValues?.scopes?.length ? undefined : SCOPES_PLACEHOLDER
+                }
+                tokenSeparators={[' ', ',']}
+                open={false}
+                suffixIcon={null}
+              />
             </Form.Item>
             <Form.Item
               label="Client ID Environment Variable"
@@ -178,13 +189,6 @@ export const ConfigureOIDCForm = ({
               {typeWatch === 'google' && (
                 <>
                   <Form.Item
-                    label="Admin Email"
-                    name={[GROUPS_FORM_NAME, 'admin_email']}
-                    rules={[formValidation]}
-                  >
-                    <Input />
-                  </Form.Item>
-                  <Form.Item
                     label="Domain"
                     name={[GROUPS_FORM_NAME, 'domain']}
                     rules={[formValidation]}
@@ -195,6 +199,7 @@ export const ConfigureOIDCForm = ({
                     label="Service Account JSON ENV"
                     name={[GROUPS_FORM_NAME, 'service_account_json_env']}
                     rules={[formValidation]}
+                    extra={GOOGLE_SERVICE_ACCOUNT_HINT}
                   >
                     <Input />
                   </Form.Item>

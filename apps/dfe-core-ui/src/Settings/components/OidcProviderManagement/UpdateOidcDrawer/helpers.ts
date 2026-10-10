@@ -1,3 +1,4 @@
+import { toScopesRequest } from '@/core/helpers/oidcProviders.helpers';
 import { TOidcProviderUpdateRequestBody } from '@/core/hooks/useUpdateOidcProvider/types';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
@@ -23,7 +24,6 @@ const toGroupsRequest = (
     enrich_on_login: form.enrich_on_login ?? stored.enrich_on_login,
     service_account_json_env:
       form.service_account_json_env ?? stored.service_account_json_env,
-    admin_email: form.admin_email ?? stored.admin_email,
     domain: form.domain ?? stored.domain,
     tenant_id: form.tenant_id ?? stored.tenant_id,
     tenant_id_env: form.tenant_id_env ?? stored.tenant_id_env,
@@ -43,8 +43,8 @@ const toGroupsRequest = (
 /**
  * The PUT body for an OIDC provider edit. The engine replaces the whole groups
  * block, so a group field the form did not render keeps its stored value. An
- * empty secret is omitted, and name, type and issuer are not sent because the
- * update endpoint does not accept them.
+ * empty secret is omitted, scopes are sent only when edited, and name, type and
+ * issuer are not sent because the update endpoint does not accept them.
  */
 export const toUpdateOidcProviderBody = (
   values: TUpdateOidcProviderFormValues,
@@ -59,6 +59,7 @@ export const toUpdateOidcProviderBody = (
     client_id_env: values.client_id_env,
     client_secret_env: values.client_secret_env,
     ...(values.client_secret ? { client_secret: values.client_secret } : {}),
+    ...toScopesRequest(values.scopes, stored.scopes),
     ...(groups?.mode
       ? {
           groups: toGroupsRequest(
