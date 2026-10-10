@@ -14,6 +14,9 @@ import {
 } from './helpers';
 import { ReceiverFormSection } from './RecieverFormSection';
 
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const ORIGIN_LABEL = 'Origin';
+
 export const OriginFormSection = ({
   formValidation,
   form,
@@ -45,8 +48,9 @@ export const OriginFormSection = ({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <Form.Item name="origin" label="Origin" rules={[formValidation]}>
+      <Form.Item name="origin" label={ORIGIN_LABEL} rules={[formValidation]}>
         <Radio.Group
+          aria-label={ORIGIN_LABEL}
           disabled={disabledFields?.origin}
           onChange={(event) =>
             handleOriginChange(event.target.value as SourceOrigin)

@@ -1,11 +1,14 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
 import { cn } from '@/core/utils/style';
+import {
+  OidcSyncStatusTag,
+  syncStatusDetail,
+} from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 
@@ -30,35 +33,21 @@ export const ViewOidcProviderDetail = ({
       />
     );
   }
+  const syncDetail = syncStatusDetail(
+    oidcProvider.last_sync_status,
+    oidcProvider.sync_error,
+  );
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between">
         <h1 className="text-lg font-semibold">{oidcProvider?.display_name}</h1>
-        <Tooltip
-          destroyOnHidden
-          title={
-            oidcProvider?.last_sync_at ? (
-              <div className="flex flex-col gap-2">
-                <span className="font-medium">Previous Sync Details</span>
-                <span>
-                  Synced at: {formatDateToString(oidcProvider?.last_sync_at)}
-                </span>
-                <span>Status: {oidcProvider?.last_sync_status}</span>
-                {oidcProvider?.sync_error ? (
-                  <span>Error: {oidcProvider?.sync_error}</span>
-                ) : null}
-              </div>
-            ) : null
-          }
-        >
-          <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
-            {oidcProvider?.last_sync_at ? (
-              <>Last synced {formatDateXAgo(oidcProvider?.last_sync_at)}</>
-            ) : (
-              <span>Not synced yet</span>
-            )}
-          </p>
-        </Tooltip>
+        <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
+          {oidcProvider?.last_sync_at ? (
+            <>Last synced {formatDateXAgo(oidcProvider?.last_sync_at)}</>
+          ) : (
+            <span>Not synced yet</span>
+          )}
+        </p>
       </div>
       <dl className={dataListGridStyle}>
         <dt className={dataListTermStyle}>Name:</dt>
@@ -189,6 +178,21 @@ export const ViewOidcProviderDetail = ({
             <>
               <dt className={dataListTermStyle}>Okta Domain:</dt>
               <dd>{oidcProvider?.groups?.okta_domain}</dd>
+            </>
+          )}
+          {oidcProvider?.last_sync_at && (
+            <>
+              <dt className={dataListTermStyle}>Last Sync:</dt>
+              <dd className="flex flex-wrap items-center gap-x-2">
+                <OidcSyncStatusTag status={oidcProvider.last_sync_status} />
+                {formatDateToString(oidcProvider.last_sync_at)}
+              </dd>
+              {syncDetail && (
+                <>
+                  <dt className={dataListTermStyle}>Sync Message:</dt>
+                  <dd>{syncDetail}</dd>
+                </>
+              )}
             </>
           )}
         </dl>

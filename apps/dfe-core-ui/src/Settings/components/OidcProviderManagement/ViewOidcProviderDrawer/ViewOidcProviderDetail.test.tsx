@@ -196,3 +196,90 @@ describe('ViewOidcProviderDetail', () => {
     expect(renderRows(OKTA)).toContainEqual(['Enrich on Login:', 'Yes']);
   });
 });
+
+const SYNCED_AT = '2026-10-10T08:30:00Z';
+const SYNCED_AT_LABEL = '10 Oct 2026, 08:30';
+const NOT_CONFIGURED_MESSAGE =
+  'The directory credential is not configured, so no groups were synced; configure it on the provider and sync again';
+const REFUSED_MESSAGE =
+  'The directory API could not use the configured credential: check it is current and valid; the engine log has the reason';
+
+describe('ViewOidcProviderDetail sync status', () => {
+  test.each([
+    { status: 'ok', label: 'OK', syncError: '', message: undefined },
+    {
+      status: 'not_configured',
+      label: 'Not configured',
+      syncError: NOT_CONFIGURED_MESSAGE,
+      message: NOT_CONFIGURED_MESSAGE,
+    },
+    {
+      status: 'error',
+      label: 'Failed',
+      syncError: REFUSED_MESSAGE,
+      message: REFUSED_MESSAGE,
+    },
+  ])(
+    'a $status sync reads $label, with the engine message when it sent one',
+    ({ status, label, syncError, message }) => {
+      const rows = renderRows({
+        ...OKTA,
+        last_sync_at: SYNCED_AT,
+        last_sync_status: status,
+        sync_error: syncError,
+      });
+
+      expect(rows).toContainEqual(['Last Sync:', `${label}${SYNCED_AT_LABEL}`]);
+      expect(rows.find(([term]) => term === 'Sync Message:')?.[1]).toBe(
+        message,
+      );
+      expect(screen.queryByText(status)).not.toBeInTheDocument();
+    },
+  );
+
+  test('a partial sync says how many groups it left and why', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status:
+        'partial: 2 of 10 groups skipped, their identifier makes no valid group name',
+      sync_error: '',
+    });
+
+    expect(rows).toContainEqual(['Last Sync:', `Partial${SYNCED_AT_LABEL}`]);
+    expect(rows).toContainEqual([
+      'Sync Message:',
+      '2 of 10 groups skipped, their identifier makes no valid group name',
+    ]);
+  });
+
+  test('a status the engine adds later shows as written', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'throttled',
+    });
+
+    expect(rows).toContainEqual(['Last Sync:', `throttled${SYNCED_AT_LABEL}`]);
+  });
+
+  test('a provider that has never synced shows no sync row', () => {
+    const rows = renderRows(OKTA);
+
+    expect(rows.map(([term]) => term)).not.toContain('Last Sync:');
+    expect(rows.map(([term]) => term)).not.toContain('Sync Message:');
+    expect(screen.getByText('Not synced yet')).toBeInTheDocument();
+  });
+
+  test('the status and message are on the page without a hover', () => {
+    renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'not_configured',
+      sync_error: NOT_CONFIGURED_MESSAGE,
+    });
+
+    expect(screen.getByText('Not configured')).toBeVisible();
+    expect(screen.getByText(NOT_CONFIGURED_MESSAGE)).toBeVisible();
+  });
+});
