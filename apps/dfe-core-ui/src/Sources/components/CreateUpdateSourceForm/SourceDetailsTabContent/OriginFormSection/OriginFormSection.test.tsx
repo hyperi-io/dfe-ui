@@ -78,6 +78,38 @@ describe('OriginFormSection', () => {
     expect(screen.getByRole('radio', { name: 'Shared table' })).toBeChecked();
   });
 
+  it('marks the match field and operator required, and the value only while the operator takes one', async () => {
+    const user = userEvent.setup();
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    const field = await screen.findByLabelText(/^Field/);
+    const operator = screen.getByLabelText(/^Operator/);
+    expect(field).toHaveAttribute('aria-required', 'true');
+    expect(operator).toHaveAttribute('aria-required', 'true');
+    expect(screen.getByLabelText(/^Value/)).toHaveAttribute(
+      'aria-required',
+      'true',
+    );
+    for (const label of ['Field', 'Operator', 'Value']) {
+      expect(screen.getByText(label).closest('label')).toHaveClass(
+        'ant-form-item-required',
+      );
+    }
+
+    await user.click(operator);
+    await user.click(await screen.findByTitle('exists'));
+
+    await waitFor(() =>
+      expect(screen.getByText('Value').closest('label')).not.toHaveClass(
+        'ant-form-item-required',
+      ),
+    );
+    expect(screen.getByLabelText(/^Value/)).not.toHaveAttribute(
+      'aria-required',
+      'true',
+    );
+  });
+
   it('swaps the match fields for the fetcher fields', async () => {
     const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });

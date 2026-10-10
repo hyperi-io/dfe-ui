@@ -119,6 +119,9 @@ describe('TransformForm', () => {
 
     expect(await screen.findByText('Engine is required')).toBeInTheDocument();
     expect(screen.getByText(hint)).toBeInTheDocument();
+    const engine = screen.getByLabelText(/^Transform Engine/);
+    expect(engine).toHaveAttribute('aria-invalid', 'true');
+    expect(engine).toHaveAccessibleDescription(`Engine is required ${hint}`);
   });
 
   it('shows the engine error when the transform apps are deployed and none is picked', async () => {
