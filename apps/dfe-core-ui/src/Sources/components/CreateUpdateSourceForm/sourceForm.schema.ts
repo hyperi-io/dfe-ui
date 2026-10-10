@@ -122,7 +122,9 @@ const schemaConfigTabSchema = {
 const transformTabSchema = {
   transform: z
     .object({
-      engine: z.string().min(1, { message: 'Engine is required' }),
+      engine: z
+        .string({ message: 'Engine is required' })
+        .min(1, { message: 'Engine is required' }),
       config_file: z.string().optional().nullable(),
       env: z
         .array(
