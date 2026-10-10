@@ -15122,9 +15122,15 @@ export interface components {
             error: string | null;
             /**
              * Skipped
-             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, or has no directory credential configured. The provider's last_sync_status reads not_configured in that last case.
+             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, has no directory credential configured, or reads each login's groups with the user's own token and has no directory to sync. The provider's last_sync_status reads not_configured and user_token in those last two cases.
              */
             skipped?: string | null;
+            /**
+             * Status
+             * @description How the sync ended: ok, partial (some groups skipped), error (the listing failed or the secret store holding its credential did not answer), not_configured (no directory credential), user_token (no directory to sync, which is a Google provider's default and not a fault) or skipped (disabled or not in api mode). Key on this, never on the text of error or skipped.
+             * @enum {string}
+             */
+            status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";
         };
         /** TestResponse */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
