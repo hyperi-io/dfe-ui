@@ -1,11 +1,17 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { DESTINATION_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input, Switch } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .refine((v) => DESTINATION_NAME_VALIDATOR.regex.test(v), {
+      message: DESTINATION_NAME_VALIDATOR.message('Name'),
+    }),
   url: z.string().min(1, { message: 'URL is required' }),
   description: z.string().min(1, { message: 'Description is required' }),
   enabled: z.boolean(),

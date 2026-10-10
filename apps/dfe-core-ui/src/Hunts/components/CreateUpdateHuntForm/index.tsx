@@ -3,21 +3,19 @@ import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
 import z from 'zod';
 import { RuleSelect } from './RuleSelect';
 
-const NAME_REGEX = /^[a-z][a-z0-9_]*$/;
-
 const formSchema = z.object({
   name: z
     .string({ message: 'Identifier is required' })
     .min(1, { message: 'Identifier is required' })
-    .refine((v) => NAME_REGEX.test(v), {
-      message:
-        'Identifier must contain only lowercase letters, numbers, and underscores',
+    .refine((v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v), {
+      message: RULE_HUNT_NAME_VALIDATOR.message('Identifier'),
     }),
   display_name: z.string().optional().nullable(),
   global_target_table_name: z
