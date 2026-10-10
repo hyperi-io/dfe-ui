@@ -152,10 +152,23 @@ describe('ViewOidcProviderDetail', () => {
       'Client Secret:',
       'API Token:',
       'Service Account JSON:',
-      'Tenant ID:',
     ]) {
       expect(labels).not.toContain(secretLabel);
     }
+  });
+
+  test('the client id and tenant id show as themselves, beside their variables', () => {
+    const rows = renderRows({
+      ...ENTRA_ID,
+      groups: { ...ENTRA_ID.groups, tenant_id: 'contoso.onmicrosoft.com' },
+    });
+
+    expect(rows).toContainEqual(['Client ID:', 'client-id']);
+    expect(rows).toContainEqual(['Tenant ID:', 'contoso.onmicrosoft.com']);
+    expect(rows).toContainEqual([
+      'Tenant ID Environment Variable:',
+      'ENTRA_TENANT_ID',
+    ]);
   });
 
   test('Google lists each scope it requests and no admin email', () => {

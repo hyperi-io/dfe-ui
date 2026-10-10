@@ -6,7 +6,7 @@ This theme system provides a comprehensive and consistent design language across
 
 ## Directory Structure
 
-```
+```text
 theme/
 ├── tokens/           # Design tokens (colors, spacing, typography)
 │   ├── colors.ts    # Color palette and semantic colors
