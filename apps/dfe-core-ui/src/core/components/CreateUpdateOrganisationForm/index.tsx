@@ -1,7 +1,7 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input, Select } from 'antd';
 import z from 'zod';
 
@@ -9,8 +9,8 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-      message: DB_NAME_VALIDATOR.message('Name'),
+    .refine((v) => ORG_NAME_VALIDATOR.regex.test(v), {
+      message: ORG_NAME_VALIDATOR.message('Name'),
     }),
   display_name: z.string().min(1, { message: 'Display name is required' }),
   org_ids: z.array(z.string()).optional(),

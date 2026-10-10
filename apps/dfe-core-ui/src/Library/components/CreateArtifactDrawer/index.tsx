@@ -7,6 +7,10 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import {
+  GITOPS_NAME_VALIDATOR,
+  LIBRARY_TOKEN_VALIDATOR,
+} from '@/core/validationSchemas/utils';
 import { useCreateLibraryArtifact } from '@/Library/hooks/useCreateLibraryArtifact';
 import { useFetchLibraryKinds } from '@/Library/hooks/useFetchLibraryKinds';
 import { IconPlus } from '@repo/dfe-icons';
@@ -17,11 +21,19 @@ import z from 'zod';
 const formSchema = z.object({
   name: z
     .string({ message: 'Name is required' })
-    .min(1, { message: 'Name is required' }),
+    .min(1, { message: 'Name is required' })
+    .refine((v) => GITOPS_NAME_VALIDATOR.regex.test(v), {
+      message: GITOPS_NAME_VALIDATOR.message('Name'),
+    }),
   kind: z
     .string({ message: 'Kind is required' })
     .min(1, { message: 'Kind is required' }),
-  group: z.string().optional(),
+  group: z
+    .string()
+    .optional()
+    .refine((v) => !v || LIBRARY_TOKEN_VALIDATOR.regex.test(v), {
+      message: LIBRARY_TOKEN_VALIDATOR.message('Group'),
+    }),
   description: z.string().optional(),
   content: z.string().optional(),
 });
@@ -99,7 +111,7 @@ export const CreateArtifactDrawer = () => {
           <Form.Item
             name="group"
             label="Group"
-            help="Optional namespace, used for filtering."
+            extra="Optional namespace, used for filtering."
             rules={[formValidation]}
           >
             <Input placeholder="network" />

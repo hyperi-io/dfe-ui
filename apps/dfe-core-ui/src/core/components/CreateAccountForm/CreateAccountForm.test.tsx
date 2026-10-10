@@ -1,6 +1,11 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { useCreateAccount } from '@/core/hooks/useCreateAccount';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import {
+  expectNameRule,
+  NAME_RULE_TEST_TIMEOUT_MS,
+} from '@/core/utils/test-utils/expectNameRule';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -116,4 +121,21 @@ describe('CreateAccountForm password floor', () => {
       ),
     ).toBeInTheDocument();
   });
+});
+
+describe('CreateAccountForm username', () => {
+  test(
+    'takes the names the engine takes and refuses the ones it refuses',
+    { timeout: NAME_RULE_TEST_TIMEOUT_MS },
+    async () => {
+      render(<CreateAccount />, { wrapper });
+
+      await expectNameRule({
+        input: screen.getByLabelText(/^Username/),
+        message: STORE_NAME_VALIDATOR.message('Username'),
+        accepts: ['new-user.1', 'a'.repeat(128)],
+        refuses: ['-user', 'new user', 'a'.repeat(129)],
+      });
+    },
+  );
 });

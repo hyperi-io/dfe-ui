@@ -4,7 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
@@ -18,8 +18,8 @@ const formSchema = z.object({
   name: z
     .string({ message: 'Name is required' })
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-      message: DB_NAME_VALIDATOR.message('Name'),
+    .refine((v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v), {
+      message: RULE_HUNT_NAME_VALIDATOR.message('Name'),
     }),
   display_name: z.string().optional().nullable(),
 });
