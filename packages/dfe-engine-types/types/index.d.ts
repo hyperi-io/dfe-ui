@@ -6567,7 +6567,7 @@ export interface components {
         ChangeOwnPasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password; at least 12 characters
+             * @description New plaintext password; at least 12 characters and at most 72 bytes
              */
             new_password: string;
             /**
@@ -7021,7 +7021,7 @@ export interface components {
             username: string;
             /**
              * Password
-             * @description Plaintext password (bcrypt-hashed before storage); at least 12 characters
+             * @description Plaintext password (bcrypt-hashed before storage); at least 12 characters and at most 72 bytes
              */
             password: string;
             /**
@@ -9634,7 +9634,7 @@ export interface components {
              * Last Sync Status
              * @default
              */
-            last_sync_status: string;
+            last_sync_status: ("" | "ok" | "error" | "not_configured" | "user_token") | string;
             /**
              * Sync Error
              * @default
@@ -10845,8 +10845,11 @@ export interface components {
             created_at: string;
             /** Last Sync At */
             last_sync_at: string;
-            /** Last Sync Status */
-            last_sync_status: string;
+            /**
+             * Last Sync Status
+             * @description How the last group sync ended: empty before the first, ok, error (sync_error says why), not_configured (no directory credential), user_token (each login reads its own groups, so there is no directory to sync), or 'partial: ' followed by how many groups were skipped and why.
+             */
+            last_sync_status: ("" | "ok" | "error" | "not_configured" | "user_token") | string;
             /** Sync Error */
             sync_error: string;
         };
@@ -11051,7 +11054,7 @@ export interface components {
         ResetPasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password; at least 12 characters
+             * @description New plaintext password; at least 12 characters and at most 72 bytes
              */
             new_password: string;
         };
@@ -15114,7 +15117,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, or a name held by a stored group not linked to that provider group. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
@@ -15122,9 +15125,15 @@ export interface components {
             error: string | null;
             /**
              * Skipped
-             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, or has no directory credential configured. The provider's last_sync_status reads not_configured in that last case.
+             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, has no directory credential configured, or reads each login's groups with the user's own token and has no directory to sync. The provider's last_sync_status reads not_configured and user_token in those last two cases.
              */
             skipped?: string | null;
+            /**
+             * Status
+             * @description How the sync ended: ok, partial (some groups skipped), error (the listing failed, or the secret store holding its credential did not answer or refused access), not_configured (no directory credential), user_token (no directory to sync, which is a Google provider's default and not a fault) or skipped (disabled or not in api mode). Key on this, never on the text of error or skipped.
+             * @enum {string}
+             */
+            status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";
         };
         /** TestResponse */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
