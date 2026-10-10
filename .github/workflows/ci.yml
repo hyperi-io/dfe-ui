@@ -30,6 +30,13 @@ name: CI
         default: 'auto'
         description: 'Version resolution for from-head: auto | patch | minor (forced -- release even with no release-worthy commit) | X.Y.Z (exact version).'
 
+# The ceiling for every job in the reusable workflow, which asks for no more than this.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  packages: write
+
 jobs:
   ci:
     uses: hyperi-io/hyperi-ci/.github/workflows/ts-ci.yml@main
