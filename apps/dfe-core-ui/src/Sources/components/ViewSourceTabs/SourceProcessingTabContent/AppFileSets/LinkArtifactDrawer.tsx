@@ -8,22 +8,30 @@ import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useLinkAppFile } from '@/core/hooks/apps/files/useLinkAppFile';
 import { useFetchLibraryArtifacts } from '@/core/hooks/library/useFetchLibraryArtifacts';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { APP_FILENAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { IconLink } from '@repo/dfe-icons';
 import { Button, Input, Select } from 'antd';
 import { useMemo, useState } from 'react';
 import z from 'zod';
 
-const formSchema = z.object({
-  name: z
-    .string({ message: 'Filename is required' })
-    .min(1, { message: 'Filename is required' }),
-  artifact: z
-    .string({ message: 'Artefact is required' })
-    .min(1, { message: 'Artefact is required' }),
-  tag: z.string().optional(),
-  version: z.number().optional(),
-});
-type LinkFormData = z.infer<typeof formSchema>;
+const buildFormSchema = (suffixes: string[]) =>
+  z.object({
+    name: z
+      .string({ message: 'Filename is required' })
+      .min(1, { message: 'Filename is required' })
+      .refine((v) => APP_FILENAME_VALIDATOR.regex.test(v), {
+        message: APP_FILENAME_VALIDATOR.message('Filename'),
+      })
+      .refine((v) => suffixes.some((suffix) => v.endsWith(suffix)), {
+        message: 'Filename needs an extension this app reads',
+      }),
+    artifact: z
+      .string({ message: 'Artefact is required' })
+      .min(1, { message: 'Artefact is required' }),
+    tag: z.string().optional(),
+    version: z.number().optional(),
+  });
+type LinkFormData = z.infer<ReturnType<typeof buildFormSchema>>;
 
 /**
  * Point one file in the set at a library artefact.
@@ -45,6 +53,7 @@ export const LinkArtifactDrawer = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [form] = Form.useForm<LinkFormData>();
+  const formSchema = useMemo(() => buildFormSchema(suffixes), [suffixes]);
   const formValidation = useAntdZodResolver(formSchema);
   const { data: artifacts } = useFetchLibraryArtifacts({
     queryEnabled: isOpen,
@@ -103,7 +112,7 @@ export const LinkArtifactDrawer = ({
           <Form.Item
             name="name"
             label="Filename"
-            help={`Must end in one of ${suffixes.join(', ')}`}
+            extra={`Must end in one of ${suffixes.join(', ')}`}
             rules={[formValidation]}
           >
             <Input placeholder={`my-file${suffixes[0] ?? ''}`} />

@@ -8,7 +8,8 @@ import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
-import { Button, Input, Select } from 'antd';
+import { LIBRARY_TOKEN_VALIDATOR } from '@/core/validationSchemas/utils';
+import { Button, FormRule, Input, Select } from 'antd';
 import { useEffect } from 'react';
 
 type LabelsFormData = {
@@ -28,6 +29,28 @@ export const parseLabelLines = (raw: string): Record<string, string> => {
     out[trimmed.slice(0, split).trim()] = trimmed.slice(split + 1).trim();
   }
   return out;
+};
+
+const groupRule: FormRule = {
+  validator: (_rule, value?: string) =>
+    !value || LIBRARY_TOKEN_VALIDATOR.regex.test(value)
+      ? Promise.resolve()
+      : Promise.reject(new Error(LIBRARY_TOKEN_VALIDATOR.message('Group'))),
+};
+
+const labelsRule: FormRule = {
+  validator: (_rule, value?: string) =>
+    Object.entries(parseLabelLines(value ?? '')).every(
+      ([key, labelValue]) =>
+        LIBRARY_TOKEN_VALIDATOR.regex.test(key) &&
+        LIBRARY_TOKEN_VALIDATOR.regex.test(labelValue),
+    )
+      ? Promise.resolve()
+      : Promise.reject(
+          new Error(
+            LIBRARY_TOKEN_VALIDATOR.message('Each label key and value'),
+          ),
+        ),
 };
 
 const formatLabelLines = (labels: Record<string, string>) =>
@@ -102,13 +125,14 @@ export const ArtifactLabels = ({
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={2} />
             </Form.Item>
-            <Form.Item name="group" label="Group">
+            <Form.Item name="group" label="Group" rules={[groupRule]}>
               <Input placeholder="network" />
             </Form.Item>
             <Form.Item
               name="labels"
               label="Labels"
-              help="One key=value per line. Listing filters on these."
+              extra="One key=value per line. Listing filters on these."
+              rules={[labelsRule]}
             >
               <Input.TextArea rows={4} className="font-mono" />
             </Form.Item>

@@ -4,11 +4,17 @@ import { Form } from '@/core/components/Form';
 import { TAccountCreateRequestBody } from '@/core/hooks/useCreateAccount/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { newPasswordSchema } from '@/core/validationSchemas/password.schema';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: 'Username is required' }),
+  username: z
+    .string()
+    .min(1, { message: 'Username is required' })
+    .refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
+      message: STORE_NAME_VALIDATOR.message('Username'),
+    }),
   password: newPasswordSchema,
   groups: z.array(z.string()).optional(),
   email: z.email({ message: 'Valid email is required' }),

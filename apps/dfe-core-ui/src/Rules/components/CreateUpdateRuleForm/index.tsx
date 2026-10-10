@@ -6,30 +6,43 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { ValidateButton } from '@/core/components/ValidateButton';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useValidateRule } from '@/Rules/hooks/useValidateRule';
 import { TSqlValidationResponse } from '@/Rules/hooks/useValidateRule/types';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { AdvancedSettings } from './AdvancedSettings';
 import { ResponseModal } from './ResponseModal';
 import { RuleSettings } from './RuleSettings';
 import { SqlValidationErrors } from './SqlValidationErrors';
 
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  display_name: z.string().optional().nullable(),
-  user_sql: z.string().min(1, { message: 'User SQL is required' }),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
-  source_type: z.enum(['raw', 'hyperdx']).optional().nullable(),
-  cel_filter: z.string().optional(),
-  hunt_name: z.string().optional(),
-  source: z.string().optional(),
-  estimate_cost: z.boolean().optional(),
-  cost_window_minutes: z.string().optional(),
-});
-export type CreateUpdateRuleFormData = z.infer<typeof formSchema>;
+const requiredName = z.string().min(1, { message: 'Name is required' });
+
+// The engine checks the name on create only, and the gitops store allows names
+// the create endpoint refuses, so an existing rule's locked name stays unchecked.
+const newName = requiredName.refine(
+  (v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v),
+  { message: RULE_HUNT_NAME_VALIDATOR.message('Name') },
+);
+
+const buildFormSchema = (nameIsNew: boolean) =>
+  z.object({
+    name: nameIsNew ? newName : requiredName,
+    display_name: z.string().optional().nullable(),
+    user_sql: z.string().min(1, { message: 'User SQL is required' }),
+    severity: z.enum(['low', 'medium', 'high', 'critical']),
+    source_type: z.enum(['raw', 'hyperdx']).optional().nullable(),
+    cel_filter: z.string().optional(),
+    hunt_name: z.string().optional(),
+    source: z.string().optional(),
+    estimate_cost: z.boolean().optional(),
+    cost_window_minutes: z.string().optional(),
+  });
+export type CreateUpdateRuleFormData = z.infer<
+  ReturnType<typeof buildFormSchema>
+>;
 
 export interface DisabledFields {
   name?: boolean;
@@ -61,6 +74,10 @@ const CreateUpdateRuleFormBase = ({
   ...props
 }: CreateUpdateRuleFormProps) => {
   const [form] = Form.useForm<CreateUpdateRuleFormData>();
+  const formSchema = useMemo(
+    () => buildFormSchema(!disabledFields?.name),
+    [disabledFields?.name],
+  );
   const formValidation =
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
 

@@ -2,6 +2,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { GroupRoleSelect } from '@/Settings/components/GroupManagement/GroupRoleSelect';
 import { useCreateApiKey } from '@/Settings/hooks/apiKeys/useCreateApiKey';
 import { TApiKeyCreateResponse } from '@/Settings/hooks/apiKeys/useCreateApiKey/types';
@@ -37,7 +38,10 @@ const expiryAtEndOfSelectedDay = (val: unknown): unknown => {
 const createApiKeyFormSchema = z.object({
   name: z
     .string({ message: 'Name is required' })
-    .min(1, { message: 'Name is required' }),
+    .min(1, { message: 'Name is required' })
+    .refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
+      message: STORE_NAME_VALIDATOR.message('Name'),
+    }),
   description: z
     .string({ message: 'Description is required' })
     .min(1, { message: 'Description is required' }),

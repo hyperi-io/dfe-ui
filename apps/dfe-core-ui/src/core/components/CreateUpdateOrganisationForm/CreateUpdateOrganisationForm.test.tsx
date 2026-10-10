@@ -1,4 +1,9 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import {
+  expectNameRule,
+  NAME_RULE_TEST_TIMEOUT_MS,
+} from '@/core/utils/test-utils/expectNameRule';
+import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -84,4 +89,26 @@ describe('CreateUpdateOrganisationForm', () => {
       }),
     );
   });
+
+  test(
+    'takes the names the engine takes and refuses the ones it refuses',
+    { timeout: NAME_RULE_TEST_TIMEOUT_MS },
+    async () => {
+      render(
+        <CreateUpdateOrganisationForm
+          initialValues={{ name: '', display_name: '', org_ids: [] }}
+          onFinish={vi.fn()}
+          buttonLabel="Create"
+        />,
+        { wrapper },
+      );
+
+      await expectNameRule({
+        input: screen.getByPlaceholderText('Enter name'),
+        message: ORG_NAME_VALIDATOR.message('Name'),
+        accepts: ['acme-corp.eu', 'a'.repeat(129)],
+        refuses: ['-acme', 'acme corp'],
+      });
+    },
+  );
 });

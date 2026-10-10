@@ -3,6 +3,7 @@ import { FieldMapSelect } from '@/core/components/FieldMapSelect';
 import { Form } from '@/core/components/Form';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { FIELD_MAP_STANDARD_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, FormProps, Input } from 'antd';
 import { useEffect } from 'react';
 import z from 'zod';
@@ -11,7 +12,10 @@ import { MappingBuilder } from './MappingBuilder';
 export const formSchema = z.object({
   standard: z
     .string({ message: 'Standard is required' })
-    .min(1, { message: 'Standard is required' }),
+    .min(1, { message: 'Standard is required' })
+    .refine((v) => FIELD_MAP_STANDARD_VALIDATOR.regex.test(v), {
+      message: FIELD_MAP_STANDARD_VALIDATOR.message('Standard'),
+    }),
   source: z.string().nullable().optional(),
   version: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
