@@ -71,6 +71,14 @@ export const SyncOidcProviderGroupsDrawer = ({
           <dd>{data?.total}</dd>
         </dl>
 
+        {data?.skipped && (
+          <NotificationCard
+            title="Sync skipped"
+            description={data.skipped}
+            type="warning"
+          />
+        )}
+
         {data?.error && (
           <NotificationCard
             title="Error"

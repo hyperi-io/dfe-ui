@@ -6,6 +6,13 @@ import { expect } from 'vitest';
 export const NAME_RULE_TEST_TIMEOUT_MS = 60_000;
 
 /**
+ * How long one rule check waits for its message to appear or go. A cleared
+ * message takes about 0.55s to leave (antd's 500ms motion deadline), so the 1s
+ * findBy default leaves under half a second of slack.
+ */
+export const NAME_RULE_BACKSTOP_MS = 15_000;
+
+/**
  * Drives one name input through values the engine accepts and values it
  * refuses, and checks the form shows the rule's message for exactly the refused
  * ones. Each value flips the input between showing and not showing the message,
@@ -37,12 +44,15 @@ export const expectNameRule = async ({
   };
   const expectRefused = async (value: string) => {
     await type(value);
-    expect(await screen.findByText(message)).toBeInTheDocument();
+    expect(
+      await screen.findByText(message, {}, { timeout: NAME_RULE_BACKSTOP_MS }),
+    ).toBeInTheDocument();
   };
   const expectAccepted = async (value: string) => {
     await type(value);
-    await waitFor(() =>
-      expect(screen.queryByText(message)).not.toBeInTheDocument(),
+    await waitFor(
+      () => expect(screen.queryByText(message)).not.toBeInTheDocument(),
+      { timeout: NAME_RULE_BACKSTOP_MS },
     );
   };
 

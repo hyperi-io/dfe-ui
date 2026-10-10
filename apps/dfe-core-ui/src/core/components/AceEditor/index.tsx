@@ -25,7 +25,10 @@ const SUPPORTED_ACE_BEAUTIFY_MODES = new Set([
 ]);
 
 interface AceEditorProps
-  extends React.ComponentPropsWithRef<typeof ReactAceEditor>, FormControlAria {}
+  extends React.ComponentPropsWithRef<typeof ReactAceEditor>, FormControlAria {
+  /** The id Form.Item sets for its label to point at. It goes on the textbox, since react-ace puts `name` on the wrapper div. */
+  id?: string;
+}
 
 /** An absent attribute and `false` mean the same, so neither is written. */
 const ariaValue = (value: React.AriaAttributes['aria-invalid']) =>
@@ -45,8 +48,15 @@ const setAttribute = (
   }
 };
 
+const labelText = (input: HTMLTextAreaElement) =>
+  Array.from(input.labels ?? [], (label) => label.textContent?.trim())
+    .filter(Boolean)
+    .join(' ');
+
 export const AceEditor = ({
   className,
+  id,
+  name,
   'aria-invalid': ariaInvalid,
   'aria-describedby': ariaDescribedBy,
   'aria-required': ariaRequired,
@@ -62,12 +72,24 @@ export const AceEditor = ({
   const isInvalid = invalid !== undefined;
 
   useEffect(() => {
-    const input = editorRef.current?.textInput?.getElement();
-    if (!input) return;
+    const editor = editorRef.current;
+    const input = editor?.textInput?.getElement();
+    if (!editor || !input) return;
+    // A label's `for` only names a textarea. react-ace puts `name` on the
+    // wrapper div, which a label cannot name.
+    if (id === undefined) {
+      input.removeAttribute('id');
+    } else {
+      input.id = id;
+    }
+    // Ace gives the textarea its own aria-label, which beats the form label
+    // in the accessible name. It prefixes the option to its cursor-row text.
+    editor.setOption('textInputAriaLabel', labelText(input));
+    editor.textInput.setAriaLabel();
     setAttribute(input, 'aria-invalid', invalid);
     setAttribute(input, 'aria-describedby', ariaDescribedBy);
     setAttribute(input, 'aria-required', required);
-  }, [invalid, ariaDescribedBy, required]);
+  }, [id, invalid, ariaDescribedBy, required]);
 
   const beautifyContent = (editor: Editor) => {
     aceBeautify.beautify(editor.getSession());
@@ -93,6 +115,7 @@ export const AceEditor = ({
 
   return (
     <ReactAceEditor
+      name={id === undefined ? name : `${id}-editor`}
       width="100%"
       height="600px"
       showPrintMargin={false}

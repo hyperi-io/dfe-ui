@@ -8,6 +8,9 @@ import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormRule, Radio, Select } from 'antd';
 import { getFetcherSourceTypes } from './helpers';
 
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const TOPIC_LABEL = 'Topic';
+
 export const FetcherFormSection = ({
   formValidation,
   disabledFields,
@@ -52,11 +55,12 @@ export const FetcherFormSection = ({
 
       <Form.Item
         name={['fetcher', 'topic']}
-        label="Topic"
+        label={TOPIC_LABEL}
         rules={[formValidation]}
         help="Its own topic gives this source its own table; main sends it to the shared table."
       >
         <Radio.Group
+          aria-label={TOPIC_LABEL}
           disabled={disabledFields?.fetcher?.topic}
           options={Object.entries(FETCHER_TOPIC_LABELS).map(
             ([value, label]) => ({ label, value }),
