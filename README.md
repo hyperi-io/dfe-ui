@@ -18,7 +18,7 @@ yarn dev                 # turbo dev - app on http://localhost:3000
 On a system-installed node (`/usr/bin/node`) `corepack enable` fails with
 `EACCES` on its symlink. Either `corepack enable --install-directory
 ~/.local/bin` (any writable directory on your PATH), or prefix each command
-with `corepack ` -- `corepack yarn install` -- which needs no enable. A yarn 1
+with `corepack` -- `corepack yarn install` -- which needs no enable. A yarn 1
 already on your PATH is the wrong yarn for this lockfile.
 
 Point it at an engine with `NEXT_PUBLIC_API_URL` (defaults suit local dev).
@@ -68,7 +68,7 @@ config repos. One artifact ships, the `ghcr.io/hyperi-io/dfe-ui` container.
 This repo and dfe-receiver are the two components in the suite that take
 untrusted input, so an advisory here is graded on reachability before
 severity. The exposure model is declared once, in dfe-infra:
-https://github.com/hyperi-io/dfe-infra/blob/main/docs/THREAT-MODEL.md
+<https://github.com/hyperi-io/dfe-infra/blob/main/docs/THREAT-MODEL.md>
 
 ### Where things live
 

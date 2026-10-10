@@ -11,36 +11,28 @@ const appRoot = __dirname;
 const escapeGlob = (value: string) =>
   value.replace(/[[\]{}()*+?!,\\]/g, '\\$&');
 
-const listTests = (dir: string): string[] => {
-  if (!fs.existsSync(dir)) {
-    return [];
-  }
-  const files: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...listTests(full));
-    } else if (/\.test\.tsx?$/.test(entry.name)) {
-      files.push(full);
-    }
-  }
-  return files;
-};
+const TEST_ROOTS = ['src', 'eslint'];
 
 const mocked: string[] = [];
 const shared: string[] = [];
-for (const file of [
-  ...listTests(path.join(appRoot, 'src')),
-  ...listTests(path.join(appRoot, 'eslint')),
-]) {
-  const source = fs.readFileSync(file, 'utf8');
-  const pattern = escapeGlob(
-    path.relative(appRoot, file).split(path.sep).join('/'),
-  );
-  if (/\bvi\.(?:mock|doMock)\s*\(/.test(source)) {
-    mocked.push(pattern);
-  } else {
-    shared.push(pattern);
+for (const root of TEST_ROOTS) {
+  const rootDir = path.join(appRoot, root);
+  if (!fs.existsSync(rootDir)) {
+    continue;
+  }
+  const entries = fs.readdirSync(rootDir, {
+    recursive: true,
+    encoding: 'utf8',
+  });
+  for (const entry of entries.filter((name) => /\.test\.tsx?$/.test(name))) {
+    const file = path.join(root, entry);
+    const source = fs.readFileSync(path.join(appRoot, file), 'utf8');
+    const pattern = escapeGlob(file.split(path.sep).join('/'));
+    if (/\bvi\.(?:mock|doMock)\s*\(/.test(source)) {
+      mocked.push(pattern);
+    } else {
+      shared.push(pattern);
+    }
   }
 }
 

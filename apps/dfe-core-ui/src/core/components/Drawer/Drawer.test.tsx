@@ -54,6 +54,16 @@ describe('Drawer', () => {
     ).toBeInTheDocument();
   });
 
+  it('names its close button for assistive tech', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    renderDrawer(onClose);
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('closes on the X when clickaway protection is off', () => {
     const onClose = vi.fn();
     render(
@@ -69,7 +79,7 @@ describe('Drawer', () => {
       </App>,
     );
 
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -78,7 +88,7 @@ describe('Drawer', () => {
     const onClose = vi.fn();
     renderDrawer(onClose);
 
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(onClose).toHaveBeenCalled();
     expect(
