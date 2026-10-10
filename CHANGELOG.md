@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.9](https://github.com/hyperi-io/dfe-ui/compare/v1.7.8...v1.7.9) (2026-10-10)
+
+### Bug Fixes
+
+* accept the lint-only braces advisory with its reason ([#514](https://github.com/hyperi-io/dfe-ui/issues/514)) ([95e24ad](https://github.com/hyperi-io/dfe-ui/commit/95e24ad21f407c7ea38893bab1d89d37b5a3ac7f))
+* match name fields to the engine's rules ([#515](https://github.com/hyperi-io/dfe-ui/issues/515)) ([e8950fd](https://github.com/hyperi-io/dfe-ui/commit/e8950fd7114eae15013e4e2696ce2950e366e058))
+
 ## [1.7.8](https://github.com/hyperi-io/dfe-ui/compare/v1.7.7...v1.7.8) (2026-10-10)
 
 ### Bug Fixes
