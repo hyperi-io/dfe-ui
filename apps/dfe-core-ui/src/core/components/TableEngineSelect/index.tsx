@@ -1,3 +1,4 @@
+import type { FormControlAria } from '@/core/components/Form/formControlAria';
 import { TTableEngine } from '@/core/hooks/useFetchTableEngines/types';
 import { Input, Select } from 'antd';
 
@@ -54,7 +55,10 @@ export const TableEngineInput = ({
   engines,
   loading,
   placeholder,
-}: {
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
+}: FormControlAria & {
   id?: string;
   value?: string | null;
   onChange?: (value: string | undefined) => void;
@@ -62,10 +66,18 @@ export const TableEngineInput = ({
   loading: boolean;
   placeholder?: string;
 }) => {
+  // The error is about the field, and either box may be the one to fix.
+  const fieldAria = {
+    'aria-describedby': ariaDescribedBy,
+    'aria-invalid': ariaInvalid,
+  };
+
   if (!loading && engines.length === 0) {
     return (
       <Input
         id={id}
+        {...fieldAria}
+        aria-required={ariaRequired}
         allowClear
         placeholder={placeholder}
         value={value ?? undefined}
@@ -87,6 +99,8 @@ export const TableEngineInput = ({
     <div className="flex flex-col gap-2">
       <Select
         id={id}
+        {...fieldAria}
+        aria-required={ariaRequired}
         allowClear
         showSearch
         loading={loading}
@@ -101,6 +115,7 @@ export const TableEngineInput = ({
       />
       {showArguments && (
         <Input
+          {...fieldAria}
           aria-label={`${variant} arguments`}
           placeholder={argumentsPlaceholder}
           value={args}

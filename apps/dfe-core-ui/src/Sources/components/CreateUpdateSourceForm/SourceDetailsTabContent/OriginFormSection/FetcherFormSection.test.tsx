@@ -107,6 +107,25 @@ describe('FetcherFormSection errors', () => {
       await screen.findByText('Source type is required'),
     ).toBeInTheDocument();
     expect(screen.getByText(SOURCE_TYPE_HINT)).toBeInTheDocument();
+    const sourceType = screen.getByLabelText(/^Source type/);
+    expect(sourceType).toHaveAttribute('aria-invalid', 'true');
+    expect(sourceType).toHaveAccessibleDescription(
+      `Source type is required ${SOURCE_TYPE_HINT}`,
+    );
+  });
+
+  it('marks the source type required, a rule the schema holds only for fetchers', async () => {
+    render(
+      <Harness fetcher={{ source_type: '', topic: 'own', config: '' }} />,
+      { wrapper },
+    );
+
+    const sourceType = await screen.findByLabelText(/^Source type/);
+
+    expect(screen.getByText('Source type').closest('label')).toHaveClass(
+      'ant-form-item-required',
+    );
+    expect(sourceType).toHaveAttribute('aria-required', 'true');
   });
 
   it('shows the config error beside the hint when the config sets a key the engine owns', async () => {

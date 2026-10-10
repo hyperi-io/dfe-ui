@@ -30,6 +30,8 @@ export const FetcherFormSection = ({
         name={['fetcher', 'source_type']}
         label="Source type"
         rules={[formValidation]}
+        // The schema holds the rule in its fetcher refinement, so it derives no mark.
+        required
         extra={
           hasSourceTypes
             ? undefined
