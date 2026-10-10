@@ -15120,6 +15120,11 @@ export interface components {
             groups_skipped: number;
             /** Error */
             error: string | null;
+            /**
+             * Skipped
+             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, or has no directory credential configured. The provider's last_sync_status reads not_configured in that last case.
+             */
+            skipped?: string | null;
         };
         /** TestResponse */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
