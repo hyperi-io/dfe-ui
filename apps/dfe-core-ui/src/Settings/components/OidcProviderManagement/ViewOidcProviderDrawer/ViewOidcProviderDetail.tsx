@@ -69,6 +69,20 @@ export const ViewOidcProviderDetail = ({
         <dd>{oidcProvider?.type}</dd>
         <dt className={dataListTermStyle}>Issuer:</dt>
         <dd>{oidcProvider?.issuer}</dd>
+        <dt className={dataListTermStyle}>Scopes:</dt>
+        <dd>
+          {oidcProvider?.scopes?.length ? (
+            <ul className="flex flex-col">
+              {oidcProvider.scopes.map((scope) => (
+                <li key={scope} className="break-all">
+                  {scope}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
         <dt className={dataListTermStyle}>Client ID Environment Variable:</dt>
         <dd>
           {oidcProvider?.client_id_env ? (
@@ -129,12 +143,6 @@ export const ViewOidcProviderDetail = ({
                 Service Account JSON Environment Variable:
               </dt>
               <dd>{oidcProvider?.groups?.service_account_json_env}</dd>
-            </>
-          )}
-          {oidcProvider?.groups?.admin_email && (
-            <>
-              <dt className={dataListTermStyle}>Admin Email:</dt>
-              <dd>{oidcProvider?.groups?.admin_email}</dd>
             </>
           )}
           {oidcProvider?.groups?.domain && (

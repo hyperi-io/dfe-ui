@@ -11,7 +11,6 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
   enrich_on_login: false,
   service_account_json_env: '',
   service_account_json_path: '',
-  admin_email: '',
   domain: '',
   tenant_id_env: '',
   client_secret_env: '',
@@ -32,6 +31,7 @@ const PROVIDER: TOidcProviderListItem = {
   client_id_env: 'IDP_CLIENT_ID',
   client_secret_env: 'IDP_CLIENT_SECRET',
   client_secret_path: 'oidc/provider/client_secret',
+  scopes: ['openid', 'email', 'profile', 'groups'],
   groups: NO_GROUPS,
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
@@ -66,13 +66,16 @@ const ENTRA_ID: TOidcProviderListItem = {
   },
 };
 
+const GOOGLE_GROUPS_SCOPE =
+  'https://www.googleapis.com/auth/cloud-identity.groups.readonly';
+
 const GOOGLE: TOidcProviderListItem = {
   ...PROVIDER,
   type: 'google',
+  scopes: ['openid', 'email', 'profile', GOOGLE_GROUPS_SCOPE],
   groups: {
     ...NO_GROUPS,
     service_account_json_env: 'GOOGLE_SA_JSON',
-    admin_email: 'admin@example.com',
     domain: 'example.com',
   },
 };
@@ -153,6 +156,26 @@ describe('ViewOidcProviderDetail', () => {
     ]) {
       expect(labels).not.toContain(secretLabel);
     }
+  });
+
+  test('Google lists each scope it requests and no admin email', () => {
+    const rows = renderRows(GOOGLE);
+
+    expect(rows).toContainEqual([
+      'Scopes:',
+      `openidemailprofile${GOOGLE_GROUPS_SCOPE}`,
+    ]);
+    expect(
+      screen.getAllByRole('listitem').map((item) => item.textContent),
+    ).toEqual(['openid', 'email', 'profile', GOOGLE_GROUPS_SCOPE]);
+    expect(rows.map(([label]) => label)).not.toContain('Admin Email:');
+  });
+
+  test('a provider with no scopes says so', () => {
+    expect(renderRows({ ...PROVIDER, scopes: [] })).toContainEqual([
+      'Scopes:',
+      'None',
+    ]);
   });
 
   test('enrich on login shows No when it is off', () => {
