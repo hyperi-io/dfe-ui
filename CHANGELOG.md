@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.10](https://github.com/hyperi-io/dfe-ui/compare/v1.7.9...v1.7.10) (2026-10-10)
+
+### Bug Fixes
+
+* link errors to fields, mark required ones ([#518](https://github.com/hyperi-io/dfe-ui/issues/518)) ([dc285ed](https://github.com/hyperi-io/dfe-ui/commit/dc285eda3f1264956977e75e114b4c102c567e44)), closes [#516](https://github.com/hyperi-io/dfe-ui/issues/516)
+* show form errors beside hints and make the hunt target table optional ([#516](https://github.com/hyperi-io/dfe-ui/issues/516)) ([bbae391](https://github.com/hyperi-io/dfe-ui/commit/bbae391111b64cef1f7361900a0b113f624dbed2))
+
 ## [1.7.9](https://github.com/hyperi-io/dfe-ui/compare/v1.7.8...v1.7.9) (2026-10-10)
 
 ### Bug Fixes
