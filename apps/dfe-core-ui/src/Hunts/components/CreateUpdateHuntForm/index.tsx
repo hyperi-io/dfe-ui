@@ -18,9 +18,7 @@ const formSchema = z.object({
       message: RULE_HUNT_NAME_VALIDATOR.message('Identifier'),
     }),
   display_name: z.string().optional().nullable(),
-  global_target_table_name: z
-    .string({ message: 'Global target table name is required' })
-    .min(1, { message: 'Global target table name is required' }),
+  global_target_table_name: z.string().optional().nullable(),
   global_source_table_name: z
     .string({ message: 'Global source table name is required' })
     .min(1, { message: 'Global source table name is required' }),
@@ -110,9 +108,10 @@ export const CreateUpdateHuntForm = ({
       <Form.Item
         name="global_target_table_name"
         label="Target Table"
+        extra="Leave blank to write detections to the default detection table."
         rules={[formValidation]}
       >
-        <Input placeholder="Enter target table" />
+        <Input placeholder="Optional" />
       </Form.Item>
       <Form.Item name="rules" label="Rules" rules={[formValidation]}>
         <RuleSelect mode="multiple" placeholder="Select rules" />

@@ -30,7 +30,7 @@ export const FetcherFormSection = ({
         name={['fetcher', 'source_type']}
         label="Source type"
         rules={[formValidation]}
-        help={
+        extra={
           hasSourceTypes
             ? undefined
             : 'No fetcher is deployed, so there are no source types to pick from'
@@ -66,7 +66,7 @@ export const FetcherFormSection = ({
         name={['fetcher', 'config']}
         label="Config"
         rules={[formValidation]}
-        help="The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals."
+        extra="The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals."
       >
         <AceEditor name="fetcher_config" mode="yaml" height="300px" />
       </Form.Item>

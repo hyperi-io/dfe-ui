@@ -4,6 +4,7 @@ import { THuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 import { describe, expect, it } from 'vitest';
 import {
   transformHuntDetailToFormData,
+  transformHuntFormDataToCreateRequest,
   transformHuntFormDataToUpdateRequest,
 } from './transformHuntDetailToFormData';
 
@@ -50,13 +51,14 @@ describe('transformHuntFormDataToUpdateRequest', () => {
   it('merges form edits with unchanged hunt metadata for PUT', () => {
     const formValues = transformHuntDetailToFormData(huntDetail);
     formValues.name = 'Updated Hunt';
+    formValues.global_source_table_name = 'windows_audit';
 
     const expectedRequest: THuntUpdateRequest = {
       display_name: 'My Hunt',
       cron: '0 * * * *',
       log_buffer: 120,
       global_target_table_name: 'target',
-      global_source_table_name: null,
+      global_source_table_name: 'windows_audit',
       customers: ['org_a'],
       rules: ['rule_one'],
       customer_filters: null,
@@ -70,4 +72,68 @@ describe('transformHuntFormDataToUpdateRequest', () => {
       transformHuntFormDataToUpdateRequest(formValues, huntDetail),
     ).toEqual(expectedRequest);
   });
+
+  it('sends the tables as edited in the form', () => {
+    const formValues = transformHuntDetailToFormData(huntDetail);
+    formValues.global_source_table_name = 'dns_audit';
+    formValues.global_target_table_name = 'dns_alerts';
+
+    const request = transformHuntFormDataToUpdateRequest(
+      formValues,
+      huntDetail,
+    );
+
+    expect(request.global_source_table_name).toBe('dns_audit');
+    expect(request.global_target_table_name).toBe('dns_alerts');
+  });
+
+  it.each(['', '   ', null, undefined])(
+    'sends no target table key when the form value is %j',
+    (blank) => {
+      const formValues = transformHuntDetailToFormData(huntDetail);
+      formValues.global_target_table_name = blank;
+
+      const request = transformHuntFormDataToUpdateRequest(
+        formValues,
+        huntDetail,
+      );
+
+      expect(request).not.toHaveProperty('global_target_table_name');
+    },
+  );
+});
+
+describe('transformHuntFormDataToCreateRequest', () => {
+  const formValues: CreateUpdateHuntFormData = {
+    name: 'my_hunt',
+    display_name: 'My Hunt',
+    cron: '*/15 * * * *',
+    log_buffer: 60,
+    customers: ['org_a'],
+    rules: ['rule_one'],
+    global_source_table_name: 'windows_audit',
+    global_target_table_name: 'alerts',
+  };
+
+  it('sends the form as it is when both tables are filled', () => {
+    expect(transformHuntFormDataToCreateRequest(formValues)).toEqual(
+      formValues,
+    );
+  });
+
+  it.each(['', '   ', null, undefined])(
+    'sends no target table key when the form value is %j',
+    (blank) => {
+      const request = transformHuntFormDataToCreateRequest({
+        ...formValues,
+        global_target_table_name: blank,
+      });
+
+      expect(request).not.toHaveProperty('global_target_table_name');
+      expect(request).toMatchObject({
+        name: 'my_hunt',
+        global_source_table_name: 'windows_audit',
+      });
+    },
+  );
 });

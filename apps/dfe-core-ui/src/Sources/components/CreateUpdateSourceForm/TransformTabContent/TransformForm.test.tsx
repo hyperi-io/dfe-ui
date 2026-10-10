@@ -1,7 +1,11 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import {
+  CreateUpdateSourceFormData,
+  formSchema,
+} from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, FormRule } from 'antd';
@@ -28,16 +32,25 @@ const acceptAll: FormRule = { validator: async () => undefined };
 
 const Harness = ({
   onFinish = vi.fn(),
+  formValidation = acceptAll,
 }: {
   onFinish?: (values: CreateUpdateSourceFormData) => void;
+  formValidation?: FormRule;
 }) => {
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   return (
     <Form form={form} layout="vertical" onFinish={onFinish}>
-      <TransformForm formValidation={acceptAll} />
+      <TransformForm formValidation={formValidation} />
       <Button htmlType="submit">Submit</Button>
     </Form>
   );
+};
+
+/** The real source schema, so the engine rule is the one the form ships with. */
+const SchemaHarness = () => {
+  const formValidation =
+    useAntdZodResolver<CreateUpdateSourceFormData>(formSchema);
+  return <Harness formValidation={formValidation} />;
 };
 
 describe('TransformForm', () => {
@@ -90,5 +103,31 @@ describe('TransformForm', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/^Transform Engine/)).toBeDisabled();
+  });
+
+  it('shows the engine error beside the hint when no transform app is deployed', async () => {
+    const user = userEvent.setup();
+    server.use(
+      API_CONFIG_MOCKS.apps.default.get.success({ mockedResponse: [] }),
+    );
+    render(<SchemaHarness />, { wrapper });
+
+    const hint =
+      'No transform app is deployed, so there are no engines to pick from';
+    expect(await screen.findByText(hint)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(await screen.findByText('Engine is required')).toBeInTheDocument();
+    expect(screen.getByText(hint)).toBeInTheDocument();
+  });
+
+  it('shows the engine error when the transform apps are deployed and none is picked', async () => {
+    const user = userEvent.setup();
+    render(<SchemaHarness />, { wrapper });
+
+    await screen.findByLabelText(/^Transform Engine/);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(await screen.findByText('Engine is required')).toBeInTheDocument();
   });
 });
