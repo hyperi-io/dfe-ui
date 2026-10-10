@@ -23,6 +23,7 @@ export const ReceiverFormSection = ({
   const operationType = Form.useWatch(['match', 'operator'], form);
   const isMatchValueDisabled = operationType === 'exists';
 
+  // The schema holds these rules in its receiver refinement, so it derives no mark.
   return (
     <>
       <NotificationCard
@@ -35,6 +36,7 @@ export const ReceiverFormSection = ({
           name={['match', 'field']}
           label="Field"
           rules={[formValidation]}
+          required
         >
           <Input placeholder="Enter field" />
         </Form.Item>
@@ -43,6 +45,7 @@ export const ReceiverFormSection = ({
           label="Operator"
           className="min-w-36"
           rules={[formValidation]}
+          required
         >
           <Select
             placeholder="Select operator"
@@ -69,6 +72,7 @@ export const ReceiverFormSection = ({
           name={['match', 'value']}
           label="Value"
           rules={[formValidation]}
+          required={!isMatchValueDisabled}
         >
           <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
         </Form.Item>
