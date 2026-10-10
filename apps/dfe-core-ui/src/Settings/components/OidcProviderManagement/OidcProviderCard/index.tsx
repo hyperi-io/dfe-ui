@@ -43,9 +43,10 @@ export const OidcProviderCard = ({
       />
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-base font-medium flex items-center">
-          {oidcProvider.display_name}
-          <span className="text-sm text-foreground/50 ml-1">
+        {/* Inline text, not flex, so a long name wraps as one run of text rather than two columns. */}
+        <h3 className="text-base font-medium pr-8 break-words">
+          {oidcProvider.display_name}{' '}
+          <span className="text-sm text-foreground/50 dark:text-dark-foreground/50">
             ({oidcProvider.name})
           </span>
         </h3>

@@ -28,7 +28,7 @@ through corepack (`corepack yarn install`), which needs no enable. Skipping
 corepack and using a yarn 1 from your PATH runs the wrong yarn against this
 lockfile.
 
-The app answers on http://localhost:3000 within seconds. Port 3000 is not a
+The app answers on <http://localhost:3000> within seconds. Port 3000 is not a
 habit -- the engine's default CORS allowlist breaks login on any other port
 (see the gotchas). `yarn dev` (turbo) runs the same app when you do not need
 to pass a port.
@@ -100,7 +100,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000/login
 # -> 200
 ```
 
-Then prove it as a user: open http://localhost:3000/login, sign in, and land
+Then prove it as a user: open <http://localhost:3000/login>, sign in, and land
 in the app (the `/setup` wizard on a fresh engine).
 
 ## The gotchas that actually bite

@@ -1,8 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import {
+  toCreateOidcProviderBody,
   toScopeList,
-  toScopesRequest,
+  toUpdateOidcProviderBody,
 } from '@/core/helpers/oidcProviders.helpers';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
@@ -58,19 +59,21 @@ export const ConfigureOidcStep = ({
       ? toScopeList(effectiveOidcProvider.scopes)
       : undefined;
 
-  const handleFinish = ({
-    scopes,
-    ...values
-  }: CreateUpdateOidcProviderFormData) => {
+  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     if (effectiveOidcProvider?.name) {
-      updateOidcProvider({
-        ...values,
-        ...toScopesRequest(scopes, initialScopes ?? []),
-      });
+      const storedType =
+        'type' in effectiveOidcProvider ? effectiveOidcProvider.type : '';
+      updateOidcProvider(
+        toUpdateOidcProviderBody(values, {
+          ...effectiveOidcProvider,
+          type: storedType,
+          scopes: initialScopes ?? [],
+        }),
+      );
       return;
     }
 
-    createOidcProvider({ ...values, ...toScopesRequest(scopes) });
+    createOidcProvider(toCreateOidcProviderBody(values));
   };
   return (
     <Card
@@ -99,8 +102,11 @@ export const ConfigureOidcStep = ({
               : 'Add OIDC Provider'
           }
           hasReset={!!effectiveOidcProvider?.name}
+          // The engine's update takes no name, type or issuer.
           disabledFields={{
             name: !!effectiveOidcProvider?.name,
+            type: !!effectiveOidcProvider?.name,
+            issuer: !!effectiveOidcProvider?.name,
           }}
         />
 

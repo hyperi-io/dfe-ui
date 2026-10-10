@@ -77,6 +77,8 @@ const GOOGLE: TOidcProviderListItem = {
   ],
   groups: {
     ...NO_GROUPS,
+    mode: 'api',
+    enrich_on_login: true,
     service_account_json_env: 'GOOGLE_SA_JSON',
     domain: 'example.com',
   },
@@ -240,33 +242,53 @@ describe('UpdateOidcProviderDrawer', () => {
     });
   });
 
-  test('Google group edits and a token-claim mode reach the PUT body', async () => {
+  test('Google group edits reach the PUT body, with enrichment kept on', async () => {
     const user = await openEditDrawer(GOOGLE);
 
     await retype(user, 'groups_domain', 'corp.example.com');
     await retype(user, 'groups_service_account_json_env', 'GOOGLE_DIR_SA');
-    await chooseGroupMode(user, 'Token Claim');
-    await retype(user, 'groups_claim_name', 'roles');
+    await retype(user, 'groups_service_account_json', '{"type":"sa"}');
+    await retype(user, 'groups_sync_interval', '900');
 
     const body = await submitAndReadBody(user);
     expect(body.groups).toEqual({
       ...groupsRequest(GOOGLE.groups),
-      tenant_id: '',
-      mode: 'token_claim',
-      claim_name: 'roles',
+      mode: 'api',
+      enrich_on_login: true,
       domain: 'corp.example.com',
       service_account_json_env: 'GOOGLE_DIR_SA',
+      service_account_json: '{"type":"sa"}',
+      sync_interval: 900,
     });
     expect(body.groups).not.toHaveProperty('admin_email');
+  });
+
+  test('Google offers only the api mode the engine accepts', async () => {
+    const user = await openEditDrawer(GOOGLE);
+
+    await user.click(field('groups_mode'));
+    await waitFor(() =>
+      expect(
+        document.querySelectorAll('.ant-select-item-option').length,
+      ).toBeGreaterThan(0),
+    );
+    expect(
+      Array.from(document.querySelectorAll('.ant-select-item-option')).map(
+        (option) => option.getAttribute('title'),
+      ),
+    ).toEqual(['API']);
   });
 
   test('Google shows only its own group fields, with no admin email', async () => {
     await openEditDrawer(GOOGLE);
 
     expect(field('groups_domain')).toBeInTheDocument();
+    expect(field('groups_service_account_json')).toBeInTheDocument();
     expect(field('groups_service_account_json_env')).toBeInTheDocument();
     for (const id of [
       'groups_admin_email',
+      'groups_enrich_on_login',
+      'groups_claim_name',
       'groups_okta_domain',
       'groups_api_token_env',
       'groups_tenant_id',
@@ -298,22 +320,59 @@ describe('UpdateOidcProviderDrawer', () => {
     ]);
   });
 
-  test('Entra ID group edits reach the PUT body and a hidden setting is kept', async () => {
+  test('Entra ID group edits reach the PUT body', async () => {
     const user = await openEditDrawer(ENTRA_ID);
 
+    await retype(user, 'groups_tenant_id', 'contoso.onmicrosoft.com');
     await retype(user, 'groups_tenant_id_env', 'ENTRA_DIRECTORY_TENANT');
     await retype(user, 'groups_client_secret_env', 'ENTRA_DIRECTORY_SECRET');
+
+    const body = await submitAndReadBody(user);
+    expect(body.groups).toEqual({
+      ...groupsRequest(ENTRA_ID.groups),
+      tenant_id: 'contoso.onmicrosoft.com',
+      tenant_id_env: 'ENTRA_DIRECTORY_TENANT',
+      client_secret_env: 'ENTRA_DIRECTORY_SECRET',
+    });
+  });
+
+  test('a switch to manual mode clears the directory settings the engine refuses there and keeps the rest', async () => {
+    const user = await openEditDrawer(ENTRA_ID);
+
     await chooseGroupMode(user, 'Manual');
 
     const body = await submitAndReadBody(user);
     expect(body.groups).toEqual({
       ...groupsRequest(ENTRA_ID.groups),
       mode: 'manual',
-      tenant_id_env: 'ENTRA_DIRECTORY_TENANT',
-      tenant_id: '',
-      client_secret_env: 'ENTRA_DIRECTORY_SECRET',
+      tenant_id_env: '',
+      client_secret_env: '',
     });
     expect(body.groups.sync_interval).toBe(900);
+  });
+
+  test('Entra ID in api mode with a stored login secret needs no directory secret', async () => {
+    const user = await openEditDrawer({
+      ...ENTRA_ID,
+      groups: {
+        ...ENTRA_ID.groups,
+        client_secret_env: '',
+        client_secret_path: '',
+      },
+    });
+
+    expect((await submitAndReadBody(user)).groups.client_secret_env).toBe('');
+  });
+
+  test('Okta in api mode with a stored API token saves without retyping it', async () => {
+    const user = await openEditDrawer({
+      ...OKTA,
+      groups: { ...OKTA.groups, api_token_env: '' },
+    });
+
+    const body = await submitAndReadBody(user);
+    expect(body.groups).not.toHaveProperty('api_token');
+    expect(body.groups.api_token_env).toBe('');
   });
 
   test('the fields the engine cannot change are read-only and never sent', async () => {

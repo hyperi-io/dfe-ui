@@ -83,6 +83,10 @@ export const ViewOidcProviderDetail = ({
             <EmptyData />
           )}
         </dd>
+        <dt className={dataListTermStyle}>Client ID:</dt>
+        <dd>
+          {oidcProvider?.client_id ? oidcProvider.client_id : <EmptyData />}
+        </dd>
         <dt className={dataListTermStyle}>Client ID Environment Variable:</dt>
         <dd>
           {oidcProvider?.client_id_env ? (
@@ -149,6 +153,12 @@ export const ViewOidcProviderDetail = ({
             <>
               <dt className={dataListTermStyle}>Domain:</dt>
               <dd>{oidcProvider?.groups?.domain}</dd>
+            </>
+          )}
+          {oidcProvider?.groups?.tenant_id && (
+            <>
+              <dt className={dataListTermStyle}>Tenant ID:</dt>
+              <dd>{oidcProvider?.groups?.tenant_id}</dd>
             </>
           )}
           {oidcProvider?.groups?.tenant_id_env && (
