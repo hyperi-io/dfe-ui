@@ -1,5 +1,6 @@
 import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { GOOGLE_SERVICE_ACCOUNT_HINT } from '@/core/constants/oidcProviders.constants';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
@@ -26,7 +27,6 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
   enrich_on_login: false,
   service_account_json_env: '',
   service_account_json_path: '',
-  admin_email: '',
   domain: '',
   tenant_id_env: '',
   client_secret_env: '',
@@ -47,6 +47,7 @@ const OKTA: TOidcProviderListItem = {
   client_id_env: 'OKTA_CLIENT_ID',
   client_secret_env: 'OKTA_CLIENT_SECRET',
   client_secret_path: 'oidc/okta/client_secret',
+  scopes: ['openid', 'email', 'profile', 'groups'],
   groups: {
     ...NO_GROUPS,
     mode: 'api',
@@ -68,10 +69,15 @@ const GOOGLE: TOidcProviderListItem = {
   issuer: 'https://accounts.google.com',
   client_id_env: 'GOOGLE_CLIENT_ID',
   client_secret_env: 'GOOGLE_CLIENT_SECRET',
+  scopes: [
+    'openid',
+    'email',
+    'profile',
+    'https://www.googleapis.com/auth/cloud-identity.groups.readonly',
+  ],
   groups: {
     ...NO_GROUPS,
     service_account_json_env: 'GOOGLE_SA_JSON',
-    admin_email: 'admin@example.com',
     domain: 'example.com',
   },
 };
@@ -237,7 +243,6 @@ describe('UpdateOidcProviderDrawer', () => {
   test('Google group edits and a token-claim mode reach the PUT body', async () => {
     const user = await openEditDrawer(GOOGLE);
 
-    await retype(user, 'groups_admin_email', 'it@example.com');
     await retype(user, 'groups_domain', 'corp.example.com');
     await retype(user, 'groups_service_account_json_env', 'GOOGLE_DIR_SA');
     await chooseGroupMode(user, 'Token Claim');
@@ -249,10 +254,48 @@ describe('UpdateOidcProviderDrawer', () => {
       tenant_id: '',
       mode: 'token_claim',
       claim_name: 'roles',
-      admin_email: 'it@example.com',
       domain: 'corp.example.com',
       service_account_json_env: 'GOOGLE_DIR_SA',
     });
+    expect(body.groups).not.toHaveProperty('admin_email');
+  });
+
+  test('Google shows only its own group fields, with no admin email', async () => {
+    await openEditDrawer(GOOGLE);
+
+    expect(field('groups_domain')).toBeInTheDocument();
+    expect(field('groups_service_account_json_env')).toBeInTheDocument();
+    for (const id of [
+      'groups_admin_email',
+      'groups_okta_domain',
+      'groups_api_token_env',
+      'groups_tenant_id',
+      'groups_tenant_id_env',
+      'groups_client_secret_env',
+    ]) {
+      expect(document.getElementById(id)).toBeNull();
+    }
+    expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
+  });
+
+  test('the stored scopes show as a list and an unedited save leaves them out', async () => {
+    const user = await openEditDrawer(GOOGLE);
+
+    for (const scope of GOOGLE.scopes) {
+      expect(screen.getByTitle(scope)).toBeInTheDocument();
+    }
+    expect(await submitAndReadBody(user)).not.toHaveProperty('scopes');
+  });
+
+  test('an added scope sends the whole list', async () => {
+    const user = await openEditDrawer(OKTA);
+
+    await user.type(field('scopes'), 'offline_access ');
+
+    expect((await submitAndReadBody(user)).scopes).toEqual([
+      ...OKTA.scopes,
+      'offline_access',
+    ]);
   });
 
   test('Entra ID group edits reach the PUT body and a hidden setting is kept', async () => {

@@ -1,5 +1,8 @@
 import { Form } from '@/core/components/Form';
-import { PROVIDERS_MAP } from '@/core/constants/oidcProviders.constants';
+import {
+  GOOGLE_SERVICE_ACCOUNT_HINT,
+  PROVIDERS_MAP,
+} from '@/core/constants/oidcProviders.constants';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,13 +11,14 @@ import { ConfigureOIDCForm } from './ConfigureOIDCForm';
 
 const { wrapper } = buildTestWrapper().withTheme();
 
+const GOOGLE_SERVICE_ACCOUNT_FIELDS = [
+  'Domain',
+  'Service Account JSON ENV',
+  'Service Account JSON',
+];
+
 const PROVIDER_GROUP_FIELDS: Record<string, string[]> = {
-  google: [
-    'Admin Email',
-    'Domain',
-    'Service Account JSON ENV',
-    'Service Account JSON',
-  ],
+  google: GOOGLE_SERVICE_ACCOUNT_FIELDS,
   entra_id: ['Tenant ID', 'Client Secret ENV', 'Client Secret'],
   okta: ['Okta Domain', 'API Token Environment Variable', 'API Token'],
   generic: [],
@@ -116,6 +120,41 @@ describe('ConfigureOIDCForm', () => {
     render(<OidcForm type={type} />, { wrapper });
 
     expect(screen.getByLabelText(label)).toHaveAttribute('type', 'text');
+  });
+
+  test('Type = google asks for no admin email and requires no service account', () => {
+    render(<OidcForm type="google" />, { wrapper });
+
+    expect(screen.queryByLabelText('Admin Email')).not.toBeInTheDocument();
+    expect(screen.getByText('Name', { selector: 'label' })).toHaveClass(
+      'ant-form-item-required',
+    );
+    for (const label of GOOGLE_SERVICE_ACCOUNT_FIELDS) {
+      expect(screen.getByText(label, { selector: 'label' })).not.toHaveClass(
+        'ant-form-item-required',
+      );
+    }
+    expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
+  });
+
+  test('a new Google provider defaults to the api group mode the engine requires', () => {
+    expect(PROVIDERS_MAP['google']?.initialValues.groups?.mode).toBe('api');
+  });
+
+  test('scopes are entered and submitted as a list', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<OidcForm type="google" onFinish={onFinish} />, { wrapper });
+
+    await user.type(screen.getByLabelText('Scopes'), 'openid email ');
+    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+
+    await waitFor(() => {
+      expect(onFinish).toHaveBeenCalledTimes(1);
+    });
+    expect(onFinish).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['openid', 'email'] }),
+    );
   });
 
   test('submits with the other providers fields hidden', async () => {

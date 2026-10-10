@@ -1,5 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
+import {
+  toScopeList,
+  toScopesRequest,
+} from '@/core/helpers/oidcProviders.helpers';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
@@ -48,13 +52,25 @@ export const ConfigureOidcStep = ({
     name: effectiveOidcProvider?.name ?? '',
   });
 
-  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
+  // Setup status carries scopes as one string, a created provider as a list.
+  const initialScopes =
+    effectiveOidcProvider && 'scopes' in effectiveOidcProvider
+      ? toScopeList(effectiveOidcProvider.scopes)
+      : undefined;
+
+  const handleFinish = ({
+    scopes,
+    ...values
+  }: CreateUpdateOidcProviderFormData) => {
     if (effectiveOidcProvider?.name) {
-      updateOidcProvider(values);
+      updateOidcProvider({
+        ...values,
+        ...toScopesRequest(scopes, initialScopes ?? []),
+      });
       return;
     }
 
-    createOidcProvider(values);
+    createOidcProvider({ ...values, ...toScopesRequest(scopes) });
   };
   return (
     <Card
@@ -75,6 +91,7 @@ export const ConfigureOidcStep = ({
           onFinish={handleFinish}
           initialValues={{
             ...effectiveOidcProvider,
+            scopes: initialScopes,
           }}
           submitButtonLabel={
             effectiveOidcProvider?.name

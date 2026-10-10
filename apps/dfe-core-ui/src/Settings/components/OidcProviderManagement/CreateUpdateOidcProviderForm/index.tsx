@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
+  SCOPES_PLACEHOLDER,
 } from '@/core/constants/oidcProviders.constants';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { Button, FormProps, Input, Select, Switch } from 'antd';
@@ -81,6 +82,18 @@ export const CreateUpdateOidcProviderForm = ({
           </Form.Item>
           <Form.Item label="Issuer" name="issuer">
             <Input disabled={disabledFields?.issuer} />
+          </Form.Item>
+          <Form.Item label="Scopes" name="scopes">
+            <Select
+              mode="tags"
+              // An emptied edit keeps the stored scopes, so no default hint.
+              placeholder={
+                initialValues?.scopes?.length ? undefined : SCOPES_PLACEHOLDER
+              }
+              tokenSeparators={[' ', ',']}
+              open={false}
+              suffixIcon={null}
+            />
           </Form.Item>
           <Form.Item
             label="Client ID Environment Variable"

@@ -1,5 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { toScopesRequest } from '@/core/helpers/oidcProviders.helpers';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
@@ -26,8 +27,11 @@ export const CreateOidcProviderDrawer = ({ title }: { title: string }) => {
     },
   });
 
-  const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
-    createOidcProvider(values);
+  const handleFinish = ({
+    scopes,
+    ...values
+  }: CreateUpdateOidcProviderFormData) => {
+    createOidcProvider({ ...values, ...toScopesRequest(scopes) });
   };
 
   return (
