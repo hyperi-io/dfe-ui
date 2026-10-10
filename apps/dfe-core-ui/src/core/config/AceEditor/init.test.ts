@@ -17,8 +17,19 @@ describe('Ace worker loading', () => {
     (worker) => {
       const url = ace.config.moduleUrl(worker, 'worker');
 
-      expect(url).toMatch(/worker-(json|javascript|yaml)\.js$/);
+      expect(decodeURIComponent(url)).toMatch(
+        /worker-(json|javascript|yaml)\.js$/,
+      );
       expect(url).not.toMatch(/cdn|jsdelivr|unpkg/);
     },
   );
+
+  test('the YAML worker starts through the shim, which names the worker to load', () => {
+    const url = new URL(ace.config.moduleUrl('ace/mode/yaml_worker', 'worker'));
+
+    expect(url.pathname).toMatch(/yamlWorkerShim[^/]*\.js$/);
+    expect(decodeURIComponent(url.hash.slice(1))).toMatch(
+      /worker-yaml[^/]*\.js$/,
+    );
+  });
 });
