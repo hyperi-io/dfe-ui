@@ -11,6 +11,9 @@ import {
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormInstance, FormRule, Input, Radio, Select } from 'antd';
 
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const TABLE_LABEL = 'Table';
+
 export const ReceiverFormSection = ({
   formValidation,
   form,
@@ -79,11 +82,12 @@ export const ReceiverFormSection = ({
       </div>
       <Form.Item
         name={['receiver_ui_config', 'table']}
-        label="Table"
+        label={TABLE_LABEL}
         rules={[formValidation]}
         help="You can either use the shared table or add your own table. You will need to deploy the source if own table is selected."
       >
         <Radio.Group
+          aria-label={TABLE_LABEL}
           disabled={disabledFields?.receiver_ui_config?.table}
           options={Object.entries(RECEIVER_TABLE_LABELS).map(
             ([value, label]) => ({ label, value }),

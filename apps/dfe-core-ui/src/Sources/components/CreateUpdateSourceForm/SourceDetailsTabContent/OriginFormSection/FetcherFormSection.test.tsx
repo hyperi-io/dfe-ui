@@ -114,6 +114,21 @@ describe('FetcherFormSection errors', () => {
     );
   });
 
+  it('names the topic radio group by its label', async () => {
+    render(
+      <Harness
+        fetcher={{ source_type: 'crates_io', topic: 'own', config: '' }}
+      />,
+      { wrapper },
+    );
+
+    const topic = await screen.findByRole('radiogroup', { name: 'Topic' });
+
+    expect(topic).toContainElement(
+      screen.getByRole('radio', { name: 'Own topic and table' }),
+    );
+  });
+
   it('marks the source type required, a rule the schema holds only for fetchers', async () => {
     render(
       <Harness fetcher={{ source_type: '', topic: 'own', config: '' }} />,

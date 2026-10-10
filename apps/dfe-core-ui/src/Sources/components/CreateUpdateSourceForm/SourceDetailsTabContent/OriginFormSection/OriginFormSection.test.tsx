@@ -78,6 +78,20 @@ describe('OriginFormSection', () => {
     expect(screen.getByRole('radio', { name: 'Shared table' })).toBeChecked();
   });
 
+  it('names the origin and table radio groups by their labels', async () => {
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    const origin = await screen.findByRole('radiogroup', { name: 'Origin' });
+    const table = screen.getByRole('radiogroup', { name: 'Table' });
+
+    expect(origin).toContainElement(
+      screen.getByRole('radio', { name: 'Receiver' }),
+    );
+    expect(table).toContainElement(
+      screen.getByRole('radio', { name: 'Shared table' }),
+    );
+  });
+
   it('marks the match field and operator required, and the value only while the operator takes one', async () => {
     const user = userEvent.setup();
     render(<Harness onFinish={vi.fn()} />, { wrapper });

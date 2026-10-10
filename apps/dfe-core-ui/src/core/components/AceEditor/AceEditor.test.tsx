@@ -36,6 +36,31 @@ const Harness = ({ required = false }: { required?: boolean }) => (
 );
 
 describe('AceEditor in a Form.Item', () => {
+  it('names the textbox by the form label, then the cursor row Ace reads out', () => {
+    render(<Harness />, { wrapper });
+
+    const textbox = screen.getByRole('textbox', {
+      name: /^Config, Cursor at row \d+$/,
+    });
+    expect(textbox).toBe(screen.getByLabelText('Config'));
+  });
+
+  it('names a textbox with no form label by its cursor row alone', () => {
+    render(<AceEditor name="bare" />, { wrapper });
+
+    expect(screen.getByRole('textbox')).toHaveAccessibleName(
+      /^Cursor at row \d+$/,
+    );
+  });
+
+  it('keeps the form field id on the textbox alone', () => {
+    const { container } = render(<Harness />, { wrapper });
+
+    const textbox = screen.getByRole('textbox');
+    expect(textbox.id).toBe('config');
+    expect(container.querySelectorAll('#config')).toHaveLength(1);
+  });
+
   it('links the textbox to the hint before there is an error', () => {
     render(<Harness />, { wrapper });
 
