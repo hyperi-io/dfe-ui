@@ -20,7 +20,7 @@ export const TransformForm = ({
           name={['transform', 'engine']}
           label="Transform Engine"
           rules={[formValidation]}
-          help={
+          extra={
             hasEngines
               ? undefined
               : 'No transform app is deployed, so there are no engines to pick from'
