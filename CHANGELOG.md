@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.11](https://github.com/hyperi-io/dfe-ui/compare/v1.7.10...v1.7.11) (2026-10-10)
+
+### Bug Fixes
+
+* show OIDC sync status, name form controls ([#519](https://github.com/hyperi-io/dfe-ui/issues/519)) ([1ed3b66](https://github.com/hyperi-io/dfe-ui/commit/1ed3b66e814229c39a1ad28e0da8da68626cbf8c))
+* stop the YAML worker requesting 404 files ([#520](https://github.com/hyperi-io/dfe-ui/issues/520)) ([00ed48c](https://github.com/hyperi-io/dfe-ui/commit/00ed48c37f25c735b511e424c6438c2a4ea94463))
+
 ## [1.7.10](https://github.com/hyperi-io/dfe-ui/compare/v1.7.9...v1.7.10) (2026-10-10)
 
 ### Bug Fixes
