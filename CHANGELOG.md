@@ -3,6 +3,14 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.8](https://github.com/hyperi-io/dfe-ui/compare/v1.7.7...v1.7.8) (2026-10-10)
+
+### Bug Fixes
+
+* drop the Google admin email from the OIDC provider forms ([#512](https://github.com/hyperi-io/dfe-ui/issues/512)) ([fc6fb38](https://github.com/hyperi-io/dfe-ui/commit/fc6fb3824d951227a183fb032704d4e407dc9708))
+* give the CI workflow an explicit permissions ceiling ([#509](https://github.com/hyperi-io/dfe-ui/issues/509)) ([5db7a49](https://github.com/hyperi-io/dfe-ui/commit/5db7a49ceeda38e76d5bba72efb790998a5637f5))
+* match the OIDC provider forms to the engine ([#513](https://github.com/hyperi-io/dfe-ui/issues/513)) ([02049f2](https://github.com/hyperi-io/dfe-ui/commit/02049f2762aa58ace387051f8e44641d0b79e7e7))
+
 ## [1.7.7](https://github.com/hyperi-io/dfe-ui/compare/v1.7.6...v1.7.7) (2026-10-09)
 
 ### Bug Fixes
