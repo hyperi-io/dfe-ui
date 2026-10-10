@@ -7199,6 +7199,11 @@ export interface components {
              * @default
              */
             client_secret_env: string;
+            /**
+             * Scopes
+             * @description OAuth scopes requested at login, one scope per entry; must include openid. One space-separated string is accepted too, and a blank one is no override. Omit for the provider type's default: openid email profile, plus groups for generic and okta, and https://www.googleapis.com/auth/cloud-identity.groups.readonly for google, which reads each user's groups with their own token. Google and Entra ID fail a login that asks for groups.
+             */
+            scopes?: string[] | null;
             groups?: components["schemas"]["GroupResolutionRequest"];
         };
         /** CreateRequest */
@@ -8154,11 +8159,6 @@ export interface components {
              */
             service_account_json_path: string;
             /**
-             * Admin Email
-             * @default
-             */
-            admin_email: string;
-            /**
              * Domain
              * @default
              */
@@ -8228,7 +8228,7 @@ export interface components {
             enrich_on_login: boolean;
             /**
              * Service Account Json
-             * @description Google service account JSON. Write-only: it goes to the secret store and only its path is kept in config.
+             * @description Optional Google service account JSON, for the group sync and for logins whose own token cannot read their groups. It acts as itself, so the org's admin must assign it a groups admin role. Write-only: it goes to the secret store and only its path is kept in config.
              * @default
              */
             service_account_json: string;
@@ -8239,14 +8239,8 @@ export interface components {
              */
             service_account_json_env: string;
             /**
-             * Admin Email
-             * @description Google Workspace admin email
-             * @default
-             */
-            admin_email: string;
-            /**
              * Domain
-             * @description Google Workspace domain
+             * @description Google Workspace domain the service account syncs
              * @default
              */
             domain: string;
@@ -8307,8 +8301,6 @@ export interface components {
             service_account_json_env: string;
             /** Service Account Json Path */
             service_account_json_path: string;
-            /** Admin Email */
-            admin_email: string;
             /** Domain */
             domain: string;
             /** Tenant Id */
@@ -9624,7 +9616,7 @@ export interface components {
             client_secret_path: string;
             /**
              * Scopes
-             * @default openid email profile groups
+             * @default
              */
             scopes: string;
             groups?: components["schemas"]["GroupResolutionConfig"];
@@ -10843,6 +10835,11 @@ export interface components {
             client_secret_env: string;
             /** Client Secret Path */
             client_secret_path: string;
+            /**
+             * Scopes
+             * @description OAuth scopes requested at login
+             */
+            scopes: string[];
             groups: components["schemas"]["GroupResolutionResponse"];
             /** Created At */
             created_at: string;
@@ -14497,6 +14494,11 @@ export interface components {
              * @description Env var name for the RP client secret
              */
             client_secret_env?: string | null;
+            /**
+             * Scopes
+             * @description Replace the OAuth scopes requested at login, one scope per entry; must include openid. One space-separated string is accepted too, and a blank one leaves the scopes as they are.
+             */
+            scopes?: string[] | null;
             /** @description Group resolution config */
             groups?: components["schemas"]["GroupResolutionRequest"] | null;
         };
