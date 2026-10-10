@@ -18,9 +18,15 @@ if (typeof window !== 'undefined') {
     new URL('ace-builds/src-noconflict/worker-javascript.js', import.meta.url)
       .href,
   );
+  // The shim loads the YAML worker named in its URL fragment, then stops it requesting two modules that do not exist.
+  const yamlWorker = new URL(
+    'ace-builds/src-noconflict/worker-yaml.js',
+    import.meta.url,
+  );
+  const yamlWorkerShim = new URL('./yamlWorkerShim.js', import.meta.url);
   ace.config.setModuleUrl(
     'ace/mode/yaml_worker',
-    new URL('ace-builds/src-noconflict/worker-yaml.js', import.meta.url).href,
+    `${yamlWorkerShim.href}#${encodeURIComponent(yamlWorker.href)}`,
   );
 }
 
