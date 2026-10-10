@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import { describe, expect, test } from 'vitest';
 
 const WORKER_URL = 'http://localhost/_next/static/media/worker-yaml.abc123.js';
+const SHIM_URL = 'http://localhost/_next/static/media/yamlWorkerShim.def456.js';
 const WORKER_SOURCE = readFileSync(
   createRequire(import.meta.url).resolve(
     'ace-builds/src-noconflict/worker-yaml.js',
@@ -22,14 +23,19 @@ type Message = { type: string; name?: string; data?: unknown };
  * Runs Ace's real YAML worker in a bare global with the one thing a browser
  * worker adds, importScripts, which can fetch only the worker itself.
  */
-const startWorker = (viaShim: boolean) => {
+const startWorker = (viaShim: boolean, target: string = WORKER_URL) => {
   const requested: string[] = [];
   const posted: Message[] = [];
   const context = vm.createContext({
     postMessage: (message: Message) => posted.push(message),
     setTimeout,
     clearTimeout,
-    location: { hash: `#${encodeURIComponent(WORKER_URL)}` },
+    URL,
+    location: {
+      hash: `#${encodeURIComponent(target)}`,
+      href: SHIM_URL,
+      origin: new URL(SHIM_URL).origin,
+    },
     importScripts: (url: string) => {
       requested.push(url);
       if (url !== WORKER_URL) throw new Error(`NetworkError: ${url}`);
@@ -79,6 +85,19 @@ describe('YAML worker shim', () => {
     const { requested } = startWorker(true);
 
     expect(requested).toEqual([WORKER_URL]);
+  });
+
+  test.each([
+    [
+      'a script on another origin',
+      'https://elsewhere.example/_next/static/media/worker-yaml.abc123.js',
+    ],
+    [
+      'a same-origin script that is not the YAML worker',
+      'http://localhost/_next/static/chunks/app.js',
+    ],
+  ])('it refuses %s before loading anything', (_label, target) => {
+    expect(() => startWorker(true, target)).toThrow(/refusing a worker URL/);
   });
 
   test('with it the worker still reports a YAML syntax error', async () => {
