@@ -213,6 +213,10 @@ export interface paths {
         /**
          * Oidc Callback
          * @description Complete the OIDC flow and re-mint the engine token (single issuer).
+         *
+         *     A login started with ``return_to`` returns there refused as well as admitted,
+         *     so a browser never lands on this route's JSON error. Without ``return_to`` a
+         *     refusal answers JSON with its status, as any API error does.
          */
         get: operations["oidc_callback_api_v1_auth_oidc__provider__callback_get"];
         put?: never;
@@ -11262,7 +11266,7 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
@@ -15117,7 +15121,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
@@ -15632,7 +15636,7 @@ export interface operations {
             query?: {
                 /** @description When false, return JSON with authorization_url for SPA clients (use credentials: include, then window.location.assign the URL). */
                 redirect?: boolean;
-                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...). A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
+                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...), or the refusal's code (#error=<code>&provider=...) when the login is refused. A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
                 return_to?: string | null;
             };
             header?: never;
@@ -15690,7 +15694,7 @@ export interface operations {
                     "application/json": components["schemas"]["OidcCallbackResponse"];
                 };
             };
-            /** @description Login started with return_to: redirect there with the engine token in the URL fragment. */
+            /** @description Login started with return_to: redirect there with the engine token in the URL fragment, or with the refusal's code (#error=<code>&provider=...) when the login is refused. */
             303: {
                 headers: {
                     [name: string]: unknown;
