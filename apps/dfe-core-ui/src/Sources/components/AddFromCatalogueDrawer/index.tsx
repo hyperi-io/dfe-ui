@@ -181,7 +181,7 @@ export const AddFromCatalogueDrawer = () => {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
-              {error && <Alert type="error" message={error.message} />}
+              {error && <Alert type="error" title={error.message} />}
               <Button
                 type="primary"
                 loading={isPending}
