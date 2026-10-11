@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.12](https://github.com/hyperi-io/dfe-ui/compare/v1.7.11...v1.7.12) (2026-10-11)
+
+### Bug Fixes
+
+* adopt engine v1.22.21 sync states and names ([#524](https://github.com/hyperi-io/dfe-ui/issues/524)) ([2ada465](https://github.com/hyperi-io/dfe-ui/commit/2ada465b85196124cea166b6a14730dedd93b4ae))
+* load only a same-origin YAML worker from the shim ([#521](https://github.com/hyperi-io/dfe-ui/issues/521)) ([9fcacca](https://github.com/hyperi-io/dfe-ui/commit/9fcaccab4d87a73aec45d87a3002f5e6fd776392))
+
 ## [1.7.11](https://github.com/hyperi-io/dfe-ui/compare/v1.7.10...v1.7.11) (2026-10-10)
 
 ### Bug Fixes
