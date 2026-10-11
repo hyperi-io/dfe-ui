@@ -13,7 +13,7 @@
 # builds the app + its @repo/* workspace packages.
 
 # Trixie by name: the bare node:24-slim tag is still Debian 12. Renovate moves the digest.
-ARG NODE_IMAGE=node:24-trixie-slim@sha256:8ec5d7557396cfe32d21c3f9c13072355ceab22b584578ca4bb28af31120cffe
+ARG NODE_IMAGE=node:24-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66
 
 # --- Builder ---
 FROM ${NODE_IMAGE} AS builder
