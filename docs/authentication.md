@@ -15,7 +15,7 @@ flowchart TB
 ```
 
 - **Local account:** the login form posts to the engine's local auth. The console forwards the browser's `X-Forwarded-For` so the engine's audit trail can name the client.
-- **OIDC:** the engine is the relying party and re-mints its own token. It returns the browser to `/login/oidc` with the token in the URL fragment. The console accepts that token only when the `login_nonce` on the return URL matches the one the same tab stored when it started the login, so a crafted link carrying someone else's token cannot sign a browser in.
+- **OIDC:** the engine is the relying party and re-mints its own token. It returns the browser to `/login/oidc` with the token in the URL fragment. The console accepts that token only when the `login_nonce` on the return URL matches the one the same tab stored when it started the login, so a crafted link carrying someone else's token cannot sign a browser in. A login the engine refuses comes back the same way with the refusal's code instead (`#error=no_role_granted`), and the sign-in form says why. The code picks fixed words in `src/core/config/loginRefusal.ts`, so a link cannot put text on the page.
 
 ## Session renewal
 

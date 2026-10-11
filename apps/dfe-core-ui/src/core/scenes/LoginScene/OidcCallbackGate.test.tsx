@@ -13,9 +13,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, refresh }),
 }));
 
-// The fallback form fetches setup status; the gate's own decision is what is under test.
-vi.mock('@/core/scenes/LoginScene', () => ({
-  LoginScene: () => <div>login form</div>,
+// The form fetches setup status; the gate's decision and what the page says are under test.
+vi.mock('@/core/components/LoginLocalOidcSwitch', () => ({
+  LoginLocalOidcSwitch: () => <div>login form</div>,
 }));
 
 const mockedSignIn = vi.mocked(signIn);
@@ -104,4 +104,48 @@ describe('OidcCallbackGate', () => {
     ).toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
+
+  test('a user with no DFE role is told why, on the sign-in form, and signed in nowhere', async () => {
+    rememberOidcLoginNonce('n1');
+    landOn('?login_nonce=n1', 'error=no_role_granted&provider=dex');
+
+    render(<OidcCallbackGate loginNonce="n1" />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('No access to DFE yet');
+    expect(alert).toHaveTextContent(/Ask a DFE administrator to link one/);
+    expect(alert).toHaveTextContent(/sign out of your identity provider/);
+    expect(screen.getByText('login form')).toBeInTheDocument();
+    expect(mockedSignIn).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+    expect(window.location.hash).toBe('');
+    // The nonce is spent, so the same hand-back cannot be replayed into a sign-in.
+    expect(window.sessionStorage.length).toBe(0);
+  });
+
+  test('a refusal carrying a token as well signs nobody in', async () => {
+    rememberOidcLoginNonce('n1');
+    landOn('?login_nonce=n1', 'access_token=engine-jwt&error=account_blocked');
+
+    render(<OidcCallbackGate loginNonce="n1" />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Account blocked',
+    );
+    expect(mockedSignIn).not.toHaveBeenCalled();
+  });
+
+  test.each(['made_up_code', 'constructor', '__proto__'])(
+    'a refusal code of %j gets the general failure words, never its own',
+    async (code) => {
+      landOn('', `error=${code}`);
+
+      render(<OidcCallbackGate />);
+
+      const alert = await screen.findByRole('alert');
+      expect(alert).toHaveTextContent('Sign-in failed');
+      expect(alert).not.toHaveTextContent(code);
+      expect(mockedSignIn).not.toHaveBeenCalled();
+    },
+  );
 });
