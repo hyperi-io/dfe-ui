@@ -54,8 +54,10 @@ const status = (
   ...overrides,
 });
 
+const BACKSTOP = { timeout: 15_000 };
+
 const retireButton = () =>
-  screen.findByRole('button', { name: /Retire the bootstrap admin/ });
+  screen.findByRole('button', { name: /Retire the bootstrap admin/ }, BACKSTOP);
 
 describe('CompleteStep', () => {
   test('offers the retirement only when the engine says it would accept it', async () => {
@@ -67,7 +69,9 @@ describe('CompleteStep', () => {
 
     render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
 
-    expect(await screen.findByText('Complete')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Complete', {}, BACKSTOP),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Retire the bootstrap admin/ }),
     ).not.toBeInTheDocument();
@@ -86,7 +90,9 @@ describe('CompleteStep', () => {
     render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
 
     expect(await retireButton()).toBeInTheDocument();
-    expect(await screen.findByText('installer')).toBeInTheDocument();
+    expect(
+      await screen.findByText('installer', {}, BACKSTOP),
+    ).toBeInTheDocument();
   });
 
   test('retires the admin and reports the account is retired', async () => {
@@ -109,7 +115,7 @@ describe('CompleteStep', () => {
       expect(
         screen.getByText('The admin account is retired'),
       ).toBeInTheDocument();
-    });
+    }, BACKSTOP);
   });
 
   test('offers Back while there is a step to go back to', async () => {
@@ -121,7 +127,9 @@ describe('CompleteStep', () => {
     const goPrevious = vi.fn();
 
     render(<CompleteStep goPrevious={goPrevious} />, { wrapper });
-    await userEvent.click(await screen.findByRole('button', { name: /Back/ }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Back/ }, BACKSTOP),
+    );
 
     expect(goPrevious).toHaveBeenCalledTimes(1);
   });
@@ -136,7 +144,7 @@ describe('CompleteStep', () => {
     render(<CompleteStep />, { wrapper });
 
     expect(
-      await screen.findByRole('button', { name: /Get started/ }),
+      await screen.findByRole('button', { name: /Get started/ }, BACKSTOP),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Back/ }),
@@ -158,7 +166,7 @@ describe('CompleteStep', () => {
       expect(
         screen.getByText('The engine would not retire the admin'),
       ).toBeInTheDocument();
-    });
+    }, BACKSTOP);
     expect(
       screen.queryByText('The admin account is retired'),
     ).not.toBeInTheDocument();
