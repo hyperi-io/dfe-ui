@@ -11262,7 +11262,7 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
