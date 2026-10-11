@@ -60,6 +60,8 @@ const TWELVE_CHARS = 'twelve-chars';
 const ACCENTED = String.fromCodePoint(0xe9);
 const SEVENTY_TWO_BYTES = `${'a'.repeat(70)}${ACCENTED}`;
 const SEVENTY_THREE_BYTES = `${'a'.repeat(71)}${ACCENTED}`;
+// Each emoji is one code point and two UTF-16 units, so six are 12 units long.
+const EMOJI = String.fromCodePoint(0x1f511);
 
 const submit = async (password: string) => {
   const user = userEvent.setup();
@@ -79,6 +81,26 @@ describe('CreateAccountForm password length', () => {
 
     expect(await screen.findByText(FLOOR_MESSAGE)).toBeInTheDocument();
     expect(sent).toEqual([]);
+  });
+
+  test('refuses 6 emoji before any request goes out', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(EMOJI.repeat(6));
+
+    expect(await screen.findByText(FLOOR_MESSAGE)).toBeInTheDocument();
+    expect(sent).toEqual([]);
+  });
+
+  test('sends 12 emoji to the engine', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(EMOJI.repeat(12));
+
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(await sent[0]?.json()).toMatchObject({
+      password: EMOJI.repeat(12),
+    });
   });
 
   test('refuses a 73-byte password before any request goes out', async () => {

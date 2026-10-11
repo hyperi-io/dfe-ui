@@ -3,8 +3,10 @@
 import { describe, expect, test } from 'vitest';
 import {
   MAX_PASSWORD_BYTES,
+  MIN_PASSWORD_LENGTH,
   newPasswordSchema,
   PASSWORD_CEILING_MESSAGE,
+  PASSWORD_FLOOR_MESSAGE,
   passwordBytes,
 } from './password.schema';
 
@@ -19,6 +21,35 @@ const refusal = (value: string) =>
   newPasswordSchema
     .safeParse(value)
     .error?.issues.map(({ message }) => message);
+
+describe('newPasswordSchema floor', () => {
+  test.each([
+    { name: '11 ASCII characters', value: 'a'.repeat(11) },
+    { name: '6 emoji, 12 UTF-16 units', value: EMOJI.repeat(6) },
+    { name: '11 emoji, 22 UTF-16 units', value: EMOJI.repeat(11) },
+  ])('refuses $name', ({ value }) => {
+    expect(refusal(value)).toEqual([PASSWORD_FLOOR_MESSAGE]);
+  });
+
+  test.each([
+    { name: '12 ASCII characters', value: 'a'.repeat(12) },
+    { name: '12 emoji', value: EMOJI.repeat(12) },
+    { name: '12 three-byte characters', value: CJK.repeat(12) },
+    {
+      name: '11 ASCII characters and one emoji',
+      value: `${'a'.repeat(11)}${EMOJI}`,
+    },
+  ])('takes $name', ({ value }) => {
+    expect(newPasswordSchema.safeParse(value).success).toBe(true);
+  });
+
+  test('counts code points, as the engine does, not UTF-16 units', () => {
+    const value = EMOJI.repeat(6);
+    expect(value.length).toBe(MIN_PASSWORD_LENGTH);
+    expect(Array.from(value)).toHaveLength(6);
+    expect(newPasswordSchema.safeParse(value).success).toBe(false);
+  });
+});
 
 describe('newPasswordSchema byte ceiling', () => {
   test.each([
