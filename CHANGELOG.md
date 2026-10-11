@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.13](https://github.com/hyperi-io/dfe-ui/compare/v1.7.12...v1.7.13) (2026-10-11)
+
+### Bug Fixes
+
+* refuse new passwords over 72 bytes ([#526](https://github.com/hyperi-io/dfe-ui/issues/526)) ([1e87fe6](https://github.com/hyperi-io/dfe-ui/commit/1e87fe6e2783672b46cc9f6e4f1b9a4426f3b2b2))
+
 ## [1.7.12](https://github.com/hyperi-io/dfe-ui/compare/v1.7.11...v1.7.12) (2026-10-11)
 
 ### Bug Fixes
