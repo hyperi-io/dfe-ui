@@ -2,7 +2,7 @@ import { Form } from '@/core/components/Form';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
-import { render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, FormRule } from 'antd';
 import {
@@ -40,6 +40,9 @@ global.IntersectionObserver = MockIntersectionObserver as any;
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   server.resetHandlers();
+  // Unmount first: clearing the store under a mounted DefaultsSection renders
+  // it outside act().
+  cleanup();
   resetSystemDefaultsStore();
 });
 afterAll(() => server.close());

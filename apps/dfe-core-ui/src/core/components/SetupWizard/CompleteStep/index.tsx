@@ -43,7 +43,7 @@ export const CompleteStep = ({ goPrevious }: { goPrevious?: () => void }) => {
             <Alert
               type="error"
               showIcon
-              message="The engine would not retire the admin"
+              title="The engine would not retire the admin"
               description={error.message}
             />
           )}
@@ -55,7 +55,7 @@ export const CompleteStep = ({ goPrevious }: { goPrevious?: () => void }) => {
           className="mt-8"
           type="success"
           showIcon
-          message={`The ${adminName} account is retired`}
+          title={`The ${adminName} account is retired`}
           description="It is disabled and is not recreated at the next start, so its minted password can be deleted from the secret store. Sign in as break-glass if you ever lose your own admin."
         />
       )}
