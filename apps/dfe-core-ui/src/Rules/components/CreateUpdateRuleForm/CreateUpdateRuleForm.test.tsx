@@ -139,8 +139,8 @@ describe('CreateUpdateRuleForm name', () => {
       await expectNameRule({
         input: screen.getByLabelText(/^Name/),
         message: RULE_HUNT_NAME_VALIDATOR.message('Name'),
-        accepts: ['brute-force_1', 'A'.repeat(300)],
-        refuses: ['brute.force', 'brute force'],
+        accepts: ['brute-force_1', '-leading', 'A'.repeat(128)],
+        refuses: ['brute.force', '.leading', 'brute force', 'A'.repeat(129)],
       });
     },
   );

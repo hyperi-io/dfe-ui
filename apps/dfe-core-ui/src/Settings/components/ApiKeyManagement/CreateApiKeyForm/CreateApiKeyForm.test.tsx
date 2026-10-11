@@ -26,7 +26,7 @@ describe('CreateApiKeyForm name', () => {
         input: screen.getByLabelText(/^Name/),
         message: STORE_NAME_VALIDATOR.message('Name'),
         accepts: ['ci-deploy.1', 'a'.repeat(128)],
-        refuses: ['-ci', 'ci deploy', 'a'.repeat(129)],
+        refuses: ['-ci', '.ci', 'ci deploy', 'a'.repeat(129)],
       });
     },
   );

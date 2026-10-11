@@ -1,5 +1,8 @@
 import { PopoverMenu } from '@/core/components/PopoverMenu';
+import { formatDateXAgo } from '@/core/helpers/date.helpers';
+import { groupModeLabel } from '@/core/helpers/oidcProviderFieldRules';
 import { DeleteOidcProviderModal } from '@/Settings/components/OidcProviderManagement/DeleteOidcProviderModal';
+import { OidcSyncStatusTag } from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
 import { SyncOidcProviderGroupsDrawer } from '@/Settings/components/OidcProviderManagement/SyncOidcProviderGroupsDrawer';
 import { TestOidcProviderModal } from '@/Settings/components/OidcProviderManagement/TestOidcProviderModal';
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
@@ -54,7 +57,7 @@ export const OidcProviderCard = ({
           <dt className={dataListTermStyle}>Type:</dt>
           <dd>{oidcProvider.type}</dd>
           <dt className={dataListTermStyle}>Mode:</dt>
-          <dd>{oidcProvider.groups.mode}</dd>
+          <dd>{groupModeLabel(oidcProvider.groups.mode)}</dd>
           <dt className={dataListTermStyle}>Enrich on Login:</dt>
           <dd className="flex items-center gap-2">
             {oidcProvider.groups.enrich_on_login ? (
@@ -69,6 +72,17 @@ export const OidcProviderCard = ({
               </>
             )}
           </dd>
+          {oidcProvider.last_sync_status && (
+            <>
+              <dt className={dataListTermStyle}>Last Sync:</dt>
+              <dd className="flex flex-col items-start gap-1">
+                <OidcSyncStatusTag status={oidcProvider.last_sync_status} />
+                <span className={dataListTermStyle}>
+                  {formatDateXAgo(oidcProvider.last_sync_at)}
+                </span>
+              </dd>
+            </>
+          )}
         </dl>
       </div>
     </div>

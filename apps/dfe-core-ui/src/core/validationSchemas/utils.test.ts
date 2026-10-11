@@ -25,12 +25,26 @@ const check = (
   });
 };
 
-describe('STORE_NAME_VALIDATOR (auth/store_names.py VALID_NAME)', () => {
+describe('STORE_NAME_VALIDATOR (openapi.json CreateGroupRequest.name)', () => {
   check(
     STORE_NAME_VALIDATOR,
     ['a', '0', 'google-workspace', 'okta.prod', 'a_b', 'a'.repeat(128)],
     ['', '-a', '.a', '_a', 'a b', 'a/b', 'a'.repeat(129), 'a\n'],
   );
+});
+
+describe('STORE_NAME_VALIDATOR.copyName', () => {
+  test.each([
+    ['soc_analyst', 'soc_analyst_copy'],
+    ['okta.prod-1', 'okta.prod-1_copy'],
+    ['a'.repeat(128), `${'a'.repeat(123)}_copy`],
+    ['soc analyst', 'soc_analyst_copy'],
+    ['-legacy', 'legacy_copy'],
+    ['---', 'copy'],
+  ])('copies %j as %j, a name the rule accepts', (name, copy) => {
+    expect(STORE_NAME_VALIDATOR.copyName(name)).toBe(copy);
+    expect(STORE_NAME_VALIDATOR.regex.test(copy)).toBe(true);
+  });
 });
 
 describe('ORG_NAME_VALIDATOR (orgs/models.py ORG_NAME_PATTERN)', () => {
@@ -41,12 +55,34 @@ describe('ORG_NAME_VALIDATOR (orgs/models.py ORG_NAME_PATTERN)', () => {
   );
 });
 
-describe('RULE_HUNT_NAME_VALIDATOR (api/v1/rules.py, api/v1/hunts.py)', () => {
+describe('RULE_HUNT_NAME_VALIDATOR (openapi.json RuleCreateRequest.name)', () => {
   check(
     RULE_HUNT_NAME_VALIDATOR,
-    ['a', 'Rule1', 'brute-force', 'brute_force', '-leading', '_leading', '1'],
-    ['', 'a.b', 'a b', 'a/b', 'a\n'],
+    [
+      'a',
+      'Rule1',
+      'brute-force',
+      'brute_force',
+      '-leading',
+      '_leading',
+      '1',
+      'a'.repeat(128),
+    ],
+    ['', 'a.b', '.leading', 'a b', 'a/b', 'a\n', 'a'.repeat(129)],
   );
+});
+
+describe('RULE_HUNT_NAME_VALIDATOR.copyName', () => {
+  test.each([
+    ['brute_force', 'brute_force_copy'],
+    ['Brute-Force', 'Brute-Force_copy'],
+    ['a'.repeat(128), `${'a'.repeat(123)}_copy`],
+    ['a'.repeat(124), `${'a'.repeat(123)}_copy`],
+    ['imported.rule', 'imported_rule_copy'],
+  ])('copies %j as %j, a name the rule accepts', (name, copy) => {
+    expect(RULE_HUNT_NAME_VALIDATOR.copyName(name)).toBe(copy);
+    expect(RULE_HUNT_NAME_VALIDATOR.regex.test(copy)).toBe(true);
+  });
 });
 
 describe('GITOPS_NAME_VALIDATOR (gitcrud/commit_policy.py validate_name)', () => {

@@ -1,4 +1,5 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import {
   CreateUpdateRoleForm,
   CreateUpdateRoleFormData,
@@ -61,7 +62,7 @@ export const CloneRoleForm = ({
       buttonLabel="Clone Role"
       initialValues={{
         ...roleFields,
-        name: `${role_name}_copy`,
+        name: STORE_NAME_VALIDATOR.copyName(role_name),
       }}
     />
   );

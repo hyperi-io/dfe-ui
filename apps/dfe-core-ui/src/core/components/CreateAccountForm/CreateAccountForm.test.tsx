@@ -134,7 +134,7 @@ describe('CreateAccountForm username', () => {
         input: screen.getByLabelText(/^Username/),
         message: STORE_NAME_VALIDATOR.message('Username'),
         accepts: ['new-user.1', 'a'.repeat(128)],
-        refuses: ['-user', 'new user', 'a'.repeat(129)],
+        refuses: ['-user', '.user', 'new user', 'a'.repeat(129)],
       });
     },
   );

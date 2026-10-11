@@ -75,6 +75,8 @@ export const CloneRuleModal = ({
     setOpen(true);
   };
 
+  const copyName = RULE_HUNT_NAME_VALIDATOR.copyName(rule.name);
+
   return (
     <>
       <RbacProtected action={RbacProtected.rbacActions.rule_write}>
@@ -138,7 +140,7 @@ export const CloneRuleModal = ({
           form={form}
           onFinish={handleCloneRule}
           initialValues={{
-            name: `${rule.name}_copy`,
+            name: copyName,
             display_name: `Copy: ${rule.display_name ?? rule.name}`,
             user_sql: rule.original_sql,
             severity: rule.severity,
@@ -153,7 +155,7 @@ export const CloneRuleModal = ({
             rules={[formValidation]}
             className="w-full mb-2"
           >
-            <Input placeholder={`${rule.name}_copy`} />
+            <Input placeholder={copyName} />
           </Form.Item>
 
           {error && <FormNotification text={error.message} type="error" />}

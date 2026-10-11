@@ -1,29 +1,48 @@
-/** Role, schema and column names, which the engine does not restrict to this set. */
+/** Schema and column names, which the engine does not restrict to this set. */
 export const DB_NAME_VALIDATOR = {
   regex: /^[a-zA-Z0-9_]+$/,
   message: (fieldName: string = 'Name') =>
     `${fieldName} must contain only letters, numbers, and underscores`,
 };
 
-/** The engine's name rule for every YAML store key (dfe-engine auth/store_names.py VALID_NAME). */
+/** The longest account, group, API key, role, rule or hunt name the engine takes (openapi.json maxLength). */
+export const MAX_NAME_LENGTH = 128;
+
+const COPY_SUFFIX = '_copy';
+
+/** `base` trimmed so `base` plus the copy suffix stays within MAX_NAME_LENGTH. */
+const withCopySuffix = (base: string) =>
+  `${base.slice(0, MAX_NAME_LENGTH - COPY_SUFFIX.length)}${COPY_SUFFIX}`;
+
+/** The engine's account, group, API key, OIDC provider and role name rule (openapi.json CreateGroupRequest.name and siblings). */
 export const STORE_NAME_VALIDATOR = {
-  regex: /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/,
+  regex: new RegExp(`^[a-zA-Z0-9][a-zA-Z0-9._-]{0,${MAX_NAME_LENGTH - 1}}$`),
   message: (fieldName: string = 'Name') =>
-    `${fieldName} must start with a letter or number, contain only letters, numbers, dots, underscores and hyphens, and be at most 128 characters`,
+    `${fieldName} must start with a letter or number, contain only letters, numbers, dots, underscores and hyphens, and be at most ${MAX_NAME_LENGTH} characters`,
+  /** A default name for a copy of `name` that this rule accepts, whatever `name` holds. */
+  copyName: (name: string) => {
+    const base = name
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/^[^a-zA-Z0-9]+/, '');
+    return base ? withCopySuffix(base) : 'copy';
+  },
 };
 
-/** The engine's organisation name rule (dfe-engine orgs/models.py ORG_NAME_PATTERN). */
+/** The engine's organisation name rule (openapi.json CreateOrgRequest.name). */
 export const ORG_NAME_VALIDATOR = {
   regex: /^[A-Za-z0-9][A-Za-z0-9._-]*$/,
   message: (fieldName: string = 'Name') =>
     `${fieldName} must start with a letter or number and contain only letters, numbers, dots, underscores and hyphens`,
 };
 
-/** The engine's rule and hunt name rule (dfe-engine api/v1/rules.py and api/v1/hunts.py). */
+/** The engine's rule and hunt name rule (openapi.json RuleCreateRequest.name and HuntCreateRequest.name). */
 export const RULE_HUNT_NAME_VALIDATOR = {
-  regex: /^[a-zA-Z0-9_-]+$/,
+  regex: new RegExp(`^[A-Za-z0-9_-]{1,${MAX_NAME_LENGTH}}$`),
   message: (fieldName: string = 'Name') =>
-    `${fieldName} must contain only letters, numbers, underscores and hyphens`,
+    `${fieldName} must contain only letters, numbers, underscores and hyphens, and be at most ${MAX_NAME_LENGTH} characters`,
+  /** A default name for a copy of `name` that this rule accepts, whatever `name` holds. */
+  copyName: (name: string) =>
+    withCopySuffix(name.replace(/[^A-Za-z0-9_-]/g, '_')),
 };
 
 /** The engine's gitops resource name rule (dfe-engine gitcrud/commit_policy.py validate_name). */

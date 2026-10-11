@@ -1,5 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -50,6 +51,8 @@ describe('.useSyncOidcProviderGroups', () => {
         total: 1,
         groups_skipped: 0,
         error: null,
+        skipped: null,
+        status: 'ok',
       };
 
       await waitFor(() => {
@@ -67,6 +70,25 @@ describe('.useSyncOidcProviderGroups', () => {
 
       await waitFor(() => {
         expect(onError).not.toHaveBeenCalled();
+      });
+    });
+
+    test('marks the provider list stale, so its last sync status refreshes', async () => {
+      const testWrapper = buildTestWrapper().withReactQuery();
+      const { result } = renderHook(() => useSyncOidcProviderGroups({ name }), {
+        wrapper: testWrapper.wrapper,
+      });
+      const listKey = QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS({
+        per_page: 10,
+      });
+      testWrapper.queryClient?.setQueryData(listKey, { pages: [] });
+
+      result.current.mutate();
+
+      await waitFor(() => {
+        expect(
+          testWrapper.queryClient?.getQueryState(listKey)?.isInvalidated,
+        ).toBe(true);
       });
     });
   });
