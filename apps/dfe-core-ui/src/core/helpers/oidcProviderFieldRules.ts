@@ -147,6 +147,12 @@ export const GROUP_MODE_LABELS: Readonly<Record<TGroupMode, string>> = {
   api: 'API',
 };
 
+/** A stored group mode as the forms name it; a mode the engine adds later shows as written. */
+export const groupModeLabel = (mode: string): string =>
+  Object.hasOwn(GROUP_MODE_LABELS, mode)
+    ? GROUP_MODE_LABELS[mode as TGroupMode]
+    : mode;
+
 const modesLabel = (type: TOidcProviderType) =>
   GROUP_MODES_BY_TYPE[type].map((mode) => GROUP_MODE_LABELS[mode]).join(', ');
 

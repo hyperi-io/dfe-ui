@@ -290,6 +290,69 @@ export const oidcProviders = {
   },
   syncGroups: {
     mockedUrl: '/api/v1/auth/oidc-providers/{name}/sync',
+    /** One result per status, shaped as the engine's sync_provider returns it. */
+    results: {
+      ok: {
+        created: 3,
+        updated: 2,
+        total: 5,
+        groups_skipped: 0,
+        error: null,
+        skipped: null,
+        status: 'ok',
+      },
+      partial: {
+        created: 3,
+        updated: 1,
+        total: 4,
+        groups_skipped: 2,
+        error: null,
+        skipped: null,
+        status: 'partial',
+      },
+      error: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error:
+          'The directory API could not use the configured credential: check it is current and valid; the engine log has the reason',
+        skipped: null,
+        status: 'error',
+      },
+      not_configured: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped:
+          'The directory credential is not configured, so no groups were synced; configure it on the provider and sync again',
+        status: 'not_configured',
+      },
+      user_token: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped:
+          "Each login reads that user's groups with their own token, so there is no directory to sync",
+        status: 'user_token',
+      },
+      skipped: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped: 'disabled',
+        status: 'skipped',
+      },
+    } satisfies Record<
+      TSyncOidcProviderGroupsResponse['status'],
+      TSyncOidcProviderGroupsResponse
+    >,
     post: {
       success: ({
         mockedResponse = {
@@ -298,6 +361,8 @@ export const oidcProviders = {
           total: 1,
           groups_skipped: 0,
           error: null,
+          skipped: null,
+          status: 'ok',
         },
         name = 'name',
       }: {

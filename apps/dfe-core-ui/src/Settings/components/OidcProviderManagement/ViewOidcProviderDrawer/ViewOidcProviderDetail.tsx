@@ -4,6 +4,7 @@ import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
+import { groupModeLabel } from '@/core/helpers/oidcProviderFieldRules';
 import { cn } from '@/core/utils/style';
 import {
   OidcSyncStatusTag,
@@ -103,7 +104,7 @@ export const ViewOidcProviderDetail = ({
       >
         <dl className={dataListGridStyle}>
           <dt className={dataListTermStyle}>Mode:</dt>
-          <dd>{oidcProvider?.groups?.mode}</dd>
+          <dd>{groupModeLabel(oidcProvider?.groups?.mode ?? '')}</dd>
           {oidcProvider?.groups?.claim_name && (
             <>
               <dt className={dataListTermStyle}>Claim Name:</dt>
