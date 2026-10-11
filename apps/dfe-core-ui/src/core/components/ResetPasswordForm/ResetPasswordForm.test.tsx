@@ -1,5 +1,6 @@
 import { ApiError } from '@/core/config/api/client';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { PASSWORD_CEILING_MESSAGE } from '@/core/validationSchemas/password.schema';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
@@ -8,6 +9,8 @@ import { ResetPasswordForm } from '.';
 const { wrapper } = buildTestWrapper().withTheme();
 
 const FLOOR_MESSAGE = 'Password must contain at least 12 characters';
+// 72 characters and 73 bytes: the accented letter takes two.
+const SEVENTY_THREE_BYTES = `${'a'.repeat(71)}${String.fromCodePoint(0xe9)}`;
 
 describe('ResetPasswordForm', () => {
   test('refuses an 11-character password without submitting', async () => {
@@ -20,6 +23,26 @@ describe('ResetPasswordForm', () => {
     await user.click(screen.getByRole('button', { name: 'Reset Password' }));
 
     expect(await screen.findAllByText(FLOOR_MESSAGE)).toHaveLength(2);
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  test('refuses a 73-byte password without submitting, and describes why on the field', async () => {
+    const onFinish = vi.fn();
+    const user = userEvent.setup();
+    render(<ResetPasswordForm onFinish={onFinish} />, { wrapper });
+
+    const newPassword = screen.getByLabelText('New Password');
+    await user.click(newPassword);
+    await user.paste(SEVENTY_THREE_BYTES);
+    await user.click(screen.getByLabelText('Confirm Password'));
+    await user.paste(SEVENTY_THREE_BYTES);
+    await user.click(screen.getByRole('button', { name: 'Reset Password' }));
+
+    expect(await screen.findAllByText(PASSWORD_CEILING_MESSAGE)).toHaveLength(
+      2,
+    );
+    expect(newPassword).toHaveAttribute('aria-invalid', 'true');
+    expect(newPassword).toHaveAccessibleDescription(PASSWORD_CEILING_MESSAGE);
     expect(onFinish).not.toHaveBeenCalled();
   });
 
