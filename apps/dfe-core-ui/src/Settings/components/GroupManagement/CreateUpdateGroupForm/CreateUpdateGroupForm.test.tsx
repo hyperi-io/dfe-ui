@@ -40,7 +40,7 @@ describe('CreateUpdateGroupForm name', () => {
         input: screen.getByPlaceholderText('Enter name'),
         message: STORE_NAME_VALIDATOR.message('Name'),
         accepts: ['okta.prod-1', 'a'.repeat(128)],
-        refuses: ['-soc', 'soc analysts', 'a'.repeat(129)],
+        refuses: ['-soc', '.soc', 'soc analysts', 'a'.repeat(129)],
       });
     },
   );

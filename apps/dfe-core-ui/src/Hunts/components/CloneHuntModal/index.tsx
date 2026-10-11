@@ -74,6 +74,8 @@ export const CloneHuntModal = ({
     setOpen(true);
   };
 
+  const copyName = RULE_HUNT_NAME_VALIDATOR.copyName(hunt.name);
+
   return (
     <>
       <RbacProtected action={RbacProtected.rbacActions.rule_write}>
@@ -137,7 +139,7 @@ export const CloneHuntModal = ({
           form={form}
           onFinish={handleCloneHunt}
           initialValues={{
-            name: `${hunt.name}_copy`,
+            name: copyName,
             display_name: `Copy: ${hunt.display_name ?? hunt.name}`,
             cron: hunt.cron,
             log_buffer: hunt.log_buffer,
@@ -153,7 +155,7 @@ export const CloneHuntModal = ({
             rules={[formValidation]}
             className="w-full mb-2"
           >
-            <Input placeholder={`${hunt.name}_copy`} />
+            <Input placeholder={copyName} />
           </Form.Item>
           <Form.Item
             name="display_name"

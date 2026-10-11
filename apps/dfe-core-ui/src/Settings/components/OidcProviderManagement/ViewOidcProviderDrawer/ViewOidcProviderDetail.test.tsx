@@ -206,12 +206,25 @@ const REFUSED_MESSAGE =
 
 describe('ViewOidcProviderDetail sync status', () => {
   test.each([
-    { status: 'ok', label: 'OK', syncError: '', message: undefined },
+    {
+      status: 'ok',
+      label: 'OK',
+      syncError: '',
+      message: 'Every directory group synced.',
+    },
     {
       status: 'not_configured',
       label: 'Not configured',
       syncError: NOT_CONFIGURED_MESSAGE,
-      message: NOT_CONFIGURED_MESSAGE,
+      message:
+        'The provider has no directory credential. Edit the provider to add one, then sync again.',
+    },
+    {
+      status: 'user_token',
+      label: 'Read at login',
+      syncError: '',
+      message:
+        "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
     },
     {
       status: 'error',
@@ -220,7 +233,7 @@ describe('ViewOidcProviderDetail sync status', () => {
       message: REFUSED_MESSAGE,
     },
   ])(
-    'a $status sync reads $label, with the engine message when it sent one',
+    'a $status sync reads $label, with what happened under it',
     ({ status, label, syncError, message }) => {
       const rows = renderRows({
         ...OKTA,
@@ -253,14 +266,38 @@ describe('ViewOidcProviderDetail sync status', () => {
     ]);
   });
 
-  test('a status the engine adds later shows as written', () => {
+  test('sync_error reads only for a failed sync', () => {
+    renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'not_configured',
+      sync_error: NOT_CONFIGURED_MESSAGE,
+    });
+
+    expect(screen.queryByText(NOT_CONFIGURED_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  test('a failed sync with no engine message still says it failed', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'error',
+      sync_error: '',
+    });
+
+    expect(rows).toContainEqual(['Sync Message:', 'No groups changed.']);
+  });
+
+  test('a status the engine adds later shows as written, with no message', () => {
     const rows = renderRows({
       ...OKTA,
       last_sync_at: SYNCED_AT,
       last_sync_status: 'throttled',
+      sync_error: 'rate limited',
     });
 
     expect(rows).toContainEqual(['Last Sync:', `throttled${SYNCED_AT_LABEL}`]);
+    expect(rows.map(([term]) => term)).not.toContain('Sync Message:');
   });
 
   test('a provider that has never synced shows no sync row', () => {
@@ -275,11 +312,11 @@ describe('ViewOidcProviderDetail sync status', () => {
     renderRows({
       ...OKTA,
       last_sync_at: SYNCED_AT,
-      last_sync_status: 'not_configured',
-      sync_error: NOT_CONFIGURED_MESSAGE,
+      last_sync_status: 'error',
+      sync_error: REFUSED_MESSAGE,
     });
 
-    expect(screen.getByText('Not configured')).toBeVisible();
-    expect(screen.getByText(NOT_CONFIGURED_MESSAGE)).toBeVisible();
+    expect(screen.getByText('Failed')).toBeVisible();
+    expect(screen.getByText(REFUSED_MESSAGE)).toBeVisible();
   });
 });
