@@ -11262,7 +11262,7 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
@@ -15117,7 +15117,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
