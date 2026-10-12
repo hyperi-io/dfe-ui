@@ -11,7 +11,7 @@ export const ClickawayModal = ({
   onOk: () => void;
   onCancel: () => void;
   title?: string;
-  message?: string;
+  message?: React.ReactNode | string;
   confirmLabel?: string;
   cancelLabel?: string;
 }) => {

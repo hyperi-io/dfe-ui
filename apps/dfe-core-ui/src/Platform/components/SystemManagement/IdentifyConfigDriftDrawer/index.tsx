@@ -1,4 +1,5 @@
 import { Drawer } from '@/core/components/Drawer';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IdentifyConfigDriftTabs } from '@/Platform/components/SystemManagement//IdentifyConfigDriftTabs';
 import { IconScan } from '@repo/dfe-icons';
@@ -52,7 +53,15 @@ export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
                 enabled: true,
                 explicit: true,
                 title: 'Pending deploys',
-                message: pendingDeployWarning(pendingDeployCount),
+                message: (
+                  <div className="flex flex-col gap-2">
+                    <p>{pendingDeployWarning(pendingDeployCount)}</p>
+                    <NotificationCard
+                      description="If you close this drawer you will need to manually redeploy each affected source from the sources view."
+                      type="warning"
+                    />
+                  </div>
+                ),
                 confirmLabel: 'Close',
                 cancelLabel: 'Keep open',
               }

@@ -13,7 +13,7 @@ interface DrawerProps extends AntdDrawerProps {
   title: React.ReactNode | string;
   preventClickaway?: {
     title?: string;
-    message?: string;
+    message?: React.ReactNode | string;
     enabled?: boolean;
     // Close only from the warning's confirm action. The X, mask, and Escape
     // open the warning and do not close the drawer on their own.
