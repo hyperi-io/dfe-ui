@@ -16,7 +16,10 @@ export const ClickawayModal = ({
   cancelLabel?: string;
 }) => {
   return (
-    <div className="cursor-not-allowed pointer-events-none bg-black/30 dark:bg-black/60 fixed h-full w-full top-0 left-0 right-0 bottom-0 z-10000 flex items-center justify-center">
+    <div
+      className="cursor-not-allowed pointer-events-none bg-black/30 dark:bg-black/60 fixed h-full w-full top-0 left-0 right-0 bottom-0 flex items-center justify-center"
+      style={{ zIndex: 2000 }}
+    >
       <Card
         data-clickaway-card
         className="pointer-events-auto"

@@ -5,6 +5,7 @@ import {
   type DrawerProps as AntdDrawerProps,
 } from 'antd';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ClickawayModal } from './ClickawayModal';
 
 interface DrawerProps extends AntdDrawerProps {
@@ -83,7 +84,9 @@ export const Drawer = ({
   };
 
   useEffect(() => {
-    if (!isConfirmOpen) {
+    // Explicit close is only the warning's confirm action. A click on the
+    // drawer, including the header close control, must not dismiss it.
+    if (!isConfirmOpen || preventClickaway.explicit) {
       return;
     }
 
@@ -109,7 +112,7 @@ export const Drawer = ({
       window.clearTimeout(timeoutId);
       document.removeEventListener('click', onDocumentClick);
     };
-  }, [isConfirmOpen]);
+  }, [isConfirmOpen, preventClickaway.explicit]);
 
   return (
     <>
@@ -140,16 +143,18 @@ export const Drawer = ({
         footer={null}
       >
         {children}
-        {isConfirmOpen && (
-          <ClickawayModal
-            onOk={closeDrawer}
-            onCancel={closeConfirm}
-            title={preventClickaway.title}
-            message={preventClickaway.message}
-            confirmLabel={preventClickaway.confirmLabel}
-            cancelLabel={preventClickaway.cancelLabel}
-          />
-        )}
+        {isConfirmOpen &&
+          createPortal(
+            <ClickawayModal
+              onOk={closeDrawer}
+              onCancel={closeConfirm}
+              title={preventClickaway.title}
+              message={preventClickaway.message}
+              confirmLabel={preventClickaway.confirmLabel}
+              cancelLabel={preventClickaway.cancelLabel}
+            />,
+            document.body,
+          )}
       </AntdDrawer>
     </>
   );
