@@ -1,10 +1,8 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
-import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useApplyDefaults } from '@/Platform/hooks/system/useApplyDefaults';
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
-import { useFetchInfiniteDefaultsDriftSources } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources';
 import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { Button, Tag } from 'antd';
 import { useState } from 'react';
@@ -36,15 +34,13 @@ const DriftTag = ({
 
 export const ConfigDriftTab = ({
   onSuccess,
+  defaultsDriftSources,
 }: {
   onSuccess?: (response: TApplyDefaultsResponse) => void;
+  defaultsDriftSources: TDefaultsDriftSourceItem[];
 }) => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
-  const {
-    data: { items: defaultsDriftSources } = {},
-    isLoading,
-    error,
-  } = useFetchInfiniteDefaultsDriftSources();
+
   const {
     mutate: applyDefaults,
     isPending,
@@ -131,17 +127,12 @@ export const ConfigDriftTab = ({
     },
   ];
 
-  if (error) {
-    return <NotificationCard type="error" title={error.message} />;
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <ApiErrorNotification error={applyError} />
       <Table<TDefaultsDriftSourceItem>
         rowKey="source"
         dataSource={defaultsDriftSources}
-        loading={isLoading}
         columns={columns}
         rowSelection={{
           selectedRowKeys: selectedSources,

@@ -48,7 +48,9 @@ export const BuildDeployTab = ({
   ];
   return (
     <div className="flex flex-col gap-4">
-      <NotificationCard title={appliedSuccessMessage} type="success" />
+      {appliedSuccessMessage && (
+        <NotificationCard title={appliedSuccessMessage} type="success" />
+      )}
       <Table<TBulkActionSourcesRequestBody['sources'][number]>
         rowKey="source"
         dataSource={appliedSources}
