@@ -191,10 +191,12 @@ const apiModeProblems = (
     }
     case 'entra_id': {
       const problems: TFieldProblem[] = [];
+      // The forms read the tenant from the issuer, so the message names the issuer.
       if (!groups.tenant_id && !groups.tenant_id_env) {
         problems.push({
           path: ['groups', 'tenant_id'],
-          message: 'Enter a tenant ID or its environment variable',
+          message:
+            'The issuer must name a specific tenant, not common, organizations or consumers',
         });
       }
       const hasDirectorySecret =

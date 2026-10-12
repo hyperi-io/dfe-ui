@@ -238,15 +238,12 @@ describe('oidcProviders.helpers', () => {
     test.each([
       ['an env var', { tenant_id: '', tenant_id_env: 'ENTRA_TENANT' }],
       ['a value', { tenant_id: 'tid', tenant_id_env: '' }],
+      ['both', { tenant_id: 'tid', tenant_id_env: 'ENTRA_TENANT' }],
     ])(
-      'a tenant stored as %s is sent back as stored when the form shows it',
+      'a tenant stored as %s is sent back as the form carries it',
       (_source, tenant) => {
-        const shown = tenant.tenant_id_env
-          ? { tenant_id_env: tenant.tenant_id_env }
-          : { tenant_id: tenant.tenant_id };
-
         const body = toUpdateOidcProviderBody(
-          { groups: { mode: 'api', ...shown } },
+          { groups: { mode: 'api', ...tenant } },
           { ...stored, groups: { ...stored.groups, ...tenant } },
         );
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { Form } from '@/core/components/Form';
+import { ruleCheckingField } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select, Space, type FormItemProps, type FormRule } from 'antd';
 import { useId, useState } from 'react';
 
@@ -17,24 +18,6 @@ const STORED_SECRET_HINT = 'Secret stored - leave blank to keep it';
 
 const isFilled = (value: unknown) => typeof value === 'string' && value !== '';
 
-const toFieldName = (name: TNamePath) =>
-  (Array.isArray(name) ? name : [name]).join('.');
-
-/** `rule` run as the check of `name`, so the shown member also reports an error the rules pin to the member that is not mounted. */
-const ruleFor =
-  (rule: FormRule, name: TNamePath): FormRule =>
-  (form) => {
-    const resolved = typeof rule === 'function' ? rule(form) : rule;
-    const { validator } = resolved;
-    const field = toFieldName(name);
-    return validator
-      ? {
-          validator: (checked, value, callback) =>
-            validator(Object.assign({}, checked, { field }), value, callback),
-        }
-      : {};
-  };
-
 interface CredentialFieldProps {
   label: string;
   /** The form field holding the credential itself. */
@@ -49,7 +32,6 @@ interface CredentialFieldProps {
   secret?: boolean;
   /** The stored secret's path, non-empty when a blank value keeps it. */
   storedName?: TNamePath;
-  tooltip?: FormItemProps['tooltip'];
 }
 
 /** A credential set as a value or as the name of the env var holding it; only the selected member is a mounted form field, so a submit carries that member alone. */
@@ -60,7 +42,6 @@ export const CredentialField = ({
   rule,
   secret = false,
   storedName,
-  tooltip,
   valueName,
 }: CredentialFieldProps) => {
   const form = Form.useFormInstance();
@@ -75,10 +56,11 @@ export const CredentialField = ({
       : 'value',
   );
   const inputId = `${id}-${source}`;
-  const rules = (hidden: TNamePath) => [rule, ruleFor(rule, hidden)];
+  // The shown member also reports an error the rules pin to the member that is not mounted.
+  const rules = (hidden: TNamePath) => [rule, ruleCheckingField(rule, hidden)];
 
   return (
-    <Form.Item label={label} htmlFor={inputId} tooltip={tooltip}>
+    <Form.Item label={label} htmlFor={inputId}>
       <Space.Compact block>
         <Select
           id={`${id}-source`}

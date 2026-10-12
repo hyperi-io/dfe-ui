@@ -1,4 +1,5 @@
 import { Form } from '@/core/components/Form';
+import { GROUPS_FORM_NAME } from '@/core/constants/oidcProviders.constants';
 import {
   buildEntraIssuer,
   buildOktaIssuer,
@@ -8,10 +9,13 @@ import {
   TIssuerMode,
   TOktaIssuerParts,
 } from '@/core/helpers/oidcIssuer';
+import { ruleCheckingField } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select, Space, type FormInstance, type FormRule } from 'antd';
 import { useId, useState } from 'react';
 
 type TGuidedType = 'okta' | 'entra_id';
+
+const TENANT_ID_NAME = [GROUPS_FORM_NAME, 'tenant_id'];
 
 const FULL_URL_PLACEHOLDERS: Record<TGuidedType, string> = {
   entra_id:
@@ -131,6 +135,11 @@ export const IssuerField = ({
   const type: unknown =
     Form.useWatch('type', form) ?? form.getFieldValue('type');
   const issuer: unknown = Form.useWatch('issuer', form);
+  // The Entra ID groups tenant is read from the issuer, so the issuer row says when it names none.
+  const rules =
+    type === 'entra_id'
+      ? [rule, ruleCheckingField(rule, TENANT_ID_NAME)]
+      : [rule];
 
   if (disabled || !isGuidedType(type)) {
     return (
@@ -138,7 +147,7 @@ export const IssuerField = ({
         className="col-span-2"
         label="Issuer"
         name="issuer"
-        rules={[rule]}
+        rules={rules}
       >
         <Input disabled={disabled || type === 'google'} />
       </Form.Item>
@@ -174,13 +183,13 @@ export const IssuerField = ({
         {guided ? (
           <GuidedIssuerInput builder={builder} id={inputId} type={type} />
         ) : (
-          <Form.Item name="issuer" noStyle rules={[rule]}>
+          <Form.Item name="issuer" noStyle rules={rules}>
             <Input id={inputId} placeholder={FULL_URL_PLACEHOLDERS[type]} />
           </Form.Item>
         )}
       </Space.Compact>
       {guided && (
-        <Form.Item name="issuer" noStyle rules={[rule]}>
+        <Form.Item name="issuer" noStyle rules={rules}>
           <BuiltIssuer />
         </Form.Item>
       )}

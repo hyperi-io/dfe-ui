@@ -22,14 +22,16 @@ const GOOGLE_SERVICE_ACCOUNT_FIELDS = ['Domain', 'Service Account JSON'];
 
 const PROVIDER_GROUP_FIELDS: [TType, TMode, string[]][] = [
   ['google', 'api', GOOGLE_SERVICE_ACCOUNT_FIELDS],
-  ['entra_id', 'api', ['Tenant ID', 'Directory Secret']],
+  ['entra_id', 'api', ['Directory Secret']],
   ['okta', 'api', ['Okta Domain', 'API Token']],
   ['generic', 'token_claim', []],
 ];
 
-const ALL_PROVIDER_GROUP_FIELDS = PROVIDER_GROUP_FIELDS.flatMap(
-  ([, , fields]) => fields,
-);
+const ALL_PROVIDER_GROUP_FIELDS = [
+  ...PROVIDER_GROUP_FIELDS.flatMap(([, , fields]) => fields),
+  // The Entra ID groups tenant is read from the issuer and never shown.
+  'Tenant ID',
+];
 
 const OidcForm = ({
   type,
@@ -139,7 +141,6 @@ describe('ConfigureOIDCForm', () => {
     ['google', 'api', 'Client ID'],
     ['google', 'api', 'Client Secret'],
     ['google', 'api', 'Service Account JSON'],
-    ['entra_id', 'api', 'Tenant ID'],
     ['entra_id', 'api', 'Directory Secret'],
     ['okta', 'api', 'API Token'],
   ] as const)(
@@ -217,7 +218,9 @@ describe('ConfigureOIDCForm', () => {
     expect(screen.queryByLabelText('Issuer mode')).not.toBeInTheDocument();
   });
 
-  test('an existing Entra ID provider keeps its stored tenant', () => {
+  test('an existing Entra ID provider submits its stored tenant untouched', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
     render(
       <OidcForm
         type="entra_id"
@@ -229,11 +232,42 @@ describe('ConfigureOIDCForm', () => {
           },
         }}
         disabledFields={{ name: true, type: true, issuer: true }}
+        onFinish={onFinish}
       />,
       { wrapper },
     );
 
-    expect(screen.getByLabelText('Tenant ID')).toHaveValue('ENTRA_TENANT_ID');
+    expect(screen.queryByLabelText('Tenant ID')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+
+    await waitFor(() =>
+      expect(onFinish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          groups: expect.objectContaining({
+            tenant_id: '',
+            tenant_id_env: 'ENTRA_TENANT_ID',
+          }),
+        }),
+      ),
+    );
+  });
+
+  test('a new Entra ID provider whose guided issuer names no tenant says so on the Tenant ID input', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<OidcForm type="entra_id" onFinish={onFinish} />, { wrapper });
+
+    await fillField(user, 'Directory (Tenant) ID', 'organizations');
+    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+
+    expect(screen.getByLabelText('Issuer')).toBe(
+      screen.getByLabelText('Directory (Tenant) ID'),
+    );
+    await expectFieldError(
+      'Issuer',
+      'The issuer must name a specific tenant, not common, organizations or consumers',
+    );
+    expect(onFinish).not.toHaveBeenCalled();
   });
 
   test('a provider name with a hyphen is accepted, as the engine accepts it', async () => {

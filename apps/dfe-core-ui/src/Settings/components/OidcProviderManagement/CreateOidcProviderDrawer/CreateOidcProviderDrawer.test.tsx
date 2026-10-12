@@ -160,7 +160,7 @@ describe(
       expect(body).not.toHaveProperty('client_secret_env');
     });
 
-    test('the Entra tenant and directory secret are sent from their sources', async () => {
+    test('the Entra tenant comes from the issuer and the directory secret from its source', async () => {
       const user = await openCreateDrawer();
 
       await chooseType(user, 'Entra ID');
@@ -171,9 +171,9 @@ describe(
       const body = await submitAndReadBody(user);
       expect(body.groups).toMatchObject({
         tenant_id: 'tenant-guid',
+        tenant_id_env: '',
         client_secret_env: 'ENTRA_DIRECTORY_SECRET',
       });
-      expect(body.groups).not.toHaveProperty('tenant_id_env');
       expect(body.groups).not.toHaveProperty('client_secret');
     });
 

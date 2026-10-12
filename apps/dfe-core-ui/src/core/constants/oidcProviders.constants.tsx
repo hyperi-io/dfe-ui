@@ -103,7 +103,4 @@ export const ENTRA_API_SECRET_HINT =
 export const ENTRA_TOKEN_CLAIM_HINT =
   'Optional. Read only when a user is in too many groups for the token to list them.';
 
-export const FROM_ISSUER_HINT =
-  'Filled in from the Issuer. Change it only if your provider uses a different value.';
-
 export const SCOPES_PLACEHOLDER = 'Provider type default';

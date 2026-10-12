@@ -471,14 +471,10 @@ describe(
       ]);
     });
 
-    test('Entra ID group edits reach the PUT body', async () => {
+    test('Entra ID group edits reach the PUT body with the stored tenant untouched', async () => {
       const user = await openEditDrawer(ENTRA_ID);
 
-      await retype(
-        user,
-        screen.getByLabelText('Tenant ID'),
-        'ENTRA_DIRECTORY_TENANT',
-      );
+      expect(screen.queryByLabelText('Tenant ID')).not.toBeInTheDocument();
       await chooseCredentialSource(user, 'Directory Secret', 'Env Var');
       await retype(
         user,
@@ -489,9 +485,22 @@ describe(
       const body = await submitAndReadBody(user);
       expect(body.groups).toEqual({
         ...groupsRequest(ENTRA_ID.groups),
-        tenant_id: '',
-        tenant_id_env: 'ENTRA_DIRECTORY_TENANT',
         client_secret_env: 'ENTRA_DIRECTORY_SECRET',
+      });
+    });
+
+    test('an Entra ID provider that stored no tenant takes the issuer tenant when it moves to API mode', async () => {
+      const user = await openEditDrawer({
+        ...ENTRA_ID,
+        groups: { ...ENTRA_ID.groups, mode: 'manual', tenant_id_env: '' },
+      });
+
+      await chooseGroupMode(user, 'API');
+
+      expect((await submitAndReadBody(user)).groups).toMatchObject({
+        mode: 'api',
+        tenant_id: 'tenant',
+        tenant_id_env: '',
       });
     });
 

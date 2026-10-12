@@ -8,7 +8,6 @@ import {
 import {
   ENTRA_API_SECRET_HINT,
   ENTRA_TOKEN_CLAIM_HINT,
-  FROM_ISSUER_HINT,
   GOOGLE_SERVICE_ACCOUNT_HINT,
   GROUPS_FORM_NAME,
   groupModeOptions,
@@ -44,6 +43,7 @@ const groupsField = (field: string) => [GROUPS_FORM_NAME, field];
 const ENRICH_ON_LOGIN_NAME = groupsField('enrich_on_login');
 const OKTA_DOMAIN_NAME = groupsField('okta_domain');
 const TENANT_ID_NAME = groupsField('tenant_id');
+const TENANT_ID_ENV_NAME = groupsField('tenant_id_env');
 
 const FieldHint = ({ children }: { children: ReactNode }) => (
   <p className="col-span-2 m-0 text-sm text-foreground/50 dark:text-dark-foreground/50">
@@ -51,15 +51,17 @@ const FieldHint = ({ children }: { children: ReactNode }) => (
   </p>
 );
 
-/** Keeps the field `name` set to what `derive` reads from the issuer, until the user types a different value. */
+/** Keeps the field `name` set to what `derive` reads from the issuer, until it holds a value this did not fill or the field `unlessSet` holds one. */
 const useFieldFromIssuer = ({
   derive,
   enabled,
   name,
+  unlessSet,
 }: {
   derive: ({ issuer }: { issuer: string }) => string;
   enabled: boolean;
   name: string[];
+  unlessSet?: string[];
 }) => {
   const form = Form.useFormInstance();
   const issuer: unknown = Form.useWatch('issuer', form);
@@ -71,11 +73,13 @@ const useFieldFromIssuer = ({
     }
     const value = derive({ issuer });
     const current: unknown = form.getFieldValue(name);
-    if (!current || current === filled.current) {
+    const isSetElsewhere =
+      unlessSet !== undefined && !!form.getFieldValue(unlessSet);
+    if (!isSetElsewhere && (!current || current === filled.current)) {
       form.setFieldValue(name, value);
     }
     filled.current = value;
-  }, [derive, enabled, form, issuer, name]);
+  }, [derive, enabled, form, issuer, name, unlessSet]);
 };
 
 /** The Type change both provider forms make: presets fill what the user has not typed, and the guided issuer follows the new type. */
@@ -152,7 +156,7 @@ export const OidcLoginFields = ({
 
 interface OidcGroupFieldsProps {
   rule: FormRule;
-  /** Fills the Okta Domain and the Entra ID tenant from the issuer, for a new provider only: an edit keeps what is stored. */
+  /** Fills the Okta Domain from the issuer, for a new provider only: an edit keeps what is stored. */
   derivesFromIssuer?: boolean;
 }
 
@@ -185,10 +189,12 @@ export const OidcGroupFields = ({
     enabled: derivesFromIssuer && providerType === 'okta',
     name: OKTA_DOMAIN_NAME,
   });
+  // A provider that stores no tenant, new or edited, takes the one its issuer names; a stored one is left alone.
   useFieldFromIssuer({
     derive: entraTenantFromIssuer,
-    enabled: derivesFromIssuer && providerType === 'entra_id',
+    enabled: providerType === 'entra_id',
     name: TENANT_ID_NAME,
+    unlessSet: TENANT_ID_ENV_NAME,
   });
 
   // The engine stores its own value when the type and mode leave no choice, so the switch shows that value.
@@ -204,7 +210,6 @@ export const OidcGroupFields = ({
   const uses = (field: Parameters<typeof isDirectoryFieldUsed>[0]) =>
     isDirectoryFieldUsed(field, providerType, mode);
   const modeOptions = groupModeOptions(providerType);
-  const fromIssuerHint = derivesFromIssuer ? FROM_ISSUER_HINT : undefined;
 
   return (
     <>
@@ -237,7 +242,6 @@ export const OidcGroupFields = ({
           label="Okta Domain"
           name={OKTA_DOMAIN_NAME}
           rules={[rule]}
-          tooltip={fromIssuerHint}
           required
         >
           <Input />
@@ -259,13 +263,13 @@ export const OidcGroupFields = ({
           {mode === 'token_claim' && (
             <FieldHint>{ENTRA_TOKEN_CLAIM_HINT}</FieldHint>
           )}
-          <CredentialField
-            label="Tenant ID"
-            valueName={TENANT_ID_NAME}
-            envName={groupsField('tenant_id_env')}
-            rule={rule}
-            tooltip={fromIssuerHint}
-          />
+          {/* Read from the issuer, never typed; errors show on the Issuer row. */}
+          <Form.Item name={TENANT_ID_NAME} hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item name={TENANT_ID_ENV_NAME} hidden>
+            <Input />
+          </Form.Item>
         </>
       )}
 

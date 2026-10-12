@@ -118,13 +118,6 @@ const toGroupsRequest = (
     Pick<TGroupResolutionFormData, 'mode'>,
   stored: NonNullable<TStoredOidcProvider['groups']>,
 ): TGroupsRequest => {
-  const tenantId = toCredential({
-    envKey: 'tenant_id_env',
-    secret: false,
-    stored: { value: stored.tenant_id, env: stored.tenant_id_env },
-    submitted: form,
-    valueKey: 'tenant_id',
-  });
   const directorySecret = toCredential({
     envKey: 'client_secret_env',
     secret: true,
@@ -154,8 +147,9 @@ const toGroupsRequest = (
     enrich_on_login: form.enrich_on_login ?? stored.enrich_on_login,
     domain: form.domain ?? stored.domain,
     okta_domain: form.okta_domain ?? stored.okta_domain,
-    tenant_id: tenantId.value,
-    tenant_id_env: tenantId.env,
+    // The forms read the tenant from the issuer and carry a stored env var through untouched.
+    tenant_id: form.tenant_id ?? stored.tenant_id,
+    tenant_id_env: form.tenant_id_env ?? stored.tenant_id_env,
     client_secret: directorySecret.value,
     client_secret_env: directorySecret.env,
     api_token: apiToken.value,

@@ -29,8 +29,8 @@ type TMode = 'manual' | 'token_claim' | 'api';
 // Every type- or mode-specific group field label, by the type and mode that show it.
 const GROUP_FIELDS: [TType, TMode, string[]][] = [
   ['google', 'api', ['Sync Interval', 'Service Account JSON', 'Domain']],
-  ['entra_id', 'api', ['Sync Interval', 'Tenant ID', 'Directory Secret']],
-  ['entra_id', 'token_claim', ['Claim Name', 'Tenant ID', 'Directory Secret']],
+  ['entra_id', 'api', ['Sync Interval', 'Directory Secret']],
+  ['entra_id', 'token_claim', ['Claim Name', 'Directory Secret']],
   ['entra_id', 'manual', []],
   ['okta', 'api', ['Okta Domain', 'Sync Interval', 'API Token']],
   ['okta', 'token_claim', ['Claim Name']],
@@ -41,7 +41,12 @@ const GROUP_FIELDS: [TType, TMode, string[]][] = [
 
 const ALL_GROUP_FIELDS = [
   ...new Set(GROUP_FIELDS.flatMap(([, , fields]) => fields)),
+  // The Entra ID groups tenant is read from the issuer and never shown.
+  'Tenant ID',
 ];
+
+const TENANT_FROM_ISSUER =
+  'The issuer must name a specific tenant, not common, organizations or consumers';
 
 const ENTRA_ISSUER = 'https://login.microsoftonline.com/issuer-tenant/v2.0';
 
@@ -409,6 +414,44 @@ describe(
       expect(onFinish).not.toHaveBeenCalled();
     });
 
+    test('a guided Entra ID issuer that names no tenant says so on the Tenant ID input', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      renderForm('entra_id', 'api', onFinish);
+
+      await fillField(user, 'Directory (Tenant) ID', 'common');
+      await user.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(screen.getByLabelText('Issuer')).toBe(
+        screen.getByLabelText('Directory (Tenant) ID'),
+      );
+      await expectFieldError('Issuer', TENANT_FROM_ISSUER);
+      expect(onFinish).not.toHaveBeenCalled();
+    });
+
+    test.each(['common', 'organizations', 'consumers'])(
+      'a full Entra ID issuer URL for %s fills in no tenant and says so on the URL input',
+      async (alias) => {
+        const user = userEvent.setup();
+        const onFinish = vi.fn();
+        renderForm('entra_id', 'api', onFinish);
+
+        await chooseOption(user, 'Issuer mode', 'Full URL');
+        await fillField(
+          user,
+          'Issuer',
+          `https://login.microsoftonline.com/${alias}/v2.0`,
+        );
+        await user.click(screen.getByRole('button', { name: 'Create' }));
+
+        expect(screen.getByLabelText('Issuer')).toHaveValue(
+          `https://login.microsoftonline.com/${alias}/v2.0`,
+        );
+        await expectFieldError('Issuer', TENANT_FROM_ISSUER);
+        expect(onFinish).not.toHaveBeenCalled();
+      },
+    );
+
     test.each<{
       label: string;
       message: string;
@@ -438,12 +481,6 @@ describe(
           await chooseCredentialSource(user, 'Service Account JSON', 'Env Var');
           await fillField(user, 'Service Account JSON', 'not a variable name');
         },
-      },
-      {
-        label: 'Tenant ID',
-        type: 'entra_id',
-        message: 'Enter a tenant ID or its environment variable',
-        setUp: (user) => chooseCredentialSource(user, 'Tenant ID', 'Env Var'),
       },
       {
         label: 'Directory Secret',
@@ -542,23 +579,6 @@ describe(
       },
     );
 
-    test.each(['common', 'organizations', 'consumers'])(
-      'an Entra ID issuer for the %s alias fills in no tenant',
-      async (alias) => {
-        const user = userEvent.setup();
-        renderForm('entra_id');
-
-        await chooseOption(user, 'Issuer mode', 'Full URL');
-        await fillField(
-          user,
-          'Issuer',
-          `https://login.microsoftonline.com/${alias}/v2.0`,
-        );
-
-        expect(screen.getByLabelText('Tenant ID')).toHaveValue('');
-      },
-    );
-
     test('Google shows its fixed issuer read-only', () => {
       renderForm('google');
 
@@ -585,7 +605,7 @@ describe(
           'Issuer: https://login.microsoftonline.com/tenant-guid/v2.0',
         ),
       ).toBeInTheDocument();
-      expect(screen.getByLabelText('Tenant ID')).toHaveValue('tenant-guid');
+      expect(screen.queryByLabelText('Tenant ID')).not.toBeInTheDocument();
     });
 
     test('switching Okta to Full URL pre-fills the built issuer for editing', async () => {
@@ -622,25 +642,64 @@ describe(
     });
 
     test.each([
-      ['an env var', { tenant_id: '', tenant_id_env: 'ENTRA_TENANT_ID' }],
-      ['a value', { tenant_id: 'stored-tenant', tenant_id_env: '' }],
-      ['nothing', { tenant_id: '', tenant_id_env: '' }],
+      [
+        'an env var',
+        { tenant_id: '', tenant_id_env: 'ENTRA_TENANT_ID' },
+        { tenant_id: '', tenant_id_env: 'ENTRA_TENANT_ID' },
+      ],
+      [
+        'a value',
+        { tenant_id: 'stored-tenant', tenant_id_env: '' },
+        { tenant_id: 'stored-tenant', tenant_id_env: '' },
+      ],
+      [
+        'nothing',
+        { tenant_id: '', tenant_id_env: '' },
+        { tenant_id: 'issuer-tenant', tenant_id_env: '' },
+      ],
     ])(
-      'editing an Entra ID provider with %s stored as its tenant leaves it as stored',
-      async (_stored, tenant) => {
-        renderEdit({
-          ...PROVIDERS_MAP['entra_id']?.initialValues,
-          issuer: ENTRA_ISSUER,
-          groups: { ...defaultGroupResolution('entra_id'), ...tenant },
-        });
+      'editing an Entra ID provider with %s stored as its tenant submits the right tenant',
+      async (_stored, tenant, expected) => {
+        const user = userEvent.setup();
+        const onFinish = vi.fn();
+        renderEdit(
+          {
+            ...PROVIDERS_MAP['entra_id']?.initialValues,
+            issuer: ENTRA_ISSUER,
+            groups: { ...defaultGroupResolution('entra_id'), ...tenant },
+          },
+          onFinish,
+        );
 
-        // Give the issuer watch a render to act on, as it would on create.
-        await screen.findByLabelText('Mode');
-        expect(screen.getByLabelText('Tenant ID')).toHaveValue(
-          tenant.tenant_id_env || tenant.tenant_id,
+        await user.click(screen.getByRole('button', { name: 'Update' }));
+
+        await waitFor(() =>
+          expect(onFinish).toHaveBeenCalledWith(
+            expect.objectContaining({
+              groups: expect.objectContaining(expected),
+            }),
+          ),
         );
       },
     );
+
+    test('editing an Entra ID provider whose issuer names no tenant says so on the Issuer row', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      renderEdit(
+        {
+          ...PROVIDERS_MAP['entra_id']?.initialValues,
+          issuer: 'https://login.microsoftonline.com/common/v2.0',
+          groups: defaultGroupResolution('entra_id'),
+        },
+        onFinish,
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Update' }));
+
+      await expectFieldError('Issuer', TENANT_FROM_ISSUER);
+      expect(onFinish).not.toHaveBeenCalled();
+    });
 
     test('editing an Okta provider leaves an empty Okta Domain empty', async () => {
       renderEdit({
