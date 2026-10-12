@@ -1,11 +1,10 @@
-import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useApplyDefaults } from '@/Platform/hooks/system/useApplyDefaults';
-import { useFetchInfiniteDefaultsDriftSources } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources';
+import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
-import { App, Button, Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import { useState } from 'react';
 
 const NoDriftTag = () => {
@@ -32,41 +31,24 @@ const DriftTag = ({
     </span>
   );
 };
-const appliedDefaultsMessage = (updated: string[], unchanged: string[]) => {
-  if (updated.length === 0) {
-    return 'Selected sources already match the defaults';
-  }
 
-  const updatedLabel = `Applied defaults to ${updated.length} source${updated.length === 1 ? '' : 's'}`;
-  if (unchanged.length === 0) {
-    return updatedLabel;
-  }
-
-  return `${updatedLabel}. ${unchanged.length} already matched`;
-};
-
-export const ApplyDefaultsContent = () => {
+export const ConfigDriftTab = ({
+  onSuccess,
+  defaultsDriftSources,
+}: {
+  onSuccess?: (response: TApplyDefaultsResponse) => void;
+  defaultsDriftSources: TDefaultsDriftSourceItem[];
+}) => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
-  const { notification } = App.useApp();
-  const {
-    data: { items: defaultsDriftSources } = {},
-    isLoading,
-    error,
-  } = useFetchInfiniteDefaultsDriftSources();
+
   const {
     mutate: applyDefaults,
     isPending,
     error: applyError,
   } = useApplyDefaults({
-    onSuccess: ({ updated, unchanged }) => {
+    onSuccess: (response) => {
       setSelectedSources([]);
-      notification.success({
-        title: appliedDefaultsMessage(
-          updated.map((item) => item.source),
-          unchanged.map((item) => item.source),
-        ),
-        placement: 'bottomLeft',
-      });
+      onSuccess?.(response);
     },
   });
 
@@ -145,17 +127,11 @@ export const ApplyDefaultsContent = () => {
     },
   ];
 
-  if (error) {
-    return <NotificationCard type="error" title={error.message} />;
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      <ApiErrorNotification error={applyError} />
       <Table<TDefaultsDriftSourceItem>
         rowKey="source"
         dataSource={defaultsDriftSources}
-        loading={isLoading}
         columns={columns}
         rowSelection={{
           selectedRowKeys: selectedSources,
@@ -173,6 +149,9 @@ export const ApplyDefaultsContent = () => {
           },
         }}
       />
+      {applyError && (
+        <NotificationCard type="error" title={applyError?.message} />
+      )}
       <div className="flex items-center justify-end gap-3">
         <span className="text-xs text-foreground/50 dark:text-foreground/50">
           {selectedSources.length} selected
@@ -183,7 +162,7 @@ export const ApplyDefaultsContent = () => {
           disabled={selectedSources.length === 0}
           onClick={() => applyDefaults({ sources: selectedSources })}
         >
-          Apply Defaults
+          Update Configurations
         </Button>
       </div>
     </div>

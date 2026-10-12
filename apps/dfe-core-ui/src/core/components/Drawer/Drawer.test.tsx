@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from 'antd';
 import { describe, expect, it, vi } from 'vitest';
@@ -149,6 +155,52 @@ describe('Drawer', () => {
         screen.queryByText('Closing now may discard unsaved data.'),
       ).not.toBeInTheDocument();
     });
+  });
+
+  it('requires the warning confirm action when close is explicit', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const { baseElement } = render(
+      <App>
+        <Drawer
+          title="Edit Source"
+          open
+          onClose={onClose}
+          preventClickaway={{
+            enabled: true,
+            explicit: true,
+            title: 'Pending deploys',
+            message: 'There are pending deploys.',
+            confirmLabel: 'Close',
+            cancelLabel: 'Keep open',
+          }}
+        >
+          <p>body</p>
+        </Drawer>
+      </App>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).not.toHaveBeenCalled();
+    const warning = await screen.findByText('There are pending deploys.');
+
+    clickMask(baseElement);
+    expect(onClose).not.toHaveBeenCalled();
+
+    const closeButton = document.querySelector('[data-drawer-close]');
+    expect(closeButton).not.toBeNull();
+    await user.click(closeButton as HTMLElement);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByText('There are pending deploys.')).toBeInTheDocument();
+
+    const warningCard = warning.closest('.ant-card');
+    expect(warningCard).not.toBeNull();
+    await user.click(
+      within(warningCard as HTMLElement).getByRole('button', { name: 'Close' }),
+    );
+
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('dismisses only the warning when the drawer panel is clicked', async () => {

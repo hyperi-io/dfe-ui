@@ -1,10 +1,10 @@
 import { Popover } from '@/core/components/Popover';
 import { cn } from '@/core/utils/style';
 import { IconMenu2 } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { Button, PopoverProps } from 'antd';
 import { useState } from 'react';
 
-interface PopoverMenuProps {
+interface PopoverMenuProps extends PopoverProps {
   options: React.ReactNode[];
   className?: string;
   ariaLabel?: string;
@@ -14,11 +14,13 @@ export const PopoverMenu = ({
   options,
   className,
   ariaLabel = 'Actions',
+  ...props
 }: PopoverMenuProps) => {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover
+      {...props}
       open={open}
       onOpenChange={setOpen}
       trigger="click"
