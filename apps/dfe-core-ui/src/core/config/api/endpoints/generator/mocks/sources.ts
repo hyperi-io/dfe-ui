@@ -1,5 +1,6 @@
 import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
+import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
@@ -646,8 +647,36 @@ export const sources = {
   bulk: {
     mockedUrl: '/api/v1/sources/bulk',
     post: {
-      success: () => {
-        console.error('Not implemented');
+      success: ({
+        mockedResponse = {
+          action: 'string',
+          succeeded: ['string'],
+          deployments: [
+            {
+              source: 'string',
+              version: 'string',
+              task_id: 'string',
+              kind: 'string',
+            },
+          ],
+        },
+      }: {
+        mockedResponse?: TBulkActionSourcesResponse;
+      } = {}) => {
+        return http.post(sources.bulk.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.post(sources.bulk.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },

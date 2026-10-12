@@ -22,7 +22,7 @@ describe('SystemDefaultsSettings', () => {
       screen.getByText(/Set by DFE_CLICKHOUSE_DEFAULT_TTL_DAYS/),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Edit retention' }),
+      screen.getByRole('button', { name: 'System defaults actions' }),
     ).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
   });
