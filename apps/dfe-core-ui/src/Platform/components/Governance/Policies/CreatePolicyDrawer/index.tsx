@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { GITOPS_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useCreateGovernancePolicy } from '@/Platform/hooks/governance/useCreateGovernancePolicy';
 import { IconPlus } from '@repo/dfe-icons';
 import { App, Button, ButtonProps, Input, Select } from 'antd';
@@ -14,7 +15,12 @@ interface CreatePolicyDrawerProps {
 }
 
 const createPolicySchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .refine((v) => GITOPS_NAME_VALIDATOR.regex.test(v), {
+      message: GITOPS_NAME_VALIDATOR.message('Name'),
+    }),
   description: z.string().min(1, { message: 'Description is required' }),
   protected: z.array(z.string()).min(1, { message: 'Protected is required' }),
 });
@@ -87,18 +93,14 @@ export const CreatePolicyDrawer = ({ trigger }: CreatePolicyDrawerProps) => {
             protected: [],
           }}
         >
-          <Form.Item
-            label={<Form.Label required>Name</Form.Label>}
-            name="name"
-            rules={[formValidation]}
-          >
+          <Form.Item label="Name" name="name" rules={[formValidation]}>
             <Input />
           </Form.Item>
           <Form.Item label="Description" name="description">
             <Input.TextArea />
           </Form.Item>
           <Form.Item
-            label={<Form.Label required>Protected</Form.Label>}
+            label="Protected"
             name="protected"
             rules={[formValidation]}
           >

@@ -61,6 +61,7 @@ describe('.useUpdateAccount', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        oidc_id: 'string',
       };
 
       await waitFor(() => {

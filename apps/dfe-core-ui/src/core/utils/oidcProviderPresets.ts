@@ -1,9 +1,12 @@
 import {
-  GROUP_MODE_OPTIONS,
-  GROUP_MODES_BY_TYPE,
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import {
+  isGroupModeAllowed,
+  isOidcProviderType,
+  type TGroupMode,
+} from '@/core/helpers/oidcProviderFieldRules';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 
 type TPresetValues = Partial<CreateUpdateOidcProviderFormData>;
@@ -18,38 +21,13 @@ const keepsGroupMode = ({
   mode,
   type,
 }: {
-  mode: string | undefined;
+  mode: TGroupMode | undefined;
   type: string;
 }) =>
   mode !== undefined &&
-  groupModeOptionsForType({ type }).some((option) => option.value === mode) &&
+  isOidcProviderType(type) &&
+  isGroupModeAllowed(type, mode) &&
   !PROVIDERS.some((provider) => provider.initialValues.groups?.mode === mode);
-
-/** The Enrich on Login value the engine fixes for a type and mode, or undefined when the user chooses (Okta in API mode) or the type or mode is not known yet. Google always enriches because its tokens carry no groups. */
-export const forcedEnrichOnLogin = ({
-  mode,
-  type,
-}: {
-  mode?: string;
-  type?: string;
-}) => {
-  if (type === undefined || mode === undefined) {
-    return undefined;
-  }
-  if (type === 'google') {
-    return true;
-  }
-  return type === 'okta' && mode === 'api' ? undefined : false;
-};
-
-/** The group mode options the engine accepts for a provider type, or every option for an unknown type. */
-export const groupModeOptionsForType = ({ type }: { type?: string }) => {
-  const modes = type ? GROUP_MODES_BY_TYPE[type] : undefined;
-
-  return modes
-    ? GROUP_MODE_OPTIONS.filter((option) => modes.includes(option.value))
-    : GROUP_MODE_OPTIONS;
-};
 
 /** The preset fields a Type change applies: a field still empty or holding any type's preset takes the new type's preset, so a value the user typed is kept. The group mode takes the new type's default unless the user chose one the new type also accepts. */
 export const presetFieldsForType = ({

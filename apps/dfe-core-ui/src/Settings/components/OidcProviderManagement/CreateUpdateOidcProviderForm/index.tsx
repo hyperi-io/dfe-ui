@@ -1,15 +1,22 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
-import { CredentialField } from '@/core/components/CredentialField';
 import { Form } from '@/core/components/Form';
+import {
+  OidcGroupFields,
+  OidcLoginFields,
+  useOidcProviderTypeChange,
+} from '@/core/components/OidcProviderFields';
+import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
-import { presetFieldsForType } from '@/core/utils/oidcProviderPresets';
-import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
-import { Button, FormProps, Input, Select, Switch } from 'antd';
-import { GroupFormSection } from './GroupFormSection';
-import { IssuerField, useIssuerBuilder } from './IssuerField';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import {
+  buildOidcProviderSchema,
+  CreateUpdateOidcProviderFormData,
+} from '@/core/validationSchemas/oidcProviders.schema';
+import { Button, FormProps, Select, Switch } from 'antd';
+import { useMemo } from 'react';
 
 interface CreateUpdateOidcProviderFormProps extends FormProps {
   disabledFields?: {
@@ -35,7 +42,22 @@ export const CreateUpdateOidcProviderForm = ({
   ...props
 }: CreateUpdateOidcProviderFormProps) => {
   const [form] = Form.useForm();
-  const issuerBuilder = useIssuerBuilder({ form });
+  const { changeType, issuerBuilder } = useOidcProviderTypeChange({ form });
+  const loginSecretPath = initialValues?.client_secret_path;
+  const apiTokenPath = initialValues?.groups?.api_token_path;
+  const directorySecretPath = initialValues?.groups?.client_secret_path;
+  const schema = useMemo(
+    () =>
+      buildOidcProviderSchema({
+        client_secret_path: loginSecretPath,
+        groups: {
+          api_token_path: apiTokenPath,
+          client_secret_path: directorySecretPath,
+        },
+      }),
+    [loginSecretPath, apiTokenPath, directorySecretPath],
+  );
+  const formValidation = useAntdZodResolver(schema);
 
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     onFinish?.(values);
@@ -55,58 +77,54 @@ export const CreateUpdateOidcProviderForm = ({
       onFinish={handleFinish}
     >
       <div className="flex gap-2">
-        <Form.Item className="grow" label="Type" name="type">
+        <Form.Item
+          className="grow"
+          label="Type"
+          name="type"
+          rules={[formValidation]}
+        >
           <Select
             disabled={disabledFields?.type}
             options={PROVIDERS.map((provider) => ({
               label: provider.name,
               value: provider.key,
             }))}
-            onChange={(value) => {
-              form.setFieldsValue(
-                presetFieldsForType({
-                  current: form.getFieldsValue(true),
-                  type: value,
-                }),
-              );
-              issuerBuilder.changeType(value);
-            }}
+            onChange={changeType}
           />
         </Form.Item>
-        <Form.Item className="w-20" label="Enabled" name="enabled">
+        <Form.Item
+          className="w-20"
+          label="Enabled"
+          name="enabled"
+          rules={[formValidation]}
+        >
           <Switch />
         </Form.Item>
       </div>
 
-      <>
-        <div className="grid grid-cols-2 gap-4">
-          <Form.Item label="Name" name="name">
-            <Input disabled={disabledFields?.name} />
-          </Form.Item>
+      <div className="grid grid-cols-2 gap-4">
+        <OidcLoginFields
+          rule={formValidation}
+          issuerBuilder={issuerBuilder}
+          disabledFields={disabledFields}
+          hasStoredScopes={!!initialValues?.scopes?.length}
+        />
+      </div>
 
-          <Form.Item label="Display Name" name="display_name">
-            <Input />
-          </Form.Item>
-          <IssuerField
-            builder={issuerBuilder}
-            disabled={disabledFields?.issuer}
-          />
-          <CredentialField
-            label="Client ID"
-            valueName="client_id"
-            envName="client_id_env"
-          />
-          <CredentialField
-            label="Client Secret"
-            valueName="client_secret"
-            envName="client_secret_env"
-            storedName="client_secret_path"
-            secret
-          />
-        </div>
-
-        <GroupFormSection />
-      </>
+      <SimpleCollapse
+        title="Groups"
+        classNames={{
+          // No side padding, so the group fields line up with the fields above.
+          container: 'px-0',
+          content: 'grid grid-cols-2 gap-4',
+        }}
+        defaultOpen={true}
+      >
+        <OidcGroupFields
+          rule={formValidation}
+          derivesFromIssuer={!disabledFields?.issuer}
+        />
+      </SimpleCollapse>
 
       {error && <ApiErrorNotification error={error} />}
 

@@ -1,63 +1,60 @@
-import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
-import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { OidcProviderCard } from '@/Settings/components/OidcProviderManagement/OidcProviderCard';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
-
-const PROVIDER: TOidcProviderListItem = {
-  name: 'okta',
-  type: 'okta',
-  enabled: true,
-  display_name: 'Okta',
-  issuer: 'https://example.okta.com',
-  client_id: 'okta-client-id',
-  client_id_env: 'OKTA_CLIENT_ID',
-  client_secret_env: 'OKTA_CLIENT_SECRET',
-  client_secret_path: '',
-  groups: {
-    mode: 'api',
-    claim_name: 'groups',
-    sync_interval: 3600,
-    enrich_on_login: false,
-    service_account_json_env: '',
-    service_account_json_path: '',
-    admin_email: '',
-    domain: '',
-    tenant_id_env: '',
-    client_secret_env: '',
-    client_secret_path: '',
-    api_token_env: 'OKTA_API_TOKEN',
-    api_token_path: '',
-    okta_domain: 'example.okta.com',
-    tenant_id: '',
-  },
-  created_at: '2026-09-01T00:00:00Z',
-  last_sync_at: '',
-  last_sync_status: '',
-  sync_error: '',
-};
-
-const server = setupServer(
-  API_CONFIG_MOCKS.auth.me.get.success({
-    mockedResponse: ADMIN_MOCKED_RESPONSE,
-  }),
-);
+import { OidcProviderCard } from '.';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const { wrapper } = buildTestWrapper().withReactQuery().withTheme();
+const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
+
+const GOOGLE: TOidcProviderListItem = {
+  name: 'google',
+  type: 'google',
+  enabled: true,
+  display_name: 'Google Workspace',
+  issuer: 'https://accounts.google.com',
+  client_id: 'client-id',
+  client_id_env: '',
+  client_secret_env: '',
+  client_secret_path: 'oidc/google/client_secret',
+  scopes: ['openid', 'email', 'profile'],
+  groups: {
+    mode: 'api',
+    claim_name: '',
+    sync_interval: 3600,
+    enrich_on_login: true,
+    service_account_json_env: '',
+    service_account_json_path: '',
+    domain: 'example.com',
+    tenant_id_env: '',
+    client_secret_env: '',
+    client_secret_path: '',
+    api_token_env: '',
+    api_token_path: '',
+    okta_domain: '',
+    tenant_id: '',
+  },
+  created_at: '2026-09-01T00:00:00Z',
+  last_sync_at: '2026-10-10T08:30:00Z',
+  last_sync_status: 'user_token',
+  sync_error: '',
+};
+
+const lastSync = () =>
+  Array.from(document.querySelectorAll('dt')).find(
+    (term) => term.textContent === 'Last Sync:',
+  );
 
 const openActions = async (mode: TOidcProviderListItem['groups']['mode']) => {
   const user = userEvent.setup();
   render(
     <OidcProviderCard
-      oidcProvider={{ ...PROVIDER, groups: { ...PROVIDER.groups, mode } }}
+      oidcProvider={{ ...GOOGLE, groups: { ...GOOGLE.groups, mode } }}
     />,
     { wrapper },
   );
@@ -67,7 +64,35 @@ const openActions = async (mode: TOidcProviderListItem['groups']['mode']) => {
   return screen.findAllByRole('listitem');
 };
 
-describe('OidcProviderCard', () => {
+describe('OidcProviderCard last sync', () => {
+  test('shows how the last sync ended, user_token included', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    expect(lastSync()).toBeDefined();
+    expect(screen.getByText('Read at login')).toBeVisible();
+    expect(screen.queryByText('user_token')).not.toBeInTheDocument();
+  });
+
+  test('names the group mode as the forms do', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    expect(screen.getByText('API')).toBeVisible();
+    expect(screen.queryByText('api')).not.toBeInTheDocument();
+  });
+
+  test('a provider that has never synced shows no last sync', () => {
+    render(
+      <OidcProviderCard
+        oidcProvider={{ ...GOOGLE, last_sync_at: '', last_sync_status: '' }}
+      />,
+      { wrapper },
+    );
+
+    expect(lastSync()).toBeUndefined();
+  });
+});
+
+describe('OidcProviderCard actions', () => {
   test('an api provider offers to sync its groups', async () => {
     const actions = await openActions('api');
 
@@ -92,13 +117,15 @@ describe('OidcProviderCard', () => {
       ).not.toBeInTheDocument();
     },
   );
+});
 
+describe('OidcProviderCard enabled status', () => {
   test.each([
     [true, 'Provider is enabled'],
     [false, 'Provider is disabled'],
   ])('enabled=%s shows "%s"', async (enabled, status) => {
     const user = userEvent.setup();
-    render(<OidcProviderCard oidcProvider={{ ...PROVIDER, enabled }} />, {
+    render(<OidcProviderCard oidcProvider={{ ...GOOGLE, enabled }} />, {
       wrapper,
     });
 
@@ -106,6 +133,17 @@ describe('OidcProviderCard', () => {
 
     expect(
       await screen.findByRole('tooltip', { name: status }),
+    ).toBeInTheDocument();
+  });
+
+  test('the status sits inside the heading, which stays one run of text', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(heading).toHaveTextContent('Google Workspace (google)');
+    expect(heading).not.toHaveClass('flex');
+    expect(
+      screen.getByRole('button', { name: 'Provider is enabled' }),
     ).toBeInTheDocument();
   });
 });

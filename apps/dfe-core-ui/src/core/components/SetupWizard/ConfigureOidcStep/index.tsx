@@ -1,5 +1,10 @@
 import { Form } from '@/core/components/Form';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
+import {
+  toCreateOidcProviderBody,
+  toScopeList,
+  toUpdateOidcProviderBody,
+} from '@/core/helpers/oidcProviders.helpers';
 import { useCreateOidcProvider } from '@/core/hooks/useCreateOidcProvider';
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { TOidcProvider } from '@/core/hooks/useFetchSetupStatus/types';
@@ -48,13 +53,27 @@ export const ConfigureOidcStep = ({
     name: effectiveOidcProvider?.name ?? '',
   });
 
+  // Setup status carries scopes as one string, a created provider as a list.
+  const initialScopes =
+    effectiveOidcProvider && 'scopes' in effectiveOidcProvider
+      ? toScopeList(effectiveOidcProvider.scopes)
+      : undefined;
+
   const handleFinish = (values: CreateUpdateOidcProviderFormData) => {
     if (effectiveOidcProvider?.name) {
-      updateOidcProvider(values);
+      const storedType =
+        'type' in effectiveOidcProvider ? effectiveOidcProvider.type : '';
+      updateOidcProvider(
+        toUpdateOidcProviderBody(values, {
+          ...effectiveOidcProvider,
+          type: storedType,
+          scopes: initialScopes ?? [],
+        }),
+      );
       return;
     }
 
-    createOidcProvider(values);
+    createOidcProvider(toCreateOidcProviderBody(values));
   };
   return (
     <Card
@@ -75,6 +94,7 @@ export const ConfigureOidcStep = ({
           onFinish={handleFinish}
           initialValues={{
             ...effectiveOidcProvider,
+            scopes: initialScopes,
           }}
           submitButtonLabel={
             effectiveOidcProvider?.name
@@ -82,8 +102,11 @@ export const ConfigureOidcStep = ({
               : 'Add OIDC Provider'
           }
           hasReset={!!effectiveOidcProvider?.name}
+          // The engine's update takes no name, type or issuer.
           disabledFields={{
             name: !!effectiveOidcProvider?.name,
+            type: !!effectiveOidcProvider?.name,
+            issuer: !!effectiveOidcProvider?.name,
           }}
         />
 

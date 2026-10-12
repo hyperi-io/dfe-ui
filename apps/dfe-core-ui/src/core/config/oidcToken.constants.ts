@@ -22,3 +22,9 @@ export function readTokenFragment(hash: string): {
   if (!token) return null;
   return { token, provider: params.get('provider') ?? '' };
 }
+
+/** The code the engine refused the login with, from the same fragment. */
+export function readRefusalFragment(hash: string): string | null {
+  const params = new URLSearchParams(hash.replace(/^#/, ''));
+  return params.get('error') || null;
+}

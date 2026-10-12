@@ -54,8 +54,16 @@ docs/superpowers/
 .mcp.json
 STATE.md
 CLAUDE.md
+AGENTS.md
+GEMINI.md
 TODO.md
 .ai-version
+.codex/
+.gemini/
+
+# Cursor editor rules and settings are per-developer, never committed
+.cursor/
+.cursorrules
 
 # OS junk (never useful in repo)
 .DS_Store
@@ -73,22 +81,6 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.example.*
-
-# them alone if already present.
-docs/superpowers/
-.mcp.json
-.ai-version
-
-# committed -- mirrored in .git/info/exclude.
-CLAUDE.md
-TODO.md
-AGENTS.md
-GEMINI.md
-.claude/
-.codex/
-.cursor/
-.gemini/
-.cursorrules
 
 # Git worktrees (local dev convenience)
 .worktrees/

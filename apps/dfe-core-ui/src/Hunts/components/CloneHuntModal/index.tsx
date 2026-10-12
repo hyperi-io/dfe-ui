@@ -4,7 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
@@ -18,8 +18,8 @@ const formSchema = z.object({
   name: z
     .string({ message: 'Name is required' })
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-      message: DB_NAME_VALIDATOR.message('Name'),
+    .refine((v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v), {
+      message: RULE_HUNT_NAME_VALIDATOR.message('Name'),
     }),
   display_name: z.string().optional().nullable(),
 });
@@ -73,6 +73,8 @@ export const CloneHuntModal = ({
   const handleOpen = () => {
     setOpen(true);
   };
+
+  const copyName = RULE_HUNT_NAME_VALIDATOR.copyName(hunt.name);
 
   return (
     <>
@@ -137,7 +139,7 @@ export const CloneHuntModal = ({
           form={form}
           onFinish={handleCloneHunt}
           initialValues={{
-            name: `${hunt.name}_copy`,
+            name: copyName,
             display_name: `Copy: ${hunt.display_name ?? hunt.name}`,
             cron: hunt.cron,
             log_buffer: hunt.log_buffer,
@@ -149,11 +151,11 @@ export const CloneHuntModal = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
+            label="Name"
             rules={[formValidation]}
             className="w-full mb-2"
           >
-            <Input placeholder={`${hunt.name}_copy`} />
+            <Input placeholder={copyName} />
           </Form.Item>
           <Form.Item
             name="display_name"

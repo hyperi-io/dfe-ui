@@ -2,15 +2,27 @@ import { renderHook } from '@testing-library/react';
 import type { FormInstance } from 'antd';
 import { describe, expect, test } from 'vitest';
 import z from 'zod';
-import { useAntdZodResolver } from './useAntdZodResolver';
+import {
+  getZodSchemaForRule,
+  isZodFieldRequired,
+  useAntdZodResolver,
+} from './useAntdZodResolver';
 
 type ResolverFn = (form: FormInstance) => {
+  required?: boolean;
   validator: (rule: unknown, value: unknown) => Promise<void>;
 };
 
 const schema = z.object({
   username: z.string().min(1, { message: 'Username is required' }),
   email: z.email({ message: 'Invalid email' }),
+  nickname: z.string().optional(),
+  notes: z.string().nullable(),
+  label: z.string().optional().nullable(),
+  nested: z.object({
+    title: z.string().min(1, { message: 'Title is required' }),
+    hint: z.string().optional(),
+  }),
   mappings: z.array(
     z.tuple([
       z.string().min(1, { message: 'Source field is required' }),
@@ -19,7 +31,27 @@ const schema = z.object({
   ),
 });
 
+describe('isZodFieldRequired', () => {
+  test('is true for plain required fields', () => {
+    expect(isZodFieldRequired(schema, 'username')).toBe(true);
+    expect(isZodFieldRequired(schema, 'email')).toBe(true);
+    expect(isZodFieldRequired(schema, ['nested', 'title'])).toBe(true);
+  });
+
+  test('is false for optional, nullable, and nullish fields', () => {
+    expect(isZodFieldRequired(schema, 'nickname')).toBe(false);
+    expect(isZodFieldRequired(schema, 'notes')).toBe(false);
+    expect(isZodFieldRequired(schema, 'label')).toBe(false);
+    expect(isZodFieldRequired(schema, ['nested', 'hint'])).toBe(false);
+  });
+});
+
 describe('useAntdZodResolver', () => {
+  test('registers the schema so Form.Item can derive the required mark', () => {
+    const { result } = renderHook(() => useAntdZodResolver(schema));
+    expect(getZodSchemaForRule(result.current)).toBe(schema);
+  });
+
   test('returns a function that produces a rule with a validator', () => {
     const { result } = renderHook(() => useAntdZodResolver(schema));
     const formValidation = result.current as ResolverFn;
@@ -58,6 +90,7 @@ describe('useAntdZodResolver', () => {
         username: 'john',
         email: 'john@example.com',
         mappings: [['src', 'dest']],
+        nested: { title: 't' },
       }),
     } as FormInstance;
     const rule = formValidation(mockForm);

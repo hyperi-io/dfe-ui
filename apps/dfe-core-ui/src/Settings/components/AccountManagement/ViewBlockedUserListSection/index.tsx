@@ -5,7 +5,7 @@ import { SectionCard } from '@/core/components/SectionCard';
 import { Table } from '@/core/components/Table';
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { renderColumns } from '@/Settings/components/AccountManagement/helpers';
+import { renderColumns } from '@/Settings/helpers/accountManagementHelpers';
 import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
 import { TAccountsItemSummary } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { IconInfoCircle, IconNoEntry } from '@repo/dfe-icons';

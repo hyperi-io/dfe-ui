@@ -16,6 +16,10 @@ export const CustomScrollbar = ({
   return (
     <div
       style={{
+        // Fixed height, not max-height: a max-height box grows with its
+        // content and can sit taller than a clipped parent, so the last
+        // rows are below the fold and the scrollport never reaches them.
+        height: `${height}px`,
         maxHeight: `${height}px`,
       }}
       className={cn(

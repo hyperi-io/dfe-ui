@@ -13,6 +13,7 @@ const OKTA_PROVIDER: TOidcProviderListItem = {
   client_id_env: 'OKTA_CLIENT_ID',
   client_secret_env: 'OKTA_CLIENT_SECRET',
   client_secret_path: '',
+  scopes: ['openid', 'email', 'profile', 'groups'],
   groups: {
     mode: 'token_claim',
     claim_name: 'groups',
@@ -20,7 +21,6 @@ const OKTA_PROVIDER: TOidcProviderListItem = {
     enrich_on_login: false,
     service_account_json_env: '',
     service_account_json_path: '',
-    admin_email: '',
     domain: '',
     tenant_id_env: '',
     client_secret_env: '',

@@ -2,14 +2,20 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
+import { DisabledFields } from '@/Sources/components/CreateUpdateSourceForm';
 import { FETCHER_TOPIC_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormRule, Radio, Select } from 'antd';
 import { getFetcherSourceTypes } from './helpers';
 
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const TOPIC_LABEL = 'Topic';
+
 export const FetcherFormSection = ({
   formValidation,
+  disabledFields,
 }: {
+  disabledFields?: DisabledFields;
   formValidation: FormRule;
 }) => {
   const { data: apps, isLoading } = useFetchApps();
@@ -27,7 +33,9 @@ export const FetcherFormSection = ({
         name={['fetcher', 'source_type']}
         label="Source type"
         rules={[formValidation]}
-        help={
+        // The schema holds the rule in its fetcher refinement, so it derives no mark.
+        required
+        extra={
           hasSourceTypes
             ? undefined
             : 'No fetcher is deployed, so there are no source types to pick from'
@@ -47,11 +55,13 @@ export const FetcherFormSection = ({
 
       <Form.Item
         name={['fetcher', 'topic']}
-        label="Topic"
+        label={TOPIC_LABEL}
         rules={[formValidation]}
         help="Its own topic gives this source its own table; main sends it to the shared table."
       >
         <Radio.Group
+          aria-label={TOPIC_LABEL}
+          disabled={disabledFields?.fetcher?.topic}
           options={Object.entries(FETCHER_TOPIC_LABELS).map(
             ([value, label]) => ({ label, value }),
           )}
@@ -62,7 +72,7 @@ export const FetcherFormSection = ({
         name={['fetcher', 'config']}
         label="Config"
         rules={[formValidation]}
-        help="The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals."
+        extra="The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals."
       >
         <AceEditor name="fetcher_config" mode="yaml" height="300px" />
       </Form.Item>

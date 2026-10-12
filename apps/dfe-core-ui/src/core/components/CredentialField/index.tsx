@@ -1,31 +1,39 @@
 'use client';
 
 import { Form } from '@/core/components/Form';
-import { Input, Select, Space, type FormItemProps } from 'antd';
+import { Input, Select, Space, type FormItemProps, type FormRule } from 'antd';
 import { useId, useState } from 'react';
 
 type TNamePath = NonNullable<FormItemProps['name']>;
 
 type TCredentialSource = 'value' | 'env';
 
-/** The engine rejects an env var name that does not match this. */
-const ENV_VAR_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
-
 const SOURCE_OPTIONS: { label: string; value: TCredentialSource }[] = [
   { label: 'Value', value: 'value' },
   { label: 'Env Var', value: 'env' },
 ];
 
-const ENV_VAR_NAME_RULES: FormItemProps['rules'] = [
-  {
-    pattern: ENV_VAR_NAME_PATTERN,
-    message: 'Use letters, digits and underscores, not a leading digit',
-  },
-];
-
 const STORED_SECRET_HINT = 'Secret stored - leave blank to keep it';
 
 const isFilled = (value: unknown) => typeof value === 'string' && value !== '';
+
+const toFieldName = (name: TNamePath) =>
+  (Array.isArray(name) ? name : [name]).join('.');
+
+/** `rule` run as the check of `name`, so the shown member also reports an error the rules pin to the member that is not mounted. */
+const ruleFor =
+  (rule: FormRule, name: TNamePath): FormRule =>
+  (form) => {
+    const resolved = typeof rule === 'function' ? rule(form) : rule;
+    const { validator } = resolved;
+    const field = toFieldName(name);
+    return validator
+      ? {
+          validator: (checked, value, callback) =>
+            validator(Object.assign({}, checked, { field }), value, callback),
+        }
+      : {};
+  };
 
 interface CredentialFieldProps {
   label: string;
@@ -33,17 +41,23 @@ interface CredentialFieldProps {
   valueName: TNamePath;
   /** The form field holding the name of the env var that supplies it. */
   envName: TNamePath;
+  /** The form's validation rule, checked for both members whichever is shown. */
+  rule: FormRule;
+  /** Fields whose change re-checks this credential. */
+  dependencies?: FormItemProps['dependencies'];
   /** Masks the value, which the engine treats as write-only. */
   secret?: boolean;
   /** The stored secret's path, non-empty when a blank value keeps it. */
   storedName?: TNamePath;
-  tooltip?: string;
+  tooltip?: FormItemProps['tooltip'];
 }
 
 /** A credential set as a value or as the name of the env var holding it; only the selected member is a mounted form field, so a submit carries that member alone. */
 export const CredentialField = ({
+  dependencies,
   envName,
   label,
+  rule,
   secret = false,
   storedName,
   tooltip,
@@ -61,6 +75,7 @@ export const CredentialField = ({
       : 'value',
   );
   const inputId = `${id}-${source}`;
+  const rules = (hidden: TNamePath) => [rule, ruleFor(rule, hidden)];
 
   return (
     <Form.Item label={label} htmlFor={inputId} tooltip={tooltip}>
@@ -75,7 +90,13 @@ export const CredentialField = ({
           virtual={false}
         />
         {source === 'value' ? (
-          <Form.Item key="value" name={valueName} noStyle>
+          <Form.Item
+            key="value"
+            name={valueName}
+            noStyle
+            rules={rules(envName)}
+            dependencies={dependencies}
+          >
             {secret ? (
               <Input.Password
                 id={inputId}
@@ -91,7 +112,8 @@ export const CredentialField = ({
             key="env"
             name={envName}
             noStyle
-            rules={ENV_VAR_NAME_RULES}
+            rules={rules(valueName)}
+            dependencies={dependencies}
           >
             <Input id={inputId} placeholder="Environment variable name" />
           </Form.Item>

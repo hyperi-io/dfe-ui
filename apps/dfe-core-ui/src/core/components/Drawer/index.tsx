@@ -99,7 +99,14 @@ export const Drawer = ({
         title={title}
         closeIcon={null}
         onClose={handleClose}
-        extra={<Button shape="circle" icon={<IconX />} onClick={closeDrawer} />}
+        extra={
+          <Button
+            shape="circle"
+            aria-label="Close"
+            icon={<IconX />}
+            onClick={closeDrawer}
+          />
+        }
         footer={null}
       >
         {children}

@@ -24,8 +24,8 @@ Users can create a schema from metadata fields plus columns. Columns can come fr
 
 2. **Form lists** — `AddSchemaTable` uses `useLayoutEffect` to `setFieldsValue` for its `Form.List` name when `initialValues` content changes (dependency is a serialized signature, not reference equality).
 
-3. **Invalid → valid promotion (two paths)**  
-   - **`InvalidColumnsCollapse`**: `Form.useWatch('invalidColumns')` + `useEffect` re-parses rows; when a row becomes valid, `handleUpdateInvalidUploadedSchemaColumn` moves it into `uploadedSchemaColumns`, updates `invalidColumns` / `uploadedColumns` in the form, then `queueMicrotask` → `validateFields` on the promoted row paths.  
+3. **Invalid → valid promotion (two paths)**
+   - **`InvalidColumnsCollapse`**: `Form.useWatch('invalidColumns')` + `useEffect` re-parses rows; when a row becomes valid, `handleUpdateInvalidUploadedSchemaColumn` moves it into `uploadedSchemaColumns`, updates `invalidColumns` / `uploadedColumns` in the form, then `queueMicrotask` → `validateFields` on the promoted row paths.
    - **`handleUpdateUploadedSchemaColumns`** (called from `onValuesChange` on the main form): if `uploadedColumns` changed and there are still invalid rows, merges live form rows with invalid payloads **by stable row `id`** and promotes when `rowSchema.safeParse` succeeds.
 
 4. **Submit** — `onFinish` does **not** rely on Ant Design alone: it runs `rowSchema.safeParse` over **every** `uploadedSchemaColumns` and `schemaColumns` entry from context and blocks submit if `invalidUploadedSchemaColumns` is non-empty or any parse fails.
@@ -73,12 +73,12 @@ CSV conversion (`convertCsv`) and Elastic conversion (`useElasticConvert`) run o
 
 ## Practical workarounds
 
-**For users / operators**
+### For users / operators
 
 - Prefer **cleaning CSV/JSON upstream** so fewer rows land in **Invalid Columns** (that panel is unpaginated).
 - For enormous files, consider **splitting** artifacts or correcting imports outside the UI if conversion or submit payloads hit limits.
 
-**For maintainers**
+### For maintainers
 
 - Treat context arrays + submit-time `rowSchema` checks as the **contract** for correctness; use pagination as a **rendering** mitigation, not proof that validation cost is bounded.
 - Before adding more `Form.Item`s with `formValidation`, remember each validation can re-parse the **whole** form — scoped rules or lighter validators on hot paths reduce quadratic-style blowups.

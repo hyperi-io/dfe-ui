@@ -32,6 +32,13 @@ export { formSchema, type CreateUpdateSourceFormData };
 
 export interface DisabledFields {
   source?: boolean;
+  origin?: boolean;
+  fetcher?: {
+    topic?: boolean;
+  };
+  receiver_ui_config?: {
+    table?: boolean;
+  };
   // Add other disabled fields here as necessary
 }
 

@@ -4,11 +4,17 @@ import { Form } from '@/core/components/Form';
 import { TAccountCreateRequestBody } from '@/core/hooks/useCreateAccount/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { newPasswordSchema } from '@/core/validationSchemas/password.schema';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input } from 'antd';
 import z from 'zod';
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: 'Username is required' }),
+  username: z
+    .string()
+    .min(1, { message: 'Username is required' })
+    .refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
+      message: STORE_NAME_VALIDATOR.message('Username'),
+    }),
   password: newPasswordSchema,
   groups: z.array(z.string()).optional(),
   email: z.email({ message: 'Valid email is required' }),
@@ -63,54 +69,30 @@ export const CreateAccountForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item
-        name="username"
-        label={<Form.Label required>Username</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="username" label="Username" rules={[formValidation]}>
         <Input placeholder="Enter username" />
       </Form.Item>
 
-      <Form.Item
-        name="email"
-        label={<Form.Label required>Email</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="email" label="Email" rules={[formValidation]}>
         <Input type="email" placeholder="Enter email" />
       </Form.Item>
 
-      <Form.Item
-        name="name"
-        label={<Form.Label>Name</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" />
       </Form.Item>
 
-      <Form.Item
-        name="phone"
-        label={<Form.Label>Phone</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="phone" label="Phone" rules={[formValidation]}>
         <Input placeholder="Enter phone" />
       </Form.Item>
 
-      <Form.Item
-        name="password"
-        label={<Form.Label required>Password</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="password" label="Password" rules={[formValidation]}>
         <Input.Password
           autoComplete="new-password"
           placeholder="Enter password"
         />
       </Form.Item>
 
-      <Form.Item
-        name="groups"
-        label={<Form.Label required>Groups</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="groups" label="Groups" rules={[formValidation]}>
         <AccountGroupSelect disabled={disabledFields?.groups} />
       </Form.Item>
 

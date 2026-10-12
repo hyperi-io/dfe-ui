@@ -6,10 +6,12 @@ import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { MainContentCard } from '@/core/components/ContentCard';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NavigationTabLabel } from '@/core/components/NavigationTabLabel';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { Spin, Tabs } from 'antd';
 
 /**
@@ -24,6 +26,10 @@ import { Spin, Tabs } from 'antd';
  */
 export const ComponentsScene = () => {
   const { data: apps, isLoading, error } = useFetchApps();
+
+  const { componentHeight } = useSetComponentHeight({
+    offset: 200,
+  });
 
   if (isLoading) {
     return (
@@ -66,66 +72,68 @@ export const ComponentsScene = () => {
           title="No components are deployed"
           description="A component appears here once the deploy repo holds its values."
         />
-        <div className="mt-6">
+        <CustomScrollbar className="mt-6" height={componentHeight}>
           <BackingServices />
-        </div>
+        </CustomScrollbar>
       </MainContentCard>
     );
   }
 
   return (
     <MainContentCard className="pl-0">
-      <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
-        <RbacProtected.Unrestricted>
-          <Tabs
-            className="h-full min-h-0"
-            tabPlacement="start"
-            classNames={{
-              root: 'min-h-0',
-              header: 'w-full max-w-68 shrink-0',
-              content: 'min-w-0 flex-1 pl-6',
-            }}
-            items={pools.map((pool) => ({
-              key: pool.key,
-              label: (
-                <NavigationTabLabel
-                  label={pool.service}
-                  description={`Instance ${pool.instance}`}
-                />
-              ),
-              children: (
-                <div className="flex flex-col">
-                  <AppOperationalCard
-                    service={pool.service}
-                    instance={pool.instance}
+      <CustomScrollbar height={componentHeight}>
+        <RbacProtected action={RbacProtected.rbacActions.deployment_read}>
+          <RbacProtected.Unrestricted>
+            <Tabs
+              className="h-full min-h-0"
+              tabPlacement="start"
+              classNames={{
+                root: 'min-h-0',
+                header: 'w-full max-w-68 shrink-0',
+                content: 'min-w-0 flex-1 pl-6',
+              }}
+              items={pools.map((pool) => ({
+                key: pool.key,
+                label: (
+                  <NavigationTabLabel
+                    label={pool.service}
+                    description={`Instance ${pool.instance}`}
                   />
-                  {pool.scaleDeployed && (
-                    <ScalingCard
+                ),
+                children: (
+                  <div className="flex flex-col">
+                    <AppOperationalCard
                       service={pool.service}
                       instance={pool.instance}
                     />
-                  )}
-                  <AppConfigCard
-                    service={pool.service}
-                    instance={pool.instance}
-                  />
-                  <AppHistoryCard
-                    service={pool.service}
-                    instance={pool.instance}
-                  />
-                </div>
-              ),
-            }))}
-          />
-        </RbacProtected.Unrestricted>
-        <RbacProtected.Restricted className="h-full">
-          <RbacProtected.RestrictedRoute />
-        </RbacProtected.Restricted>
-      </RbacProtected>
+                    {pool.scaleDeployed && (
+                      <ScalingCard
+                        service={pool.service}
+                        instance={pool.instance}
+                      />
+                    )}
+                    <AppConfigCard
+                      service={pool.service}
+                      instance={pool.instance}
+                    />
+                    <AppHistoryCard
+                      service={pool.service}
+                      instance={pool.instance}
+                    />
+                  </div>
+                ),
+              }))}
+            />
+          </RbacProtected.Unrestricted>
+          <RbacProtected.Restricted className="h-full">
+            <RbacProtected.RestrictedRoute />
+          </RbacProtected.Restricted>
+        </RbacProtected>
 
-      <div className="mt-8 pl-6">
-        <BackingServices />
-      </div>
+        <div className="mt-8 pl-6">
+          <BackingServices />
+        </div>
+      </CustomScrollbar>
     </MainContentCard>
   );
 };

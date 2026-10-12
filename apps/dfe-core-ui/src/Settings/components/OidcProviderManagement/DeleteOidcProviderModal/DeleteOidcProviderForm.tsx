@@ -1,7 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { Button, Input } from 'antd';
+import { useFetchInfiniteFilteredAccounts } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts';
+import { Button, Input, Spin } from 'antd';
 import { useState } from 'react';
 import z from 'zod';
 
@@ -38,6 +40,14 @@ export const DeleteOidcProviderForm = ({
     onFinish(values);
   };
 
+  const {
+    data: { total: accountsCount },
+    isLoading: isLoadingAccounts,
+  } = useFetchInfiniteFilteredAccounts({
+    oidc_id: oidcProviderName,
+    blocked: false,
+  });
+
   return (
     <>
       <Form form={form} onFinish={handleFinish}>
@@ -45,6 +55,21 @@ export const DeleteOidcProviderForm = ({
           Are you sure you want to delete{' '}
           <span className="font-semibold">{oidcProviderName}</span>?
         </p>
+
+        {isLoadingAccounts && (
+          <>
+            <Spin />{' '}
+            <span className="sr-only">Loading associated accounts...</span>
+          </>
+        )}
+
+        {accountsCount > 0 && (
+          <NotificationCard
+            type="error"
+            title="This action cannot be undone."
+            description={`${accountsCount} accounts are associated with this OIDC Provider. Accounts will be deleted and user access will be revoked.`}
+          />
+        )}
 
         <Form.Item name="oidcProviderName" rules={[formValidation]}>
           <Input placeholder="Enter OIDC Provider Name to be deleted" />
@@ -55,8 +80,8 @@ export const DeleteOidcProviderForm = ({
 
         <div className="flex w-full justify-end gap-x-2">
           <Button
-            loading={isPending}
-            disabled={isPending}
+            loading={isPending || isLoadingAccounts}
+            disabled={isPending || isLoadingAccounts}
             type="primary"
             danger
             htmlType="submit"

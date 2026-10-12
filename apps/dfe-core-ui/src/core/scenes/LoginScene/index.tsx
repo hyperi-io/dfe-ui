@@ -1,6 +1,7 @@
 'use client';
 
 import { LoginLocalOidcSwitch } from '@/core/components/LoginLocalOidcSwitch';
+import { type TLoginRefusal } from '@/core/config/loginRefusal';
 import { loginNotice } from '@/core/config/loginNotice';
 import { cn } from '@/core/utils/style';
 import { IconPrimaryLogoFull } from '@repo/dfe-icons';
@@ -10,9 +11,11 @@ import './Login.css';
 const Login = ({
   callbackUrl,
   notice,
+  failure,
 }: {
   callbackUrl: string;
   notice?: string;
+  failure?: TLoginRefusal;
 }) => {
   const shown = loginNotice(notice);
   return (
@@ -25,12 +28,21 @@ const Login = ({
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground min-w-96 flex flex-col items-center gap-4">
+      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground min-w-96 max-w-md flex flex-col items-center gap-4">
         <IconPrimaryLogoFull
           className={cn('m-auto', 'text-brand-primary')}
           height={30}
           width={150}
         />
+        {failure && (
+          <Alert
+            className="w-full"
+            type="error"
+            showIcon
+            title={failure.title}
+            description={failure.description}
+          />
+        )}
         {shown && (
           <Alert
             className="w-full"
@@ -40,7 +52,7 @@ const Login = ({
             description={shown.description}
           />
         )}
-        <LoginLocalOidcSwitch callbackUrl={callbackUrl} />
+        <LoginLocalOidcSwitch callbackUrl={callbackUrl} className="min-h-45" />
       </div>
     </main>
   );
@@ -49,10 +61,13 @@ const Login = ({
 export const LoginScene = ({
   callbackUrl = '/',
   notice,
+  failure,
 }: {
   callbackUrl?: string;
   /** A LOGIN_NOTICE_PARAM value; anything unknown shows nothing. */
   notice?: string;
+  /** Why the last sign-in did not complete, shown above the form so the user can try again. */
+  failure?: TLoginRefusal;
 }) => {
-  return <Login callbackUrl={callbackUrl} notice={notice} />;
+  return <Login callbackUrl={callbackUrl} notice={notice} failure={failure} />;
 };

@@ -1,15 +1,11 @@
+import { type TGroupMode } from '@/core/helpers/oidcProviderFieldRules';
 import {
   CreateUpdateOidcProviderFormData,
   DEFAULT_GROUP_RESOLUTION,
+  defaultGroupResolution,
 } from '@/core/validationSchemas/oidcProviders.schema';
 import { describe, expect, test } from 'vitest';
-import {
-  forcedEnrichOnLogin,
-  groupModeOptionsForType,
-  presetFieldsForType,
-} from './oidcProviderPresets';
-
-type TGroupMode = (typeof DEFAULT_GROUP_RESOLUTION)['mode'];
+import { presetFieldsForType } from './oidcProviderPresets';
 
 const GOOGLE_UNTOUCHED: Partial<CreateUpdateOidcProviderFormData> = {
   name: 'google',
@@ -18,7 +14,7 @@ const GOOGLE_UNTOUCHED: Partial<CreateUpdateOidcProviderFormData> = {
   issuer: 'https://accounts.google.com',
   client_id_env: 'DFE_OIDC_GOOGLE_CLIENT_ID',
   client_secret_env: 'DFE_OIDC_GOOGLE_CLIENT_SECRET',
-  groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+  groups: defaultGroupResolution('google'),
 };
 
 const withGroups = (groups: Partial<typeof DEFAULT_GROUP_RESOLUTION>) => ({
@@ -37,7 +33,7 @@ describe('presetFieldsForType', () => {
       issuer: '',
       client_id_env: 'DFE_OIDC_OKTA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_OKTA_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+      groups: defaultGroupResolution('google'),
     });
   });
 
@@ -70,7 +66,7 @@ describe('presetFieldsForType', () => {
       issuer: '',
       client_id_env: 'DFE_OIDC_ENTRA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_ENTRA_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+      groups: defaultGroupResolution('entra_id'),
     });
   });
 
@@ -101,12 +97,12 @@ describe('presetFieldsForType', () => {
   ])('$name', ({ expected, mode, type }) => {
     expect(
       presetFieldsForType({
-        current: withGroups({ admin_email: 'admin@example.com', mode }),
+        current: withGroups({ domain: 'example.com', mode }),
         type,
       }).groups,
     ).toEqual({
       ...DEFAULT_GROUP_RESOLUTION,
-      admin_email: 'admin@example.com',
+      domain: 'example.com',
       mode: expected,
     });
   });
@@ -124,34 +120,5 @@ describe('presetFieldsForType', () => {
     expect(
       presetFieldsForType({ current: GOOGLE_UNTOUCHED, type: 'unknown' }),
     ).toEqual({});
-  });
-});
-
-describe('groupModeOptionsForType', () => {
-  test.each<{ expected: string[]; type?: string }>([
-    { type: 'google', expected: ['api'] },
-    { type: 'okta', expected: ['manual', 'token_claim', 'api'] },
-    { type: 'entra_id', expected: ['manual', 'token_claim', 'api'] },
-    { type: 'generic', expected: ['manual', 'token_claim'] },
-    { type: undefined, expected: ['manual', 'token_claim', 'api'] },
-  ])('type $type', ({ expected, type }) => {
-    expect(
-      groupModeOptionsForType({ type }).map((option) => option.value),
-    ).toEqual(expected);
-  });
-});
-
-describe('forcedEnrichOnLogin', () => {
-  test.each<{ expected: boolean | undefined; mode?: string; type?: string }>([
-    { type: 'google', mode: 'api', expected: true },
-    { type: 'okta', mode: 'api', expected: undefined },
-    { type: 'okta', mode: 'token_claim', expected: false },
-    { type: 'okta', mode: 'manual', expected: false },
-    { type: 'entra_id', mode: 'api', expected: false },
-    { type: 'generic', mode: 'token_claim', expected: false },
-    { type: undefined, mode: 'api', expected: undefined },
-    { type: 'okta', mode: undefined, expected: undefined },
-  ])('type $type in mode $mode', ({ expected, mode, type }) => {
-    expect(forcedEnrichOnLogin({ mode, type })).toBe(expected);
   });
 });

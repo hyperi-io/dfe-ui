@@ -6,6 +6,8 @@ import { appVersionEnv } from './src/core/appVersion/resolveAppVersion';
 const monorepoRoot = path.resolve(process.cwd(), '..', '..');
 
 const nextConfig: NextConfig = {
+  // An agent reading this folder auto-loads AGENTS.md and CLAUDE.md, so next dev must not write them.
+  agentRules: false,
   // Bakes the stamped VERSION (or env fallback) in at build time, so the
   // sidebar and the metrics info gauge match the image tag.
   env: appVersionEnv({ root: monorepoRoot }),

@@ -213,6 +213,10 @@ export interface paths {
         /**
          * Oidc Callback
          * @description Complete the OIDC flow and re-mint the engine token (single issuer).
+         *
+         *     A login started with ``return_to`` returns there refused as well as admitted,
+         *     so a browser never lands on this route's JSON error. Without ``return_to`` a
+         *     refusal answers JSON with its status, as any API error does.
          */
         get: operations["oidc_callback_api_v1_auth_oidc__provider__callback_get"];
         put?: never;
@@ -287,6 +291,8 @@ export interface paths {
         /**
          * Get Account
          * @description Get a single account by username (admin only).
+         *
+         *     Soft-deleted (anonymized) accounts answer 404 the same as a missing name.
          */
         get: operations["get_account_api_v1_auth_accounts__username__get"];
         /**
@@ -426,12 +432,12 @@ export interface paths {
         };
         /**
          * Get Account Attributes
-         * @description Read an account's non-sensitive attribute blob (404 if the account is missing).
+         * @description Read an account's non-sensitive attribute blob (404 if missing or soft-deleted).
          */
         get: operations["get_account_attributes_api_v1_auth_accounts__username__attributes_get"];
         /**
          * Put Account Attributes
-         * @description Full-replace an account's non-sensitive attribute blob (404 if missing).
+         * @description Full-replace an account's non-sensitive attribute blob (404 if missing or soft-deleted).
          */
         put: operations["put_account_attributes_api_v1_auth_accounts__username__attributes_put"];
         post?: never;
@@ -453,12 +459,13 @@ export interface paths {
          * @description Read an account's SENSITIVE attribute blob from the separate keyed store.
          *
          *     The account must exist first (404 otherwise), so a sensitive read cannot be
-         *     used to probe for accounts that are not there.
+         *     used to probe for accounts that are not there. Soft-deleted accounts answer
+         *     the same way.
          */
         get: operations["get_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_get"];
         /**
          * Put Account Sensitive Attributes
-         * @description Full-replace an account's SENSITIVE attribute blob (404 if the account is missing).
+         * @description Full-replace an account's SENSITIVE attribute blob (404 if missing or soft-deleted).
          */
         put: operations["put_account_sensitive_attributes_api_v1_auth_accounts__username__sensitive_attributes_put"];
         post?: never;
@@ -769,17 +776,20 @@ export interface paths {
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. A secret the body names an env var for and sends no value for loses its stored copy once the update is saved, so the env var is read instead. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written or deleted.
+         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. A secret the body names a new env var for, other than the one the provider already names, and sends no value for loses its stored copy once the update is saved, so the env var is read instead; resending the stored env var name keeps the stored secret. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written or deleted.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
         /**
          * Delete Provider
-         * @description Detach an OIDC provider and report orphaned groups (admin only).
+         * @description Detach an OIDC provider and soft-delete its accounts (admin only).
          *
          *     Does NOT delete groups -- they become orphaned with their source_provider
-         *     still set to the deleted provider name. The provider's stored credentials
-         *     ARE removed: nothing is left that can authenticate as a detached provider.
+         *     still set to the deleted provider name. Accounts owned by the provider
+         *     (``source_provider``) or last logged in through it (``oidc_id``) are
+         *     soft-deleted: disabled and renamed to ``{uuid}-deleted`` with contact fields
+         *     cleared. The provider's stored credentials ARE removed: nothing is left that
+         *     can authenticate as a detached provider.
          */
         delete: operations["delete_provider_api_v1_auth_oidc_providers__name__delete"];
         options?: never;
@@ -1169,10 +1179,14 @@ export interface paths {
          * @description Update a source from a flat revision body.
          *
          *     Before the first deploy, edits update the working version in place. After deploy, a new
-         *     major version is created only when ``current`` equals ``deployed_version`` and schema pins
-         *     (``meta_schema``, ``meta_schema_version``, ``derived_schema``, ``additional_fields``),
-         *     ``views``, or ``transform`` change. Draft versions (``current`` not deployed) update
-         *     in place.
+         *     major version is created only when ``current`` equals ``deployed_version`` and a
+         *     table-shaping field changes: schema pins (``meta_schema``, ``meta_schema_version``,
+         *     ``derived_schema``, ``additional_fields``), ``ttl_days``, ``engine``, common-header
+         *     type/version, ``views``, or ``transform``. Draft versions (``current`` not deployed)
+         *     update in place.
+         *
+         *     Origin (receiver vs fetcher) cannot change, and a pinned ``meta_schema`` cannot be
+         *     cleared: once a source owns its own table it cannot move back onto ``main``.
          *
          *     ``header`` is optional: when omitted, no header is stored on the written version snapshot
          *     (same as create). Send ``header`` explicitly to set or change it.
@@ -1934,7 +1948,7 @@ export interface paths {
          *     This is the operator's record of the schema apply, replacing the completed
          *     ArgoCD Job the engine took over from. ``state`` is what readiness follows:
          *     converged or observed is ready, failed leaves the pod up and NotReady with
-         *     the cause here.
+         *     the stage that failed here and the cause in the engine log.
          */
         get: operations["get_schema_status_api_v1_system_schema_get"];
         put?: never;
@@ -5634,6 +5648,12 @@ export interface components {
              */
             external: boolean;
             /**
+             * Oidc Id
+             * @description OIDC provider name last used to log this account in, empty if none
+             * @default
+             */
+            oidc_id: string;
+            /**
              * Password Change Required
              * @description True until the account replaces an issued password. The account's own read reports no groups while it is set, as its session holds none.
              * @default false
@@ -6551,7 +6571,7 @@ export interface components {
         ChangeOwnPasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password; at least 12 characters
+             * @description New plaintext password; at least 12 characters and at most 72 bytes
              */
             new_password: string;
             /**
@@ -7005,7 +7025,7 @@ export interface components {
             username: string;
             /**
              * Password
-             * @description Plaintext password (bcrypt-hashed before storage); at least 12 characters
+             * @description Plaintext password (bcrypt-hashed before storage); at least 12 characters and at most 72 bytes
              */
             password: string;
             /**
@@ -7104,7 +7124,7 @@ export interface components {
             source_id: string;
             /**
              * Source Provider
-             * @description The provider whose logins the source ID answers, required with a source ID: an OIDC provider name, a key or value of auth.source_provider_bindings, 'scim' or, while auth.trust_proxy_auth_headers is on, auth.proxy_provider. At most 512 characters. A link saved before a provider was required may have none; it answers any provider until it is saved with one or a group sync pins it.
+             * @description The provider whose logins the source ID answers, required with a source ID: an OIDC provider name, a key or value of auth.source_provider_bindings, 'scim' or, while auth.trust_proxy_auth_headers is on, auth.proxy_provider. At most 512 characters.
              * @default
              */
             source_provider: string;
@@ -7195,6 +7215,11 @@ export interface components {
              * @default
              */
             client_secret_env: string;
+            /**
+             * Scopes
+             * @description OAuth scopes requested at login, one scope per entry; must include openid. One space-separated string is accepted too, and a blank one is no override. Omit for the provider type's default: openid email profile, plus groups for generic and okta, and https://www.googleapis.com/auth/cloud-identity.groups.readonly for google, which reads each user's groups with their own token. Google and Entra ID fail a login that asks for groups.
+             */
+            scopes?: string[] | null;
             groups?: components["schemas"]["GroupResolutionRequest"];
         };
         /** CreateRequest */
@@ -7568,6 +7593,37 @@ export interface components {
             deleted: string;
             /** Orphaned Groups */
             orphaned_groups: components["schemas"]["OrphanedGroupInfo"][];
+            /**
+             * Disabled Accounts
+             * @description Accounts soft-disabled and renamed to ``{uuid}-deleted`` because they were owned by or last logged in through the detached provider. Already-disabled and protected recovery accounts are left alone.
+             */
+            disabled_accounts?: components["schemas"]["DisabledAccountInfo"][];
+        };
+        /**
+         * DisabledAccountInfo
+         * @description An account soft-disabled and anonymized because its OIDC provider was detached.
+         */
+        DisabledAccountInfo: {
+            /**
+             * Username
+             * @description Anonymized account id (``{uuid}-deleted``)
+             */
+            username: string;
+            /**
+             * Previous Username
+             * @description Account id before anonymization
+             */
+            previous_username: string;
+            /**
+             * Source Provider
+             * @description Ownership stamp on the account (OIDC provider name, scim, or empty)
+             */
+            source_provider: string;
+            /**
+             * Oidc Id
+             * @description OIDC provider name last used to log this account in
+             */
+            oidc_id: string;
         };
         /**
          * DraftColumn
@@ -8119,11 +8175,6 @@ export interface components {
              */
             service_account_json_path: string;
             /**
-             * Admin Email
-             * @default
-             */
-            admin_email: string;
-            /**
              * Domain
              * @default
              */
@@ -8193,25 +8244,19 @@ export interface components {
             enrich_on_login: boolean;
             /**
              * Service Account Json
-             * @description Google service account JSON. Write-only: it goes to the secret store and only its path is kept in config.
+             * @description Optional Google service account JSON, for the group sync and for logins whose own token cannot read their groups. It acts as itself, so the org's admin must assign it a groups admin role. Write-only: it goes to the secret store and only its path is kept in config.
              * @default
              */
             service_account_json: string;
             /**
              * Service Account Json Env
-             * @description Env var for Google SA JSON. On an update, setting it without service_account_json drops the stored JSON, so the env var is used.
+             * @description Env var for Google SA JSON. On an update, naming a different env var without service_account_json drops the stored JSON, so the env var is used.
              * @default
              */
             service_account_json_env: string;
             /**
-             * Admin Email
-             * @description Google Workspace admin email
-             * @default
-             */
-            admin_email: string;
-            /**
              * Domain
-             * @description Google Workspace domain
+             * @description Google Workspace domain the service account syncs
              * @default
              */
             domain: string;
@@ -8235,7 +8280,7 @@ export interface components {
             client_secret: string;
             /**
              * Client Secret Env
-             * @description Env var for Entra ID client secret. On an update, setting it without client_secret drops the stored secret, so the env var is used.
+             * @description Env var for Entra ID client secret. On an update, naming a different env var without client_secret drops the stored secret, so the env var is used.
              * @default
              */
             client_secret_env: string;
@@ -8247,7 +8292,7 @@ export interface components {
             api_token: string;
             /**
              * Api Token Env
-             * @description Env var for Okta API token. On an update, setting it without api_token drops the stored token, so the env var is used.
+             * @description Env var for Okta API token. On an update, naming a different env var without api_token drops the stored token, so the env var is used.
              * @default
              */
             api_token_env: string;
@@ -8272,8 +8317,6 @@ export interface components {
             service_account_json_env: string;
             /** Service Account Json Path */
             service_account_json_path: string;
-            /** Admin Email */
-            admin_email: string;
             /** Domain */
             domain: string;
             /** Tenant Id */
@@ -9593,7 +9636,7 @@ export interface components {
             client_secret_path: string;
             /**
              * Scopes
-             * @default openid email profile groups
+             * @default
              */
             scopes: string;
             groups?: components["schemas"]["GroupResolutionConfig"];
@@ -9611,7 +9654,7 @@ export interface components {
              * Last Sync Status
              * @default
              */
-            last_sync_status: string;
+            last_sync_status: ("" | "ok" | "error" | "not_configured" | "user_token") | string;
             /**
              * Sync Error
              * @default
@@ -10812,13 +10855,21 @@ export interface components {
             client_secret_env: string;
             /** Client Secret Path */
             client_secret_path: string;
+            /**
+             * Scopes
+             * @description OAuth scopes requested at login
+             */
+            scopes: string[];
             groups: components["schemas"]["GroupResolutionResponse"];
             /** Created At */
             created_at: string;
             /** Last Sync At */
             last_sync_at: string;
-            /** Last Sync Status */
-            last_sync_status: string;
+            /**
+             * Last Sync Status
+             * @description How the last group sync ended: empty before the first, ok, error (sync_error says why), not_configured (no directory credential), user_token (each login reads its own groups, so there is no directory to sync), or 'partial: ' followed by how many groups were skipped and why.
+             */
+            last_sync_status: ("" | "ok" | "error" | "not_configured" | "user_token") | string;
             /** Sync Error */
             sync_error: string;
         };
@@ -11023,7 +11074,7 @@ export interface components {
         ResetPasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password; at least 12 characters
+             * @description New plaintext password; at least 12 characters and at most 72 bytes
              */
             new_password: string;
         };
@@ -11231,7 +11282,7 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
@@ -12190,7 +12241,7 @@ export interface components {
             duration_seconds: number;
             /**
              * Error
-             * @description Why the pass failed; empty when it did not.
+             * @description The stage that failed, its cause in the engine log; empty when none did.
              */
             error: string;
             /**
@@ -13485,7 +13536,7 @@ export interface components {
             origin?: ("receiver" | "fetcher") | null;
             /**
              * Current Table Topic Type
-             * @description Where records land: ``own`` when a meta schema pins a per-source table, ``main`` when there is none and records share the landing table
+             * @description Where the working ``current`` version lands: ``own`` when that version pins a meta schema, ``main`` when it does not (even if a deployed older version still has its own table)
              * @enum {string}
              */
             current_table_topic_type: "own" | "main";
@@ -13642,6 +13693,12 @@ export interface components {
              * @description Version ids with a successful deploy in source-deploys history, excluding the live deployed_version
              */
             previous_deployed_versions?: string[];
+            /**
+             * Current Table Topic Type
+             * @description Where the working ``current`` version lands: ``own`` when that version pins a meta schema, ``main`` when it does not (even if a deployed older version still has its own table)
+             * @enum {string}
+             */
+            current_table_topic_type: "own" | "main";
             /** @description Configuration snapshot for ``selected`` plus pipeline artifacts */
             version: components["schemas"]["SourceVersionDetail"];
         };
@@ -14195,7 +14252,7 @@ export interface components {
         };
         /**
          * TopicFailure
-         * @description One topic the broker would not do the thing to, and what it said.
+         * @description One topic the broker would not do the thing to; the broker's own text is in the log.
          */
         TopicFailure: {
             /** Name */
@@ -14395,7 +14452,7 @@ export interface components {
             source_id?: string | null;
             /**
              * Source Provider
-             * @description Replace the source provider; omit to keep it. The provider whose logins the source ID answers, required with a source ID: an OIDC provider name, a key or value of auth.source_provider_bindings, 'scim' or, while auth.trust_proxy_auth_headers is on, auth.proxy_provider. At most 512 characters. A link saved before a provider was required may have none; it answers any provider until it is saved with one or a group sync pins it.
+             * @description Replace the source provider; omit to keep it. The provider whose logins the source ID answers, required with a source ID: an OIDC provider name, a key or value of auth.source_provider_bindings, 'scim' or, while auth.trust_proxy_auth_headers is on, auth.proxy_provider. At most 512 characters.
              */
             source_provider?: string | null;
         };
@@ -14467,9 +14524,14 @@ export interface components {
             client_secret?: string | null;
             /**
              * Client Secret Env
-             * @description Env var name for the RP client secret. Setting it without client_secret drops the stored secret, so the env var is used.
+             * @description Env var name for the RP client secret. Naming a different env var without client_secret drops the stored secret, so the env var is used.
              */
             client_secret_env?: string | null;
+            /**
+             * Scopes
+             * @description Replace the OAuth scopes requested at login, one scope per entry; must include openid. One space-separated string is accepted too, and a blank one leaves the scopes as they are.
+             */
+            scopes?: string[] | null;
             /** @description Group resolution config */
             groups?: components["schemas"]["GroupResolutionRequest"] | null;
         };
@@ -15085,20 +15147,23 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name (invalid_name), a name held by a stored group that does not load (stored_unloadable) or by one not linked to that provider group (name_taken) and an id held by a group linked to a provider not bound to this one (id_taken) or by a stored group the sync cannot update (holder_unwritable). Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
-            /**
-             * Error
-             * @description Why the sync failed, such as the directory refusing or failing a request; it is also stored as the provider's sync_error. Null when the sync did not fail.
-             */
+            /** Error */
             error: string | null;
             /**
              * Skipped
-             * @description Why the sync did not run: the provider is disabled or its groups mode is not 'api', so there is no directory to sync. Null when the sync ran.
+             * @description Why the sync did nothing, when it did not run: the provider is disabled, is not in api mode, has no directory credential configured, or reads each login's groups with the user's own token and has no directory to sync. The provider's last_sync_status reads not_configured and user_token in those last two cases.
              */
             skipped?: string | null;
+            /**
+             * Status
+             * @description How the sync ended: ok, partial (some groups skipped), error (the listing failed, or the secret store holding its credential did not answer or refused access), not_configured (no directory credential), user_token (no directory to sync, which is a Google provider's default and not a fault) or skipped (disabled or not in api mode). Key on this, never on the text of error or skipped.
+             * @enum {string}
+             */
+            status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";
         };
         /** TestResponse */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
@@ -15597,7 +15662,7 @@ export interface operations {
             query?: {
                 /** @description When false, return JSON with authorization_url for SPA clients (use credentials: include, then window.location.assign the URL). */
                 redirect?: boolean;
-                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...). A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
+                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...), or the refusal's code (#error=<code>&provider=...) when the login is refused. A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
                 return_to?: string | null;
             };
             header?: never;
@@ -15655,7 +15720,7 @@ export interface operations {
                     "application/json": components["schemas"]["OidcCallbackResponse"];
                 };
             };
-            /** @description Login started with return_to: redirect there with the engine token in the URL fragment. */
+            /** @description Login started with return_to: redirect there with the engine token in the URL fragment, or with the refusal's code (#error=<code>&provider=...) when the login is refused. */
             303: {
                 headers: {
                     [name: string]: unknown;
@@ -15678,6 +15743,8 @@ export interface operations {
             query?: {
                 /** @description Search in username, name, or email */
                 search?: string | null;
+                /** @description Exact match on the OIDC provider name last used to log the account in */
+                oidc_id?: string | null;
                 /** @description Filter by blocked status. Omitted returns every account. */
                 blocked?: boolean | null;
                 /** @description Include the local admin and break-glass recovery accounts. */

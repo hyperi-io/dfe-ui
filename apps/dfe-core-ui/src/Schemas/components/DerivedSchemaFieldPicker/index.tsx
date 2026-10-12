@@ -1,3 +1,4 @@
+import type { FormControlAria } from '@/core/components/Form/formControlAria';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
 import { INDEX_USE_CASE_OPTIONS } from '@/Schemas/constants/indexUseCase';
@@ -29,7 +30,10 @@ const readOnlyCell = (value?: string | null) =>
     <span className="text-foreground/40 dark:text-dark-foreground/40">-</span>
   );
 
-export interface DerivedSchemaFieldPickerProps {
+export interface DerivedSchemaFieldPickerProps extends Pick<
+  FormControlAria,
+  'aria-describedby'
+> {
   /** Registry path of the meta schema the columns come from. */
   basePath: string | null;
   /** Version of that meta schema. */
@@ -51,6 +55,7 @@ export const DerivedSchemaFieldPicker = ({
   value = EMPTY_SELECTION,
   onChange,
   disabled = false,
+  'aria-describedby': ariaDescribedBy,
 }: DerivedSchemaFieldPickerProps) => {
   const [search, setSearch] = useState('');
 
@@ -201,7 +206,12 @@ export const DerivedSchemaFieldPicker = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    // A group takes no aria-invalid, so the error reaches it as its description.
+    <div
+      role="group"
+      aria-describedby={ariaDescribedBy}
+      className="flex flex-col gap-2"
+    >
       <div className="flex items-center justify-between gap-2">
         <p className="text-foreground/60 dark:text-dark-foreground/60">
           {value.length} of {columnItems.length} columns selected

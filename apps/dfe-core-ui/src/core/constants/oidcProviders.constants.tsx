@@ -1,10 +1,15 @@
 import {
+  GROUP_MODE_LABELS,
+  GROUP_MODES_BY_TYPE,
+  type TOidcProviderType,
+} from '@/core/helpers/oidcProviderFieldRules';
+import {
   CreateUpdateOidcProviderFormData,
-  DEFAULT_GROUP_RESOLUTION,
+  defaultGroupResolution,
 } from '@/core/validationSchemas/oidcProviders.schema';
 
 export const PROVIDERS: readonly {
-  key: string;
+  key: TOidcProviderType;
   name: string;
   description: React.ReactNode;
   initialValues: Partial<CreateUpdateOidcProviderFormData>;
@@ -20,7 +25,7 @@ export const PROVIDERS: readonly {
       issuer: 'https://accounts.google.com',
       client_id_env: 'DFE_OIDC_GOOGLE_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_GOOGLE_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+      groups: defaultGroupResolution('google'),
     },
   },
   {
@@ -34,7 +39,7 @@ export const PROVIDERS: readonly {
       issuer: '',
       client_id_env: 'DFE_OIDC_ENTRA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_ENTRA_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+      groups: defaultGroupResolution('entra_id'),
     },
   },
   {
@@ -48,7 +53,7 @@ export const PROVIDERS: readonly {
       issuer: '',
       client_id_env: 'DFE_OIDC_OKTA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_OKTA_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'api' },
+      groups: defaultGroupResolution('okta'),
     },
   },
   {
@@ -62,7 +67,7 @@ export const PROVIDERS: readonly {
       issuer: 'https://your-custom-oidc-provider.com',
       client_id_env: 'DFE_OIDC_CUSTOM_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_CUSTOM_CLIENT_SECRET',
-      groups: { ...DEFAULT_GROUP_RESOLUTION, mode: 'token_claim' },
+      groups: defaultGroupResolution('generic'),
     },
   },
 ]);
@@ -73,29 +78,32 @@ export const PROVIDERS_MAP = Object.freeze(
       acc[provider.key] = provider;
       return acc;
     },
-    {} as Record<(typeof PROVIDERS)[number]['key'], (typeof PROVIDERS)[number]>,
+    {} as Record<string, (typeof PROVIDERS)[number]>,
   ),
 );
 
-type TGroupMode = (typeof DEFAULT_GROUP_RESOLUTION)['mode'];
-
-export const GROUP_MODE_OPTIONS: {
-  label: string;
-  value: TGroupMode;
-}[] = [
-  { label: 'Manual', value: 'manual' },
-  { label: 'Token Claim', value: 'token_claim' },
-  { label: 'API', value: 'api' },
-];
-
-/** The group modes the engine accepts for each provider type. */
-export const GROUP_MODES_BY_TYPE: Readonly<
-  Record<string, readonly TGroupMode[]>
-> = Object.freeze({
-  entra_id: ['manual', 'token_claim', 'api'],
-  generic: ['manual', 'token_claim'],
-  google: ['api'],
-  okta: ['manual', 'token_claim', 'api'],
-});
+/** The group modes the engine accepts for a provider type. */
+export const groupModeOptions = (type: TOidcProviderType) =>
+  GROUP_MODES_BY_TYPE[type].map((mode) => ({
+    label: GROUP_MODE_LABELS[mode],
+    value: mode,
+  }));
 
 export const GROUPS_FORM_NAME = 'groups';
+
+export const MANUAL_MODE_HINT =
+  "Group membership is managed in DFE. The token's groups are ignored and nothing syncs.";
+
+export const GOOGLE_SERVICE_ACCOUNT_HINT =
+  'Optional. For the group sync, and for logins whose own token cannot read their groups.';
+
+export const ENTRA_API_SECRET_HINT =
+  'The directory secret is optional: the login client secret is used when both are empty.';
+
+export const ENTRA_TOKEN_CLAIM_HINT =
+  'Optional. Read only when a user is in too many groups for the token to list them.';
+
+export const FROM_ISSUER_HINT =
+  'Filled in from the Issuer. Change it only if your provider uses a different value.';
+
+export const SCOPES_PLACEHOLDER = 'Provider type default';

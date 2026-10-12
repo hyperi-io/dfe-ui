@@ -4,7 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
@@ -18,8 +18,8 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-      message: DB_NAME_VALIDATOR.message('Name'),
+    .refine((v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v), {
+      message: RULE_HUNT_NAME_VALIDATOR.message('Name'),
     }),
 });
 
@@ -74,6 +74,8 @@ export const CloneRuleModal = ({
   const handleOpen = () => {
     setOpen(true);
   };
+
+  const copyName = RULE_HUNT_NAME_VALIDATOR.copyName(rule.name);
 
   return (
     <>
@@ -138,7 +140,7 @@ export const CloneRuleModal = ({
           form={form}
           onFinish={handleCloneRule}
           initialValues={{
-            name: `${rule.name}_copy`,
+            name: copyName,
             display_name: `Copy: ${rule.display_name ?? rule.name}`,
             user_sql: rule.original_sql,
             severity: rule.severity,
@@ -149,11 +151,11 @@ export const CloneRuleModal = ({
         >
           <Form.Item
             name="name"
-            label={<Form.Label required>Name</Form.Label>}
+            label="Name"
             rules={[formValidation]}
             className="w-full mb-2"
           >
-            <Input placeholder={`${rule.name}_copy`} />
+            <Input placeholder={copyName} />
           </Form.Item>
 
           {error && <FormNotification text={error.message} type="error" />}

@@ -52,6 +52,7 @@ const accounts = (): TAccountsResponse => ({
       email: 'string',
       phone: 'string',
       name: 'string',
+      oidc_id: 'string',
     },
     {
       username: 'alice',
@@ -67,6 +68,7 @@ const accounts = (): TAccountsResponse => ({
       email: 'string',
       phone: 'string',
       name: 'string',
+      oidc_id: 'string',
     },
   ],
   total: 2,
@@ -154,7 +156,7 @@ describe('AccountManagement', () => {
             email: 'dfe-test@dfe-oidc.test',
             phone: '',
             name: 'DFE dfe-test',
-
+            oidc_id: 'string',
             external: false,
             password_change_required: false,
             blocked: false,
@@ -170,6 +172,7 @@ describe('AccountManagement', () => {
             email: '',
             phone: '',
             name: '',
+            oidc_id: 'string',
             external: false,
             password_change_required: false,
             blocked: false,

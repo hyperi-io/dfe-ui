@@ -1,0 +1,13 @@
+# Project:   dfe-ui
+# File:      osv-scanner.toml
+# Purpose:   Advisories osv-scanner reports that are accepted, each with its reason
+#
+# License:   BUSL-1.1
+# Copyright: (c) 2026 HYPERI PTY LIMITED
+
+# Graded by reachability, per dfe-infra docs/THREAT-MODEL.md: dfe-ui takes
+# untrusted input, so only an advisory that reaches no shipped code is accepted.
+
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "braces 3.0.3, pulled only by micromatch 4 under fast-glob 3.3.1 under @next/eslint-plugin-next: lint-time tooling that matches our own source globs, never in the Next.js server or browser bundle, so no request input reaches it. No fixed braces release exists. Drop when @next/eslint-plugin-next moves off fast-glob 3.3.1 or braces ships a fix."

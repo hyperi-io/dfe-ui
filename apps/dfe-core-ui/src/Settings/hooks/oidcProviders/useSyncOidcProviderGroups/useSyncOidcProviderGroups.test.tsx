@@ -1,5 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -51,6 +52,7 @@ describe('.useSyncOidcProviderGroups', () => {
         groups_skipped: 0,
         error: null,
         skipped: null,
+        status: 'ok',
       };
 
       await waitFor(() => {
@@ -70,39 +72,24 @@ describe('.useSyncOidcProviderGroups', () => {
         expect(onError).not.toHaveBeenCalled();
       });
     });
-  });
 
-  describe('a skipped sync', () => {
-    test('passes the reason through', async () => {
-      const skipped =
-        "groups mode is 'manual': group membership is managed in DFE, so there is no directory to sync";
-      server.use(
-        API_CONFIG_MOCKS.oidcProviders.syncGroups.post.success({
-          mockedResponse: {
-            created: 0,
-            updated: 0,
-            total: 0,
-            groups_skipped: 0,
-            error: null,
-            skipped,
-          },
-        }),
-      );
-      const onSuccess = vi.fn();
-
-      const { result } = renderHook(
-        () => useSyncOidcProviderGroups({ name, onSuccess }),
-        { wrapper },
-      );
+    test('marks the provider list stale, so its last sync status refreshes', async () => {
+      const testWrapper = buildTestWrapper().withReactQuery();
+      const { result } = renderHook(() => useSyncOidcProviderGroups({ name }), {
+        wrapper: testWrapper.wrapper,
+      });
+      const listKey = QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS({
+        per_page: 10,
+      });
+      testWrapper.queryClient?.setQueryData(listKey, { pages: [] });
 
       result.current.mutate();
 
       await waitFor(() => {
-        expect(result.current.data?.skipped).toBe(skipped);
+        expect(
+          testWrapper.queryClient?.getQueryState(listKey)?.isInvalidated,
+        ).toBe(true);
       });
-      expect(onSuccess).toHaveBeenCalledWith(
-        expect.objectContaining({ skipped }),
-      );
     });
   });
 

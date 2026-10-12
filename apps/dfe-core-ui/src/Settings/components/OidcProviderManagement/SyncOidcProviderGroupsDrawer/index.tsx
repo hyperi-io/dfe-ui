@@ -2,8 +2,10 @@ import { Drawer } from '@/core/components/Drawer';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { Tooltip } from '@/core/components/Tooltip';
-import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
+import {
+  SYNC_STATES,
+  syncStateText,
+} from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
 import { useSyncOidcProviderGroups } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
 import { IconArrowMergeAltRight } from '@repo/dfe-icons';
@@ -12,58 +14,73 @@ import { useState } from 'react';
 
 const dataListTermStyle =
   'text-sm font-medium text-gray-500 dark:text-gray-400';
+const descriptionStyle =
+  'text-sm text-foreground-muted dark:text-dark-foreground-muted';
 
-// The engine skips a disabled provider, so the reason is shown before the click.
-const DISABLED_REASON =
-  'This provider is disabled, so there is nothing to sync.';
+/** Only a sync that listed the directory has counts to report. */
+const SyncCounts = ({
+  result,
+}: {
+  result: TSyncOidcProviderGroupsResponse;
+}) => (
+  <dl className="grid grid-cols-2 gap-2">
+    <dt className={dataListTermStyle}>Groups Created</dt>
+    <dd>{result.created}</dd>
+    <dt className={dataListTermStyle}>Groups Updated</dt>
+    <dd>{result.updated}</dd>
+    <dt className={dataListTermStyle}>Total</dt>
+    <dd>{result.total}</dd>
+    {result.status === 'partial' && (
+      <>
+        <dt className={dataListTermStyle}>Groups Skipped</dt>
+        <dd>{result.groups_skipped}</dd>
+      </>
+    )}
+  </dl>
+);
 
 const SyncResult = ({
   result,
 }: {
   result: TSyncOidcProviderGroupsResponse;
 }) => {
-  if (result.skipped) {
+  // Keyed on status, never on the text of error or skipped (the engine's contract).
+  const state = Object.hasOwn(SYNC_STATES, result.status)
+    ? SYNC_STATES[result.status]
+    : undefined;
+  if (!state) {
     return (
-      <NotificationCard
-        title="Sync skipped"
-        description={result.skipped}
-        type="info"
-      />
+      <NotificationCard title="Sync finished" description={result.status} />
     );
   }
-
-  if (result.error) {
-    return (
-      <NotificationCard
-        title="Sync failed"
-        description={result.error}
-        type="error"
-      />
-    );
-  }
-
+  const reason = result.status === 'error' ? result.error : null;
   return (
-    <dl className="grid grid-cols-2 gap-2">
-      <dt className={dataListTermStyle}>Groups Created</dt>
-      <dd>{result.created}</dd>
-      <dt className={dataListTermStyle}>Groups Updated</dt>
-      <dd>{result.updated}</dd>
-      <dt className={dataListTermStyle}>Total</dt>
-      <dd>{result.total}</dd>
-      {result.groups_skipped > 0 && (
-        <>
-          <dt className={dataListTermStyle}>Groups Skipped</dt>
-          <dd>{result.groups_skipped}</dd>
-        </>
+    <>
+      <NotificationCard
+        type={state.notice}
+        title={state.title}
+        description={
+          reason ? (
+            <div className="flex flex-col gap-1">
+              <p className={descriptionStyle}>{state.message}</p>
+              <p className={descriptionStyle}>{reason}</p>
+            </div>
+          ) : (
+            syncStateText(result.status)
+          )
+        }
+      />
+      {(result.status === 'ok' || result.status === 'partial') && (
+        <SyncCounts result={result} />
       )}
-    </dl>
+    </>
   );
 };
 
 export const SyncOidcProviderGroupsDrawer = ({
-  oidcProvider,
+  oidcProviderName,
 }: {
-  oidcProvider: TOidcProviderListItem;
+  oidcProviderName: string;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -73,7 +90,7 @@ export const SyncOidcProviderGroupsDrawer = ({
     isPending,
     error,
   } = useSyncOidcProviderGroups({
-    name: oidcProvider.name,
+    name: oidcProviderName,
   });
 
   const handleSyncOidcProvider = () => {
@@ -85,23 +102,15 @@ export const SyncOidcProviderGroupsDrawer = ({
     <>
       <RbacProtected action={RbacProtected.rbacActions.oidc_write}>
         <RbacProtected.Unrestricted>
-          {oidcProvider.enabled ? (
-            <Button
-              type="text"
-              icon={<IconArrowMergeAltRight />}
-              onClick={handleSyncOidcProvider}
-              loading={isPending}
-              disabled={isPending}
-            >
-              Sync OIDC Provider Groups
-            </Button>
-          ) : (
-            <Tooltip title={DISABLED_REASON}>
-              <Button type="text" icon={<IconArrowMergeAltRight />} disabled>
-                Sync OIDC Provider Groups
-              </Button>
-            </Tooltip>
-          )}
+          <Button
+            type="text"
+            icon={<IconArrowMergeAltRight />}
+            onClick={handleSyncOidcProvider}
+            loading={isPending}
+            disabled={isPending}
+          >
+            Sync OIDC Provider Groups
+          </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted tooltip={{ show: true }}>
           <Button type="text" icon={<IconArrowMergeAltRight />} disabled>
@@ -110,7 +119,7 @@ export const SyncOidcProviderGroupsDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
       <Drawer
-        title="Sync OIDC Provider"
+        title="Sync OIDC Provider Groups"
         open={open}
         size="30%"
         destroyOnHidden
@@ -121,13 +130,13 @@ export const SyncOidcProviderGroupsDrawer = ({
         }}
       >
         {isPending && (
-          <>
-            <Spin />{' '}
-            <p className="sr-only">Syncing {oidcProvider.name} groups</p>
-          </>
+          <div className="flex items-center gap-2">
+            <Spin size="small" />
+            <span className={descriptionStyle}>Syncing groups</span>
+          </div>
         )}
 
-        {data && <SyncResult result={data} />}
+        {!isPending && data && <SyncResult result={data} />}
 
         {error && <FormNotification text={error.message} type="error" />}
       </Drawer>

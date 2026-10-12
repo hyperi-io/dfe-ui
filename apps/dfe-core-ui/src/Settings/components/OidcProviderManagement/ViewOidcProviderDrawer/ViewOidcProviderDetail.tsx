@@ -1,11 +1,15 @@
 import { EmptyDetail } from '@/core/components/EmptyDetail';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
-import { Tooltip } from '@/core/components/Tooltip';
 import {
   formatDateToString,
   formatDateXAgo,
 } from '@/core/helpers/date.helpers';
+import { groupModeLabel } from '@/core/helpers/oidcProviderFieldRules';
 import { cn } from '@/core/utils/style';
+import {
+  OidcSyncStatusTag,
+  syncStatusDetail,
+} from '@/Settings/components/OidcProviderManagement/OidcSyncStatusTag';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconCheck, IconX } from '@repo/dfe-icons';
 
@@ -30,35 +34,21 @@ export const ViewOidcProviderDetail = ({
       />
     );
   }
+  const syncDetail = syncStatusDetail(
+    oidcProvider.last_sync_status,
+    oidcProvider.sync_error,
+  );
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between">
         <h1 className="text-lg font-semibold">{oidcProvider?.display_name}</h1>
-        <Tooltip
-          destroyOnHidden
-          title={
-            oidcProvider?.last_sync_at ? (
-              <div className="flex flex-col gap-2">
-                <span className="font-medium">Previous Sync Details</span>
-                <span>
-                  Synced at: {formatDateToString(oidcProvider?.last_sync_at)}
-                </span>
-                <span>Status: {oidcProvider?.last_sync_status}</span>
-                {oidcProvider?.sync_error ? (
-                  <span>Error: {oidcProvider?.sync_error}</span>
-                ) : null}
-              </div>
-            ) : null
-          }
-        >
-          <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
-            {oidcProvider?.last_sync_at ? (
-              <>Last synced {formatDateXAgo(oidcProvider?.last_sync_at)}</>
-            ) : (
-              <span>Not synced yet</span>
-            )}
-          </p>
-        </Tooltip>
+        <p className="flex items-center text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-full px-4 py-1">
+          {oidcProvider?.last_sync_at ? (
+            <>Last synced {formatDateXAgo(oidcProvider?.last_sync_at)}</>
+          ) : (
+            <span>Not synced yet</span>
+          )}
+        </p>
       </div>
       <dl className={dataListGridStyle}>
         <dt className={dataListTermStyle}>Name:</dt>
@@ -69,6 +59,24 @@ export const ViewOidcProviderDetail = ({
         <dd>{oidcProvider?.type}</dd>
         <dt className={dataListTermStyle}>Issuer:</dt>
         <dd>{oidcProvider?.issuer}</dd>
+        <dt className={dataListTermStyle}>Scopes:</dt>
+        <dd>
+          {oidcProvider?.scopes?.length ? (
+            <ul className="flex flex-col">
+              {oidcProvider.scopes.map((scope) => (
+                <li key={scope} className="break-all">
+                  {scope}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyData />
+          )}
+        </dd>
+        <dt className={dataListTermStyle}>Client ID:</dt>
+        <dd>
+          {oidcProvider?.client_id ? oidcProvider.client_id : <EmptyData />}
+        </dd>
         <dt className={dataListTermStyle}>Client ID Environment Variable:</dt>
         <dd>
           {oidcProvider?.client_id_env ? (
@@ -96,7 +104,7 @@ export const ViewOidcProviderDetail = ({
       >
         <dl className={dataListGridStyle}>
           <dt className={dataListTermStyle}>Mode:</dt>
-          <dd>{oidcProvider?.groups?.mode}</dd>
+          <dd>{groupModeLabel(oidcProvider?.groups?.mode ?? '')}</dd>
           {oidcProvider?.groups?.claim_name && (
             <>
               <dt className={dataListTermStyle}>Claim Name:</dt>
@@ -131,16 +139,16 @@ export const ViewOidcProviderDetail = ({
               <dd>{oidcProvider?.groups?.service_account_json_env}</dd>
             </>
           )}
-          {oidcProvider?.groups?.admin_email && (
-            <>
-              <dt className={dataListTermStyle}>Admin Email:</dt>
-              <dd>{oidcProvider?.groups?.admin_email}</dd>
-            </>
-          )}
           {oidcProvider?.groups?.domain && (
             <>
               <dt className={dataListTermStyle}>Domain:</dt>
               <dd>{oidcProvider?.groups?.domain}</dd>
+            </>
+          )}
+          {oidcProvider?.groups?.tenant_id && (
+            <>
+              <dt className={dataListTermStyle}>Tenant ID:</dt>
+              <dd>{oidcProvider?.groups?.tenant_id}</dd>
             </>
           )}
           {oidcProvider?.groups?.tenant_id_env && (
@@ -171,6 +179,21 @@ export const ViewOidcProviderDetail = ({
             <>
               <dt className={dataListTermStyle}>Okta Domain:</dt>
               <dd>{oidcProvider?.groups?.okta_domain}</dd>
+            </>
+          )}
+          {oidcProvider?.last_sync_at && (
+            <>
+              <dt className={dataListTermStyle}>Last Sync:</dt>
+              <dd className="flex flex-wrap items-center gap-x-2">
+                <OidcSyncStatusTag status={oidcProvider.last_sync_status} />
+                {formatDateToString(oidcProvider.last_sync_at)}
+              </dd>
+              {syncDetail && (
+                <>
+                  <dt className={dataListTermStyle}>Sync Message:</dt>
+                  <dd>{syncDetail}</dd>
+                </>
+              )}
             </>
           )}
         </dl>

@@ -2,54 +2,106 @@ import { CredentialField } from '@/core/components/CredentialField';
 import { chooseCredentialSource } from '@/core/components/CredentialField/CredentialField.mocks';
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { ENV_VAR_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from 'antd';
-import type { ReactNode } from 'react';
 import { describe, expect, test, vi } from 'vitest';
+import z from 'zod';
 
 const { wrapper } = buildTestWrapper().withTheme();
 
 const STORED_SECRET_HINT = 'Secret stored - leave blank to keep it';
 
-const CLIENT_ID = (
-  <CredentialField
-    label="Client ID"
-    valueName="client_id"
-    envName="client_id_env"
-  />
-);
+const CLIENT_ID_REQUIRED = 'Enter a Client ID or its environment variable';
 
-const CLIENT_SECRET = (
-  <CredentialField
-    label="Client Secret"
-    valueName="client_secret"
-    envName="client_secret_env"
-    storedName="client_secret_path"
-    secret
-  />
-);
+const envVarName = () =>
+  z
+    .string()
+    .refine((value) => !value || ENV_VAR_NAME_VALIDATOR.regex.test(value), {
+      message: ENV_VAR_NAME_VALIDATOR.message,
+    })
+    .default('');
+
+// A rule that pins its either-or error to the value member, as the provider rules do.
+const SCHEMA = z
+  .object({
+    client_id: z.string().default(''),
+    client_id_env: envVarName(),
+    client_secret: z.string().default(''),
+    client_secret_env: envVarName(),
+  })
+  .superRefine((values, ctx) => {
+    if (!values.client_id && !values.client_id_env) {
+      ctx.addIssue({
+        code: 'custom',
+        message: CLIENT_ID_REQUIRED,
+        path: ['client_id'],
+      });
+    }
+  });
+
+type TFields = 'clientId' | 'clientSecret' | 'both';
+
+const Fields = ({
+  fields,
+  initialValues,
+  onFinish,
+}: {
+  fields: TFields;
+  initialValues: Record<string, string>;
+  onFinish: (values: unknown) => void;
+}) => {
+  const rule = useAntdZodResolver(SCHEMA);
+
+  return (
+    <Form initialValues={initialValues} onFinish={onFinish}>
+      {fields !== 'clientSecret' && (
+        <CredentialField
+          label="Client ID"
+          valueName="client_id"
+          envName="client_id_env"
+          rule={rule}
+        />
+      )}
+      {fields !== 'clientId' && (
+        <CredentialField
+          label="Client Secret"
+          valueName="client_secret"
+          envName="client_secret_env"
+          storedName="client_secret_path"
+          rule={rule}
+          secret
+        />
+      )}
+      <Button htmlType="submit">Save</Button>
+    </Form>
+  );
+};
 
 const renderFields = (
-  fields: ReactNode,
+  fields: TFields,
   initialValues: Record<string, string>,
 ) => {
   const onFinish = vi.fn();
   render(
-    <Form initialValues={initialValues} onFinish={onFinish}>
-      {fields}
-      <Button htmlType="submit">Save</Button>
-    </Form>,
+    <Fields
+      fields={fields}
+      initialValues={initialValues}
+      onFinish={onFinish}
+    />,
     { wrapper },
   );
   return { onFinish, user: userEvent.setup() };
 };
 
 const renderClientId = (initialValues: Record<string, string>) =>
-  renderFields(CLIENT_ID, initialValues);
+  renderFields('clientId', initialValues);
 
 const renderClientSecret = (initialValues: Record<string, string>) =>
-  renderFields(CLIENT_SECRET, initialValues);
+  renderFields('clientSecret', { client_id: 'client-id', ...initialValues });
 
 const submittedValues = async (onFinish: ReturnType<typeof vi.fn>) => {
   await waitFor(() => expect(onFinish).toHaveBeenCalled());
@@ -99,13 +151,10 @@ describe('CredentialField', () => {
   });
 
   test('each source selector switches only its own field', async () => {
-    const { user } = renderFields(
-      <>
-        {CLIENT_ID}
-        {CLIENT_SECRET}
-      </>,
-      { client_id: 'okta-client-id', client_secret_env: '' },
-    );
+    const { user } = renderFields('both', {
+      client_id: 'okta-client-id',
+      client_secret_env: '',
+    });
 
     await chooseCredentialSource(user, 'Client ID', 'Env Var');
     await chooseCredentialSource(user, 'Client Secret', 'Env Var');
@@ -149,7 +198,7 @@ describe('CredentialField', () => {
   });
 
   test.each(['1OKTA_CLIENT_ID', 'OKTA-CLIENT-ID'])(
-    'the env var name %j is rejected with a reason',
+    'the env var name %j is refused with the rule message',
     async (name) => {
       const { onFinish, user } = renderClientId({ client_id: '' });
 
@@ -157,28 +206,26 @@ describe('CredentialField', () => {
       await user.type(screen.getByLabelText('Client ID'), name);
       await user.click(screen.getByRole('button', { name: 'Save' }));
 
-      expect(
-        await screen.findByText(
-          'Use letters, digits and underscores, not a leading digit',
-        ),
-      ).toBeInTheDocument();
+      await expectFieldError('Client ID', ENV_VAR_NAME_VALIDATOR.message);
       expect(onFinish).not.toHaveBeenCalled();
     },
   );
 
-  test('a blank env var name is not required', async () => {
-    const { onFinish, user } = renderClientId({
-      client_id: 'okta-client-id',
-      client_id_env: '',
-    });
+  test.each(['Value', 'Env Var'] as const)(
+    'an error the rule pins to the value shows with %s selected',
+    async (source) => {
+      const { onFinish, user } = renderClientId({
+        client_id: '',
+        client_id_env: '',
+      });
 
-    await chooseCredentialSource(user, 'Client ID', 'Env Var');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+      await chooseCredentialSource(user, 'Client ID', source);
+      await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await submittedValues(onFinish)).toStrictEqual({
-      client_id_env: '',
-    });
-  });
+      await expectFieldError('Client ID', CLIENT_ID_REQUIRED);
+      expect(onFinish).not.toHaveBeenCalled();
+    },
+  );
 
   test('a secret value is masked and never autofilled', () => {
     renderClientSecret({ client_secret_env: '' });

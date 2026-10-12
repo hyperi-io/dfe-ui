@@ -2,9 +2,10 @@ import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconEye } from '@repo/dfe-icons';
-import { Button } from 'antd';
+import { Button, Tabs } from 'antd';
 import { useState } from 'react';
 import { ViewOidcProviderDetail } from './ViewOidcProviderDetail';
+import { ViewOidcUserAccounts } from './ViewOidcUserAccounts';
 
 export const ViewOidcProviderDrawer = ({
   oidcProvider,
@@ -37,8 +38,24 @@ export const ViewOidcProviderDrawer = ({
         title="OIDC Provider Details"
         open={open}
         onClose={() => setOpen(false)}
+        size="60%"
       >
-        <ViewOidcProviderDetail oidcProvider={oidcProvider} />
+        <Tabs
+          items={[
+            {
+              label: 'Details',
+              key: 'details',
+              children: <ViewOidcProviderDetail oidcProvider={oidcProvider} />,
+            },
+            {
+              label: 'Users',
+              key: 'users',
+              children: (
+                <ViewOidcUserAccounts oidcProviderId={oidcProvider.name} />
+              ),
+            },
+          ]}
+        />
       </Drawer>
     </>
   );

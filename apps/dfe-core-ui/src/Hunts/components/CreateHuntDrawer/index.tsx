@@ -6,6 +6,7 @@ import {
 } from '@/Hunts/components/CreateUpdateHuntForm';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
+import { transformHuntFormDataToCreateRequest } from '@/Hunts/utils/transformHuntData/transformHuntDetailToFormData';
 
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -44,7 +45,7 @@ export const CreateHuntDrawer = ({
     },
   });
   const handleCreateHunt = (values: CreateUpdateHuntFormData) => {
-    createHuntMutation(values);
+    createHuntMutation(transformHuntFormDataToCreateRequest(values));
   };
   return (
     <>

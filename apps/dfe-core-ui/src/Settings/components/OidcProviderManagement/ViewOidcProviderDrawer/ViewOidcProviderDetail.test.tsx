@@ -11,7 +11,6 @@ const NO_GROUPS: TOidcProviderListItem['groups'] = {
   enrich_on_login: false,
   service_account_json_env: '',
   service_account_json_path: '',
-  admin_email: '',
   domain: '',
   tenant_id_env: '',
   client_secret_env: '',
@@ -32,6 +31,7 @@ const PROVIDER: TOidcProviderListItem = {
   client_id_env: 'IDP_CLIENT_ID',
   client_secret_env: 'IDP_CLIENT_SECRET',
   client_secret_path: 'oidc/provider/client_secret',
+  scopes: ['openid', 'email', 'profile', 'groups'],
   groups: NO_GROUPS,
   created_at: '2026-09-01T00:00:00Z',
   last_sync_at: '',
@@ -66,13 +66,16 @@ const ENTRA_ID: TOidcProviderListItem = {
   },
 };
 
+const GOOGLE_GROUPS_SCOPE =
+  'https://www.googleapis.com/auth/cloud-identity.groups.readonly';
+
 const GOOGLE: TOidcProviderListItem = {
   ...PROVIDER,
   type: 'google',
+  scopes: ['openid', 'email', 'profile', GOOGLE_GROUPS_SCOPE],
   groups: {
     ...NO_GROUPS,
     service_account_json_env: 'GOOGLE_SA_JSON',
-    admin_email: 'admin@example.com',
     domain: 'example.com',
   },
 };
@@ -149,14 +152,171 @@ describe('ViewOidcProviderDetail', () => {
       'Client Secret:',
       'API Token:',
       'Service Account JSON:',
-      'Tenant ID:',
     ]) {
       expect(labels).not.toContain(secretLabel);
     }
   });
 
+  test('the client id and tenant id show as themselves, beside their variables', () => {
+    const rows = renderRows({
+      ...ENTRA_ID,
+      groups: { ...ENTRA_ID.groups, tenant_id: 'contoso.onmicrosoft.com' },
+    });
+
+    expect(rows).toContainEqual(['Client ID:', 'client-id']);
+    expect(rows).toContainEqual(['Tenant ID:', 'contoso.onmicrosoft.com']);
+    expect(rows).toContainEqual([
+      'Tenant ID Environment Variable:',
+      'ENTRA_TENANT_ID',
+    ]);
+  });
+
+  test('Google lists each scope it requests and no admin email', () => {
+    const rows = renderRows(GOOGLE);
+
+    expect(rows).toContainEqual([
+      'Scopes:',
+      `openidemailprofile${GOOGLE_GROUPS_SCOPE}`,
+    ]);
+    expect(
+      screen.getAllByRole('listitem').map((item) => item.textContent),
+    ).toEqual(['openid', 'email', 'profile', GOOGLE_GROUPS_SCOPE]);
+    expect(rows.map(([label]) => label)).not.toContain('Admin Email:');
+  });
+
+  test('a provider with no scopes says so', () => {
+    expect(renderRows({ ...PROVIDER, scopes: [] })).toContainEqual([
+      'Scopes:',
+      'None',
+    ]);
+  });
+
   test('enrich on login shows No when it is off', () => {
     expect(renderRows(GOOGLE)).toContainEqual(['Enrich on Login:', 'No']);
     expect(renderRows(OKTA)).toContainEqual(['Enrich on Login:', 'Yes']);
+  });
+});
+
+const SYNCED_AT = '2026-10-10T08:30:00Z';
+const SYNCED_AT_LABEL = '10 Oct 2026, 08:30';
+const NOT_CONFIGURED_MESSAGE =
+  'The directory credential is not configured, so no groups were synced; configure it on the provider and sync again';
+const REFUSED_MESSAGE =
+  'The directory API could not use the configured credential: check it is current and valid; the engine log has the reason';
+
+describe('ViewOidcProviderDetail sync status', () => {
+  test.each([
+    {
+      status: 'ok',
+      label: 'OK',
+      syncError: '',
+      message: 'Every directory group synced.',
+    },
+    {
+      status: 'not_configured',
+      label: 'Not configured',
+      syncError: NOT_CONFIGURED_MESSAGE,
+      message:
+        'The provider has no directory credential. Edit the provider to add one, then sync again.',
+    },
+    {
+      status: 'user_token',
+      label: 'Read at login',
+      syncError: '',
+      message:
+        "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
+    },
+    {
+      status: 'error',
+      label: 'Failed',
+      syncError: REFUSED_MESSAGE,
+      message: REFUSED_MESSAGE,
+    },
+  ])(
+    'a $status sync reads $label, with what happened under it',
+    ({ status, label, syncError, message }) => {
+      const rows = renderRows({
+        ...OKTA,
+        last_sync_at: SYNCED_AT,
+        last_sync_status: status,
+        sync_error: syncError,
+      });
+
+      expect(rows).toContainEqual(['Last Sync:', `${label}${SYNCED_AT_LABEL}`]);
+      expect(rows.find(([term]) => term === 'Sync Message:')?.[1]).toBe(
+        message,
+      );
+      expect(screen.queryByText(status)).not.toBeInTheDocument();
+    },
+  );
+
+  test('a partial sync says how many groups it left and why', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status:
+        'partial: 2 of 10 groups skipped, their identifier makes no valid group name',
+      sync_error: '',
+    });
+
+    expect(rows).toContainEqual(['Last Sync:', `Partial${SYNCED_AT_LABEL}`]);
+    expect(rows).toContainEqual([
+      'Sync Message:',
+      '2 of 10 groups skipped, their identifier makes no valid group name',
+    ]);
+  });
+
+  test('sync_error reads only for a failed sync', () => {
+    renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'not_configured',
+      sync_error: NOT_CONFIGURED_MESSAGE,
+    });
+
+    expect(screen.queryByText(NOT_CONFIGURED_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  test('a failed sync with no engine message still says it failed', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'error',
+      sync_error: '',
+    });
+
+    expect(rows).toContainEqual(['Sync Message:', 'No groups changed.']);
+  });
+
+  test('a status the engine adds later shows as written, with no message', () => {
+    const rows = renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'throttled',
+      sync_error: 'rate limited',
+    });
+
+    expect(rows).toContainEqual(['Last Sync:', `throttled${SYNCED_AT_LABEL}`]);
+    expect(rows.map(([term]) => term)).not.toContain('Sync Message:');
+  });
+
+  test('a provider that has never synced shows no sync row', () => {
+    const rows = renderRows(OKTA);
+
+    expect(rows.map(([term]) => term)).not.toContain('Last Sync:');
+    expect(rows.map(([term]) => term)).not.toContain('Sync Message:');
+    expect(screen.getByText('Not synced yet')).toBeInTheDocument();
+  });
+
+  test('the status and message are on the page without a hover', () => {
+    renderRows({
+      ...OKTA,
+      last_sync_at: SYNCED_AT,
+      last_sync_status: 'error',
+      sync_error: REFUSED_MESSAGE,
+    });
+
+    expect(screen.getByText('Failed')).toBeVisible();
+    expect(screen.getByText(REFUSED_MESSAGE)).toBeVisible();
   });
 });

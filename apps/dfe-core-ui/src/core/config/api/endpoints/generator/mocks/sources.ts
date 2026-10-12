@@ -241,6 +241,7 @@ export const sources = {
           selected: '1.0.0',
           previous_deployed_versions: ['1.0.0'],
           state: 'active',
+          current_table_topic_type: 'own',
           version: {
             origin: 'receiver',
             date_time: 'string',
@@ -569,6 +570,7 @@ export const sources = {
           selected: 'string',
           versions: ['string'],
           state: 'active',
+          current_table_topic_type: 'own',
           version: {
             origin: 'receiver',
             date_time: 'string',

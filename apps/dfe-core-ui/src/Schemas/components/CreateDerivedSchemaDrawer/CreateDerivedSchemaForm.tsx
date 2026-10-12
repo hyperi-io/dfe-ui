@@ -69,23 +69,19 @@ export const CreateDerivedSchemaForm = ({
         >
           <Input placeholder="Enter path" />
         </Form.Item>
-        <Form.Item
-          name="name"
-          label={<Form.Label required>Name</Form.Label>}
-          rules={[formValidation]}
-        >
+        <Form.Item name="name" label="Name" rules={[formValidation]}>
           <Input placeholder="Enter name" />
         </Form.Item>
         <Form.Item
           name="base"
-          label={<Form.Label required>Base Meta Schema</Form.Label>}
+          label="Base Meta Schema"
           rules={[formValidation]}
         >
           <BaseMetaSchemaSelect onChange={handleBaseChange} />
         </Form.Item>
         <Form.Item
           name="base_version"
-          label={<Form.Label required>Base Version</Form.Label>}
+          label="Base Version"
           rules={[formValidation]}
         >
           <Select
@@ -99,28 +95,20 @@ export const CreateDerivedSchemaForm = ({
             }
           />
         </Form.Item>
-        <Form.Item
-          name="version"
-          label={<Form.Label required>Version</Form.Label>}
-          rules={[formValidation]}
-        >
+        <Form.Item name="version" label="Version" rules={[formValidation]}>
           <Input />
         </Form.Item>
       </div>
 
       <Form.Item
         name="description"
-        label={<Form.Label required>Description</Form.Label>}
+        label="Description"
         rules={[formValidation]}
       >
         <Input.TextArea placeholder="Enter description" />
       </Form.Item>
 
-      <Form.Item
-        name="select"
-        label={<Form.Label required>Columns</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="select" label="Columns" rules={[formValidation]}>
         <DerivedSchemaFieldPicker
           basePath={base ?? null}
           baseVersion={baseVersion ?? null}

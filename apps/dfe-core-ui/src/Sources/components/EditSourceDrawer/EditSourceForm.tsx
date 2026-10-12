@@ -81,6 +81,13 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
         key={source_name ?? 'empty'}
         disabledFields={{
           source: true,
+          origin: true,
+          fetcher: {
+            topic: sourceDetailData?.current_table_topic_type === 'own' && true,
+          },
+          receiver_ui_config: {
+            table: sourceDetailData?.current_table_topic_type === 'own' && true,
+          },
         }}
         initialValues={initialValues}
         onFinish={handleUpdateSource}

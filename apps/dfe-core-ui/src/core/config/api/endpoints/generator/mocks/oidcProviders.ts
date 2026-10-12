@@ -31,13 +31,13 @@ export const oidcProviders = {
               sync_error: 'string',
               client_id: 'string',
               client_secret_path: 'string',
+              scopes: ['openid', 'email', 'profile'],
               groups: {
                 mode: 'string',
                 claim_name: 'string',
                 sync_interval: 1000,
                 enrich_on_login: true,
                 service_account_json_env: 'string',
-                admin_email: 'string',
                 domain: 'string',
                 tenant_id_env: 'string',
                 client_secret_env: 'string',
@@ -92,13 +92,13 @@ export const oidcProviders = {
           sync_error: 'string',
           client_id: 'client_id',
           client_secret_path: 'client_secret_path',
+          scopes: ['openid', 'email', 'profile'],
           groups: {
             mode: 'manual',
             claim_name: 'string',
             sync_interval: 1000,
             enrich_on_login: true,
             service_account_json_env: 'string',
-            admin_email: 'string',
             domain: 'string',
             tenant_id_env: 'string',
             client_secret_env: 'string',
@@ -148,13 +148,13 @@ export const oidcProviders = {
           sync_error: 'sync_error',
           client_id: 'client_id',
           client_secret_path: 'client_secret_path',
+          scopes: ['openid', 'email', 'profile'],
           groups: {
             mode: 'mode',
             claim_name: 'claim_name',
             sync_interval: 1,
             enrich_on_login: true,
             service_account_json_env: 'service_account_json_env',
-            admin_email: 'admin_email',
             domain: 'domain',
             tenant_id_env: 'tenant_id_env',
             client_secret_env: 'client_secret_env',
@@ -207,13 +207,13 @@ export const oidcProviders = {
           client_secret_env: 'client_secret_env',
           client_id: 'client_id',
           client_secret_path: 'client_secret_path',
+          scopes: ['openid', 'email', 'profile'],
           groups: {
             mode: 'mode',
             claim_name: 'claim_name',
             sync_interval: 1,
             enrich_on_login: true,
             service_account_json_env: 'service_account_json_env',
-            admin_email: 'admin_email',
             domain: 'domain',
             tenant_id_env: 'tenant_id_env',
             client_secret_env: 'client_secret_env',
@@ -290,6 +290,69 @@ export const oidcProviders = {
   },
   syncGroups: {
     mockedUrl: '/api/v1/auth/oidc-providers/{name}/sync',
+    /** One result per status, shaped as the engine's sync_provider returns it. */
+    results: {
+      ok: {
+        created: 3,
+        updated: 2,
+        total: 5,
+        groups_skipped: 0,
+        error: null,
+        skipped: null,
+        status: 'ok',
+      },
+      partial: {
+        created: 3,
+        updated: 1,
+        total: 4,
+        groups_skipped: 2,
+        error: null,
+        skipped: null,
+        status: 'partial',
+      },
+      error: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error:
+          'The directory API could not use the configured credential: check it is current and valid; the engine log has the reason',
+        skipped: null,
+        status: 'error',
+      },
+      not_configured: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped:
+          'The directory credential is not configured, so no groups were synced; configure it on the provider and sync again',
+        status: 'not_configured',
+      },
+      user_token: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped:
+          "Each login reads that user's groups with their own token, so there is no directory to sync",
+        status: 'user_token',
+      },
+      skipped: {
+        created: 0,
+        updated: 0,
+        total: 0,
+        groups_skipped: 0,
+        error: null,
+        skipped: 'disabled',
+        status: 'skipped',
+      },
+    } satisfies Record<
+      TSyncOidcProviderGroupsResponse['status'],
+      TSyncOidcProviderGroupsResponse
+    >,
     post: {
       success: ({
         mockedResponse = {
@@ -299,6 +362,7 @@ export const oidcProviders = {
           groups_skipped: 0,
           error: null,
           skipped: null,
+          status: 'ok',
         },
         name = 'name',
       }: {

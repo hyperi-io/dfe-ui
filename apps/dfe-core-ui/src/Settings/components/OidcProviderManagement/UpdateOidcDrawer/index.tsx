@@ -1,5 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { toUpdateOidcProviderBody } from '@/core/helpers/oidcProviders.helpers';
 import { useUpdateOidcProvider } from '@/core/hooks/useUpdateOidcProvider';
 import { CreateUpdateOidcProviderFormData } from '@/core/validationSchemas/oidcProviders.schema';
 import { CreateUpdateOidcProviderForm } from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm';
@@ -7,7 +8,6 @@ import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchIn
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
-import { toUpdateOidcProviderBody } from './helpers';
 
 export const UpdateOidcProviderDrawer = ({
   oidcProvider,

@@ -3,6 +3,57 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.13](https://github.com/hyperi-io/dfe-ui/compare/v1.7.12...v1.7.13) (2026-10-11)
+
+### Bug Fixes
+
+* refuse new passwords over 72 bytes ([#526](https://github.com/hyperi-io/dfe-ui/issues/526)) ([1e87fe6](https://github.com/hyperi-io/dfe-ui/commit/1e87fe6e2783672b46cc9f6e4f1b9a4426f3b2b2))
+
+## [1.7.12](https://github.com/hyperi-io/dfe-ui/compare/v1.7.11...v1.7.12) (2026-10-11)
+
+### Bug Fixes
+
+* adopt engine v1.22.21 sync states and names ([#524](https://github.com/hyperi-io/dfe-ui/issues/524)) ([2ada465](https://github.com/hyperi-io/dfe-ui/commit/2ada465b85196124cea166b6a14730dedd93b4ae))
+* load only a same-origin YAML worker from the shim ([#521](https://github.com/hyperi-io/dfe-ui/issues/521)) ([9fcacca](https://github.com/hyperi-io/dfe-ui/commit/9fcaccab4d87a73aec45d87a3002f5e6fd776392))
+
+## [1.7.11](https://github.com/hyperi-io/dfe-ui/compare/v1.7.10...v1.7.11) (2026-10-10)
+
+### Bug Fixes
+
+* show OIDC sync status, name form controls ([#519](https://github.com/hyperi-io/dfe-ui/issues/519)) ([1ed3b66](https://github.com/hyperi-io/dfe-ui/commit/1ed3b66e814229c39a1ad28e0da8da68626cbf8c))
+* stop the YAML worker requesting 404 files ([#520](https://github.com/hyperi-io/dfe-ui/issues/520)) ([00ed48c](https://github.com/hyperi-io/dfe-ui/commit/00ed48c37f25c735b511e424c6438c2a4ea94463))
+
+## [1.7.10](https://github.com/hyperi-io/dfe-ui/compare/v1.7.9...v1.7.10) (2026-10-10)
+
+### Bug Fixes
+
+* link errors to fields, mark required ones ([#518](https://github.com/hyperi-io/dfe-ui/issues/518)) ([dc285ed](https://github.com/hyperi-io/dfe-ui/commit/dc285eda3f1264956977e75e114b4c102c567e44)), closes [#516](https://github.com/hyperi-io/dfe-ui/issues/516)
+* show form errors beside hints and make the hunt target table optional ([#516](https://github.com/hyperi-io/dfe-ui/issues/516)) ([bbae391](https://github.com/hyperi-io/dfe-ui/commit/bbae391111b64cef1f7361900a0b113f624dbed2))
+
+## [1.7.9](https://github.com/hyperi-io/dfe-ui/compare/v1.7.8...v1.7.9) (2026-10-10)
+
+### Bug Fixes
+
+* accept the lint-only braces advisory with its reason ([#514](https://github.com/hyperi-io/dfe-ui/issues/514)) ([95e24ad](https://github.com/hyperi-io/dfe-ui/commit/95e24ad21f407c7ea38893bab1d89d37b5a3ac7f))
+* match name fields to the engine's rules ([#515](https://github.com/hyperi-io/dfe-ui/issues/515)) ([e8950fd](https://github.com/hyperi-io/dfe-ui/commit/e8950fd7114eae15013e4e2696ce2950e366e058))
+
+## [1.7.8](https://github.com/hyperi-io/dfe-ui/compare/v1.7.7...v1.7.8) (2026-10-10)
+
+### Bug Fixes
+
+* drop the Google admin email from the OIDC provider forms ([#512](https://github.com/hyperi-io/dfe-ui/issues/512)) ([fc6fb38](https://github.com/hyperi-io/dfe-ui/commit/fc6fb3824d951227a183fb032704d4e407dc9708))
+* give the CI workflow an explicit permissions ceiling ([#509](https://github.com/hyperi-io/dfe-ui/issues/509)) ([5db7a49](https://github.com/hyperi-io/dfe-ui/commit/5db7a49ceeda38e76d5bba72efb790998a5637f5))
+* match the OIDC provider forms to the engine ([#513](https://github.com/hyperi-io/dfe-ui/issues/513)) ([02049f2](https://github.com/hyperi-io/dfe-ui/commit/02049f2762aa58ace387051f8e44641d0b79e7e7))
+
+## [1.7.7](https://github.com/hyperi-io/dfe-ui/compare/v1.7.6...v1.7.7) (2026-10-09)
+
+### Bug Fixes
+
+* clear next, sharp and source-map-js security advisories ([#502](https://github.com/hyperi-io/dfe-ui/issues/502)) ([a82a9d0](https://github.com/hyperi-io/dfe-ui/commit/a82a9d09f0978dcc3a6680e17648067d57b0934e))
+* commit dfe-ui's deployment contract ([#501](https://github.com/hyperi-io/dfe-ui/issues/501)) ([4e2118c](https://github.com/hyperi-io/dfe-ui/commit/4e2118c17a5aec55f573d522dd0897e0cb9e5fd2))
+* fix OIDC delete and soft delete users ([#507](https://github.com/hyperi-io/dfe-ui/issues/507)) ([2fdf52c](https://github.com/hyperi-io/dfe-ui/commit/2fdf52ce42e2f5f116b06d2dedf4fec5c59ef8e4))
+* high priority issues asst ([#505](https://github.com/hyperi-io/dfe-ui/issues/505)) ([1125181](https://github.com/hyperi-io/dfe-ui/commit/11251811dc0df0262aa28f6254c89aa9ab904da6))
+
 ## [1.4.0](https://github.com/hyperi-io/dfe-ui/compare/v1.3.9...v1.4.0) (2026-08-31)
 
 ### Features

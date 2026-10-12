@@ -2,16 +2,17 @@ import {
   chooseCredentialSource,
   SOURCE_SWITCH_TEST_TIMEOUT_MS,
 } from '@/core/components/CredentialField/CredentialField.mocks';
+import {
+  chooseOption,
+  fillField,
+} from '@/core/components/IssuerField/IssuerField.mocks';
 import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
 import { CreateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/CreateOidcProviderDrawer';
-import {
-  chooseOption,
-  fillField,
-} from '@/Settings/components/OidcProviderManagement/CreateUpdateOidcProviderForm/IssuerField.mocks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { App } from 'antd';
@@ -38,14 +39,14 @@ const CREATED: TCreateOidcProviderResponse = {
   client_id_env: 'DFE_OIDC_GOOGLE_CLIENT_ID',
   client_secret_env: 'DFE_OIDC_GOOGLE_CLIENT_SECRET',
   client_secret_path: '',
+  scopes: ['openid', 'email', 'profile'],
   groups: {
-    mode: 'manual',
+    mode: 'api',
     claim_name: '',
     sync_interval: 3600,
     enrich_on_login: true,
     service_account_json_env: '',
     service_account_json_path: '',
-    admin_email: '',
     domain: '',
     tenant_id: '',
     tenant_id_env: '',
@@ -109,10 +110,17 @@ const chooseType = async (user: UserEvent, type: string) => {
   await user.click(await screen.findByTitle(type));
 };
 
+// A new Okta provider starts in API mode, which needs its directory token.
+const chooseOkta = async (user: UserEvent) => {
+  await chooseType(user, 'Okta');
+  await fillField(user, 'API Token', 'okta-token');
+};
+
+const clickCreate = (user: UserEvent) =>
+  user.click(screen.getByRole('button', { hidden: true, name: 'Create' }));
+
 const submitAndReadBody = async (user: UserEvent) => {
-  await user.click(
-    screen.getByRole('button', { hidden: true, name: 'Create' }),
-  );
+  await clickCreate(user);
   await waitFor(() => expect(onPost).toHaveBeenCalledTimes(1), {
     timeout: 15_000,
   });
@@ -157,12 +165,8 @@ describe(
 
       await chooseType(user, 'Entra ID');
       await fillField(user, 'Directory (Tenant) ID', 'tenant-guid');
-      await chooseCredentialSource(user, 'Directory Client Secret', 'Env Var');
-      await fillField(
-        user,
-        'Directory Client Secret',
-        'ENTRA_DIRECTORY_SECRET',
-      );
+      await chooseCredentialSource(user, 'Directory Secret', 'Env Var');
+      await fillField(user, 'Directory Secret', 'ENTRA_DIRECTORY_SECRET');
 
       const body = await submitAndReadBody(user);
       expect(body.groups).toMatchObject({
@@ -184,14 +188,18 @@ describe(
       expect(body.groups).not.toHaveProperty('service_account_json');
     });
 
-    test('the Okta token is sent from its source', async () => {
+    test('the Okta token and domain are sent with API groups', async () => {
       const user = await openCreateDrawer();
 
-      await chooseType(user, 'Okta');
-      await fillField(user, 'API Token', 'okta-token');
+      await chooseOkta(user);
+      await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
 
       const body = await submitAndReadBody(user);
-      expect(body.groups.api_token).toBe('okta-token');
+      expect(body.groups).toMatchObject({
+        mode: 'api',
+        api_token: 'okta-token',
+        okta_domain: 'dev-123.okta.com',
+      });
       expect(body.groups).not.toHaveProperty('api_token_env');
     });
 
@@ -218,7 +226,7 @@ describe(
       {
         name: 'Okta builds the org issuer from a pasted org URL',
         enter: async (user) => {
-          await chooseType(user, 'Okta');
+          await chooseOkta(user);
           await fillField(user, 'Okta Org Domain', 'https://dev-123.okta.com/');
         },
         issuer: 'https://dev-123.okta.com',
@@ -226,7 +234,7 @@ describe(
       {
         name: 'Okta Manual sends the issuer as typed',
         enter: async (user) => {
-          await chooseType(user, 'Okta');
+          await chooseOkta(user);
           await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
           await chooseOption(user, 'Issuer mode', 'Full URL');
           await fillField(user, 'Issuer', 'https://id.example.com/oauth2/aus9');
@@ -262,15 +270,6 @@ describe(
         },
         issuer: 'https://idp.example.com',
       },
-      {
-        name: 'switching Okta to Entra ID drops the Okta issuer',
-        enter: async (user) => {
-          await chooseType(user, 'Okta');
-          await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
-          await chooseType(user, 'Entra ID');
-        },
-        issuer: '',
-      },
     ])('$name', async ({ enter, issuer }) => {
       const user = await openCreateDrawer();
 
@@ -278,6 +277,18 @@ describe(
 
       const body = await submitAndReadBody(user);
       expect(body.issuer).toBe(issuer);
+    });
+
+    test('switching Okta to Entra ID drops the Okta issuer, so none is sent', async () => {
+      const user = await openCreateDrawer();
+
+      await chooseType(user, 'Okta');
+      await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
+      await chooseType(user, 'Entra ID');
+      await clickCreate(user);
+
+      await expectFieldError('Issuer', 'Issuer is required');
+      expect(onPost).not.toHaveBeenCalled();
     });
   },
 );

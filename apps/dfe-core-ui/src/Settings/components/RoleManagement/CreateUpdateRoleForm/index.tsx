@@ -1,26 +1,32 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { RoleScopeSelect } from '@/Settings/components/RoleManagement/RoleScopeSelect';
 import { Button, Input, Switch } from 'antd';
+import { useMemo } from 'react';
 import z from 'zod';
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name is required' })
-    .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-      message: DB_NAME_VALIDATOR.message('Name'),
-    }),
-  description: z.string().min(1, { message: 'Description is required' }),
-  permissions: z
-    .array(z.string())
-    .min(1, { message: 'Permissions are required' }),
-  scoped: z.boolean(),
+const requiredName = z.string().min(1, { message: 'Name is required' });
+
+// The engine checks the name on create only, so an existing role's locked name stays unchecked.
+const newName = requiredName.refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
+  message: STORE_NAME_VALIDATOR.message('Name'),
 });
 
-export type CreateUpdateRoleFormData = z.infer<typeof formSchema>;
+const buildFormSchema = (nameIsNew: boolean) =>
+  z.object({
+    name: nameIsNew ? newName : requiredName,
+    description: z.string().min(1, { message: 'Description is required' }),
+    permissions: z
+      .array(z.string())
+      .min(1, { message: 'Permissions are required' }),
+    scoped: z.boolean(),
+  });
+
+export type CreateUpdateRoleFormData = z.infer<
+  ReturnType<typeof buildFormSchema>
+>;
 
 export const CreateUpdateRoleForm = ({
   name,
@@ -49,6 +55,10 @@ export const CreateUpdateRoleForm = ({
   };
 }) => {
   const [form] = Form.useForm<CreateUpdateRoleFormData>();
+  const formSchema = useMemo(
+    () => buildFormSchema(!disabledFields?.name),
+    [disabledFields?.name],
+  );
   const formValidation =
     useAntdZodResolver<CreateUpdateRoleFormData>(formSchema);
 
@@ -63,17 +73,13 @@ export const CreateUpdateRoleForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item
-        name="name"
-        label={<Form.Label required>Name</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
 
       <Form.Item
         name="description"
-        label={<Form.Label required>Description</Form.Label>}
+        label="Description"
         rules={[formValidation]}
       >
         <Input.TextArea placeholder="Enter description" />
@@ -81,7 +87,7 @@ export const CreateUpdateRoleForm = ({
 
       <Form.Item
         name="permissions"
-        label={<Form.Label required>Permissions</Form.Label>}
+        label="Permissions"
         rules={[formValidation]}
       >
         <RoleScopeSelect />

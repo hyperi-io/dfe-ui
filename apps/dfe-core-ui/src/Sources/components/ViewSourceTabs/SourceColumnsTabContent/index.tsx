@@ -1,4 +1,5 @@
 import { SchemaColumnRow } from '@/core/components/CreateSchemaForm/AddSchemaTable/types';
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { Tooltip } from '@/core/components/Tooltip';
@@ -13,7 +14,12 @@ export const SourceColumnsTabContent = ({
 }: {
   source_name: string;
 }) => {
-  const { componentHeight } = useSetComponentHeight({ offset: 300 });
+  const { componentHeight: tableHeight } = useSetComponentHeight({
+    offset: 400,
+  });
+  const { componentHeight: contentHeight } = useSetComponentHeight({
+    offset: 300,
+  });
   const {
     data: { items: sourceColumns = [], total = 0 } = {},
     error,
@@ -126,28 +132,30 @@ export const SourceColumnsTabContent = ({
   ];
 
   return (
-    <SchemaTable<SchemaColumnRow>
-      rowKey="name"
-      title={() => (
-        <div className="flex items-center justify-between w-full">
-          <p> {total > 0 ? <>{total} columns</> : <>No columns loaded</>} </p>
-        </div>
-      )}
-      visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}
-      lockedColumns={['_field_type', 'name']}
-      dataSource={sourceColumns ?? []}
-      columns={columns}
-      loading={isFetchingNextPageSourceColumns}
-      scroll={{ y: componentHeight, x: 'max-content' }}
-      locale={{
-        emptyText: (
-          <div className="flex items-center justify-center gap-2 text-foreground-muted dark:text-dark-foreground-muted">
-            <IconInfoCircle className="w-4 h-4" />
-            <p>No columns loaded</p>
+    <CustomScrollbar height={contentHeight} className="flex flex-col">
+      <SchemaTable<SchemaColumnRow>
+        rowKey="name"
+        title={() => (
+          <div className="flex items-center justify-between w-full">
+            <p> {total > 0 ? <>{total} columns</> : <>No columns loaded</>} </p>
           </div>
-        ),
-      }}
-      onScroll={handleScroll}
-    />
+        )}
+        visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}
+        lockedColumns={['_field_type', 'name']}
+        dataSource={sourceColumns ?? []}
+        columns={columns}
+        loading={isFetchingNextPageSourceColumns}
+        scroll={{ y: tableHeight, x: 'max-content' }}
+        locale={{
+          emptyText: (
+            <div className="flex items-center justify-center gap-2 text-foreground-muted dark:text-dark-foreground-muted">
+              <IconInfoCircle className="w-4 h-4" />
+              <p>No columns loaded</p>
+            </div>
+          ),
+        }}
+        onScroll={handleScroll}
+      />
+    </CustomScrollbar>
   );
 };

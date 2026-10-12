@@ -1,6 +1,12 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { useCreateAccount } from '@/core/hooks/useCreateAccount';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import {
+  expectNameRule,
+  NAME_RULE_TEST_TIMEOUT_MS,
+} from '@/core/utils/test-utils/expectNameRule';
+import { PASSWORD_CEILING_MESSAGE } from '@/core/validationSchemas/password.schema';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -50,17 +56,24 @@ const CreateAccount = () => {
 const FLOOR_MESSAGE = 'Password must contain at least 12 characters';
 const ELEVEN_CHARS = 'eleven-char';
 const TWELVE_CHARS = 'twelve-chars';
+// The accented letter takes two bytes, so each is one byte longer than its length.
+const ACCENTED = String.fromCodePoint(0xe9);
+const SEVENTY_TWO_BYTES = `${'a'.repeat(70)}${ACCENTED}`;
+const SEVENTY_THREE_BYTES = `${'a'.repeat(71)}${ACCENTED}`;
+// Each emoji is one code point and two UTF-16 units, so six are 12 units long.
+const EMOJI = String.fromCodePoint(0x1f511);
 
 const submit = async (password: string) => {
   const user = userEvent.setup();
   render(<CreateAccount />, { wrapper });
   await user.type(screen.getByLabelText(/^Username/), 'new-user');
   await user.type(screen.getByLabelText(/^Email/), 'new-user@example.com');
-  await user.type(screen.getByLabelText(/^Password/), password);
+  await user.click(screen.getByLabelText(/^Password/));
+  await user.paste(password);
   await user.click(screen.getByRole('button', { name: 'Create Account' }));
 };
 
-describe('CreateAccountForm password floor', () => {
+describe('CreateAccountForm password length', () => {
   test('refuses an 11-character password before any request goes out', async () => {
     server.use(API_CONFIG_MOCKS.accounts.default.post.success());
 
@@ -68,6 +81,48 @@ describe('CreateAccountForm password floor', () => {
 
     expect(await screen.findByText(FLOOR_MESSAGE)).toBeInTheDocument();
     expect(sent).toEqual([]);
+  });
+
+  test('refuses 6 emoji before any request goes out', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(EMOJI.repeat(6));
+
+    expect(await screen.findByText(FLOOR_MESSAGE)).toBeInTheDocument();
+    expect(sent).toEqual([]);
+  });
+
+  test('sends 12 emoji to the engine', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(EMOJI.repeat(12));
+
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(await sent[0]?.json()).toMatchObject({
+      password: EMOJI.repeat(12),
+    });
+  });
+
+  test('refuses a 73-byte password before any request goes out', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(SEVENTY_THREE_BYTES);
+
+    expect(
+      await screen.findByText(PASSWORD_CEILING_MESSAGE),
+    ).toBeInTheDocument();
+    expect(sent).toEqual([]);
+  });
+
+  test('sends a 72-byte password to the engine', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+
+    await submit(SEVENTY_TWO_BYTES);
+
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(await sent[0]?.json()).toMatchObject({
+      password: SEVENTY_TWO_BYTES,
+    });
   });
 
   test('sends a 12-character password to the engine', async () => {
@@ -116,4 +171,21 @@ describe('CreateAccountForm password floor', () => {
       ),
     ).toBeInTheDocument();
   });
+});
+
+describe('CreateAccountForm username', () => {
+  test(
+    'takes the names the engine takes and refuses the ones it refuses',
+    { timeout: NAME_RULE_TEST_TIMEOUT_MS },
+    async () => {
+      render(<CreateAccount />, { wrapper });
+
+      await expectNameRule({
+        input: screen.getByLabelText(/^Username/),
+        message: STORE_NAME_VALIDATOR.message('Username'),
+        accepts: ['new-user.1', 'a'.repeat(128)],
+        refuses: ['-user', '.user', 'new user', 'a'.repeat(129)],
+      });
+    },
+  );
 });

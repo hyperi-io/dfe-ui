@@ -12,6 +12,7 @@ export type TAccountsItemSummary = TAccountsResponse['items'][number];
 
 export type TFetchAccountsQueryParams = {
   search?: string;
+  oidc_id?: string;
   blocked?: boolean;
   include_core?: boolean;
   sort_by?: 'created_at' | 'updated_at';

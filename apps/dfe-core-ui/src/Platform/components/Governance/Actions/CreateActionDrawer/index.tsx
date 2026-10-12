@@ -4,6 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { GITOPS_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useCreateGovernanceAction } from '@/Platform/hooks/governance/useCreateGovernanceAction';
 import { IconMinus, IconPlus } from '@repo/dfe-icons';
 import { App, Button, ButtonProps, Input } from 'antd';
@@ -15,7 +16,12 @@ interface CreateActionDrawerProps {
 }
 
 const createActionSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .refine((v) => GITOPS_NAME_VALIDATOR.regex.test(v), {
+      message: GITOPS_NAME_VALIDATOR.message('Name'),
+    }),
   description: z.string().min(1, { message: 'Description is required' }),
   required_action: z
     .string()
@@ -101,18 +107,14 @@ export const CreateActionDrawer = ({ trigger }: CreateActionDrawerProps) => {
             changes: [],
           }}
         >
-          <Form.Item
-            label={<Form.Label required>Name</Form.Label>}
-            name="name"
-            rules={[formValidation]}
-          >
+          <Form.Item label="Name" name="name" rules={[formValidation]}>
             <Input />
           </Form.Item>
           <Form.Item label="Description" name="description">
             <Input.TextArea />
           </Form.Item>
           <Form.Item
-            label={<Form.Label required>Required Action</Form.Label>}
+            label="Required Action"
             name="required_action"
             rules={[formValidation]}
           >

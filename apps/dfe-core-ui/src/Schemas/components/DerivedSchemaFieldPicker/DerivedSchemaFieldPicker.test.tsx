@@ -1,8 +1,10 @@
+import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { DerivedSchemaFieldPicker } from '@/Schemas/components/DerivedSchemaFieldPicker';
 import { DerivedSelectEntry } from '@/Schemas/components/DerivedSchemaFieldPicker/DerivedSchemaFieldPicker.helpers';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Button } from 'antd';
 import { useState } from 'react';
 import {
   afterAll,
@@ -178,5 +180,46 @@ describe('DerivedSchemaFieldPicker', () => {
       expect(screen.queryByText('log_offset')).not.toBeInTheDocument(),
     );
     expect(screen.getByText('host_name')).toBeInTheDocument();
+  });
+});
+
+describe('DerivedSchemaFieldPicker in a Form.Item', () => {
+  const HINT = 'Pick the columns this schema deploys.';
+  const ERROR = 'Select at least one column from the base schema';
+
+  const FormHarness = () => (
+    <Form>
+      <Form.Item
+        name="select"
+        label="Columns"
+        extra={HINT}
+        rules={[
+          {
+            validator: async () => {
+              throw new Error(ERROR);
+            },
+          },
+        ]}
+      >
+        <DerivedSchemaFieldPicker
+          basePath={BASE_SCHEMA_PATH}
+          baseVersion={BASE_SCHEMA_VERSION}
+        />
+      </Form.Item>
+      <Button htmlType="submit">Submit</Button>
+    </Form>
+  );
+
+  it('groups the columns and links the group to the error and the hint', async () => {
+    const user = userEvent.setup();
+    render(<FormHarness />, { wrapper });
+
+    await screen.findByText('timestamp', {}, { timeout: 15000 });
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(await screen.findByText(ERROR)).toBeInTheDocument();
+
+    const group = screen.getByRole('group');
+    expect(group).toHaveAccessibleDescription(`${ERROR} ${HINT}`);
+    expect(within(group).getAllByRole('checkbox').length).toBeGreaterThan(0);
   });
 });

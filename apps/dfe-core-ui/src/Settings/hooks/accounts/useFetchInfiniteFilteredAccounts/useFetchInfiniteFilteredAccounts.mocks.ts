@@ -17,6 +17,7 @@ const ACCOUNT_ITEM: TAccountsItemSummary = {
   email: 'string',
   phone: 'string',
   name: 'string',
+  oidc_id: 'string',
 };
 
 const TOTAL_ITEMS = 25;

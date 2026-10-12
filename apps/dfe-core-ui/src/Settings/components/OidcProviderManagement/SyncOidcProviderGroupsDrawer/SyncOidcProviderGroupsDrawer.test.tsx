@@ -1,159 +1,155 @@
-import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hooks.mocks';
+import {
+  ADMIN_MOCKED_RESPONSE,
+  server,
+} from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { SyncOidcProviderGroupsDrawer } from '@/Settings/components/OidcProviderManagement/SyncOidcProviderGroupsDrawer';
-import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
-
-const API_PROVIDER: TOidcProviderListItem = {
-  name: 'okta',
-  type: 'okta',
-  enabled: true,
-  display_name: 'Okta',
-  issuer: 'https://example.okta.com',
-  client_id: 'okta-client-id',
-  client_id_env: 'OKTA_CLIENT_ID',
-  client_secret_env: 'OKTA_CLIENT_SECRET',
-  client_secret_path: '',
-  groups: {
-    mode: 'api',
-    claim_name: 'groups',
-    sync_interval: 3600,
-    enrich_on_login: false,
-    service_account_json_env: '',
-    service_account_json_path: '',
-    admin_email: '',
-    domain: '',
-    tenant_id_env: '',
-    client_secret_env: '',
-    client_secret_path: '',
-    api_token_env: 'OKTA_API_TOKEN',
-    api_token_path: '',
-    okta_domain: 'example.okta.com',
-    tenant_id: '',
-  },
-  created_at: '2026-09-01T00:00:00Z',
-  last_sync_at: '',
-  last_sync_status: '',
-  sync_error: '',
-};
-
-const NOTHING_SYNCED: TSyncOidcProviderGroupsResponse = {
-  created: 0,
-  updated: 0,
-  total: 0,
-  groups_skipped: 0,
-  error: null,
-  skipped: null,
-};
-
-const server = setupServer(
-  API_CONFIG_MOCKS.auth.me.get.success({
-    mockedResponse: ADMIN_MOCKED_RESPONSE,
-  }),
-);
+import { SyncOidcProviderGroupsDrawer } from '.';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const { wrapper } = buildTestWrapper().withReactQuery().withTheme();
+const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-const findSyncButton = () =>
-  screen.findByRole(
-    'button',
-    { name: /Sync OIDC Provider Groups/ },
-    { timeout: 15_000 },
-  );
+const RESULTS = API_CONFIG_MOCKS.oidcProviders.syncGroups.results;
 
-const syncWith = async (result: TSyncOidcProviderGroupsResponse) => {
+const sync = async (mockedResponse: TSyncOidcProviderGroupsResponse) => {
   server.use(
     API_CONFIG_MOCKS.oidcProviders.syncGroups.post.success({
-      mockedResponse: result,
-      name: API_PROVIDER.name,
+      mockedResponse,
+      name: 'okta',
     }),
   );
-  const user = userEvent.setup();
-  render(<SyncOidcProviderGroupsDrawer oidcProvider={API_PROVIDER} />, {
+  render(<SyncOidcProviderGroupsDrawer oidcProviderName="okta" />, {
     wrapper,
   });
-  await user.click(await findSyncButton());
+  await userEvent.click(
+    await screen.findByRole('button', { name: 'Sync OIDC Provider Groups' }),
+  );
 };
 
-const countRows = () =>
-  Object.fromEntries(
-    Array.from(document.querySelectorAll('dt')).map((term) => [
-      term.textContent,
-      term.nextElementSibling?.textContent,
-    ]),
-  );
+const TITLES = {
+  ok: 'Sync complete',
+  partial: 'Sync partly complete',
+  error: 'Sync failed',
+  not_configured: 'Sync not run',
+  user_token: 'No sync needed',
+  skipped: 'Sync skipped',
+} as const;
 
 describe('SyncOidcProviderGroupsDrawer', () => {
-  test('a sync that ran shows its counts', async () => {
-    await syncWith({ ...NOTHING_SYNCED, created: 2, updated: 1, total: 5 });
+  test.each([
+    { status: 'ok', message: 'Every directory group synced.' },
+    {
+      status: 'partial',
+      message:
+        'Some directory groups were skipped and the rest synced. The provider details say why each was skipped.',
+    },
+    {
+      status: 'not_configured',
+      message:
+        'The provider has no directory credential. Edit the provider to add one, then sync again.',
+    },
+    {
+      status: 'user_token',
+      message:
+        "Each user's groups are read from their own token when they log in, so there is no directory to sync.",
+    },
+    {
+      status: 'skipped',
+      message:
+        'The provider is disabled, or its group Mode is not API. To sync, enable it and set Mode to API.',
+    },
+  ] as const)(
+    'a $status sync says what happened and what to do',
+    async ({ status, message }) => {
+      await sync(RESULTS[status]);
 
-    await screen.findByText('Groups Created', {}, { timeout: 15_000 });
-    expect(countRows()).toEqual({
-      'Groups Created': '2',
-      'Groups Updated': '1',
-      Total: '5',
+      expect(await screen.findByText(TITLES[status])).toBeVisible();
+      expect(screen.getByText(message)).toBeVisible();
+      expect(screen.queryByText(TITLES.error)).not.toBeInTheDocument();
+    },
+  );
+
+  test.each(['not_configured', 'user_token', 'skipped'] as const)(
+    'a %s sync shows the engine status, never its skipped text',
+    async (status) => {
+      await sync(RESULTS[status]);
+
+      await screen.findByText(TITLES[status]);
+      expect(
+        screen.queryByText(RESULTS[status].skipped),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  test('a failed sync shows the engine error under its message', async () => {
+    await sync(RESULTS.error);
+
+    expect(await screen.findByText(TITLES.error)).toBeVisible();
+    expect(screen.getByText('No groups changed.')).toBeVisible();
+    expect(screen.getByText(RESULTS.error.error)).toBeVisible();
+  });
+
+  test('the error text reads only for a failed sync', async () => {
+    await sync({
+      ...RESULTS.ok,
+      error: 'left over from an earlier run',
     });
-  });
 
-  test('provider groups the sync left out are counted', async () => {
-    await syncWith({ ...NOTHING_SYNCED, total: 4, groups_skipped: 3 });
-
-    await screen.findByText('Groups Created', {}, { timeout: 15_000 });
-    expect(countRows()['Groups Skipped']).toBe('3');
-  });
-
-  test('a skipped sync shows why and no counts', async () => {
-    const reason =
-      "groups mode is 'token_claim': groups come from each login's token, so there is no directory to sync; link a group to the IdP group by its source ID";
-    await syncWith({ ...NOTHING_SYNCED, skipped: reason });
-
+    await screen.findByText(TITLES.ok);
     expect(
-      await screen.findByText(reason, {}, { timeout: 15_000 }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Sync skipped')).toBeInTheDocument();
-    expect(screen.queryByText('Groups Created')).not.toBeInTheDocument();
+      screen.queryByText('left over from an earlier run'),
+    ).not.toBeInTheDocument();
   });
 
-  test('a failed directory call shows the error and no counts', async () => {
-    const error =
-      "okta directory: GET '/api/v1/groups' returned HTTP 401: 'Invalid token provided'";
-    await syncWith({ ...NOTHING_SYNCED, error });
+  test('a sync that ran shows its counts', async () => {
+    await sync(RESULTS.ok);
 
+    expect(await screen.findByText('Groups Created')).toBeVisible();
+    expect(screen.getByText('5')).toBeVisible();
+    expect(screen.queryByText('Groups Skipped')).not.toBeInTheDocument();
+  });
+
+  test('a partial sync counts the groups it skipped', async () => {
+    await sync(RESULTS.partial);
+
+    expect(await screen.findByText('Groups Skipped')).toBeVisible();
     expect(
-      await screen.findByText(error, {}, { timeout: 15_000 }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Sync failed')).toBeInTheDocument();
-    expect(screen.queryByText('Groups Created')).not.toBeInTheDocument();
+      screen.getByText('Groups Skipped').nextElementSibling,
+    ).toHaveTextContent('2');
   });
 
-  test('a disabled provider says why it cannot sync instead of offering to', async () => {
-    const user = userEvent.setup();
-    render(
-      <SyncOidcProviderGroupsDrawer
-        oidcProvider={{ ...API_PROVIDER, enabled: false }}
-      />,
-      { wrapper },
+  test('an account without oidc:write sees the sync action disabled', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.me.get.success({
+        mockedResponse: {
+          ...ADMIN_MOCKED_RESPONSE,
+          permissions: ['oidc:read'],
+        },
+      }),
     );
-
-    const button = await findSyncButton();
-    expect(button).toBeDisabled();
-    await user.hover(button);
+    render(<SyncOidcProviderGroupsDrawer oidcProviderName="okta" />, {
+      wrapper,
+    });
 
     expect(
-      await screen.findByText(
-        'This provider is disabled, so there is nothing to sync.',
-        {},
-        { timeout: 15_000 },
-      ),
-    ).toBeInTheDocument();
+      await screen.findByRole('button', { name: 'Sync OIDC Provider Groups' }),
+    ).toBeDisabled();
   });
+
+  test.each(['error', 'not_configured', 'user_token', 'skipped'] as const)(
+    'a %s sync that listed nothing shows no counts',
+    async (status) => {
+      await sync(RESULTS[status]);
+
+      await screen.findByText(TITLES[status]);
+      expect(screen.queryByText('Groups Created')).not.toBeInTheDocument();
+    },
+  );
 });

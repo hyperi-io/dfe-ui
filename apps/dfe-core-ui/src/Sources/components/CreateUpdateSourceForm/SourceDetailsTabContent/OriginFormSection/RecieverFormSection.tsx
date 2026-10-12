@@ -1,6 +1,9 @@
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
-import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
+import {
+  CreateUpdateSourceFormData,
+  DisabledFields,
+} from '@/Sources/components/CreateUpdateSourceForm';
 import {
   MATCH_OPERATORS,
   RECEIVER_TABLE_LABELS,
@@ -8,16 +11,22 @@ import {
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { FormInstance, FormRule, Input, Radio, Select } from 'antd';
 
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const TABLE_LABEL = 'Table';
+
 export const ReceiverFormSection = ({
   formValidation,
   form,
+  disabledFields,
 }: {
   formValidation: FormRule;
   form: FormInstance<CreateUpdateSourceFormData>;
+  disabledFields?: DisabledFields;
 }) => {
   const operationType = Form.useWatch(['match', 'operator'], form);
   const isMatchValueDisabled = operationType === 'exists';
 
+  // The schema holds these rules in its receiver refinement, so it derives no mark.
   return (
     <>
       <NotificationCard
@@ -28,8 +37,9 @@ export const ReceiverFormSection = ({
         <Form.Item
           className="w-full"
           name={['match', 'field']}
-          label={<Form.Label required>Field</Form.Label>}
+          label="Field"
           rules={[formValidation]}
+          required
         >
           <Input placeholder="Enter field" />
         </Form.Item>
@@ -38,6 +48,7 @@ export const ReceiverFormSection = ({
           label="Operator"
           className="min-w-36"
           rules={[formValidation]}
+          required
         >
           <Select
             placeholder="Select operator"
@@ -62,21 +73,22 @@ export const ReceiverFormSection = ({
         <Form.Item
           className="w-full"
           name={['match', 'value']}
-          label={
-            <Form.Label required={operationType !== 'exists'}>Value</Form.Label>
-          }
+          label="Value"
           rules={[formValidation]}
+          required={!isMatchValueDisabled}
         >
           <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
         </Form.Item>
       </div>
       <Form.Item
         name={['receiver_ui_config', 'table']}
-        label="Table"
+        label={TABLE_LABEL}
         rules={[formValidation]}
         help="You can either use the shared table or add your own table. You will need to deploy the source if own table is selected."
       >
         <Radio.Group
+          aria-label={TABLE_LABEL}
+          disabled={disabledFields?.receiver_ui_config?.table}
           options={Object.entries(RECEIVER_TABLE_LABELS).map(
             ([value, label]) => ({ label, value }),
           )}

@@ -3,47 +3,52 @@ import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
+import { useMemo } from 'react';
 import z from 'zod';
 import { RuleSelect } from './RuleSelect';
 
-const NAME_REGEX = /^[a-z][a-z0-9_]*$/;
+const requiredName = z
+  .string({ message: 'Name is required' })
+  .min(1, { message: 'Name is required' });
 
-const formSchema = z.object({
-  name: z
-    .string({ message: 'Identifier is required' })
-    .min(1, { message: 'Identifier is required' })
-    .refine((v) => NAME_REGEX.test(v), {
-      message:
-        'Identifier must contain only lowercase letters, numbers, and underscores',
-    }),
-  display_name: z.string().optional().nullable(),
-  global_target_table_name: z
-    .string({ message: 'Global target table name is required' })
-    .min(1, { message: 'Global target table name is required' }),
-  global_source_table_name: z
-    .string({ message: 'Global source table name is required' })
-    .min(1, { message: 'Global source table name is required' }),
-  customers: z
-    .array(z.string({ message: 'Customer is required' }))
-    .min(1, { message: 'Customers are required' }),
-  rules: z
-    .array(
-      z
-        .string({ message: 'Rule is required' })
-        .min(1, { message: 'Rule is required' }),
-    )
-    .min(1, { message: 'Rules are required' }),
-  cron: z
-    .string({ message: 'Cron is required' })
-    .min(1, { message: 'Cron is required' }),
-  log_buffer: z
-    .number({ message: 'Log buffer is required' })
-    .min(1, { message: 'Log buffer is required' }),
-});
-export type CreateUpdateHuntFormData = z.infer<typeof formSchema>;
+// The engine checks the name on create only, so an existing hunt's locked name stays unchecked.
+const newName = requiredName.refine(
+  (v) => RULE_HUNT_NAME_VALIDATOR.regex.test(v),
+  { message: RULE_HUNT_NAME_VALIDATOR.message('Name') },
+);
+
+const buildFormSchema = (nameIsNew: boolean) =>
+  z.object({
+    name: nameIsNew ? newName : requiredName,
+    display_name: z.string().optional().nullable(),
+    global_target_table_name: z.string().optional().nullable(),
+    global_source_table_name: z
+      .string({ message: 'Global source table name is required' })
+      .min(1, { message: 'Global source table name is required' }),
+    customers: z
+      .array(z.string({ message: 'Customer is required' }))
+      .min(1, { message: 'Customers are required' }),
+    rules: z
+      .array(
+        z
+          .string({ message: 'Rule is required' })
+          .min(1, { message: 'Rule is required' }),
+      )
+      .min(1, { message: 'Rules are required' }),
+    cron: z
+      .string({ message: 'Cron is required' })
+      .min(1, { message: 'Cron is required' }),
+    log_buffer: z
+      .number({ message: 'Log buffer is required' })
+      .min(1, { message: 'Log buffer is required' }),
+  });
+export type CreateUpdateHuntFormData = z.infer<
+  ReturnType<typeof buildFormSchema>
+>;
 
 interface DisabledFields {
   name?: boolean;
@@ -68,6 +73,10 @@ export const CreateUpdateHuntForm = ({
   ...props
 }: CreateUpdateHuntFormProps) => {
   const [form] = Form.useForm<CreateUpdateHuntFormData>();
+  const formSchema = useMemo(
+    () => buildFormSchema(!disabledFields?.name),
+    [disabledFields?.name],
+  );
   const formValidation =
     useAntdZodResolver<CreateUpdateHuntFormData>(formSchema);
 
@@ -82,11 +91,7 @@ export const CreateUpdateHuntForm = ({
       initialValues={initialValues}
       {...props}
     >
-      <Form.Item
-        name="name"
-        label={<Form.Label required>Name</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="name" label="Name" rules={[formValidation]}>
         <Input placeholder="Enter name" disabled={disabledFields?.name} />
       </Form.Item>
       <Form.Item
@@ -98,7 +103,7 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="customers"
-        label={<Form.Label required>Organisations</Form.Label>}
+        label="Organisations"
         rules={[formValidation]}
       >
         <OrganisationSelect
@@ -108,31 +113,24 @@ export const CreateUpdateHuntForm = ({
       </Form.Item>
       <Form.Item
         name="global_source_table_name"
-        label={<Form.Label required>Source Table</Form.Label>}
+        label="Source Table"
         rules={[formValidation]}
       >
         <SourceSelect placeholder="Select source" />
       </Form.Item>
       <Form.Item
         name="global_target_table_name"
-        label={<Form.Label required>Target Table</Form.Label>}
+        label="Target Table"
+        extra="Leave blank to write detections to the default detection table."
         rules={[formValidation]}
       >
-        <Input placeholder="Enter target table" />
+        <Input placeholder="Optional" />
       </Form.Item>
-      <Form.Item
-        name="rules"
-        label={<Form.Label required>Rules</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="rules" label="Rules" rules={[formValidation]}>
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
-      <Form.Item
-        name="cron"
-        label={<Form.Label required>Cron Expression</Form.Label>}
-        rules={[formValidation]}
-      >
+      <Form.Item name="cron" label="Cron Expression" rules={[formValidation]}>
         <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>
 

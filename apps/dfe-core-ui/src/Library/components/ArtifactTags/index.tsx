@@ -6,6 +6,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { WriteResultFeedback } from '@/core/components/WriteResultFeedback';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { LIBRARY_TOKEN_VALIDATOR } from '@/core/validationSchemas/utils';
 import { useDeleteLibraryTag } from '@/Library/hooks/useDeleteLibraryTag';
 import { TLibraryArtifactDetail } from '@/Library/hooks/useFetchLibraryArtifactDetail/types';
 import { useSetLibraryTag } from '@/Library/hooks/useSetLibraryTag';
@@ -16,7 +17,10 @@ import z from 'zod';
 const formSchema = z.object({
   tag: z
     .string({ message: 'Tag name is required' })
-    .min(1, { message: 'Tag name is required' }),
+    .min(1, { message: 'Tag name is required' })
+    .refine((v) => LIBRARY_TOKEN_VALIDATOR.regex.test(v), {
+      message: LIBRARY_TOKEN_VALIDATOR.message('Tag name'),
+    }),
   version: z
     .number({ message: 'Version is required' })
     .min(1, { message: 'Version is required' }),
@@ -93,16 +97,12 @@ export const ArtifactTags = ({
             }}
           >
             <div className="grid grid-cols-2 gap-3">
-              <Form.Item
-                name="tag"
-                label={<Form.Label required>Tag</Form.Label>}
-                rules={[formValidation]}
-              >
+              <Form.Item name="tag" label="Tag" rules={[formValidation]}>
                 <Input placeholder="stable" />
               </Form.Item>
               <Form.Item
                 name="version"
-                label={<Form.Label required>Points at version</Form.Label>}
+                label="Points at version"
                 rules={[formValidation]}
               >
                 {(artifact.versions ?? []).length > 0 ? (

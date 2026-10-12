@@ -1,4 +1,4 @@
-import { DB_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
+import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import z from 'zod';
 
 const SOURCE_ID_MAX_LENGTH = 512;
@@ -21,8 +21,8 @@ export const createGroupFormSchema = (stored: GroupSourceLink) =>
       name: z
         .string()
         .min(1, { message: 'Name is required' })
-        .refine((v) => DB_NAME_VALIDATOR.regex.test(v), {
-          message: DB_NAME_VALIDATOR.message('Name'),
+        .refine((v) => STORE_NAME_VALIDATOR.regex.test(v), {
+          message: STORE_NAME_VALIDATOR.message('Name'),
         }),
       description: z.string(),
       roles: z.array(z.string()).min(1, { message: 'Roles are required' }),
