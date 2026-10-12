@@ -3,7 +3,7 @@ import { TBulkActionSourcesRequestBody } from '@/core/hooks/useBulkActionSources
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { useFetchInfiniteDefaultsDriftSources } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources';
 import { Spin, Steps, StepsProps } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BuildDeployTab } from './BuildDeployTab';
 import { ConfigDriftTab } from './ConfigDriftTab';
 
@@ -47,8 +47,10 @@ const appliedDefaultsMessage = (
 
 export const IdentifyConfigDriftTabs = ({
   onSuccess,
+  onPendingDeployCountChange,
 }: {
   onSuccess?: () => void;
+  onPendingDeployCountChange?: (count: number) => void;
 }) => {
   const [currentStep, setCurrentStep] = useState<CurrentStep>('config-drift');
   const [appliedSources, setAppliedSources] = useState<
@@ -62,6 +64,10 @@ export const IdentifyConfigDriftTabs = ({
     useState<string>('');
 
   const buildDeployUnlocked = appliedSources.length > 0;
+
+  useEffect(() => {
+    onPendingDeployCountChange?.(appliedSources.length);
+  }, [appliedSources.length, onPendingDeployCountChange]);
 
   const handleConfigDriftSuccess = (sources: TApplyDefaultsResponse) => {
     const nextAppliedSources = [...appliedSources, ...sources.updated];

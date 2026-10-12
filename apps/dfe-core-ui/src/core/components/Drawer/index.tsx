@@ -14,6 +14,11 @@ interface DrawerProps extends AntdDrawerProps {
     title?: string;
     message?: string;
     enabled?: boolean;
+    // Close only from the warning's confirm action. The X, mask, and Escape
+    // open the warning and do not close the drawer on their own.
+    explicit?: boolean;
+    confirmLabel?: string;
+    cancelLabel?: string;
   };
   onOk?: () => void;
 }
@@ -27,6 +32,10 @@ const isDrawerPanel = (target: EventTarget | null) =>
 
 const isConfirmModal = (target: EventTarget | null) =>
   target instanceof Element && Boolean(target.closest('[data-clickaway-card]'));
+
+const isDrawerCloseControl = (target: EventTarget | null) =>
+  target instanceof Element &&
+  Boolean(target.closest('[data-drawer-close], .ant-drawer-close'));
 
 export const Drawer = ({
   children,
@@ -58,7 +67,7 @@ export const Drawer = ({
       return;
     }
 
-    if (isMaskClick && confirmOpenRef.current) {
+    if (isMaskClick && confirmOpenRef.current && !preventClickaway.explicit) {
       closeDrawer();
       return;
     }
@@ -68,7 +77,9 @@ export const Drawer = ({
   };
 
   const handleClose: AntdDrawerProps['onClose'] = (event) => {
-    requestClose(event.type === 'click');
+    const target = 'target' in event ? event.target : null;
+    const fromCloseControl = isDrawerCloseControl(target);
+    requestClose(event.type === 'click' && !fromCloseControl);
   };
 
   useEffect(() => {
@@ -77,7 +88,11 @@ export const Drawer = ({
     }
 
     const onDocumentClick = (event: MouseEvent) => {
-      if (isConfirmModal(event.target) || isDrawerMask(event.target)) {
+      if (
+        isConfirmModal(event.target) ||
+        isDrawerMask(event.target) ||
+        isDrawerCloseControl(event.target)
+      ) {
         return;
       }
       if (isDrawerPanel(event.target)) {
@@ -85,8 +100,15 @@ export const Drawer = ({
       }
     };
 
-    document.addEventListener('click', onDocumentClick);
-    return () => document.removeEventListener('click', onDocumentClick);
+    // The click that opens the warning is still bubbling. Attaching on the
+    // next turn keeps that click from dismissing the warning immediately.
+    const timeoutId = window.setTimeout(() => {
+      document.addEventListener('click', onDocumentClick);
+    }, 0);
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener('click', onDocumentClick);
+    };
   }, [isConfirmOpen]);
 
   return (
@@ -103,8 +125,16 @@ export const Drawer = ({
           <Button
             shape="circle"
             aria-label="Close"
+            data-drawer-close
             icon={<IconX />}
-            onClick={closeDrawer}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (preventClickaway.enabled && preventClickaway.explicit) {
+                requestClose(false);
+                return;
+              }
+              closeDrawer();
+            }}
           />
         }
         footer={null}
@@ -116,6 +146,8 @@ export const Drawer = ({
             onCancel={closeConfirm}
             title={preventClickaway.title}
             message={preventClickaway.message}
+            confirmLabel={preventClickaway.confirmLabel}
+            cancelLabel={preventClickaway.cancelLabel}
           />
         )}
       </AntdDrawer>

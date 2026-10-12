@@ -5,10 +5,17 @@ import { IconScan } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
+const pendingDeployWarning = (count: number) =>
+  count === 1
+    ? 'There is 1 pending deploy. These configuration updates have not been deployed.'
+    : `There are ${count} pending deploys. These configuration updates have not been deployed.`;
+
 export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
   const [isOpen, setIsOpen] = useState(open);
+  const [pendingDeployCount, setPendingDeployCount] = useState(0);
 
   const handleSuccess = () => {
+    setPendingDeployCount(0);
     setIsOpen(false);
   };
   return (
@@ -39,8 +46,23 @@ export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
         open={isOpen}
         onClose={() => setIsOpen(false)}
         size="80%"
+        preventClickaway={
+          pendingDeployCount > 0
+            ? {
+                enabled: true,
+                explicit: true,
+                title: 'Pending deploys',
+                message: pendingDeployWarning(pendingDeployCount),
+                confirmLabel: 'Close',
+                cancelLabel: 'Keep open',
+              }
+            : undefined
+        }
       >
-        <IdentifyConfigDriftTabs onSuccess={handleSuccess} />
+        <IdentifyConfigDriftTabs
+          onSuccess={handleSuccess}
+          onPendingDeployCountChange={setPendingDeployCount}
+        />
       </Drawer>
     </>
   );
