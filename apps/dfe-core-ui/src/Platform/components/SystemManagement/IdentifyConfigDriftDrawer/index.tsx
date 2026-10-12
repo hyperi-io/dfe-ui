@@ -5,8 +5,8 @@ import { IconScan } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
-export const IdentifyConfigDriftDrawer = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
+  const [isOpen, setIsOpen] = useState(open);
 
   const handleSuccess = () => {
     setIsOpen(false);

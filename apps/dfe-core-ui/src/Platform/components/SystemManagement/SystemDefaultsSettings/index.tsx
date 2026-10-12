@@ -9,6 +9,7 @@ export const SystemDefaultsSettings = () => {
   const { data: defaults, error } = useFetchDefaults();
 
   const [isEditDefaultsOpen, setIsEditDefaultsOpen] = useState(false);
+  const [hasDefaultsChanged, setHasDefaultsChanged] = useState(false);
 
   return (
     <SectionCard
@@ -16,14 +17,16 @@ export const SystemDefaultsSettings = () => {
       rightTitleSlot={
         <SystemDefaultsActionMenu
           onClick={{ onEditDefaultsClick: () => setIsEditDefaultsOpen(true) }}
+          isConfigDriftOpen={hasDefaultsChanged}
         />
       }
     >
       {isEditDefaultsOpen ? (
         <EditSystemDefaultsForm
           onClose={() => setIsEditDefaultsOpen(false)}
-          onSuccess={() => {
+          onSuccess={({ changed }) => {
             setIsEditDefaultsOpen(false);
+            setHasDefaultsChanged(changed);
           }}
           initialValues={{
             ttl_days: defaults?.ttl_days?.effective ?? 0,

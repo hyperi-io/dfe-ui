@@ -61,7 +61,7 @@ export const IdentifyConfigDriftTabs = ({
   const [appliedSuccessMessage, setAppliedSuccessMessage] =
     useState<string>('');
 
-  const buildDeployUnlocked = appliedSources.length > 1;
+  const buildDeployUnlocked = appliedSources.length > 0;
 
   const handleConfigDriftSuccess = (sources: TApplyDefaultsResponse) => {
     const nextAppliedSources = [...appliedSources, ...sources.updated];
@@ -74,7 +74,7 @@ export const IdentifyConfigDriftTabs = ({
       nextUnchangedSources,
     );
     setAppliedSuccessMessage(message);
-    if (nextAppliedSources.length > 1) {
+    if (nextAppliedSources.length >= 1) {
       setCurrentStep('build-deploy');
     }
   };
@@ -107,17 +107,18 @@ export const IdentifyConfigDriftTabs = ({
     );
   }
 
+  const hasDriftSources = (defaultsDriftSources?.length ?? 0) > 0;
   const renderNotFound =
-    defaultsDriftSources &&
-    defaultsDriftSources.length === 0 &&
-    appliedSources?.length === 0;
+    defaultsDriftSources != null &&
+    !hasDriftSources &&
+    appliedSources.length === 0;
 
   return (
     <>
       {renderNotFound && (
         <NotificationCard title="No sources with config drift found in your environment." />
       )}
-      {defaultsDriftSources && defaultsDriftSources.length > 0 && (
+      {(hasDriftSources || appliedSources.length > 0) && (
         <div className="flex flex-col gap-4">
           <NotificationCard
             title={formatNotificationCardTitleAndDescription(currentStep).title}

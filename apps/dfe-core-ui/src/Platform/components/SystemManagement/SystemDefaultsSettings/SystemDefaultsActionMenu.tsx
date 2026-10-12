@@ -6,10 +6,12 @@ import { Button } from 'antd';
 
 export const SystemDefaultsActionMenu = ({
   onClick,
+  isConfigDriftOpen = false,
 }: {
   onClick: {
     onEditDefaultsClick: () => void;
   };
+  isConfigDriftOpen: boolean;
 }) => {
   return (
     <PopoverMenu
@@ -43,7 +45,10 @@ export const SystemDefaultsActionMenu = ({
             </Button>
           </RbacProtected.Restricted>
         </RbacProtected>,
-        <IdentifyConfigDriftDrawer key="identify-config-drift" />,
+        <IdentifyConfigDriftDrawer
+          open={isConfigDriftOpen}
+          key="identify-config-drift"
+        />,
       ]}
     />
   );

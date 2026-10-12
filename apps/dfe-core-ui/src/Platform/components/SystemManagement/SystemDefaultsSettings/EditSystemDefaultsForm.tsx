@@ -4,6 +4,7 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { SourceEngineSelect } from '@/core/components/SourceEngineSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
+import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { App, Button, InputNumber, Select } from 'antd';
 import isInteger from 'lodash/isInteger';
 import { useCallback, useMemo, useState } from 'react';
@@ -18,13 +19,72 @@ const formSchema = z.object({
 
 type TFormValues = z.infer<typeof formSchema>;
 
+const normalizeHeaderType = (value?: string) =>
+  (value ?? '').replace(/^common-header\//, '');
+
+const haveFormValuesChanged = (
+  initial: TFormValues | undefined,
+  current: Partial<TFormValues> | undefined,
+) => {
+  if (!initial || !current) {
+    return false;
+  }
+
+  const fieldsReady = [
+    current.ttl_days,
+    current.engine,
+    current.common_header_type,
+    current.common_header_version,
+  ].some((value) => value !== undefined);
+
+  if (!fieldsReady) {
+    return false;
+  }
+
+  return (
+    initial.ttl_days !== current.ttl_days ||
+    initial.engine !== current.engine ||
+    normalizeHeaderType(initial.common_header_type) !==
+      normalizeHeaderType(current.common_header_type) ||
+    initial.common_header_version !== current.common_header_version
+  );
+};
+
+const hasDefaultsChanged = ({
+  initial_ttl_days,
+  initial_engine,
+  initial_common_header_type,
+  initial_common_header_version,
+  response_ttl_days,
+  response_engine,
+  response_common_header_type,
+  response_common_header_version,
+}: {
+  initial_ttl_days: number;
+  initial_engine: string;
+  initial_common_header_type: string;
+  initial_common_header_version: string;
+  response_ttl_days: number;
+  response_engine: string;
+  response_common_header_type: string;
+  response_common_header_version: string;
+}) => {
+  return (
+    initial_ttl_days !== response_ttl_days ||
+    initial_engine !== response_engine ||
+    initial_common_header_type !== response_common_header_type ||
+    initial_common_header_version !== response_common_header_version
+  );
+};
 export const EditSystemDefaultsForm = ({
   initialValues,
   onSuccess,
   onClose,
 }: {
   initialValues?: TFormValues;
-  onSuccess?: () => void;
+  onSuccess?: (
+    response: TUpdateSystemDefaultsResponse & { changed: boolean },
+  ) => void;
   onClose?: () => void;
 }) => {
   const { notification } = App.useApp();
@@ -34,8 +94,20 @@ export const EditSystemDefaultsForm = ({
     isPending: isUpdating,
     error,
   } = useUpdateSystemDefaults({
-    onSuccess: () => {
-      onSuccess?.();
+    onSuccess: (response) => {
+      const changed = hasDefaultsChanged({
+        initial_ttl_days: initialValues?.ttl_days ?? 0,
+        initial_engine: initialValues?.engine ?? '',
+        initial_common_header_type: initialValues?.common_header_type ?? '',
+        initial_common_header_version:
+          initialValues?.common_header_version ?? '',
+        response_ttl_days: response.ttl_days.effective,
+        response_engine: response.engine.effective,
+        response_common_header_type: response.common_header_type.effective,
+        response_common_header_version:
+          response.common_header_version.effective,
+      });
+      onSuccess?.({ ...response, changed });
       notification.success({
         title: 'Common header defaults updated successfully',
         placement: 'bottomLeft',
@@ -45,6 +117,18 @@ export const EditSystemDefaultsForm = ({
 
   const [form] = Form.useForm<TFormValues>();
   const formValidation = useAntdZodResolver(formSchema);
+  const ttlDays = Form.useWatch('ttl_days', form);
+  const engine = Form.useWatch('engine', form);
+  const commonHeaderType = Form.useWatch('common_header_type', form);
+  const commonHeaderVersion = Form.useWatch('common_header_version', form);
+  const canUpdate =
+    !isUpdating &&
+    haveFormValuesChanged(initialValues, {
+      ttl_days: ttlDays,
+      engine,
+      common_header_type: commonHeaderType,
+      common_header_version: commonHeaderVersion,
+    });
 
   const handleChangeTtlDays = (value: number | null) => {
     if (!value) {
@@ -162,7 +246,7 @@ export const EditSystemDefaultsForm = ({
           type="primary"
           htmlType="submit"
           loading={isUpdating}
-          disabled={isUpdating}
+          disabled={!canUpdate}
         >
           Update
         </Button>

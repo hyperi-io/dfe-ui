@@ -82,7 +82,15 @@ const { wrapper } = buildTestWrapper()
 describe('ApplyDefaultsContent', () => {
   test('applies defaults to the selected sources and skips engine-owned ones', async () => {
     const user = userEvent.setup();
-    render(<ConfigDriftTab />, { wrapper });
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[
+          driftSource('core_source', true),
+          driftSource('custom_source', false),
+        ]}
+      />,
+      { wrapper },
+    );
 
     const applyButton = await screen.findByRole('button', {
       name: 'Update Configurations',
