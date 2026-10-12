@@ -61,7 +61,10 @@ export const ApplyDefaultsContent = () => {
     onSuccess: ({ updated, unchanged }) => {
       setSelectedSources([]);
       notification.success({
-        title: appliedDefaultsMessage(updated, unchanged),
+        title: appliedDefaultsMessage(
+          updated.map((item) => item.source),
+          unchanged.map((item) => item.source),
+        ),
         placement: 'bottomLeft',
       });
     },

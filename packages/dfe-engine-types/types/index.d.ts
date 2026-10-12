@@ -213,6 +213,10 @@ export interface paths {
         /**
          * Oidc Callback
          * @description Complete the OIDC flow and re-mint the engine token (single issuer).
+         *
+         *     A login started with ``return_to`` returns there refused as well as admitted,
+         *     so a browser never lands on this route's JSON error. Without ``return_to`` a
+         *     refusal answers JSON with its status, as any API error does.
          */
         get: operations["oidc_callback_api_v1_auth_oidc__provider__callback_get"];
         put?: never;
@@ -1302,7 +1306,11 @@ export interface paths {
         put?: never;
         /**
          * Bulk Action
-         * @description Perform a bulk action (enable, disable, dormant, delete) on multiple sources.
+         * @description Perform a bulk action on multiple sources.
+         *
+         *     ``enable`` / ``disable`` / ``dormant`` / ``delete`` apply immediately.
+         *     ``deploy`` submits one ``source:deploy`` background task per accepted source
+         *     (poll ``GET /tasks/{task_id}``); refused names land in ``failed``.
          */
         post: operations["bulk_action_api_v1_sources_bulk_post"];
         delete?: never;
@@ -5907,6 +5915,22 @@ export interface components {
             file_sets: components["schemas"]["FileSetSummary"][];
         };
         /**
+         * ApplyDefaultsPin
+         * @description One source whose current version was considered for the table defaults.
+         */
+        ApplyDefaultsPin: {
+            /**
+             * Source
+             * @description Source name (_source label)
+             */
+            source: string;
+            /**
+             * Version
+             * @description Version id that was pinned or already matched; null when unset
+             */
+            version?: string | null;
+        };
+        /**
          * ApplyDefaultsRequest
          * @description The sources to pin to the current table defaults.
          */
@@ -5922,10 +5946,16 @@ export interface components {
          * @description Which named sources were pinned, which already had these defaults, and their tables.
          */
         ApplyDefaultsResponse: {
-            /** Updated */
-            updated: string[];
-            /** Unchanged */
-            unchanged: string[];
+            /**
+             * Updated
+             * @description Sources whose current version was written with the defaults
+             */
+            updated: components["schemas"]["ApplyDefaultsPin"][];
+            /**
+             * Unchanged
+             * @description Sources whose current version already matched the defaults
+             */
+            unchanged: components["schemas"]["ApplyDefaultsPin"][];
             /**
              * Live
              * @description One entry per named source, in request order: what reached its table.
@@ -6139,20 +6169,42 @@ export interface components {
             file: string;
         };
         /**
+         * BulkActionItem
+         * @description One source in a bulk request.
+         */
+        BulkActionItem: {
+            /**
+             * Source
+             * @description Source name (_source label)
+             */
+            source: string;
+            /**
+             * Version
+             * @description Deploy only: version id to deploy. Omitted uses the working current. Ignored for enable/disable/dormant/delete.
+             */
+            version?: string | null;
+        };
+        /**
          * BulkActionRequest
          * @description Bulk operation on multiple sources.
          */
         BulkActionRequest: {
             /**
              * Action
-             * @description Action: enable, disable, dormant, delete
+             * @description Action: enable, disable, dormant, delete, deploy
              */
             action: string;
             /**
              * Sources
-             * @description Source names to act on
+             * @description Sources to act on. Plain name strings are accepted.
              */
-            sources: string[];
+            sources: components["schemas"]["BulkActionItem"][];
+            /**
+             * Dry Run
+             * @description Deploy only: plan/validate DDL without applying it. Ignored otherwise.
+             * @default false
+             */
+            dry_run: boolean;
         };
         /**
          * BulkActionResponse
@@ -6170,6 +6222,35 @@ export interface components {
             failed?: {
                 [key: string]: string;
             }[];
+            /**
+             * Deployments
+             * @description Deploy only: one ``source:deploy`` task per accepted source. Poll via GET /tasks/{task_id}.
+             */
+            deployments?: components["schemas"]["BulkDeployTask"][];
+        };
+        /**
+         * BulkDeployTask
+         * @description One accepted deploy submitted as a background task.
+         */
+        BulkDeployTask: {
+            /** Source */
+            source: string;
+            /**
+             * Version
+             * @description Version requested; null means the working current at task start
+             */
+            version?: string | null;
+            /**
+             * Task Id
+             * @description Task id for polling via GET /tasks/{task_id}
+             */
+            task_id: string;
+            /**
+             * Kind
+             * @description Task kind
+             * @default source:deploy
+             */
+            kind: string;
         };
         /**
          * BundleSchema
@@ -11262,7 +11343,7 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters and never the shipped default
+             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
@@ -15117,7 +15198,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
@@ -15632,7 +15713,7 @@ export interface operations {
             query?: {
                 /** @description When false, return JSON with authorization_url for SPA clients (use credentials: include, then window.location.assign the URL). */
                 redirect?: boolean;
-                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...). A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
+                /** @description Where the callback sends the browser after login, with the engine token in the URL fragment (#access_token=...&token_type=bearer&provider=...), or the refusal's code (#error=<code>&provider=...) when the login is refused. A relative path, or an absolute URL on this API's origin or a CORS-allowed origin. Omit to have the callback answer with JSON instead. */
                 return_to?: string | null;
             };
             header?: never;
@@ -15690,7 +15771,7 @@ export interface operations {
                     "application/json": components["schemas"]["OidcCallbackResponse"];
                 };
             };
-            /** @description Login started with return_to: redirect there with the engine token in the URL fragment. */
+            /** @description Login started with return_to: redirect there with the engine token in the URL fragment, or with the refusal's code (#error=<code>&provider=...) when the login is refused. */
             303: {
                 headers: {
                     [name: string]: unknown;
