@@ -12182,9 +12182,11 @@ export interface components {
             restart_required?: string[];
             /** @description The TTL move this deploy makes (or, on a dry run, would make) on the table it already has; null when the TTL does not move */
             ttl_change?: components["schemas"]["TtlChange"] | null;
+            /** @description On a dry run, the table-settings move the deploy would make on the table it already has; null when the settings do not move */
+            settings_change?: components["schemas"]["SettingsChange"] | null;
             /**
              * Live Table Error
-             * @description On a dry run, why the deployed table could not be read; its TTL move is then unknown. Null otherwise.
+             * @description On a dry run, why the deployed table could not be read; its TTL and settings moves are then unknown. Null otherwise.
              */
             live_table_error?: string | null;
         };
@@ -12535,6 +12537,22 @@ export interface components {
         SetVarRequest: {
             /** Value */
             value: unknown;
+        };
+        /**
+         * SettingsChange
+         * @description The table-settings move a deploy makes on a table that already exists.
+         */
+        SettingsChange: {
+            /**
+             * Assignments
+             * @description 'name = value' for each setting the move sets
+             */
+            assignments: string[];
+            /**
+             * Statement
+             * @description The ALTER TABLE that makes the move
+             */
+            statement: string;
         };
         /**
          * SettingsSummary
