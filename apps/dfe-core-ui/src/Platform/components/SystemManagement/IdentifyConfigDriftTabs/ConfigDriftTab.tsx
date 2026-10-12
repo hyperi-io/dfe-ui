@@ -1,4 +1,4 @@
-import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useApplyDefaults } from '@/Platform/hooks/system/useApplyDefaults';
@@ -129,7 +129,6 @@ export const ConfigDriftTab = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <ApiErrorNotification error={applyError} />
       <Table<TDefaultsDriftSourceItem>
         rowKey="source"
         dataSource={defaultsDriftSources}
@@ -150,6 +149,9 @@ export const ConfigDriftTab = ({
           },
         }}
       />
+      {applyError && (
+        <NotificationCard type="error" title={applyError?.message} />
+      )}
       <div className="flex items-center justify-end gap-3">
         <span className="text-xs text-foreground/50 dark:text-foreground/50">
           {selectedSources.length} selected

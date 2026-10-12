@@ -54,15 +54,39 @@ export const IdentifyConfigDriftTabs = ({
   const [appliedSources, setAppliedSources] = useState<
     TBulkActionSourcesRequestBody['sources']
   >([]);
+  const [unchangedSources, setUnchangedSources] = useState<
+    TBulkActionSourcesRequestBody['sources']
+  >([]);
 
   const [appliedSuccessMessage, setAppliedSuccessMessage] =
     useState<string>('');
 
+  const buildDeployUnlocked = appliedSources.length > 1;
+
   const handleConfigDriftSuccess = (sources: TApplyDefaultsResponse) => {
-    const message = appliedDefaultsMessage(sources.updated, sources.unchanged);
+    const nextAppliedSources = [...appliedSources, ...sources.updated];
+    const nextUnchangedSources = [...unchangedSources, ...sources.unchanged];
+
+    setAppliedSources(nextAppliedSources);
+    setUnchangedSources(nextUnchangedSources);
+    const message = appliedDefaultsMessage(
+      nextAppliedSources,
+      nextUnchangedSources,
+    );
     setAppliedSuccessMessage(message);
-    setAppliedSources([...appliedSources, ...sources.updated]);
-    setCurrentStep('build-deploy');
+    if (nextAppliedSources.length > 1) {
+      setCurrentStep('build-deploy');
+    }
+  };
+
+  const handleStepChange = (stepIndex: number) => {
+    const nextStep = steps[stepIndex]?.key;
+    if (nextStep === 'build-deploy' && !buildDeployUnlocked) {
+      return;
+    }
+    if (nextStep === 'config-drift' || nextStep === 'build-deploy') {
+      setCurrentStep(nextStep);
+    }
   };
 
   const {
@@ -83,9 +107,14 @@ export const IdentifyConfigDriftTabs = ({
     );
   }
 
+  const renderNotFound =
+    defaultsDriftSources &&
+    defaultsDriftSources.length === 0 &&
+    appliedSources?.length === 0;
+
   return (
     <>
-      {defaultsDriftSources && defaultsDriftSources.length === 0 && (
+      {renderNotFound && (
         <NotificationCard title="No sources with config drift found in your environment." />
       )}
       {defaultsDriftSources && defaultsDriftSources.length > 0 && (
@@ -99,8 +128,12 @@ export const IdentifyConfigDriftTabs = ({
           <Steps
             size="small"
             current={steps.findIndex((step) => step.key === currentStep)}
-            onChange={(step) => setCurrentStep(steps[step].key as CurrentStep)}
-            items={steps}
+            onChange={handleStepChange}
+            items={steps.map((step) =>
+              step.key === 'build-deploy'
+                ? { ...step, disabled: !buildDeployUnlocked }
+                : step,
+            )}
           />
 
           {currentStep === 'config-drift' && (
