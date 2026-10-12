@@ -7,6 +7,10 @@ import { useState } from 'react';
 
 export const IdentifyConfigDriftDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleSuccess = () => {
+    setIsOpen(false);
+  };
   return (
     <>
       <RbacProtected action={RbacProtected.rbacActions.system_write}>
@@ -33,13 +37,10 @@ export const IdentifyConfigDriftDrawer = () => {
       <Drawer
         title="Identify Config Drift"
         open={isOpen}
-        classNames={{
-          body: 'pt-2',
-        }}
         onClose={() => setIsOpen(false)}
         size="80%"
       >
-        <IdentifyConfigDriftTabs />
+        <IdentifyConfigDriftTabs onSuccess={handleSuccess} />
       </Drawer>
     </>
   );

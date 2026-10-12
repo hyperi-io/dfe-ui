@@ -42,7 +42,10 @@ describe('.useApplyDefaults', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TApplyDefaultsResponse = {
-        updated: [{ source: 'source1' }, { source: 'source2' }],
+        updated: [
+          { source: 'source1', version: '1.0.0' },
+          { source: 'source2', version: '1.0.0' },
+        ],
         unchanged: [],
         live: [],
       };

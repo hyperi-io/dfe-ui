@@ -31,7 +31,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 describe('.useBulkActionSources', () => {
   const requestBody: TBulkActionSourcesRequestBody = {
     action: 'string',
-    sources: [{ name: 'string', version: 'string' }],
+    sources: [{ source: 'string', version: 'string' }],
     dry_run: false,
   };
   describe('onSuccess', () => {
