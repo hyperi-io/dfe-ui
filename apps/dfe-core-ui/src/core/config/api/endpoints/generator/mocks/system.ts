@@ -296,7 +296,7 @@ export const system = {
     post: {
       success: ({
         mockedResponse = {
-          updated: ['source1', 'source2'],
+          updated: [{ source: 'source1' }, { source: 'source2' }],
           unchanged: [],
           live: [],
         },
