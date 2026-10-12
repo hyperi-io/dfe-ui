@@ -1,5 +1,10 @@
 'use client';
 
+import {
+  initialCredentialSource,
+  isStoredSecret,
+  type TCredentialSource,
+} from '@/core/components/CredentialField/credentialSource';
 import { Form } from '@/core/components/Form';
 import { ruleCheckingField } from '@/core/utils/zod/useAntdZodResolver';
 import { Input, Select, Space, type FormItemProps, type FormRule } from 'antd';
@@ -7,16 +12,12 @@ import { useId, useState } from 'react';
 
 type TNamePath = NonNullable<FormItemProps['name']>;
 
-type TCredentialSource = 'value' | 'env';
-
 const SOURCE_OPTIONS: { label: string; value: TCredentialSource }[] = [
   { label: 'Value', value: 'value' },
   { label: 'Env Var', value: 'env' },
 ];
 
 const STORED_SECRET_HINT = 'Secret stored - leave blank to keep it';
-
-const isFilled = (value: unknown) => typeof value === 'string' && value !== '';
 
 interface CredentialFieldProps {
   label: string;
@@ -47,17 +48,29 @@ export const CredentialField = ({
   const form = Form.useFormInstance();
   const id = useId();
   const hasStoredSecret =
-    storedName !== undefined && isFilled(form.getFieldValue(storedName));
-  const [source, setSource] = useState<TCredentialSource>(() =>
-    isFilled(form.getFieldValue(envName)) &&
-    !isFilled(form.getFieldValue(valueName)) &&
-    !hasStoredSecret
-      ? 'env'
-      : 'value',
+    storedName !== undefined && isStoredSecret(form.getFieldValue(storedName));
+  const [initialSource] = useState<TCredentialSource>(() =>
+    initialCredentialSource({
+      env: form.getFieldValue(envName),
+      hasStoredSecret,
+      value: form.getFieldValue(valueName),
+    }),
   );
+  const [source, setSource] = useState(initialSource);
   const inputId = `${id}-${source}`;
   // The shown member also reports an error the rules pin to the member that is not mounted.
   const rules = (hidden: TNamePath) => [rule, ruleCheckingField(rule, hidden)];
+  // A secret that opened on Env Var has none stored, so a blank value switched to would leave it with no source.
+  const valueRules =
+    secret && initialSource === 'env'
+      ? [
+          ...rules(envName),
+          {
+            required: true,
+            message: `Enter the ${label}, or switch back to Env Var`,
+          },
+        ]
+      : rules(envName);
 
   return (
     <Form.Item label={label} htmlFor={inputId}>
@@ -76,7 +89,7 @@ export const CredentialField = ({
             key="value"
             name={valueName}
             noStyle
-            rules={rules(envName)}
+            rules={valueRules}
             dependencies={dependencies}
           >
             {secret ? (

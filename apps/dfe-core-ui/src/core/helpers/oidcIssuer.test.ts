@@ -28,6 +28,11 @@ describe('buildOktaIssuer', () => {
       expected: 'https://dev-123.okta.com',
     },
     {
+      name: 'a pasted custom authorization server URL keeps its path',
+      parts: { domain: 'https://dev-123.okta.com/oauth2/default/' },
+      expected: 'https://dev-123.okta.com/oauth2/default',
+    },
+    {
       name: 'an http URL with several trailing slashes',
       parts: { domain: 'HTTP://dev-123.okta.com//' },
       expected: 'https://dev-123.okta.com',

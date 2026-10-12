@@ -104,7 +104,7 @@ export const defaultGroupMode = (type: TOidcProviderType): TGroupMode =>
   DEFAULT_GROUP_MODES[type];
 
 type TGroupsValues = { mode: TGroupMode; enrich_on_login?: boolean } & Partial<
-  Record<TDirectoryTextField, string>
+  Record<TDirectoryTextField, string | null>
 >;
 
 /**

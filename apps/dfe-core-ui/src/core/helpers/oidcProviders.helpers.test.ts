@@ -5,6 +5,7 @@ import {
   toScopeList,
   toScopesRequest,
   toUpdateOidcProviderBody,
+  type TStoredOidcProvider,
 } from './oidcProviders.helpers';
 
 const GOOGLE_GROUPS_SCOPE =
@@ -176,63 +177,126 @@ describe('oidcProviders.helpers', () => {
       });
     });
 
-    test.each([
-      [
-        'a value shown blanks its env var',
-        { client_id: 'cid' },
-        { client_id: 'cid', client_id_env: '' },
-      ],
-      [
-        'an env var shown blanks its value',
-        { client_id_env: 'ENTRA_ID' },
-        { client_id: '', client_id_env: 'ENTRA_ID' },
-      ],
-      [
-        'a typed secret blanks its env var',
-        { client_secret: 's3cret' },
-        { client_secret: 's3cret', client_secret_env: '' },
-      ],
-      [
-        'a blank secret keeps the stored one and blanks its env var',
-        { client_secret: '' },
-        { client_secret_env: '' },
-      ],
-      [
-        'a secret env var sends no secret',
-        { client_secret_env: 'ENTRA_SECRET' },
-        { client_secret_env: 'ENTRA_SECRET' },
-      ],
-    ])('%s', (_name, values, expected) => {
-      expect(toUpdateOidcProviderBody(values, stored)).toEqual(expected);
+    // The login credentials as the form shows them, against what the provider stores.
+    test.each<{
+      expected: Record<string, string>;
+      name: string;
+      saved: Partial<TStoredOidcProvider>;
+      shown: Record<string, string>;
+    }>([
+      {
+        name: 'an unedited client ID sends nothing',
+        saved: { client_id: 'cid', client_id_env: 'ENTRA_ID' },
+        shown: { client_id: 'cid' },
+        expected: {},
+      },
+      {
+        name: 'an edited client ID blanks its env var',
+        saved: { client_id: 'cid', client_id_env: '' },
+        shown: { client_id: 'rotated' },
+        expected: { client_id: 'rotated', client_id_env: '' },
+      },
+      {
+        name: 'an unedited client ID env var sends nothing',
+        saved: { client_id: '', client_id_env: 'ENTRA_ID' },
+        shown: { client_id_env: 'ENTRA_ID' },
+        expected: {},
+      },
+      {
+        name: 'a client ID switched to an env var blanks its value',
+        saved: { client_id: 'cid', client_id_env: '' },
+        shown: { client_id_env: 'ENTRA_ID' },
+        expected: { client_id: '', client_id_env: 'ENTRA_ID' },
+      },
+      {
+        name: 'a typed secret blanks its env var',
+        saved: { client_secret_path: 'oidc/entra/client_secret' },
+        shown: { client_secret: 's3cret' },
+        expected: { client_secret: 's3cret', client_secret_env: '' },
+      },
+      {
+        name: 'a blank secret sends nothing, keeping the stored one and its env var',
+        saved: {
+          client_secret_env: 'ENTRA_SECRET',
+          client_secret_path: 'oidc/entra/client_secret',
+        },
+        shown: { client_secret: '' },
+        expected: {},
+      },
+      {
+        name: 'a stored secret switched to the env var it already names sends it',
+        saved: {
+          client_secret_env: 'ENTRA_SECRET',
+          client_secret_path: 'oidc/entra/client_secret',
+        },
+        shown: { client_secret_env: 'ENTRA_SECRET' },
+        expected: { client_secret_env: 'ENTRA_SECRET' },
+      },
+      {
+        name: 'an unedited secret env var sends nothing',
+        saved: { client_secret_env: 'ENTRA_SECRET', client_secret_path: '' },
+        shown: { client_secret_env: 'ENTRA_SECRET' },
+        expected: {},
+      },
+      {
+        name: 'a secret env var cleared is sent blank',
+        saved: { client_secret_env: 'ENTRA_SECRET', client_secret_path: '' },
+        shown: { client_secret_env: '' },
+        expected: { client_secret_env: '' },
+      },
+    ])('$name', ({ expected, saved, shown }) => {
+      expect(toUpdateOidcProviderBody(shown, { ...stored, ...saved })).toEqual(
+        expected,
+      );
     });
 
-    // The engine drops a stored secret only for a new env var name sent without a value, so these bodies decide it.
-    test.each([
-      [
-        'the stored env var name resent keeps the stored secret',
-        { client_secret_env: 'ENTRA_SECRET' },
-        { client_secret_env: 'ENTRA_SECRET' },
-      ],
-      [
-        'a new env var name is sent without a value, replacing the stored secret',
-        { client_secret_env: 'ENTRA_DIRECTORY_SECRET' },
-        { client_secret_env: 'ENTRA_DIRECTORY_SECRET' },
-      ],
-      [
-        'a typed secret is stored and its env var blanked',
-        { client_secret: 'rotated' },
-        { client_secret: 'rotated', client_secret_env: '' },
-      ],
-    ])('directory secret: %s', (_name, shown, expected) => {
-      const body = toUpdateOidcProviderBody(
+    // The engine drops a stored secret for an env var name sent without a value, so these bodies decide it.
+    test.each<{
+      expected: Record<string, string>;
+      name: string;
+      path: string;
+      shown: Record<string, string>;
+    }>([
+      {
+        name: 'an unedited env var name sends nothing, keeping what is stored',
+        path: '',
+        shown: { client_secret_env: 'ENTRA_SECRET' },
+        expected: {},
+      },
+      {
+        name: 'a new env var name is sent without a value, replacing the stored secret',
+        path: '',
+        shown: { client_secret_env: 'ENTRA_DIRECTORY_SECRET' },
+        expected: { client_secret_env: 'ENTRA_DIRECTORY_SECRET' },
+      },
+      {
+        name: 'a typed secret is stored and its env var blanked',
+        path: '',
+        shown: { client_secret: 'rotated' },
+        expected: { client_secret: 'rotated', client_secret_env: '' },
+      },
+      {
+        name: 'a stored secret switched to the env var it already names sends it',
+        path: 'oidc/entra/groups_client_secret',
+        shown: { client_secret_env: 'ENTRA_SECRET' },
+        expected: { client_secret_env: 'ENTRA_SECRET' },
+      },
+      {
+        name: 'a stored secret left blank sends nothing',
+        path: 'oidc/entra/groups_client_secret',
+        shown: { client_secret: '' },
+        expected: {},
+      },
+    ])('directory secret: $name', ({ expected, path, shown }) => {
+      const groups = toUpdateOidcProviderBody(
         { groups: { mode: 'api', ...shown } },
-        stored,
-      );
+        { ...stored, groups: { ...stored.groups, client_secret_path: path } },
+      ).groups;
 
-      expect(body.groups).toMatchObject(expected);
-      if (!('client_secret' in expected)) {
-        expect(body.groups?.client_secret).toBeUndefined();
-      }
+      expect({
+        client_secret: groups?.client_secret,
+        client_secret_env: groups?.client_secret_env,
+      }).toEqual(expected);
     });
 
     test.each([

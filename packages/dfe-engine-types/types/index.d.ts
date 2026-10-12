@@ -751,7 +751,7 @@ export interface paths {
          * Create Provider
          * @description Create a new OIDC provider configuration (admin only).
          *
-         *     Secret values in the body are written to the secret store before the YAML, and only once the name is free and the provider passes the field rules for its type and mode, so a refused provider leaves nothing behind.
+         *     Secret values in the body are written to the secret store before the YAML, and only once the name is free and the provider passes the field rules for its type and mode, so a refused provider leaves nothing behind. A secret named by an env var the engine does not set, with no value sent for it, is refused the same way (``env_var_not_set``).
          */
         post: operations["create_provider_api_v1_auth_oidc_providers_post"];
         delete?: never;
@@ -776,7 +776,7 @@ export interface paths {
          * Update Provider
          * @description Update an OIDC provider configuration (admin only).
          *
-         *     A secret the body omits keeps the path the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential. A secret the body names a new env var for, other than the one the provider already names, and sends no value for loses its stored copy once the update is saved, so the env var is read instead; resending the stored env var name keeps the stored secret. Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules, checked before a secret is written or deleted.
+         *     A secret the body omits, value and env var name alike, keeps what the provider already holds, so an update that only flips ``enabled`` does not strand a stored credential; an empty env var name clears the name and keeps the stored copy. A secret the body names an env var for and sends no value for moves onto that env var and its stored copy is deleted once the update is saved, unless the name is the one already held with nothing stored. A move onto an env var the engine does not set is refused (``env_var_not_set``). Any update that touches more than ``enabled`` or ``display_name`` must leave the provider passing the field rules. Both are checked before a secret is written or deleted.
          */
         put: operations["update_provider_api_v1_auth_oidc_providers__name__put"];
         post?: never;
@@ -7211,7 +7211,7 @@ export interface components {
             client_secret: string;
             /**
              * Client Secret Env
-             * @description Env var name for the RP client secret used in the auth-code exchange
+             * @description Env var name for the RP client secret used in the auth-code exchange. With no client_secret, one the engine does not set is refused with 422 env_var_not_set on this field and nothing is saved.
              * @default
              */
             client_secret_env: string;
@@ -8250,10 +8250,9 @@ export interface components {
             service_account_json: string;
             /**
              * Service Account Json Env
-             * @description Env var for Google SA JSON. On an update, naming a different env var without service_account_json drops the stored JSON, so the env var is used.
-             * @default
+             * @description Env var for the Google service account JSON. Omit it on an update to keep the name and any stored copy or send an empty string to clear the name and keep the stored copy. Naming an env var with no value for the secret moves the secret onto it and the stored copy is deleted once the update is saved; resending the name already held, with nothing stored, changes nothing. When that move, or a create naming an env var with no value for the secret, names one the engine does not set, the request is refused with 422 env_var_not_set on this field and nothing is saved or deleted.
              */
-            service_account_json_env: string;
+            service_account_json_env?: string | null;
             /**
              * Domain
              * @description Google Workspace domain the service account syncs
@@ -8268,10 +8267,9 @@ export interface components {
             tenant_id: string;
             /**
              * Tenant Id Env
-             * @description Env var for Entra ID tenant ID, read when tenant_id is empty
-             * @default
+             * @description Env var for Entra ID tenant ID, read when tenant_id is empty. Omit it on an update to keep the name held; send an empty string to clear it.
              */
-            tenant_id_env: string;
+            tenant_id_env?: string | null;
             /**
              * Client Secret
              * @description Entra ID application client secret. Write-only: it goes to the secret store and only its path is kept in config. When neither this nor client_secret_env is set, the login client secret is used.
@@ -8280,10 +8278,9 @@ export interface components {
             client_secret: string;
             /**
              * Client Secret Env
-             * @description Env var for Entra ID client secret. On an update, naming a different env var without client_secret drops the stored secret, so the env var is used.
-             * @default
+             * @description Env var for the Entra ID client secret. Omit it on an update to keep the name and any stored copy or send an empty string to clear the name and keep the stored copy. Naming an env var with no value for the secret moves the secret onto it and the stored copy is deleted once the update is saved; resending the name already held, with nothing stored, changes nothing. When that move, or a create naming an env var with no value for the secret, names one the engine does not set, the request is refused with 422 env_var_not_set on this field and nothing is saved or deleted.
              */
-            client_secret_env: string;
+            client_secret_env?: string | null;
             /**
              * Api Token
              * @description Okta API token. Write-only: it goes to the secret store and only its path is kept in config.
@@ -8292,10 +8289,9 @@ export interface components {
             api_token: string;
             /**
              * Api Token Env
-             * @description Env var for Okta API token. On an update, naming a different env var without api_token drops the stored token, so the env var is used.
-             * @default
+             * @description Env var for the Okta API token. Omit it on an update to keep the name and any stored copy or send an empty string to clear the name and keep the stored copy. Naming an env var with no value for the secret moves the secret onto it and the stored copy is deleted once the update is saved; resending the name already held, with nothing stored, changes nothing. When that move, or a create naming an env var with no value for the secret, names one the engine does not set, the request is refused with 422 env_var_not_set on this field and nothing is saved or deleted.
              */
-            api_token_env: string;
+            api_token_env?: string | null;
             /**
              * Okta Domain
              * @description Okta organisation domain
@@ -14524,7 +14520,7 @@ export interface components {
             client_secret?: string | null;
             /**
              * Client Secret Env
-             * @description Env var name for the RP client secret. Naming a different env var without client_secret drops the stored secret, so the env var is used.
+             * @description Env var name for the RP client secret. Omit it on an update to keep the name and any stored copy or send an empty string to clear the name and keep the stored copy. Naming an env var with no value for the secret moves the secret onto it and the stored copy is deleted once the update is saved; resending the name already held, with nothing stored, changes nothing. When that move, or a create naming an env var with no value for the secret, names one the engine does not set, the request is refused with 422 env_var_not_set on this field and nothing is saved or deleted.
              */
             client_secret_env?: string | null;
             /**
@@ -15147,7 +15143,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a name another group carries as its source_id or an id another group has as its name, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;

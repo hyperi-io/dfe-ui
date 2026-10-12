@@ -29,7 +29,7 @@ const keepsGroupMode = ({
   isGroupModeAllowed(type, mode) &&
   !PROVIDERS.some((provider) => provider.initialValues.groups?.mode === mode);
 
-/** The preset fields a Type change applies: a field still empty or holding any type's preset takes the new type's preset, so a value the user typed is kept. The group mode takes the new type's default unless the user chose one the new type also accepts. */
+/** The preset fields a Type change applies: a field still empty or holding any type's preset takes the new type's preset, so a value the user typed is kept. The groups block is left alone when its mode is one no type starts in (Manual) and the new type accepts it; otherwise it takes the new type's mode and Enrich on Login and keeps the other group fields already set. */
 export const presetFieldsForType = ({
   current,
   type,
@@ -47,9 +47,11 @@ export const presetFieldsForType = ({
   );
 
   if (preset.groups && !keepsGroupMode({ mode: current.groups?.mode, type })) {
+    // The preset's Enrich on Login is the new type's forced value, so the old type's never carries over.
     fields.groups = {
       ...preset.groups,
       ...current.groups,
+      enrich_on_login: preset.groups.enrich_on_login,
       mode: preset.groups.mode,
     };
   }

@@ -51,15 +51,6 @@ describe('ViewGroupDetails', () => {
     expect(rows['Source provider:']).toBe('None');
   });
 
-  test('a linked group with no provider prompts for one', async () => {
-    const rows = await renderRows({ ...GROUP, source_id: 'dfe-viewers' });
-
-    expect(rows['Source ID:']).toBe('dfe-viewers');
-    expect(rows['Source provider:']).toBe(
-      'Any provider (set one to restrict the link)',
-    );
-  });
-
   test('a provider with no source ID is shown on an unlinked group', async () => {
     const rows = await renderRows({ ...GROUP, source_provider: 'okta' });
 

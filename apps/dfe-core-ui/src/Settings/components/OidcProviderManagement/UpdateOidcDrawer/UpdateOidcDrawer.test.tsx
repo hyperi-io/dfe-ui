@@ -7,6 +7,7 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { GOOGLE_SERVICE_ACCOUNT_HINT } from '@/core/constants/oidcProviders.constants';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
 import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/UpdateOidcDrawer';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -236,17 +237,84 @@ describe(
   'UpdateOidcProviderDrawer',
   { timeout: SOURCE_SWITCH_TEST_TIMEOUT_MS },
   () => {
-    test('an unedited save keeps each credential in the source it shows and sends no secret', async () => {
+    test('an unedited save sends no credential, so the engine keeps each as stored', async () => {
       const user = await openEditDrawer(OKTA);
+      const { api_token_env: _token, ...unchangedGroups } = groupsRequest(
+        OKTA.groups,
+      );
 
       expect(await submitAndReadBody(user)).toEqual({
         enabled: true,
         display_name: 'Okta',
-        client_id: 'okta-client-id',
-        client_id_env: '',
-        client_secret_env: '',
-        groups: { ...groupsRequest(OKTA.groups), api_token_env: '' },
+        groups: unchangedGroups,
       });
+    });
+
+    test('a stored secret switched to the env var it already names sends that env var', async () => {
+      const user = await openEditDrawer(OKTA);
+
+      await chooseCredentialSource(user, 'Client Secret', 'Env Var');
+      await chooseCredentialSource(user, 'API Token', 'Env Var');
+
+      const body = await submitAndReadBody(user);
+      expect(body).toMatchObject({
+        client_secret_env: 'OKTA_CLIENT_SECRET',
+        groups: { api_token_env: 'OKTA_API_TOKEN' },
+      });
+      expect(body).not.toHaveProperty('client_secret');
+      expect(body.groups).not.toHaveProperty('api_token');
+    });
+
+    test('a credential switched to Value and left blank with no stored secret is refused on its input', async () => {
+      const user = await openEditDrawer(GOOGLE);
+
+      await chooseCredentialSource(user, 'Service Account JSON', 'Value');
+      await user.click(
+        screen.getByRole('button', { hidden: true, name: 'Update' }),
+      );
+
+      await expectFieldError(
+        'Service Account JSON',
+        'Enter the Service Account JSON, or switch back to Env Var',
+      );
+      expect(onPut).not.toHaveBeenCalled();
+    });
+
+    test('an env var the engine cannot read is reported on that credential', async () => {
+      const message =
+        'Environment variable OKTA_DIR_TOKEN is not set in the engine';
+      server.use(
+        http.put(
+          API_CONFIG_MOCKS.oidcProviders.provider.mockedUrl.replace(
+            '{name}',
+            ':name',
+          ),
+          () =>
+            HttpResponse.json(
+              {
+                code: 'validation_error',
+                message: '1 validation error(s)',
+                errors: [
+                  {
+                    field: 'groups.api_token_env',
+                    message,
+                    code: 'env_var_not_set',
+                  },
+                ],
+              },
+              { status: 422 },
+            ),
+        ),
+      );
+      const user = await openEditDrawer(OKTA);
+
+      await chooseCredentialSource(user, 'API Token', 'Env Var');
+      await retype(user, screen.getByLabelText('API Token'), 'OKTA_DIR_TOKEN');
+      await user.click(
+        screen.getByRole('button', { hidden: true, name: 'Update' }),
+      );
+
+      await expectFieldError('API Token', message);
     });
 
     test('the provider settings the engine accepts reach the PUT body', async () => {
@@ -377,7 +445,7 @@ describe(
       );
     });
 
-    test('a credential set only by env var opens on its env var', async () => {
+    test('a credential set only by env var opens on its env var and an unedited save leaves it out', async () => {
       const user = await openEditDrawer(GOOGLE);
 
       expect(screen.getByLabelText('Service Account JSON')).toHaveValue(
@@ -385,8 +453,8 @@ describe(
       );
 
       const body = await submitAndReadBody(user);
-      expect(body.groups.service_account_json_env).toBe('GOOGLE_SA_JSON');
-      expect(body).not.toHaveProperty('groups.service_account_json');
+      expect(body.groups).not.toHaveProperty('service_account_json_env');
+      expect(body.groups).not.toHaveProperty('service_account_json');
     });
 
     test('Okta group edits reach the PUT body', async () => {
@@ -544,7 +612,9 @@ describe(
         },
       });
 
-      expect((await submitAndReadBody(user)).groups.client_secret_env).toBe('');
+      expect((await submitAndReadBody(user)).groups).not.toHaveProperty(
+        'client_secret_env',
+      );
     });
 
     test('Okta in api mode with a stored API token saves without retyping it', async () => {
@@ -555,7 +625,7 @@ describe(
 
       const body = await submitAndReadBody(user);
       expect(body.groups).not.toHaveProperty('api_token');
-      expect(body.groups.api_token_env).toBe('');
+      expect(body.groups).not.toHaveProperty('api_token_env');
     });
 
     test('the fields the engine cannot change are read-only and never sent', async () => {

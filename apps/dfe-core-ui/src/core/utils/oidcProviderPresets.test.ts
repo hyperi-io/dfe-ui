@@ -1,4 +1,8 @@
-import { type TGroupMode } from '@/core/helpers/oidcProviderFieldRules';
+import {
+  isEnrichOnLoginForced,
+  type TGroupMode,
+  type TOidcProviderType,
+} from '@/core/helpers/oidcProviderFieldRules';
 import {
   CreateUpdateOidcProviderFormData,
   DEFAULT_GROUP_RESOLUTION,
@@ -33,9 +37,49 @@ describe('presetFieldsForType', () => {
       issuer: '',
       client_id_env: 'DFE_OIDC_OKTA_CLIENT_ID',
       client_secret_env: 'DFE_OIDC_OKTA_CLIENT_SECRET',
-      groups: defaultGroupResolution('google'),
+      groups: defaultGroupResolution('okta'),
     });
   });
+
+  test.each<{
+    current: TGroupMode;
+    enrich: boolean;
+    expected: boolean;
+    from: string;
+    type: string;
+  }>([
+    {
+      from: 'Google',
+      current: 'api',
+      enrich: true,
+      type: 'okta',
+      expected: false,
+    },
+    {
+      from: 'Okta',
+      current: 'api',
+      enrich: false,
+      type: 'google',
+      expected: true,
+    },
+    {
+      from: 'Okta set on',
+      current: 'api',
+      enrich: true,
+      type: 'entra_id',
+      expected: false,
+    },
+  ])(
+    'Enrich on Login from $from follows the $type rule',
+    ({ current, enrich, expected, type }) => {
+      expect(
+        presetFieldsForType({
+          current: withGroups({ enrich_on_login: enrich, mode: current }),
+          type,
+        }).groups?.enrich_on_login,
+      ).toBe(expected);
+    },
+  );
 
   test('fields the user typed are kept', () => {
     expect(
@@ -74,7 +118,7 @@ describe('presetFieldsForType', () => {
     expected: TGroupMode;
     mode: TGroupMode;
     name: string;
-    type: string;
+    type: TOidcProviderType;
   }>([
     {
       name: 'a default mode takes the new type default',
@@ -103,6 +147,7 @@ describe('presetFieldsForType', () => {
     ).toEqual({
       ...DEFAULT_GROUP_RESOLUTION,
       domain: 'example.com',
+      enrich_on_login: isEnrichOnLoginForced(type),
       mode: expected,
     });
   });

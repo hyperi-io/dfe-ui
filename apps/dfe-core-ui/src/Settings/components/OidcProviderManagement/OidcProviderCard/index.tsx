@@ -11,7 +11,6 @@ import { UpdateOidcProviderDrawer } from '@/Settings/components/OidcProviderMana
 import { ViewOidcProviderDrawer } from '@/Settings/components/OidcProviderManagement/ViewOidcProviderDrawer';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { IconCapture, IconCaptureOff, IconCheck, IconX } from '@repo/dfe-icons';
-import { Button } from 'antd';
 
 const dataListTermStyle = 'text-foreground/50';
 export const OidcProviderCard = ({
@@ -62,19 +61,18 @@ export const OidcProviderCard = ({
         {/* Inline text, not flex, so a long name wraps as one run of text rather than two columns. */}
         <h3 className="text-base font-medium pr-8 break-words">
           <Tooltip destroyOnHidden title={enabledStatus} placement="top">
-            <Button
-              type="default"
-              shape="circle"
-              size="small"
+            <span
+              role="img"
               aria-label={enabledStatus}
               className={cn(
-                'mr-2 p-0.5 align-middle',
+                'mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-solid p-0.5 align-middle',
                 oidcProvider.enabled
                   ? 'text-success border-success bg-background dark:bg-dark-background'
                   : 'text-gray-500 border-gray-500 bg-background-muted dark:bg-dark-background-muted',
               )}
-              icon={oidcProvider.enabled ? <IconCapture /> : <IconCaptureOff />}
-            />
+            >
+              {oidcProvider.enabled ? <IconCapture /> : <IconCaptureOff />}
+            </span>
           </Tooltip>
           {oidcProvider.display_name}{' '}
           <span className="text-sm text-foreground/50 dark:text-dark-foreground/50">

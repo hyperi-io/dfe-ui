@@ -9,6 +9,7 @@ import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import { useApiFieldErrors } from '@/core/hooks/useApiFieldErrors';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   buildOidcProviderSchema,
@@ -41,6 +42,7 @@ export const ConfigureOIDCForm = ({
   ...props
 }: ConfigureOidcProviderFormProps) => {
   const { changeType, issuerBuilder } = useOidcProviderTypeChange({ form });
+  useApiFieldErrors({ error, form });
   const loginSecretPath = initialValues?.client_secret_path;
   const apiTokenPath = initialValues?.groups?.api_token_path;
   const directorySecretPath = initialValues?.groups?.client_secret_path;

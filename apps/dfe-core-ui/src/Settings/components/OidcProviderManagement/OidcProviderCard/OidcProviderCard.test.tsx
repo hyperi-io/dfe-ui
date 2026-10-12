@@ -1,7 +1,7 @@
 import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { OidcProviderCard } from '.';
@@ -129,7 +129,7 @@ describe('OidcProviderCard enabled status', () => {
       wrapper,
     });
 
-    await user.hover(screen.getByRole('button', { name: status }));
+    await user.hover(screen.getByRole('img', { name: status }));
 
     expect(
       await screen.findByRole('tooltip', { name: status }),
@@ -143,7 +143,17 @@ describe('OidcProviderCard enabled status', () => {
     expect(heading).toHaveTextContent('Google Workspace (google)');
     expect(heading).not.toHaveClass('flex');
     expect(
-      screen.getByRole('button', { name: 'Provider is enabled' }),
+      within(heading).getByRole('img', { name: 'Provider is enabled' }),
     ).toBeInTheDocument();
+  });
+
+  test('the status is not a control', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(within(heading).queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      within(heading).getByRole('img', { name: 'Provider is enabled' }),
+    ).not.toHaveAttribute('tabindex');
   });
 });

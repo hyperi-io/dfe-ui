@@ -40,7 +40,7 @@ const isTypedIssuer = (
   !built.includes(issuer) &&
   !PRESET_ISSUERS.includes(issuer);
 
-/** The Okta org issuer, '' until the domain is filled in; a pasted org URL is reduced to its host. */
+/** The Okta issuer, https:// and the domain, '' until the domain is filled in; a pasted URL loses its scheme and trailing slashes but keeps any path. */
 export const buildOktaIssuer = ({ domain }: TOktaIssuerParts) => {
   const host = domain
     .trim()

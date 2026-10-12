@@ -268,6 +268,35 @@ describe('CredentialField', () => {
     );
   });
 
+  test('a secret switched from its env var to a blank value is refused', async () => {
+    const { onFinish, user } = renderClientSecret({
+      client_secret_env: 'OKTA_CLIENT_SECRET',
+      client_secret_path: '',
+    });
+
+    await chooseCredentialSource(user, 'Client Secret', 'Value');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await expectFieldError(
+      'Client Secret',
+      'Enter the Client Secret, or switch back to Env Var',
+    );
+    expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  test('a stored secret left blank on Value submits', async () => {
+    const { onFinish, user } = renderClientSecret({
+      client_secret_env: 'OKTA_CLIENT_SECRET',
+      client_secret_path: 'oidc/okta/client_secret',
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await submittedValues(onFinish)).not.toHaveProperty(
+      'client_secret_env',
+    );
+  });
+
   test('a secret with nothing stored gives no stored-secret hint', () => {
     renderClientSecret({ client_secret_env: '', client_secret_path: '' });
 

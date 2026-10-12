@@ -11,21 +11,6 @@ const EmptyData = ({ label = 'None' }: { label?: string }) => (
   </span>
 );
 
-const SourceProvider = ({
-  source_id,
-  source_provider,
-}: {
-  source_id: string;
-  source_provider: string;
-}) => {
-  if (source_provider) return source_provider;
-  return (
-    <EmptyData
-      label={source_id ? 'Any provider (set one to restrict the link)' : 'None'}
-    />
-  );
-};
-
 export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
   const { data, isLoading, error } = useFetchGroupDetail({
     group_name,
@@ -72,12 +57,7 @@ export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
         {data.source_id || <EmptyData label="Not linked" />}
       </dd>
       <dt className={dataListTermStyle}>Source provider:</dt>
-      <dd>
-        <SourceProvider
-          source_id={data.source_id}
-          source_provider={data.source_provider}
-        />
-      </dd>
+      <dd>{data.source_provider || <EmptyData />}</dd>
       <dt className={dataListTermStyle}>Roles:</dt>
       <dd>
         {data.roles?.length > 0 ? (

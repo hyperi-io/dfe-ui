@@ -1,4 +1,8 @@
 import {
+  initialCredentialSource,
+  isStoredSecret,
+} from '@/core/components/CredentialField/credentialSource';
+import {
   isOidcProviderType,
   toAllowedGroups,
 } from '@/core/helpers/oidcProviderFieldRules';
@@ -52,16 +56,23 @@ type TGroupsRequest = NonNullable<TOidcProviderUpdateRequestBody['groups']>;
 export interface TStoredOidcProvider {
   type: string;
   scopes?: TScopes;
+  client_id?: string;
+  client_id_env?: string;
+  client_secret_env?: string;
+  client_secret_path?: string;
   groups?: {
     claim_name?: string;
     sync_interval?: number;
     enrich_on_login?: boolean;
     service_account_json_env?: string;
+    service_account_json_path?: string;
     domain?: string;
     tenant_id?: string;
     tenant_id_env?: string;
     client_secret_env?: string;
+    client_secret_path?: string;
     api_token_env?: string;
+    api_token_path?: string;
     okta_domain?: string;
   };
 }
@@ -88,55 +99,97 @@ const rendered = <T extends object>(values: T, key: keyof T) => {
   return typeof value === 'string' ? value : '';
 };
 
-/** One credential's request fields from whichever member the form rendered, with the other member blanked; a secret value is sent only when typed, and a credential the form did not render falls back to `stored`. */
+/** A credential as saved: its env var name, its value when it is not a secret, and whether a secret is stored. */
+interface TStoredCredential {
+  env?: string;
+  hasSecret?: boolean;
+  value?: string;
+}
+
+/** One credential's request fields: nothing while it shows the source it opened on, unedited, or a blank secret value, so the engine keeps what it holds; otherwise the shown member with the other blanked, an env var sent with no secret. A credential the form did not render sends `unrendered`. */
 const toCredential = <T extends object>({
   envKey,
   secret,
   stored,
   submitted,
+  unrendered,
   valueKey,
 }: {
   envKey: keyof T;
   secret: boolean;
-  stored: TCredential;
+  stored: TStoredCredential;
   submitted: T;
+  unrendered: TCredential;
   valueKey: keyof T;
 }): TCredential => {
   const value = rendered(submitted, valueKey);
-  if (value !== undefined) {
-    return secret && !value ? { env: '' } : { env: '', value };
-  }
   const env = rendered(submitted, envKey);
+  const opened = initialCredentialSource({
+    env: stored.env,
+    hasStoredSecret: !!stored.hasSecret,
+    value: stored.value,
+  });
+  if (value !== undefined) {
+    const unedited = secret
+      ? value === ''
+      : opened === 'value' && value === (stored.value ?? '');
+    return unedited ? {} : { env: '', value };
+  }
   if (env !== undefined) {
+    if (opened === 'env' && env === (stored.env ?? '')) {
+      return {};
+    }
     return secret ? { env } : { env, value: '' };
   }
-  return stored;
+  return unrendered;
 };
+
+/** A directory secret as saved, from the env var and store path fields that keep it. */
+const storedSecret = ({
+  env,
+  path,
+}: {
+  env?: string;
+  path?: string;
+}): TStoredCredential => ({ env, hasSecret: isStoredSecret(path) });
 
 const toGroupsRequest = (
   form: Partial<TGroupResolutionFormData> &
     Pick<TGroupResolutionFormData, 'mode'>,
   stored: NonNullable<TStoredOidcProvider['groups']>,
 ): TGroupsRequest => {
+  // A directory credential is rendered only where the type and mode use it, so an unrendered one carries its stored env var for toAllowedGroups to clear.
   const directorySecret = toCredential({
     envKey: 'client_secret_env',
     secret: true,
-    stored: { env: stored.client_secret_env },
+    stored: storedSecret({
+      env: stored.client_secret_env,
+      path: stored.client_secret_path,
+    }),
     submitted: form,
+    unrendered: { env: stored.client_secret_env },
     valueKey: 'client_secret',
   });
   const apiToken = toCredential({
     envKey: 'api_token_env',
     secret: true,
-    stored: { env: stored.api_token_env },
+    stored: storedSecret({
+      env: stored.api_token_env,
+      path: stored.api_token_path,
+    }),
     submitted: form,
+    unrendered: { env: stored.api_token_env },
     valueKey: 'api_token',
   });
   const serviceAccountJson = toCredential({
     envKey: 'service_account_json_env',
     secret: true,
-    stored: { env: stored.service_account_json_env },
+    stored: storedSecret({
+      env: stored.service_account_json_env,
+      path: stored.service_account_json_path,
+    }),
     submitted: form,
+    unrendered: { env: stored.service_account_json_env },
     valueKey: 'service_account_json',
   });
 
@@ -157,18 +210,11 @@ const toGroupsRequest = (
     service_account_json: serviceAccountJson.value,
     service_account_json_env: serviceAccountJson.env,
   };
-  // The generated type requires defaulted fields; an omitted secret is kept.
+  // The generated type requires defaulted fields; an omitted credential is kept.
   return groups as TGroupsRequest;
 };
 
-/**
- * The PUT body for an OIDC provider edit. The engine replaces the whole groups
- * block, so a group field the form did not render keeps its stored value, and
- * one the type and mode do not use is cleared. Each credential sends the member
- * the form shows and blanks the other, an empty secret is omitted, scopes are
- * sent only when edited, and name, type and issuer are not sent because the
- * update endpoint does not accept them.
- */
+/** The PUT body for an OIDC provider edit. The engine replaces the whole groups block, so a group field the form did not render keeps its stored value, and one the type and mode do not use is cleared. A credential is sent only when its source or value changed, scopes only when edited, and name, type and issuer never, because the update endpoint does not accept them. */
 export const toUpdateOidcProviderBody = (
   values: TUpdateOidcProviderFormValues,
   stored: TStoredOidcProvider,
@@ -181,15 +227,20 @@ export const toUpdateOidcProviderBody = (
   const clientId = toCredential({
     envKey: 'client_id_env',
     secret: false,
-    stored: {},
+    stored: { env: stored.client_id_env, value: stored.client_id },
     submitted: values,
+    unrendered: {},
     valueKey: 'client_id',
   });
   const clientSecret = toCredential({
     envKey: 'client_secret_env',
     secret: true,
-    stored: {},
+    stored: storedSecret({
+      env: stored.client_secret_env,
+      path: stored.client_secret_path,
+    }),
     submitted: values,
+    unrendered: {},
     valueKey: 'client_secret',
   });
 

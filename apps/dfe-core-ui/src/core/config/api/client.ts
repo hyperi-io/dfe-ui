@@ -339,6 +339,26 @@ export function getApiErrorFieldMessages(error: unknown): string[] {
     );
 }
 
+/** The refused fields as form field errors, each name split from the engine's dotted path; a refusal that names no field is left out. */
+export function getApiErrorFields(
+  error: unknown,
+): { name: string[]; errors: string[] }[] {
+  const errors = getApiErrorResponseBody(error)?.errors;
+  if (!Array.isArray(errors)) return [];
+  const byField = new Map<string, string[]>();
+  for (const detail of errors) {
+    if (!detail?.field || typeof detail.message !== 'string') continue;
+    byField.set(detail.field, [
+      ...(byField.get(detail.field) ?? []),
+      detail.message,
+    ]);
+  }
+  return Array.from(byField, ([field, messages]) => ({
+    name: field.split('.'),
+    errors: messages,
+  }));
+}
+
 /** A write refused because the resource moved since it was read. */
 export type ApiWriteConflict = {
   message: string;
