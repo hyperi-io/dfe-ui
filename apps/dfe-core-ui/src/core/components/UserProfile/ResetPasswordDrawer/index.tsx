@@ -8,6 +8,7 @@ import { loginWithNotice } from '@/core/config/loginNotice';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 
+import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
 import { Button } from 'antd';
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
@@ -21,6 +22,7 @@ export const ResetPasswordDrawer = () => {
   } = useFetchCurrentUser();
 
   const {
+    data,
     mutate: resetPassword,
     reset: clearResetError,
     isPending: isResetPasswordPending,
@@ -75,6 +77,8 @@ export const ResetPasswordDrawer = () => {
           submitText="Reset Password"
         />
       </Drawer>
+
+      <GitEnabledResponseModal data={data} />
     </>
   );
 };

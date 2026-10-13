@@ -1,3 +1,4 @@
+import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -20,6 +21,7 @@ export const ResetAccountPasswordProgressiveDisclosure = ({
   const { notification } = App.useApp();
 
   const {
+    data,
     mutate: resetPassword,
     isPending,
     error,
@@ -31,6 +33,7 @@ export const ResetAccountPasswordProgressiveDisclosure = ({
         placement: 'bottomLeft',
       });
       setResetSuccess(true);
+      setShowResetPasswordForm(false);
       onSuccess?.();
     },
   });
@@ -85,6 +88,8 @@ export const ResetAccountPasswordProgressiveDisclosure = ({
           </RbacProtected>
         </div>
       )}
+
+      <GitEnabledResponseModal data={data} />
     </>
   );
 };

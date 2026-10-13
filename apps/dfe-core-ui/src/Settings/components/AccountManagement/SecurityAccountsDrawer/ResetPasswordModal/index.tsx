@@ -1,4 +1,5 @@
 import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
+import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -65,7 +66,7 @@ export const ResetPasswordModal = ({
     setPending(null);
   };
 
-  const { mutate, isPending, error, reset } = useAccountResetPassword({
+  const { data, mutate, isPending, error, reset } = useAccountResetPassword({
     username: username,
     onSuccess: ({ git }) => {
       if (!git.merged && git.pending) {
@@ -135,6 +136,8 @@ export const ResetPasswordModal = ({
           />
         )}
       </Modal>
+
+      <GitEnabledResponseModal data={data} />
     </>
   );
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
+import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
 import {
   ResetPasswordForm,
   TResetPasswordFormValues,
@@ -120,6 +121,7 @@ export const ChangePasswordScene = () => {
   };
 
   const {
+    data,
     mutate: changePassword,
     reset: clearChangeError,
     isPending,
@@ -249,6 +251,8 @@ export const ChangePasswordScene = () => {
                 secondaryAction={logout}
               />
             )}
+
+            <GitEnabledResponseModal data={data} />
           </>
         )}
       </div>
