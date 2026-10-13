@@ -4157,6 +4157,8 @@ export interface paths {
          *     The overlay's presence is what the layer2-apps ApplicationSet turns into an Argo
          *     Application, so this is the whole deployment step. A new instance stores nothing,
          *     so a masked value copied from another instance's read is a 400 ``masked_value``.
+         *     A per-config instance name too long for its Helm release name is a 422
+         *     ``name_too_long`` naming how many characters this app takes.
          */
         post: operations["create_instance_api_v1_apps__service__instances_post"];
         delete?: never;
