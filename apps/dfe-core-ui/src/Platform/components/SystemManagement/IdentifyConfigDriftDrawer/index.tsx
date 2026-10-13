@@ -55,7 +55,7 @@ export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
                 title: 'Pending deploys',
                 message: (
                   <div className="flex flex-col gap-2">
-                    <p>{pendingDeployWarning(pendingDeployCount)}</p>
+                    <span>{pendingDeployWarning(pendingDeployCount)}</span>
                     <NotificationCard
                       description="If you close this drawer you will need to manually redeploy each affected source from the sources view."
                       type="warning"
