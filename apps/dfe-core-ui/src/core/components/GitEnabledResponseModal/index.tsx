@@ -19,9 +19,13 @@ export const GitEnabledResponseModal = ({
   };
 
   const isGitEnabled = data?.git?.enabled;
-  const isAlreadyGitCommitted = !data?.git?.committed;
+  const isAlreadyGitCommitted = !data?.git?.committed || data?.git?.merged;
 
-  if (!isGitEnabled || isAlreadyGitCommitted) {
+  if (!isGitEnabled) {
+    return null;
+  }
+
+  if (isAlreadyGitCommitted) {
     return null;
   }
 
@@ -33,11 +37,13 @@ export const GitEnabledResponseModal = ({
       footer={null}
     >
       <div>
-        <p>
-          Changes have not been committed yet. Please perform the following
-          action to commit the changes:
-        </p>
-        <CopyCodeBlock code={data?.git.pending?.command ?? ''} />
+        <p>Changes have not been committed yet.</p>
+        {data?.git.pending?.command && (
+          <>
+            <p>Run the following command to commit the changes:</p>
+            <CopyCodeBlock code={data?.git.pending?.command ?? ''} />
+          </>
+        )}
 
         {data?.git.pending?.pr_url && data?.git.pending?.branch && (
           <dl className="grid grid-cols-2 gap-2">
