@@ -97,7 +97,6 @@ const addSource = async (
   // The Transform tab is disclosed only once a meta schema is chosen, so the
   // schema is picked before the name.
   await drawer.getByRole('tab', { name: 'Table Settings' }).click();
-  await page.getByText('Define Schema', { exact: true }).click();
   await page.locator('#schema_meta_schema').click();
   await page
     .locator('.ant-select-dropdown:visible .ant-select-item-option-content', {

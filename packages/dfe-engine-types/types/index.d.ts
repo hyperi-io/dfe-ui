@@ -1306,7 +1306,11 @@ export interface paths {
         put?: never;
         /**
          * Bulk Action
-         * @description Perform a bulk action (enable, disable, dormant, delete) on multiple sources.
+         * @description Perform a bulk action on multiple sources.
+         *
+         *     ``enable`` / ``disable`` / ``dormant`` / ``delete`` apply immediately.
+         *     ``deploy`` submits one ``source:deploy`` background task per accepted source
+         *     (poll ``GET /tasks/{task_id}``); refused names land in ``failed``.
          */
         post: operations["bulk_action_api_v1_sources_bulk_post"];
         delete?: never;
@@ -5911,6 +5915,22 @@ export interface components {
             file_sets: components["schemas"]["FileSetSummary"][];
         };
         /**
+         * ApplyDefaultsPin
+         * @description One source whose current version was considered for the table defaults.
+         */
+        ApplyDefaultsPin: {
+            /**
+             * Source
+             * @description Source name (_source label)
+             */
+            source: string;
+            /**
+             * Version
+             * @description Version id that was pinned or already matched; null when unset
+             */
+            version?: string | null;
+        };
+        /**
          * ApplyDefaultsRequest
          * @description The sources to pin to the current table defaults.
          */
@@ -5926,10 +5946,16 @@ export interface components {
          * @description Which named sources were pinned, which already had these defaults, and their tables.
          */
         ApplyDefaultsResponse: {
-            /** Updated */
-            updated: string[];
-            /** Unchanged */
-            unchanged: string[];
+            /**
+             * Updated
+             * @description Sources whose current version was written with the defaults
+             */
+            updated: components["schemas"]["ApplyDefaultsPin"][];
+            /**
+             * Unchanged
+             * @description Sources whose current version already matched the defaults
+             */
+            unchanged: components["schemas"]["ApplyDefaultsPin"][];
             /**
              * Live
              * @description One entry per named source, in request order: what reached its table.
@@ -6143,20 +6169,42 @@ export interface components {
             file: string;
         };
         /**
+         * BulkActionItem
+         * @description One source in a bulk request.
+         */
+        BulkActionItem: {
+            /**
+             * Source
+             * @description Source name (_source label)
+             */
+            source: string;
+            /**
+             * Version
+             * @description Deploy only: version id to deploy. Omitted uses the working current. Ignored for enable/disable/dormant/delete.
+             */
+            version?: string | null;
+        };
+        /**
          * BulkActionRequest
          * @description Bulk operation on multiple sources.
          */
         BulkActionRequest: {
             /**
              * Action
-             * @description Action: enable, disable, dormant, delete
+             * @description Action: enable, disable, dormant, delete, deploy
              */
             action: string;
             /**
              * Sources
-             * @description Source names to act on
+             * @description Sources to act on. Plain name strings are accepted.
              */
-            sources: string[];
+            sources: components["schemas"]["BulkActionItem"][];
+            /**
+             * Dry Run
+             * @description Deploy only: plan/validate DDL without applying it. Ignored otherwise.
+             * @default false
+             */
+            dry_run: boolean;
         };
         /**
          * BulkActionResponse
@@ -6174,6 +6222,35 @@ export interface components {
             failed?: {
                 [key: string]: string;
             }[];
+            /**
+             * Deployments
+             * @description Deploy only: one ``source:deploy`` task per accepted source. Poll via GET /tasks/{task_id}.
+             */
+            deployments?: components["schemas"]["BulkDeployTask"][];
+        };
+        /**
+         * BulkDeployTask
+         * @description One accepted deploy submitted as a background task.
+         */
+        BulkDeployTask: {
+            /** Source */
+            source: string;
+            /**
+             * Version
+             * @description Version requested; null means the working current at task start
+             */
+            version?: string | null;
+            /**
+             * Task Id
+             * @description Task id for polling via GET /tasks/{task_id}
+             */
+            task_id: string;
+            /**
+             * Kind
+             * @description Task kind
+             * @default source:deploy
+             */
+            kind: string;
         };
         /**
          * BundleSchema
@@ -12117,9 +12194,11 @@ export interface components {
             restart_required?: string[];
             /** @description The TTL move this deploy makes (or, on a dry run, would make) on the table it already has; null when the TTL does not move */
             ttl_change?: components["schemas"]["TtlChange"] | null;
+            /** @description On a dry run, the table-settings move the deploy would make on the table it already has; null when the settings do not move */
+            settings_change?: components["schemas"]["SettingsChange"] | null;
             /**
              * Live Table Error
-             * @description On a dry run, why the deployed table could not be read; its TTL move is then unknown. Null otherwise.
+             * @description On a dry run, why the deployed table could not be read; its TTL and settings moves are then unknown. Null otherwise.
              */
             live_table_error?: string | null;
         };
@@ -12470,6 +12549,22 @@ export interface components {
         SetVarRequest: {
             /** Value */
             value: unknown;
+        };
+        /**
+         * SettingsChange
+         * @description The table-settings move a deploy makes on a table that already exists.
+         */
+        SettingsChange: {
+            /**
+             * Assignments
+             * @description 'name = value' for each setting the move sets
+             */
+            assignments: string[];
+            /**
+             * Statement
+             * @description The ALTER TABLE that makes the move
+             */
+            statement: string;
         };
         /**
          * SettingsSummary
