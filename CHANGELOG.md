@@ -3,6 +3,20 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.14](https://github.com/hyperi-io/dfe-ui/compare/v1.7.13...v1.7.14) (2026-10-13)
+
+### Bug Fixes
+
+* clear leftover OpenTelemetry, Alert and act warnings ([#530](https://github.com/hyperi-io/dfe-ui/issues/530)) ([7071cd4](https://github.com/hyperi-io/dfe-ui/commit/7071cd46b8df6ad6ce8fed0010e3166d9b366773))
+* declare dfe-core-ui peers, widen test waits ([#528](https://github.com/hyperi-io/dfe-ui/issues/528)) ([9195c55](https://github.com/hyperi-io/dfe-ui/commit/9195c55e82a0afcd7de46d1280dd4c23d2a6442a))
+* declare the peers third-party packages leave out ([#531](https://github.com/hyperi-io/dfe-ui/issues/531)) ([7dafd21](https://github.com/hyperi-io/dfe-ui/commit/7dafd21a12d4ea24e069b07dc94564596d7750ec))
+* **deps:** move /metrics to @prometheus-io/client and refresh the node digest ([#536](https://github.com/hyperi-io/dfe-ui/issues/536)) ([6275380](https://github.com/hyperi-io/dfe-ui/commit/6275380f494cc884acffa8ce1ac19228b2aad246))
+* fix bugs rules ([#543](https://github.com/hyperi-io/dfe-ui/issues/543)) ([1ed7895](https://github.com/hyperi-io/dfe-ui/commit/1ed78957c7a3ea62e7f4ab8fb2378b1d00c432ec))
+* fix platform settings defaults apply ([#538](https://github.com/hyperi-io/dfe-ui/issues/538)) ([208a2f4](https://github.com/hyperi-io/dfe-ui/commit/208a2f48a7c9f263aaca4c0fba13edc34cb8bfa4))
+* name the telemetry template that sets the OTLP endpoint ([#532](https://github.com/hyperi-io/dfe-ui/issues/532)) ([d5959bb](https://github.com/hyperi-io/dfe-ui/commit/d5959bb2223fdec99055efec24b3513c3221724b))
+* say why an OIDC sign-in was refused, on the sign-in form ([#533](https://github.com/hyperi-io/dfe-ui/issues/533)) ([622b42c](https://github.com/hyperi-io/dfe-ui/commit/622b42ce0d63c12c22e11f3bbd5688612a9240f2)), closes [hyperi-io/dfe-engine#823](https://github.com/hyperi-io/dfe-engine/issues/823) [#488](https://github.com/hyperi-io/dfe-ui/issues/488)
+* set a group's IdP link and rework the OIDC provider form ([#542](https://github.com/hyperi-io/dfe-ui/issues/542)) ([f6a7d4d](https://github.com/hyperi-io/dfe-ui/commit/f6a7d4d97ee419ac2f2b3474fa48de5adac84f8f)), closes [hyperi-io/dfe-engine#758](https://github.com/hyperi-io/dfe-engine/issues/758)
+
 ## [1.7.13](https://github.com/hyperi-io/dfe-ui/compare/v1.7.12...v1.7.13) (2026-10-11)
 
 ### Bug Fixes
