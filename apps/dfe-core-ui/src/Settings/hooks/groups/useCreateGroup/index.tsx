@@ -11,7 +11,7 @@ export const useCreateGroup = ({
   onSuccess,
   onError,
 }: UseCreateGroupProps = {}) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (group: TGroupCreateRequestBody) =>
       createGroup({
         body: group,
@@ -29,5 +29,6 @@ export const useCreateGroup = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

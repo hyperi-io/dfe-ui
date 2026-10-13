@@ -3,11 +3,13 @@ import { Form } from '@/core/components/Form';
 import {
   OidcGroupFields,
   OidcLoginFields,
+  useOidcProviderTypeChange,
 } from '@/core/components/OidcProviderFields';
 import {
   PROVIDERS,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
+import { useApiFieldErrors } from '@/core/hooks/useApiFieldErrors';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   buildOidcProviderSchema,
@@ -39,6 +41,8 @@ export const ConfigureOIDCForm = ({
   disabledFields = {},
   ...props
 }: ConfigureOidcProviderFormProps) => {
+  const { changeType, issuerBuilder } = useOidcProviderTypeChange({ form });
+  useApiFieldErrors({ error, form });
   const loginSecretPath = initialValues?.client_secret_path;
   const apiTokenPath = initialValues?.groups?.api_token_path;
   const directorySecretPath = initialValues?.groups?.client_secret_path;
@@ -84,11 +88,7 @@ export const ConfigureOIDCForm = ({
                   label: provider.name,
                   value: provider.key,
                 }))}
-                onChange={(value) => {
-                  form.setFieldsValue({
-                    ...PROVIDERS_MAP[value]?.initialValues,
-                  });
-                }}
+                onChange={changeType}
               />
             </Form.Item>
             <Form.Item
@@ -104,6 +104,7 @@ export const ConfigureOIDCForm = ({
           <div className="grid grid-cols-2 gap-4">
             <OidcLoginFields
               rule={formValidation}
+              issuerBuilder={issuerBuilder}
               disabledFields={disabledFields}
               hasStoredScopes={!!initialValues?.scopes?.length}
             />
@@ -116,7 +117,10 @@ export const ConfigureOIDCForm = ({
           <div className="flex flex-col gap-2 w-[47%]">
             <p className="font-medium">Groups</p>
             <div className="grid grid-cols-2 gap-4">
-              <OidcGroupFields rule={formValidation} />
+              <OidcGroupFields
+                rule={formValidation}
+                derivesFromIssuer={!disabledFields.issuer}
+              />
             </div>
           </div>
         )}

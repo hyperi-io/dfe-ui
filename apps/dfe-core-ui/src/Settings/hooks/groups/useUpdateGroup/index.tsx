@@ -13,7 +13,7 @@ export const useUpdateGroup = ({
   onSuccess,
   onError,
 }: UseUpdateGroupProps) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (group: TGroupUpdateRequestBody) =>
       updateGroup({
         body: group,
@@ -27,5 +27,5 @@ export const useUpdateGroup = ({
     },
   });
 
-  return { data, mutate, isPending, error };
+  return { data, mutate, isPending, error, reset };
 };

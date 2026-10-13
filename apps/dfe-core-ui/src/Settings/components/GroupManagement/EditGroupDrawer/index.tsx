@@ -24,6 +24,7 @@ export const EditGroupDrawer = ({
     mutate: updateGroup,
     isPending,
     error,
+    reset: resetUpdateGroup,
   } = useUpdateGroup({
     group_name,
     onSuccess: () => {
@@ -39,6 +40,11 @@ export const EditGroupDrawer = ({
       });
     },
   });
+
+  const closeDrawer = () => {
+    setOpen(false);
+    resetUpdateGroup();
+  };
 
   const handleUpdateGroup = (values: UpdateGroupFormData) => {
     updateGroup(values);
@@ -65,7 +71,7 @@ export const EditGroupDrawer = ({
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer title="Edit Group" open={open} onClose={() => setOpen(false)}>
+      <Drawer title="Edit Group" open={open} onClose={closeDrawer}>
         <UpdateGroupForm
           onFinish={handleUpdateGroup}
           group_name={group_name}

@@ -92,12 +92,19 @@ export const isEnrichOnLoginSettable = (
   !isEnrichOnLoginForced(type) &&
   isDirectoryFieldUsed('enrich_on_login', type, mode);
 
-/** The group mode a new provider of this type starts in. */
+const DEFAULT_GROUP_MODES: Readonly<Record<TOidcProviderType, TGroupMode>> = {
+  entra_id: 'api',
+  generic: 'token_claim',
+  google: 'api',
+  okta: 'api',
+};
+
+/** The group mode a new provider of this type starts in: API for a type with a directory the engine reads, Token Claim for a custom provider. */
 export const defaultGroupMode = (type: TOidcProviderType): TGroupMode =>
-  type === 'google' ? 'api' : 'manual';
+  DEFAULT_GROUP_MODES[type];
 
 type TGroupsValues = { mode: TGroupMode; enrich_on_login?: boolean } & Partial<
-  Record<TDirectoryTextField, string>
+  Record<TDirectoryTextField, string | null>
 >;
 
 /**
@@ -184,10 +191,12 @@ const apiModeProblems = (
     }
     case 'entra_id': {
       const problems: TFieldProblem[] = [];
+      // The forms read the tenant from the issuer, so the message names the issuer.
       if (!groups.tenant_id && !groups.tenant_id_env) {
         problems.push({
           path: ['groups', 'tenant_id'],
-          message: 'Enter a tenant ID or its environment variable',
+          message:
+            'The issuer must name a specific tenant, not common, organizations or consumers',
         });
       }
       const hasDirectorySecret =

@@ -14,5 +14,7 @@ export const createUpdateGroupRequestToFormData = (
     members: request.members,
     scope: scope as CreateUpdateGroupFormData['scope'],
     organisation: organisation ?? undefined,
+    source_id: request.source_id,
+    source_provider: request.source_provider,
   };
 };

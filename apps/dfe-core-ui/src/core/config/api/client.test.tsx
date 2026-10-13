@@ -13,6 +13,7 @@ import {
   ApiError,
   createApiClient,
   getApiErrorFieldMessages,
+  getApiErrorFields,
   getApiErrorResponseBody,
   getApiWriteConflict,
   getErrorMessage,
@@ -582,5 +583,46 @@ describe('getApiErrorFieldMessages', () => {
       ),
     ).toEqual([]);
     expect(getApiErrorFieldMessages(new Error('offline'))).toEqual([]);
+  });
+});
+
+describe('getApiErrorFields', () => {
+  test('groups the messages under each field, split into a form name', () => {
+    const fields = getApiErrorFields(
+      apiError(422, {
+        code: 'validation_error',
+        message: '3 validation error(s)',
+        errors: [
+          {
+            field: 'groups.api_token_env',
+            message: 'OKTA_TOKEN is not set in the engine',
+            code: 'env_var_not_set',
+          },
+          { field: 'client_id', message: 'Client ID is required' },
+          { field: 'client_id', message: 'Client ID is too long' },
+          { field: '', message: 'At least one column is required' },
+        ],
+      }),
+    );
+
+    expect(fields).toEqual([
+      {
+        name: ['groups', 'api_token_env'],
+        errors: ['OKTA_TOKEN is not set in the engine'],
+      },
+      {
+        name: ['client_id'],
+        errors: ['Client ID is required', 'Client ID is too long'],
+      },
+    ]);
+  });
+
+  test('returns nothing when the engine named no field', () => {
+    expect(
+      getApiErrorFields(
+        apiError(409, { code: 'conflict', message: 'already exists' }),
+      ),
+    ).toEqual([]);
+    expect(getApiErrorFields(new Error('offline'))).toEqual([]);
   });
 });
