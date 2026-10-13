@@ -50,8 +50,13 @@ debug-storybook.log
 # Local working files (not committed)
 docs/superpowers/
 .claude/
-.hyperi-ai/
+.hyperi-ai
+.superpowers/
+.playwright-mcp/
 .mcp.json
+.tmp/
+.kube/
+.secrets/
 STATE.md
 CLAUDE.md
 AGENTS.md
@@ -72,14 +77,16 @@ Thumbs.db
 *.swo
 *~
 
-# Editor / IDE local state
+# Editor / IDE local state. The contents are globbed, not the directory, so the
+# tracked team settings can be re-included.
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Local environment files (never commit -- contain secrets)
 .env
 .env.*
-!.env.example
+!.env*.example
 !.env.example.*
 
 # Git worktrees (local dev convenience)
@@ -101,6 +108,8 @@ out/
 # Test / coverage
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
 
 # Yarn / pnpm / npm
 .pnpm-store/
