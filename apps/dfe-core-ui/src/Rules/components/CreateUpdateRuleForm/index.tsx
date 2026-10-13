@@ -82,7 +82,7 @@ const CreateUpdateRuleFormBase = ({
     useAntdZodResolver<CreateUpdateRuleFormData>(formSchema);
 
   const { componentHeight } = useSetComponentHeight({
-    offset: 370,
+    offset: 450,
   });
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
-import { GenericErrorCard } from '@/core/components/GenericError';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateRuleForm,
@@ -10,7 +9,6 @@ import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { useQueryClient } from '@tanstack/react-query';
-import { Spin } from 'antd';
 
 interface UpdateRuleFormProps {
   rule: TRuleDetail;
@@ -48,19 +46,6 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
         : 0,
     });
   };
-  if (isUpdatingRule)
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Spin />
-      </div>
-    );
-  if (updateRuleError)
-    return (
-      <GenericErrorCard
-        title="Error updating rule"
-        description={updateRuleError.message}
-      />
-    );
 
   return (
     <CustomScrollbar className="flex flex-col gap-4" height={componentHeight}>
