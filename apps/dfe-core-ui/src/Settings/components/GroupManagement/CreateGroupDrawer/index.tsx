@@ -18,6 +18,7 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
     mutate: createGroup,
     isPending,
     error,
+    reset: resetCreateGroup,
   } = useCreateGroup({
     onSuccess: () => {
       setIsOpen(false);
@@ -28,6 +29,11 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
       });
     },
   });
+
+  const closeDrawer = () => {
+    setIsOpen(false);
+    resetCreateGroup();
+  };
 
   const handleCreateGroup = (values: CreateUpdateGroupFormData) => {
     createGroup(createGroupTransformFormDataToRequest(values));
@@ -60,11 +66,7 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
         </RbacProtected.Restricted>
       </RbacProtected>
 
-      <Drawer
-        title="Create Group"
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
+      <Drawer title="Create Group" open={isOpen} onClose={closeDrawer}>
         <CreateUpdateGroupForm
           name="create-group-form"
           onFinish={handleCreateGroup}

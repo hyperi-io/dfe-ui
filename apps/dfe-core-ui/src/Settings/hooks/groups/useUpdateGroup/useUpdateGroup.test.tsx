@@ -53,6 +53,8 @@ describe('.useUpdateGroup', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       await waitFor(() => {
@@ -60,6 +62,7 @@ describe('.useUpdateGroup', () => {
           isPending: false,
           error: null,
           mutate: expect.any(Function),
+          reset: expect.any(Function),
           data: expectedResponse,
         });
       });

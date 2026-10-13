@@ -161,3 +161,18 @@ export const useAntdZodResolver = <T = unknown>(schema: z.ZodType<T>) => {
 
   return resolver as FormRule;
 };
+
+/** `rule` run as the check of the field `name`, so a form item can show an error the schema pins to a field that item does not hold. */
+export const ruleCheckingField =
+  (rule: FormRule, name: NamePath): FormRule =>
+  (form) => {
+    const resolved = typeof rule === 'function' ? rule(form) : rule;
+    const { validator } = resolved;
+    const field = toFieldPath(name);
+    return validator
+      ? {
+          validator: (checked, value, callback) =>
+            validator(Object.assign({}, checked, { field }), value, callback),
+        }
+      : {};
+  };

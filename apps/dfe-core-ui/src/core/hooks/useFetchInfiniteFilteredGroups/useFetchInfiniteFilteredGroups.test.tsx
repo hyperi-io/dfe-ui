@@ -72,6 +72,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       expect(result.current.data).toBeDefined();
@@ -144,6 +146,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       // Data should be flattened - 20 items total
@@ -179,6 +183,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       // Verify we have 20 items (pages 1 and 2)

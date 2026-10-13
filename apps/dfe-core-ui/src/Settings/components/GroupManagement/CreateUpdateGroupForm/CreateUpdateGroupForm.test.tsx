@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, test, vi } from 'vitest';
 import { CreateUpdateGroupForm } from '.';
 
-// The pickers read roles, organisations and accounts, and the name rule needs none of them.
+// The pickers read roles, organisations, accounts and OIDC providers, and the name rule needs none of them.
 vi.mock('@/core/components/OrganisationSelect', () => ({
   OrganisationSelect: () => null,
 }));
@@ -18,6 +18,12 @@ vi.mock('@/Settings/components/GroupManagement/GroupRoleSelect', () => ({
 vi.mock('@/Settings/components/GroupManagement/GroupMemberSelect', () => ({
   GroupMemberSelect: () => null,
 }));
+vi.mock(
+  '@/Settings/components/GroupManagement/GroupSourceProviderInput',
+  () => ({
+    GroupSourceProviderInput: () => null,
+  }),
+);
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 

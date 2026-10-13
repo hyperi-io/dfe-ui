@@ -1,7 +1,8 @@
 import { server } from '@/core/components/RbacProtected/hooks/hooks.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TOidcProviderListItem } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { OidcProviderCard } from '.';
 
@@ -49,6 +50,20 @@ const lastSync = () =>
     (term) => term.textContent === 'Last Sync:',
   );
 
+const openActions = async (mode: TOidcProviderListItem['groups']['mode']) => {
+  const user = userEvent.setup();
+  render(
+    <OidcProviderCard
+      oidcProvider={{ ...GOOGLE, groups: { ...GOOGLE.groups, mode } }}
+    />,
+    { wrapper },
+  );
+  await user.click(
+    screen.getByRole('button', { name: 'OIDC Provider actions' }),
+  );
+  return screen.findAllByRole('listitem');
+};
+
 describe('OidcProviderCard last sync', () => {
   test('shows how the last sync ended, user_token included', () => {
     render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
@@ -74,5 +89,71 @@ describe('OidcProviderCard last sync', () => {
     );
 
     expect(lastSync()).toBeUndefined();
+  });
+});
+
+describe('OidcProviderCard actions', () => {
+  test('an api provider offers to sync its groups', async () => {
+    const actions = await openActions('api');
+
+    expect(actions).toHaveLength(5);
+    expect(
+      await screen.findByRole(
+        'button',
+        { name: /Sync OIDC Provider Groups/ },
+        { timeout: 15_000 },
+      ),
+    ).toBeEnabled();
+  });
+
+  test.each(['token_claim', 'manual'] as const)(
+    'a %s provider has no sync action',
+    async (mode) => {
+      const actions = await openActions(mode);
+
+      expect(actions).toHaveLength(4);
+      expect(
+        screen.queryByRole('button', { name: /Sync OIDC Provider Groups/ }),
+      ).not.toBeInTheDocument();
+    },
+  );
+});
+
+describe('OidcProviderCard enabled status', () => {
+  test.each([
+    [true, 'Provider is enabled'],
+    [false, 'Provider is disabled'],
+  ])('enabled=%s shows "%s"', async (enabled, status) => {
+    const user = userEvent.setup();
+    render(<OidcProviderCard oidcProvider={{ ...GOOGLE, enabled }} />, {
+      wrapper,
+    });
+
+    await user.hover(screen.getByRole('img', { name: status }));
+
+    expect(
+      await screen.findByRole('tooltip', { name: status }),
+    ).toBeInTheDocument();
+  });
+
+  test('the status sits inside the heading, which stays one run of text', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(heading).toHaveTextContent('Google Workspace (google)');
+    expect(heading).not.toHaveClass('flex');
+    expect(
+      within(heading).getByRole('img', { name: 'Provider is enabled' }),
+    ).toBeInTheDocument();
+  });
+
+  test('the status is not a control', () => {
+    render(<OidcProviderCard oidcProvider={GOOGLE} />, { wrapper });
+
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(within(heading).queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      within(heading).getByRole('img', { name: 'Provider is enabled' }),
+    ).not.toHaveAttribute('tabindex');
   });
 });

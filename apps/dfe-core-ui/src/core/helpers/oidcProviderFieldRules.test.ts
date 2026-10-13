@@ -4,6 +4,7 @@ import {
 } from '@/core/validationSchemas/oidcProviders.schema';
 import { describe, expect, test } from 'vitest';
 import {
+  defaultGroupMode,
   GROUP_MODES_BY_TYPE,
   isDirectoryFieldUsed,
   isOidcProviderType,
@@ -34,6 +35,15 @@ describe('oidcProviderFieldRules', () => {
         'token_claim',
         'api',
       ]);
+    });
+
+    test.each([
+      ['google', 'api'],
+      ['entra_id', 'api'],
+      ['okta', 'api'],
+      ['generic', 'token_claim'],
+    ] as const)('a new %s provider starts in %s mode', (type, mode) => {
+      expect(defaultGroupMode(type)).toBe(mode);
     });
   });
 

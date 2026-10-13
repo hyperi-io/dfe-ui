@@ -1,9 +1,12 @@
+import { chooseCredentialSource } from '@/core/components/CredentialField/CredentialField.mocks';
 import { Form } from '@/core/components/Form';
+import { fillField } from '@/core/components/IssuerField/IssuerField.mocks';
 import {
   GOOGLE_SERVICE_ACCOUNT_HINT,
   PROVIDERS_MAP,
 } from '@/core/constants/oidcProviders.constants';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { expectFieldError } from '@/core/utils/test-utils/expectFieldError';
 import { defaultGroupResolution } from '@/core/validationSchemas/oidcProviders.schema';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,31 +18,20 @@ const { wrapper } = buildTestWrapper().withTheme();
 type TType = 'google' | 'entra_id' | 'okta' | 'generic';
 type TMode = 'manual' | 'token_claim' | 'api';
 
-const GOOGLE_SERVICE_ACCOUNT_FIELDS = [
-  'Domain',
-  'Service Account Env Var',
-  'Service Account JSON',
-];
+const GOOGLE_SERVICE_ACCOUNT_FIELDS = ['Domain', 'Service Account JSON'];
 
 const PROVIDER_GROUP_FIELDS: [TType, TMode, string[]][] = [
   ['google', 'api', GOOGLE_SERVICE_ACCOUNT_FIELDS],
-  [
-    'entra_id',
-    'api',
-    [
-      'Tenant ID',
-      'Tenant ID Env Var',
-      'Directory Secret',
-      'Directory Secret Env Var',
-    ],
-  ],
-  ['okta', 'api', ['Okta Domain', 'API Token Env Var', 'API Token']],
+  ['entra_id', 'api', ['Directory Secret']],
+  ['okta', 'api', ['Okta Domain', 'API Token']],
   ['generic', 'token_claim', []],
 ];
 
-const ALL_PROVIDER_GROUP_FIELDS = PROVIDER_GROUP_FIELDS.flatMap(
-  ([, , fields]) => fields,
-);
+const ALL_PROVIDER_GROUP_FIELDS = [
+  ...PROVIDER_GROUP_FIELDS.flatMap(([, , fields]) => fields),
+  // The Entra ID groups tenant is read from the issuer and never shown.
+  'Tenant ID',
+];
 
 const OidcForm = ({
   type,
@@ -119,13 +111,11 @@ describe('ConfigureOIDCForm', () => {
 
     await user.click(screen.getByLabelText('Type'));
     await user.click(await screen.findByTitle('Okta'));
-    await user.click(screen.getByLabelText('Mode'));
-    await user.click(await screen.findByTitle('API'));
 
     await waitFor(() => {
       expect(screen.getByLabelText('Okta Domain')).toBeInTheDocument();
     });
-    expectOnlyProviderFields(['Okta Domain', 'API Token Env Var', 'API Token']);
+    expectOnlyProviderFields(['Okta Domain', 'API Token']);
   });
 
   test.each([
@@ -135,8 +125,11 @@ describe('ConfigureOIDCForm', () => {
     ['okta', 'api', 'API Token'],
   ] as const)(
     'Type = %s in %s mode masks the %s value',
-    (type, mode, label) => {
+    async (type, mode, label) => {
+      const user = userEvent.setup();
       render(<OidcForm type={type} mode={mode} />, { wrapper });
+
+      await chooseCredentialSource(user, label, 'Value');
 
       const input = screen.getByLabelText(label);
       expect(input).toHaveAttribute('type', 'password');
@@ -146,34 +139,23 @@ describe('ConfigureOIDCForm', () => {
 
   test.each([
     ['google', 'api', 'Client ID'],
-    ['google', 'api', 'Client ID Env Var'],
-    ['google', 'api', 'Client Secret Env Var'],
-    ['google', 'api', 'Service Account Env Var'],
-    ['entra_id', 'api', 'Tenant ID'],
-    ['entra_id', 'api', 'Tenant ID Env Var'],
-    ['entra_id', 'api', 'Directory Secret Env Var'],
-    ['okta', 'api', 'API Token Env Var'],
+    ['google', 'api', 'Client Secret'],
+    ['google', 'api', 'Service Account JSON'],
+    ['entra_id', 'api', 'Directory Secret'],
+    ['okta', 'api', 'API Token'],
   ] as const)(
-    'Type = %s in %s mode keeps the %s as plain text',
-    (type, mode, label) => {
+    'Type = %s in %s mode takes the %s env var name as plain text',
+    async (type, mode, label) => {
+      const user = userEvent.setup();
       render(<OidcForm type={type} mode={mode} />, { wrapper });
 
-      expect(screen.getByLabelText(label)).toHaveAttribute('type', 'text');
+      await chooseCredentialSource(user, label, 'Env Var');
+
+      const input = screen.getByLabelText(label);
+      expect(input).toHaveAttribute('type', 'text');
+      expect(input).toHaveAttribute('placeholder', 'Environment variable name');
     },
   );
-
-  test('Tenant ID and its variable are separate fields bound to separate settings', () => {
-    render(<OidcForm type="entra_id" mode="api" />, { wrapper });
-
-    expect(screen.getByLabelText('Tenant ID')).toHaveAttribute(
-      'id',
-      'groups_tenant_id',
-    );
-    expect(screen.getByLabelText('Tenant ID Env Var')).toHaveAttribute(
-      'id',
-      'groups_tenant_id_env',
-    );
-  });
 
   test('Type = google asks for no admin email and requires only what the engine requires', () => {
     const { container } = render(<OidcForm type="google" />, { wrapper });
@@ -188,7 +170,7 @@ describe('ConfigureOIDCForm', () => {
     for (const label of [
       ...GOOGLE_SERVICE_ACCOUNT_FIELDS,
       'Client ID',
-      'Client ID Env Var',
+      'Client Secret',
     ]) {
       expect(screen.getByText(label, { selector: 'label' })).not.toHaveClass(
         'ant-form-item-required',
@@ -197,8 +179,28 @@ describe('ConfigureOIDCForm', () => {
     expect(screen.getByText(GOOGLE_SERVICE_ACCOUNT_HINT)).toBeInTheDocument();
   });
 
-  test('a new Google provider defaults to the api group mode the engine requires', () => {
-    expect(PROVIDERS_MAP['google']?.initialValues.groups?.mode).toBe('api');
+  test.each([
+    ['google', 'api'],
+    ['okta', 'api'],
+    ['entra_id', 'api'],
+    ['generic', 'token_claim'],
+  ] as const)('a new %s provider starts in the %s group mode', (type, mode) => {
+    expect(PROVIDERS_MAP[type]?.initialValues.groups?.mode).toBe(mode);
+  });
+
+  test('a new Okta provider builds its issuer and Okta Domain from the org domain', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<OidcForm type="okta" onFinish={onFinish} />, { wrapper });
+
+    await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
+
+    expect(screen.getByLabelText('Okta Domain')).toHaveValue(
+      'dev-123.okta.com',
+    );
+    expect(
+      screen.getByText('Issuer: https://dev-123.okta.com'),
+    ).toBeInTheDocument();
   });
 
   test('an existing provider locks the fields the engine update ignores', () => {
@@ -213,6 +215,59 @@ describe('ConfigureOIDCForm', () => {
     expect(screen.getByLabelText('Name')).toBeDisabled();
     expect(screen.getByLabelText('Type')).toBeDisabled();
     expect(screen.getByLabelText('Issuer')).toBeDisabled();
+    expect(screen.queryByLabelText('Issuer mode')).not.toBeInTheDocument();
+  });
+
+  test('an existing Entra ID provider submits its stored tenant untouched', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <OidcForm
+        type="entra_id"
+        initialValues={{
+          issuer: 'https://login.microsoftonline.com/issuer-tenant/v2.0',
+          groups: {
+            ...defaultGroupResolution('entra_id'),
+            tenant_id_env: 'ENTRA_TENANT_ID',
+          },
+        }}
+        disabledFields={{ name: true, type: true, issuer: true }}
+        onFinish={onFinish}
+      />,
+      { wrapper },
+    );
+
+    expect(screen.queryByLabelText('Tenant ID')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+
+    await waitFor(() =>
+      expect(onFinish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          groups: expect.objectContaining({
+            tenant_id: '',
+            tenant_id_env: 'ENTRA_TENANT_ID',
+          }),
+        }),
+      ),
+    );
+  });
+
+  test('a new Entra ID provider whose guided issuer names no tenant says so on the Tenant ID input', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(<OidcForm type="entra_id" onFinish={onFinish} />, { wrapper });
+
+    await fillField(user, 'Directory (Tenant) ID', 'organizations');
+    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+
+    expect(screen.getByLabelText('Issuer')).toBe(
+      screen.getByLabelText('Directory (Tenant) ID'),
+    );
+    await expectFieldError(
+      'Issuer',
+      'The issuer must name a specific tenant, not common, organizations or consumers',
+    );
+    expect(onFinish).not.toHaveBeenCalled();
   });
 
   test('a provider name with a hyphen is accepted, as the engine accepts it', async () => {
@@ -281,23 +336,30 @@ describe('ConfigureOIDCForm', () => {
     );
   });
 
-  test('a provider with no client id or variable is refused before it is sent', async () => {
-    const user = userEvent.setup();
-    const onFinish = vi.fn();
-    render(
-      <OidcForm
-        type="google"
-        initialValues={{ client_id_env: '' }}
-        onFinish={onFinish}
-      />,
-      { wrapper },
-    );
+  test.each(['Value', 'Env Var'] as const)(
+    'a provider with no client id or variable is refused with %s shown',
+    async (source) => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(
+        <OidcForm
+          type="google"
+          initialValues={{ client_id_env: '' }}
+          onFinish={onFinish}
+        />,
+        { wrapper },
+      );
 
-    await user.click(screen.getByRole('button', { name: 'Add OIDC Provider' }));
+      await chooseCredentialSource(user, 'Client ID', source);
+      await user.click(
+        screen.getByRole('button', { name: 'Add OIDC Provider' }),
+      );
 
-    expect(
-      await screen.findByText('Enter a Client ID or its environment variable'),
-    ).toBeInTheDocument();
-    expect(onFinish).not.toHaveBeenCalled();
-  });
+      await expectFieldError(
+        'Client ID',
+        'Enter a Client ID or its environment variable',
+      );
+      expect(onFinish).not.toHaveBeenCalled();
+    },
+  );
 });

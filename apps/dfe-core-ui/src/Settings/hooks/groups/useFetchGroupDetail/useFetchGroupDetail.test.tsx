@@ -32,6 +32,8 @@ describe('.useFetchGroupDetail', () => {
         roles: ['string'],
         members: ['string'],
         scope: 'string',
+        source_id: 'string',
+        source_provider: 'string',
       };
 
       await waitFor(() => {

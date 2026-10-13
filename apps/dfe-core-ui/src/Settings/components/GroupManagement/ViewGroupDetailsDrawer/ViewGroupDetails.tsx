@@ -5,8 +5,10 @@ import { Spin } from 'antd';
 
 const dataListTermStyle =
   'font-medium text-foreground/40 dark:text-dark-foreground/40';
-const EmptyData = () => (
-  <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
+const EmptyData = ({ label = 'None' }: { label?: string }) => (
+  <span className="text-foreground/40 dark:text-dark-foreground/40">
+    {label}
+  </span>
 );
 
 export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
@@ -50,6 +52,12 @@ export const ViewGroupDetails = ({ group_name }: { group_name: string }) => {
       <dd className="text-xs bg-foreground/10 dark:bg-dark-foreground/10 rounded-md px-2 py-0.5 whitespace-nowrap mr-auto">
         {data.scope}
       </dd>
+      <dt className={dataListTermStyle}>Source ID:</dt>
+      <dd className="break-all">
+        {data.source_id || <EmptyData label="Not linked" />}
+      </dd>
+      <dt className={dataListTermStyle}>Source provider:</dt>
+      <dd>{data.source_provider || <EmptyData />}</dd>
       <dt className={dataListTermStyle}>Roles:</dt>
       <dd>
         {data.roles?.length > 0 ? (
