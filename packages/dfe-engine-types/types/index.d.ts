@@ -1899,7 +1899,7 @@ export interface paths {
         };
         /**
          * Get Deployment
-         * @description What this deployment IS: its profile, what it can carry records on, and its versions.
+         * @description What this deployment IS: its profile, transports, backing services and versions.
          *
          *     Authenticated but ungated, for the same reason /version is: every console pane
          *     that must not guess reads this, and the body carries deployment shape and
@@ -2082,14 +2082,16 @@ export interface paths {
          *     these values is unchanged in the deploy repo. A missing or engine-owned name
          *     fails the request before any source is written.
          *
-         *     Then every named source whose current version is the deployed one, pinned now
-         *     or earlier, has its table brought to the pinned values in this request: the
-         *     TTL moves and the header's missing columns are added. The engine of an
-         *     existing table needs a rebuild, so it reaches new tables only, and existing
-         *     columns keep their type. ``live`` reports each source: what reached the table,
-         *     what did not and why. A source with no table for the pinned version takes the
-         *     values on its next deploy. A ClickHouse failure is reported on that source,
-         *     and the pin stays committed.
+         *     A draft takes the values in place. A deployed version is never rewritten: the
+         *     values land on a new major version, which becomes ``current``. Either way the
+         *     table takes them when that version is deployed.
+         *
+         *     A named source whose deployed version already carries the values has its table
+         *     brought to them in this request: the TTL moves and the header's missing
+         *     columns are added. The engine of an existing table needs a rebuild, so it
+         *     reaches new tables only, and existing columns keep their type. ``live``
+         *     reports each source: what reached the table, what did not and why. A
+         *     ClickHouse failure is reported on that source, and the pin stays committed.
          */
         post: operations["apply_defaults_api_v1_system_defaults_apply_post"];
         delete?: never;
@@ -4009,11 +4011,14 @@ export interface paths {
         };
         /**
          * List Backing Services
-         * @description Every backing service's DECLARED deploy configuration.
+         * @description Every backing service's DECLARED deploy configuration, and who runs it.
          *
          *     Declared, not observed: these are the values the deploy repo asks for, read
          *     from git. The engine runs no Kubernetes client, so a figure here can differ
-         *     from the cluster whenever Argo has not synced the declaration yet.
+         *     from the cluster whenever Argo has not synced the declaration yet. A service
+         *     DFE does not run (managed_by provider or external) adds ``observed``, read from
+         *     its own broker or server and held briefly per service, and ``read_only``, the
+         *     values a write is refused on.
          */
         get: operations["list_backing_services_api_v1_backing_services_get"];
         put?: never;
@@ -4098,11 +4103,13 @@ export interface paths {
          * Set Overlay Var
          * @description Set a substrate/platform value.
          *
-         *     403 with the policy that blocked it when the var is protected - the storage
-         *     model, the data-layer modes and the disk size are decided at deploy, and moving
-         *     one on a live deployment is a data migration. 400 when the value would lower a
-         *     declared node or broker count, or leave it undeclared (a parent map that omits
-         *     it), which loses data rather than capacity; helmvars:override does not lift it.
+         *     409 managed_by_provider, before any other check, when DFE does not run the
+         *     service and the value is one of its read_only paths; helmvars:override does not
+         *     lift it. 403 with the policy that blocked it when the var is protected - the
+         *     storage model, the data-layer modes and the disk size are decided at deploy, and
+         *     moving one on a live deployment is a data migration. 400 when the value would
+         *     lower a declared node or broker count, or leave it undeclared (a parent map that
+         *     omits it), which loses data rather than capacity; helmvars:override does not lift it.
          */
         put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
         post?: never;
@@ -4110,6 +4117,8 @@ export interface paths {
          * Delete Overlay Var
          * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
          *
+         *     409 managed_by_provider, before any other check and whatever the caller holds,
+         *     when DFE does not run the service and the value is one of its read_only paths.
          *     400 when the revert would lower a declared node or broker count, or leave it
          *     undeclared, unless the caller holds helmvars:override. An undeclared count falls
          *     to the chart or profile default, which the engine cannot read, so a revert that
@@ -5862,6 +5871,27 @@ export interface components {
              */
             dials?: unknown[];
         };
+        /**
+         * AppPrincipal
+         * @description The identity one app connects to the service as. Names only, never a secret.
+         */
+        AppPrincipal: {
+            /**
+             * App
+             * @description The DFE app, e.g. dfe-loader.
+             */
+            app: string;
+            /**
+             * Principal
+             * @description The user or service account it connects as.
+             */
+            principal: string;
+            /**
+             * Mechanism
+             * @description How it authenticates, e.g. SCRAM-SHA-512.
+             */
+            mechanism: string;
+        };
         /** AppSummary */
         AppSummary: {
             /** Service */
@@ -6054,10 +6084,53 @@ export interface components {
             org_ids?: string[];
         };
         /**
+         * BackingFacts
+         * @description Who runs one backing service, from what the deployer states and the provider catalogue.
+         */
+        BackingFacts: {
+            /** @description dfe: DFE runs it and every declared value reaches it. provider: a SaaS whose API DFE knows runs it. external: someone else runs it, and DFE has no API to it. dfe wherever the deployer states no provider. */
+            managed_by: components["schemas"]["ManagedBy"];
+            /**
+             * Provider
+             * @description The provider key the deployer stated; null when it stated none.
+             */
+            provider: string | null;
+            /**
+             * Tier
+             * @description The provider tier or instance type the deployer stated; null when none.
+             */
+            tier: string | null;
+            /**
+             * Region
+             * @description The provider region the deployer stated; null when none.
+             */
+            region: string | null;
+        };
+        /**
          * BackingServiceConfig
-         * @description A backing service's deploy configuration AS DECLARED, not as observed.
+         * @description A backing service's deploy configuration as DECLARED, and who runs it.
+         *
+         *     A service DFE does not run also carries ``observed``, its size as its own data
+         *     plane reports it, because the declared values do not reach it.
          */
         BackingServiceConfig: {
+            /** @description dfe: DFE runs it and every declared value reaches it. provider: a SaaS whose API DFE knows runs it. external: someone else runs it, and DFE has no API to it. dfe wherever the deployer states no provider. */
+            managed_by: components["schemas"]["ManagedBy"];
+            /**
+             * Provider
+             * @description The provider key the deployer stated; null when it stated none.
+             */
+            provider: string | null;
+            /**
+             * Tier
+             * @description The provider tier or instance type the deployer stated; null when none.
+             */
+            tier: string | null;
+            /**
+             * Region
+             * @description The provider region the deployer stated; null when none.
+             */
+            region: string | null;
             /** Service */
             service: string;
             /** Chart */
@@ -6078,6 +6151,23 @@ export interface components {
             resources?: {
                 [key: string]: components["schemas"]["DeclaredValue"];
             };
+            /**
+             * Read Only
+             * @description Value paths below prefix that a write is refused on with 409 managed_by_provider, at the path, below it or at a parent, because nothing in the deployment reads them. Empty where DFE runs the service.
+             */
+            read_only: string[];
+            /** @description The size the service's own data plane reports, read at most every 30 seconds per service; null where DFE runs the service, whose declared values are the answer. */
+            observed: components["schemas"]["ObservedSizing"] | null;
+            /**
+             * Limits
+             * @description The provider's caps for this tier; empty until the catalogue carries limits.
+             */
+            limits: components["schemas"]["ProviderLimit"][];
+            /**
+             * Principals
+             * @description The identity each app connects as; empty until per-app identities deploy.
+             */
+            principals: components["schemas"]["AppPrincipal"][];
         };
         /**
          * BackingWriteResult
@@ -7491,6 +7581,13 @@ export interface components {
              * @enum {string}
              */
             source: "deploy-repo" | "deployment" | "engine";
+            /**
+             * Backing
+             * @description Who runs each backing service, keyed as GET /backing-services names it. managed_by is dfe wherever the deployer states no provider.
+             */
+            backing: {
+                [key: string]: components["schemas"]["BackingFacts"];
+            };
         };
         /**
          * DerivedSchemaResponse
@@ -9286,6 +9383,12 @@ export interface components {
             mark_synthetic: boolean;
         };
         /**
+         * ManagedBy
+         * @description Who runs a backing service.
+         * @enum {string}
+         */
+        ManagedBy: "dfe" | "provider" | "external";
+        /**
          * MatchConflictContext
          * @description Structured context for duplicate receiver match (field + value).
          */
@@ -9786,6 +9889,55 @@ export interface components {
             updated_at: string;
             /** Etag */
             etag: string;
+        };
+        /**
+         * ObservedSizing
+         * @description A service's size as its own data plane reports it, held briefly per service.
+         *
+         *     Shown, never acted on. A field is null where its read failed or does not apply
+         *     to the service, so a down broker or server blanks it rather than failing the read.
+         */
+        ObservedSizing: {
+            /**
+             * Brokers
+             * @description Kafka brokers the cluster metadata lists.
+             */
+            brokers?: number | null;
+            /**
+             * Replicas
+             * @description ClickHouse replicas per shard in the cluster system.clusters lists; null where the server declares no cluster to count.
+             */
+            replicas?: number | null;
+            /**
+             * Shards
+             * @description ClickHouse shards in that cluster.
+             */
+            shards?: number | null;
+            /**
+             * Memory Bytes
+             * @description Memory available to the ClickHouse server that answered: its cgroup limit, else the host total.
+             */
+            memory_bytes?: number | null;
+            /**
+             * Provider Replicas
+             * @description Replicas the ClickHouse Cloud service object states; null unless clickhouse.cloud is configured.
+             */
+            provider_replicas?: number | null;
+            /**
+             * Provider Min Replica Memory Gb
+             * @description The ClickHouse Cloud service object's minimum memory per replica, in GB.
+             */
+            provider_min_replica_memory_gb?: number | null;
+            /**
+             * Provider Max Replica Memory Gb
+             * @description The ClickHouse Cloud service object's maximum memory per replica, in GB.
+             */
+            provider_max_replica_memory_gb?: number | null;
+            /**
+             * Provider Idle Scaling
+             * @description Whether the ClickHouse Cloud service idles when unused.
+             */
+            provider_idle_scaling?: boolean | null;
         };
         /**
          * OidcCallbackResponse
@@ -10905,6 +11057,37 @@ export interface components {
          * @enum {string}
          */
         ProviderKind: "git_repo" | "valhalla" | "local_files";
+        /**
+         * ProviderLimit
+         * @description One cap the provider publishes for this tier, and how much of it is in use.
+         */
+        ProviderLimit: {
+            /**
+             * Limit
+             * @description What is capped, e.g. partitions.
+             */
+            limit: string;
+            /**
+             * Allowed
+             * @description The provider's published cap for this tier.
+             */
+            allowed: number;
+            /**
+             * Used
+             * @description What the data plane reports in use; null where it could not be read.
+             */
+            used?: number | null;
+            /**
+             * Source Url
+             * @description Where the provider publishes the cap.
+             */
+            source_url: string;
+            /**
+             * As Of
+             * @description The date the cap was read, YYYY-MM-DD.
+             */
+            as_of: string;
+        };
         /**
          * ProviderResponse
          * @description Provider config -- env var names and secret paths, never a secret value.
@@ -26966,6 +27149,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -27009,6 +27201,15 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
