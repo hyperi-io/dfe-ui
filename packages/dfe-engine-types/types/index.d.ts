@@ -170,9 +170,10 @@ export interface paths {
          *     ends the reseed: the account stays disabled, the password may be deleted, and
          *     ``breakglass`` is the recovery path.
          *
-         *     Refused unless the deployment already has an enabled admin-role account of its
-         *     own -- ``retire_admin_available`` on the setup status is the same predicate, so
-         *     the wizard only offers what this accepts. Returns the setup status, which now
+         *     The console keeps the bootstrap admin. Retiring it is an operator's policy
+         *     choice made here. Refused unless the deployment already has an enabled
+         *     admin-role account of its own -- ``retire_admin_available`` on the setup status
+         *     is the same predicate. Returns the setup status, which now
          *     reports ``admin_retired``. Reversal is not an API: remove ``admin_retired``
          *     from ``governance/settings/auth.yaml`` in the deploy repo and restart.
          */
@@ -298,12 +299,21 @@ export interface paths {
         /**
          * Update Account
          * @description Update account groups, enabled/blocked status, or contact fields (admin only).
+         *
+         *     Refused when the caller disables or blocks their own account, or when that
+         *     (or stripping every system-scope admin group) would leave no usable
+         *     system-admin account.
          */
         put: operations["update_account_api_v1_auth_accounts__username__put"];
         post?: never;
         /**
          * Delete Account
          * @description Delete an account (admin only).
+         *
+         *     Refused when the caller targets their own account, when the account holds the
+         *     system admin role and no other usable admin-role account would remain
+         *     (bootstrap admin and break-glass count when they can sign in), or when the
+         *     store refuses a recovery credential.
          */
         delete: operations["delete_account_api_v1_auth_accounts__username__delete"];
         options?: never;
@@ -382,14 +392,15 @@ export interface paths {
         put?: never;
         /**
          * Rotate Password
-         * @description Rotate an account's password in the deployment's secret store.
+         * @description Rotate the local admin's password in the deployment's secret store.
          *
          *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
-         *     password, so the engine writes the new value through the scalo secrets seam
-         *     and never into its own YAML. The next boot reconcile issues the rotated value
-         *     to the admin, who must replace it at the following login. Returns 501 with the
-         *     store command when the deployment has not declared a secrets path for the
-         *     password.
+         *     password, so the engine writes the new value through its secrets backend and
+         *     never into its own YAML. The next boot reconcile issues the rotated value to
+         *     the admin, who must replace it at the following login. Returns 501 with the
+         *     command that changes it where it is kept when the deployment has not declared
+         *     a secrets path for the password. Every other account, ``breakglass`` included,
+         *     changes its password through reset-password.
          */
         post: operations["rotate_password_api_v1_auth_accounts__username__rotate_password_post"];
         delete?: never;
@@ -409,10 +420,11 @@ export interface paths {
          * Account Git Status
          * @description Poll whether an account's password has merged to the deploy repo's main.
          *
-         *     Step 2 of the review-PR path for the break-glass admin: the UI polls this after
-         *     the operator merges the PR; it fetches remote main and flips ``merged`` true.
-         *     Durable immediately in the auto-merge and file-share modes. A regular user is
-         *     never git-persisted, so it reports not-git-backed (durable in its own store).
+         *     Step 2 of the review-PR path for the local admin and ``breakglass``: the UI
+         *     polls this after the operator merges the PR; it fetches remote main and flips
+         *     ``merged`` true. Durable immediately in the auto-merge and file-share modes. A
+         *     regular user is never git-persisted, so it reports not-git-backed (durable in
+         *     its own store).
          */
         get: operations["account_git_status_api_v1_auth_accounts__username__git_status_get"];
         put?: never;
@@ -1899,7 +1911,7 @@ export interface paths {
         };
         /**
          * Get Deployment
-         * @description What this deployment IS: its profile, what it can carry records on, and its versions.
+         * @description What this deployment IS: its profile, transports, backing services and versions.
          *
          *     Authenticated but ungated, for the same reason /version is: every console pane
          *     that must not guess reads this, and the body carries deployment shape and
@@ -2082,14 +2094,16 @@ export interface paths {
          *     these values is unchanged in the deploy repo. A missing or engine-owned name
          *     fails the request before any source is written.
          *
-         *     Then every named source whose current version is the deployed one, pinned now
-         *     or earlier, has its table brought to the pinned values in this request: the
-         *     TTL moves and the header's missing columns are added. The engine of an
-         *     existing table needs a rebuild, so it reaches new tables only, and existing
-         *     columns keep their type. ``live`` reports each source: what reached the table,
-         *     what did not and why. A source with no table for the pinned version takes the
-         *     values on its next deploy. A ClickHouse failure is reported on that source,
-         *     and the pin stays committed.
+         *     A draft takes the values in place. A deployed version is never rewritten: the
+         *     values land on a new major version, which becomes ``current``. Either way the
+         *     table takes them when that version is deployed.
+         *
+         *     A named source whose deployed version already carries the values has its table
+         *     brought to them in this request: the TTL moves and the header's missing
+         *     columns are added. The engine of an existing table needs a rebuild, so it
+         *     reaches new tables only, and existing columns keep their type. ``live``
+         *     reports each source: what reached the table, what did not and why. A
+         *     ClickHouse failure is reported on that source, and the pin stays committed.
          */
         post: operations["apply_defaults_api_v1_system_defaults_apply_post"];
         delete?: never;
@@ -4009,11 +4023,14 @@ export interface paths {
         };
         /**
          * List Backing Services
-         * @description Every backing service's DECLARED deploy configuration.
+         * @description Every backing service's DECLARED deploy configuration, and who runs it.
          *
          *     Declared, not observed: these are the values the deploy repo asks for, read
          *     from git. The engine runs no Kubernetes client, so a figure here can differ
-         *     from the cluster whenever Argo has not synced the declaration yet.
+         *     from the cluster whenever Argo has not synced the declaration yet. A service
+         *     DFE does not run (managed_by provider or external) adds ``observed``, read from
+         *     its own broker or server and held briefly per service, and ``read_only``, the
+         *     values a write is refused on.
          */
         get: operations["list_backing_services_api_v1_backing_services_get"];
         put?: never;
@@ -4098,11 +4115,13 @@ export interface paths {
          * Set Overlay Var
          * @description Set a substrate/platform value.
          *
-         *     403 with the policy that blocked it when the var is protected - the storage
-         *     model, the data-layer modes and the disk size are decided at deploy, and moving
-         *     one on a live deployment is a data migration. 400 when the value would lower a
-         *     declared node or broker count, or leave it undeclared (a parent map that omits
-         *     it), which loses data rather than capacity; helmvars:override does not lift it.
+         *     409 managed_by_provider, before any other check, when DFE does not run the
+         *     service and the value is one of its read_only paths; helmvars:override does not
+         *     lift it. 403 with the policy that blocked it when the var is protected - the
+         *     storage model, the data-layer modes and the disk size are decided at deploy, and
+         *     moving one on a live deployment is a data migration. 400 when the value would
+         *     lower a declared node or broker count, or leave it undeclared (a parent map that
+         *     omits it), which loses data rather than capacity; helmvars:override does not lift it.
          */
         put: operations["set_overlay_var_api_v1_backing_services_overlays__name__vars__path__put"];
         post?: never;
@@ -4110,6 +4129,8 @@ export interface paths {
          * Delete Overlay Var
          * @description Revert a substrate/platform value to its chart default. Protected vars refuse.
          *
+         *     409 managed_by_provider, before any other check and whatever the caller holds,
+         *     when DFE does not run the service and the value is one of its read_only paths.
          *     400 when the revert would lower a declared node or broker count, or leave it
          *     undeclared, unless the caller holds helmvars:override. An undeclared count falls
          *     to the chart or profile default, which the engine cannot read, so a revert that
@@ -4820,7 +4841,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Actions */
+        /**
+         * List Actions
+         * @description List the defined actions by name.
+         */
         get: operations["list_actions_api_v1_governance_actions_get"];
         put?: never;
         post?: never;
@@ -4857,7 +4881,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Policies */
+        /**
+         * List Policies
+         * @description List the protected-var policies by name.
+         */
         get: operations["list_policies_api_v1_governance_policies_get"];
         put?: never;
         post?: never;
@@ -4874,7 +4901,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Policy */
+        /**
+         * Get Policy
+         * @description Return one protected-var policy.
+         */
         get: operations["get_policy_api_v1_governance_policies__name__get"];
         put?: never;
         post?: never;
@@ -4900,8 +4930,13 @@ export interface paths {
          *     ``body.params`` supplies values for the action's declared params (422 on a
          *     constraint violation; omitted params take their defaults). A hunt or rule
          *     document the action would leave invalid is 422 ``invalid_document``, with the
-         *     hunts API's own message. Direct commit in dev/solo; a production+team invoke is
-         *     routed to a review PR (or 409 ``review_required`` when no forge is configured).
+         *     hunts API's own message. A change to the infra overlay meets the backing-services
+         *     guards on what the action leaves, dry run included, whatever the caller holds:
+         *     409 ``managed_by_provider`` for a read-only value of a service DFE does not run,
+         *     then 400 ``scale_down_refused`` where it lowers or un-declares a node or broker
+         *     count.
+         *     Direct commit in dev/solo; a production+team invoke is routed to a review PR (or
+         *     409 ``review_required`` when no forge is configured).
          */
         post: operations["invoke_action_api_v1_governance_actions__name__invoke_post"];
         delete?: never;
@@ -4925,7 +4960,9 @@ export interface paths {
          *
          *     Nothing is committed - this is the authoring hand-hold, run before the
          *     define endpoint so a wizard can show the full diff and every problem in
-         *     one round trip.
+         *     one round trip. That includes each change invoke would refuse under the
+         *     infra overlay guards (``managed_by_provider``, ``scale_down_refused``), on
+         *     every enum map branch, reported by its message.
          */
         post: operations["validate_action_api_v1_governance_admin_actions_validate_post"];
         delete?: never;
@@ -4967,7 +5004,10 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete Action */
+        /**
+         * Delete Action
+         * @description Remove a defined action.
+         */
         delete: operations["delete_action_api_v1_governance_admin_actions__name__delete"];
         options?: never;
         head?: never;
@@ -4983,7 +5023,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create Policy */
+        /**
+         * Create Policy
+         * @description Define or replace a protected-var policy.
+         */
         post: operations["create_policy_api_v1_governance_admin_policies_post"];
         delete?: never;
         options?: never;
@@ -5001,7 +5044,10 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete Policy */
+        /**
+         * Delete Policy
+         * @description Remove a protected-var policy.
+         */
         delete: operations["delete_policy_api_v1_governance_admin_policies__name__delete"];
         options?: never;
         head?: never;
@@ -5019,9 +5065,10 @@ export interface paths {
         put?: never;
         /**
          * Reconcile Ch Rbac Endpoint
-         * @description Reconcile CH quota tiers + service roles + per-org row policies into
-         *     ClickHouse, minting the service-user secrets via the secrets seam. Idempotent.
-         *     governance:write.
+         * @description Reconcile ClickHouse quota tiers, service roles and per-org row policies.
+         *
+         *     It mints the service-user secrets in the configured secrets backend, and a repeat run
+         *     changes nothing.
          */
         post: operations["reconcile_ch_rbac_endpoint_api_v1_governance_ch_rbac_reconcile_post"];
         delete?: never;
@@ -5587,7 +5634,7 @@ export interface components {
         AccountGitState: {
             /**
              * Enabled
-             * @description This account is git-persisted (the break-glass admin on a gitops deploy). False for a regular user -- durable in its own store, no git flow.
+             * @description This account's password is kept in the deploy repo: the local admin and breakglass on a gitops deploy. False for a regular user -- durable in its own store, no git flow.
              */
             enabled: boolean;
             /**
@@ -5862,6 +5909,27 @@ export interface components {
              */
             dials?: unknown[];
         };
+        /**
+         * AppPrincipal
+         * @description The identity one app connects to the service as. Names only, never a secret.
+         */
+        AppPrincipal: {
+            /**
+             * App
+             * @description The DFE app, e.g. dfe-loader.
+             */
+            app: string;
+            /**
+             * Principal
+             * @description The user or service account it connects as.
+             */
+            principal: string;
+            /**
+             * Mechanism
+             * @description How it authenticates, e.g. SCRAM-SHA-512.
+             */
+            mechanism: string;
+        };
         /** AppSummary */
         AppSummary: {
             /** Service */
@@ -6054,10 +6122,53 @@ export interface components {
             org_ids?: string[];
         };
         /**
+         * BackingFacts
+         * @description Who runs one backing service, from what the deployer states and the provider catalogue.
+         */
+        BackingFacts: {
+            /** @description dfe: DFE runs it and every declared value reaches it. provider: a SaaS whose API DFE knows runs it. external: someone else runs it, and DFE has no API to it. dfe wherever the deployer states no provider. */
+            managed_by: components["schemas"]["ManagedBy"];
+            /**
+             * Provider
+             * @description The provider key the deployer stated; null when it stated none.
+             */
+            provider: string | null;
+            /**
+             * Tier
+             * @description The provider tier or instance type the deployer stated; null when none.
+             */
+            tier: string | null;
+            /**
+             * Region
+             * @description The provider region the deployer stated; null when none.
+             */
+            region: string | null;
+        };
+        /**
          * BackingServiceConfig
-         * @description A backing service's deploy configuration AS DECLARED, not as observed.
+         * @description A backing service's deploy configuration as DECLARED, and who runs it.
+         *
+         *     A service DFE does not run also carries ``observed``, its size as its own data
+         *     plane reports it, because the declared values do not reach it.
          */
         BackingServiceConfig: {
+            /** @description dfe: DFE runs it and every declared value reaches it. provider: a SaaS whose API DFE knows runs it. external: someone else runs it, and DFE has no API to it. dfe wherever the deployer states no provider. */
+            managed_by: components["schemas"]["ManagedBy"];
+            /**
+             * Provider
+             * @description The provider key the deployer stated; null when it stated none.
+             */
+            provider: string | null;
+            /**
+             * Tier
+             * @description The provider tier or instance type the deployer stated; null when none.
+             */
+            tier: string | null;
+            /**
+             * Region
+             * @description The provider region the deployer stated; null when none.
+             */
+            region: string | null;
             /** Service */
             service: string;
             /** Chart */
@@ -6078,6 +6189,23 @@ export interface components {
             resources?: {
                 [key: string]: components["schemas"]["DeclaredValue"];
             };
+            /**
+             * Read Only
+             * @description Value paths below prefix that a write is refused on with 409 managed_by_provider, at the path, below it or at a parent, because nothing in the deployment reads them. Empty where DFE runs the service.
+             */
+            read_only: string[];
+            /** @description The size the service's own data plane reports, read at most every 30 seconds per service; null where DFE runs the service, whose declared values are the answer. */
+            observed: components["schemas"]["ObservedSizing"] | null;
+            /**
+             * Limits
+             * @description The provider's caps for this tier; empty until the catalogue carries limits.
+             */
+            limits: components["schemas"]["ProviderLimit"][];
+            /**
+             * Principals
+             * @description The identity each app connects as; empty until per-app identities deploy.
+             */
+            principals: components["schemas"]["AppPrincipal"][];
         };
         /**
          * BackingWriteResult
@@ -7491,6 +7619,13 @@ export interface components {
              * @enum {string}
              */
             source: "deploy-repo" | "deployment" | "engine";
+            /**
+             * Backing
+             * @description Who runs each backing service, keyed as GET /backing-services names it. managed_by is dfe wherever the deployer states no provider.
+             */
+            backing: {
+                [key: string]: components["schemas"]["BackingFacts"];
+            };
         };
         /**
          * DerivedSchemaResponse
@@ -8891,7 +9026,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** InvokeResponse */
+        /**
+         * InvokeResponse
+         * @description Outcome of invoking a defined action: the diff, and the commit or review PR it made.
+         */
         InvokeResponse: {
             /** Dry Run */
             dry_run: boolean;
@@ -9285,6 +9423,12 @@ export interface components {
              */
             mark_synthetic: boolean;
         };
+        /**
+         * ManagedBy
+         * @description Who runs a backing service.
+         * @enum {string}
+         */
+        ManagedBy: "dfe" | "provider" | "external";
         /**
          * MatchConflictContext
          * @description Structured context for duplicate receiver match (field + value).
@@ -9786,6 +9930,55 @@ export interface components {
             updated_at: string;
             /** Etag */
             etag: string;
+        };
+        /**
+         * ObservedSizing
+         * @description A service's size as its own data plane reports it, held briefly per service.
+         *
+         *     Shown, never acted on. A field is null where its read failed or does not apply
+         *     to the service, so a down broker or server blanks it rather than failing the read.
+         */
+        ObservedSizing: {
+            /**
+             * Brokers
+             * @description Kafka brokers the cluster metadata lists.
+             */
+            brokers?: number | null;
+            /**
+             * Replicas
+             * @description ClickHouse replicas per shard in the cluster system.clusters lists; null where the server declares no cluster to count.
+             */
+            replicas?: number | null;
+            /**
+             * Shards
+             * @description ClickHouse shards in that cluster.
+             */
+            shards?: number | null;
+            /**
+             * Memory Bytes
+             * @description Memory available to the ClickHouse server that answered: its cgroup limit, else the host total.
+             */
+            memory_bytes?: number | null;
+            /**
+             * Provider Replicas
+             * @description Replicas the ClickHouse Cloud service object states; null unless clickhouse.cloud is configured.
+             */
+            provider_replicas?: number | null;
+            /**
+             * Provider Min Replica Memory Gb
+             * @description The ClickHouse Cloud service object's minimum memory per replica, in GB.
+             */
+            provider_min_replica_memory_gb?: number | null;
+            /**
+             * Provider Max Replica Memory Gb
+             * @description The ClickHouse Cloud service object's maximum memory per replica, in GB.
+             */
+            provider_max_replica_memory_gb?: number | null;
+            /**
+             * Provider Idle Scaling
+             * @description Whether the ClickHouse Cloud service idles when unused.
+             */
+            provider_idle_scaling?: boolean | null;
         };
         /**
          * OidcCallbackResponse
@@ -10857,7 +11050,7 @@ export interface components {
             kind: components["schemas"]["AuthKind"];
             /**
              * Secret Path
-             * @description Path in the scalo.secrets seam holding the token/key
+             * @description Path in the secret store holding the token or key
              * @default
              */
             secret_path: string;
@@ -10905,6 +11098,37 @@ export interface components {
          * @enum {string}
          */
         ProviderKind: "git_repo" | "valhalla" | "local_files";
+        /**
+         * ProviderLimit
+         * @description One cap the provider publishes for this tier, and how much of it is in use.
+         */
+        ProviderLimit: {
+            /**
+             * Limit
+             * @description What is capped, e.g. partitions.
+             */
+            limit: string;
+            /**
+             * Allowed
+             * @description The provider's published cap for this tier.
+             */
+            allowed: number;
+            /**
+             * Used
+             * @description What the data plane reports in use; null where it could not be read.
+             */
+            used?: number | null;
+            /**
+             * Source Url
+             * @description Where the provider publishes the cap.
+             */
+            source_url: string;
+            /**
+             * As Of
+             * @description The date the cap was read, YYYY-MM-DD.
+             */
+            as_of: string;
+        };
         /**
          * ProviderResponse
          * @description Provider config -- env var names and secret paths, never a secret value.
@@ -11355,23 +11579,23 @@ export interface components {
         RotatePasswordRequest: {
             /**
              * New Password
-             * @description New plaintext password to write to the store; at least 12 characters, at most 72 bytes, and never the shipped default
+             * @description New plaintext password to write to the secret store; at least 12 characters, at most 72 bytes, and never the shipped default
              */
             new_password: string;
         };
         /**
          * RotatePasswordResponse
-         * @description Outcome of a rotation written through the secrets seam.
+         * @description Outcome of a rotation written to the deployment's secrets backend.
          */
         RotatePasswordResponse: {
             /**
              * Message
-             * @default password rotated in the secret store
+             * @default Password saved in the secret store. The engine gives it to the admin at its next restart, and the admin must change it at the next sign-in.
              */
             message: string;
             /**
              * Secret Path
-             * @description scalo.secrets path the new password was written to
+             * @description Where in the secret store the new password went
              */
             secret_path: string;
         };
@@ -12653,7 +12877,7 @@ export interface components {
             default_engine: string;
             /**
              * Admin Username
-             * @description The bootstrap admin's account name, which the deployment may rename. The console names it in the retire prompt and marks it retired in the account list, so it cannot guess at 'admin'.
+             * @description The bootstrap admin's account name, which the deployment may rename. The console looks the account up by it and marks it retired in the account list, so it cannot guess at 'admin'.
              * @default
              */
             admin_username: string;
@@ -12665,7 +12889,7 @@ export interface components {
             admin_retired: boolean;
             /**
              * Retire Admin Available
-             * @description True when retiring the bootstrap admin would be accepted now: setup is complete, an enabled admin-role account other than the seeded pair exists, and the admin is not retired yet. The wizard enables its button on it.
+             * @description True when retiring the bootstrap admin would be accepted now: setup is complete, an enabled admin-role account other than the seeded pair exists, and the admin is not retired yet. The console keeps the admin, so retiring it is an operator's choice made through the API.
              * @default false
              */
             retire_admin_available: boolean;
@@ -16113,8 +16337,17 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description self_deactivate: an account cannot disable or block itself */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description last_admin: disabling, blocking, or stripping the system admin group from this account would leave no usable system admin */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16160,8 +16393,17 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description self_delete: an account cannot delete itself */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description last_admin: deleting this account would leave no usable system admin */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -26966,6 +27208,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -27009,6 +27260,15 @@ export interface operations {
             };
             /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description managed_by_provider: DFE does not run the service, so nothing in the deployment reads this value; context names who sizes it and set_in where. Also conflict (a stale If-Match) and review_required (production+team). */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
