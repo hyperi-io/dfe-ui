@@ -1,7 +1,6 @@
 import { useFetchSetupStatus } from '@/core/hooks/useFetchSetupStatus';
-import { useRetireAdmin } from '@/core/hooks/useRetireAdmin';
 import { cn } from '@/core/utils/style';
-import { IconArrowLeft, IconArrowRight, IconLockCheck } from '@repo/dfe-icons';
+import { IconArrowLeft, IconArrowRight } from '@repo/dfe-icons';
 import { Alert, Button } from 'antd';
 import { useRouter } from 'next/navigation';
 
@@ -11,7 +10,6 @@ export const CompleteStep = ({ goPrevious }: { goPrevious?: () => void }) => {
   // Fetched here rather than passed in: the last step created the first user, so
   // the props this wizard was rendered with predate the answer.
   const { data: status } = useFetchSetupStatus();
-  const { mutate: retire, isPending, error } = useRetireAdmin();
 
   const adminName = status?.admin_username || 'admin';
 
@@ -22,32 +20,12 @@ export const CompleteStep = ({ goPrevious }: { goPrevious?: () => void }) => {
         Congratulations! You have successfully configured the system.
       </p>
 
-      {status?.retire_admin_available && (
-        <div className="mt-8 flex flex-col gap-3">
-          <p className="text-lg font-extralight">
-            You now have an admin of your own, so the deployment no longer needs
-            the <span className="font-normal">{adminName}</span> account it was
-            given at install. Retire it and the engine stops recreating it on
-            every start, which is what lets you delete the password your deploy
-            minted &mdash; the Secret key in Kubernetes, or the .env key with
-            Compose. The break-glass account remains your way back in.
-          </p>
-          <Button
-            className="mr-auto"
-            loading={isPending}
-            onClick={() => retire()}
-          >
-            <IconLockCheck /> Retire the bootstrap admin
-          </Button>
-          {error && (
-            <Alert
-              type="error"
-              showIcon
-              title="The engine would not retire the admin"
-              description={error.message}
-            />
-          )}
-        </div>
+      {status && !status.admin_retired && (
+        <p className="mt-8 text-lg font-extralight">
+          The <span className="font-normal">{adminName}</span> account stays as
+          your local way in. Reset its password any time under Settings, Account
+          Management, Security accounts.
+        </p>
       )}
 
       {status?.admin_retired && (

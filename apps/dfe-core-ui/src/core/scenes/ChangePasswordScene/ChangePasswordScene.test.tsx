@@ -153,7 +153,7 @@ const refuseCurrentPassword = () =>
         HttpResponse.json(
           {
             code: 'invalid_current_password',
-            message: "current_password is not this account's password",
+            message: "That is not this account's current password.",
           },
           { status: 403 },
         ),
@@ -265,7 +265,7 @@ describe('ChangePasswordScene', () => {
       await screen.findByText('That is not your current password.'),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("current_password is not this account's password"),
+      screen.queryByText("That is not this account's current password."),
     ).not.toBeInTheDocument();
     expect(signOut).not.toHaveBeenCalled();
   });
