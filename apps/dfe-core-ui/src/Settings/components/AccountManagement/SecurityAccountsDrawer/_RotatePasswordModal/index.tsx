@@ -1,3 +1,4 @@
+import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -16,9 +17,16 @@ export const RotatePasswordModal = ({ username }: { username: string }) => {
 
   const { mutate, isPending, error } = useRotatePassword({
     username: username,
-    onSuccess: () => {
+    onSuccess: ({ message, secret_path }) => {
       notification.success({
-        title: `${username} password reset successfully`,
+        title: `${username} password rotated successfully`,
+        description: (
+          <div className="flex flex-col gap-2">
+            <p>{message}</p>
+            Secret path:
+            <CopyCodeBlock code={secret_path} />
+          </div>
+        ),
         placement: 'bottomLeft',
       });
       setOpen(false);
