@@ -1,4 +1,5 @@
 import { Modal } from '@/core/components/Modal';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -17,7 +18,7 @@ export const DeReactivateAccount = ({
   const { notification } = App.useApp();
   const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
 
-  const { mutate, isPending } = useUpdateAccount({
+  const { mutate, isPending, error } = useUpdateAccount({
     username,
     onSuccess: () => {
       notification.success({
@@ -56,15 +57,27 @@ export const DeReactivateAccount = ({
           open={isConfirming}
           destroyOnHidden
           onCancel={() => setIsConfirming(false)}
-          onOk={() => mutate({ enabled: !isActive })}
           okText="Deactivate"
           okType="danger"
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => setIsConfirming(false)}>Cancel</Button>
+              <Button
+                type="primary"
+                onClick={() => mutate({ enabled: !isActive })}
+                danger
+              >
+                Deactivate
+              </Button>
+            </div>
+          }
         >
           <p>
             You are trying to deactivate your own account, you will be logged
             out and will lose access to your account. Are you sure you want to
             continue?
           </p>
+          {error && <NotificationCard type="error" title={error.message} />}
         </Modal>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>

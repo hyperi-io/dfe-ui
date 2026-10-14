@@ -1,4 +1,5 @@
 import { Modal } from '@/core/components/Modal';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -18,7 +19,7 @@ export const BlockUnblockAccount = ({
   const actionTitle = isBlocked ? 'Unblock Account' : 'Block Account';
   const isEnabled = !isBlocked;
 
-  const { mutate, isPending } = useUpdateAccount({
+  const { mutate, isPending, error } = useUpdateAccount({
     username,
     onSuccess: () => {
       notification.success({
@@ -74,6 +75,8 @@ export const BlockUnblockAccount = ({
             You are trying to block your own account, you will be logged out and
             will lose access to your account. Are you sure you want to continue?
           </p>
+
+          {error && <NotificationCard type="error" title={error.message} />}
         </Modal>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>
