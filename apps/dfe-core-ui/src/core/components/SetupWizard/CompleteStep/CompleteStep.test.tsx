@@ -56,66 +56,55 @@ const status = (
 
 const BACKSTOP = { timeout: 15_000 };
 
-const retireButton = () =>
-  screen.findByRole('button', { name: /Retire the bootstrap admin/ }, BACKSTOP);
-
 describe('CompleteStep', () => {
-  test('offers the retirement only when the engine says it would accept it', async () => {
-    server.use(
-      API_CONFIG_MOCKS.auth.setupStatus.get.success({
-        mockedResponse: status({ retire_admin_available: false }),
-      }),
-    );
-
-    render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
-
-    expect(
-      await screen.findByText('Complete', {}, BACKSTOP),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /Retire the bootstrap admin/ }),
-    ).not.toBeInTheDocument();
-  });
-
-  test('names the deployment own admin account in the offer', async () => {
-    server.use(
-      API_CONFIG_MOCKS.auth.setupStatus.get.success({
-        mockedResponse: status({
-          retire_admin_available: true,
-          admin_username: 'installer',
-        }),
-      }),
-    );
-
-    render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
-
-    expect(await retireButton()).toBeInTheDocument();
-    expect(
-      await screen.findByText('installer', {}, BACKSTOP),
-    ).toBeInTheDocument();
-  });
-
-  test('retires the admin and reports the account is retired', async () => {
+  test('keeps the admin: never offers to retire it, even when the engine would accept it', async () => {
     server.use(
       API_CONFIG_MOCKS.auth.setupStatus.get.success({
         mockedResponse: status({ retire_admin_available: true }),
       }),
-      API_CONFIG_MOCKS.auth.retireAdmin.post.success({
-        mockedResponse: status({
-          admin_retired: true,
-          retire_admin_available: false,
-        }),
+    );
+
+    render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
+
+    expect(
+      await screen.findByText(/stays as your local way in/, {}, BACKSTOP),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Retire/ })).toBeNull();
+    expect(screen.queryByText(/retired/i)).toBeNull();
+  });
+
+  test('names the deployment own admin account and where to reset it', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.setupStatus.get.success({
+        mockedResponse: status({ admin_username: 'installer' }),
       }),
     );
 
     render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
-    await userEvent.click(await retireButton());
+
+    expect(
+      await screen.findByText('installer', {}, BACKSTOP),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Account Management, Security accounts/),
+    ).toBeInTheDocument();
+  });
+
+  test('reports an admin an operator has already retired', async () => {
+    server.use(
+      API_CONFIG_MOCKS.auth.setupStatus.get.success({
+        mockedResponse: status({ admin_retired: true }),
+      }),
+    );
+
+    render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
 
     await waitFor(() => {
       expect(
         screen.getByText('The admin account is retired'),
       ).toBeInTheDocument();
     }, BACKSTOP);
+    expect(screen.queryByText(/stays as your local way in/)).toBeNull();
   });
 
   test('offers Back while there is a step to go back to', async () => {
@@ -148,27 +137,6 @@ describe('CompleteStep', () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Back/ }),
-    ).not.toBeInTheDocument();
-  });
-
-  test('surfaces a refusal instead of claiming the admin is retired', async () => {
-    server.use(
-      API_CONFIG_MOCKS.auth.setupStatus.get.success({
-        mockedResponse: status({ retire_admin_available: true }),
-      }),
-      API_CONFIG_MOCKS.auth.retireAdmin.post.error(),
-    );
-
-    render(<CompleteStep goPrevious={vi.fn()} />, { wrapper });
-    await userEvent.click(await retireButton());
-
-    await waitFor(() => {
-      expect(
-        screen.getByText('The engine would not retire the admin'),
-      ).toBeInTheDocument();
-    }, BACKSTOP);
-    expect(
-      screen.queryByText('The admin account is retired'),
     ).not.toBeInTheDocument();
   });
 });

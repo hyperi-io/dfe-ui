@@ -7,7 +7,6 @@ export const QUERY_KEYS = Object.freeze({
   auth: {
     login: () => ['auth', 'login'],
     setupStatus: () => ['auth', 'setup-status'],
-    retireAdmin: () => ['auth', 'setup', 'retire-admin'],
     refresh: () => ['auth', 'refresh'],
     logout: () => ['auth', 'logout'],
     me: () => ['auth', 'me'],
@@ -111,7 +110,6 @@ export const QUERY_KEYS = Object.freeze({
       ...(per_page ? ['per_page', per_page] : []),
     ],
     account: () => ['auth', 'accounts', '{username}'],
-    rotatePassword: () => ['auth', 'accounts', '{username}', 'rotate-password'],
     resetPassword: () => ['auth', 'accounts', '{username}', 'reset-password'],
     resetCurrentUserPassword: () => ['auth', 'accounts', 'reset-password'],
     me: () => ['auth', 'accounts', 'me'],

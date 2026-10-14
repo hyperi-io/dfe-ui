@@ -16,7 +16,7 @@ export const useAccountResetPassword = ({
   onSuccess,
   onError,
 }: UseAccountResetPasswordProps) => {
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (body: TAccountResetPasswordRequestBody) =>
       resetPassword({
         body,
@@ -36,5 +36,6 @@ export const useAccountResetPassword = ({
     mutate,
     isPending,
     error,
+    reset,
   };
 };

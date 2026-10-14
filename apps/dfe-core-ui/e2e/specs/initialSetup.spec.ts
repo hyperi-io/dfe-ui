@@ -5,6 +5,7 @@ import {
   completeForcedPasswordChange,
   expectForcedPasswordChange,
   expectSourcesLanding,
+  textbox,
 } from '../config/login.helpers';
 
 import { BASE_URL } from '../config/e2e.client';
@@ -32,12 +33,8 @@ test.beforeEach(async ({ playwright }) => {
 // runs on authenticated engine calls, so a wrong password here fails setup the
 // same way a baked-in one did in the product (dfe-ui#206).
 const login = async (page: Page) => {
-  await page
-    .getByRole('textbox', { name: 'Username', exact: true })
-    .fill('admin');
-  await page
-    .getByRole('textbox', { name: 'Password', exact: true })
-    .fill(adminPassword());
+  await textbox(page, 'Username').fill('admin');
+  await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
 };
 
@@ -98,13 +95,8 @@ test('setup from start testing forward and back navigation', async ({
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
   ).toBeDisabled();
-  // The required marker is part of each label's accessible name.
-  await page
-    .getByRole('textbox', { name: 'Name *', exact: true })
-    .fill('test_organisation');
-  await page
-    .getByRole('textbox', { name: 'Display Name *', exact: true })
-    .fill('Test Organisation');
+  await textbox(page, 'Name').fill('test_organisation');
+  await textbox(page, 'Display Name').fill('Test Organisation');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page).toHaveURL(configureLoginPageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
@@ -135,16 +127,9 @@ test('setup from start testing forward and back navigation', async ({
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
   ).toBeDisabled();
-  // The required marker is part of each label's accessible name.
-  await page
-    .getByRole('textbox', { name: 'Username *', exact: true })
-    .fill('test_username');
-  await page
-    .getByRole('textbox', { name: 'Email *', exact: true })
-    .fill('test_username@example.com');
-  await page
-    .getByRole('textbox', { name: 'Password *', exact: true })
-    .fill('test_password');
+  await textbox(page, 'Username').fill('test_username');
+  await textbox(page, 'Email').fill('test_username@example.com');
+  await textbox(page, 'Password').fill('test_password');
   await page
     .getByRole('button', { name: 'Create Account', exact: true })
     .click();

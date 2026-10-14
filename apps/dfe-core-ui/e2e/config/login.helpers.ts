@@ -32,6 +32,17 @@ export const newAdminPassword = (): string => {
 
 export const CHANGE_PASSWORD_PATH = '/change-password';
 
+/**
+ * The text field a form labels *label*. A required field's label carries the
+ * form's `*` marker, before or after the words, and it is part of the
+ * accessible name, so an exact match on the words alone finds nothing.
+ */
+export const textbox = (page: Page, label: string) =>
+  page
+    .getByRole('textbox', { name: label, exact: true })
+    .or(page.getByRole('textbox', { name: `* ${label}`, exact: true }))
+    .or(page.getByRole('textbox', { name: `${label} *`, exact: true }));
+
 /** The console put the signed-in account on its forced password change. */
 export const expectForcedPasswordChange = (page: Page) =>
   expect(page).toHaveURL((url) => url.pathname === CHANGE_PASSWORD_PATH);
@@ -45,23 +56,15 @@ export const completeForcedPasswordChange = async (
   user = 'admin',
 ) => {
   const password = newAdminPassword();
-  await page
-    .getByRole('textbox', { name: 'Current Password', exact: true })
-    .fill(adminPassword());
-  await page
-    .getByRole('textbox', { name: 'New Password', exact: true })
-    .fill(password);
-  await page
-    .getByRole('textbox', { name: 'Confirm Password', exact: true })
-    .fill(password);
+  await textbox(page, 'Current Password').fill(adminPassword());
+  await textbox(page, 'New Password').fill(password);
+  await textbox(page, 'Confirm Password').fill(password);
   await page.getByRole('button', { name: 'Set password', exact: true }).click();
   await expect(page).toHaveURL((url) => url.pathname === '/login');
   await expect(page.getByText('Password changed')).toBeVisible();
 
-  await page.getByRole('textbox', { name: 'Username', exact: true }).fill(user);
-  await page
-    .getByRole('textbox', { name: 'Password', exact: true })
-    .fill(password);
+  await textbox(page, 'Username').fill(user);
+  await textbox(page, 'Password').fill(password);
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   await expect(page).not.toHaveURL(
     (url) => url.pathname === '/login' || url.pathname === CHANGE_PASSWORD_PATH,
@@ -121,10 +124,8 @@ export const expectLoggedOut = (page: Page) =>
 export const loginAs = async (page: Page, user: string) => {
   await page.goto(`${BASE_URL}/login`);
 
-  await page.getByRole('textbox', { name: 'Username', exact: true }).fill(user);
-  await page
-    .getByRole('textbox', { name: 'Password', exact: true })
-    .fill(adminPassword());
+  await textbox(page, 'Username').fill(user);
+  await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   // Either the console lands, or the account is on an issued password and must change it first.
   await expect(page).toHaveURL(

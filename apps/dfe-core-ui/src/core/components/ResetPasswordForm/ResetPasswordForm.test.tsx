@@ -121,7 +121,7 @@ describe('ResetPasswordForm', () => {
   test('a wrong current password is marked on that field, not as a banner', () => {
     const error = new ApiError(403, 'Forbidden', {
       code: 'invalid_current_password',
-      message: "current_password is not this account's password",
+      message: "That is not this account's current password.",
     });
 
     render(<ResetPasswordForm askCurrentPassword error={error} />, {
@@ -132,7 +132,7 @@ describe('ResetPasswordForm', () => {
       screen.getByText('That is not your current password.'),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("current_password is not this account's password"),
+      screen.queryByText("That is not this account's current password."),
     ).not.toBeInTheDocument();
   });
 
