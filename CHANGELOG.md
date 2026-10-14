@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.15](https://github.com/hyperi-io/dfe-ui/compare/v1.7.14...v1.7.15) (2026-10-14)
+
+### Bug Fixes
+
+* one working password reset per recovery account ([#550](https://github.com/hyperi-io/dfe-ui/issues/550)) ([a735924](https://github.com/hyperi-io/dfe-ui/commit/a7359246f9ec3e89d04af2d7c6f06ee135df4b95))
+
 ## [1.7.14](https://github.com/hyperi-io/dfe-ui/compare/v1.7.13...v1.7.14) (2026-10-13)
 
 ### Bug Fixes
