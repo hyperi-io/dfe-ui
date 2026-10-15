@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.16](https://github.com/hyperi-io/dfe-ui/compare/v1.7.15...v1.7.16) (2026-10-15)
+
+### Bug Fixes
+
+* hide Sigma from view standards and fix the field-map pin ([#555](https://github.com/hyperi-io/dfe-ui/issues/555)) ([42e1ac6](https://github.com/hyperi-io/dfe-ui/commit/42e1ac6d15c8f74e4fc9fd1c79a9a1eb556884fc))
+
 ## [1.7.15](https://github.com/hyperi-io/dfe-ui/compare/v1.7.14...v1.7.15) (2026-10-14)
 
 ### Bug Fixes
