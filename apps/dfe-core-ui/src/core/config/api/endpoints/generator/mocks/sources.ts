@@ -7,8 +7,8 @@ import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TCatalogueSourceResponse } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
+import { TSourceCataloguesResponse } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
-import { TSourceCatalogueResponse } from '@/Sources/hooks/useFetchSourceCatalogue/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
@@ -127,7 +127,7 @@ export const sources = {
           prev_page: null,
         },
       }: {
-        mockedResponse?: TSourceCatalogueResponse;
+        mockedResponse?: TSourceCataloguesResponse;
       } = {}) => {
         return http.get(sources.catalogue.mockedUrl, () => {
           return HttpResponse.json(mockedResponse);
