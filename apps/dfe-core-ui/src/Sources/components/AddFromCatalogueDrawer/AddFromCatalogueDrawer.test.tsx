@@ -64,6 +64,7 @@ describe('AddFromCatalogueDrawer', () => {
     // tests bound their waits at 15 s for the same reason.
     await user.click(await screen.findByLabelText('Intake for this source'));
     await user.click(await screen.findByTitle('Beats'));
+    await user.type(screen.getByLabelText(/^Source Name/), 'okta');
 
     await user.click(await screen.findByRole('button', { name: 'Add' }));
 
