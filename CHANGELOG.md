@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.18](https://github.com/hyperi-io/dfe-ui/compare/v1.7.17...v1.7.18) (2026-10-15)
+
+### Bug Fixes
+
+* send what a source save means ([#559](https://github.com/hyperi-io/dfe-ui/issues/559)) ([e2a6f70](https://github.com/hyperi-io/dfe-ui/commit/e2a6f70fe2d9423d3d307fc0440b192a62c8c5b4))
+
 ## [1.7.17](https://github.com/hyperi-io/dfe-ui/compare/v1.7.16...v1.7.17) (2026-10-15)
 
 ### Bug Fixes
