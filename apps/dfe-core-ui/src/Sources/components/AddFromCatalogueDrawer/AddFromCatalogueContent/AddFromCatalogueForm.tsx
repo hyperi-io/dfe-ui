@@ -16,11 +16,9 @@ const formSchema = z.object({
     .string({ message: 'Intake is required' })
     .min(1, { message: 'Intake is required' }),
   name: z.string().optional().nullable(),
-  transform: z
-    .string({ message: 'Transform is required' })
-    .min(1, { message: 'Transform is required' }),
+  transform: z.string().optional(),
   transport: z.enum(['bus', 'direct']).nullable().optional(),
-  archive: z.boolean(),
+  archive: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -69,7 +67,14 @@ export const AddFromCatalogueForm = ({
   });
 
   const handleFinish = (values: FormValues) => {
-    createSourceFromCatalogue({ entry: entry.name, body: values });
+    createSourceFromCatalogue({
+      entry: entry.name,
+      body: {
+        ...values,
+        transform: values.transform ?? entry.transforms[0] ?? 'default',
+        archive: values.archive ?? false,
+      },
+    });
   };
 
   return (
@@ -145,7 +150,10 @@ export const AddFromCatalogueForm = ({
           <Form.Item
             name="transform"
             label="Transform"
-            rules={[formValidation]}
+            rules={[
+              formValidation,
+              { required: true, message: 'Transform is required' },
+            ]}
           >
             <Select
               aria-label="Transform for this source"
