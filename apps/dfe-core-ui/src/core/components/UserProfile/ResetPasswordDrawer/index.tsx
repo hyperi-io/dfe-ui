@@ -8,7 +8,7 @@ import { loginWithNotice } from '@/core/config/loginNotice';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 
-import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
+import { GitEnabledPendingReviewModal } from '@/core/components/GitEnabledPendingReviewModal';
 import { Button } from 'antd';
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
@@ -78,7 +78,7 @@ export const ResetPasswordDrawer = () => {
         />
       </Drawer>
 
-      <GitEnabledResponseModal data={data} />
+      <GitEnabledPendingReviewModal pending={data?.git.pending} />
     </>
   );
 };

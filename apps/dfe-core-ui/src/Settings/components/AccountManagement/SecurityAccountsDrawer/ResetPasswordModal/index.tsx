@@ -1,5 +1,4 @@
-import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
-import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
+import { GitEnabledPendingReviewModal } from '@/core/components/GitEnabledPendingReviewModal';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -8,45 +7,9 @@ import {
 } from '@/core/components/ResetPasswordForm';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
-import { TAccountResetPasswordResponse } from '@/core/hooks/useAccountResetPassword/types';
 import { IconRefresh } from '@repo/dfe-icons';
-import { Alert, App, Button } from 'antd';
+import { App, Button } from 'antd';
 import { useState } from 'react';
-
-type TPendingReview = NonNullable<
-  TAccountResetPasswordResponse['git']['pending']
->;
-
-/** What the operator does to keep a password a review deployment has not merged yet. */
-const PendingReview = ({
-  pending,
-  onDone,
-}: {
-  pending: TPendingReview;
-  onDone: () => void;
-}) => (
-  <div className="flex flex-col gap-3 w-full">
-    <Alert
-      type="warning"
-      showIcon
-      title="Merge the review to keep this password"
-      description="The new password works now. This deployment reviews account changes, so a restart before the review merges brings back the old one."
-    />
-    {pending.pr_url && (
-      <a href={pending.pr_url} target="_blank" rel="noreferrer">
-        Open the review
-      </a>
-    )}
-    {!pending.pr_url && pending.command && (
-      <CopyCodeBlock code={pending.command} />
-    )}
-    <div className="flex justify-end">
-      <Button type="primary" onClick={onDone}>
-        Done
-      </Button>
-    </div>
-  </div>
-);
 
 export const ResetPasswordModal = ({
   username,
@@ -57,22 +20,16 @@ export const ResetPasswordModal = ({
   disabledReason?: string;
 }) => {
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState<TPendingReview | null>(null);
 
   const { notification } = App.useApp();
 
   const close = () => {
     setOpen(false);
-    setPending(null);
   };
 
   const { data, mutate, isPending, error, reset } = useAccountResetPassword({
     username: username,
-    onSuccess: ({ git }) => {
-      if (!git.merged && git.pending) {
-        setPending(git.pending);
-        return;
-      }
+    onSuccess: () => {
       notification.success({
         title: `${username} password reset successfully`,
         placement: 'bottomLeft',
@@ -124,20 +81,19 @@ export const ResetPasswordModal = ({
         footer={null}
         destroyOnHidden
       >
-        {pending ? (
-          <PendingReview pending={pending} onDone={close} />
-        ) : (
-          <ResetPasswordForm
-            id={`${username}-reset-password-form`}
-            onFinish={onFinish}
-            error={error}
-            isPending={isPending}
-            submitText="Reset Password"
-          />
-        )}
+        <ResetPasswordForm
+          id={`${username}-reset-password-form`}
+          onFinish={onFinish}
+          error={error}
+          isPending={isPending}
+          submitText="Reset Password"
+        />
       </Modal>
 
-      <GitEnabledResponseModal data={data} />
+      <GitEnabledPendingReviewModal
+        pending={data?.git.pending}
+        onCancel={close}
+      />
     </>
   );
 };

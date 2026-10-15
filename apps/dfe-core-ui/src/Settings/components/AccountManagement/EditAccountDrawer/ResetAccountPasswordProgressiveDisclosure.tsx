@@ -1,4 +1,4 @@
-import { GitEnabledResponseModal } from '@/core/components/GitEnabledResponseModal';
+import { GitEnabledPendingReviewModal } from '@/core/components/GitEnabledPendingReviewModal';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import {
@@ -89,7 +89,7 @@ export const ResetAccountPasswordProgressiveDisclosure = ({
         </div>
       )}
 
-      <GitEnabledResponseModal data={data} />
+      <GitEnabledPendingReviewModal pending={data?.git.pending} />
     </>
   );
 };
