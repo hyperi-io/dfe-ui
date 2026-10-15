@@ -67,7 +67,7 @@ describe('ViewsTabContent standard picker', () => {
     expect(offeredStandards()).toEqual(NEW_VIEW_STANDARDS);
   });
 
-  it('stops at three views on a source with no Sigma view', () => {
+  it('stops at three views on a source with no Sigma view', async () => {
     render(
       <Harness
         views={[{ standard: 'ecs' }, { standard: 'cim' }, { standard: 'ocsf' }]}
@@ -75,23 +75,23 @@ describe('ViewsTabContent standard picker', () => {
       { wrapper },
     );
 
-    expect(addView()).toBeDisabled();
+    await waitFor(() => expect(addView()).toBeDisabled());
   });
 });
 
 describe('ViewsTabContent with an existing Sigma view', () => {
-  it('shows the view as Sigma and does not let its standard change', () => {
+  it('shows the view as Sigma and does not let its standard change', async () => {
     render(<Harness views={[{ standard: 'sigma', taxonomy: 'windows' }]} />, {
       wrapper,
     });
 
-    expect(screen.getByTitle('Sigma')).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toBeDisabled();
     expect(
-      screen.getByText(
+      await screen.findByText(
         'Sigma is kept on this view but cannot be picked for a new one',
       ),
     ).toBeInTheDocument();
+    expect(screen.getByTitle('Sigma')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
   it('does not offer Sigma to a view added beside it', async () => {
@@ -133,7 +133,7 @@ describe('ViewsTabContent with an existing Sigma view', () => {
     ]);
   });
 
-  it('counts the Sigma view toward the limit, so all four standards fit', () => {
+  it('counts the Sigma view toward the limit, so all four standards fit', async () => {
     render(
       <Harness
         views={[
@@ -146,10 +146,10 @@ describe('ViewsTabContent with an existing Sigma view', () => {
       { wrapper },
     );
 
-    expect(addView()).toBeDisabled();
+    await waitFor(() => expect(addView()).toBeDisabled());
   });
 
-  it('leaves room for the last standard beside a Sigma view', () => {
+  it('leaves room for the last standard beside a Sigma view', async () => {
     render(
       <Harness
         views={[
@@ -161,6 +161,6 @@ describe('ViewsTabContent with an existing Sigma view', () => {
       { wrapper },
     );
 
-    expect(addView()).toBeEnabled();
+    await waitFor(() => expect(addView()).toBeEnabled());
   });
 });
