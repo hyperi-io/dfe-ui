@@ -1,35 +1,42 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { useFetchSourceCatalogue } from '@/Sources/hooks/useFetchSourceCatalogue';
+import { useFetchInfiniteSourceCatalogues } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues';
 import {
-  TCatalogueEntry,
-  TCatalogueIntake,
-} from '@/Sources/hooks/useFetchSourceCatalogue/types';
+  TSourceCatalogueIntake,
+  TSourceCatalogueItem,
+} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
 export const AddFromCatalogueTable = ({
   onSelect,
 }: {
-  onSelect: (entry: TCatalogueEntry) => void;
+  onSelect: (entry: TSourceCatalogueItem) => void;
 }) => {
   const [search, setSearch] = useState('');
-  const [intakeFilter, setIntakeFilter] = useState<TCatalogueIntake>();
+  const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
 
   const { componentHeight } = useSetComponentHeight({
     offset: 220,
   });
 
-  const { entries, total, isLoading } = useFetchSourceCatalogue({
+  const {
+    data: { items: entries, total },
+    isLoading,
+    fetchNextPage: fetchNextPageSourceCatalogues,
+    hasNextPage: hasNextPageSourceCatalogues,
+    isFetchingNextPage: isFetchingNextPageSourceCatalogues,
+  } = useFetchInfiniteSourceCatalogues({
     search,
     intake: intakeFilter,
+    per_page: 20,
   });
 
-  const columns: ColumnsType<TCatalogueEntry> = [
+  const columns: ColumnsType<TSourceCatalogueItem> = [
     {
       title: 'Entry',
       dataIndex: 'name',
@@ -79,7 +86,7 @@ export const AddFromCatalogueTable = ({
       title: '',
       key: 'select',
       width: '75px',
-      render: (_: unknown, entry: TCatalogueEntry) => (
+      render: (_: unknown, entry: TSourceCatalogueItem) => (
         <Button size="small" type="primary" onClick={() => onSelect(entry)}>
           Select
         </Button>
@@ -87,8 +94,28 @@ export const AddFromCatalogueTable = ({
     },
   ];
 
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const el = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+
+      if (!hasNextPageSourceCatalogues || isFetchingNextPageSourceCatalogues)
+        return;
+
+      // Fetch data when user is near the bottom
+      if (scrollHeight - scrollTop - clientHeight < 40) {
+        void fetchNextPageSourceCatalogues();
+      }
+    },
+    [
+      hasNextPageSourceCatalogues,
+      isFetchingNextPageSourceCatalogues,
+      fetchNextPageSourceCatalogues,
+    ],
+  );
+
   return (
-    <Table<TCatalogueEntry>
+    <Table<TSourceCatalogueItem>
       loading={isLoading}
       scroll={{ y: componentHeight, x: 'max-content' }}
       locale={{
@@ -101,7 +128,9 @@ export const AddFromCatalogueTable = ({
       }}
       title={() => (
         <div className="flex justify-between items-center">
-          <span className="font-medium">{total} entries found</span>
+          <span className="font-medium">
+            {entries?.length} of {total} entries shown
+          </span>
           <div className="flex items-center gap-2">
             <Input.Search
               placeholder="Search by name or dataset"
@@ -124,6 +153,7 @@ export const AddFromCatalogueTable = ({
       rowKey="name"
       columns={columns}
       dataSource={entries}
+      onScroll={handleScroll}
     />
   );
 };

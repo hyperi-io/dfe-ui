@@ -4,9 +4,9 @@ import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSourceFromCatalogue } from '@/Sources/hooks/useCreateSourceFromCatalogue';
 import {
-  TCatalogueEntry,
-  TCatalogueIntake,
-} from '@/Sources/hooks/useFetchSourceCatalogue/types';
+  TSourceCatalogueIntake,
+  TSourceCatalogueItem,
+} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { App, Button, Input, Select } from 'antd';
 import z from 'zod';
 import { INTAKE_OPTIONS } from './constants';
@@ -30,7 +30,7 @@ export const AddFromCatalogueForm = ({
   onSuccess,
   onCancel,
 }: {
-  entry: TCatalogueEntry;
+  entry: TSourceCatalogueItem;
   onSuccess?: () => void;
   onCancel?: () => void;
 }) => {
@@ -134,7 +134,7 @@ export const AddFromCatalogueForm = ({
       />
       <Form onFinish={handleFinish} form={form}>
         <Form.Item name="intake" label="Intake" rules={[formValidation]}>
-          <Select<TCatalogueIntake>
+          <Select<TSourceCatalogueIntake>
             aria-label="Intake for this source"
             options={INTAKE_OPTIONS.filter((option) =>
               entry.intakes.includes(option.value),

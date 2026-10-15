@@ -2,6 +2,7 @@
 import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
+import { UseFetchInfiniteSourceCataloguesProps } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 
 export const QUERY_KEYS = Object.freeze({
   auth: {
@@ -23,7 +24,17 @@ export const QUERY_KEYS = Object.freeze({
     seed: () => ['sources', 'seed'],
     plan: () => ['sources', '{name}', 'plan'],
     deploy: () => ['sources', '{name}', 'deploy'],
-    catalogue: () => ['sources', 'catalogue'],
+    catalogue: ({
+      search,
+      intake,
+      per_page,
+    }: UseFetchInfiniteSourceCataloguesProps = {}) => [
+      'sources',
+      'catalogue',
+      ...(search ? ['search', search] : []),
+      ...(intake ? ['intake', intake] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
     fromCatalogue: () => ['sources', 'from-catalogue', '{entry}'],
     engines: () => ['sources', 'engines'],
   },
