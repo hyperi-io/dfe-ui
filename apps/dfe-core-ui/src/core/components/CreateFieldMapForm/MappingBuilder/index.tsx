@@ -33,7 +33,10 @@ export const MappingBuilder = ({
                   className="w-full"
                   rules={[formValidation]}
                 >
-                  <Input placeholder="Enter source field" />
+                  <Input
+                    aria-label="Standard field"
+                    placeholder="Enter standard field"
+                  />
                 </Form.Item>
                 <Form.Item
                   {...restField}
@@ -41,7 +44,10 @@ export const MappingBuilder = ({
                   className="w-full"
                   rules={[formValidation]}
                 >
-                  <Input placeholder="Enter destination field" />
+                  <Input
+                    aria-label="Source field"
+                    placeholder="Enter source field"
+                  />
                 </Form.Item>
                 <Button
                   aria-label="Delete mapping"
