@@ -27,6 +27,7 @@ export const ViewDetailsModal = ({
         size="small"
         type="text"
         htmlType="button"
+        aria-label={`View ${standard} details`}
         icon={<IconEye />}
         onClick={() => setOpen(true)}
       />

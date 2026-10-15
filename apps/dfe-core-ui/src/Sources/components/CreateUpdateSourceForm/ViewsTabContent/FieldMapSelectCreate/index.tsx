@@ -20,9 +20,11 @@ export const FieldMapSelectCreate = ({
   return (
     <RbacProtected action={RbacProtected.rbacActions.fieldmap_read}>
       <RbacProtected.Unrestricted>
-        <div className="flex gap-x-2">
+        {/* The create button sits under the picker so the picker keeps the full column width its neighbours have. */}
+        <div className="flex flex-col items-start gap-2">
           <FieldMapSelect
             {...props}
+            className="w-full"
             placeholder="Select field map"
             onChange={handleChange}
             allowClear
@@ -30,7 +32,6 @@ export const FieldMapSelectCreate = ({
 
           <CreateFieldMapDrawer
             title="Create New Standard"
-            className={{ trigger: 'mt-auto' }}
             onSuccess={(fieldMap) => {
               handleChange(fieldMapPin(fieldMap));
             }}
@@ -45,8 +46,12 @@ export const FieldMapSelectCreate = ({
         </div>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted>
-        <div className="flex gap-x-2">
-          <Select placeholder="Select mapping standards" disabled />
+        <div className="flex flex-col items-start gap-2">
+          <Select
+            className="w-full"
+            placeholder="Select mapping standards"
+            disabled
+          />
           <Button
             type="default"
             htmlType="button"

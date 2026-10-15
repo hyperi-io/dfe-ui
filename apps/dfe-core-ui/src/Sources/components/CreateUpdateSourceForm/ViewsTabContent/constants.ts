@@ -13,3 +13,9 @@ export const HIDDEN_STANDARD_OPTIONS = [
 /** One view per standard the engine accepts, with no duplicates. */
 export const MAX_VIEWS =
   STANDARD_OPTIONS.length + HIDDEN_STANDARD_OPTIONS.length;
+
+/** The display name of a view standard, falling back to the stored value for one the console does not know. */
+export const standardLabel = (standard: string) =>
+  [...STANDARD_OPTIONS, ...HIDDEN_STANDARD_OPTIONS].find(
+    (option) => option.value === standard,
+  )?.label ?? standard;
