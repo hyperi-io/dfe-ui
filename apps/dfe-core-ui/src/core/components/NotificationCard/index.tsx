@@ -86,9 +86,8 @@ export const NotificationCard = ({
         classNames?.root,
       )}
     >
-      {icon && icon}
-
-      <div className={cn('flex flex-col gap-1', classNames?.container)}>
+      {icon && <div className="flex flex-start shrink-0">{icon}</div>}
+      <div className={cn('flex flex-col gap-1 ', classNames?.container)}>
         {typeof title === 'string' ? (
           <h3
             className={cn(

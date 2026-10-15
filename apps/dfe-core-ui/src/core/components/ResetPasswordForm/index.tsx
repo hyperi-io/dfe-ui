@@ -1,8 +1,8 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
-import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { cn } from '@/core/utils/style';
+import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { newPasswordSchema } from '@/core/validationSchemas/password.schema';
 import { Button, FormProps, Input } from 'antd';
 import type { ReactNode } from 'react';
@@ -47,6 +47,7 @@ interface ResetPasswordFormProps extends FormProps<TResetPasswordFormValues> {
   secondaryAction?: ReactNode;
   /** An account changing its own password proves the current one as well. */
   askCurrentPassword?: boolean;
+  onCancel?: () => void;
 }
 export const ResetPasswordForm = ({
   id = 'reset-password-form',
@@ -56,6 +57,7 @@ export const ResetPasswordForm = ({
   submitText = 'Reset Password',
   secondaryAction,
   askCurrentPassword = false,
+  onCancel,
   ...formProps
 }: ResetPasswordFormProps) => {
   const [form] = Form.useForm<TResetPasswordFormValues>();
@@ -110,13 +112,15 @@ export const ResetPasswordForm = ({
 
       <ApiErrorNotification error={currentRefused ? null : error} />
 
-      <div
-        className={cn(
-          'flex items-center',
-          secondaryAction ? 'justify-between' : 'justify-end',
-        )}
-      >
+      <div className={cn('flex items-center justify-end gap-2')}>
         {secondaryAction}
+
+        {onCancel && (
+          <Button type="default" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+
         <Button type="primary" htmlType="submit" loading={isPending}>
           {submitText}
         </Button>

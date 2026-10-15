@@ -70,6 +70,7 @@ describe('.useUpdateAccount', () => {
           error: null,
           mutate: expect.any(Function),
           data: expectedResponse,
+          reset: expect.any(Function),
         });
       });
 

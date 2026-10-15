@@ -24,6 +24,9 @@ const formSchema = z.object({
 
 export type CreateAccountFormData = z.infer<typeof formSchema>;
 
+const USERNAME_HELP =
+  "Username is used to identify the account. It needs to be unique and can't be updated later.";
+
 export const CreateAccountForm = ({
   onFinish,
   disabledFields,
@@ -69,8 +72,19 @@ export const CreateAccountForm = ({
       onFinish={handleFinish}
       initialValues={initialValues}
     >
-      <Form.Item name="username" label="Username" rules={[formValidation]}>
-        <Input placeholder="Enter username" />
+      <Form.Item noStyle shouldUpdate>
+        {() => (
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[formValidation]}
+            help={
+              form.getFieldError('username').length > 0 ? null : USERNAME_HELP
+            }
+          >
+            <Input placeholder="Enter username" />
+          </Form.Item>
+        )}
       </Form.Item>
 
       <Form.Item name="email" label="Email" rules={[formValidation]}>
