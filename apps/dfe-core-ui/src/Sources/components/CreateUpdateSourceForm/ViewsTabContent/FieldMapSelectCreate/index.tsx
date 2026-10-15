@@ -1,5 +1,5 @@
 import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
-import { FieldMapSelect } from '@/core/components/FieldMapSelect';
+import { FieldMapSelect, fieldMapPin } from '@/core/components/FieldMapSelect';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { IconPlus } from '@repo/dfe-icons';
@@ -31,8 +31,8 @@ export const FieldMapSelectCreate = ({
           <CreateFieldMapDrawer
             title="Create New Standard"
             className={{ trigger: 'mt-auto' }}
-            onSuccess={({ standard, source }) => {
-              handleChange(`${standard}:${source}`);
+            onSuccess={(fieldMap) => {
+              handleChange(fieldMapPin(fieldMap));
             }}
             initialValues={{
               standard: '',
