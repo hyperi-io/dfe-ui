@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { DFE_RUN } from '@/core/config/api/endpoints/generator/mocks/backingServices';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,6 +30,7 @@ describe('BackingServices', () => {
       API_CONFIG_MOCKS.backingServices.default.get.success({
         mockedResponse: [
           {
+            ...DFE_RUN,
             service: 'minio',
             chart: 'minio',
             overlay: 'minio.yaml',

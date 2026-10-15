@@ -66,6 +66,8 @@ export const CreateFieldMapForm = ({
   return (
     <Form
       form={form}
+      // Prefixes the field ids, which collide with the source form's when opened from its Views tab.
+      name="field-map"
       onFinish={onFinish}
       scrollToFirstError
       initialValues={{

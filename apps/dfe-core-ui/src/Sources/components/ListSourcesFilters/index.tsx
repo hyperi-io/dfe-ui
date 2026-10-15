@@ -14,8 +14,7 @@ export const ListSourcesFilters = ({ className }: { className?: string }) => {
         <span className="flex justify-between items-center w-full">
           <p className="font-semibold">Filters</p>
           <p className="text-xs text-gray-400 mr-4">
-            {sources.length} of {total}{' '}
-            {sources.length > 1 ? 'results' : 'result'}
+            {sources.length} of {total} {total === 1 ? 'result' : 'results'}
           </p>
         </span>
       }

@@ -6,7 +6,8 @@ import { objectArrayToObject, parseFetcherConfig } from './helpers';
 /*
  * Transforms the source form data to a request body for the update source API.
  * The selected origin decides which of match and fetcher is sent; the engine
- * refuses a body carrying both or neither.
+ * refuses a body carrying both or neither. A field the body leaves out keeps
+ * its stored value, so a clear is sent as null.
  *
  * @param source - The source form data to transform
  * @returns The transformed source request body
@@ -15,7 +16,16 @@ import { objectArrayToObject, parseFetcherConfig } from './helpers';
 export const transformSourceFormDataToRequestBody = (
   source: CreateUpdateSourceFormData,
 ): TSourceUpdateRequestBody => {
-  const { fetcher, match, origin, schema, views, transform, ...rest } = source;
+  const {
+    fetcher,
+    match,
+    origin,
+    schema,
+    views,
+    transform,
+    transform_ui_config,
+    ...rest
+  } = source;
 
   const isFetcherOrigin = origin === 'fetcher';
 
@@ -61,9 +71,16 @@ export const transformSourceFormDataToRequestBody = (
         }
       : {}),
     match: apiMatch,
-    ...(transform != null
-      ? { transform: { ...transform, env: objectArrayToObject(transform.env) } }
-      : {}),
+    ...(transform_ui_config?.assign === 'none'
+      ? { transform: null }
+      : transform != null
+        ? {
+            transform: {
+              ...transform,
+              env: objectArrayToObject(transform.env),
+            },
+          }
+        : {}),
     fetcher: apiFetcher,
   };
   return transformedSource;

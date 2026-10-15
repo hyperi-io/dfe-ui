@@ -14,6 +14,28 @@ const declared = (value: unknown, isProtected = false) => ({
   protected: isProtected,
 });
 
+/** Run by DFE, so every declared value reaches the service and none is read-only. */
+export const DFE_RUN: Pick<
+  TBackingServicesResponse[number],
+  | 'managed_by'
+  | 'provider'
+  | 'tier'
+  | 'region'
+  | 'read_only'
+  | 'observed'
+  | 'limits'
+  | 'principals'
+> = {
+  managed_by: 'dfe',
+  provider: null,
+  tier: null,
+  region: null,
+  read_only: [],
+  observed: null,
+  limits: [],
+  principals: [],
+};
+
 /**
  * Both declaration states on purpose: ClickHouse fully declared with its
  * storage locked, Kafka declaring nothing at all so every value falls to the
@@ -21,6 +43,7 @@ const declared = (value: unknown, isProtected = false) => ({
  */
 const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
   {
+    ...DFE_RUN,
     service: 'clickhouse',
     chart: 'clickhouse-cluster',
     overlay: 'clickhouse-cluster.yaml',
@@ -38,6 +61,7 @@ const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
     },
   },
   {
+    ...DFE_RUN,
     service: 'kafka',
     chart: 'kafka',
     overlay: 'kafka.yaml',

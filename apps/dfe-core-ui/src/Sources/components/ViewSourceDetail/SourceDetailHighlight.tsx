@@ -1,6 +1,10 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { cn } from '@/core/utils/style';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import {
+  COMMON_HEADER_DIR,
+  commonHeaderName,
+} from '@/Sources/utils/commonHeader';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
 
@@ -37,7 +41,7 @@ export const SourceDetailHighlight = ({
               <span className="font-medium">Header:</span>
               <Link
                 className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas/other-schemas?schema_path=${header?.type}&schema_version=${header?.version}`}
+                href={`/schemas/other-schemas?schema_path=${COMMON_HEADER_DIR}${commonHeaderName(header.type)}&schema_version=${header.version}`}
               >
                 <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
                 {header?.type}@{header?.version}

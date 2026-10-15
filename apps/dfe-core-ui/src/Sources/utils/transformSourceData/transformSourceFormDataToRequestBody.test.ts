@@ -108,6 +108,37 @@ describe('transformSourceFormDataToRequestBody', () => {
     );
   });
 
+  test('No Transform sends a null transform, whatever the form still holds', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', operator: 'equals', value: 'value' },
+      transform: { engine: 'vrl' },
+      transform_ui_config: { assign: 'none' },
+    };
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result).toHaveProperty('transform', null);
+    expect(result).not.toHaveProperty('transform_ui_config');
+  });
+
+  test('a form that never showed the Transform tab leaves transform out', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', operator: 'equals', value: 'value' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source)).not.toHaveProperty(
+      'transform',
+    );
+  });
+
   test('maps view custom_mappings from form tuples to API record', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
