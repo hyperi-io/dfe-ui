@@ -13,8 +13,7 @@ export const ListFieldMapsFilters = () => {
         <span className="flex justify-between items-center w-full">
           <p className="font-semibold">Filters</p>
           <p className="text-xs text-gray-400 mr-4">
-            {fieldMaps.length} of {total}{' '}
-            {total === 1 ? 'result' : 'results'}
+            {fieldMaps.length} of {total} {total === 1 ? 'result' : 'results'}
           </p>
         </span>
       }
