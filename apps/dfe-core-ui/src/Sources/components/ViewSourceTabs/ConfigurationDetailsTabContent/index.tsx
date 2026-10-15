@@ -127,24 +127,28 @@ export const ConfigurationDetailsTabContent = ({
           defaultOpen={true}
         >
           <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
-            <dt className={dataListTermStyle}>Header Type:</dt>
-            <dd>
-              <Link
-                className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
-                href={`/schemas/other-schemas?schema_path=${isMainSource ? 'common-header/' : ''}${header?.type.replace('common-header/', '')}&schema_version=${header?.version}`}
-              >
-                <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
-                <span className="text-foreground/40 dark:text-dark-foreground/40">
-                  {header?.type?.split('/').slice(0, -1).join('/')}
-                  {isMainSource ? '' : '/'}
-                </span>
-                {/* Header type name */}
-                {header?.type?.split('/').pop()}
-                {YAML_POSTFIX}
-              </Link>
-            </dd>
-            <dt className={dataListTermStyle}>Header Version:</dt>
-            <dd>{header?.version}</dd>
+            {header?.type && (
+              <>
+                <dt className={dataListTermStyle}>Header Type:</dt>
+                <dd>
+                  <Link
+                    className="hover:underline text-foreground! dark:text-dark-foreground! flex items-center"
+                    href={`/schemas/other-schemas?schema_path=${isMainSource ? 'common-header/' : ''}${header.type.replace('common-header/', '')}&schema_version=${header.version}`}
+                  >
+                    <IconLink className="text-foreground/40 dark:text-dark-foreground/40 mr-0.5" />
+                    <span className="text-foreground/40 dark:text-dark-foreground/40">
+                      {header.type.split('/').slice(0, -1).join('/')}
+                      {isMainSource ? '' : '/'}
+                    </span>
+                    {/* Header type name */}
+                    {header.type.split('/').pop()}
+                    {YAML_POSTFIX}
+                  </Link>
+                </dd>
+                <dt className={dataListTermStyle}>Header Version:</dt>
+                <dd>{header.version}</dd>
+              </>
+            )}
             {schema?.meta_schema ? (
               <>
                 <dt className={dataListTermStyle}>Meta Schema:</dt>

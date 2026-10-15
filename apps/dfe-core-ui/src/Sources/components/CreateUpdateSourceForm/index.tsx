@@ -26,6 +26,7 @@ import {
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
 import { TransformTabContent } from './TransformTabContent';
+import { getInitialAssignTransform } from './TransformTabContent/TransformTabContent.helpers';
 import { ViewsTabContent } from './ViewsTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
@@ -103,7 +104,7 @@ export const CreateUpdateSourceFormBase = ({
   };
 
   const handleFinish = (values: CreateUpdateSourceFormData) => {
-    // An unrendered Views tab sends no views, and the engine's update drops any it is not sent.
+    // An unrendered Views tab sends no views, and an older engine drops any it is not sent.
     onFinish?.({ ...values, views: values.views ?? initialValues?.views });
   };
 
@@ -223,6 +224,10 @@ export const CreateUpdateSourceFormBase = ({
         receiver_ui_config: {
           ...EMPTY_RECEIVER_UI_CONFIG,
           ...initialValues?.receiver_ui_config,
+        },
+        transform_ui_config: {
+          assign: getInitialAssignTransform(initialValues?.transform),
+          ...initialValues?.transform_ui_config,
         },
       }}
       layout="vertical"

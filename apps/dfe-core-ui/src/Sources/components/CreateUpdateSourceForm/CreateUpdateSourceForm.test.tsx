@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vitest';
 import { CreateUpdateSourceForm } from '.';
-import { server } from './CreateUpdateSourceForm.mocks';
+import { ownTableHandlers, server } from './CreateUpdateSourceForm.mocks';
 import { CreateUpdateSourceFormData } from './sourceForm.schema';
 
 // The field-maps provider behind the form reads the URL to keep filters
@@ -122,6 +122,65 @@ describe('CreateUpdateSourceForm views', () => {
     // The engine's update replaces the version, so a body without views clears them.
     expect(transformSourceFormDataToRequestBody(submitted).views).toEqual(
       storedViews,
+    );
+  });
+});
+
+describe('CreateUpdateSourceForm transform', () => {
+  it('sends a clear when No Transform replaces a stored transform', async () => {
+    server.use(...ownTableHandlers);
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <CreateUpdateSourceForm
+        onFinish={onFinish}
+        isPending={false}
+        error={null}
+        buttonLabel="Update Source"
+        initialValues={{
+          source: 'own-probe',
+          enabled: true,
+          archive: false,
+          origin: 'receiver',
+          match: {
+            field: 'data_stream.dataset',
+            operator: 'equals',
+            value: 'probe.log',
+          },
+          receiver_ui_config: { table: 'own' },
+          header: { type: 'common-header/timeseries', version: '1.0.0' },
+          schema: {
+            meta_schema: 'meta/aws/cloudtrail',
+            meta_schema_version: '1.0.0',
+            engine: '',
+          },
+          transform: { engine: 'vrl' },
+        }}
+      />,
+      { wrapper },
+    );
+
+    await user.click(
+      await screen.findByRole(
+        'tab',
+        { name: 'Transform' },
+        { timeout: 15_000 },
+      ),
+    );
+    await user.click(screen.getByRole('radio', { name: 'No Transform' }));
+    expect(
+      screen.queryByLabelText(/^Transform Engine/),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Update Source' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+      timeout: 10_000,
+    });
+    const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+    // The engine keeps a transform the body leaves out.
+    expect(transformSourceFormDataToRequestBody(submitted)).toHaveProperty(
+      'transform',
+      null,
     );
   });
 });

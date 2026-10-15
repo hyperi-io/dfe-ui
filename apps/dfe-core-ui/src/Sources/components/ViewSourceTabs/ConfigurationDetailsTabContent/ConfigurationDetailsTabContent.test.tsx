@@ -89,6 +89,17 @@ describe('ConfigurationDetailsTabContent', () => {
     expect(originValue()).toHaveTextContent('Fetcher');
   });
 
+  it('shows no header rows for a source that stores no header', () => {
+    renderDetails({
+      schema: { meta_schema: 'meta/aws/cloudtrail', engine: '' },
+    });
+
+    expect(screen.getByText('Meta Schema:')).toBeInTheDocument();
+    expect(screen.queryByText('Header Type:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Header Version:')).not.toBeInTheDocument();
+    expect(screen.queryByText(/\/\.yml/)).not.toBeInTheDocument();
+  });
+
   it('shows no origin for a core source with neither, such as main', () => {
     renderDetails({ match: null, fetcher: null });
 

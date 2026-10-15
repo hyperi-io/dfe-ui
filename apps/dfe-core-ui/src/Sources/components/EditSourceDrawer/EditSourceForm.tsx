@@ -58,7 +58,13 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
 
   const handleUpdateSource = (values: CreateUpdateSourceFormData) => {
     const transformedValues = transformSourceFormDataToRequestBody(values);
-    updateSource(transformedValues);
+    // A hidden Table Settings tab sends neither; the stored values keep the pins the engine compares.
+    const stored = sourceDetailData?.version;
+    updateSource({
+      ...transformedValues,
+      header: transformedValues.header ?? stored?.header,
+      schema: transformedValues.schema ?? stored?.schema,
+    });
   };
   if (isLoadingSourceDetail)
     return (
