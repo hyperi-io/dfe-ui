@@ -4,7 +4,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { TAccountResetPasswordResponse } from '@/core/hooks/useAccountResetPassword/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const GitEnabledPendingReviewModal = ({
   pending,
@@ -13,30 +13,27 @@ export const GitEnabledPendingReviewModal = ({
   pending: TAccountResetPasswordResponse['git']['pending'];
   onCancel?: () => void;
 }) => {
-  const [open, setOpen] = useState(false);
-  const isPendingChanges = Boolean(
-    pending?.command || pending?.pr_url || pending?.branch,
-  );
-
-  useEffect(() => {
-    if (isPendingChanges) {
-      queueMicrotask(() => setOpen(true));
-    }
-  }, [isPendingChanges]);
+  // Remember which review was dismissed. Opening on a later tick lets the
+  // password dialog's close dismiss this one before it is on screen.
+  const [dismissed, setDismissed] = useState<typeof pending>(null);
+  const show =
+    pending != null &&
+    dismissed !== pending &&
+    Boolean(pending.command || pending.pr_url || pending.branch);
 
   const handleCancel = () => {
-    setOpen(false);
+    setDismissed(pending);
     onCancel?.();
   };
 
-  if (!isPendingChanges) {
+  if (!show) {
     return null;
   }
 
   return (
     <Modal
       title="Git is enabled for this account"
-      open={open}
+      open
       onCancel={handleCancel}
       footer={
         <div className="flex gap-2 justify-end">
