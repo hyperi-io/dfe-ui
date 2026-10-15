@@ -1,7 +1,8 @@
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { App } from 'antd';
 import {
   afterAll,
   afterEach,
@@ -39,7 +40,9 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper()
   .withTheme()
   .withReactQuery()
-  .withListSourcesProvider({});
+  .withListSourcesProvider()
+  // Success is an App notification. Without the holder it never mounts.
+  .withWrapper(({ children }) => <App>{children}</App>);
 
 describe('AddFromCatalogueDrawer', () => {
   it('lists what the catalogue offers and creates the source from an entry', async () => {
@@ -59,19 +62,18 @@ describe('AddFromCatalogueDrawer', () => {
 
     // The CI runner renders the selection under load; the suite's component
     // tests bound their waits at 15 s for the same reason.
-    const add = await screen.findByRole(
-      'button',
-      { name: /Add okta/ },
-      { timeout: 15_000 },
-    );
-    await user.click(add);
+    await user.click(await screen.findByLabelText('Intake for this source'));
+    await user.click(await screen.findByTitle('Beats'));
+    await user.type(screen.getByLabelText(/^Source Name/), 'okta');
 
-    await waitFor(
-      () =>
-        expect(
-          screen.getByText('Source okta created from the catalogue'),
-        ).toBeInTheDocument(),
-      { timeout: 15_000 },
-    );
+    await user.click(await screen.findByRole('button', { name: 'Add' }));
+
+    expect(
+      await screen.findByText(
+        'Source okta created from the catalogue',
+        {},
+        { timeout: 15_000 },
+      ),
+    ).toBeInTheDocument();
   });
 });

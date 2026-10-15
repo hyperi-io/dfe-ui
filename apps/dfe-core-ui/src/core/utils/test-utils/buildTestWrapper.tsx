@@ -123,7 +123,7 @@ class TestWrapperBuilder {
     defaultFilters,
   }: {
     defaultFilters?: UseFetchInfiniteFilteredSourcesProps;
-  }) {
+  } = {}) {
     this.#wrapperList.push(({ children }: { children: React.ReactNode }) => {
       return (
         <ListSourcesProvider defaultFilters={defaultFilters}>
