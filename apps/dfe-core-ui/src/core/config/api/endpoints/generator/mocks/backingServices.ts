@@ -19,8 +19,21 @@ const declared = (value: unknown, isProtected = false) => ({
  * storage locked, Kafka declaring nothing at all so every value falls to the
  * tier default the engine cannot see.
  */
+/** DFE runs both, so nothing is read-only and the data plane has nothing to report. */
+const dfeRun = {
+  managed_by: 'dfe' as const,
+  provider: null,
+  tier: null,
+  region: null,
+  read_only: [] as string[],
+  observed: null,
+  limits: [],
+  principals: [],
+};
+
 const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
   {
+    ...dfeRun,
     service: 'clickhouse',
     chart: 'clickhouse-cluster',
     overlay: 'clickhouse-cluster.yaml',
@@ -38,6 +51,7 @@ const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
     },
   },
   {
+    ...dfeRun,
     service: 'kafka',
     chart: 'kafka',
     overlay: 'kafka.yaml',

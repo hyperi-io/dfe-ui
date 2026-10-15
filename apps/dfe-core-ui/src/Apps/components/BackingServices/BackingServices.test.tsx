@@ -29,6 +29,14 @@ describe('BackingServices', () => {
       API_CONFIG_MOCKS.backingServices.default.get.success({
         mockedResponse: [
           {
+            managed_by: 'dfe',
+            provider: null,
+            tier: null,
+            region: null,
+            read_only: [],
+            observed: null,
+            limits: [],
+            principals: [],
             service: 'minio',
             chart: 'minio',
             overlay: 'minio.yaml',

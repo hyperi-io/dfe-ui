@@ -2,7 +2,13 @@ import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { DerivedSchemaFieldPicker } from '@/Schemas/components/DerivedSchemaFieldPicker';
 import { DerivedSelectEntry } from '@/Schemas/components/DerivedSchemaFieldPicker/DerivedSchemaFieldPicker.helpers';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from 'antd';
 import { useState } from 'react';
@@ -128,13 +134,14 @@ describe('DerivedSchemaFieldPicker', () => {
   });
 
   it('orders the selection by the base schema, not by the order ticked', async () => {
-    const user = userEvent.setup();
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />, { wrapper });
 
     await screen.findByText('message', {}, { timeout: 15000 });
-    await user.click(rowCheckbox('message'));
-    await user.click(rowCheckbox('timestamp'));
+    // Pointer clicks walk layout for every ancestor. Under coverage that walk
+    // outlives the suite limit, and the order does not depend on it.
+    fireEvent.click(rowCheckbox('message'));
+    fireEvent.click(rowCheckbox('timestamp'));
 
     await waitFor(() =>
       expect(onChange).toHaveBeenLastCalledWith([
