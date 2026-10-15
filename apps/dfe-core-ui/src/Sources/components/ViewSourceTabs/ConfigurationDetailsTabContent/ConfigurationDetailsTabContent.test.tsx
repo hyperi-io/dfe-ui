@@ -100,6 +100,23 @@ describe('ConfigurationDetailsTabContent', () => {
     expect(screen.queryByText(/\/\.yml/)).not.toBeInTheDocument();
   });
 
+  it.each(['timeseries', 'common-header/timeseries'])(
+    'links a %s header to its common-header schema',
+    (type) => {
+      renderDetails({
+        header: { type, version: '1.0.0' },
+        schema: { engine: '' },
+      });
+
+      const link = screen.getByRole('link', { name: /timeseries/ });
+      expect(link).toHaveTextContent(/^common-header\/timeseries\.yml$/);
+      expect(link).toHaveAttribute(
+        'href',
+        '/schemas/other-schemas?schema_path=common-header/timeseries&schema_version=1.0.0',
+      );
+    },
+  );
+
   it('shows no origin for a core source with neither, such as main', () => {
     renderDetails({ match: null, fetcher: null });
 

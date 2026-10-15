@@ -14,7 +14,7 @@ export const ListFieldMapsFilters = () => {
           <p className="font-semibold">Filters</p>
           <p className="text-xs text-gray-400 mr-4">
             {fieldMaps.length} of {total}{' '}
-            {fieldMaps.length > 1 ? 'results' : 'result'}
+            {total === 1 ? 'result' : 'results'}
           </p>
         </span>
       }
