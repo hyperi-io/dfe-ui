@@ -33,6 +33,11 @@ export const SimpleCollapse = ({
 
   const content =
     typeof children === 'function' ? children(collapseProps) : children;
+  // A title that is not text names the toggle through its content instead.
+  const toggleLabel =
+    typeof title === 'string'
+      ? `${open ? 'Collapse' : 'Expand'} ${title}`
+      : undefined;
 
   return (
     <div
@@ -46,7 +51,8 @@ export const SimpleCollapse = ({
       )}
     >
       <button
-        aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+        aria-label={toggleLabel}
+        aria-expanded={open}
         type="button"
         className={cn('flex justify-between items-center', classNames?.title)}
         onClick={() => setOpen(!open)}

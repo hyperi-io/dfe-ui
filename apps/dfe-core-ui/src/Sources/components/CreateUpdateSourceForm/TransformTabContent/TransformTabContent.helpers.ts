@@ -1,7 +1,9 @@
 import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 
-export type AssignTransformOptions = 'none' | 'define_transform';
+export type AssignTransformOptions = NonNullable<
+  NonNullable<CreateUpdateSourceFormData['transform_ui_config']>['assign']
+>;
 
 // The engine names a transform app after the engine it runs, so the two convert
 // by this prefix in both directions.

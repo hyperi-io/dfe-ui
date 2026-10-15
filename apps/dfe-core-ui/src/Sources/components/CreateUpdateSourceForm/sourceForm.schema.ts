@@ -138,6 +138,13 @@ const transformTabSchema = {
     })
     .optional()
     .nullable(),
+  // Form-only: the No Transform choice, which the request body sends as a clear.
+  transform_ui_config: z
+    .object({
+      assign: z.enum(['none', 'define_transform']).optional().nullable(),
+    })
+    .optional()
+    .nullable(),
 };
 export type TransformTabSchemaValues = z.infer<typeof transformTabSchema>;
 

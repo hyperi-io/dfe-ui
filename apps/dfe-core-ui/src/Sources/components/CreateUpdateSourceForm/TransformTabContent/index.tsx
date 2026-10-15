@@ -1,11 +1,10 @@
+import { Form } from '@/core/components/Form';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { FormRule, Radio, type FormInstance } from 'antd';
-import { useState } from 'react';
 import { TransformForm } from './TransformForm';
-import {
-  AssignTransformOptions,
-  getInitialAssignTransform,
-} from './TransformTabContent.helpers';
+
+/** A label's `for` cannot name a radio group, so the group carries the same text itself. */
+const TRANSFORM_LABEL = 'Transform';
 
 export const TransformTabContent = ({
   formValidation,
@@ -14,22 +13,18 @@ export const TransformTabContent = ({
   formValidation: FormRule;
   form: FormInstance<CreateUpdateSourceFormData>;
 }) => {
-  const initialTransform = form.getFieldValue('transform');
-  const [assignTransform, setAssignTransform] =
-    useState<AssignTransformOptions>(() =>
-      getInitialAssignTransform(initialTransform),
-    );
+  const assignTransform = Form.useWatch(
+    ['transform_ui_config', 'assign'],
+    form,
+  );
   return (
     <div className="flex flex-col gap-2">
-      <Radio.Group
-        value={assignTransform}
-        onChange={(e) => {
-          setAssignTransform(e.target.value as AssignTransformOptions);
-        }}
-      >
-        <Radio value="none">No Transform</Radio>
-        <Radio value="define_transform">Define Transform</Radio>
-      </Radio.Group>
+      <Form.Item name={['transform_ui_config', 'assign']} noStyle>
+        <Radio.Group aria-label={TRANSFORM_LABEL}>
+          <Radio value="none">No Transform</Radio>
+          <Radio value="define_transform">Define Transform</Radio>
+        </Radio.Group>
+      </Form.Item>
 
       {assignTransform === 'define_transform' && (
         <TransformForm formValidation={formValidation} />

@@ -13,8 +13,7 @@ export const ListSchemasFilters = () => {
         <span className="flex justify-between items-center w-full">
           <p className="font-semibold">Filters</p>
           <p className="text-xs text-gray-400 mr-4">
-            {schemas.length} of {total}{' '}
-            {schemas.length > 1 ? 'results' : 'result'}
+            {schemas.length} of {total} {total === 1 ? 'result' : 'results'}
           </p>
         </span>
       }
