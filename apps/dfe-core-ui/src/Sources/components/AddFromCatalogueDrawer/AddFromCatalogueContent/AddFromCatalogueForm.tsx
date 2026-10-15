@@ -7,6 +7,7 @@ import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+import { sourceNameValidator } from '@/Sources/utils/validation';
 import { App, Button, Input, Select } from 'antd';
 import z from 'zod';
 import { INTAKE_OPTIONS } from './constants';
@@ -15,7 +16,7 @@ const formSchema = z.object({
   intake: z
     .string({ message: 'Intake is required' })
     .min(1, { message: 'Intake is required' }),
-  name: z.string().optional().nullable(),
+  name: sourceNameValidator,
   transform: z.string().optional(),
   transport: z.enum(['bus', 'direct']).nullable().optional(),
   archive: z.boolean().optional(),

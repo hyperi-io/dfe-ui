@@ -36,63 +36,65 @@ export const AddFromCatalogueTable = ({
     per_page: 20,
   });
 
-  const columns: ColumnsType<TSourceCatalogueItem> = [
-    {
-      title: 'Entry',
-      dataIndex: 'name',
-      key: 'name',
-      width: '50%',
-      render: (name) => (
-        <Highlighter searchWords={[search]} textToHighlight={name} />
-      ),
-    },
-    {
-      title: 'Dataset',
-      dataIndex: 'dataset',
-      key: 'dataset',
-      width: '50%',
-    },
-    {
-      title: 'Arrives by',
-      dataIndex: 'intakes',
-      key: 'intakes',
-      width: '220px',
-      render: (intakes: string[]) => (
-        <div className="flex gap-2">
-          {intakes.map((intake) => (
-            <Tag key={intake}>
-              <Highlighter
-                searchWords={
-                  intakeFilter
-                    ? [
-                        INTAKE_OPTIONS_MAP[
-                          intakeFilter as keyof typeof INTAKE_OPTIONS_MAP
-                        ] ?? intake,
-                      ]
-                    : []
-                }
-                textToHighlight={
-                  INTAKE_OPTIONS_MAP[
-                    intake as keyof typeof INTAKE_OPTIONS_MAP
-                  ] ?? intake
-                }
-              />
-            </Tag>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: '',
-      key: 'select',
-      width: '75px',
-      render: (_: unknown, entry: TSourceCatalogueItem) => (
-        <Button size="small" type="primary" onClick={() => onSelect(entry)}>
-          Select
-        </Button>
-      ),
-    },
-  ];
+  const columns: ColumnsType<TSourceCatalogueItem> = entries?.length
+    ? [
+        {
+          title: 'Entry',
+          dataIndex: 'name',
+          key: 'name',
+          width: '50%',
+          render: (name) => (
+            <Highlighter searchWords={[search]} textToHighlight={name} />
+          ),
+        },
+        {
+          title: 'Dataset',
+          dataIndex: 'dataset',
+          key: 'dataset',
+          width: '50%',
+        },
+        {
+          title: 'Arrives by',
+          dataIndex: 'intakes',
+          key: 'intakes',
+          width: '220px',
+          render: (intakes: string[]) => (
+            <div className="flex gap-2">
+              {intakes.map((intake) => (
+                <Tag key={intake}>
+                  <Highlighter
+                    searchWords={
+                      intakeFilter
+                        ? [
+                            INTAKE_OPTIONS_MAP[
+                              intakeFilter as keyof typeof INTAKE_OPTIONS_MAP
+                            ] ?? intake,
+                          ]
+                        : []
+                    }
+                    textToHighlight={
+                      INTAKE_OPTIONS_MAP[
+                        intake as keyof typeof INTAKE_OPTIONS_MAP
+                      ] ?? intake
+                    }
+                  />
+                </Tag>
+              ))}
+            </div>
+          ),
+        },
+        {
+          title: '',
+          key: 'select',
+          width: '75px',
+          render: (_: unknown, entry: TSourceCatalogueItem) => (
+            <Button size="small" type="primary" onClick={() => onSelect(entry)}>
+              Select
+            </Button>
+          ),
+        },
+      ]
+    : [];
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
