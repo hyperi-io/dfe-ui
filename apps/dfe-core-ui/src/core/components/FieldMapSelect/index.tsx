@@ -4,6 +4,15 @@ import { useMemo, useState } from 'react';
 
 const SCROLL_LOAD_THRESHOLD = 50;
 
+/** The engine's field_map pin, `{standard}/{source}`, with `_default` naming a standard's base map. */
+export const fieldMapPin = ({
+  standard,
+  source,
+}: {
+  standard: string;
+  source?: string | null;
+}) => `${standard}/${source ?? '_default'}`;
+
 export const FieldMapSelect = (props: SelectProps) => {
   const [search, setSearch] = useState<string>('');
   const {
@@ -31,7 +40,7 @@ export const FieldMapSelect = (props: SelectProps) => {
   const fieldMapsOptions = useMemo(() => {
     return fieldMaps.map((fieldMap) => ({
       label: `${fieldMap.standard}: ${fieldMap.source ?? '_default'}`,
-      value: `${fieldMap.standard}/${fieldMap.source ?? '_default'}`,
+      value: fieldMapPin(fieldMap),
     }));
   }, [fieldMaps]);
 

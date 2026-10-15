@@ -20,10 +20,11 @@ export const formSchema = z.object({
   version: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   inherits: z.string().nullable().optional(),
+  // Each pair is the engine's standard_field -> source column, in that order.
   mappings: z.array(
     z.tuple([
+      z.string().min(1, { message: 'Standard field is required' }),
       z.string().min(1, { message: 'Source field is required' }),
-      z.string().min(1, { message: 'Destination field is required' }),
     ]),
   ),
 });

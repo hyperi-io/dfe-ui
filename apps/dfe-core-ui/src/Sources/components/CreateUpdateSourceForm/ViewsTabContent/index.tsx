@@ -5,9 +5,56 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { type CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { IconPlus, IconTrash } from '@repo/dfe-icons';
-import { Button, FormInstance, FormRule, Input, Select } from 'antd';
-import { MAX_VIEWS, STANDARD_OPTIONS } from './constants';
+import {
+  Button,
+  FormInstance,
+  FormRule,
+  Input,
+  Select,
+  type FormListFieldData,
+  type SelectProps,
+} from 'antd';
+import { HIDDEN_STANDARD_OPTIONS, STANDARD_OPTIONS } from './constants';
 import { FieldMapSelectCreate } from './FieldMapSelectCreate';
+
+/** A view's standard picker, locked when the view already carries a standard no new view can pick. */
+const StandardFormItem = ({
+  name,
+  restField,
+  standard,
+  options,
+  formValidation,
+}: {
+  name: FormListFieldData['name'];
+  restField: Omit<FormListFieldData, 'key' | 'name'>;
+  standard: string | undefined;
+  options: SelectProps['options'];
+  formValidation: FormRule;
+}) => {
+  const hiddenStandard = HIDDEN_STANDARD_OPTIONS.find(
+    (option) => option.value === standard,
+  );
+  return (
+    <Form.Item
+      {...restField}
+      className="col-span-2"
+      name={[name, 'standard']}
+      label="Standard"
+      rules={[formValidation]}
+      extra={
+        hiddenStandard &&
+        `${hiddenStandard.label} is kept on this view but cannot be picked for a new one`
+      }
+    >
+      <Select
+        options={hiddenStandard ? [hiddenStandard] : options}
+        disabled={!!hiddenStandard}
+        placeholder="Select standard"
+      />
+    </Form.Item>
+  );
+};
+
 export const ViewsTabContent = ({
   formValidation,
   form,
@@ -18,6 +65,11 @@ export const ViewsTabContent = ({
   const { componentHeight } = useSetComponentHeight({ offset: 280 });
   const watchViews = Form.useWatch('views', form);
   const selectedStandards = watchViews?.map((view) => view.standard);
+  // A hidden standard counts only on a source that already carries a view for it.
+  const hiddenInUse = HIDDEN_STANDARD_OPTIONS.filter((standard) =>
+    selectedStandards?.includes(standard.value),
+  ).length;
+  const maxViews = STANDARD_OPTIONS.length + hiddenInUse;
 
   const standardsOptions = STANDARD_OPTIONS.map((standard) => {
     const isSelected = selectedStandards?.includes(standard.value);
@@ -47,10 +99,10 @@ export const ViewsTabContent = ({
               Configure the standards that will be used to create the views -
               Multiple standards can be selected but no duplicates are allowed
             </p>
-            {fields.length >= MAX_VIEWS ? (
+            {fields.length >= maxViews ? (
               <Tooltip
                 destroyOnHidden
-                title={`Maximum of ${MAX_VIEWS} views (one per standard)`}
+                title={`Maximum of ${maxViews} views (one per standard)`}
               >
                 <span className="ml-auto inline-block">
                   <Button htmlType="button" icon={<IconPlus />} disabled>
@@ -88,18 +140,13 @@ export const ViewsTabContent = ({
                     htmlType="button"
                     onClick={() => remove(name)}
                   />
-                  <Form.Item
-                    {...restField}
-                    className="col-span-2"
-                    name={[name, 'standard']}
-                    label="Standard"
-                    rules={[formValidation]}
-                  >
-                    <Select
-                      options={standardsOptions}
-                      placeholder="Select standard"
-                    />
-                  </Form.Item>
+                  <StandardFormItem
+                    name={name}
+                    restField={restField}
+                    standard={watchViews?.[name]?.standard}
+                    options={standardsOptions}
+                    formValidation={formValidation}
+                  />
                   <Form.Item
                     {...restField}
                     name={[name, 'field_map']}
