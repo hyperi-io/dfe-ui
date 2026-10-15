@@ -79,6 +79,80 @@ describe('ViewsTabContent standard picker', () => {
   });
 });
 
+describe('ViewsTabContent accessible names', () => {
+  it('names each view delete button after its standard', async () => {
+    const user = userEvent.setup();
+    render(<Harness views={[{ standard: 'sigma' }, { standard: 'ecs' }]} />, {
+      wrapper,
+    });
+
+    expect(
+      await screen.findByRole('button', { name: 'Delete Sigma view' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Delete Elastic Common Schema view' }),
+    ).toBeInTheDocument();
+
+    await user.click(addView());
+    expect(
+      screen.getByRole('button', { name: 'Delete view' }),
+    ).toBeInTheDocument();
+  });
+
+  it('names the delete button of a custom mapping', async () => {
+    const user = userEvent.setup();
+    render(<Harness views={[{ standard: 'ecs' }]} />, { wrapper });
+
+    await user.click(
+      await screen.findByRole('button', { name: /Add Custom Mapping/ }),
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Delete custom mapping' }),
+    ).toBeInTheDocument();
+  });
+
+  // The form falls back to the stored views only when none are submitted, so an emptied list must submit [].
+  it('submits an empty list once every view is deleted', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <Harness
+        views={[{ standard: 'sigma' }, { standard: 'ecs' }]}
+        onFinish={onFinish}
+      />,
+      { wrapper },
+    );
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Delete Sigma view' }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Delete Elastic Common Schema view' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    const values = onFinish.mock.calls[0]?.[0] as CreateUpdateSourceFormData;
+    expect(values.views).toEqual([]);
+  });
+
+  it('names a standard another view already uses by its label', async () => {
+    const user = userEvent.setup();
+    render(<Harness views={[{ standard: 'ecs' }]} />, { wrapper });
+
+    await user.click(addView());
+    const added = screen.getAllByRole('combobox').at(1);
+    if (!added) throw new Error('the added view has no standard picker');
+    await user.click(added);
+
+    const taken = await screen.findByRole('option', {
+      name: 'Elastic Common Schema',
+    });
+    expect(taken).toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
 describe('ViewsTabContent with an existing Sigma view', () => {
   it('shows the view as Sigma and does not let its standard change', async () => {
     render(<Harness views={[{ standard: 'sigma', taxonomy: 'windows' }]} />, {

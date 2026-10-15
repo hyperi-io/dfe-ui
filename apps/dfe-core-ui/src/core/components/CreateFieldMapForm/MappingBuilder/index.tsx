@@ -25,6 +25,14 @@ export const MappingBuilder = ({
                 onClick={() => add(['', ''])}
               />
             </div>
+            {fields.length > 0 && (
+              // The inputs already carry these names, and the headers keep them visible once a value replaces the placeholder.
+              <div aria-hidden="true" className="flex gap-2">
+                <span className="w-full">Standard field</span>
+                <span className="w-full">Source field</span>
+                <span className="w-6 shrink-0" />
+              </div>
+            )}
             {fields.map(({ key, name, ...restField }) => (
               <div key={key} className="flex gap-2 justify-start">
                 <Form.Item
