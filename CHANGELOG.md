@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.17](https://github.com/hyperi-io/dfe-ui/compare/v1.7.16...v1.7.17) (2026-10-15)
+
+### Bug Fixes
+
+* keep a source's views when its Views tab is hidden ([#557](https://github.com/hyperi-io/dfe-ui/issues/557)) ([86aff5b](https://github.com/hyperi-io/dfe-ui/commit/86aff5b4f81f7bb2ca0c4acd6a0157c216be51bc))
+
 ## [1.7.16](https://github.com/hyperi-io/dfe-ui/compare/v1.7.15...v1.7.16) (2026-10-15)
 
 ### Bug Fixes
