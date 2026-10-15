@@ -14,8 +14,22 @@ import {
   type FormListFieldData,
   type SelectProps,
 } from 'antd';
-import { HIDDEN_STANDARD_OPTIONS, STANDARD_OPTIONS } from './constants';
+import {
+  HIDDEN_STANDARD_OPTIONS,
+  STANDARD_OPTIONS,
+  standardLabel,
+} from './constants';
 import { FieldMapSelectCreate } from './FieldMapSelectCreate';
+
+/** The tooltip wraps the rendered option only, so the option keeps its label as its accessible name. */
+const renderStandardOption: SelectProps['optionRender'] = (option) =>
+  option.data.disabled ? (
+    <Tooltip destroyOnHidden title="Standard already selected" placement="left">
+      {option.label}
+    </Tooltip>
+  ) : (
+    option.label
+  );
 
 /** A view's standard picker, locked when the view already carries a standard no new view can pick. */
 const StandardFormItem = ({
@@ -48,6 +62,7 @@ const StandardFormItem = ({
     >
       <Select
         options={hiddenStandard ? [hiddenStandard] : options}
+        optionRender={renderStandardOption}
         disabled={!!hiddenStandard}
         placeholder="Select standard"
       />
@@ -71,24 +86,11 @@ export const ViewsTabContent = ({
   ).length;
   const maxViews = STANDARD_OPTIONS.length + hiddenInUse;
 
-  const standardsOptions = STANDARD_OPTIONS.map((standard) => {
-    const isSelected = selectedStandards?.includes(standard.value);
-    return {
-      label: isSelected ? (
-        <Tooltip
-          destroyOnHidden
-          title="Standard already selected"
-          placement="left"
-        >
-          {standard.label}
-        </Tooltip>
-      ) : (
-        standard.label
-      ),
-      value: standard.value,
-      disabled: isSelected,
-    };
-  });
+  const standardsOptions = STANDARD_OPTIONS.map((standard) => ({
+    label: standard.label,
+    value: standard.value,
+    disabled: selectedStandards?.includes(standard.value),
+  }));
 
   return (
     <Form.List name="views">
@@ -96,8 +98,8 @@ export const ViewsTabContent = ({
         <div className="flex flex-col gap-2">
           <div className="flex gap-2 items-center">
             <p className="text-sm text-foreground-muted dark:text-foreground-muted-dark">
-              Configure the standards that will be used to create the views -
-              Multiple standards can be selected but no duplicates are allowed
+              Configure the standards used to create the views. Each standard
+              can be added once.
             </p>
             {fields.length >= maxViews ? (
               <Tooltip
@@ -123,114 +125,123 @@ export const ViewsTabContent = ({
           </div>
           <CustomScrollbar height={componentHeight}>
             <ul className="flex flex-col gap-2">
-              {fields.map(({ key, name, ...restField }) => (
-                <li
-                  className={cn(
-                    'border border-foreground/10 dark:border-foreground/10 rounded-md p-4 ',
-                    'relative grid grid-cols-2 gap-2 w-full',
-                  )}
-                  key={key}
-                >
-                  <Button
-                    className="absolute top-2 right-2 z-1"
-                    icon={<IconTrash />}
-                    size="small"
-                    shape="circle"
-                    type="text"
-                    htmlType="button"
-                    onClick={() => remove(name)}
-                  />
-                  <StandardFormItem
-                    name={name}
-                    restField={restField}
-                    standard={watchViews?.[name]?.standard}
-                    options={standardsOptions}
-                    formValidation={formValidation}
-                  />
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'field_map']}
-                    label="Field Map"
-                    rules={[formValidation]}
+              {fields.map(({ key, name, ...restField }) => {
+                const standard = watchViews?.[name]?.standard;
+                return (
+                  <li
+                    className={cn(
+                      'border border-foreground/10 dark:border-dark-foreground/10 rounded-md p-4 ',
+                      'relative grid grid-cols-2 gap-2 w-full',
+                    )}
+                    key={key}
                   >
-                    <FieldMapSelectCreate
-                      source_name={form.getFieldValue('source')}
+                    <Button
+                      className="absolute top-2 right-2 z-1"
+                      aria-label={
+                        standard
+                          ? `Delete ${standardLabel(standard)} view`
+                          : 'Delete view'
+                      }
+                      icon={<IconTrash />}
+                      size="small"
+                      shape="circle"
+                      type="text"
+                      htmlType="button"
+                      onClick={() => remove(name)}
                     />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'taxonomy']}
-                    label="Taxonomy"
-                  >
-                    <Input placeholder="Enter taxonomy" />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'category']}
-                    label="Category"
-                  >
-                    <Input placeholder="Enter category" />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'service']}
-                    label="Service"
-                  >
-                    <Input placeholder="Enter service" />
-                  </Form.Item>
+                    <StandardFormItem
+                      name={name}
+                      restField={restField}
+                      standard={standard}
+                      options={standardsOptions}
+                      formValidation={formValidation}
+                    />
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'field_map']}
+                      label="Field Map"
+                      rules={[formValidation]}
+                    >
+                      <FieldMapSelectCreate
+                        source_name={form.getFieldValue('source')}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'taxonomy']}
+                      label="Taxonomy"
+                    >
+                      <Input placeholder="Enter taxonomy" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'category']}
+                      label="Category"
+                    >
+                      <Input placeholder="Enter category" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'service']}
+                      label="Service"
+                    >
+                      <Input placeholder="Enter service" />
+                    </Form.Item>
 
-                  <Form.List name={[name, 'custom_mappings']}>
-                    {(fields, { add, remove }) => (
-                      <div className="col-span-2 flex flex-col gap-2">
-                        <div className="flex items-center gap-2 justify-between">
-                          <p className="text-sm text-foreground-muted dark:text-foreground-muted-dark w-full">
-                            Add custom mappings to the view
-                          </p>
-                          <Button
-                            htmlType="button"
-                            icon={<IconPlus />}
-                            onClick={() => add({ key: '', value: '' })}
-                          >
-                            Add Custom Mapping
-                          </Button>
-                        </div>
-
-                        {fields.map(({ key, name, ...restField }) => (
-                          <div
-                            className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 w-full mt-2"
-                            key={key}
-                          >
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'key']}
-                              label="Key"
-                              layout="horizontal"
-                              rules={[formValidation]}
-                            >
-                              <Input placeholder="Enter key" />
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'value']}
-                              label="Value"
-                              layout="horizontal"
-                              rules={[formValidation]}
-                            >
-                              <Input placeholder="Enter value" />
-                            </Form.Item>
+                    <Form.List name={[name, 'custom_mappings']}>
+                      {(fields, { add, remove }) => (
+                        <div className="col-span-2 flex flex-col gap-2">
+                          <div className="flex items-center gap-2 justify-between">
+                            <p className="text-sm text-foreground-muted dark:text-foreground-muted-dark w-full">
+                              Add custom mappings to the view
+                            </p>
                             <Button
                               htmlType="button"
-                              shape="circle"
-                              icon={<IconTrash />}
-                              onClick={() => remove(name)}
-                            />
+                              icon={<IconPlus />}
+                              onClick={() => add({ key: '', value: '' })}
+                            >
+                              Add Custom Mapping
+                            </Button>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </Form.List>
-                </li>
-              ))}
+
+                          {fields.map(({ key, name, ...restField }) => (
+                            <div
+                              className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 w-full mt-2"
+                              key={key}
+                            >
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'key']}
+                                label="Key"
+                                layout="horizontal"
+                                rules={[formValidation]}
+                              >
+                                <Input placeholder="Enter key" />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'value']}
+                                label="Value"
+                                layout="horizontal"
+                                rules={[formValidation]}
+                              >
+                                <Input placeholder="Enter value" />
+                              </Form.Item>
+                              <Button
+                                htmlType="button"
+                                aria-label="Delete custom mapping"
+                                shape="circle"
+                                icon={<IconTrash />}
+                                onClick={() => remove(name)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Form.List>
+                  </li>
+                );
+              })}
             </ul>
           </CustomScrollbar>
         </div>

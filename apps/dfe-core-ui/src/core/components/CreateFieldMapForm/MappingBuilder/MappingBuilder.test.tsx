@@ -14,16 +14,14 @@ const acceptAll: FormRule = { validator: async () => undefined };
 
 const Harness = ({
   onFinish,
+  mappings = [['', '']],
 }: {
   onFinish: (values: Pick<CreateFieldMapFormData, 'mappings'>) => void;
+  mappings?: CreateFieldMapFormData['mappings'];
 }) => {
   const [form] = Form.useForm<Pick<CreateFieldMapFormData, 'mappings'>>();
   return (
-    <Form
-      form={form}
-      initialValues={{ mappings: [['', '']] }}
-      onFinish={onFinish}
-    >
+    <Form form={form} initialValues={{ mappings }} onFinish={onFinish}>
       <MappingBuilder formValidation={acceptAll} />
       <Button htmlType="submit">Submit</Button>
     </Form>
@@ -65,6 +63,30 @@ describe('MappingBuilder', () => {
     expect(
       screen.getByPlaceholderText('Enter standard field'),
     ).toHaveAccessibleName('Standard field');
+  });
+
+  it('shows column headers once a value replaces the placeholder', async () => {
+    const user = userEvent.setup();
+    render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'Standard field' }),
+      'host.name',
+    );
+    await user.type(
+      screen.getByRole('textbox', { name: 'Source field' }),
+      'hostname',
+    );
+
+    expect(screen.getByText('Standard field')).toBeVisible();
+    expect(screen.getByText('Source field')).toBeVisible();
+  });
+
+  it('shows no column headers when there are no pairs', () => {
+    render(<Harness onFinish={vi.fn()} mappings={[]} />, { wrapper });
+
+    expect(screen.queryByText('Standard field')).not.toBeInTheDocument();
+    expect(screen.queryByText('Source field')).not.toBeInTheDocument();
   });
 });
 

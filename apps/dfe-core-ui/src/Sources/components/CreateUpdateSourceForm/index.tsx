@@ -103,8 +103,8 @@ export const CreateUpdateSourceFormBase = ({
   };
 
   const handleFinish = (values: CreateUpdateSourceFormData) => {
-    // Handle data transformation for header type if needed
-    onFinish?.(values);
+    // An unrendered Views tab sends no views, and the engine's update drops any it is not sent.
+    onFinish?.({ ...values, views: values.views ?? initialValues?.views });
   };
 
   const metaSchema = Form.useWatch(['schema'], form);
