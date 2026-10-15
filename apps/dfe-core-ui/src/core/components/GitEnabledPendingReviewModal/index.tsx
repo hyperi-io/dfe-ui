@@ -4,7 +4,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { TAccountResetPasswordResponse } from '@/core/hooks/useAccountResetPassword/types';
 import { IconAlertCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const GitEnabledPendingReviewModal = ({
   pending,
@@ -13,16 +13,23 @@ export const GitEnabledPendingReviewModal = ({
   pending: TAccountResetPasswordResponse['git']['pending'];
   onCancel?: () => void;
 }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const isPendingChanges = Boolean(
+    pending?.command || pending?.pr_url || pending?.branch,
+  );
+
+  useEffect(() => {
+    if (isPendingChanges) {
+      queueMicrotask(() => setOpen(true));
+    }
+  }, [isPendingChanges]);
 
   const handleCancel = () => {
     setOpen(false);
     onCancel?.();
   };
 
-  const isPending = pending?.command || pending?.pr_url || pending?.branch;
-
-  if (!isPending) {
+  if (!isPendingChanges) {
     return null;
   }
 
@@ -32,7 +39,7 @@ export const GitEnabledPendingReviewModal = ({
       open={open}
       onCancel={handleCancel}
       footer={
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-end">
           <Button type="default" onClick={handleCancel}>
             Cancel
           </Button>

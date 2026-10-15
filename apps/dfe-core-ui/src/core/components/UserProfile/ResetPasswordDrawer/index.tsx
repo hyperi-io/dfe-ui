@@ -29,7 +29,15 @@ export const ResetPasswordDrawer = () => {
     error: resetPasswordError,
   } = useCurrentUserResetPassword({
     // The engine ends every session of the account on a change, this one included.
-    onSuccess: () => {
+    onSuccess: ({ git }) => {
+      const held =
+        !git.merged &&
+        Boolean(
+          git.pending?.command || git.pending?.pr_url || git.pending?.branch,
+        );
+      if (held) {
+        return;
+      }
       void signOut({ callbackUrl: loginWithNotice('password-changed') });
     },
   });
