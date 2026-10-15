@@ -16,7 +16,7 @@ export const useUpdateAccount = ({
 }: UseUpdateAccountProps) => {
   const queryClient = useQueryClient();
 
-  const { data, mutate, isPending, error } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (account: TAccountUpdateRequestBody) =>
       updateAccount({
         body: account,
@@ -33,5 +33,5 @@ export const useUpdateAccount = ({
     },
   });
 
-  return { data, mutate, isPending, error };
+  return { data, mutate, isPending, error, reset };
 };

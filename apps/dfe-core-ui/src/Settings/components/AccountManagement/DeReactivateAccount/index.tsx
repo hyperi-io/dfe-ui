@@ -1,4 +1,5 @@
 import { Modal } from '@/core/components/Modal';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -17,7 +18,7 @@ export const DeReactivateAccount = ({
   const { notification } = App.useApp();
   const actionTitle = isActive ? 'Deactivate Account' : 'Activate Account';
 
-  const { mutate, isPending } = useUpdateAccount({
+  const { mutate, isPending, error, reset } = useUpdateAccount({
     username,
     onSuccess: () => {
       notification.success({
@@ -38,6 +39,11 @@ export const DeReactivateAccount = ({
     }
   };
 
+  const handleCancel = () => {
+    setIsConfirming(false);
+    reset();
+  };
+
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_write}>
       <RbacProtected.Unrestricted>
@@ -53,18 +59,21 @@ export const DeReactivateAccount = ({
         </Button>
         <Modal
           title="Confirm Action"
-          open={isConfirming}
+          open={isConfirming || !!error}
           destroyOnHidden
-          onCancel={() => setIsConfirming(false)}
-          onOk={() => mutate({ enabled: !isActive })}
+          onCancel={handleCancel}
           okText="Deactivate"
           okType="danger"
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button onClick={handleCancel}>Cancel</Button>
+            </div>
+          }
         >
           <p>
-            You are trying to deactivate your own account, you will be logged
-            out and will lose access to your account. Are you sure you want to
-            continue?
+            You are trying to deactivate an account that cannot be deactivated.
           </p>
+          {error && <NotificationCard type="error" title={error.message} />}
         </Modal>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>

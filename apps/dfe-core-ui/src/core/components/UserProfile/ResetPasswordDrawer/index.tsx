@@ -8,6 +8,7 @@ import { loginWithNotice } from '@/core/config/loginNotice';
 import { useCurrentUserResetPassword } from '@/core/hooks/useCurrentUserResetPassword';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 
+import { GitEnabledPendingReviewModal } from '@/core/components/GitEnabledPendingReviewModal';
 import { Button } from 'antd';
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
@@ -21,13 +22,22 @@ export const ResetPasswordDrawer = () => {
   } = useFetchCurrentUser();
 
   const {
+    data,
     mutate: resetPassword,
     reset: clearResetError,
     isPending: isResetPasswordPending,
     error: resetPasswordError,
   } = useCurrentUserResetPassword({
     // The engine ends every session of the account on a change, this one included.
-    onSuccess: () => {
+    onSuccess: ({ git }) => {
+      const held =
+        !git.merged &&
+        Boolean(
+          git.pending?.command || git.pending?.pr_url || git.pending?.branch,
+        );
+      if (held) {
+        return;
+      }
       void signOut({ callbackUrl: loginWithNotice('password-changed') });
     },
   });
@@ -75,6 +85,8 @@ export const ResetPasswordDrawer = () => {
           submitText="Reset Password"
         />
       </Drawer>
+
+      <GitEnabledPendingReviewModal pending={data?.git.pending} />
     </>
   );
 };

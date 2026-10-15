@@ -127,22 +127,27 @@ describe('DerivedSchemaFieldPicker', () => {
     expect(onChange).toHaveBeenLastCalledWith([{ name: 'message' }]);
   });
 
-  it('orders the selection by the base schema, not by the order ticked', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(<Harness onChange={onChange} />, { wrapper });
+  // Two clicks follow the 15s content backstop, which overruns the 20s suite limit on a busy worker.
+  it(
+    'orders the selection by the base schema, not by the order ticked',
+    { timeout: 45_000 },
+    async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<Harness onChange={onChange} />, { wrapper });
 
-    await screen.findByText('message', {}, { timeout: 15000 });
-    await user.click(rowCheckbox('message'));
-    await user.click(rowCheckbox('timestamp'));
+      await screen.findByText('message', {}, { timeout: 15000 });
+      await user.click(rowCheckbox('message'));
+      await user.click(rowCheckbox('timestamp'));
 
-    await waitFor(() =>
-      expect(onChange).toHaveBeenLastCalledWith([
-        { name: 'timestamp' },
-        { name: 'message' },
-      ]),
-    );
-  });
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith([
+          { name: 'timestamp' },
+          { name: 'message' },
+        ]),
+      );
+    },
+  );
 
   it('writes the index only once the user changes it', async () => {
     const user = userEvent.setup();

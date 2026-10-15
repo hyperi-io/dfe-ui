@@ -6,8 +6,8 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { BackingServices } from '.';
-import { server } from './BackingServices.mocks';
 import { STORAGE_REMEDY } from './BackingServiceCard';
+import { server } from './BackingServices.mocks';
 import { CLICKHOUSE_MEMORY_DOWN_WARNING } from './ResourceField';
 import { REPLICA_DECREASE_REASON } from './replicaGuard';
 

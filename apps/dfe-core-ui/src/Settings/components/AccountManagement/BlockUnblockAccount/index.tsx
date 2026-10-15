@@ -1,4 +1,5 @@
 import { Modal } from '@/core/components/Modal';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAuthMe } from '@/core/hooks/useAuthMe';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
@@ -18,7 +19,7 @@ export const BlockUnblockAccount = ({
   const actionTitle = isBlocked ? 'Unblock Account' : 'Block Account';
   const isEnabled = !isBlocked;
 
-  const { mutate, isPending } = useUpdateAccount({
+  const { mutate, isPending, error, reset } = useUpdateAccount({
     username,
     onSuccess: () => {
       notification.success({
@@ -43,6 +44,11 @@ export const BlockUnblockAccount = ({
     }
   };
 
+  const handleCancel = () => {
+    setIsConfirming(false);
+    reset();
+  };
+
   return (
     <RbacProtected action={RbacProtected.rbacActions.account_write}>
       <RbacProtected.Unrestricted>
@@ -58,22 +64,18 @@ export const BlockUnblockAccount = ({
         </Button>
         <Modal
           title="Confirm Action"
-          open={isConfirming}
+          open={isConfirming || !!error}
           destroyOnHidden
-          onCancel={() => setIsConfirming(false)}
+          onCancel={handleCancel}
           footer={
             <div className="flex justify-end gap-2">
-              <Button onClick={() => setIsConfirming(false)}>Cancel</Button>
-              <Button onClick={handleBlockUnblockAccount} type="primary" danger>
-                {actionTitle}
-              </Button>
+              <Button onClick={handleCancel}>Cancel</Button>
             </div>
           }
         >
-          <p>
-            You are trying to block your own account, you will be logged out and
-            will lose access to your account. Are you sure you want to continue?
-          </p>
+          <p>You are trying to block an account that cannot be blocked.</p>
+
+          {error && <NotificationCard type="error" title={error.message} />}
         </Modal>
       </RbacProtected.Unrestricted>
       <RbacProtected.Restricted tooltip={{ show: true }}>

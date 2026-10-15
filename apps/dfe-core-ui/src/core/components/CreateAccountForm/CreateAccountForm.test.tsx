@@ -173,7 +173,36 @@ describe('CreateAccountForm password length', () => {
   });
 });
 
+const USERNAME_HELP =
+  "Username is used to identify the account. It needs to be unique and can't be updated later.";
+
 describe('CreateAccountForm username', () => {
+  test('replaces the username hint while the field is invalid', async () => {
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+
+    expect(screen.getByText(USERNAME_HELP)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/^Username/), '-user');
+
+    expect(
+      await screen.findByText(STORE_NAME_VALIDATOR.message('Username')),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText(USERNAME_HELP)).not.toBeInTheDocument();
+    });
+
+    await user.clear(screen.getByLabelText(/^Username/));
+    await user.type(screen.getByLabelText(/^Username/), 'new-user');
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(STORE_NAME_VALIDATOR.message('Username')),
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(USERNAME_HELP)).toBeInTheDocument();
+  });
+
   test(
     'takes the names the engine takes and refuses the ones it refuses',
     { timeout: NAME_RULE_TEST_TIMEOUT_MS },

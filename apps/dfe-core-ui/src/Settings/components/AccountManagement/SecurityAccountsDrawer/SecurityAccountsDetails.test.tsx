@@ -306,17 +306,17 @@ describe('SecurityAccountsDetails', () => {
     );
 
     render(<SecurityAccountsDetails />, { wrapper });
-    const dialog = await resetThrough('breakglass');
+    await resetThrough('breakglass');
 
     expect(
-      await within(dialog).findByText(
+      await screen.findByText(
         'Merge the review to keep this password',
         {},
         BACKSTOP,
       ),
     ).toBeInTheDocument();
     expect(
-      within(dialog).getByRole('link', { name: 'Open the review' }),
+      screen.getByRole('link', { name: 'Open the review' }),
     ).toHaveAttribute('href', 'https://forge.example/deploy/pulls/9');
   });
 
@@ -341,13 +341,13 @@ describe('SecurityAccountsDetails', () => {
     );
 
     render(<SecurityAccountsDetails />, { wrapper });
-    const dialog = await resetThrough('admin');
+    await resetThrough('admin');
 
     // CopyCodeBlock wraps each word, so the command is the code element's text.
     const commandBlock = (_: string, element: Element | null) =>
       element?.tagName === 'CODE' && element.textContent === command;
     expect(
-      await within(dialog).findByText(commandBlock, {}, BACKSTOP),
+      await screen.findByText(commandBlock, {}, BACKSTOP),
     ).toBeInTheDocument();
   });
 
