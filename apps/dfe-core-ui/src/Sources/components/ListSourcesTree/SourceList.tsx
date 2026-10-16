@@ -8,9 +8,16 @@ import { Spin, Tree } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTransformSourceToTree } from './hooks/useTransformSourceToTree';
 
-export const SourceList = ({ className }: { className?: string }) => {
+export const SourceList = ({
+  className,
+  isFiltersOpen,
+}: {
+  className?: string;
+  isFiltersOpen?: boolean;
+}) => {
+  const filtersHeight = isFiltersOpen ? 175 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 175,
+    offset: 175 + filtersHeight,
   });
   const {
     data: { items: sources, objects: sourceObjects },

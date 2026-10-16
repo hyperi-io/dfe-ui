@@ -3,7 +3,11 @@ import { cn } from '@/core/utils/style';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { ListSourcesFilterForm } from './ListSourcesFilterForm';
 
-export const ListSourcesFilters = ({ className }: { className?: string }) => {
+export const ListSourcesFilters = ({
+  onCollapseChange,
+}: {
+  onCollapseChange?: (open: boolean) => void;
+}) => {
   const {
     data: { items: sources, total },
   } = useListSourcesContext();
@@ -18,13 +22,14 @@ export const ListSourcesFilters = ({ className }: { className?: string }) => {
           </p>
         </span>
       }
-      className={cn(
-        'absolute top-0 left-0 z-10 bg-background dark:bg-dark-background',
-        className,
-      )}
+      className={cn('bg-background dark:bg-dark-background')}
+      onCollapseChange={onCollapseChange}
     >
       {({ setOpen }) => (
-        <ListSourcesFilterForm onSuccess={() => setOpen(false)} />
+        <ListSourcesFilterForm
+          onSuccess={() => setOpen(false)}
+          onClose={() => setOpen(false)}
+        />
       )}
     </SimpleCollapse>
   );

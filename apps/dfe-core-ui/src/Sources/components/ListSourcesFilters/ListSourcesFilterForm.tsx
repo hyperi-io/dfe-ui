@@ -8,50 +8,69 @@ import z from 'zod';
 
 const formSchema = z.object({
   search: z.string().optional(),
-  enabled: z.boolean().optional(),
+  status: z.enum(['enabled', 'disabled']).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface ListSourcesFilterFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
+const transformFiltersEnabledFormDataToRequest = (
+  status: string | undefined,
+) => {
+  if (status === 'enabled') return 'enabled';
+  if (status === 'disabled') return 'disabled';
+  return undefined;
+};
+
+const transformFiltersEnabledRequestToFormData = (
+  status: 'enabled' | 'disabled' | undefined,
+) => {
+  if (status === 'enabled') return 'enabled';
+  if (status === 'disabled') return 'disabled';
+  return undefined;
+};
 export const ListSourcesFilterForm = ({
   onSuccess,
+  onClose,
 }: ListSourcesFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
   const { filters, setFilters } = useListSourcesContext();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { search, enabled } = values;
+    const { search, status } = values;
     setFilters({
       search: search ?? undefined,
-      enabled: enabled ?? undefined,
+      status: transformFiltersEnabledFormDataToRequest(status),
     });
     onSuccess?.();
   };
 
   const handleResetFilters = () => {
-    form.setFieldsValue({ enabled: undefined, search: '' });
+    form.setFieldsValue({ status: undefined, search: '' });
     setFilters({
       search: undefined,
-      enabled: undefined,
+      status: undefined,
     });
+    onClose?.();
   };
+
   useEffect(() => {
     form.setFieldsValue({
       search: filters.search ?? '',
-      enabled: filters.enabled ?? undefined,
+      status: transformFiltersEnabledRequestToFormData(filters.status),
     });
-  }, [form, filters.search, filters.enabled]);
+  }, [form, filters.search, filters.status]);
 
   const sortBySelectId = useId();
 
   return (
     <Form
-      key={`${filters.search ?? ''}-${filters.enabled ?? ''}`}
+      key={`${filters.search ?? ''}-${filters.status ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
@@ -78,21 +97,28 @@ export const ListSourcesFilterForm = ({
 
       <Form.Item
         name="search"
-        label="Filter by Keyword"
+        label="Keyword"
         rules={[formValidation]}
+        layout="horizontal"
       >
-        <Input placeholder="Enter name or description" />
+        <Input
+          allowClear
+          size="small"
+          placeholder="Filter keyword: name or description"
+        />
       </Form.Item>
       <Form.Item
-        name="enabled"
-        label="Filter by Status"
+        name="status"
+        label="Status"
         rules={[formValidation]}
+        layout="horizontal"
       >
         <Select
-          placeholder="Select status"
+          size="small"
+          placeholder="Filter status"
           options={[
-            { label: 'Enabled', value: 'true' },
-            { label: 'Disabled', value: 'false' },
+            { label: 'Enabled', value: 'enabled' },
+            { label: 'Disabled', value: 'disabled' },
           ]}
           allowClear
         />
@@ -105,11 +131,11 @@ export const ListSourcesFilterForm = ({
           size="small"
           htmlType="reset"
           onClick={handleResetFilters}
-          disabled={!filters.search && !filters.enabled}
+          disabled={!filters.search && !filters.status}
         >
           Reset Filters
         </Button>
-        <Button type="default" htmlType="submit">
+        <Button size="small" type="default" htmlType="submit">
           Apply Filters
         </Button>
       </Form.Item>

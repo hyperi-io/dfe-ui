@@ -6,13 +6,19 @@ import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const INFINITE_SOURCES_QUERY_KEY = (
-  search?: string | null,
-  enabled?: boolean,
-  sort_by?: string | null,
-  sort_order?: string | null,
-  per_page?: number | null,
-) => [
+export const INFINITE_SOURCES_QUERY_KEY = ({
+  search,
+  enabled,
+  sort_by,
+  sort_order,
+  per_page,
+}: {
+  search?: string | null;
+  enabled?: boolean;
+  sort_by?: string | null;
+  sort_order?: string | null;
+  per_page?: number | null;
+} = {}) => [
   'sources',
   ...(search ? [search] : []),
   ...(enabled ? [enabled] : []),
@@ -31,9 +37,16 @@ export const INFINITE_SOURCES_QUERY_KEY = (
 /**
  * @returns A list of sources.
  */
+const transformStatusToEnabled = (
+  status: 'enabled' | 'disabled' | undefined,
+) => {
+  if (status === 'enabled') return true;
+  if (status === 'disabled') return false;
+  return undefined;
+};
 export const useFetchInfiniteFilteredSources = ({
   search,
-  enabled,
+  status,
   sort_by,
   sort_order,
   per_page,
@@ -50,18 +63,18 @@ export const useFetchInfiniteFilteredSources = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: INFINITE_SOURCES_QUERY_KEY(
-      search,
-      enabled,
+    queryKey: INFINITE_SOURCES_QUERY_KEY({
+      search: debouncedSearch,
+      enabled: transformStatusToEnabled(status),
       sort_by,
       sort_order,
       per_page,
-    ),
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredSources({
         queryParams: {
           search: debouncedSearch || undefined,
-          enabled,
+          enabled: transformStatusToEnabled(status),
           sort_by,
           sort_order,
           page: pageParam,

@@ -14,7 +14,7 @@ export const SourceSelect = (props: SelectProps) => {
     isFetchingNextPage,
   } = useFetchInfiniteFilteredSources({
     search,
-    enabled: true,
+    status: 'enabled',
   });
 
   const handlePopupScroll = (event: React.UIEvent<HTMLDivElement>) => {
