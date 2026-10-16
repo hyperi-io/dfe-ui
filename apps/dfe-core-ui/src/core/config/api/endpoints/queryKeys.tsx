@@ -24,7 +24,6 @@ export const QUERY_KEYS = Object.freeze({
     }: UseFetchInfiniteFilteredSourcesProps = {}) => {
       return [
         'sources',
-        'default',
         ...(search ? [search] : []),
         ...(status ? [status] : []),
         ...(sort_by ? [sort_by] : []),
@@ -38,7 +37,7 @@ export const QUERY_KEYS = Object.freeze({
     }: { name?: string | null; version?: string | null } = {}) => {
       return [
         'sources',
-        'details',
+        '{name}',
         ...(name ? [name] : []),
         ...(version ? [version] : []),
       ];
