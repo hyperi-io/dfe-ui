@@ -5,9 +5,9 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { JsonView } from '@repo/dfe-json-viewer-cn';
 import { Spin } from 'antd';
 import { FieldPromoteBanner } from './FieldPromoteBanner';
+import { SampleRowsCard } from './SampleRowsCard';
 
 export const SampleEventsTabContent = () => {
   const { isMetaSchemaDefined, isMainSource, canPromoteFields } =
@@ -77,7 +77,13 @@ export const SampleEventsTabContent = () => {
         )}
 
         <CustomScrollbar height={componentHeight}>
-          <JsonView data={sampleRows?.rows} className="mt-2 mb-24" />
+          <ul className="flex flex-col gap-y-3 mt-2 mb-24">
+            {sampleRows?.rows.map((row) => (
+              <li key={row._uuid as string}>
+                <SampleRowsCard row={row} />
+              </li>
+            ))}
+          </ul>
         </CustomScrollbar>
       </div>
     </>
