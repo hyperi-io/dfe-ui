@@ -133,7 +133,7 @@ export const ListSourcesFilterForm = ({
           onClick={handleResetFilters}
           disabled={!filters.search && !filters.status}
         >
-          Reset Filters
+          Clear Filters
         </Button>
         <Button size="small" type="default" htmlType="submit">
           Apply Filters

@@ -63,6 +63,7 @@ export const SourceList = ({
         defaultFilters={{
           ...filters,
           search: undefined,
+          status: undefined,
         }}
       />
     );

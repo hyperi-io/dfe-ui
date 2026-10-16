@@ -54,6 +54,7 @@ export const RulesList = ({
           ...filters,
           search: undefined,
           severity: undefined,
+          source: undefined,
         }}
       />
     );

@@ -50,6 +50,7 @@ const filtersToSearchString = (f: ListRulesQueryParams): string => {
   const params = new URLSearchParams();
   if (f.search) params.set('search', f.search);
   if (f.severity) params.set('severity', f.severity);
+  if (f.source) params.set('source', f.source);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.per_page) params.set('per_page', String(f.per_page));
@@ -136,6 +137,7 @@ export const ListRulesProvider = ({
   } = useFetchInfiniteFilteredRules({
     search: filters.search,
     severity: filters.severity,
+    source: filters.source,
     sort_by: filters.sort_by,
     sort_order: filters.sort_order,
     per_page: filters.per_page,

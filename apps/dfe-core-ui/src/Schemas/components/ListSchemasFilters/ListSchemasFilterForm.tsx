@@ -92,7 +92,7 @@ export const ListSchemasFilterForm = ({
           onClick={handleResetFilters}
           disabled={!filters.search}
         >
-          Reset Filters
+          Clear Filters
         </Button>
         <Button size="small" type="default" htmlType="submit">
           Apply Filters

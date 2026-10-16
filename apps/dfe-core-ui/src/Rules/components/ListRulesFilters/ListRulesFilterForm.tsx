@@ -29,10 +29,11 @@ export const ListRulesFilterForm = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { severity, search } = values;
+    const { severity, search, source } = values;
     setFilters({
       severity: severity ?? undefined,
       search: search ?? undefined,
+      source: source ?? undefined,
     });
     onSuccess?.();
   };
@@ -42,6 +43,7 @@ export const ListRulesFilterForm = ({
     setFilters({
       severity: undefined,
       search: undefined,
+      source: undefined,
     });
     onClose?.();
   };
@@ -132,7 +134,7 @@ export const ListRulesFilterForm = ({
           onClick={handleResetFilters}
           disabled={!filters.severity && !filters.search}
         >
-          Reset Filters
+          Clear Filters
         </Button>
         <Button size="small" type="default" htmlType="submit">
           Apply Filters
