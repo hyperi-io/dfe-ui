@@ -1,5 +1,4 @@
-import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
-import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createSourceFromCatalogue } from './api';
 import {
@@ -27,10 +26,13 @@ export const useCreateSourceFromCatalogue = ({
       createSourceFromCatalogue({ pathParams: { entry }, body }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SOURCES_QUERY_KEY(),
+        queryKey: QUERY_KEYS.sources.default(),
       });
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(data.source, data.current),
+        queryKey: QUERY_KEYS.sources.source({
+          name: data.source,
+          version: data.current,
+        }),
       });
       onSuccess?.(data);
     },

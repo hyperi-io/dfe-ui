@@ -1,4 +1,4 @@
-import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { planSource } from './api';
 import { SourcePlanRequest, TSourcePlanResponse } from './types';
@@ -24,7 +24,10 @@ export const usePlanSource = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(data.source_name, data.version),
+        queryKey: QUERY_KEYS.sources.source({
+          name: data.source_name,
+          version: data.version,
+        }),
       });
       onSuccess?.(data);
     },

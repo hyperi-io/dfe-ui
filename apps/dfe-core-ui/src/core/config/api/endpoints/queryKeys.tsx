@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-imports */
+import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
 import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
@@ -14,8 +15,34 @@ export const QUERY_KEYS = Object.freeze({
     permissions: () => ['auth', 'permissions'],
   },
   sources: {
-    default: () => ['sources'],
-    source: () => ['sources', '{name}'],
+    default: ({
+      search,
+      status: status,
+      sort_by,
+      sort_order,
+      per_page,
+    }: UseFetchInfiniteFilteredSourcesProps = {}) => {
+      return [
+        'sources',
+        'default',
+        ...(search ? [search] : []),
+        ...(status ? [status] : []),
+        ...(sort_by ? [sort_by] : []),
+        ...(sort_order ? [sort_order] : []),
+        ...(per_page ? [per_page] : []),
+      ];
+    },
+    source: ({
+      name,
+      version,
+    }: { name?: string | null; version?: string | null } = {}) => {
+      return [
+        'sources',
+        'details',
+        ...(name ? [name] : []),
+        ...(version ? [version] : []),
+      ];
+    },
     sourceFlow: () => ['sources', '{name}', 'flow'],
     sourceColumns: () => ['sources', '{name}', 'columns'],
     sourceBuild: () => ['sources', '{name}', 'build'],
