@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -6,20 +7,6 @@ import { UseFetchInfiniteFilteredSourcesProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const INFINITE_SOURCES_QUERY_KEY = (
-  search?: string | null,
-  enabled?: boolean,
-  sort_by?: string | null,
-  sort_order?: string | null,
-  per_page?: number | null,
-) => [
-  'sources',
-  ...(search ? [search] : []),
-  ...(enabled ? [enabled] : []),
-  ...(sort_by ? [sort_by] : []),
-  ...(sort_order ? [sort_order] : []),
-  ...(per_page ? [per_page] : []),
-];
 /** useFetchInfiniteFilteredSources props */
 /**
  * @param search - The search query to filter the sources by display name.
@@ -31,9 +18,16 @@ export const INFINITE_SOURCES_QUERY_KEY = (
 /**
  * @returns A list of sources.
  */
+const transformStatusToEnabled = (
+  status: 'enabled' | 'disabled' | undefined,
+) => {
+  if (status === 'enabled') return true;
+  if (status === 'disabled') return false;
+  return undefined;
+};
 export const useFetchInfiniteFilteredSources = ({
   search,
-  enabled,
+  status,
   sort_by,
   sort_order,
   per_page,
@@ -50,18 +44,18 @@ export const useFetchInfiniteFilteredSources = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: INFINITE_SOURCES_QUERY_KEY(
-      search,
-      enabled,
+    queryKey: QUERY_KEYS.sources.default({
+      search: debouncedSearch,
+      status,
       sort_by,
       sort_order,
       per_page,
-    ),
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredSources({
         queryParams: {
           search: debouncedSearch || undefined,
-          enabled,
+          enabled: transformStatusToEnabled(status),
           sort_by,
           sort_order,
           page: pageParam,

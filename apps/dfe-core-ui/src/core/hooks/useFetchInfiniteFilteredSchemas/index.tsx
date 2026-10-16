@@ -51,7 +51,7 @@ export const useFetchInfiniteFilteredSchemas = ({
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: INFINITE_SCHEMAS_QUERY_KEY({
-      search,
+      search: debouncedSearch,
       schema_type,
       sort_by,
       sort_order,

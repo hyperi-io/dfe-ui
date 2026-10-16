@@ -11,7 +11,13 @@ import { useTransformMetaSchemaToTree } from './hooks/useTransformMetaSchemaToTr
 const META_ROOT_PATH_SEGMENTS = ['meta'];
 const EMPTY_PATH_SEGMENTS: string[] = [];
 
-export const SchemaList = ({ className }: { className?: string }) => {
+export const SchemaList = ({
+  className,
+  isFiltersOpen,
+}: {
+  className?: string;
+  isFiltersOpen?: boolean;
+}) => {
   const {
     data: { items: metaSchemas, objects: schemaObjectsResponse },
     error,
@@ -27,8 +33,9 @@ export const SchemaList = ({ className }: { className?: string }) => {
     schemaTypesScope,
   } = useListSchemasContext();
 
+  const filtersHeight = isFiltersOpen ? 125 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 175,
+    offset: 175 + filtersHeight,
   });
 
   const hasOnlyMetaSchemas =

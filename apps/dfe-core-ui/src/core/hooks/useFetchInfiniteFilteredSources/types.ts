@@ -12,7 +12,7 @@ export type TSourceSummary = TSourceListResponse['objects'];
 export type TSourceListSummary = TSourceListResponse['items'][number];
 export interface SourceListRequestParams {
   search?: string;
-  enabled?: boolean;
+  status?: 'enabled' | 'disabled';
   sort_by?: string;
   sort_order?: string;
   page?: number;

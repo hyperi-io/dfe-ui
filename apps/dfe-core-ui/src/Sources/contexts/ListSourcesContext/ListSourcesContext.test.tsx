@@ -104,7 +104,7 @@ describe('ListSourcesContext', () => {
 
     it('parses filters from URL search params', async () => {
       searchParamsRef.current = new URLSearchParams(
-        'search=foo&enabled=true&sort_by=source&sort_order=asc',
+        'search=foo&status=enabled&sort_by=source&sort_order=asc',
       );
 
       const { result } = renderHook(() => useListSourcesContext(), {
@@ -117,7 +117,7 @@ describe('ListSourcesContext', () => {
 
       expect(result.current.filters).toEqual({
         search: 'foo',
-        enabled: true,
+        status: 'enabled',
         sort_by: 'source',
         sort_order: 'asc',
       });
@@ -129,7 +129,7 @@ describe('ListSourcesContext', () => {
         .withListSourcesProvider({
           defaultFilters: {
             search: 'default-search',
-            enabled: true,
+            status: 'enabled',
           },
         });
 
@@ -143,7 +143,7 @@ describe('ListSourcesContext', () => {
 
       expect(result.current.filters).toEqual({
         search: undefined,
-        enabled: undefined,
+        status: undefined,
         sort_by: undefined,
         sort_order: undefined,
       });
@@ -182,8 +182,8 @@ describe('ListSourcesContext', () => {
       expect(result.current.hasFilters).toBe(true);
     });
 
-    it('hasFilters is true when enabled is set', async () => {
-      searchParamsRef.current = new URLSearchParams('enabled=true');
+    it('hasFilters is true when status is set', async () => {
+      searchParamsRef.current = new URLSearchParams('status=enabled');
 
       const { result } = renderHook(() => useListSourcesContext(), {
         wrapper,
@@ -209,7 +209,7 @@ describe('ListSourcesContext', () => {
         expect(result.current.isLoading).toBe(true);
       });
 
-      expect(result.current.hasFilters).toBe(true);
+      expect(result.current.hasFilters).toBe(false);
     });
 
     it('setFilters calls router.replace with updated query string', async () => {
@@ -221,10 +221,10 @@ describe('ListSourcesContext', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      result.current.setFilters({ search: 'new-search', enabled: false });
+      result.current.setFilters({ search: 'new-search', status: 'disabled' });
 
       expect(mockReplace).toHaveBeenCalledWith(
-        '/sources?search=new-search&enabled=false',
+        '/sources?search=new-search&status=disabled',
       );
     });
 
@@ -239,10 +239,10 @@ describe('ListSourcesContext', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      result.current.setFilters({ enabled: true });
+      result.current.setFilters({ status: 'enabled' });
 
       expect(mockReplace).toHaveBeenCalledWith(
-        '/sources?search=existing&enabled=true',
+        '/sources?search=existing&status=enabled',
       );
     });
 
