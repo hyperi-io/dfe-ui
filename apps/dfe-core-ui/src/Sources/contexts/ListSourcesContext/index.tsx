@@ -33,16 +33,16 @@ const parseFiltersFromParams = (
   const searchParam = params.get('search');
   const search =
     searchParam === null || searchParam === '' ? undefined : searchParam;
-  const enabledParam = params.get('enabled');
-  const enabled =
-    enabledParam === 'true'
-      ? true
-      : enabledParam === 'false'
-        ? false
+  const statusParam = params.get('status');
+  const status =
+    statusParam === 'enabled'
+      ? 'enabled'
+      : statusParam === 'disabled'
+        ? 'disabled'
         : undefined;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
-  return { search, enabled, sort_by, sort_order };
+  return { search, status, sort_by, sort_order };
 };
 
 /**
@@ -59,7 +59,7 @@ const filtersToSearchString = (
   const params = new URLSearchParams(keep);
   for (const owned of [
     'search',
-    'enabled',
+    'status',
     'sort_by',
     'sort_order',
     'source_name',
@@ -68,7 +68,7 @@ const filtersToSearchString = (
     params.delete(owned);
   }
   if (f.search) params.set('search', f.search);
-  if (f.enabled !== undefined) params.set('enabled', String(f.enabled));
+  if (f.status !== undefined) params.set('status', f.status);
   if (f.sort_by) params.set('sort_by', f.sort_by);
   if (f.sort_order) params.set('sort_order', f.sort_order);
   if (f.source_name) params.set('source_name', f.source_name);
@@ -76,12 +76,14 @@ const filtersToSearchString = (
   return params.toString();
 };
 
+const hasSortFilters = (f: ListSourcesQueryParams) =>
+  f.sort_by !== undefined || f.sort_order !== undefined;
+
+const hasSearchFilters = (f: ListSourcesQueryParams) =>
+  f.search !== undefined || f.status !== undefined;
+
 const hasAnyFilters = (f: ListSourcesQueryParams) =>
-  f.search !== undefined ||
-  f.enabled !== undefined ||
-  f.sort_by !== undefined ||
-  f.sort_order !== undefined ||
-  f.source_name !== undefined;
+  hasSearchFilters(f) || hasSortFilters(f);
 
 export interface ListSourcesContextValue {
   data: TSourceListResponse;
@@ -136,12 +138,9 @@ export const ListSourcesProvider = ({
   defaultFilters = {},
 }: ListSourcesProviderProps) => {
   const queryClient = useQueryClient();
-  const [selectedSourceName, setSelectedSourceName] = useState<string | null>(
-    null,
-  );
-  const [selectedSourceVersion, setSelectedSourceVersion] = useState<
-    string | null
-  >(null);
+  const [selectedSourceName, setSelectedSourceName] = useState<string>('main');
+  const [selectedSourceVersion, setSelectedSourceVersion] =
+    useState<string>('1.0.0');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -158,15 +157,15 @@ export const ListSourcesProvider = ({
     const source_version = searchParams.get('source_version');
     startTransition(() => {
       setSelectedSourceName(
-        source_name && source_name !== '' ? source_name : null,
+        source_name && source_name !== '' ? source_name : 'main',
       );
       setSelectedSourceVersion(
-        source_version && source_version !== '' ? source_version : null,
+        source_version && source_version !== '' ? source_version : '1.0.0',
       );
     });
   }, [searchParams]);
 
-  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
+  const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
 
   const {
     data = DEFAULT_SOURCE_LIST_RESPONSE,
@@ -205,8 +204,8 @@ export const ListSourcesProvider = ({
       tab?: string;
     }) => {
       const sourceChanged = source_name !== selectedSourceName;
-      setSelectedSourceName(source_name);
-      setSelectedSourceVersion(source_version);
+      setSelectedSourceName(source_name ?? 'main');
+      setSelectedSourceVersion(source_version ?? '1.0.0');
       const keep = new URLSearchParams(searchParams.toString());
       // Processing and the later tabs are not on every source. Keeping a stale
       // tab when the source changes leaves the URL pointing at a strip that is

@@ -297,9 +297,9 @@ describe('useFetchInfiniteFilteredSources', () => {
       expect(result.current.data.items).toBeDefined();
     });
 
-    it('should include enabled filter in query', async () => {
+    it('should include status filter in query', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredSources({ enabled: true }),
+        () => useFetchInfiniteFilteredSources({ status: 'enabled' }),
         {
           wrapper,
         },
@@ -350,7 +350,7 @@ describe('useFetchInfiniteFilteredSources', () => {
         () =>
           useFetchInfiniteFilteredSources({
             search: 'test',
-            enabled: true,
+            status: 'enabled',
             sort_by: 'path',
             sort_order: 'asc',
 

@@ -73,10 +73,13 @@ const filtersToSearchString = (f: ListSchemasQueryParams): string => {
   return params.toString();
 };
 
+const hasSortFilters = (f: ListSchemasQueryParams) =>
+  f.sort_by !== undefined || f.sort_order !== undefined;
+
+const hasSearchFilters = (f: ListSchemasQueryParams) => f.search !== undefined;
+
 const hasAnyFilters = (f: ListSchemasQueryParams) =>
-  f.search !== undefined ||
-  f.sort_by !== undefined ||
-  f.sort_order !== undefined;
+  hasSearchFilters(f) || hasSortFilters(f);
 
 export interface ListSchemasContextValue {
   data: TSchemaListResponse;
@@ -158,7 +161,7 @@ export const ListSchemasProvider = ({
     });
   }, [searchParams]);
 
-  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
+  const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
 
   const {
     data = DEFAULT_SCHEMA_LIST_RESPONSE,

@@ -99,7 +99,7 @@ export const ListFieldMapsFilterForm = ({
           onClick={handleResetFilters}
           disabled={!filters.standard && !filters.search}
         >
-          Reset Filters
+          Clear Filters
         </Button>
         <Button type="default" htmlType="submit">
           Apply Filters

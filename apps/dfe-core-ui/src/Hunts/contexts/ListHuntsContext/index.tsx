@@ -51,10 +51,13 @@ const filtersToSearchString = (f: ListHuntsQueryParams): string => {
   return params.toString();
 };
 
+const hasSortFilters = (f: ListHuntsQueryParams) =>
+  f.sort_by !== undefined || f.sort_order !== undefined;
+
+const hasSearchFilters = (f: ListHuntsQueryParams) => f.search !== undefined;
+
 const hasAnyFilters = (f: ListHuntsQueryParams) =>
-  f.search !== undefined ||
-  f.sort_by !== undefined ||
-  f.sort_order !== undefined;
+  hasSearchFilters(f) || hasSortFilters(f);
 
 export interface ListHuntsContextValue {
   data: THuntListResponse;
@@ -112,7 +115,7 @@ export const ListHuntsProvider = ({
     );
   }, [searchParams]);
 
-  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
+  const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
 
   const {
     data = DEFAULT_HUNT_LIST_RESPONSE,

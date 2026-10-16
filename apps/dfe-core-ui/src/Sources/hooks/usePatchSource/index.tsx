@@ -1,5 +1,4 @@
-import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
-import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patchSource } from './api';
 import { TSourcePatchRequestBody, TSourcePatchResponse } from './types';
@@ -21,10 +20,10 @@ export const usePatchSource = ({
       }),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(response.source),
+        queryKey: QUERY_KEYS.sources.source({ name: response.source }),
       });
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SOURCES_QUERY_KEY(),
+        queryKey: QUERY_KEYS.sources.default(),
       });
       onSuccess?.(response);
     },
