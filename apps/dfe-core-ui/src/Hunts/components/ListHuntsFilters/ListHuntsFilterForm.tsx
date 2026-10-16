@@ -15,13 +15,15 @@ type FormData = z.infer<typeof formSchema>;
 
 interface ListHuntsFilterFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export const ListHuntsFilterForm = ({
   onSuccess,
+  onClose,
 }: ListHuntsFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
-  const { filters, setFilters } = useListHuntsContext();
+  const { filters, setFilters, hasFilters } = useListHuntsContext();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
@@ -37,6 +39,7 @@ export const ListHuntsFilterForm = ({
     setFilters({
       search: undefined,
     });
+    onClose?.();
   };
 
   useEffect(() => {
@@ -54,9 +57,11 @@ export const ListHuntsFilterForm = ({
       onFinish={handleApplyFilters}
     >
       <SortActions
+        showLabel={!hasFilters}
         id={{
           select: sortBySelectId,
         }}
+        classNames={{ root: 'w-full', select: 'w-full' }}
         sortByValue={filters.sort_by}
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
@@ -80,7 +85,7 @@ export const ListHuntsFilterForm = ({
         label="Filter by Keyword"
         rules={[formValidation]}
       >
-        <Input placeholder="Name, Customers, Rules, etc." />
+        <Input size="small" placeholder="Name, Customers, Rules, etc." />
       </Form.Item>
 
       <Form.Item className="flex justify-end">
@@ -92,9 +97,9 @@ export const ListHuntsFilterForm = ({
           onClick={handleResetFilters}
           disabled={!filters.search}
         >
-          Reset Filters
+          Clear Filters
         </Button>
-        <Button type="default" htmlType="submit">
+        <Button size="small" type="default" htmlType="submit">
           Apply Filters
         </Button>
       </Form.Item>

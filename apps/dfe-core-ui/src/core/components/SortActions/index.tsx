@@ -25,6 +25,7 @@ interface SortActionsProps {
     label?: string;
   };
   layout?: 'horizontal' | 'vertical';
+  showLabel?: boolean;
 }
 
 const DEFAULT_DIRECTION = 'asc' as const;
@@ -38,6 +39,7 @@ export const SortActions = ({
   id,
   classNames,
   layout = 'horizontal',
+  showLabel = true,
 }: SortActionsProps) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
     (sortDirectionValue as 'asc' | 'desc') ?? DEFAULT_DIRECTION,
@@ -59,9 +61,11 @@ export const SortActions = ({
         classNames?.root,
       )}
     >
-      <label className={classNames?.label} htmlFor={id.select}>
-        Sort by
-      </label>
+      {showLabel && (
+        <label className={classNames?.label} htmlFor={id.select}>
+          Sort by
+        </label>
+      )}
 
       <div className={cn('flex gap-2 items-center', classNames?.select)}>
         {sortByOptions && (

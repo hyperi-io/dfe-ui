@@ -7,7 +7,13 @@ import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
 
-export const HuntList = ({ className }: { className?: string }) => {
+export const HuntList = ({
+  className,
+  isFiltersOpen,
+}: {
+  className?: string;
+  isFiltersOpen?: boolean;
+}) => {
   const {
     data: { items: hunts },
     error,
@@ -21,8 +27,10 @@ export const HuntList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListHuntsContext();
 
+  const filtersHeight = isFiltersOpen ? 150 : 0;
+
   const { componentHeight } = useSetComponentHeight({
-    offset: 175,
+    offset: 175 + filtersHeight,
   });
 
   if (isLoading && hunts.length === 0) {

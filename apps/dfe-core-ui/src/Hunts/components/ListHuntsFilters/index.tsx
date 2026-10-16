@@ -2,7 +2,11 @@ import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { ListHuntsFilterForm } from './ListHuntsFilterForm';
 
-export const ListHuntsFilters = () => {
+export const ListHuntsFilters = ({
+  onCollapseChange,
+}: {
+  onCollapseChange?: (open: boolean) => void;
+}) => {
   const {
     data: { items: hunts, total },
   } = useListHuntsContext();
@@ -17,11 +21,19 @@ export const ListHuntsFilters = () => {
           </p>
         </span>
       }
-      className="absolute top-0 left-0 z-10 bg-background dark:bg-dark-background"
+      className="z-10 bg-background dark:bg-dark-background"
+      onCollapseChange={onCollapseChange}
     >
-      {({ setOpen }) => (
-        <ListHuntsFilterForm onSuccess={() => setOpen(false)} />
-      )}
+      {({ setOpen }) => {
+        return (
+          <ListHuntsFilterForm
+            onSuccess={() => {
+              setOpen(false);
+            }}
+            onClose={() => setOpen(false)}
+          />
+        );
+      }}
     </SimpleCollapse>
   );
 };
