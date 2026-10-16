@@ -54,6 +54,7 @@ export const SortActions = ({
   return (
     <div
       className={cn(
+        'w-full',
         layout === 'horizontal'
           ? 'flex justify-between items-center flex-wrap gap-y-2'
           : 'flex flex-col gap-2',
@@ -82,7 +83,9 @@ export const SortActions = ({
       </button>
 
       {showOptions && (
-        <div className={cn('flex gap-2 items-center', classNames?.select)}>
+        <div
+          className={cn('w-full flex gap-2 items-center', classNames?.select)}
+        >
           {sortByOptions && (
             <Select
               id={id.select}

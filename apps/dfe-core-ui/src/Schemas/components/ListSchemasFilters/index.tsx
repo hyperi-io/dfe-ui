@@ -2,7 +2,11 @@ import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { ListSchemasFilterForm } from './ListSchemasFilterForm';
 
-export const ListSchemasFilters = () => {
+export const ListSchemasFilters = ({
+  onCollapseChange,
+}: {
+  onCollapseChange?: (open: boolean) => void;
+}) => {
   const {
     data: { items: schemas, total },
   } = useListSchemasContext();
@@ -17,10 +21,14 @@ export const ListSchemasFilters = () => {
           </p>
         </span>
       }
-      className="absolute top-0 left-0 z-10 bg-background dark:bg-dark-background"
+      className="bg-background dark:bg-dark-background"
+      onCollapseChange={onCollapseChange}
     >
       {({ setOpen }) => (
-        <ListSchemasFilterForm onSuccess={() => setOpen(false)} />
+        <ListSchemasFilterForm
+          onSuccess={() => setOpen(false)}
+          onClose={() => setOpen(false)}
+        />
       )}
     </SimpleCollapse>
   );

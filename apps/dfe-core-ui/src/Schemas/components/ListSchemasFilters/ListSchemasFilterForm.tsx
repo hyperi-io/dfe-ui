@@ -14,10 +14,12 @@ type FormData = z.infer<typeof formSchema>;
 
 interface ListSchemasFilterFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export const ListSchemasFilterForm = ({
   onSuccess,
+  onClose,
 }: ListSchemasFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
   const { filters, setFilters } = useListSchemasContext();
@@ -36,6 +38,7 @@ export const ListSchemasFilterForm = ({
     setFilters({
       search: undefined,
     });
+    onClose?.();
   };
   useEffect(() => {
     form.setFieldsValue({
@@ -73,10 +76,11 @@ export const ListSchemasFilterForm = ({
       />
       <Form.Item
         name="search"
-        label="Filter by Keyword"
+        label="Keyword"
         rules={[formValidation]}
+        layout="horizontal"
       >
-        <Input placeholder="Enter name or description" />
+        <Input size="small" placeholder="Filter keyword: name or description" />
       </Form.Item>
 
       <Form.Item className="flex justify-end">
@@ -90,7 +94,7 @@ export const ListSchemasFilterForm = ({
         >
           Reset Filters
         </Button>
-        <Button type="default" htmlType="submit">
+        <Button size="small" type="default" htmlType="submit">
           Apply Filters
         </Button>
       </Form.Item>
