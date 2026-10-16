@@ -8,6 +8,7 @@ import {
 } from '@repo/dfe-icons';
 import { Tooltip, cn } from '@repo/dfe-shared-ui';
 import { useCallback, useState } from 'react';
+import { useJsonViewerContext } from './context';
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValueType = JsonPrimitive | JsonObjectType | JsonArrayType;
@@ -60,6 +61,14 @@ function isArray(value: unknown): value is JsonArrayType {
   return Array.isArray(value);
 }
 
+function childFieldPath(
+  parent: string | undefined,
+  key: string | number,
+): string {
+  const segment = String(key);
+  return parent ? `${parent}.${segment}` : segment;
+}
+
 // Resolve values that are not plain JSON into the closest JSON-like shape,
 // mirroring what JSON.stringify would do where it is defined: objects with
 // toJSON (Date, custom classes) use it, Map becomes an object, Set an array.
@@ -101,6 +110,25 @@ function stringifyValue(value: unknown): string {
   );
 }
 
+function ActionButton({
+  value,
+  level,
+  fieldPath,
+}: {
+  value: unknown;
+  level: number;
+  fieldPath: string;
+}) {
+  const { action: ActionComponent } = useJsonViewerContext();
+  return (
+    <div className="inline-flex shrink-0" onClick={(e) => e.stopPropagation()}>
+      {ActionComponent && (
+        <ActionComponent fieldPath={fieldPath} level={level} value={value} />
+      )}
+    </div>
+  );
+}
+
 function CopyButton({ value }: { value: unknown }) {
   const [copied, setCopied] = useState(false);
 
@@ -134,12 +162,14 @@ function JsonLine({
   children,
   className,
   theme,
+  fieldPath,
 }: {
   depth: number;
   value: unknown;
   children: React.ReactNode;
   className?: string;
   theme: Required<JsonViewerTheme>;
+  fieldPath?: string;
 }) {
   return (
     <div
@@ -151,6 +181,9 @@ function JsonLine({
       style={{ paddingLeft: depth * 24 }}
     >
       <span className="min-w-0 wrap-anywhere">{children}</span>
+      {fieldPath !== undefined && (
+        <ActionButton value={value} level={depth} fieldPath={fieldPath} />
+      )}
       <CopyButton value={value} />
     </div>
   );
@@ -324,6 +357,7 @@ function CollapsibleNode({
   isLast,
   internal,
   ancestors,
+  fieldPath,
 }: {
   value: JsonObjectType | JsonArrayType;
   keyName?: string;
@@ -332,6 +366,7 @@ function CollapsibleNode({
   isLast: boolean;
   internal: InternalProps;
   ancestors: readonly object[];
+  fieldPath?: string;
 }) {
   const shouldExpand =
     internal.initialDepth === Infinity
@@ -353,7 +388,7 @@ function CollapsibleNode({
   // Empty containers render inline
   if (isEmpty) {
     return (
-      <JsonLine depth={depth} value={value} theme={theme}>
+      <JsonLine depth={depth} value={value} theme={theme} fieldPath={fieldPath}>
         {keyName !== undefined && <KeyLabel name={keyName} theme={theme} />}
         <Bracket theme={theme}>
           {openBracket}
@@ -406,6 +441,10 @@ function CollapsibleNode({
             )}
           </span>
         </button>
+
+        {fieldPath !== undefined && (
+          <ActionButton value={value} level={depth} fieldPath={fieldPath} />
+        )}
         <CopyButton value={value} />
       </div>
 
@@ -428,6 +467,7 @@ function CollapsibleNode({
               isLast={idx === entries.length - 1}
               internal={internal}
               ancestors={childAncestors}
+              fieldPath={childFieldPath(fieldPath, key)}
             />
           ))}
         </div>
@@ -454,6 +494,7 @@ function JsonNode({
   isLast,
   internal,
   ancestors,
+  fieldPath,
 }: {
   value: unknown;
   keyName?: string;
@@ -462,13 +503,19 @@ function JsonNode({
   isLast: boolean;
   internal: InternalProps;
   ancestors: readonly object[];
+  fieldPath?: string;
 }) {
   const value = resolveValue(rawValue);
 
   if (isObject(value) || isArray(value)) {
     if (ancestors.includes(value)) {
       return (
-        <JsonLine depth={depth} value={value} theme={internal.theme}>
+        <JsonLine
+          depth={depth}
+          value={value}
+          theme={internal.theme}
+          fieldPath={fieldPath}
+        >
           {keyName !== undefined && (
             <KeyLabel name={keyName} theme={internal.theme} />
           )}
@@ -487,12 +534,18 @@ function JsonNode({
         isLast={isLast}
         internal={internal}
         ancestors={ancestors}
+        fieldPath={fieldPath}
       />
     );
   }
 
   return (
-    <JsonLine depth={depth} value={value} theme={internal.theme}>
+    <JsonLine
+      depth={depth}
+      value={value}
+      theme={internal.theme}
+      fieldPath={fieldPath}
+    >
       {keyName !== undefined && (
         <KeyLabel name={keyName} theme={internal.theme} />
       )}

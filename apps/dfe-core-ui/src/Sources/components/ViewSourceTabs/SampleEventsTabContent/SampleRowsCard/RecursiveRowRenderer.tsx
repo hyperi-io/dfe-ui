@@ -54,7 +54,11 @@ export const RecursiveRowRenderer = ({
               >
                 {key}:
                 {level > 0 && !isPlainObject(plainRow[key]) && (
-                  <RecursiveRendererActionMenu fieldPath={fieldPath} />
+                  <RecursiveRendererActionMenu
+                    fieldPath={fieldPath}
+                    level={level}
+                    value={plainRow[key]}
+                  />
                 )}
               </span>
               {isPlainObject(plainRow[key]) ? (

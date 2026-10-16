@@ -18,8 +18,9 @@ export const SampleEventsTabContent = () => {
 
   const { fieldsToPromote } = usePromoteRowsContext();
 
-  // The source detail chrome ends 260px down and the page clips 45px short of
-  // the window, so an offset under 305 leaves the last rows unreachable.
+  const showPromoteBanner =
+    fieldsToPromote.size > 0 && (isMainSource || canPromoteFields);
+
   const { componentHeight } = useSetComponentHeight({
     offset: 320,
   });
@@ -43,7 +44,7 @@ export const SampleEventsTabContent = () => {
 
   return (
     <>
-      {canPromoteFields && fieldsToPromote.size > 0 && (
+      {showPromoteBanner && (
         <div className="relative mb-4">
           <FieldPromoteBanner
             classNames={{

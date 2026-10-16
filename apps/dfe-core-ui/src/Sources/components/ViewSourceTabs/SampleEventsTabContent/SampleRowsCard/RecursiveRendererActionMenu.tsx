@@ -26,11 +26,12 @@ export const RecursiveRendererActionMenu = ({
     isFieldPromoted,
     promotedOnSchemaFieldsSet,
   } = usePromoteRowsContext();
-  const canPromote = level > 0 && isPlainObject(value);
 
-  if (!canPromote) {
-    return null;
-  }
+  const _canPromote = level > 0 && isPlainObject(value);
+
+  // if (!canPromote) {
+  //   return null;
+  // }
 
   const isPromoted = isFieldPromoted(fieldPath);
 
