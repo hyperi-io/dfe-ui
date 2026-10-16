@@ -39,7 +39,7 @@ export const ListRulesFilterForm = ({
   };
 
   const handleResetFilters = () => {
-    form.setFieldsValue({ severity: undefined, search: '' });
+    form.setFieldsValue({ severity: undefined, search: '', source: undefined });
     setFilters({
       severity: undefined,
       search: undefined,
@@ -52,14 +52,15 @@ export const ListRulesFilterForm = ({
     form.setFieldsValue({
       severity: filters.severity ?? undefined,
       search: filters.search ?? '',
+      source: filters.source,
     });
-  }, [form, filters.severity, filters.search]);
+  }, [form, filters.severity, filters.search, filters.source]);
 
   const sortBySelectId = useId();
 
   return (
     <Form
-      key={`${filters.search ?? ''}-${filters.severity ?? ''}`}
+      key={`${filters.search ?? ''}-${filters.severity ?? ''}-${filters.source ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
@@ -132,7 +133,7 @@ export const ListRulesFilterForm = ({
           htmlType="button"
           size="small"
           onClick={handleResetFilters}
-          disabled={!filters.severity && !filters.search}
+          disabled={!filters.severity && !filters.search && !filters.source}
         >
           Clear Filters
         </Button>
