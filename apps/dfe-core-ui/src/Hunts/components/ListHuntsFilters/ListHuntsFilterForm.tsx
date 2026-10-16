@@ -23,7 +23,7 @@ export const ListHuntsFilterForm = ({
   onClose,
 }: ListHuntsFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
-  const { filters, setFilters, hasFilters } = useListHuntsContext();
+  const { filters, setFilters } = useListHuntsContext();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
@@ -57,7 +57,6 @@ export const ListHuntsFilterForm = ({
       onFinish={handleApplyFilters}
     >
       <SortActions
-        showLabel={!hasFilters}
         id={{
           select: sortBySelectId,
         }}
