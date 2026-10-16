@@ -11,11 +11,9 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 
 export const RecursiveRendererActionMenu = ({
   fieldPath,
-  level,
   value,
 }: {
   fieldPath: string;
-  level: number;
   value: unknown;
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -27,11 +25,9 @@ export const RecursiveRendererActionMenu = ({
     promotedOnSchemaFieldsSet,
   } = usePromoteRowsContext();
 
-  const _canPromote = level > 0 && isPlainObject(value);
-
-  // if (!canPromote) {
-  //   return null;
-  // }
+  if (isPlainObject(value)) {
+    return null;
+  }
 
   const isPromoted = isFieldPromoted(fieldPath);
 
@@ -96,7 +92,9 @@ export const RecursiveRendererActionMenu = ({
           // Spacing
           'ml-2',
           // Chip
-          'bg-background dark:bg-dark-background rounded-full p-0.5',
+          'bg-background dark:bg-dark-background rounded-full p-0.5 border border-foreground/10 dark:border-dark-foreground/10',
+          isPromoted &&
+            'bg-purple-500/10 dark:bg-purple-500/20 border-purple-500/40',
         )}
         type="button"
       >
