@@ -1,4 +1,4 @@
-import { INFINITE_SOURCES_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSources';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteSource } from './api';
 
@@ -20,7 +20,7 @@ export const useDeleteSource = ({
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SOURCES_QUERY_KEY(),
+        queryKey: QUERY_KEYS.sources.default(),
       });
       onSuccess?.();
     },

@@ -1,5 +1,6 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateSourceForm,
@@ -7,7 +8,6 @@ import {
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { SOURCE_DETAIL_QUERY_KEY } from '@/Sources/hooks/useFetchSourceDetail';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
@@ -49,7 +49,10 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
         source_version: response.current,
       });
       void queryClient.invalidateQueries({
-        queryKey: SOURCE_DETAIL_QUERY_KEY(response.source, source_version),
+        queryKey: QUERY_KEYS.sources.source({
+          name: response.source,
+          version: source_version,
+        }),
       });
       refetchSources();
       onSuccess?.(response);

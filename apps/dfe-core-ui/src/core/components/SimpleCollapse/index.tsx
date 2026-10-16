@@ -2,7 +2,7 @@
 
 import { cn } from '@/core/utils/style';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 export interface SimpleCollapseRenderProps {
   setOpen: (open: boolean) => void;
@@ -19,6 +19,7 @@ interface SimpleCollapseProps {
     content?: string;
   };
   destroyOnClose?: boolean;
+  onCollapseChange?: (open: boolean) => void;
 }
 export const SimpleCollapse = ({
   title,
@@ -27,9 +28,14 @@ export const SimpleCollapse = ({
   defaultOpen = false,
   classNames,
   destroyOnClose = false,
+  onCollapseChange,
 }: SimpleCollapseProps) => {
   const [open, setOpen] = useState(defaultOpen);
   const collapseProps: SimpleCollapseRenderProps = { setOpen };
+
+  useEffect(() => {
+    onCollapseChange?.(open);
+  }, [open, onCollapseChange]);
 
   const content =
     typeof children === 'function' ? children(collapseProps) : children;

@@ -17,44 +17,50 @@ type FormData = z.infer<typeof formSchema>;
 
 interface ListRulesFilterFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export const ListRulesFilterForm = ({
   onSuccess,
+  onClose,
 }: ListRulesFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
   const { filters, setFilters } = useListRulesContext();
   const formValidation = useAntdZodResolver<FormData>(formSchema);
 
   const handleApplyFilters = (values: FormData) => {
-    const { severity, search } = values;
+    const { severity, search, source } = values;
     setFilters({
       severity: severity ?? undefined,
       search: search ?? undefined,
+      source: source ?? undefined,
     });
     onSuccess?.();
   };
 
   const handleResetFilters = () => {
-    form.setFieldsValue({ severity: undefined, search: '' });
+    form.setFieldsValue({ severity: undefined, search: '', source: undefined });
     setFilters({
       severity: undefined,
       search: undefined,
+      source: undefined,
     });
+    onClose?.();
   };
 
   useEffect(() => {
     form.setFieldsValue({
       severity: filters.severity ?? undefined,
       search: filters.search ?? '',
+      source: filters.source,
     });
-  }, [form, filters.severity, filters.search]);
+  }, [form, filters.severity, filters.search, filters.source]);
 
   const sortBySelectId = useId();
 
   return (
     <Form
-      key={`${filters.search ?? ''}-${filters.severity ?? ''}`}
+      key={`${filters.search ?? ''}-${filters.severity ?? ''}-${filters.source ?? ''}`}
       form={form}
       onFinish={handleApplyFilters}
     >
@@ -62,6 +68,7 @@ export const ListRulesFilterForm = ({
         id={{
           select: sortBySelectId,
         }}
+        classNames={{ root: 'w-full', select: 'w-full' }}
         sortByValue={filters.sort_by}
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
@@ -81,16 +88,26 @@ export const ListRulesFilterForm = ({
 
       <Form.Item
         name="search"
-        label="Filter by Keyword"
+        label="Keyword"
         rules={[formValidation]}
+        layout="horizontal"
       >
-        <Input placeholder="Name, hunt, or rule id" />
+        <Input
+          size="small"
+          placeholder="Filter keyword: name, hunt, or rule id"
+        />
       </Form.Item>
 
-      <Form.Item name="severity" label="Severity" rules={[formValidation]}>
+      <Form.Item
+        name="severity"
+        label="Severity"
+        rules={[formValidation]}
+        layout="horizontal"
+      >
         <Select
           allowClear
-          placeholder="Any severity"
+          size="small"
+          placeholder="Filter severity"
           options={[
             { label: 'Low', value: 'low' },
             { label: 'Medium', value: 'medium' },
@@ -100,8 +117,13 @@ export const ListRulesFilterForm = ({
         />
       </Form.Item>
 
-      <Form.Item name="source" label="Source" rules={[formValidation]}>
-        <SourceSelect />
+      <Form.Item
+        name="source"
+        label="Source"
+        rules={[formValidation]}
+        layout="horizontal"
+      >
+        <SourceSelect size="small" />
       </Form.Item>
 
       <Form.Item className="flex justify-end">
@@ -111,11 +133,11 @@ export const ListRulesFilterForm = ({
           htmlType="button"
           size="small"
           onClick={handleResetFilters}
-          disabled={!filters.severity && !filters.search}
+          disabled={!filters.severity && !filters.search && !filters.source}
         >
-          Reset Filters
+          Clear Filters
         </Button>
-        <Button type="default" htmlType="submit">
+        <Button size="small" type="default" htmlType="submit">
           Apply Filters
         </Button>
       </Form.Item>
