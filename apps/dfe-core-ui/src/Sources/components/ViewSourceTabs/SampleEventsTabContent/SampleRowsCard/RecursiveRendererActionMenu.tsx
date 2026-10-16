@@ -6,10 +6,17 @@ import { IconCheck, IconDots, IconMinus, IconPlus } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
 export const RecursiveRendererActionMenu = ({
   fieldPath,
+  level,
+  value,
 }: {
   fieldPath: string;
+  level: number;
+  value: unknown;
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -19,6 +26,12 @@ export const RecursiveRendererActionMenu = ({
     isFieldPromoted,
     promotedOnSchemaFieldsSet,
   } = usePromoteRowsContext();
+  const canPromote = level > 0 && isPlainObject(value);
+
+  if (!canPromote) {
+    return null;
+  }
+
   const isPromoted = isFieldPromoted(fieldPath);
 
   const isPromotedOnSchema = promotedOnSchemaFieldsSet.has(fieldPath);
@@ -31,8 +44,6 @@ export const RecursiveRendererActionMenu = ({
       <button
         aria-label={`Actions for ${fieldPath}`}
         className={cn(
-          // Spacing
-          'ml-2',
           // Chip
           'bg-background dark:bg-dark-background rounded-full p-0.5',
         )}

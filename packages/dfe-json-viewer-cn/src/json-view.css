@@ -23,9 +23,13 @@
   color: #374151;
 }
 
-.jv-line .jv-copy {
+.jv-copy {
   opacity: 0;
   transition: opacity 150ms;
+  border: 1px solid #e5e7eb;
+  border-radius: 100%;
+  padding: 2px;
+  cursor: pointer;
 }
 
 .jv-line:hover .jv-copy,

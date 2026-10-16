@@ -7,16 +7,14 @@ import {
   IconCopy,
 } from '@repo/dfe-icons';
 import { Tooltip, cn } from '@repo/dfe-shared-ui';
-import { Button } from 'antd';
 import { useCallback, useState } from 'react';
-import './json-view.css';
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValueType = JsonPrimitive | JsonObjectType | JsonArrayType;
 type JsonObjectType = { [key: string]: JsonValueType };
 type JsonArrayType = JsonValueType[];
 
-interface JsonViewTheme {
+interface JsonViewerTheme {
   key?: string;
   string?: string;
   number?: string;
@@ -26,7 +24,7 @@ interface JsonViewTheme {
   lineHover?: string;
 }
 
-const defaultTheme: Required<JsonViewTheme> = {
+const defaultTheme: Required<JsonViewerTheme> = {
   key: 'jv-key',
   string: 'jv-string',
   number: 'jv-number',
@@ -36,20 +34,20 @@ const defaultTheme: Required<JsonViewTheme> = {
   lineHover: 'jv-line',
 };
 
-interface JsonViewProps {
+interface JsonViewerProps {
   data: unknown;
   className?: string;
   defaultExpanded?: boolean;
   initialDepth?: number;
   indentGuide?: boolean;
-  theme?: JsonViewTheme;
+  theme?: JsonViewerTheme;
   rootName?: string;
   stringTruncate?: number;
 }
 
 interface InternalProps {
   indentGuide: boolean;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
   initialDepth: number;
   stringTruncate: number;
 }
@@ -117,15 +115,14 @@ function CopyButton({ value }: { value: unknown }) {
   return (
     <div className="inline-flex shrink-0" onClick={(e) => e.stopPropagation()}>
       <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-        <Button
-          size="small"
-          shape="circle"
-          type="default"
-          icon={copied ? <IconCheck /> : <IconCopy />}
+        <button
           aria-label={copied ? 'Copied' : 'Copy value'}
           className="jv-copy"
+          type="button"
           onClick={handleCopy}
-        />
+        >
+          {copied ? <IconCheck /> : <IconCopy />}
+        </button>
       </Tooltip>
     </div>
   );
@@ -142,7 +139,7 @@ function JsonLine({
   value: unknown;
   children: React.ReactNode;
   className?: string;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
 }) {
   return (
     <div
@@ -164,12 +161,12 @@ function Bracket({
   theme,
 }: {
   children: React.ReactNode;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
 }) {
   return <span className={cn('font-semibold', theme.bracket)}>{children}</span>;
 }
 
-function Comma({ theme }: { theme: Required<JsonViewTheme> }) {
+function Comma({ theme }: { theme: Required<JsonViewerTheme> }) {
   return <span className={theme.bracket}>,</span>;
 }
 
@@ -184,7 +181,7 @@ function KeyLabel({
   theme,
 }: {
   name: string;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
 }) {
   return (
     <span className={cn('whitespace-pre-wrap', theme.key)}>
@@ -199,7 +196,7 @@ function StringValue({
   theme,
 }: {
   value: string;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
 }) {
   return (
     <span className={cn('whitespace-pre-wrap', theme.string)}>
@@ -215,7 +212,7 @@ function TruncatedString({
 }: {
   value: string;
   truncate: number;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -269,7 +266,7 @@ function JsonPrimitiveValue({
   stringTruncate,
 }: {
   value: unknown;
-  theme: Required<JsonViewTheme>;
+  theme: Required<JsonViewerTheme>;
   stringTruncate: number;
 }) {
   if (value === null) {
@@ -509,7 +506,7 @@ function JsonNode({
   );
 }
 
-function JsonView({
+function JsonViewer({
   data,
   className,
   defaultExpanded = true,
@@ -518,8 +515,11 @@ function JsonView({
   theme: themeOverride,
   rootName,
   stringTruncate = 0,
-}: JsonViewProps) {
-  const theme: Required<JsonViewTheme> = { ...defaultTheme, ...themeOverride };
+}: JsonViewerProps) {
+  const theme: Required<JsonViewerTheme> = {
+    ...defaultTheme,
+    ...themeOverride,
+  };
 
   const resolvedInitialDepth =
     initialDepth !== undefined ? initialDepth : defaultExpanded ? Infinity : 0;
@@ -546,5 +546,5 @@ function JsonView({
   return <div className={cn('font-mono text-sm', className)}>{content}</div>;
 }
 
-export { JsonView };
-export type { JsonViewProps, JsonViewTheme };
+export { JsonViewer };
+export type { JsonViewerProps, JsonViewerTheme };
