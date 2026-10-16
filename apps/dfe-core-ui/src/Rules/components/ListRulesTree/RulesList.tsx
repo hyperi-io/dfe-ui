@@ -7,7 +7,13 @@ import { Spin } from 'antd';
 import { EmptyList } from './EmptyList';
 import { ErrorList } from './ErrorList';
 
-export const RulesList = ({ className }: { className?: string }) => {
+export const RulesList = ({
+  className,
+  isFiltersOpen,
+}: {
+  className?: string;
+  isFiltersOpen?: boolean;
+}) => {
   const {
     data: { items: rules },
     error,
@@ -21,8 +27,9 @@ export const RulesList = ({ className }: { className?: string }) => {
     setFilters,
   } = useListRulesContext();
 
+  const filtersHeight = isFiltersOpen ? 215 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 175,
+    offset: 175 + filtersHeight,
   });
 
   if (isLoading && rules.length === 0) {

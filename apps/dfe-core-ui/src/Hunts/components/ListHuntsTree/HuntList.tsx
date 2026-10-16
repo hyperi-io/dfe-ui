@@ -27,7 +27,7 @@ export const HuntList = ({
     setFilters,
   } = useListHuntsContext();
 
-  const filtersHeight = isFiltersOpen ? 150 : 0;
+  const filtersHeight = isFiltersOpen ? 125 : 0;
 
   const { componentHeight } = useSetComponentHeight({
     offset: 175 + filtersHeight,

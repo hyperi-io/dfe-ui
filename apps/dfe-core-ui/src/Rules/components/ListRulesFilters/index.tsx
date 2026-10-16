@@ -2,7 +2,11 @@ import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { ListRulesFilterForm } from './ListRulesFilterForm';
 
-export const ListRulesFilters = () => {
+export const ListRulesFilters = ({
+  onCollapseChange,
+}: {
+  onCollapseChange?: (open: boolean) => void;
+}) => {
   const {
     data: { items: rules, total },
   } = useListRulesContext();
@@ -17,10 +21,14 @@ export const ListRulesFilters = () => {
           </p>
         </span>
       }
-      className="absolute top-0 left-0 z-10 bg-background dark:bg-dark-background"
+      className="bg-background dark:bg-dark-background"
+      onCollapseChange={onCollapseChange}
     >
       {({ setOpen }) => (
-        <ListRulesFilterForm onSuccess={() => setOpen(false)} />
+        <ListRulesFilterForm
+          onSuccess={() => setOpen(false)}
+          onClose={() => setOpen(false)}
+        />
       )}
     </SimpleCollapse>
   );

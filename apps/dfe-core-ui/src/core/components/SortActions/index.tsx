@@ -127,6 +127,7 @@ export const SortActions = ({
                 onClick={() => {
                   setSortDirection(DEFAULT_DIRECTION);
                   onChange({ sortDirection: '', sortBy: '' });
+                  setShowOptions(false);
                 }}
               />
             </Tooltip>

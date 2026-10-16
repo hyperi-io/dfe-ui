@@ -57,11 +57,13 @@ const filtersToSearchString = (f: ListRulesQueryParams): string => {
   return params.toString();
 };
 
+const hasSortFilters = (f: ListRulesQueryParams) =>
+  f.sort_by !== undefined || f.sort_order !== undefined;
+
+const hasSearchFilters = (f: ListRulesQueryParams) =>
+  f.search !== undefined || f.severity !== undefined || f.source !== undefined;
 const hasAnyFilters = (f: ListRulesQueryParams) =>
-  f.severity !== undefined ||
-  f.search !== undefined ||
-  f.sort_by !== undefined ||
-  f.sort_order !== undefined;
+  hasSearchFilters(f) || hasSortFilters(f);
 
 export interface ListRulesContextValue {
   data: TRuleListResponse;
@@ -119,7 +121,7 @@ export const ListRulesProvider = ({
     );
   }, [searchParams]);
 
-  const hasFilters = useMemo(() => hasAnyFilters(filters), [filters]);
+  const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
 
   const {
     data = DEFAULT_RULE_LIST_RESPONSE,

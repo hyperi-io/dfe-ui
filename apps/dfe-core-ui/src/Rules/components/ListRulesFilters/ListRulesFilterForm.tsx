@@ -17,10 +17,12 @@ type FormData = z.infer<typeof formSchema>;
 
 interface ListRulesFilterFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export const ListRulesFilterForm = ({
   onSuccess,
+  onClose,
 }: ListRulesFilterFormProps) => {
   const [form] = Form.useForm<FormData>();
   const { filters, setFilters } = useListRulesContext();
@@ -41,6 +43,7 @@ export const ListRulesFilterForm = ({
       severity: undefined,
       search: undefined,
     });
+    onClose?.();
   };
 
   useEffect(() => {
@@ -62,6 +65,7 @@ export const ListRulesFilterForm = ({
         id={{
           select: sortBySelectId,
         }}
+        classNames={{ root: 'w-full', select: 'w-full' }}
         sortByValue={filters.sort_by}
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
@@ -81,16 +85,26 @@ export const ListRulesFilterForm = ({
 
       <Form.Item
         name="search"
-        label="Filter by Keyword"
+        label="Keyword"
         rules={[formValidation]}
+        layout="horizontal"
       >
-        <Input placeholder="Name, hunt, or rule id" />
+        <Input
+          size="small"
+          placeholder="Filter keyword: name, hunt, or rule id"
+        />
       </Form.Item>
 
-      <Form.Item name="severity" label="Severity" rules={[formValidation]}>
+      <Form.Item
+        name="severity"
+        label="Severity"
+        rules={[formValidation]}
+        layout="horizontal"
+      >
         <Select
           allowClear
-          placeholder="Any severity"
+          size="small"
+          placeholder="Filter severity"
           options={[
             { label: 'Low', value: 'low' },
             { label: 'Medium', value: 'medium' },
@@ -100,8 +114,13 @@ export const ListRulesFilterForm = ({
         />
       </Form.Item>
 
-      <Form.Item name="source" label="Source" rules={[formValidation]}>
-        <SourceSelect />
+      <Form.Item
+        name="source"
+        label="Source"
+        rules={[formValidation]}
+        layout="horizontal"
+      >
+        <SourceSelect size="small" />
       </Form.Item>
 
       <Form.Item className="flex justify-end">
@@ -115,7 +134,7 @@ export const ListRulesFilterForm = ({
         >
           Reset Filters
         </Button>
-        <Button type="default" htmlType="submit">
+        <Button size="small" type="default" htmlType="submit">
           Apply Filters
         </Button>
       </Form.Item>

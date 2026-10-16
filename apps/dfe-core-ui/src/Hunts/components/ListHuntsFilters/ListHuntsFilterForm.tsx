@@ -81,10 +81,14 @@ export const ListHuntsFilterForm = ({
 
       <Form.Item
         name="search"
-        label="Filter by Keyword"
+        label="Keyword"
         rules={[formValidation]}
+        layout="horizontal"
       >
-        <Input size="small" placeholder="Name, Customers, Rules, etc." />
+        <Input
+          size="small"
+          placeholder="Filter keyword: name, customers or rules"
+        />
       </Form.Item>
 
       <Form.Item className="flex justify-end">
