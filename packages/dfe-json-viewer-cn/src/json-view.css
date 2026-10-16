@@ -23,18 +23,22 @@
   color: #374151;
 }
 
-.jv-copy {
+.jv-actions {
   opacity: 0;
   transition: opacity 150ms;
+}
+
+.jv-line:hover .jv-actions,
+.jv-line:focus-within .jv-actions,
+.jv-line:has(.jv-action-selected) .jv-actions {
+  opacity: 1;
+}
+
+.jv-copy {
   border: 1px solid #e5e7eb;
   border-radius: 100%;
   padding: 2px;
   cursor: pointer;
-}
-
-.jv-line:hover .jv-copy,
-.jv-line:focus-within .jv-copy {
-  opacity: 1;
 }
 
 .dark .jv-key {

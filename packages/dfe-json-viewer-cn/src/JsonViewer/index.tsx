@@ -1,13 +1,9 @@
 'use client';
 
-import {
-  IconCheck,
-  IconChevronRight,
-  IconChevronUp,
-  IconCopy,
-} from '@repo/dfe-icons';
+import { IconChevronRight, IconChevronUp } from '@repo/dfe-icons';
 import { Tooltip, cn } from '@repo/dfe-shared-ui';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
+import '../json-view.css';
 import { useJsonViewerContext } from './context';
 
 type JsonPrimitive = string | number | boolean | null;
@@ -84,32 +80,6 @@ function resolveValue(value: unknown): unknown {
   return value;
 }
 
-function stringifyValue(value: unknown): string {
-  if (typeof value === 'string') return value;
-  // Track the ancestor chain so circular references become "[Circular]"
-  // instead of throwing. `this` inside the replacer is the parent object.
-  const ancestors: unknown[] = [];
-  return JSON.stringify(
-    value,
-    function (this: unknown, _key, val) {
-      while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) {
-        ancestors.pop();
-      }
-      const resolved = resolveValue(val);
-      if (typeof resolved === 'bigint') {
-        const asNumber = Number(resolved);
-        return Number.isSafeInteger(asNumber) ? asNumber : resolved.toString();
-      }
-      if (resolved !== null && typeof resolved === 'object') {
-        if (ancestors.includes(resolved)) return '[Circular]';
-        ancestors.push(resolved);
-      }
-      return resolved;
-    },
-    2,
-  );
-}
-
 function ActionButton({
   value,
   level,
@@ -117,9 +87,14 @@ function ActionButton({
 }: {
   value: unknown;
   level: number;
-  fieldPath: string;
+  fieldPath?: string;
 }) {
   const { action: ActionComponent } = useJsonViewerContext();
+
+  if (!fieldPath) {
+    return null;
+  }
+
   return (
     <div className="inline-flex shrink-0" onClick={(e) => e.stopPropagation()}>
       {ActionComponent && (
@@ -129,29 +104,18 @@ function ActionButton({
   );
 }
 
-function CopyButton({ value }: { value: unknown }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    const text = stringifyValue(value);
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  }, [value]);
-
+function FieldActions({
+  value,
+  level,
+  fieldPath,
+}: {
+  value: unknown;
+  level: number;
+  fieldPath?: string;
+}) {
   return (
-    <div className="inline-flex shrink-0" onClick={(e) => e.stopPropagation()}>
-      <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-        <button
-          aria-label={copied ? 'Copied' : 'Copy value'}
-          className="jv-copy"
-          type="button"
-          onClick={handleCopy}
-        >
-          {copied ? <IconCheck /> : <IconCopy />}
-        </button>
-      </Tooltip>
+    <div className="jv-actions">
+      <ActionButton value={value} level={level} fieldPath={fieldPath} />
     </div>
   );
 }
@@ -181,10 +145,8 @@ function JsonLine({
       style={{ paddingLeft: depth * 24 }}
     >
       <span className="min-w-0 wrap-anywhere">{children}</span>
-      {fieldPath !== undefined && (
-        <ActionButton value={value} level={depth} fieldPath={fieldPath} />
-      )}
-      <CopyButton value={value} />
+
+      <FieldActions value={value} level={depth} fieldPath={fieldPath} />
     </div>
   );
 }
@@ -445,7 +407,7 @@ function CollapsibleNode({
         {fieldPath !== undefined && (
           <ActionButton value={value} level={depth} fieldPath={fieldPath} />
         )}
-        <CopyButton value={value} />
+        <FieldActions value={value} level={depth} fieldPath={fieldPath} />
       </div>
 
       {/* Children with indent guide */}

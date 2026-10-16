@@ -1,3 +1,5 @@
+import './json-view.css';
+
 export { JsonViewer } from './JsonViewer';
 export {
   JsonViewerProvider,
