@@ -9,6 +9,7 @@ import {
 import { Tooltip, cn } from '@repo/dfe-shared-ui';
 import { Button } from 'antd';
 import { useCallback, useState } from 'react';
+import './json-view.css';
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValueType = JsonPrimitive | JsonObjectType | JsonArrayType;
@@ -26,13 +27,13 @@ interface JsonViewTheme {
 }
 
 const defaultTheme: Required<JsonViewTheme> = {
-  key: 'text-blue-700 dark:text-blue-400',
-  string: 'text-green-700 dark:text-green-400',
-  number: 'text-orange-700 dark:text-amber-400',
-  boolean: 'text-purple-700 dark:text-purple-400',
-  null: 'text-gray-500 dark:text-gray-400 italic',
-  bracket: 'text-gray-700 dark:text-gray-300',
-  lineHover: 'hover:bg-muted/50',
+  key: 'jv-key',
+  string: 'jv-string',
+  number: 'jv-number',
+  boolean: 'jv-boolean',
+  null: 'jv-null',
+  bracket: 'jv-bracket',
+  lineHover: 'jv-line',
 };
 
 interface JsonViewProps {
@@ -122,7 +123,7 @@ function CopyButton({ value }: { value: unknown }) {
           type="default"
           icon={copied ? <IconCheck /> : <IconCopy />}
           aria-label={copied ? 'Copied' : 'Copy value'}
-          className="opacity-0 transition-opacity group-hover/line:opacity-100 group-has-focus-visible/line:opacity-100 focus-visible:opacity-100"
+          className="jv-copy"
           onClick={handleCopy}
         />
       </Tooltip>

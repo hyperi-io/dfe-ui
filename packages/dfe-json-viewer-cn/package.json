@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
-  "sideEffects": false,
+  "sideEffects": ["**/*.css"],
   "exports": {
     ".": {
       "types": "./types/index.d.ts",

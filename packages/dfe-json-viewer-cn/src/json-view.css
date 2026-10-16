@@ -1,0 +1,58 @@
+.jv-key {
+  color: #1d4ed8;
+}
+
+.jv-string {
+  color: #15803d;
+}
+
+.jv-number {
+  color: #c2410c;
+}
+
+.jv-boolean {
+  color: #7e22ce;
+}
+
+.jv-null {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.jv-bracket {
+  color: #374151;
+}
+
+.jv-line .jv-copy {
+  opacity: 0;
+  transition: opacity 150ms;
+}
+
+.jv-line:hover .jv-copy,
+.jv-line:focus-within .jv-copy {
+  opacity: 1;
+}
+
+.dark .jv-key {
+  color: #60a5fa;
+}
+
+.dark .jv-string {
+  color: #4ade80;
+}
+
+.dark .jv-number {
+  color: #fbbf24;
+}
+
+.dark .jv-boolean {
+  color: #c084fc;
+}
+
+.dark .jv-null {
+  color: #9ca3af;
+}
+
+.dark .jv-bracket {
+  color: #d1d5db;
+}
