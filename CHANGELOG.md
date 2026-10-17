@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.21](https://github.com/hyperi-io/dfe-ui/compare/v1.7.20...v1.7.21) (2026-10-17)
+
+### Bug Fixes
+
+* catalogue reach, fetcher Processing tab, pool labels ([#564](https://github.com/hyperi-io/dfe-ui/issues/564)) ([c84ce34](https://github.com/hyperi-io/dfe-ui/commit/c84ce34a6ce9cb69e2df647f94cb852985a237a0))
+
 ## [1.7.20](https://github.com/hyperi-io/dfe-ui/compare/v1.7.19...v1.7.20) (2026-10-17)
 
 ### Bug Fixes
