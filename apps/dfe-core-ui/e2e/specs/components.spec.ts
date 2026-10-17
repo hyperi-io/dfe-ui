@@ -2,7 +2,11 @@ import { Page, expect, test } from '@playwright/test';
 
 import { seedAppManagement } from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
-import { appInstances, forgetEngineToken } from '../config/engineApi.helpers';
+import {
+  appCatalogue,
+  appInstances,
+  forgetEngineToken,
+} from '../config/engineApi.helpers';
 import { loginAs } from '../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
@@ -37,6 +41,32 @@ test('Pools', async ({ page }) => {
   await expect(
     page.getByRole('tab', { name: /dfe-transform-vrl/ }),
   ).toBeHidden();
+});
+
+/* The label is its own line in the tab, above `Instance <name>` */
+const poolTab = (page: Page, label: string) =>
+  page.getByRole('tab').filter({ has: page.getByText(label, { exact: true }) });
+
+test('A pool carries the name the engine gives it, else its id', async ({
+  page,
+}) => {
+  await openComponents(page);
+
+  forgetEngineToken();
+  const pools = (await appCatalogue()).filter(
+    (app) => app.multiplicity === 'single' && app.instances.length > 0,
+  );
+  expect(pools.length).toBeGreaterThan(0);
+
+  for (const app of pools) {
+    await expect(poolTab(page, app.display_name || app.service)).toHaveCount(
+      app.instances.length,
+    );
+    /* A display name replaces the id in the label, never sits beside it */
+    if (app.display_name) {
+      await expect(poolTab(page, app.service)).toHaveCount(0);
+    }
+  }
 });
 
 /*
