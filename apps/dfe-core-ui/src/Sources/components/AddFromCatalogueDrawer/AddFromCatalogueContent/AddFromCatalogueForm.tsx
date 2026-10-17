@@ -1,3 +1,4 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -9,8 +10,9 @@ import {
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { App, Button, Input, Select } from 'antd';
+import { Fragment } from 'react';
 import z from 'zod';
-import { INTAKE_OPTIONS } from './constants';
+import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
 const formSchema = z.object({
   intake: z
@@ -104,7 +106,16 @@ export const AddFromCatalogueForm = ({
             {entry.intakes && (
               <>
                 <dt>Intakes</dt>
-                <dd>{entry.intakes.join(',')}</dd>
+                <dd>
+                  {entry.intakes
+                    .map(
+                      (intake) =>
+                        INTAKE_OPTIONS_MAP[
+                          intake as keyof typeof INTAKE_OPTIONS_MAP
+                        ] ?? intake,
+                    )
+                    .join(', ')}
+                </dd>
               </>
             )}
 
@@ -118,7 +129,7 @@ export const AddFromCatalogueForm = ({
             {entry.transforms && (
               <>
                 <dt>Transforms</dt>
-                <dd>{entry.transforms.join(',')}</dd>
+                <dd>{entry.transforms.join(', ')}</dd>
               </>
             )}
 
@@ -129,12 +140,12 @@ export const AddFromCatalogueForm = ({
               </>
             )}
 
-            {entry.beats && Object.keys(entry.beats).length > 0 && (
-              <>
-                <dt>Beats</dt>
-                <dd>{JSON.stringify(entry.beats)}</dd>
-              </>
-            )}
+            {Object.entries(entry.beats ?? {}).map(([key, value]) => (
+              <Fragment key={key}>
+                <dt>{`Beats ${key}`}</dt>
+                <dd>{value}</dd>
+              </Fragment>
+            ))}
           </dl>
         }
       />
@@ -170,7 +181,11 @@ export const AddFromCatalogueForm = ({
           <Input />
         </Form.Item>
 
-        {error && <NotificationCard title={error.message} type="error" />}
+        {error && (
+          <Form.Item>
+            <ApiErrorNotification error={error} />
+          </Form.Item>
+        )}
 
         <div className="flex justify-end gap-2">
           <Button type="default" htmlType="button" onClick={() => onCancel?.()}>

@@ -6,9 +6,9 @@ import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
-import { Button, Input, Select, Tag } from 'antd';
+import { Button, Input, Select, Spin, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
@@ -27,15 +27,16 @@ export const AddFromCatalogueTable = ({
   const {
     data: { items: entries, total },
     isLoading,
-    fetchNextPage: fetchNextPageSourceCatalogues,
-    hasNextPage: hasNextPageSourceCatalogues,
-    isFetchingNextPage: isFetchingNextPageSourceCatalogues,
+    hasNextPage,
+    isFetchingNextPage,
+    loadMoreRef,
   } = useFetchInfiniteSourceCatalogues({
     search,
     intake: intakeFilter,
     per_page: 20,
   });
 
+  // A wide row scrolls sideways, so the name and its Select stay pinned in view.
   const columns: ColumnsType<TSourceCatalogueItem> = entries?.length
     ? [
         {
@@ -43,6 +44,7 @@ export const AddFromCatalogueTable = ({
           dataIndex: 'name',
           key: 'name',
           width: '50%',
+          fixed: 'start',
           render: (name) => (
             <Highlighter searchWords={[search]} textToHighlight={name} />
           ),
@@ -87,34 +89,20 @@ export const AddFromCatalogueTable = ({
           title: '',
           key: 'select',
           width: '75px',
+          fixed: 'end',
           render: (_: unknown, entry: TSourceCatalogueItem) => (
-            <Button size="small" type="primary" onClick={() => onSelect(entry)}>
+            <Button
+              size="small"
+              type="primary"
+              aria-label={`Select ${entry.name}`}
+              onClick={() => onSelect(entry)}
+            >
               Select
             </Button>
           ),
         },
       ]
     : [];
-
-  const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-      const el = e.currentTarget;
-      const { scrollTop, scrollHeight, clientHeight } = el;
-
-      if (!hasNextPageSourceCatalogues || isFetchingNextPageSourceCatalogues)
-        return;
-
-      // Fetch data when user is near the bottom
-      if (scrollHeight - scrollTop - clientHeight < 40) {
-        void fetchNextPageSourceCatalogues();
-      }
-    },
-    [
-      hasNextPageSourceCatalogues,
-      isFetchingNextPageSourceCatalogues,
-      fetchNextPageSourceCatalogues,
-    ],
-  );
 
   return (
     <Table<TSourceCatalogueItem>
@@ -129,8 +117,8 @@ export const AddFromCatalogueTable = ({
         ),
       }}
       title={() => (
-        <div className="flex justify-between items-center">
-          <span className="font-medium">
+        <div className="flex justify-between items-center gap-4">
+          <span className="font-medium whitespace-nowrap">
             {entries?.length} of {total} entries shown
           </span>
           <div className="flex items-center gap-2">
@@ -155,7 +143,21 @@ export const AddFromCatalogueTable = ({
       rowKey="name"
       columns={columns}
       dataSource={entries}
-      onScroll={handleScroll}
+      // Watched rather than scrolled to: a page that fills no scroll must still load the next.
+      summary={() =>
+        hasNextPage ? (
+          <tr>
+            <td colSpan={columns.length}>
+              <div
+                ref={loadMoreRef}
+                className="flex h-8 items-center justify-center"
+              >
+                {isFetchingNextPage && <Spin size="small" />}
+              </div>
+            </td>
+          </tr>
+        ) : null
+      }
     />
   );
 };
