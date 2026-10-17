@@ -12,12 +12,13 @@ import { Spin } from 'antd';
 import { ReactNode } from 'react';
 
 /**
- * Everything that processes THIS source: how the receiver identifies it, and
- * the per-source apps that carry it onward.
+ * Everything that processes THIS source, in the order its records meet it:
+ * where they arrive, then the transform.
  *
- * The receiver appears here and on Components by design. Its per-source rule
- * belongs to the source; its pool belongs to the fleet. Showing only one of
- * them either hides the routing or duplicates the pool.
+ * A receiver source arrives through the receiver's rule for it, shown here and
+ * on Components by design: the rule belongs to the source, the pool to the
+ * fleet. A fetcher source arrives through its own fetcher and never passes the
+ * receiver, so it gets no routing card.
  */
 export const SourceProcessingTabContent = ({
   source,
@@ -35,10 +36,10 @@ export const SourceProcessingTabContent = ({
   const { data: apps, isLoading, error } = useFetchApps();
   const { originType } = useSourceDetailsContext();
 
-  // Source detail chrome (title, highlight, tab strip, panel padding) sits
-  // above this scrollport; keep the box inside the clipped panel.
+  // The source detail chrome ends 260px down and the page clips 45px short of
+  // the window, so an offset under 305 leaves the last rows unreachable.
   const { componentHeight } = useSetComponentHeight({
-    offset: 200,
+    offset: 320,
   });
 
   if (isLoading) return <Spin size="small" />;
@@ -62,26 +63,28 @@ export const SourceProcessingTabContent = ({
   const standaloneApps = perSourceApps.filter(
     (app) => !isTransformApp(app) && app.service.includes(originType ?? ''),
   );
+  const isFetcherSource = originType === 'fetcher';
 
   return (
     <CustomScrollbar height={componentHeight} className="flex flex-col">
-      {singleApps.flatMap((app) =>
-        app.instances.map((instance) => (
-          <SourceRoutingCard
-            key={`${app.service}/${instance}`}
-            service={app.service}
-            instance={instance}
-            source={source}
-            hasCompiledRouting={app.has_compiled_routing}
-          />
-        )),
-      )}
-
-      {transformSlot}
+      {!isFetcherSource &&
+        singleApps.flatMap((app) =>
+          app.instances.map((instance) => (
+            <SourceRoutingCard
+              key={`${app.service}/${instance}`}
+              service={app.service}
+              instance={instance}
+              source={source}
+              hasCompiledRouting={app.has_compiled_routing}
+            />
+          )),
+        )}
 
       {standaloneApps.map((app) => (
         <SourceAppInstance key={app.service} app={app} source={source} />
       ))}
+
+      {transformSlot}
 
       {perSourceApps.length === 0 && (
         <NotificationCard

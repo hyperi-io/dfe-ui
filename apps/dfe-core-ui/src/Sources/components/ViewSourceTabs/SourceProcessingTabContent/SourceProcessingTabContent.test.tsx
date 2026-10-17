@@ -1,6 +1,9 @@
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { SourceDetailsProvider } from '@/Sources/contexts/SourceDetailsContext';
-import { render, screen } from '@testing-library/react';
+import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { render, screen, waitFor } from '@testing-library/react';
+import { useSearchParams } from 'next/navigation';
 import {
   afterAll,
   afterEach,
@@ -85,5 +88,114 @@ describe('SourceProcessingTabContent', () => {
 
     await screen.findByRole('heading', { name: 'dfe-fetcher' });
     expect(screen.queryByText('Instance default')).not.toBeInTheDocument();
+  });
+});
+
+const SELECTED = 'seedfetch';
+
+const sourceOn = (origin: 'receiver' | 'fetcher'): TSourceVersionDetail => ({
+  source: SELECTED,
+  resource_type: 'custom',
+  display_name: 'Seed Source',
+  description: '',
+  enabled: true,
+  current: '1.0.0',
+  deployed_version: '1.0.0',
+  selected: '1.0.0',
+  versions: ['1.0.0'],
+  state: 'active',
+  current_table_topic_type: 'own',
+  version: {
+    origin,
+    date_time: '2026-10-17T00:00:00Z',
+    archive: false,
+    schema: {
+      meta_schema: 'meta/syslog',
+      meta_schema_version: '1.0.0',
+      engine: '',
+    },
+    fetcher:
+      origin === 'fetcher'
+        ? { source_type: 'crates_io', topic: 'own', config: {} }
+        : null,
+    match:
+      origin === 'receiver'
+        ? { field: 'tags.collector.type', operator: 'equals', value: SELECTED }
+        : null,
+  },
+});
+
+/** The tab for a selected source that the engine reports on `origin`. */
+const renderTabOn = (origin: 'receiver' | 'fetcher') => {
+  vi.mocked(useSearchParams).mockReturnValue(
+    new URLSearchParams({
+      source_name: SELECTED,
+      source_version: '1.0.0',
+    }) as ReturnType<typeof useSearchParams>,
+  );
+  server.use(
+    API_CONFIG_MOCKS.sources.sourceVersion.get.success({
+      name: SELECTED,
+      version: '1.0.0',
+      mockedResponse: sourceOn(origin),
+    }),
+  );
+  return render(
+    <SourceProcessingTabContent
+      source={SELECTED}
+      transformSlot={<div data-testid="transform-slot" />}
+    />,
+    { wrapper },
+  );
+};
+
+describe('SourceProcessingTabContent by origin', () => {
+  afterEach(() => {
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams() as ReturnType<typeof useSearchParams>,
+    );
+  });
+
+  it('shows a fetcher source no receiver routing', async () => {
+    renderTabOn('fetcher');
+
+    expect(
+      await screen.findByRole('heading', { name: 'dfe-fetcher' }),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: 'dfe-receiver routing' }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(screen.queryByText('no rule')).not.toBeInTheDocument();
+  });
+
+  it('leads a fetcher source with its fetcher, ahead of the transform', async () => {
+    renderTabOn('fetcher');
+
+    const fetcher = await screen.findByRole('heading', { name: 'dfe-fetcher' });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: 'dfe-receiver routing' }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(
+      fetcher.compareDocumentPosition(screen.getByTestId('transform-slot')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('keeps the receiver routing on a receiver source and drops the fetcher', async () => {
+    renderTabOn('receiver');
+
+    expect(
+      await screen.findByRole('heading', { name: 'dfe-receiver routing' }),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: 'dfe-fetcher' }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId('transform-slot')).toBeInTheDocument();
   });
 });
