@@ -35,6 +35,25 @@ describe('formSchema source details', () => {
   });
 });
 
+describe('formSchema meta schema', () => {
+  // A clone or an edit seeds an absent meta schema as '', where a create leaves it unset.
+  test('an empty meta schema is refused as an unset one is', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      origin: 'fetcher',
+      fetcher: { source_type: 'crates_io', topic: 'own', config: '' },
+      schema: { meta_schema: '', meta_schema_version: '' },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
+      'Meta schema version is required',
+    ]);
+  });
+});
+
 describe('formSchema origin', () => {
   test('a receiver source needs its match rule and ignores the fetcher block', () => {
     const data: CreateUpdateSourceFormData = {

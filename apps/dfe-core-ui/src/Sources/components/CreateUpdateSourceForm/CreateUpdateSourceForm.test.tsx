@@ -126,6 +126,54 @@ describe('CreateUpdateSourceForm views', () => {
   });
 });
 
+describe('CreateUpdateSourceForm meta schema', () => {
+  // Its backstops (15s to render the own-topic tabs, 10s to refuse) outlast the 20s default.
+  it(
+    'stops a clone of an own-topic fetcher with no meta schema, as a create stops',
+    { timeout: 45_000 },
+    async () => {
+      server.use(...ownTableHandlers);
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      // What the clone drawer seeds from a source saved with no meta schema.
+      render(
+        <CreateUpdateSourceForm
+          onFinish={onFinish}
+          isPending={false}
+          error={null}
+          buttonLabel="Clone Source"
+          initialValues={{
+            source: 'legacyfetch-copy',
+            enabled: true,
+            archive: false,
+            origin: 'fetcher',
+            fetcher: { source_type: 'crates_io', topic: 'own', config: '' },
+            schema: { meta_schema: '', meta_schema_version: '' },
+          }}
+        />,
+        { wrapper },
+      );
+
+      await screen.findByRole(
+        'tab',
+        { name: /Table Settings/ },
+        { timeout: 15_000 },
+      );
+      await user.click(screen.getByRole('button', { name: 'Clone Source' }));
+
+      expect(
+        await screen.findByText(
+          /validation errors in the following tabs: Table Settings/,
+          {},
+          { timeout: 10_000 },
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Meta schema is required')).toBeInTheDocument();
+      expect(onFinish).not.toHaveBeenCalled();
+    },
+  );
+});
+
 describe('CreateUpdateSourceForm transform', () => {
   // Its two backstops (15s to render the own-table tabs, 10s to submit) outlast the 20s default.
   it(

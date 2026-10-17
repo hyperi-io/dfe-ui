@@ -64,13 +64,20 @@ export type HyperdxTeams = {
   }[];
 };
 
-/** Which instances of each app the deploy repo carries. */
-export type AppRow = { service: string; instances: string[] };
-
-export const appInstances = async (service: string) => {
-  const rows = await engine<AppRow[]>('GET', '/api/v1/apps?per_page=50');
-  return rows.find((row) => row.service === service)?.instances ?? [];
+/** Which instances of each app the deploy repo carries, and the name a console shows for it. */
+export type AppRow = {
+  service: string;
+  display_name?: string | null;
+  multiplicity: string;
+  instances: string[];
 };
+
+export const appCatalogue = () =>
+  engine<AppRow[]>('GET', '/api/v1/apps?per_page=50');
+
+export const appInstances = async (service: string) =>
+  (await appCatalogue()).find((row) => row.service === service)?.instances ??
+  [];
 
 /**
  * Container names carry the stack's own prefix, which is why it is a setting

@@ -6,6 +6,8 @@ import { seedAppManagement } from '../config/appManagement.helpers';
 
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
+/** The fetcher-based fixture source, deployed, with its fetcher instance seeded. */
+const SEED_FETCHER_SOURCE = 'seedfetch';
 
 // RED on a docker-slim deployment, and correctly so: seed_source_with_transform
 // also seeds a fetcher source, and that tier does not offer dfe-fetcher, so the
@@ -25,16 +27,16 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'initial_user');
 });
 
-const openProcessingTab = async (page: Page) => {
+const openProcessingTab = async (page: Page, source = SEED_SOURCE) => {
   await page.goto(`${BASE_URL}/sources`);
   // The row's hover actions sit over its right-hand side, so the click lands on
   // the label's leading edge rather than the row centre.
   await page
-    .getByTestId(`source-tree-item-${SEED_SOURCE}`)
+    .getByTestId(`source-tree-item-${source}`)
     .click({ position: { x: 2, y: 2 } });
   // Selecting a source rewrites the query, and every tab reads the selection from it.
   await expect(page).toHaveURL(
-    (url) => url.searchParams.get('source_name') === SEED_SOURCE,
+    (url) => url.searchParams.get('source_name') === source,
   );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
@@ -119,25 +121,58 @@ test('An app that declares no file set gets no editor', async ({ page }) => {
   await expect(
     page.getByRole('radio', { name: /dfe-transform-vector/ }),
   ).toBeVisible();
-  /* dfe-fetcher is per-source too, and it keeps a card of its own */
+  /* dfe-fetcher belongs to fetcher sources, so a receiver source shows no card for it */
   await expect(
     page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
-  ).toBeVisible();
+  ).toBeHidden();
 
   /* Only the transform with an instance carries panels, and only it declares files */
   await expect(page.getByText('Files', { exact: true })).toHaveCount(1);
 });
 
-test('Deploy is offered only by the app that takes one', async ({ page }) => {
+test('A transform offers no deploy of its own', async ({ page }) => {
   await openProcessingTab(page);
 
-  /* A transform offers neither: the source names which one runs, and the engine
-     deploys and removes the instance with it. */
+  /* The source names which transform runs, and the engine deploys and removes
+     the instance with it. A receiver source has no fetcher card either. */
   await expect(
     page.getByRole('button', { name: 'Deploy', exact: true }),
-  ).toHaveCount(1);
-  await expect(page.getByText('Not deployed for this source.')).toHaveCount(1);
+  ).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Undeploy', exact: true }),
   ).toHaveCount(0);
+});
+
+test('A fetcher source starts at its fetcher, with no receiver routing', async ({
+  page,
+}) => {
+  await openProcessingTab(page, SEED_FETCHER_SOURCE);
+
+  const fetcher = page.getByRole('heading', {
+    name: 'dfe-fetcher',
+    exact: true,
+  });
+  await expect(fetcher).toBeVisible();
+  /* The seed deploys this source's fetcher instance, so the card offers its removal */
+  await expect(
+    page.getByRole('button', { name: 'Undeploy', exact: true }),
+  ).toHaveCount(1);
+
+  /* Its records never pass the receiver, so there is no rule there to report */
+  await expect(
+    page.getByRole('heading', { name: 'dfe-receiver routing', exact: true }),
+  ).toBeHidden();
+  await expect(page.getByText('no rule', { exact: true })).toHaveCount(0);
+
+  /* The fetcher is where its records start, so it leads and the transform follows */
+  const transform = page.getByRole('heading', {
+    name: 'Transform',
+    exact: true,
+  });
+  const [fetcherTop, transformTop] = await Promise.all(
+    [fetcher, transform].map(
+      async (heading) => (await heading.boundingBox())?.y ?? Number.NaN,
+    ),
+  );
+  expect(fetcherTop).toBeLessThan(transformTop);
 });

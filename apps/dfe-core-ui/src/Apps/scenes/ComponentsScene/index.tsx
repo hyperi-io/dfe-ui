@@ -57,6 +57,8 @@ export const ComponentsScene = () => {
       app.instances.map((instance) => ({
         key: `${app.service}/${instance}`,
         service: app.service,
+        // A label only: every card below reads and writes by the service id.
+        label: app.display_name || app.service,
         instance,
         scaleDeployed: app.scale_deployed,
       })),
@@ -96,7 +98,7 @@ export const ComponentsScene = () => {
                 key: pool.key,
                 label: (
                   <NavigationTabLabel
-                    label={pool.service}
+                    label={pool.label}
                     description={`Instance ${pool.instance}`}
                   />
                 ),

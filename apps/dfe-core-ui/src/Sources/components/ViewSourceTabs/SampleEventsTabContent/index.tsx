@@ -18,8 +18,10 @@ export const SampleEventsTabContent = () => {
 
   const { fieldsToPromote } = usePromoteRowsContext();
 
+  // The source detail chrome ends 260px down and the page clips 45px short of
+  // the window, so an offset under 305 leaves the last rows unreachable.
   const { componentHeight } = useSetComponentHeight({
-    offset: 200,
+    offset: 320,
   });
 
   if (isLoadingSampleRows) {

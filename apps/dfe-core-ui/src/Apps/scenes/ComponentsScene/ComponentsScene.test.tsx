@@ -26,6 +26,51 @@ describe('ComponentsScene', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('labels a pool by the name the engine gives it, else by its id', async () => {
+    server.use(
+      API_CONFIG_MOCKS.apps.default.get.success({
+        mockedResponse: [
+          {
+            service: 'dfe-receiver',
+            display_name: null,
+            scale_deployed: true,
+            multiplicity: 'single',
+            has_compiled_routing: true,
+            routing_scope: 'stack',
+            optional: false,
+            offered: true,
+            file_sets: [],
+            instances: ['default'],
+          },
+          {
+            service: 'hyperdx',
+            display_name: 'Search',
+            scale_deployed: false,
+            multiplicity: 'single',
+            has_compiled_routing: false,
+            routing_scope: 'stack',
+            optional: false,
+            offered: true,
+            file_sets: [],
+            instances: ['default'],
+          },
+        ],
+      }),
+    );
+
+    render(<ComponentsScene />, { wrapper });
+
+    expect(
+      await screen.findByRole('tab', { name: /^Search/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', { name: /hyperdx/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: /^dfe-receiver/ }),
+    ).toBeInTheDocument();
+  });
+
   it('shows status, metrics, scaling and history for the selected pool', async () => {
     render(<ComponentsScene />, { wrapper });
 
