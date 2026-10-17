@@ -61,6 +61,7 @@ describe('.useUpdateAccount', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         oidc_id: 'string',
       };
 

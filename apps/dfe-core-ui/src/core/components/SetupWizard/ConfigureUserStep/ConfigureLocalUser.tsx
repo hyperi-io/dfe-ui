@@ -40,6 +40,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
       ...values,
       phone: values.phone ?? '',
       name: values.name ?? '',
+      org: '',
     });
   };
 

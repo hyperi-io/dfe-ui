@@ -1,13 +1,14 @@
+import { ApiError } from '@/core/config/api/client';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import {
   expectNameRule,
   NAME_RULE_TEST_TIMEOUT_MS,
 } from '@/core/utils/test-utils/expectNameRule';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
-import { CreateUpdateHuntForm } from '.';
+import { CreateUpdateHuntForm, UNKNOWN_ORG_CODE } from '.';
 
 // The pickers read organisations, sources and rules, and the name rule needs none of them.
 vi.mock('@/core/components/OrganisationSelect', () => ({
@@ -71,6 +72,61 @@ describe('CreateUpdateHuntForm name', () => {
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
     expect(
       screen.queryByText(RULE_HUNT_NAME_VALIDATOR.message('Name')),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('CreateUpdateHuntForm refusals', () => {
+  const organisationsField = () => {
+    const item = screen
+      .getByText('Organisations')
+      .closest<HTMLElement>('.ant-form-item');
+    if (!item) throw new Error('no Organisations form item');
+    return item;
+  };
+
+  test('shows an unregistered organisation under the organisations it names', async () => {
+    const refusal = "Not a registered org: 'gone-co'";
+    render(
+      <CreateUpdateHuntForm
+        onFinish={vi.fn()}
+        isPending={false}
+        error={
+          new ApiError(422, 'Unprocessable Entity', {
+            code: UNKNOWN_ORG_CODE,
+            message: refusal,
+          })
+        }
+      />,
+      { wrapper },
+    );
+
+    expect(
+      await within(organisationsField()).findByText(refusal),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(refusal)).toHaveLength(1);
+  });
+
+  test('keeps any other refusal below the form', async () => {
+    render(
+      <CreateUpdateHuntForm
+        onFinish={vi.fn()}
+        isPending={false}
+        error={
+          new ApiError(409, 'Conflict', {
+            code: 'conflict',
+            message: "Hunt 'brute_force' already exists",
+          })
+        }
+      />,
+      { wrapper },
+    );
+
+    expect(
+      await screen.findByText("Hunt 'brute_force' already exists"),
+    ).toBeInTheDocument();
+    expect(
+      within(organisationsField()).queryByText(/already exists/),
     ).not.toBeInTheDocument();
   });
 });

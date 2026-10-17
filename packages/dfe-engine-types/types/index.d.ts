@@ -639,13 +639,15 @@ export interface paths {
         };
         /**
          * List Api Keys
-         * @description List API keys (admin only), paginated. No key hashes or full keys returned.
+         * @description List API keys, paginated. No key hashes or full keys returned.
          */
         get: operations["list_api_keys_api_v1_auth_api_keys_get"];
         put?: never;
         /**
          * Create Api Key
-         * @description Create a new API key (admin only). Returns the full key exactly once.
+         * @description Create a new API key. Returns the full key exactly once.
+         *
+         *     422 ``unknown_org`` when ``org`` names no registered org.
          */
         post: operations["create_api_key_api_v1_auth_api_keys_post"];
         delete?: never;
@@ -666,7 +668,7 @@ export interface paths {
         post?: never;
         /**
          * Revoke Api Key
-         * @description Revoke (delete) an API key by short token (admin only).
+         * @description Revoke (delete) an API key by short token.
          */
         delete: operations["revoke_api_key_api_v1_auth_api_keys__short_token__delete"];
         options?: never;
@@ -703,13 +705,13 @@ export interface paths {
         };
         /**
          * List Roles
-         * @description List roles with pagination (admin only).
+         * @description List roles with pagination, for a caller holding role:read.
          */
         get: operations["list_roles_api_v1_auth_roles_get"];
         put?: never;
         /**
          * Create Role
-         * @description Create a new RBAC role (admin only).
+         * @description Create a new RBAC role granting no more than the caller holds.
          */
         post: operations["create_role_api_v1_auth_roles_post"];
         delete?: never;
@@ -727,18 +729,18 @@ export interface paths {
         };
         /**
          * Get Role
-         * @description Get one role by name (admin only).
+         * @description Get one role by name, for a caller holding role:read.
          */
         get: operations["get_role_api_v1_auth_roles__name__get"];
         /**
          * Update Role
-         * @description Update a role (admin only).
+         * @description Update a role. A change to what it grants needs the caller to hold it before and after.
          */
         put: operations["update_role_api_v1_auth_roles__name__put"];
         post?: never;
         /**
          * Delete Role
-         * @description Delete a role (admin only).
+         * @description Delete a role no group holds, for a caller holding role:delete.
          */
         delete: operations["delete_role_api_v1_auth_roles__name__delete"];
         options?: never;
@@ -896,6 +898,10 @@ export interface paths {
          *
          *     If HyperDX integration is enabled, the lifecycle manager handles
          *     team creation as part of org provisioning.  Failure is non-fatal.
+         *
+         *     A hunt already naming the org, such as one whose org was deleted, has the new
+         *     org's tenant ids stored first. A production+team posture routes that hunt
+         *     change to review, and the ``X-DFE-Review-Required`` header says so.
          */
         post: operations["create_org_api_v1_orgs_post"];
         delete?: never;
@@ -943,12 +949,22 @@ export interface paths {
         /**
          * Update Org
          * @description Update an organisation (admin only).
+         *
+         *     The org's tenant ids are stored afresh in every hunt naming it before the org is
+         *     written, which also repairs a hunt holding stale ones. A production+team posture
+         *     routes that hunt change to review, and the ``X-DFE-Review-Required`` header says
+         *     so. An org's name is its identity, so it cannot be changed here.
          */
         put: operations["update_org_api_v1_orgs__name__put"];
         post?: never;
         /**
          * Delete Org
          * @description Delete an organisation (admin only).
+         *
+         *     Every hunt naming the org loses its stored tenant ids first and keeps the name,
+         *     so it fails as ``unknown_customers`` and holds its watermark until it is edited,
+         *     rather than reading the rows the org left behind. A production+team posture
+         *     routes that hunt change to review, and the ``X-DFE-Review-Required`` header says so.
          */
         delete: operations["delete_org_api_v1_orgs__name__delete"];
         options?: never;
@@ -1748,7 +1764,9 @@ export interface paths {
          *
          *     The service sanitizes the SQL, applies CEL->SQL transpilation,
          *     validates column references, and optionally estimates query cost. A rule
-         *     whose SQL the hunt runner could not compile is refused with 422.
+         *     whose SQL the hunt runner could not compile is refused with 422. The cost
+         *     preview counts only the orgs the hunts running the rule read, cut to the orgs
+         *     its author may read.
          *
          *     A production+team write is routed to a review branch instead of the branch the
          *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
@@ -2299,7 +2317,8 @@ export interface paths {
          * @description Create a new hunt configuration YAML.
          *
          *     A production+team write is routed to a review branch instead of the branch the
-         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
+         *     ``unknown_org`` when a customer names no registered org.
          */
         post: operations["create_hunt_api_v1_hunts_post"];
         delete?: never;
@@ -2322,10 +2341,11 @@ export interface paths {
         get: operations["get_hunt_api_v1_hunts__name__get"];
         /**
          * Update Hunt
-         * @description Replace an existing hunt configuration.
+         * @description Replace an existing hunt configuration, resolving its customers afresh.
          *
          *     A production+team write is routed to a review branch instead of the branch the
-         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so.
+         *     runner git-syncs, and the ``X-DFE-Review-Required`` header says so. 422
+         *     ``unknown_org`` when a customer names no registered org.
          */
         put: operations["update_hunt_api_v1_hunts__name__put"];
         post?: never;
@@ -2448,7 +2468,9 @@ export interface paths {
          * @description Execute a parameterized view and return JSON results.
          *
          *     The ``org_id`` parameter is always injected from the authenticated
-         *     user's context -- it cannot be overridden by the client.
+         *     user's context -- it cannot be overridden by the client. It is the org the
+         *     session's account is bound to, and a view taking it runs only when the caller's
+         *     groups grant that org or it reads every org (``granted_bound_org``).
          */
         post: operations["execute_view_api_v1_queries_views__label__execute_post"];
         delete?: never;
@@ -3829,7 +3851,7 @@ export interface paths {
          *     A production+team run commits each generated rule and hunt to its own review
          *     branch rather than the branch the hunt runner syncs; the report carries every
          *     branch and PR, and ``X-DFE-Review-Required`` says so on a run that completed
-         *     inline.
+         *     inline. 422 ``unknown_org`` when ``hunt_customers`` names no registered org.
          */
         post: operations["propagate_api_v1_sigma_propagate_post"];
         delete?: never;
@@ -5556,6 +5578,12 @@ export interface components {
             enabled: boolean;
             /** Groups */
             groups: string[];
+            /**
+             * Org
+             * @description The org the key's sessions are bound to: a registered org's name, or empty for none. A view held to one org runs only for a key bound to an org its groups grant.
+             * @default
+             */
+            org: string;
             /** Description */
             description: string;
             /** Created At */
@@ -5590,6 +5618,12 @@ export interface components {
             enabled: boolean;
             /** Groups */
             groups: string[];
+            /**
+             * Org
+             * @description The org the key's sessions are bound to: a registered org's name, or empty for none. A view held to one org runs only for a key bound to an org its groups grant.
+             * @default
+             */
+            org: string;
             /** Description */
             description: string;
             /** Created At */
@@ -5693,6 +5727,12 @@ export interface components {
              * @default
              */
             name: string;
+            /**
+             * Org
+             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             * @default
+             */
+            org: string;
             /**
              * External
              * @description True when the account authenticates through an identity provider
@@ -7203,6 +7243,12 @@ export interface components {
              */
             groups?: string[];
             /**
+             * Org
+             * @description The org the key's sessions are bound to: a registered org's name, or empty for none. A view held to one org runs only for a key bound to an org its groups grant.
+             * @default
+             */
+            org: string;
+            /**
              * Description
              * @description Optional description
              * @default
@@ -7256,6 +7302,12 @@ export interface components {
              * @default
              */
             name: string;
+            /**
+             * Org
+             * @description The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             * @default
+             */
+            org: string;
         };
         /** CreateArtifactRequest */
         CreateArtifactRequest: {
@@ -8615,12 +8667,11 @@ export interface components {
             global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
-            /** Customers */
+            /**
+             * Customers
+             * @description Names of the registered orgs the hunt reads. The engine resolves each to its tenant ids when it saves the hunt, and the runner reads no other org's rows.
+             */
             customers: string[];
-            /** Customer Filters */
-            customer_filters?: {
-                [key: string]: unknown;
-            } | null;
             /** Checkpoint Timestamp Field */
             checkpoint_timestamp_field?: string | null;
             /** Scheduling Mode */
@@ -8667,12 +8718,11 @@ export interface components {
             global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
-            /** Customers */
-            customers: string[];
-            /** Customer Filters */
-            customer_filters?: {
-                [key: string]: unknown;
-            } | null;
+            /**
+             * Customers
+             * @description Names of the registered orgs the hunt reads
+             */
+            customers?: string[];
             /** Checkpoint Timestamp Field */
             checkpoint_timestamp_field?: string | null;
             /** Scheduling Mode */
@@ -8688,6 +8738,13 @@ export interface components {
             name: string;
             /** Rules */
             rules: components["schemas"]["HuntRuleEntry"][];
+            /**
+             * Customer Tenant Ids
+             * @description Each customer's tenant ids, resolved when the hunt was saved: the _org_id values the runner reads. A customer missing here stops every run.
+             */
+            customer_tenant_ids?: {
+                [key: string]: string[];
+            };
         };
         /**
          * HuntEngineStatus
@@ -8861,12 +8918,11 @@ export interface components {
             global_target_table_name?: string | null;
             /** Global Source Table Name */
             global_source_table_name?: string | null;
-            /** Customers */
+            /**
+             * Customers
+             * @description Names of the registered orgs the hunt reads. The engine resolves each to its tenant ids when it saves the hunt, and the runner reads no other org's rows.
+             */
             customers: string[];
-            /** Customer Filters */
-            customer_filters?: {
-                [key: string]: unknown;
-            } | null;
             /** Checkpoint Timestamp Field */
             checkpoint_timestamp_field?: string | null;
             /** Scheduling Mode */
@@ -10942,7 +10998,7 @@ export interface components {
             hunt_target_table: string;
             /**
              * Hunt Customers
-             * @description customers for a new hunt (operator adjusts later via PUT /hunts)
+             * @description Names of the registered orgs a new hunt reads (adjusted later via PUT /hunts). A new hunt naming none runs nothing until it names one.
              */
             hunt_customers?: string[];
         };
@@ -14746,6 +14802,11 @@ export interface components {
              * @description Display name
              */
             name?: string | null;
+            /**
+             * Org
+             * @description Replace the org binding. The registered org the account belongs to, which its sessions carry as org_id. Empty binds it to none, so it reads no org-bound view. The binding grants nothing itself: such a view also needs the org among those its groups grant.
+             */
+            org?: string | null;
         };
         /** UpdateGroupRequest */
         UpdateGroupRequest: {
@@ -15466,7 +15527,7 @@ export interface components {
             total: number;
             /**
              * Groups Skipped
-             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a name another group carries as its source_id or an id another group has as its name, a stored group carrying the id but linked to another provider, or no id to link a group by. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
+             * @description Provider groups left unsynced: an identifier that makes no valid group name, a name held by a stored group that does not load, a name held by a stored group not linked to that provider group, a name another group carries as its source_id or an id another group has as its name, a stored group carrying the id but linked to another provider, no id to link a group by, or a group the store could not write. Each is counted on auth_oidc_sync_groups_skipped_total{reason}.
              * @default 0
              */
             groups_skipped: number;
@@ -15479,7 +15540,7 @@ export interface components {
             skipped?: string | null;
             /**
              * Status
-             * @description How the sync ended: ok, partial (some groups skipped), error (the listing failed, or the secret store holding its credential did not answer or refused access), not_configured (no directory credential), user_token (no directory to sync, which is a Google provider's default and not a fault) or skipped (disabled or not in api mode). Key on this, never on the text of error or skipped.
+             * @description How the sync ended: ok, partial (some groups skipped), error (the listing failed, the secret store holding its credential did not answer or refused access, or the group store failed part way), not_configured (no directory credential), user_token (no directory to sync, which is a Google provider's default and not a fault) or skipped (disabled or not in api mode). Key on this, never on the text of error or skipped.
              * @enum {string}
              */
             status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";

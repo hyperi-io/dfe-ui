@@ -33,6 +33,7 @@ describe('.useCreateAccount', () => {
     email: 'string',
     phone: 'string',
     name: 'string',
+    org: '',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -61,6 +62,7 @@ describe('.useCreateAccount', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
       };
 
       await waitFor(() => {

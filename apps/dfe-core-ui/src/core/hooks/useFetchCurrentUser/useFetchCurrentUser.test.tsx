@@ -54,6 +54,7 @@ describe('.useAuthMe', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         created_at: 'string',
         updated_at: 'string',
       };
