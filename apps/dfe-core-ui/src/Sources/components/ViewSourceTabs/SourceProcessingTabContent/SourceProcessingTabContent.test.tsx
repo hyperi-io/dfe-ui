@@ -3,6 +3,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { SourceDetailsProvider } from '@/Sources/contexts/SourceDetailsContext';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { render, screen, waitFor } from '@testing-library/react';
+import { delay, http, HttpResponse } from 'msw';
 import { useSearchParams } from 'next/navigation';
 import {
   afterAll,
@@ -41,60 +42,21 @@ const { wrapper } = buildTestWrapper()
     <SourceDetailsProvider>{children}</SourceDetailsProvider>
   ));
 
-const renderTab = () =>
-  render(
-    <SourceProcessingTabContent
-      source="syslog"
-      transformSlot={<div data-testid="transform-slot" />}
-    />,
-    { wrapper },
-  );
-
-describe('SourceProcessingTabContent', () => {
-  it('puts the receiver routing rule on the source page', async () => {
-    renderTab();
-
-    expect(
-      await screen.findByRole('heading', { name: 'dfe-receiver routing' }),
-    ).toBeInTheDocument();
-    // The compiled rule and the deployed one, side by side.
-    expect(await screen.findAllByText('event.dataset')).toHaveLength(2);
-  });
-
-  it('lifts the transforms into the slot and leaves the fetcher its own card', async () => {
-    renderTab();
-
-    expect(await screen.findByTestId('transform-slot')).toBeInTheDocument();
-    // A fetcher is per-source too, and deploying one is a real action, so it
-    // keeps a card of its own rather than joining the transform choice.
-    expect(
-      screen.getByRole('heading', { name: 'dfe-fetcher' }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('dfe-transform-vrl')).not.toBeInTheDocument();
-    expect(screen.queryByText('dfe-transform-elastic')).not.toBeInTheDocument();
-  });
-
-  it('offers a deploy only for the per-source app that takes one', async () => {
-    renderTab();
-
-    expect(
-      await screen.findAllByText('Not deployed for this source.'),
-    ).toHaveLength(1);
-    expect(screen.getAllByRole('button', { name: /Deploy/ })).toHaveLength(1);
-  });
-
-  it('excludes the fleet-wide pools from the per-source list', async () => {
-    renderTab();
-
-    await screen.findByRole('heading', { name: 'dfe-fetcher' });
-    expect(screen.queryByText('Instance default')).not.toBeInTheDocument();
-  });
-});
-
 const SELECTED = 'seedfetch';
 
-const sourceOn = (origin: 'receiver' | 'fetcher'): TSourceVersionDetail => ({
-  source: SELECTED,
+type SourceUnderTest = {
+  origin: 'receiver' | 'fetcher';
+  name?: string;
+  /** The family a fetcher source polls. */
+  sourceType?: string;
+};
+
+const sourceOn = ({
+  origin,
+  name = SELECTED,
+  sourceType = 'crates_io',
+}: SourceUnderTest): TSourceVersionDetail => ({
+  source: name,
   resource_type: 'custom',
   display_name: 'Seed Source',
   description: '',
@@ -116,46 +78,126 @@ const sourceOn = (origin: 'receiver' | 'fetcher'): TSourceVersionDetail => ({
     },
     fetcher:
       origin === 'fetcher'
-        ? { source_type: 'crates_io', topic: 'own', config: {} }
+        ? { source_type: sourceType, topic: 'own', config: {} }
         : null,
     match:
       origin === 'receiver'
-        ? { field: 'tags.collector.type', operator: 'equals', value: SELECTED }
+        ? { field: 'tags.collector.type', operator: 'equals', value: name }
         : null,
   },
 });
 
-/** The tab for a selected source that the engine reports on `origin`. */
-const renderTabOn = (origin: 'receiver' | 'fetcher') => {
+/** The tab for a selected source, with `pending` holding the engine's report on it back. */
+const renderTabFor = (
+  source: SourceUnderTest,
+  { pending = false }: { pending?: boolean } = {},
+) => {
+  const name = source.name ?? SELECTED;
   vi.mocked(useSearchParams).mockReturnValue(
     new URLSearchParams({
-      source_name: SELECTED,
+      source_name: name,
       source_version: '1.0.0',
     }) as ReturnType<typeof useSearchParams>,
   );
   server.use(
-    API_CONFIG_MOCKS.sources.sourceVersion.get.success({
-      name: SELECTED,
-      version: '1.0.0',
-      mockedResponse: sourceOn(origin),
-    }),
+    pending
+      ? http.get(
+          API_CONFIG_MOCKS.sources.sourceVersion.mockedUrl
+            .replace('{name}', name)
+            .replace('{version}', '1.0.0'),
+          async () => {
+            await delay('infinite');
+            return HttpResponse.json(sourceOn(source));
+          },
+        )
+      : API_CONFIG_MOCKS.sources.sourceVersion.get.success({
+          name,
+          version: '1.0.0',
+          mockedResponse: sourceOn(source),
+        }),
   );
   return render(
     <SourceProcessingTabContent
-      source={SELECTED}
+      source={name}
       transformSlot={<div data-testid="transform-slot" />}
     />,
     { wrapper },
   );
 };
 
-describe('SourceProcessingTabContent by origin', () => {
-  afterEach(() => {
-    vi.mocked(useSearchParams).mockReturnValue(
-      new URLSearchParams() as ReturnType<typeof useSearchParams>,
-    );
+const renderTabOn = (origin: SourceUnderTest['origin']) =>
+  renderTabFor({ origin });
+
+afterEach(() => {
+  vi.mocked(useSearchParams).mockReturnValue(
+    new URLSearchParams() as ReturnType<typeof useSearchParams>,
+  );
+});
+
+describe('SourceProcessingTabContent', () => {
+  it('puts the receiver routing rule on a receiver source page', async () => {
+    renderTabFor({ origin: 'receiver', name: 'syslog' });
+
+    expect(
+      await screen.findByRole('heading', { name: 'dfe-receiver routing' }),
+    ).toBeInTheDocument();
+    // The compiled rule and the deployed one, side by side.
+    expect(await screen.findAllByText('event.dataset')).toHaveLength(2);
   });
 
+  it('lifts the transforms into the slot and leaves the fetcher its own card', async () => {
+    renderTabOn('fetcher');
+
+    expect(await screen.findByTestId('transform-slot')).toBeInTheDocument();
+    // A fetcher is per-source too, and deploying one is a real action, so it
+    // keeps a card of its own rather than joining the transform choice.
+    expect(
+      screen.getByRole('heading', { name: 'dfe-fetcher' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('dfe-transform-vrl')).not.toBeInTheDocument();
+    expect(screen.queryByText('dfe-transform-elastic')).not.toBeInTheDocument();
+  });
+
+  it('offers a deploy only for the per-source app that takes one', async () => {
+    renderTabOn('fetcher');
+
+    expect(
+      await screen.findAllByText('Not deployed for this source.'),
+    ).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /Deploy/ })).toHaveLength(1);
+  });
+
+  it('excludes the fleet-wide pools from the per-source list', async () => {
+    renderTabOn('fetcher');
+
+    await screen.findByRole('heading', { name: 'dfe-fetcher' });
+    expect(screen.queryByText('Instance default')).not.toBeInTheDocument();
+  });
+
+  it('places no origin-bound card while the source is still loading', async () => {
+    renderTabFor({ origin: 'receiver' }, { pending: true });
+
+    // Neither may flash up and vanish once the engine says how the source arrives.
+    await expect(
+      screen.findByRole('heading', { name: 'dfe-fetcher' }, { timeout: 1500 }),
+    ).rejects.toThrow();
+    expect(
+      screen.queryByRole('heading', { name: 'dfe-receiver routing' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('gives a fetcher source only a fetcher that polls its family', async () => {
+    // The catalogue's dfe-fetcher declares crates_io, okta and aws.
+    renderTabFor({ origin: 'fetcher', sourceType: 'github' });
+
+    expect(await screen.findByTestId('transform-slot')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'dfe-fetcher' }),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('SourceProcessingTabContent by origin', () => {
   it('shows a fetcher source no receiver routing', async () => {
     renderTabOn('fetcher');
 

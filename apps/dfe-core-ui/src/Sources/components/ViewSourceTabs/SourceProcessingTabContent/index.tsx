@@ -7,9 +7,23 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { SourceAppInstance } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceAppInstance';
 import { SourceRoutingCard } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/SourceRoutingCard';
 import { isTransformApp } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
+import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { ReactNode } from 'react';
+
+/**
+ * Whether a per-source app takes a source polling `sourceType`, which is unset
+ * for a receiver source. An app declaring `source_types` polls only those
+ * families, and one declaring none is not tied to how a source arrives.
+ */
+const takesSource = (
+  app: TAppCatalogueEntry,
+  sourceType: string | null | undefined,
+): boolean =>
+  app.source_types?.length
+    ? !!sourceType && app.source_types.includes(sourceType)
+    : true;
 
 /**
  * Everything that processes THIS source, in the order its records meet it:
@@ -34,7 +48,8 @@ export const SourceProcessingTabContent = ({
   transformSlot?: ReactNode;
 }) => {
   const { data: apps, isLoading, error } = useFetchApps();
-  const { originType } = useSourceDetailsContext();
+  const { originType, sourceDetail, isLoadingSourceDetail } =
+    useSourceDetailsContext();
 
   // The source detail chrome ends 260px down and the page clips 45px short of
   // the window, so an offset under 305 leaves the last rows unreachable.
@@ -42,7 +57,8 @@ export const SourceProcessingTabContent = ({
     offset: 320,
   });
 
-  if (isLoading) return <Spin size="small" />;
+  // Every card below is placed by the source's origin, so none is guessed before it is known.
+  if (isLoading || isLoadingSourceDetail) return <Spin size="small" />;
 
   if (error || !apps) {
     return (
@@ -60,14 +76,17 @@ export const SourceProcessingTabContent = ({
   const perSourceApps = apps.filter((app) => app.multiplicity === 'per_config');
   // The transforms are one choice, not several deployments, so they are lifted
   // out of the per-app list into the control that writes that choice.
-  const standaloneApps = perSourceApps.filter(
-    (app) => !isTransformApp(app) && app.service.includes(originType ?? ''),
-  );
-  const isFetcherSource = originType === 'fetcher';
+  const standaloneApps = originType
+    ? perSourceApps.filter(
+        (app) =>
+          !isTransformApp(app) &&
+          takesSource(app, sourceDetail?.version?.fetcher?.source_type),
+      )
+    : [];
 
   return (
     <CustomScrollbar height={componentHeight} className="flex flex-col">
-      {!isFetcherSource &&
+      {originType === 'receiver' &&
         singleApps.flatMap((app) =>
           app.instances.map((instance) => (
             <SourceRoutingCard
