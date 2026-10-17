@@ -3,6 +3,14 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.22](https://github.com/hyperi-io/dfe-ui/compare/v1.7.21...v1.7.22) (2026-10-17)
+
+### Bug Fixes
+
+* build the image's JS on the native platform ([a572878](https://github.com/hyperi-io/dfe-ui/commit/a572878e2ce37bb6a8cea20f13be8b8b459d5e65))
+* follow engine [#900](https://github.com/hyperi-io/dfe-ui/issues/900) org and hunt contract ([ddb1ff4](https://github.com/hyperi-io/dfe-ui/commit/ddb1ff4b212d5d7b3810e38237caa835d25b87b3))
+* render on scalo-service 2.14.15 ([9992fa8](https://github.com/hyperi-io/dfe-ui/commit/9992fa84d8ab936a33f71a085dbe9ad0e03c14b0))
+
 ## [1.7.21](https://github.com/hyperi-io/dfe-ui/compare/v1.7.20...v1.7.21) (2026-10-17)
 
 ### Bug Fixes
