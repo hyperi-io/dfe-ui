@@ -30,6 +30,7 @@ describe('.useCreateApiKey', () => {
     name: 'api_key_name',
     description: 'string',
     groups: ['string'],
+    org: '',
   };
   describe('onSuccess', () => {
     test('should call onSuccess', async () => {
@@ -47,6 +48,7 @@ describe('.useCreateApiKey', () => {
         name: 'string',
         description: 'string',
         groups: ['string'],
+        org: '',
         short_token: 'string',
         enabled: true,
         created_at: 'string',

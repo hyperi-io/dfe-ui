@@ -24,7 +24,7 @@ const huntDetail: THuntDetailResponse = {
       initial_checkpoint_lookback_minutes: 0,
     },
   ],
-  customer_filters: null,
+  customer_tenant_ids: { org_a: ['org-a-1'] },
   checkpoint_timestamp_field: null,
   scheduling_mode: null,
   min_interval_seconds: null,
@@ -45,6 +45,12 @@ describe('transformHuntDetailToFormData', () => {
     };
     expect(transformHuntDetailToFormData(huntDetail)).toEqual(expectedFormData);
   });
+
+  it('opens a stored hunt naming no organisation with none selected', () => {
+    const { customers: _customers, ...namingNone } = huntDetail;
+
+    expect(transformHuntDetailToFormData(namingNone).customers).toEqual([]);
+  });
 });
 
 describe('transformHuntFormDataToUpdateRequest', () => {
@@ -61,7 +67,6 @@ describe('transformHuntFormDataToUpdateRequest', () => {
       global_source_table_name: 'windows_audit',
       customers: ['org_a'],
       rules: ['rule_one'],
-      customer_filters: null,
       checkpoint_timestamp_field: null,
       scheduling_mode: null,
       min_interval_seconds: null,

@@ -40,6 +40,7 @@ describe('.useFetchAccountDetail', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         oidc_id: 'string',
       };
 

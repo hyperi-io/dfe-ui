@@ -68,6 +68,7 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
       });
       const responseItem: TApiKeysItemSummary = {
         name: 'string',
+        org: '',
         description: 'string',
         groups: ['string'],
         short_token: 'string',
@@ -143,6 +144,7 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
 
       const responseItem: TApiKeysItemSummary = {
         name: 'string',
+        org: '',
         description: 'string',
         groups: ['string'],
         short_token: 'string',
@@ -181,6 +183,7 @@ describe('useFetchInfiniteFilteredApiKeys', () => {
 
       const responseItem: TApiKeysItemSummary = {
         name: 'string',
+        org: '',
         description: 'string',
         groups: ['string'],
         short_token: 'string',

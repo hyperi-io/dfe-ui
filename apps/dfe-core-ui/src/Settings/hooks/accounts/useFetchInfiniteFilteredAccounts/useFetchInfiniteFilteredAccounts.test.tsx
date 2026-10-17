@@ -80,6 +80,7 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         oidc_id: 'string',
       };
 
@@ -161,6 +162,7 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         oidc_id: 'string',
       };
 
@@ -205,6 +207,7 @@ describe('useFetchInfiniteFilteredAccounts', () => {
         email: 'string',
         phone: 'string',
         name: 'string',
+        org: '',
         oidc_id: 'string',
       };
 
