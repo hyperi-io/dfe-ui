@@ -3,6 +3,14 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.20](https://github.com/hyperi-io/dfe-ui/compare/v1.7.19...v1.7.20) (2026-10-17)
+
+### Bug Fixes
+
+* **deps:** update Node.js to 7f486ca ([#560](https://github.com/hyperi-io/dfe-ui/issues/560)) ([bab9e46](https://github.com/hyperi-io/dfe-ui/commit/bab9e46e023063814d6f745886a97da0f37e87b4))
+* fix catalogue and filters ([#561](https://github.com/hyperi-io/dfe-ui/issues/561)) ([a6bef95](https://github.com/hyperi-io/dfe-ui/commit/a6bef9515f71060b37bf4617617425edaf922ef2))
+* fix filters ([#562](https://github.com/hyperi-io/dfe-ui/issues/562)) ([2e75cba](https://github.com/hyperi-io/dfe-ui/commit/2e75cba36557a75528a75b8f508bea84fd50f163))
+
 ## [1.7.19](https://github.com/hyperi-io/dfe-ui/compare/v1.7.18...v1.7.19) (2026-10-15)
 
 ### Bug Fixes
