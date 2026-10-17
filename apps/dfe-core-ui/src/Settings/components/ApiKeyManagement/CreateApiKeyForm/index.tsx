@@ -99,6 +99,7 @@ export const CreateApiKeyForm = ({
   const handleOnFinish = (values: CreateApiKeyFormSchema) => {
     generateApiKey({
       ...values,
+      org: '',
       expires_at: values.expires_at
         ? dayjs(values.expires_at).toISOString()
         : null,

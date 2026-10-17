@@ -15,7 +15,7 @@ export const transformHuntDetailToFormData = (
 ): CreateUpdateHuntFormData => ({
   display_name: hunt.display_name,
   name: hunt.name,
-  customers: hunt.customers,
+  customers: hunt.customers ?? [],
   cron: normalizeCron(hunt.cron),
   log_buffer: hunt.log_buffer ?? 60,
   rules: hunt.rules.map((rule) => rule.rule_name),
@@ -50,7 +50,6 @@ export const transformHuntFormDataToUpdateRequest = (
   global_source_table_name: values.global_source_table_name,
   customers: values.customers,
   rules: values.rules,
-  customer_filters: hunt.customer_filters ?? null,
   checkpoint_timestamp_field: hunt.checkpoint_timestamp_field ?? null,
   scheduling_mode: hunt.scheduling_mode ?? null,
   min_interval_seconds: hunt.min_interval_seconds ?? null,

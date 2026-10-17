@@ -46,6 +46,7 @@ export const apiKeys = {
           short_token: 'string',
           enabled: true,
           groups: ['string'],
+          org: '',
           description: 'string',
           created_at: 'string',
           full_key: 'string',

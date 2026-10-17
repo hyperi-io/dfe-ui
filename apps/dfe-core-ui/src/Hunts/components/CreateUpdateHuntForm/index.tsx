@@ -2,14 +2,18 @@ import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { SourceSelect } from '@/core/components/SourceSelect';
+import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
 import { IconDeviceFloppy } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import z from 'zod';
 import { RuleSelect } from './RuleSelect';
+
+/** The engine's code for a hunt naming an organisation it does not hold, such as a deleted one. */
+export const UNKNOWN_ORG_CODE = 'unknown_org';
 
 const requiredName = z
   .string({ message: 'Name is required' })
@@ -84,6 +88,15 @@ export const CreateUpdateHuntForm = ({
     onFinish(values);
   };
 
+  const unknownOrg = getApiErrorResponseBody(error)?.code === UNKNOWN_ORG_CODE;
+
+  useEffect(() => {
+    const refusal = getApiErrorResponseBody(error);
+    if (refusal?.code === UNKNOWN_ORG_CODE) {
+      form.setFields([{ name: 'customers', errors: [refusal.message] }]);
+    }
+  }, [error, form]);
+
   return (
     <Form
       form={form}
@@ -134,7 +147,7 @@ export const CreateUpdateHuntForm = ({
         <CRONBuilderDrawer placeholder="Enter expression" />
       </Form.Item>
 
-      {error && <ApiErrorNotification error={error} />}
+      {error && !unknownOrg && <ApiErrorNotification error={error} />}
 
       <div className="flex gap-x-2 ml-auto! mt-2">
         <Button

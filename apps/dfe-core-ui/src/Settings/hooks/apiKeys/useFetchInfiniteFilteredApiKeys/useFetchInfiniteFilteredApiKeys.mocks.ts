@@ -5,6 +5,7 @@ import { TApiKeysItemSummary } from './types';
 
 const API_KEY_ITEM: TApiKeysItemSummary = {
   name: 'string',
+  org: '',
   description: 'string',
   groups: ['string'],
   short_token: 'string',

@@ -55,6 +55,7 @@ describe('.useUpdateCurrentUser', () => {
         name: 'string',
         email: 'string',
         phone: 'string',
+        org: '',
         username: 'string',
         enabled: true,
         blocked: false,

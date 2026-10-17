@@ -62,6 +62,7 @@ export const CreateAccountForm = ({
       email: values.email,
       phone: values.phone ?? '',
       name: values.name ?? values.username,
+      org: '',
     });
   };
 

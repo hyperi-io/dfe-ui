@@ -1,9 +1,19 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input, Select } from 'antd';
+import Link from 'next/link';
+import { useEffect } from 'react';
 import z from 'zod';
+import {
+  getHeldOrgIds,
+  getRefusedOrgIdMessages,
+  HeldOrgIds,
+  isOrgIdsRefusal,
+  ORG_IDS_FIELD,
+} from './orgIdRefusals';
 
 const formSchema = z.object({
   name: z
@@ -17,6 +27,41 @@ const formSchema = z.object({
 });
 
 export type CreateUpdateOrganisationFormData = z.infer<typeof formSchema>;
+
+const HeldOrgIdsNotification = ({ held }: { held: HeldOrgIds[] }) => {
+  const fixes = [
+    held.some((h) => !h.branch) && 'edit those hunts',
+    held.some((h) => h.branch) && 'merge or close the review',
+  ].filter(Boolean);
+
+  return (
+    <FormNotification
+      type="error"
+      title="Hunts still read these organisation IDs for another organisation"
+      text={
+        <>
+          <ul className="list-disc pl-4">
+            {held.map((h) => (
+              <li key={`${h.hunt}-${h.branch}`} className="text-sm">
+                <Link
+                  className="underline text-inherit!"
+                  href={`/hunts?name=${encodeURIComponent(h.hunt)}`}
+                >
+                  {h.hunt}
+                </Link>{' '}
+                reads {h.orgIds.join(', ')} for {h.org}
+                {h.branch && ` once review branch ${h.branch} merges`}
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm">
+            Use other organisation IDs, or {fixes.join(' and ')} first.
+          </p>
+        </>
+      }
+    />
+  );
+};
 
 export const CreateUpdateOrganisationForm = ({
   initialValues,
@@ -48,6 +93,19 @@ export const CreateUpdateOrganisationForm = ({
   const handleFinish = (values: CreateUpdateOrganisationFormData) => {
     onFinish?.(values);
   };
+
+  useEffect(() => {
+    const messages = getRefusedOrgIdMessages(
+      error,
+      form.getFieldValue(ORG_IDS_FIELD),
+    );
+    if (messages.length > 0) {
+      form.setFields([{ name: ORG_IDS_FIELD, errors: messages }]);
+    }
+  }, [error, form]);
+
+  const held = getHeldOrgIds(error);
+  const refusalOnField = !hiddenFields?.org_ids && isOrgIdsRefusal(error);
 
   return (
     <Form form={form} onFinish={handleFinish} initialValues={initialValues}>
@@ -90,7 +148,11 @@ export const CreateUpdateOrganisationForm = ({
         </Form.Item>
       )}
 
-      {error && <ApiErrorNotification error={error} />}
+      {held.length > 0 ? (
+        <HeldOrgIdsNotification held={held} />
+      ) : (
+        error && !refusalOnField && <ApiErrorNotification error={error} />
+      )}
 
       <Form.Item className="flex justify-end">
         {hasReset && (

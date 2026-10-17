@@ -34,11 +34,6 @@ describe('.useUpdateHunt', () => {
     global_source_table_name: 'string',
     customers: ['string'],
     rules: ['string'],
-    customer_filters: {
-      string: {
-        filters: ['string'],
-      },
-    },
     checkpoint_timestamp_field: 'string',
     scheduling_mode: 'string',
     min_interval_seconds: 0,
@@ -62,7 +57,6 @@ describe('.useUpdateHunt', () => {
         global_source_table_name: parameters.global_source_table_name,
         customers: parameters.customers,
         rules: parameters.rules,
-        customer_filters: parameters.customer_filters,
         checkpoint_timestamp_field: parameters.checkpoint_timestamp_field,
         scheduling_mode: parameters.scheduling_mode,
         min_interval_seconds: parameters.min_interval_seconds,
@@ -85,10 +79,8 @@ describe('.useUpdateHunt', () => {
             initial_checkpoint_lookback_minutes: 0,
           },
         ],
-        customer_filters: {
-          string: {
-            filters: ['string'],
-          },
+        customer_tenant_ids: {
+          string: ['string'],
         },
         checkpoint_timestamp_field: 'string',
         scheduling_mode: 'string',
@@ -123,11 +115,6 @@ describe('.useUpdateHunt', () => {
       global_source_table_name: 'string',
       customers: ['string'],
       rules: ['string'],
-      customer_filters: {
-        string: {
-          filters: ['string'],
-        },
-      },
       checkpoint_timestamp_field: 'string',
       scheduling_mode: 'string',
       min_interval_seconds: 0,
@@ -154,7 +141,6 @@ describe('.useUpdateHunt', () => {
         global_source_table_name: requestBody.global_source_table_name,
         customers: requestBody.customers,
         rules: requestBody.rules,
-        customer_filters: requestBody.customer_filters,
         checkpoint_timestamp_field: requestBody.checkpoint_timestamp_field,
         scheduling_mode: requestBody.scheduling_mode,
         min_interval_seconds: requestBody.min_interval_seconds,

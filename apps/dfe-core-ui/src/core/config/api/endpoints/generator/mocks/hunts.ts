@@ -73,10 +73,8 @@ export const hunts = {
               initial_checkpoint_lookback_minutes: 0,
             },
           ],
-          customer_filters: {
-            string: {
-              filters: ['string'],
-            },
+          customer_tenant_ids: {
+            string: ['string'],
           },
           checkpoint_timestamp_field: 'string',
           scheduling_mode: 'string',
@@ -142,10 +140,8 @@ export const hunts = {
               initial_checkpoint_lookback_minutes: 0,
             },
           ],
-          customer_filters: {
-            string: {
-              filters: ['string'],
-            },
+          customer_tenant_ids: {
+            string: ['string'],
           },
           checkpoint_timestamp_field: 'string',
           scheduling_mode: 'string',
@@ -179,10 +175,8 @@ export const hunts = {
               initial_checkpoint_lookback_minutes: 0,
             },
           ],
-          customer_filters: {
-            string: {
-              filters: ['string'],
-            },
+          customer_tenant_ids: {
+            string: ['string'],
           },
           checkpoint_timestamp_field: 'string',
           scheduling_mode: 'string',

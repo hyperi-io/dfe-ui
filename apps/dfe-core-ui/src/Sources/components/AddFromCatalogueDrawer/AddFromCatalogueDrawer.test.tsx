@@ -240,7 +240,7 @@ describe('AddFromCatalogueDrawer', () => {
 
   it('shows the engine refusing an own-topic fetcher with no schema, word for word', async () => {
     const refusal =
-      "source 'okta': a fetcher on its own topic needs a schema or it can never be deployed. Set the fetcher topic to 'main' to land on the shared table, or define a schema (meta_schema, derived_schema or additional_fields)";
+      "source 'okta': a fetcher on its own topic needs a schema or it can never be deployed. Set its Topic to 'Shared table', or give it a Meta Schema";
     server.use(
       refuseCatalogueCreate({ code: 'validation_error', message: refusal }),
     );
