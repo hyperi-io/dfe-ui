@@ -102,10 +102,13 @@ const originTabSchema = {
 const schemaConfigTabSchema = {
   schema: z
     .object({
-      meta_schema: z.string({ message: 'Meta schema is required' }),
-      meta_schema_version: z.string({
-        message: 'Meta schema version is required',
-      }),
+      // A clone or an edit seeds an absent value as '', so empty is refused as unset is.
+      meta_schema: z
+        .string({ message: 'Meta schema is required' })
+        .min(1, { message: 'Meta schema is required' }),
+      meta_schema_version: z
+        .string({ message: 'Meta schema version is required' })
+        .min(1, { message: 'Meta schema version is required' }),
       ttl_days: z.number().optional().nullable(),
       // Blank follows the DFE default.
       engine: z.string().optional().nullable(),
