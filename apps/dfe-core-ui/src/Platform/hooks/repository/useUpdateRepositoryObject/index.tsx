@@ -1,3 +1,4 @@
+import { RepositoryScope } from '@/Platform/hooks/repository/types';
 import { useMutation } from '@tanstack/react-query';
 import { updateRepositoryObjectApi } from './api';
 import {
@@ -13,7 +14,7 @@ export const useUpdateRepositoryObject = ({
   onSuccess,
   onError,
 }: {
-  scope: string;
+  scope: RepositoryScope;
   scope_id: string;
   namespace: string;
   key: string;

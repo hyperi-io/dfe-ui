@@ -1,3 +1,4 @@
+import { RepositoryScope } from '@/Platform/hooks/repository/types';
 import { TRepositoryObjectDetailResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjectDetail/types';
 import { TRepositoryObjectsResponse } from '@/Platform/hooks/repository/useFetchRepositoryObjects/types';
 import { TRepositoryPreferencesResponse } from '@/Platform/hooks/repository/useFetchRepositoryPreferences/types';
@@ -63,12 +64,12 @@ export const repository = {
             etag: 'etag',
           },
         ],
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
       }: {
         mockedResponse?: TRepositoryObjectsResponse;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
       } = {}) => {
@@ -97,13 +98,13 @@ export const repository = {
           updated_at: 'updated_at',
           etag: 'etag',
         },
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
         key = 'key',
       }: {
         mockedResponse?: TRepositoryObjectDetailResponse;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
         key?: string;
@@ -135,13 +136,13 @@ export const repository = {
           updated_at: 'updated_at',
           etag: 'etag',
         },
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
         key = 'key',
       }: {
         mockedResponse?: TRepositoryObjectDetailResponse;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
         key?: string;
@@ -162,14 +163,14 @@ export const repository = {
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
         status = 422,
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
         key = 'key',
       }: {
         mockedResponse?: TValidationError;
         status?: number;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
         key?: string;
@@ -189,13 +190,13 @@ export const repository = {
     delete: {
       success: ({
         status = 204,
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
         key = 'key',
       }: {
         status?: number;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
         key?: string;
@@ -214,14 +215,14 @@ export const repository = {
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
         status = 422,
-        scope = 'scope',
+        scope = 'user',
         scope_id = 'scope_id',
         namespace = 'namespace',
         key = 'key',
       }: {
         mockedResponse?: TValidationError;
         status?: number;
-        scope?: string;
+        scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
         key?: string;

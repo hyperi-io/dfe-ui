@@ -30,7 +30,7 @@ const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useUpdateRepositoryObject', () => {
   const requestBody: TUpdateRepositoryObjectRequest = undefined;
-  const scope = 'scope';
+  const scope = 'user';
   const scope_id = 'scope_id';
   const namespace = 'namespace';
   const key = 'key';
