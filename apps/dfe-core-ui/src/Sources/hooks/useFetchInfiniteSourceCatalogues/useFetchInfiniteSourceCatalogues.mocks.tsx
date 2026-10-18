@@ -5,7 +5,7 @@ import { TSourceCatalogueItem } from './types';
 
 export const MOCK_SOURCE_NAME = 'source';
 
-const SOURCE_CATALOGUE_ITEM: TSourceCatalogueItem = {
+export const SOURCE_CATALOGUE_ITEM: TSourceCatalogueItem = {
   name: 'string',
   package: 'string',
   data_stream: 'string',
@@ -13,6 +13,11 @@ const SOURCE_CATALOGUE_ITEM: TSourceCatalogueItem = {
   intakes: ['string'],
   transforms: ['string'],
   source: 'string',
+  schema_layers: {
+    resolves: true,
+    missing_layer: null,
+    missing_reference: '',
+  },
 };
 
 const TOTAL_ITEMS = 25;

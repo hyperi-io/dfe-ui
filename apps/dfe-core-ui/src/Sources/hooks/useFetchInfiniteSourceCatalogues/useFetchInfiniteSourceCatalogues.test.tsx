@@ -11,11 +11,11 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteSourceCatalogues } from '.';
+import { UseFetchInfiniteSourceCataloguesProps } from './types';
 import {
-  TSourceCatalogueItem,
-  UseFetchInfiniteSourceCataloguesProps,
-} from './types';
-import { server } from './useFetchInfiniteSourceCatalogues.mocks';
+  SOURCE_CATALOGUE_ITEM,
+  server,
+} from './useFetchInfiniteSourceCatalogues.mocks';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -81,19 +81,12 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-      const responseItem: TSourceCatalogueItem = {
-        name: 'string',
-        package: 'string',
-        data_stream: 'string',
-        dataset: 'string',
-        intakes: ['string'],
-        transforms: ['string'],
-        source: 'string',
-      };
 
       expect(result.current.data).toBeDefined();
       expect(result.current.data.items).toHaveLength(10);
-      expect(result.current.data.items[0]).toMatchObject(responseItem);
+      expect(result.current.data.items[0]).toMatchObject(
+        SOURCE_CATALOGUE_ITEM,
+      );
       expect(result.current.isError).toBe(false);
     });
 
