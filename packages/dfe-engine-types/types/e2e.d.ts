@@ -53,7 +53,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** E2EStatusResponse */
+        /**
+         * E2EStatusResponse
+         * @description Whether the e2e seeding routes are mounted.
+         */
         E2EStatusResponse: {
             /** Enabled */
             enabled: boolean;
@@ -63,7 +66,10 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** SeedRequest */
+        /**
+         * SeedRequest
+         * @description The seed script to run, by name.
+         */
         SeedRequest: {
             /**
              * Script
@@ -71,7 +77,10 @@ export interface components {
              */
             script: "seed_setup_complete" | "seed_organisation" | "seed_dfe_admin_user" | "seed_dfe_analyst_user" | "seed_dfe_infra_user" | "seed_dfe_viewers_user" | "seed_source_with_transform" | "seed_three_transforms" | "seed_library_artefact" | "seed_app_scaling_state" | "seed_managed_backing" | "reset_all";
         };
-        /** SeedResponse */
+        /**
+         * SeedResponse
+         * @description Whether the seed script ran, and what it reported.
+         */
         SeedResponse: {
             /** Success */
             success: boolean;
