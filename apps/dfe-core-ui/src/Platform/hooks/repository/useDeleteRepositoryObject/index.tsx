@@ -1,3 +1,4 @@
+import { RepositoryScope } from '@/Platform/hooks/repository/types';
 import { useMutation } from '@tanstack/react-query';
 import { deleteRepositoryObjectApi } from './api';
 
@@ -9,7 +10,7 @@ export const useDeleteRepositoryObject = ({
   onSuccess,
   onError,
 }: {
-  scope: string;
+  scope: RepositoryScope;
   scope_id: string;
   namespace: string;
   key: string;

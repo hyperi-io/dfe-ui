@@ -1,3 +1,4 @@
+import { RepositoryScope } from '@/Platform/hooks/repository/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRepositoryObjectDetailApi } from './api';
 
@@ -7,7 +8,7 @@ export const REPOSITORY_OBJECT_DETAIL_QUERY_KEY = ({
   namespace,
   key,
 }: {
-  scope?: string;
+  scope?: RepositoryScope;
   scope_id?: string;
   namespace?: string;
   key?: string;
@@ -27,7 +28,7 @@ export const useFetchRepositoryObjectDetail = ({
   namespace,
   key,
 }: {
-  scope: string;
+  scope: RepositoryScope;
   scope_id: string;
   namespace: string;
   key: string;

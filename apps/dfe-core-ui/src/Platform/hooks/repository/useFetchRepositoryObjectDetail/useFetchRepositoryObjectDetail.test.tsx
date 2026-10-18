@@ -20,7 +20,7 @@ describe('.useFetchRepositoryObjectDetail', () => {
     const { result } = renderHook(
       () =>
         useFetchRepositoryObjectDetail({
-          scope: 'scope',
+          scope: 'user',
           scope_id: 'scope_id',
           namespace: 'namespace',
           key: 'key',
