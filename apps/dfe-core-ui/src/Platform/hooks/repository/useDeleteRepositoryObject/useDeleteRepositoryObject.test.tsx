@@ -26,7 +26,7 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 describe('.useDeleteRepositoryObject', () => {
-  const scope = 'scope';
+  const scope = 'user';
   const scope_id = 'scope_id';
   const namespace = 'namespace';
   const key = 'key';
