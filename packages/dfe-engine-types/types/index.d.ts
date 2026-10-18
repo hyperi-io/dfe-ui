@@ -1021,6 +1021,9 @@ export interface paths {
          *
          *     Empty when no catalogue is mounted, which is a deployment without one rather
          *     than an error: the app that ships the catalogue prints it from its own image.
+         *     Each entry says whether its table's schema layers resolve on this deployment,
+         *     and names the first one that does not, so a console can hold back an entry
+         *     the create would refuse.
          */
         get: operations["list_catalogue_api_v1_sources_catalogue_get"];
         put?: never;
@@ -1182,6 +1185,8 @@ export interface paths {
          *     an existing one gains the columns it lacks and moves to the version's TTL, so a
          *     re-deploy changes only what differs. The engine and the type of an existing
          *     column are left as created. A schema that failed validation is never deployed.
+         *     A source on the bus transport whose Kafka topics the broker did not create is
+         *     not marked deployed either, and the call answers 502 naming each topic.
          */
         post: operations["deploy_source_schema_api_v1_sources__name__deploy_post"];
         delete?: never;
@@ -6676,6 +6681,30 @@ export interface components {
              * @default
              */
             source: string;
+            /** @description Whether the entry's table schema resolves here, and which layer does not */
+            schema_layers: components["schemas"]["CatalogueSchemaAvailability"];
+        };
+        /**
+         * CatalogueSchemaAvailability
+         * @description Whether a catalogue entry's table schema layers resolve on this deployment.
+         */
+        CatalogueSchemaAvailability: {
+            /**
+             * Resolves
+             * @description Whether the meta and derived schemas the entry's table composes from resolve here. When not, a source created from it carries no schema, and the fetcher intake refuses it (422) because a fetcher on its own topic needs one
+             */
+            resolves: boolean;
+            /**
+             * Missing Layer
+             * @description The first layer that does not resolve, or null when resolves is true
+             */
+            missing_layer?: ("meta_schema" | "derived_schema") | null;
+            /**
+             * Missing Reference
+             * @description That layer's schema reference, such as derived/cisco_ios/log. Empty when resolves is true, or when the app manifest names no schema layers at all
+             * @default
+             */
+            missing_reference: string;
         };
         /**
          * CatalogueSourceRequest
@@ -14636,6 +14665,22 @@ export interface components {
             error: string;
         };
         /**
+         * TopicNotCreated
+         * @description One Kafka topic a source deploy needed and the broker did not create.
+         */
+        TopicNotCreated: {
+            /**
+             * Topic
+             * @description The topic name
+             */
+            topic: string;
+            /**
+             * Reason
+             * @description Why, naming the broker's error code where it gave one and never its text
+             */
+            reason: string;
+        };
+        /**
          * TopicRemoveResponse
          * @description Outcome of a remove pass.
          */
@@ -14722,6 +14767,45 @@ export interface components {
              * @default false
              */
             dry_run: boolean;
+        };
+        /**
+         * TopicsNotCreatedContext
+         * @description Structured context for a source deploy refused because its topics were not created.
+         */
+        TopicsNotCreatedContext: {
+            /**
+             * Source
+             * @description The source being deployed
+             */
+            source: string;
+            /**
+             * Topics
+             * @description Every topic the broker did not create
+             */
+            topics: components["schemas"]["TopicNotCreated"][];
+        };
+        /**
+         * TopicsNotCreatedErrorResponse
+         * @description 502 when a source on the bus transport is deployed and the broker did not create its topics.
+         *
+         *     The source is not marked deployed. Its ClickHouse table is already in place,
+         *     and a later deploy re-runs both steps.
+         */
+        TopicsNotCreatedErrorResponse: {
+            /**
+             * Code
+             * @default topics_not_created
+             * @constant
+             */
+            code: "topics_not_created";
+            /**
+             * Message
+             * @description Human-readable explanation, naming each topic and reason
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["TopicsNotCreatedContext"];
         };
         /**
          * TransportFacts
@@ -19184,6 +19268,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A backing service refused the deploy: ClickHouse rejected the DDL, or the source rides the bus and the broker did not create its topics (code topics_not_created, naming each topic and the broker's error code) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicsNotCreatedErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
