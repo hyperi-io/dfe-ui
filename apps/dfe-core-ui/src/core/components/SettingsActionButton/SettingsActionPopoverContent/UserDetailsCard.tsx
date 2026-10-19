@@ -93,11 +93,6 @@ export const UserDetailsCard = () => {
                   {currentUserEmail}
                 </span>
               ) : null}
-              {currentUser?.username && currentUser.username !== name ? (
-                <span className="text-sm text-foreground/40 dark:text-dark-foreground/40">
-                  {currentUser.username}
-                </span>
-              ) : null}
             </div>
           </div>
         }
