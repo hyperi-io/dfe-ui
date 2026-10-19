@@ -146,20 +146,20 @@ export const UserDetailsCard = () => {
           </div>
         }
       />
-      {/* {currentUser?.password_change_required && ( */}
-      <NotificationCard
-        type="warning"
-        title="Password Change Required"
-        description={
-          <Link
-            className="text-foreground-muted dark:text-dark-foreground-muted hover:font-medium underline"
-            href="/account?reset_password=true"
-          >
-            Update Password
-          </Link>
-        }
-      />
-      {/* )} */}
+      {currentUser?.password_change_required && (
+        <NotificationCard
+          type="warning"
+          title="Password Change Required"
+          description={
+            <Link
+              className="text-foreground-muted dark:text-dark-foreground-muted hover:font-medium underline"
+              href="/account?reset_password=true"
+            >
+              Update Password
+            </Link>
+          }
+        />
+      )}
     </div>
   );
 };

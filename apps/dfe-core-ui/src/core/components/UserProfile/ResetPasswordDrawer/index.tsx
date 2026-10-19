@@ -11,19 +11,34 @@ import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { GitEnabledPendingReviewModal } from '@/core/components/GitEnabledPendingReviewModal';
 import { Button } from 'antd';
 import { signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-export const ResetPasswordDrawer = ({
-  open: initialOpen = false,
-}: {
-  open?: boolean;
-}) => {
-  const [open, setOpen] = useState(initialOpen || false);
+export const ResetPasswordDrawer = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const resetPasswordParam = searchParams.get('reset_password') === 'true';
+  const [open, setOpen] = useState(resetPasswordParam);
+
+  const handleClose = () => {
+    setOpen(false);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('reset_password');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
   const {
     data: { external: externalUser } = {},
     isLoading,
     error,
   } = useFetchCurrentUser();
+
+  useEffect(() => {
+    if (resetPasswordParam) {
+      queueMicrotask(() => setOpen(true));
+    }
+  }, [resetPasswordParam]);
 
   const {
     data,
@@ -42,6 +57,7 @@ export const ResetPasswordDrawer = ({
       if (held) {
         return;
       }
+      handleClose();
       void signOut({ callbackUrl: loginWithNotice('password-changed') });
     },
   });
@@ -79,7 +95,7 @@ export const ResetPasswordDrawer = ({
         </Button>
       )}
 
-      <Drawer title="Reset Password" open={open} onClose={() => setOpen(false)}>
+      <Drawer title="Reset Password" open={open} onClose={handleClose}>
         <ResetPasswordForm
           askCurrentPassword
           onFinish={onFinish}
