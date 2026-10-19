@@ -41,6 +41,7 @@ export const UpdateAccountForm = ({
 
   const handleFinish = (values: UpdateAccountFormValues) => {
     onFinish({
+      ...values,
       groups: values.groups ?? [],
     });
   };

@@ -1,6 +1,6 @@
 'use client';
 
-import { UserActionsButton } from '@/core/components/UserActionsButton';
+import { SettingsActionButton } from '@/core/components/SettingsActionButton';
 import { cn } from '@/core/utils/style';
 import { IconLock, IconPrimaryLogoFull } from '@repo/dfe-icons';
 
@@ -30,7 +30,7 @@ export const NoAccessScene = () => {
           Your account is signed in but no roles granting access have been
           assigned to it. Please contact your administrator to request access.
         </p>
-        <UserActionsButton />
+        <SettingsActionButton />
       </div>
     </main>
   );

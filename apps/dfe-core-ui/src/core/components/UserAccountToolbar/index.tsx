@@ -7,7 +7,9 @@ export const UserAccountToolbar = ({ name }: { name: string }) => {
   return (
     <ListFieldMapsProvider>
       <Toolbar>
-        <nav className="flex w-full gap-x-6">Welcome, {name}!</nav>
+        <nav className="flex w-full items-center">
+          Welcome, <span className="font-medium ml-1">{name}</span>!
+        </nav>
       </Toolbar>
     </ListFieldMapsProvider>
   );
