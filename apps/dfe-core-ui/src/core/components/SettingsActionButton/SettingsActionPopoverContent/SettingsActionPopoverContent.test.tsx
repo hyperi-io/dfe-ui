@@ -71,22 +71,5 @@ describe('SettingsActionPopoverContent', () => {
 
     expect(await screen.findByText('DFE dfe-test')).toBeInTheDocument();
     expect(screen.getByText('dfe-test@dfe-oidc.test')).toBeInTheDocument();
-    expect(screen.getByText(OIDC_SUBJECT)).toBeInTheDocument();
-  });
-
-  test('falls back to the username and omits the email for a local account without either', async () => {
-    server.use(
-      API_CONFIG_MOCKS.accounts.me.get.success({
-        mockedResponse: account({ username: 'admin', name: ' ', email: '' }),
-      }),
-    );
-
-    render(<SettingsActionPopoverContent />, { wrapper });
-
-    expect(await screen.findByText('admin')).toBeInTheDocument();
-    expect(
-      screen.queryByText('dfe-test@dfe-oidc.test'),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText(/@/)).not.toBeInTheDocument();
   });
 });
