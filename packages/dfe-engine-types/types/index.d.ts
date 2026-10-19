@@ -2845,6 +2845,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/usage/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Usage Overview
+         * @description Every usage metric per UTC day over the last 30 days, and its highest in the last 7.
+         *
+         *     The whole deployment for a caller that reads every org, else the caller's own
+         *     orgs combined, with the two core counts ``not_permitted``. Events per second over
+         *     more than one tenant id is the busiest minute of their sum, read from the minute
+         *     table, which keeps 7 days.
+         */
+        get: operations["get_usage_overview_api_v1_usage_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Usage
+         * @description One usage metric per UTC day over a range, for the whole deployment or one org.
+         *
+         *     Events per second over more than one tenant id is the busiest minute of their
+         *     sum, read from the minute table, which keeps 7 days.
+         */
+        get: operations["get_usage_api_v1_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/discovery/databases": {
         parameters: {
             query?: never;
@@ -15481,6 +15529,55 @@ export interface components {
             scoped?: boolean | null;
         };
         /**
+         * UsageDay
+         * @description One UTC day of one metric.
+         */
+        UsageDay: {
+            /**
+             * Day
+             * Format: date
+             * @description The UTC day
+             */
+            day: string;
+            /**
+             * Value
+             * @description The day's total for ingested_bytes, else the day's highest minute
+             */
+            value: number;
+        };
+        /**
+         * UsageMetricOverview
+         * @description One metric on the overview.
+         */
+        UsageMetricOverview: {
+            /**
+             * Metric
+             * @description The metric: cores_deployed, node_cores, ingested_bytes, events_per_second
+             */
+            metric: string;
+            /**
+             * Label
+             * @description What a tile showing the metric is titled
+             */
+            label: string;
+            /**
+             * Unit
+             * @description What value counts: cores, bytes or events/s
+             */
+            unit: string;
+            /** @description not_measured when the range holds no row for the metric, and not_permitted when the caller is held to its orgs and the metric is not kept per org */
+            status: components["schemas"]["UsageStatus"];
+            /** @description The highest day in the last 7 UTC days, today included, and when */
+            highest_7d: components["schemas"]["UsageDay"] | null;
+            /** @description The most recent day in the series */
+            latest: components["schemas"]["UsageDay"] | null;
+            /**
+             * Series
+             * @description One entry per UTC day with a row, oldest first
+             */
+            series: components["schemas"]["UsageDay"][];
+        };
+        /**
          * UsageModel
          * @description One file that links an artefact.
          */
@@ -15501,6 +15598,86 @@ export interface components {
              */
             tag: string;
         };
+        /**
+         * UsageOverviewResponse
+         * @description Every usage metric over the last 30 UTC days.
+         */
+        UsageOverviewResponse: {
+            /**
+             * Orgs
+             * @description The orgs the numbers cover, empty for the whole deployment
+             */
+            orgs: string[];
+            /**
+             * From
+             * Format: date
+             * @description The series' first UTC day
+             */
+            from: string;
+            /**
+             * To
+             * Format: date
+             * @description The series' last UTC day, today
+             */
+            to: string;
+            /**
+             * Highest 7D Label
+             * @description What the highest_7d number is captioned
+             */
+            highest_7d_label: string;
+            /** Metrics */
+            metrics: components["schemas"]["UsageMetricOverview"][];
+        };
+        /**
+         * UsageSeriesResponse
+         * @description One usage metric per UTC day over a range.
+         */
+        UsageSeriesResponse: {
+            /** Metric */
+            metric: string;
+            /** Label */
+            label: string;
+            /** Unit */
+            unit: string;
+            status: components["schemas"]["UsageStatus"];
+            /**
+             * Granularity
+             * @constant
+             */
+            granularity: "day";
+            /**
+             * Orgs
+             * @description The orgs the numbers cover, empty for the whole deployment
+             */
+            orgs: string[];
+            /**
+             * From
+             * Format: date
+             * @description The range's first UTC day
+             */
+            from: string;
+            /**
+             * To
+             * Format: date
+             * @description The range's last UTC day
+             */
+            to: string;
+            /** @description The highest day in the range, and when */
+            highest: components["schemas"]["UsageDay"] | null;
+            /** @description The most recent day in the series */
+            latest: components["schemas"]["UsageDay"] | null;
+            /**
+             * Series
+             * @description One entry per UTC day with a row, oldest first
+             */
+            series: components["schemas"]["UsageDay"][];
+        };
+        /**
+         * UsageStatus
+         * @description Whether a metric has a number for this caller.
+         * @enum {string}
+         */
+        UsageStatus: "measured" | "not_measured" | "not_permitted";
         /**
          * UserResponse
          * @description The calling user, their roles, permissions and org access.
@@ -24028,6 +24205,120 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_usage_overview_api_v1_usage_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageOverviewResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No usage:read, or the caller is held to its orgs and holds no registered one */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description ClickHouse could not read the usage tables */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_usage_api_v1_usage_get: {
+        parameters: {
+            query: {
+                /** @description The metric to read */
+                metric: "cores_deployed" | "node_cores" | "ingested_bytes" | "events_per_second";
+                /** @description The first UTC day, 29 days before `to` when absent */
+                from?: string | null;
+                /** @description The last UTC day, today when absent */
+                to?: string | null;
+                /** @description One org to read. Absent reads the whole deployment, or every org the caller holds */
+                org?: string | null;
+                /** @description Per UTC day, the only granularity the rollup keeps */
+                granularity?: "day";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageSeriesResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No usage:read, or the caller is held to its orgs and does not hold the one named */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description An unknown metric or org, a range ending before it starts, or an org named for a metric kept only for the whole deployment */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description ClickHouse could not read the usage tables */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
