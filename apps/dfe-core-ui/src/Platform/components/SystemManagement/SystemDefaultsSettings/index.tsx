@@ -18,6 +18,7 @@ export const SystemDefaultsSettings = () => {
         <SystemDefaultsActionMenu
           onClick={{ onEditDefaultsClick: () => setIsEditDefaultsOpen(true) }}
           isConfigDriftOpen={hasDefaultsChanged}
+          onConfigDriftClose={() => setHasDefaultsChanged(false)}
         />
       }
     >

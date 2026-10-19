@@ -5,11 +5,17 @@ import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/conte
 import { IconCheck, IconDots, IconMinus, IconPlus } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
+import { CopyButton } from './CopyButton';
 
-export const RecursiveRendererActionMenu = ({
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+export const ActionMenu = ({
   fieldPath,
+  value,
 }: {
   fieldPath: string;
+  value: unknown;
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -19,9 +25,15 @@ export const RecursiveRendererActionMenu = ({
     isFieldPromoted,
     promotedOnSchemaFieldsSet,
   } = usePromoteRowsContext();
+
+  if (isPlainObject(value)) {
+    return null;
+  }
+
   const isPromoted = isFieldPromoted(fieldPath);
 
   const isPromotedOnSchema = promotedOnSchemaFieldsSet.has(fieldPath);
+  const keepVisible = isPromoted || isPromotedOnSchema || popoverOpen;
 
   return isPromotedOnSchema ? (
     <Tooltip
@@ -31,8 +43,7 @@ export const RecursiveRendererActionMenu = ({
       <button
         aria-label={`Actions for ${fieldPath}`}
         className={cn(
-          // Spacing
-          'ml-2',
+          'jv-action-selected',
           // Chip
           'bg-background dark:bg-dark-background rounded-full p-0.5',
         )}
@@ -75,16 +86,19 @@ export const RecursiveRendererActionMenu = ({
           >
             Un-promote Field
           </Button>
+          <CopyButton value={value} />
         </div>
       }
     >
       <button
         aria-label={`Actions for ${fieldPath}`}
         className={cn(
-          // Spacing
-          'ml-2',
+          'ml-1 cursor-pointer',
+          keepVisible && 'jv-action-selected',
           // Chip
-          'bg-background dark:bg-dark-background rounded-full p-0.5',
+          'bg-background dark:bg-dark-background rounded-full p-0.5 border border-foreground/10 dark:border-dark-foreground/10',
+          isPromoted &&
+            'bg-purple-500/10 dark:bg-purple-500/20 border-purple-500/40',
         )}
         type="button"
       >
