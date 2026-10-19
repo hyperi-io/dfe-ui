@@ -167,7 +167,7 @@ export const buildSidebarMenuGroups = (
         ],
       },
       {
-        key: '/platform',
+        key: '/settings/platform',
         label: 'Platform',
         icon: <IconStack2 />,
         actions: [
