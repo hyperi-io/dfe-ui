@@ -13,8 +13,12 @@ import { Button } from 'antd';
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
 
-export const ResetPasswordDrawer = () => {
-  const [open, setOpen] = useState(false);
+export const ResetPasswordDrawer = ({
+  open: initialOpen = false,
+}: {
+  open?: boolean;
+}) => {
+  const [open, setOpen] = useState(initialOpen || false);
   const {
     data: { external: externalUser } = {},
     isLoading,

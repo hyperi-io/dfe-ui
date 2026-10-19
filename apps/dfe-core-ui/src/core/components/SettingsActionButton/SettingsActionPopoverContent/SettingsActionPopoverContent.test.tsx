@@ -1,5 +1,4 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
-import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { TCurrentUserResponse } from '@/core/hooks/useFetchCurrentUser/types';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
@@ -13,8 +12,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import { UserActionsPopoverContent } from '.';
-import { server } from './UserActionsPopoverContent.mocks';
+import { SettingsActionPopoverContent } from '.';
+import { server } from './SettingsActionPopoverContent.mocks';
 
 vi.mock('next/navigation', async (importOriginal) => ({
   ...(await importOriginal<typeof import('next/navigation')>()),
@@ -35,21 +34,6 @@ afterAll(() => server.close());
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 const OIDC_SUBJECT = '00u15mxs3ecygt7oj698';
-
-const authMe = (userId: string): TAuthMeResponse => ({
-  org_id: 'default',
-  user_id: userId,
-  roles: ['viewer'],
-  permissions: [],
-  groups: [],
-  external: false,
-  blocked: false,
-  disabled_at: '',
-  blocked_at: '',
-  password_change_required: false,
-  hyperdx_role: 'string',
-  hyperdx_identity: 'string',
-});
 
 const account = (
   overrides: Partial<TCurrentUserResponse>,
@@ -72,15 +56,9 @@ const account = (
   ...overrides,
 });
 
-const definitionFor = (term: string) =>
-  screen.getByText(term).nextElementSibling;
-
-describe('UserActionsPopoverContent', () => {
+describe('SettingsActionPopoverContent', () => {
   test('shows the account name and email while keeping the user ID', async () => {
     server.use(
-      API_CONFIG_MOCKS.auth.me.get.success({
-        mockedResponse: authMe(OIDC_SUBJECT),
-      }),
       API_CONFIG_MOCKS.accounts.me.get.success({
         mockedResponse: account({
           name: 'DFE dfe-test',
@@ -89,29 +67,26 @@ describe('UserActionsPopoverContent', () => {
       }),
     );
 
-    render(<UserActionsPopoverContent />, { wrapper });
+    render(<SettingsActionPopoverContent />, { wrapper });
 
     expect(await screen.findByText('DFE dfe-test')).toBeInTheDocument();
-    expect(await screen.findByText('Permissions:')).toBeInTheDocument();
-    expect(definitionFor('Name:')).toHaveTextContent('DFE dfe-test');
-    expect(definitionFor('Email:')).toHaveTextContent('dfe-test@dfe-oidc.test');
-    expect(definitionFor('User ID:')).toHaveTextContent(OIDC_SUBJECT);
+    expect(screen.getByText('dfe-test@dfe-oidc.test')).toBeInTheDocument();
+    expect(screen.getByText(OIDC_SUBJECT)).toBeInTheDocument();
   });
 
   test('falls back to the username and omits the email for a local account without either', async () => {
     server.use(
-      API_CONFIG_MOCKS.auth.me.get.success({ mockedResponse: authMe('admin') }),
       API_CONFIG_MOCKS.accounts.me.get.success({
         mockedResponse: account({ username: 'admin', name: ' ', email: '' }),
       }),
     );
 
-    render(<UserActionsPopoverContent />, { wrapper });
+    render(<SettingsActionPopoverContent />, { wrapper });
 
-    expect(await screen.findByText('Name:')).toBeInTheDocument();
-    expect(await screen.findByText('Permissions:')).toBeInTheDocument();
-    expect(definitionFor('Name:')).toHaveTextContent('admin');
-    expect(definitionFor('User ID:')).toHaveTextContent('admin');
-    expect(screen.queryByText('Email:')).not.toBeInTheDocument();
+    expect(await screen.findByText('admin')).toBeInTheDocument();
+    expect(
+      screen.queryByText('dfe-test@dfe-oidc.test'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/@/)).not.toBeInTheDocument();
   });
 });
