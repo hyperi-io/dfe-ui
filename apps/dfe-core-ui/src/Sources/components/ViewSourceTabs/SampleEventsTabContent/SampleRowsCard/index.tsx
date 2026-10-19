@@ -1,6 +1,10 @@
 import { TSampleRowsResponse } from '@/Sources/hooks/useFetchSampleRows/types';
+import { JsonViewer, JsonViewerProvider } from '@repo/dfe-json-viewer-cn';
 import { Card } from 'antd';
-import { RecursiveRowRenderer } from './RecursiveRowRenderer';
+import { ActionMenu } from './ActionMenu';
+
+// Row keys and the column's own top level open; anything deeper is one click away.
+const INITIAL_DEPTH = 0;
 
 export const SampleRowsCard = ({
   row,
@@ -9,7 +13,14 @@ export const SampleRowsCard = ({
 }) => {
   return (
     <Card size="small">
-      <RecursiveRowRenderer row={row} />
+      <JsonViewerProvider action={ActionMenu}>
+        <JsonViewer
+          data={row}
+          initialDepth={INITIAL_DEPTH}
+          className="text-xs"
+          rootName={row._uuid as string}
+        />
+      </JsonViewerProvider>
     </Card>
   );
 };
