@@ -20,14 +20,15 @@ export const PopoverMenu = ({
 
   return (
     <Popover
-      {...props}
       open={open}
       onOpenChange={setOpen}
-      trigger="click"
+      destroyOnHidden={false}
+      {...props}
       classNames={{
         container: 'p-0.5',
+        ...(props.classNames ?? {}),
       }}
-      destroyOnHidden={false}
+      trigger="click"
       content={
         <ul
           className="[&_button]:w-full [&_button]:text-left [&_button]:justify-start"

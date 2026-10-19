@@ -17,6 +17,7 @@ export const SystemDefaultsActionMenu = ({
     <PopoverMenu
       ariaLabel={`System defaults actions`}
       placement="leftTop"
+      destroyOnHidden={false}
       options={[
         <RbacProtected
           key="edit-defaults"

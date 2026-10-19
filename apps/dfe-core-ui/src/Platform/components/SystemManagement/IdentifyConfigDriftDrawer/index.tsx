@@ -4,7 +4,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { IdentifyConfigDriftTabs } from '@/Platform/components/SystemManagement//IdentifyConfigDriftTabs';
 import { IconScan } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const pendingDeployWarning = (count: number) =>
   count === 1
@@ -19,6 +19,10 @@ export const IdentifyConfigDriftDrawer = ({ open }: { open: boolean }) => {
     setPendingDeployCount(0);
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    queueMicrotask(() => setIsOpen(open));
+  }, [open]);
   return (
     <>
       <RbacProtected action={RbacProtected.rbacActions.system_write}>
