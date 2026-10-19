@@ -84,9 +84,7 @@ describe('useFetchInfiniteSourceCatalogues', () => {
 
       expect(result.current.data).toBeDefined();
       expect(result.current.data.items).toHaveLength(10);
-      expect(result.current.data.items[0]).toMatchObject(
-        SOURCE_CATALOGUE_ITEM,
-      );
+      expect(result.current.data.items[0]).toMatchObject(SOURCE_CATALOGUE_ITEM);
       expect(result.current.isError).toBe(false);
     });
 
