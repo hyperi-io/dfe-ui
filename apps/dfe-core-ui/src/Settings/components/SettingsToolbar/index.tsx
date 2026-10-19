@@ -14,6 +14,11 @@ export const SettingsToolbarBase = () => {
       label: 'Admin Controls',
       disabled: false,
     },
+    {
+      path: '/settings/platform',
+      label: 'Platform Settings',
+      disabled: false,
+    },
   ];
 
   const isSelected = (path: string) =>

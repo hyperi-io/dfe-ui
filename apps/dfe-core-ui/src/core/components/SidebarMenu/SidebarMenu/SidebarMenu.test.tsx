@@ -56,10 +56,7 @@ describe('SidebarMenu', () => {
         'Hunts',
         // Stack
         'Components',
-        'Platform',
         'Admin Tools',
-        // Access
-        'Settings',
       ]);
     });
 
@@ -106,13 +103,7 @@ describe('SidebarMenu', () => {
         .getAllByRole('presentation')
         .map((item) => item.textContent);
 
-      expect(headings).toEqual([
-        'Observe',
-        'Data flow',
-        'Detect',
-        'Stack',
-        'Access',
-      ]);
+      expect(headings).toEqual(['Observe', 'Data flow', 'Detect', 'Stack']);
     });
 
     it('should place every destination under exactly one group', async () => {

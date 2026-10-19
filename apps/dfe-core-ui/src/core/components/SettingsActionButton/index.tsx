@@ -1,14 +1,14 @@
 import { Popover } from '@/core/components/Popover';
-import { IconUser } from '@repo/dfe-icons';
+import { IconSettings } from '@repo/dfe-icons';
 import { Button } from 'antd';
-import { UserActionsPopoverContent } from './UserActionsPopoverContent';
+import { SettingsActionPopoverContent } from './SettingsActionPopoverContent';
 
-export const UserActionsButton = () => {
+export const SettingsActionButton = () => {
   return (
     <Popover
       destroyOnHidden
       trigger="click"
-      content={<UserActionsPopoverContent />}
+      content={<SettingsActionPopoverContent />}
       placement="topLeft"
       classNames={{
         content: 'min-w-84',
@@ -18,8 +18,8 @@ export const UserActionsButton = () => {
         className="-ml-1 bg-background-muted dark:bg-dark-background-muted hover:bg-foreground/10 dark:hover:bg-dark-foreground/10 text-[14px]"
         type="text"
         shape="circle"
-        icon={<IconUser />}
-        aria-label="User actions"
+        icon={<IconSettings />}
+        aria-label="Settings actions"
       />
     </Popover>
   );
