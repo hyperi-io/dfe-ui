@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.23](https://github.com/hyperi-io/dfe-ui/compare/v1.7.22...v1.7.23) (2026-10-19)
+
+### Bug Fixes
+
+* fix sample events ([#576](https://github.com/hyperi-io/dfe-ui/issues/576)) ([1ce078a](https://github.com/hyperi-io/dfe-ui/commit/1ce078a3b74f9e7ef4fbec10412412facb7f477f))
+* type the repository scope as the engine enum ([#572](https://github.com/hyperi-io/dfe-ui/issues/572)) ([ed56df9](https://github.com/hyperi-io/dfe-ui/commit/ed56df94f0625327bc94fa188068d124a88e7100)), closes [#923](https://github.com/hyperi-io/dfe-ui/issues/923)
+
 ## [1.7.22](https://github.com/hyperi-io/dfe-ui/compare/v1.7.21...v1.7.22) (2026-10-17)
 
 ### Bug Fixes
