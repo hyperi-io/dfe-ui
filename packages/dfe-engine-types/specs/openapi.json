@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine -- configuration, scheduling, and query API",
-    "version": "1.22.44"
+    "version": "1.22.47"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -4510,7 +4510,7 @@
           "Sources"
         ],
         "summary": "List Catalogue",
-        "description": "List the sources the deployed transforms already handle.\n\nEmpty when no catalogue is mounted, which is a deployment without one rather\nthan an error: the app that ships the catalogue prints it from its own image.",
+        "description": "List the sources the deployed transforms already handle.\n\nEmpty when no catalogue is mounted, which is a deployment without one rather\nthan an error: the app that ships the catalogue prints it from its own image.\nEach entry says whether its table's schema layers resolve on this deployment,\nand names the first one that does not, so a console can hold back an entry\nthe create would refuse.",
         "operationId": "list_catalogue_api_v1_sources_catalogue_get",
         "parameters": [
           {
@@ -5161,7 +5161,7 @@
           "Sources"
         ],
         "summary": "Deploy Source Schema",
-        "description": "Plan (``dry_run=true``) or deploy a source version's schema to ClickHouse.\n\nRuns the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard\nviews) and validation errors are returned for review WITHOUT touching\nClickHouse. In deploy mode the DDL is applied: an absent table is created, and\nan existing one gains the columns it lacks and moves to the version's TTL, so a\nre-deploy changes only what differs. The engine and the type of an existing\ncolumn are left as created. A schema that failed validation is never deployed.",
+        "description": "Plan (``dry_run=true``) or deploy a source version's schema to ClickHouse.\n\nRuns the v2 YAML -> DDL pipeline. In plan mode the CREATE TABLE (+ any standard\nviews) and validation errors are returned for review WITHOUT touching\nClickHouse. In deploy mode the DDL is applied: an absent table is created, and\nan existing one gains the columns it lacks and moves to the version's TTL, so a\nre-deploy changes only what differs. The engine and the type of an existing\ncolumn are left as created. A schema that failed validation is never deployed.\nA source on the bus transport whose Kafka topics the broker did not create is\nnot marked deployed either, and the call answers 502 naming each topic.",
         "operationId": "deploy_source_schema_api_v1_sources__name__deploy_post",
         "parameters": [
           {
@@ -5241,6 +5241,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A backing service refused the deploy: ClickHouse rejected the DDL, or the source rides the bus and the broker did not create its topics (code topics_not_created, naming each topic and the broker's error code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TopicsNotCreatedErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                  ],
+                  "title": "Response 502 Deploy Source Schema Api V1 Sources  Name  Deploy Post"
                 }
               }
             }
@@ -16937,7 +16955,7 @@
           "Governed Ops: Helm Vars"
         ],
         "summary": "Set Var",
-        "description": "Set a helm var. Direct commit in dev/solo; routed to a review PR (or 409\n'review_required') in production+team. 409 on stale If-Match; 403 if protected.",
+        "description": "Set a helm var.\n\nA direct commit in dev or solo, and routed to a review PR (or 409\n'review_required') in production+team. 409 on a stale If-Match, 403 if protected.",
         "operationId": "set_var_api_v1_helm_files__name__vars__path__put",
         "parameters": [
           {
@@ -17038,7 +17056,7 @@
           "Governed Ops: Helm Vars"
         ],
         "summary": "Delete Var",
-        "description": "Revert a helm var to its chart default. Routed like set_var (PR in prod+team);\n403 if protected, since reverting a locked var changes it as surely as setting it.",
+        "description": "Revert a helm var to its chart default.\n\nRouted like set_var (a PR in prod+team). 403 if protected, since reverting a\nlocked var changes it as surely as setting it.",
         "operationId": "delete_var_api_v1_helm_files__name__vars__path__delete",
         "parameters": [
           {
@@ -19145,6 +19163,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "Body for writing one file.",
                 "properties": {
                   "content": {
                     "title": "Content",
@@ -22377,6 +22396,7 @@
           "Rules: Authoring"
         ],
         "summary": "Ai Review",
+        "description": "Review rule SQL with the registered query optimiser module.",
         "operationId": "ai_review_api_v1_authoring_ai_review_post",
         "requestBody": {
           "content": {
@@ -22443,6 +22463,7 @@
           "Rules: Authoring"
         ],
         "summary": "Ai Create",
+        "description": "Draft a query from a prompt with the registered query generator module.",
         "operationId": "ai_create_api_v1_authoring_ai_create_post",
         "requestBody": {
           "content": {
@@ -22509,6 +22530,7 @@
           "Rules: Authoring"
         ],
         "summary": "Ai Generate Vrl",
+        "description": "Draft VRL from log samples with the registered log parser module.",
         "operationId": "ai_generate_vrl_api_v1_authoring_ai_generate_vrl_post",
         "requestBody": {
           "content": {
@@ -22575,6 +22597,7 @@
           "Rules: Authoring"
         ],
         "summary": "Ai Suggest Schema",
+        "description": "Suggest meta-schema changes with the registered schema optimiser module.",
         "operationId": "ai_suggest_schema_api_v1_authoring_ai_suggest_schema_post",
         "requestBody": {
           "content": {
@@ -22932,6 +22955,12 @@
             "in": "path",
             "required": true,
             "schema": {
+              "enum": [
+                "system",
+                "org",
+                "group",
+                "user"
+              ],
               "type": "string",
               "title": "Scope"
             }
@@ -23025,6 +23054,12 @@
             "in": "path",
             "required": true,
             "schema": {
+              "enum": [
+                "system",
+                "org",
+                "group",
+                "user"
+              ],
               "type": "string",
               "title": "Scope"
             }
@@ -23119,6 +23154,12 @@
             "in": "path",
             "required": true,
             "schema": {
+              "enum": [
+                "system",
+                "org",
+                "group",
+                "user"
+              ],
               "type": "string",
               "title": "Scope"
             }
@@ -23231,6 +23272,12 @@
             "in": "path",
             "required": true,
             "schema": {
+              "enum": [
+                "system",
+                "org",
+                "group",
+                "user"
+              ],
               "type": "string",
               "title": "Scope"
             }
@@ -23762,7 +23809,8 @@
         "required": [
           "username"
         ],
-        "title": "AddMemberRequest"
+        "title": "AddMemberRequest",
+        "description": "Body for adding one account to a group."
       },
       "AdminLinkResponse": {
         "properties": {
@@ -23853,7 +23901,8 @@
           "name",
           "url"
         ],
-        "title": "AlertDestination"
+        "title": "AlertDestination",
+        "description": "An alert destination, with its URL masked on every read."
       },
       "AlertDestinationSummary": {
         "properties": {
@@ -23882,7 +23931,8 @@
         "required": [
           "name"
         ],
-        "title": "AlertDestinationSummary"
+        "title": "AlertDestinationSummary",
+        "description": "An alert destination in a listing, without its URL."
       },
       "AppConfigResponse": {
         "properties": {
@@ -24128,7 +24178,8 @@
           "has_compiled_routing",
           "file_sets"
         ],
-        "title": "AppSummary"
+        "title": "AppSummary",
+        "description": "One deployed app instance in a listing."
       },
       "ApplyDefaultsPin": {
         "properties": {
@@ -24305,7 +24356,8 @@
           "kind",
           "state"
         ],
-        "title": "ArtifactModel"
+        "title": "ArtifactModel",
+        "description": "A library artefact, with its versions and tags."
       },
       "AuthKind": {
         "type": "string",
@@ -24328,7 +24380,8 @@
         "required": [
           "enabled"
         ],
-        "title": "AutoMergeRequest"
+        "title": "AutoMergeRequest",
+        "description": "Body for turning auto-merge on or off."
       },
       "AutoMergeStatus": {
         "properties": {
@@ -24356,7 +24409,8 @@
           "allowed",
           "reason"
         ],
-        "title": "AutoMergeStatus"
+        "title": "AutoMergeStatus",
+        "description": "The auto-merge flag as stored, as in effect, and whether the posture allows it."
       },
       "AvailableOrgIdsResponse": {
         "properties": {
@@ -24378,7 +24432,8 @@
         "required": [
           "database"
         ],
-        "title": "AvailableOrgIdsResponse"
+        "title": "AvailableOrgIdsResponse",
+        "description": "The ``_org_id`` values found in the data database."
       },
       "BackingFacts": {
         "properties": {
@@ -25210,7 +25265,8 @@
           "file_sets",
           "instances"
         ],
-        "title": "CatalogueEntry"
+        "title": "CatalogueEntry",
+        "description": "One app the catalogue offers."
       },
       "CatalogueEntryObject": {
         "properties": {
@@ -25275,6 +25331,10 @@
             "title": "Source",
             "description": "Source name this entry derives; empty when the entry's own name is not a legal source name and one must be supplied on create",
             "default": ""
+          },
+          "schema_layers": {
+            "$ref": "#/components/schemas/CatalogueSchemaAvailability",
+            "description": "Whether the entry's table schema resolves here, and which layer does not"
           }
         },
         "type": "object",
@@ -25284,10 +25344,48 @@
           "data_stream",
           "dataset",
           "intakes",
-          "transforms"
+          "transforms",
+          "schema_layers"
         ],
         "title": "CatalogueEntryObject",
         "description": "One source a deployed transform already handles, as the console lists it."
+      },
+      "CatalogueSchemaAvailability": {
+        "properties": {
+          "resolves": {
+            "type": "boolean",
+            "title": "Resolves",
+            "description": "Whether the meta and derived schemas the entry's table composes from resolve here. When not, a source created from it carries no schema, and the fetcher intake refuses it (422) because a fetcher on its own topic needs one"
+          },
+          "missing_layer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "meta_schema",
+                  "derived_schema"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missing Layer",
+            "description": "The first layer that does not resolve, or null when resolves is true"
+          },
+          "missing_reference": {
+            "type": "string",
+            "title": "Missing Reference",
+            "description": "That layer's schema reference, such as derived/cisco_ios/log. Empty when resolves is true, or when the app manifest names no schema layers at all",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolves"
+        ],
+        "title": "CatalogueSchemaAvailability",
+        "description": "Whether a catalogue entry's table schema layers resolve on this deployment."
       },
       "CatalogueSourceRequest": {
         "properties": {
@@ -25613,7 +25711,8 @@
           }
         },
         "type": "object",
-        "title": "ClientConfig"
+        "title": "ClientConfig",
+        "description": "Settings the UI reads when it starts."
       },
       "CloudServiceStateResponse": {
         "properties": {
@@ -25713,7 +25812,8 @@
           "language",
           "files"
         ],
-        "title": "CompileRequest"
+        "title": "CompileRequest",
+        "description": "Body for compiling transform source to WASM."
       },
       "CompileResponse": {
         "properties": {
@@ -25731,7 +25831,8 @@
           "wasm_base64",
           "wasm_bytes"
         ],
-        "title": "CompileResponse"
+        "title": "CompileResponse",
+        "description": "The compiled WASM module, base64-encoded."
       },
       "ConfigFieldModel": {
         "properties": {
@@ -25846,7 +25947,8 @@
           "author",
           "date"
         ],
-        "title": "ConfigHistoryEntry"
+        "title": "ConfigHistoryEntry",
+        "description": "One commit that changed a service config."
       },
       "ConfigWriteRequest": {
         "properties": {
@@ -25964,7 +26066,8 @@
         "required": [
           "target_instance"
         ],
-        "title": "CopyFilesRequest"
+        "title": "CopyFilesRequest",
+        "description": "Body for copying files to another instance."
       },
       "CopyFilesResult": {
         "properties": {
@@ -26053,7 +26156,8 @@
         "required": [
           "changed"
         ],
-        "title": "CopyFilesResult"
+        "title": "CopyFilesResult",
+        "description": "The write result, with the files copied and the files skipped."
       },
       "CoreResourceConflictContext": {
         "properties": {
@@ -26285,7 +26389,8 @@
         "required": [
           "name"
         ],
-        "title": "CreateAPIKeyRequest"
+        "title": "CreateAPIKeyRequest",
+        "description": "Body for creating an API key."
       },
       "CreateAccountRequest": {
         "properties": {
@@ -26395,7 +26500,8 @@
           "name",
           "kind"
         ],
-        "title": "CreateArtifactRequest"
+        "title": "CreateArtifactRequest",
+        "description": "Body for creating an artefact, optionally publishing version 1."
       },
       "CreateGroupRequest": {
         "properties": {
@@ -26452,7 +26558,8 @@
           "name",
           "roles"
         ],
-        "title": "CreateGroupRequest"
+        "title": "CreateGroupRequest",
+        "description": "Body for creating a group."
       },
       "CreateInstanceRequest": {
         "properties": {
@@ -26471,7 +26578,8 @@
         "required": [
           "instance"
         ],
-        "title": "CreateInstanceRequest"
+        "title": "CreateInstanceRequest",
+        "description": "Body for creating an app instance with initial helm values."
       },
       "CreateOrgRequest": {
         "properties": {
@@ -26501,7 +26609,8 @@
         "required": [
           "name"
         ],
-        "title": "CreateOrgRequest"
+        "title": "CreateOrgRequest",
+        "description": "Body for creating an org."
       },
       "CreateProviderRequest": {
         "properties": {
@@ -26589,7 +26698,8 @@
           "name",
           "type"
         ],
-        "title": "CreateProviderRequest"
+        "title": "CreateProviderRequest",
+        "description": "Body for registering an OIDC provider."
       },
       "CreateRequest": {
         "properties": {
@@ -26621,7 +26731,8 @@
         "required": [
           "prompt"
         ],
-        "title": "CreateRequest"
+        "title": "CreateRequest",
+        "description": "Body for an AI query drafted from a prompt."
       },
       "CreateRoleRequest": {
         "properties": {
@@ -26659,7 +26770,8 @@
           "name",
           "permissions"
         ],
-        "title": "CreateRoleRequest"
+        "title": "CreateRoleRequest",
+        "description": "Body for creating a custom role."
       },
       "CustomEnvModel": {
         "properties": {
@@ -27212,7 +27324,8 @@
           "deleted",
           "orphaned_groups"
         ],
-        "title": "DetachResponse"
+        "title": "DetachResponse",
+        "description": "What detaching a provider deleted, orphaned and disabled."
       },
       "DisabledAccountInfo": {
         "properties": {
@@ -27478,7 +27591,8 @@
           "key",
           "value"
         ],
-        "title": "EmittedRecord"
+        "title": "EmittedRecord",
+        "description": "One record a transform emitted."
       },
       "ErrorResponse": {
         "properties": {
@@ -27693,7 +27807,8 @@
         "required": [
           "standard"
         ],
-        "title": "FieldMapSummary"
+        "title": "FieldMapSummary",
+        "description": "A field map in a listing."
       },
       "FieldMapping": {
         "properties": {
@@ -27777,7 +27892,8 @@
           "size_bytes",
           "content"
         ],
-        "title": "FileDetail"
+        "title": "FileDetail",
+        "description": "One file with its content and etag."
       },
       "FileSetSummary": {
         "properties": {
@@ -27813,7 +27929,8 @@
           "reload",
           "directory_setting"
         ],
-        "title": "FileSetSummary"
+        "title": "FileSetSummary",
+        "description": "One file set an app consumes."
       },
       "FileSummary": {
         "properties": {
@@ -27836,7 +27953,8 @@
           "language",
           "size_bytes"
         ],
-        "title": "FileSummary"
+        "title": "FileSummary",
+        "description": "One file in an instance's file set."
       },
       "FilterTier": {
         "type": "string",
@@ -27954,7 +28072,8 @@
         "required": [
           "query"
         ],
-        "title": "FromHyperdxRequest"
+        "title": "FromHyperdxRequest",
+        "description": "Body for turning a HyperDX query into rule SQL."
       },
       "GenerateRequest": {
         "properties": {
@@ -28297,7 +28416,8 @@
           }
         },
         "type": "object",
-        "title": "GroupResolutionRequest"
+        "title": "GroupResolutionRequest",
+        "description": "How a provider's groups resolve: by hand, from a token claim, or from its API."
       },
       "GroupResolutionResponse": {
         "properties": {
@@ -28375,7 +28495,8 @@
           "api_token_path",
           "okta_domain"
         ],
-        "title": "GroupResolutionResponse"
+        "title": "GroupResolutionResponse",
+        "description": "A provider's group resolution, with secret paths in place of values."
       },
       "GroupResponse": {
         "properties": {
@@ -28424,7 +28545,8 @@
           "source_id",
           "source_provider"
         ],
-        "title": "GroupResponse"
+        "title": "GroupResponse",
+        "description": "A group as the API returns it."
       },
       "GroupedLogResponse": {
         "properties": {
@@ -28440,7 +28562,8 @@
         "required": [
           "groups"
         ],
-        "title": "GroupedLogResponse"
+        "title": "GroupedLogResponse",
+        "description": "The audit log grouped by key."
       },
       "HTTPValidationError": {
         "properties": {
@@ -28487,7 +28610,8 @@
           "timestamp",
           "state"
         ],
-        "title": "HistoryEntry"
+        "title": "HistoryEntry",
+        "description": "One commit that changed an instance."
       },
       "HuntCreateRequest": {
         "properties": {
@@ -28624,7 +28748,8 @@
           "rules",
           "name"
         ],
-        "title": "HuntCreateRequest"
+        "title": "HuntCreateRequest",
+        "description": "Body for creating a hunt under a new name."
       },
       "HuntDetailResponse": {
         "properties": {
@@ -29142,7 +29267,8 @@
           }
         },
         "type": "object",
-        "title": "HyperDXConfig"
+        "title": "HyperDXConfig",
+        "description": "Whether the UI links to HyperDX, and where."
       },
       "HyperDXConnection": {
         "properties": {
@@ -29574,7 +29700,8 @@
           "suffixes",
           "encoding"
         ],
-        "title": "KindModel"
+        "title": "KindModel",
+        "description": "An artefact kind the app manifest declares."
       },
       "LifecycleRequest": {
         "properties": {
@@ -29586,7 +29713,8 @@
         "required": [
           "state"
         ],
-        "title": "LifecycleRequest"
+        "title": "LifecycleRequest",
+        "description": "Body for setting a service's lifecycle state."
       },
       "LifecycleResponse": {
         "properties": {
@@ -29625,7 +29753,8 @@
           "state",
           "changed"
         ],
-        "title": "LifecycleResponse"
+        "title": "LifecycleResponse",
+        "description": "The outcome of a lifecycle change, which applies once Argo reconciles it."
       },
       "LifecycleState": {
         "type": "string",
@@ -29668,7 +29797,8 @@
           "version",
           "digest"
         ],
-        "title": "LinkModel"
+        "title": "LinkModel",
+        "description": "A file's link to a library artefact version."
       },
       "LinkRequest": {
         "properties": {
@@ -29705,7 +29835,8 @@
           "name",
           "artifact"
         ],
-        "title": "LinkRequest"
+        "title": "LinkRequest",
+        "description": "Body for linking a library artefact into a file."
       },
       "LinkResult": {
         "properties": {
@@ -29790,7 +29921,8 @@
         "required": [
           "changed"
         ],
-        "title": "LinkResult"
+        "title": "LinkResult",
+        "description": "The write result, with the link it made."
       },
       "LinkStatusModel": {
         "properties": {
@@ -29859,7 +29991,8 @@
           "drift",
           "outdated"
         ],
-        "title": "LinkStatusModel"
+        "title": "LinkStatusModel",
+        "description": "A link, with how the content in the file set compares to the artefact."
       },
       "LogEntryModel": {
         "properties": {
@@ -29938,7 +30071,8 @@
           "conforming",
           "state"
         ],
-        "title": "LogEntryModel"
+        "title": "LogEntryModel",
+        "description": "One commit in the deploy repo's audit log."
       },
       "LogGroup": {
         "properties": {
@@ -29960,7 +30094,8 @@
           "count",
           "latest"
         ],
-        "title": "LogGroup"
+        "title": "LogGroup",
+        "description": "Audit log entries sharing a key, with the latest of them."
       },
       "LogResponse": {
         "properties": {
@@ -29987,7 +30122,8 @@
         "required": [
           "entries"
         ],
-        "title": "LogResponse"
+        "title": "LogResponse",
+        "description": "A page of the audit log, with the cursor for the next page."
       },
       "LoginConfigCheck": {
         "properties": {
@@ -30053,7 +30189,8 @@
           "username",
           "password"
         ],
-        "title": "LoginRequest"
+        "title": "LoginRequest",
+        "description": "Body for a local login."
       },
       "LogsourceMatch": {
         "properties": {
@@ -30710,7 +30847,8 @@
           "gauges",
           "rates"
         ],
-        "title": "MetricsResponse"
+        "title": "MetricsResponse",
+        "description": "An instance's current gauges and rates over a window."
       },
       "NonEmptyDict_str_SchemaVersionCreate_": {
         "additionalProperties": {
@@ -31233,7 +31371,8 @@
           "created_at",
           "updated_at"
         ],
-        "title": "OrgResponse"
+        "title": "OrgResponse",
+        "description": "An org as the API returns it."
       },
       "OrphanedGroupInfo": {
         "properties": {
@@ -31264,7 +31403,8 @@
           "roles",
           "member_count"
         ],
-        "title": "OrphanedGroupInfo"
+        "title": "OrphanedGroupInfo",
+        "description": "A group its provider no longer backs."
       },
       "PackInfo": {
         "properties": {
@@ -31332,6 +31472,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31344,6 +31485,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31356,6 +31498,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31398,6 +31541,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31410,6 +31554,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31422,6 +31567,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31464,6 +31610,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31476,6 +31623,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31488,6 +31636,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31530,6 +31679,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31542,6 +31692,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31554,6 +31705,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31596,6 +31748,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31608,6 +31761,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31620,6 +31774,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31662,6 +31817,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31674,6 +31830,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31686,6 +31843,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31728,6 +31886,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31740,6 +31899,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31752,6 +31912,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31794,6 +31955,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31806,6 +31968,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31818,6 +31981,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31860,6 +32024,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31872,6 +32037,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31884,6 +32050,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31926,6 +32093,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -31938,6 +32106,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -31950,6 +32119,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -31992,6 +32162,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32004,6 +32175,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32016,6 +32188,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32058,6 +32231,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32070,6 +32244,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32082,6 +32257,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32124,6 +32300,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32136,6 +32313,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32148,6 +32326,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32190,6 +32369,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32202,6 +32382,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32214,6 +32395,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32256,6 +32438,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32268,6 +32451,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32280,6 +32464,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32322,6 +32507,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32334,6 +32520,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32346,6 +32533,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32388,6 +32576,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32400,6 +32589,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32412,6 +32602,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32454,6 +32645,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32466,6 +32658,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32478,6 +32671,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32524,6 +32718,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32536,6 +32731,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32548,6 +32744,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32596,6 +32793,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -32608,6 +32806,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -32620,6 +32819,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -32754,7 +32954,8 @@
           }
         },
         "type": "object",
-        "title": "PatchArtifactRequest"
+        "title": "PatchArtifactRequest",
+        "description": "Body for changing an artefact's metadata, where an omitted field keeps its value."
       },
       "PathTree_SchemaSummaryObject_": {
         "properties": {
@@ -32824,7 +33025,8 @@
           "roles",
           "permissions"
         ],
-        "title": "PermissionsResponse"
+        "title": "PermissionsResponse",
+        "description": "The calling user's roles and the permissions they resolve to."
       },
       "PipelineBuildRequest": {
         "properties": {
@@ -33598,7 +33800,8 @@
         "required": [
           "content"
         ],
-        "title": "PublishVersionRequest"
+        "title": "PublishVersionRequest",
+        "description": "Body for publishing a new version of an artefact."
       },
       "QueryOptions": {
         "properties": {
@@ -33940,7 +34143,8 @@
         "required": [
           "changed"
         ],
-        "title": "RelinkResult"
+        "title": "RelinkResult",
+        "description": "The write result, with the links it moved."
       },
       "ResetPasswordRequest": {
         "properties": {
@@ -33955,7 +34159,8 @@
         "required": [
           "new_password"
         ],
-        "title": "ResetPasswordRequest"
+        "title": "ResetPasswordRequest",
+        "description": "Body for setting an account's new password."
       },
       "ResetPasswordResponse": {
         "properties": {
@@ -34017,7 +34222,8 @@
           "p95",
           "samples"
         ],
-        "title": "ResourceBucketModel"
+        "title": "ResourceBucketModel",
+        "description": "One time bucket of a metric across an instance's pods."
       },
       "ResourceReference": {
         "properties": {
@@ -34070,7 +34276,8 @@
           "bucket_seconds",
           "buckets"
         ],
-        "title": "ResourceSeriesResponse"
+        "title": "ResourceSeriesResponse",
+        "description": "An instance's resource metrics over a window, in time buckets."
       },
       "RetentionReconcileSummary": {
         "properties": {
@@ -34255,7 +34462,8 @@
         "required": [
           "sql"
         ],
-        "title": "ReviewRequest"
+        "title": "ReviewRequest",
+        "description": "Body for an AI review of rule SQL."
       },
       "RoleResponse": {
         "properties": {
@@ -34292,7 +34500,8 @@
           "scoped",
           "resource_type"
         ],
-        "title": "RoleResponse"
+        "title": "RoleResponse",
+        "description": "A role as the API returns it."
       },
       "RollbackRequest": {
         "properties": {
@@ -34305,7 +34514,8 @@
         "required": [
           "version"
         ],
-        "title": "RollbackRequest"
+        "title": "RollbackRequest",
+        "description": "Body for pointing an artefact back at an earlier version."
       },
       "RotatePasswordRequest": {
         "properties": {
@@ -34540,7 +34750,8 @@
         "required": [
           "rule"
         ],
-        "title": "RuleCreateResponse"
+        "title": "RuleCreateResponse",
+        "description": "The created rule, what sanitising changed, and what the rule is estimated to cost."
       },
       "RuleEditRequest": {
         "properties": {
@@ -34663,7 +34874,8 @@
           "id",
           "display_name"
         ],
-        "title": "RuleFromHyperdxResponse"
+        "title": "RuleFromHyperdxResponse",
+        "description": "The rule created from a HyperDX query."
       },
       "RuleResponse": {
         "properties": {
@@ -34772,7 +34984,8 @@
           "original_sql",
           "created_at"
         ],
-        "title": "RuleResponse"
+        "title": "RuleResponse",
+        "description": "A detection rule as the API returns it."
       },
       "RuleSummary": {
         "properties": {
@@ -34845,7 +35058,8 @@
           "severity",
           "created_at"
         ],
-        "title": "RuleSummary"
+        "title": "RuleSummary",
+        "description": "A detection rule in a listing."
       },
       "RuleUpdateRequest": {
         "properties": {
@@ -34983,7 +35197,8 @@
         "required": [
           "value"
         ],
-        "title": "SampleRecord"
+        "title": "SampleRecord",
+        "description": "One input record for a transform test."
       },
       "SampleRequest": {
         "properties": {
@@ -35377,7 +35592,8 @@
         "required": [
           "table"
         ],
-        "title": "ScaffoldRequest"
+        "title": "ScaffoldRequest",
+        "description": "Body for a starter SELECT over a table's columns."
       },
       "ScalingRequest": {
         "properties": {
@@ -35472,7 +35688,8 @@
           }
         },
         "type": "object",
-        "title": "ScalingRequest"
+        "title": "ScalingRequest",
+        "description": "Body for setting an instance's scaling dials."
       },
       "ScalingResponse": {
         "properties": {
@@ -35595,7 +35812,8 @@
           "supported",
           "deploy_target"
         ],
-        "title": "ScalingResponse"
+        "title": "ScalingResponse",
+        "description": "An instance's scaling dials, or why it cannot be scaled."
       },
       "SchemaColumn-Input": {
         "properties": {
@@ -36194,10 +36412,10 @@
             "title": "Engine Version",
             "description": "dfe-engine release that ran the pass"
           },
-          "topology": {
+          "platform": {
             "type": "string",
-            "title": "Topology",
-            "description": "single, replicated or replicated_on_cluster"
+            "title": "Platform",
+            "description": "cloud or self_hosted, probed from the server"
           },
           "database": {
             "type": "string",
@@ -36285,7 +36503,7 @@
           "converged",
           "schemas_version",
           "engine_version",
-          "topology",
+          "platform",
           "database",
           "holder",
           "started_at",
@@ -36320,7 +36538,8 @@
         "required": [
           "source_name"
         ],
-        "title": "SchemaSuggestRequest"
+        "title": "SchemaSuggestRequest",
+        "description": "Body for AI meta-schema suggestions for a source."
       },
       "SchemaSummaryObject": {
         "properties": {
@@ -36567,7 +36786,8 @@
           "service",
           "instance"
         ],
-        "title": "ServiceConfigSummary"
+        "title": "ServiceConfigSummary",
+        "description": "One service config instance in a listing."
       },
       "ServiceInfo": {
         "properties": {
@@ -36590,7 +36810,8 @@
           "tier",
           "state"
         ],
-        "title": "ServiceInfo"
+        "title": "ServiceInfo",
+        "description": "A service, its tier and its lifecycle state."
       },
       "SetVarRequest": {
         "properties": {
@@ -36602,7 +36823,8 @@
         "required": [
           "value"
         ],
-        "title": "SetVarRequest"
+        "title": "SetVarRequest",
+        "description": "Body for setting one helm var."
       },
       "SettingsChange": {
         "properties": {
@@ -36612,18 +36834,21 @@
             },
             "type": "array",
             "title": "Assignments",
-            "description": "'name = value' for each setting the move sets"
+            "description": "'name = value' for each setting the move sets, 'reset name' for each it resets"
           },
-          "statement": {
-            "type": "string",
-            "title": "Statement",
-            "description": "The ALTER TABLE that makes the move"
+          "statements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Statements",
+            "description": "The ALTER TABLE statements that make the move: a MODIFY SETTING, then a RESET SETTING, each present only when it has work"
           }
         },
         "type": "object",
         "required": [
           "assignments",
-          "statement"
+          "statements"
         ],
         "title": "SettingsChange",
         "description": "The table-settings move a deploy makes on a table that already exists."
@@ -36767,7 +36992,7 @@
           "default_engine": {
             "type": "string",
             "title": "Default Engine",
-            "description": "MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The topology prefix (Replicated, Shared) is resolved against the server at DDL time, not here.",
+            "description": "MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The Replicated prefix every DFE table takes is added at DDL time, not here.",
             "default": "MergeTree"
           },
           "admin_username": {
@@ -38204,7 +38429,7 @@
           "engine": {
             "type": "string",
             "title": "Engine",
-            "description": "MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the topology (single vs Replicated/Shared/Cloud) is resolved at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).",
+            "description": "MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).",
             "default": ""
           }
         },
@@ -38249,6 +38474,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -38261,6 +38487,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -38273,6 +38500,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -39083,7 +39311,8 @@
         "required": [
           "message"
         ],
-        "title": "SqlValidationError"
+        "title": "SqlValidationError",
+        "description": "One error in rule SQL, with where it is and a suggested fix."
       },
       "SqlValidationRequest": {
         "properties": {
@@ -39097,7 +39326,8 @@
         "required": [
           "sql"
         ],
-        "title": "SqlValidationRequest"
+        "title": "SqlValidationRequest",
+        "description": "Body for validating a rule's SQL."
       },
       "SqlValidationResponse": {
         "properties": {
@@ -39117,7 +39347,8 @@
         "required": [
           "valid"
         ],
-        "title": "SqlValidationResponse"
+        "title": "SqlValidationResponse",
+        "description": "Whether rule SQL is valid, and its errors."
       },
       "StateRequest": {
         "properties": {
@@ -39131,7 +39362,8 @@
         "required": [
           "state"
         ],
-        "title": "StateRequest"
+        "title": "StateRequest",
+        "description": "Body for changing an artefact's lifecycle state."
       },
       "StatusResponse": {
         "properties": {
@@ -39182,7 +39414,8 @@
           "telemetry_name",
           "reporting"
         ],
-        "title": "StatusResponse"
+        "title": "StatusResponse",
+        "description": "Whether an instance is reporting telemetry, and since when."
       },
       "StrDefault": {
         "properties": {
@@ -39489,7 +39722,7 @@
           },
           "engine": {
             "$ref": "#/components/schemas/StrDefault",
-            "description": "MergeTree-family variant, without a topology prefix."
+            "description": "MergeTree-family variant, without the Replicated or Shared prefix."
           },
           "editable": {
             "type": "boolean",
@@ -39578,7 +39811,7 @@
           },
           "engine": {
             "$ref": "#/components/schemas/StrDefault",
-            "description": "MergeTree-family variant, without a topology prefix."
+            "description": "MergeTree-family variant, without the Replicated or Shared prefix."
           },
           "editable": {
             "type": "boolean",
@@ -39734,7 +39967,8 @@
         "required": [
           "version"
         ],
-        "title": "TagRequest"
+        "title": "TagRequest",
+        "description": "Body for pointing a tag at a version."
       },
       "TaskInfo": {
         "properties": {
@@ -39858,7 +40092,8 @@
           "wasm_base64",
           "records"
         ],
-        "title": "TestRequest"
+        "title": "TestRequest",
+        "description": "Body for running a compiled transform over sample records."
       },
       "TokenResponse": {
         "properties": {
@@ -39910,7 +40145,8 @@
           "user_id",
           "roles"
         ],
-        "title": "TokenResponse"
+        "title": "TokenResponse",
+        "description": "The token a login issues, with the flags the UI acts on."
       },
       "TopicEnsureResponse": {
         "properties": {
@@ -39963,6 +40199,27 @@
         ],
         "title": "TopicFailure",
         "description": "One topic the broker would not do the thing to; the broker's own text is in the log."
+      },
+      "TopicNotCreated": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic",
+            "description": "The topic name"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Why, naming the broker's error code where it gave one and never its text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "reason"
+        ],
+        "title": "TopicNotCreated",
+        "description": "One Kafka topic a source deploy needed and the broker did not create."
       },
       "TopicRemoveResponse": {
         "properties": {
@@ -40155,6 +40412,62 @@
         "title": "TopicUpdateResponse",
         "description": "Outcome of a converge pass.\n\n``refused`` is what DFE declined to do (a partition decrease, a replication\nfactor change); ``failed`` is what the broker rejected. They are different\nproblems with different fixes, so they are different lists."
       },
+      "TopicsNotCreatedContext": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "The source being deployed"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicNotCreated"
+            },
+            "type": "array",
+            "title": "Topics",
+            "description": "Every topic the broker did not create"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "topics"
+        ],
+        "title": "TopicsNotCreatedContext",
+        "description": "Structured context for a source deploy refused because its topics were not created."
+      },
+      "TopicsNotCreatedErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "topics_not_created",
+            "title": "Code",
+            "default": "topics_not_created"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable explanation, naming each topic and reason"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "context": {
+            "$ref": "#/components/schemas/TopicsNotCreatedContext"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "context"
+        ],
+        "title": "TopicsNotCreatedErrorResponse",
+        "description": "502 when a source on the bus transport is deployed and the broker did not create its topics.\n\nThe source is not marked deployed. Its ClickHouse table is already in place,\nand a later deploy re-runs both steps."
+      },
       "TransportFacts": {
         "properties": {
           "default": {
@@ -40315,7 +40628,8 @@
           }
         },
         "type": "object",
-        "title": "UpdateAccountRequest"
+        "title": "UpdateAccountRequest",
+        "description": "Body for updating an account, where an omitted field keeps its value."
       },
       "UpdateGroupRequest": {
         "properties": {
@@ -40387,7 +40701,8 @@
           }
         },
         "type": "object",
-        "title": "UpdateGroupRequest"
+        "title": "UpdateGroupRequest",
+        "description": "Body for updating a group, where an omitted field keeps its value."
       },
       "UpdateOrgRequest": {
         "properties": {
@@ -40433,7 +40748,8 @@
           }
         },
         "type": "object",
-        "title": "UpdateOrgRequest"
+        "title": "UpdateOrgRequest",
+        "description": "Body for updating an org, where an omitted field keeps its value."
       },
       "UpdateOwnAccountRequest": {
         "properties": {
@@ -40581,7 +40897,8 @@
           }
         },
         "type": "object",
-        "title": "UpdateProviderRequest"
+        "title": "UpdateProviderRequest",
+        "description": "Body for updating a provider, where an omitted field keeps its value."
       },
       "UpdateRoleRequest": {
         "properties": {
@@ -40627,7 +40944,8 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "UpdateRoleRequest"
+        "title": "UpdateRoleRequest",
+        "description": "Body for updating a custom role, where an omitted field keeps its value."
       },
       "UsageModel": {
         "properties": {
@@ -40665,7 +40983,8 @@
           "name",
           "version"
         ],
-        "title": "UsageModel"
+        "title": "UsageModel",
+        "description": "One file that links an artefact."
       },
       "UserResponse": {
         "properties": {
@@ -40755,7 +41074,8 @@
           "external",
           "blocked"
         ],
-        "title": "UserResponse"
+        "title": "UserResponse",
+        "description": "The calling user, their roles, permissions and org access."
       },
       "ValidateResponse": {
         "properties": {
@@ -40857,7 +41177,8 @@
         "required": [
           "status"
         ],
-        "title": "ValidationModel"
+        "title": "ValidationModel",
+        "description": "What the validation backend said about the content written."
       },
       "ValidationResult": {
         "properties": {
@@ -40877,7 +41198,8 @@
         "required": [
           "valid"
         ],
-        "title": "ValidationResult"
+        "title": "ValidationResult",
+        "description": "Whether a service config is valid, and its errors."
       },
       "ValuesResponse": {
         "properties": {
@@ -41030,7 +41352,8 @@
           "encoding",
           "content"
         ],
-        "title": "VersionDetail"
+        "title": "VersionDetail",
+        "description": "One version of an artefact, with its content."
       },
       "VersionResponse": {
         "properties": {
@@ -41146,7 +41469,8 @@
           "digest",
           "size_bytes"
         ],
-        "title": "VersionSummary"
+        "title": "VersionSummary",
+        "description": "One published version of an artefact."
       },
       "ViewDefinition": {
         "properties": {
@@ -41386,7 +41710,8 @@
         "required": [
           "samples"
         ],
-        "title": "VrlRequest"
+        "title": "VrlRequest",
+        "description": "Body for AI VRL drafted from raw log samples."
       },
       "dfe_engine__api__pagination__PaginatedResponse_SchemaColumn___1": {
         "properties": {
@@ -41415,6 +41740,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -41427,6 +41753,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -41439,6 +41766,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -41481,6 +41809,7 @@
           "total_pages": {
             "type": "integer",
             "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
             "readOnly": true
           },
           "next_page": {
@@ -41493,6 +41822,7 @@
               }
             ],
             "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
             "readOnly": true
           },
           "prev_page": {
@@ -41505,6 +41835,7 @@
               }
             ],
             "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
             "readOnly": true
           }
         },
@@ -41617,7 +41948,8 @@
         "required": [
           "changed"
         ],
-        "title": "WriteResult"
+        "title": "WriteResult",
+        "description": "The outcome of a write: its commit, review routing, validation and reload."
       },
       "dfe_engine__api__v1__fieldmaps__SeedResponse": {
         "properties": {
@@ -41630,7 +41962,8 @@
         "required": [
           "seeded"
         ],
-        "title": "SeedResponse"
+        "title": "SeedResponse",
+        "description": "How many default field maps were seeded."
       },
       "dfe_engine__api__v1__helm__WriteResult": {
         "properties": {
@@ -41675,7 +42008,8 @@
         "required": [
           "changed"
         ],
-        "title": "WriteResult"
+        "title": "WriteResult",
+        "description": "The outcome of a helm var write: its commit, or the review PR it went to."
       },
       "dfe_engine__api__v1__library__WriteResult": {
         "properties": {
@@ -41742,7 +42076,8 @@
         "required": [
           "changed"
         ],
-        "title": "WriteResult"
+        "title": "WriteResult",
+        "description": "The outcome of a library write: its commit, version and validation."
       },
       "dfe_engine__api__v1__oidc_providers__SyncResponse": {
         "properties": {
@@ -41809,7 +42144,8 @@
           "error",
           "status"
         ],
-        "title": "SyncResponse"
+        "title": "SyncResponse",
+        "description": "The outcome of a group sync."
       },
       "dfe_engine__api__v1__oidc_providers__TestResponse": {
         "properties": {
@@ -41827,7 +42163,8 @@
           "success",
           "message"
         ],
-        "title": "TestResponse"
+        "title": "TestResponse",
+        "description": "Whether the provider answered the connection test."
       },
       "dfe_engine__api__v1__schemas__SchemaBuildResult": {
         "properties": {
@@ -41932,7 +42269,8 @@
         "required": [
           "seeded"
         ],
-        "title": "SeedResponse"
+        "title": "SeedResponse",
+        "description": "How many default service configs were seeded."
       },
       "dfe_engine__api__v1__sigma__SyncResponse": {
         "properties": {
@@ -42126,7 +42464,8 @@
           "duration_ms",
           "wasm_memory_bytes"
         ],
-        "title": "TestResponse"
+        "title": "TestResponse",
+        "description": "What a transform emitted, and the time and memory it used."
       },
       "dfe_engine__schema__models__SchemaColumn-Output": {
         "properties": {
