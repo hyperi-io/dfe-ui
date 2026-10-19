@@ -1021,6 +1021,9 @@ export interface paths {
          *
          *     Empty when no catalogue is mounted, which is a deployment without one rather
          *     than an error: the app that ships the catalogue prints it from its own image.
+         *     Each entry says whether its table's schema layers resolve on this deployment,
+         *     and names the first one that does not, so a console can hold back an entry
+         *     the create would refuse.
          */
         get: operations["list_catalogue_api_v1_sources_catalogue_get"];
         put?: never;
@@ -1182,6 +1185,8 @@ export interface paths {
          *     an existing one gains the columns it lacks and moves to the version's TTL, so a
          *     re-deploy changes only what differs. The engine and the type of an existing
          *     column are left as created. A schema that failed validation is never deployed.
+         *     A source on the bus transport whose Kafka topics the broker did not create is
+         *     not marked deployed either, and the call answers 502 naming each topic.
          */
         post: operations["deploy_source_schema_api_v1_sources__name__deploy_post"];
         delete?: never;
@@ -4020,15 +4025,19 @@ export interface paths {
         get?: never;
         /**
          * Set Var
-         * @description Set a helm var. Direct commit in dev/solo; routed to a review PR (or 409
-         *     'review_required') in production+team. 409 on stale If-Match; 403 if protected.
+         * @description Set a helm var.
+         *
+         *     A direct commit in dev or solo, and routed to a review PR (or 409
+         *     'review_required') in production+team. 409 on a stale If-Match, 403 if protected.
          */
         put: operations["set_var_api_v1_helm_files__name__vars__path__put"];
         post?: never;
         /**
          * Delete Var
-         * @description Revert a helm var to its chart default. Routed like set_var (PR in prod+team);
-         *     403 if protected, since reverting a locked var changes it as surely as setting it.
+         * @description Revert a helm var to its chart default.
+         *
+         *     Routed like set_var (a PR in prod+team). 403 if protected, since reverting a
+         *     locked var changes it as surely as setting it.
          */
         delete: operations["delete_var_api_v1_helm_files__name__vars__path__delete"];
         options?: never;
@@ -5302,7 +5311,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ai Review */
+        /**
+         * Ai Review
+         * @description Review rule SQL with the registered query optimiser module.
+         */
         post: operations["ai_review_api_v1_authoring_ai_review_post"];
         delete?: never;
         options?: never;
@@ -5319,7 +5331,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ai Create */
+        /**
+         * Ai Create
+         * @description Draft a query from a prompt with the registered query generator module.
+         */
         post: operations["ai_create_api_v1_authoring_ai_create_post"];
         delete?: never;
         options?: never;
@@ -5336,7 +5351,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ai Generate Vrl */
+        /**
+         * Ai Generate Vrl
+         * @description Draft VRL from log samples with the registered log parser module.
+         */
         post: operations["ai_generate_vrl_api_v1_authoring_ai_generate_vrl_post"];
         delete?: never;
         options?: never;
@@ -5353,7 +5371,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ai Suggest Schema */
+        /**
+         * Ai Suggest Schema
+         * @description Suggest meta-schema changes with the registered schema optimiser module.
+         */
         post: operations["ai_suggest_schema_api_v1_authoring_ai_suggest_schema_post"];
         delete?: never;
         options?: never;
@@ -5786,7 +5807,10 @@ export interface components {
             /** Changes */
             changes?: components["schemas"]["VarChange"][];
         };
-        /** AddMemberRequest */
+        /**
+         * AddMemberRequest
+         * @description Body for adding one account to a group.
+         */
         AddMemberRequest: {
             /**
              * Username
@@ -5823,7 +5847,10 @@ export interface components {
          * @enum {string}
          */
         AdminLinkStatus: "up" | "down" | "unknown";
-        /** AlertDestination */
+        /**
+         * AlertDestination
+         * @description An alert destination, with its URL masked on every read.
+         */
         AlertDestination: {
             /**
              * Name
@@ -5858,7 +5885,10 @@ export interface components {
              */
             hunt_name?: string | null;
         };
-        /** AlertDestinationSummary */
+        /**
+         * AlertDestinationSummary
+         * @description An alert destination in a listing, without its URL.
+         */
         AlertDestinationSummary: {
             /** Name */
             name: string;
@@ -5970,7 +6000,10 @@ export interface components {
              */
             mechanism: string;
         };
-        /** AppSummary */
+        /**
+         * AppSummary
+         * @description One deployed app instance in a listing.
+         */
         AppSummary: {
             /** Service */
             service: string;
@@ -6086,7 +6119,10 @@ export interface components {
              */
             restart_required?: string[];
         };
-        /** ArtifactModel */
+        /**
+         * ArtifactModel
+         * @description A library artefact, with its versions and tags.
+         */
         ArtifactModel: {
             /** Name */
             name: string;
@@ -6132,12 +6168,18 @@ export interface components {
          * @enum {string}
          */
         AuthKind: "none" | "api_key" | "git_token";
-        /** AutoMergeRequest */
+        /**
+         * AutoMergeRequest
+         * @description Body for turning auto-merge on or off.
+         */
         AutoMergeRequest: {
             /** Enabled */
             enabled: boolean;
         };
-        /** AutoMergeStatus */
+        /**
+         * AutoMergeStatus
+         * @description The auto-merge flag as stored, as in effect, and whether the posture allows it.
+         */
         AutoMergeStatus: {
             /** Stored */
             stored: boolean;
@@ -6148,7 +6190,10 @@ export interface components {
             /** Reason */
             reason: string;
         };
-        /** AvailableOrgIdsResponse */
+        /**
+         * AvailableOrgIdsResponse
+         * @description The ``_org_id`` values found in the data database.
+         */
         AvailableOrgIdsResponse: {
             /**
              * Database
@@ -6562,7 +6607,10 @@ export interface components {
              */
             selected: boolean;
         };
-        /** CatalogueEntry */
+        /**
+         * CatalogueEntry
+         * @description One app the catalogue offers.
+         */
         CatalogueEntry: {
             /** Service */
             service: string;
@@ -6676,6 +6724,30 @@ export interface components {
              * @default
              */
             source: string;
+            /** @description Whether the entry's table schema resolves here, and which layer does not */
+            schema_layers: components["schemas"]["CatalogueSchemaAvailability"];
+        };
+        /**
+         * CatalogueSchemaAvailability
+         * @description Whether a catalogue entry's table schema layers resolve on this deployment.
+         */
+        CatalogueSchemaAvailability: {
+            /**
+             * Resolves
+             * @description Whether the meta and derived schemas the entry's table composes from resolve here. When not, a source created from it carries no schema, and the fetcher intake refuses it (422) because a fetcher on its own topic needs one
+             */
+            resolves: boolean;
+            /**
+             * Missing Layer
+             * @description The first layer that does not resolve, or null when resolves is true
+             */
+            missing_layer?: ("meta_schema" | "derived_schema") | null;
+            /**
+             * Missing Reference
+             * @description That layer's schema reference, such as derived/cisco_ios/log. Empty when resolves is true, or when the app manifest names no schema layers at all
+             * @default
+             */
+            missing_reference: string;
         };
         /**
          * CatalogueSourceRequest
@@ -6845,7 +6917,10 @@ export interface components {
             /** Action Writable */
             action_writable: boolean;
         };
-        /** ClientConfig */
+        /**
+         * ClientConfig
+         * @description Settings the UI reads when it starts.
+         */
         ClientConfig: {
             /**
              * Api Base
@@ -6933,7 +7008,10 @@ export interface components {
              */
             comment: string;
         };
-        /** CompileRequest */
+        /**
+         * CompileRequest
+         * @description Body for compiling transform source to WASM.
+         */
         CompileRequest: {
             /**
              * Language
@@ -6948,7 +7026,10 @@ export interface components {
                 [key: string]: string;
             };
         };
-        /** CompileResponse */
+        /**
+         * CompileResponse
+         * @description The compiled WASM module, base64-encoded.
+         */
         CompileResponse: {
             /** Wasm Base64 */
             wasm_base64: string;
@@ -7018,7 +7099,10 @@ export interface components {
              */
             set: boolean;
         };
-        /** ConfigHistoryEntry */
+        /**
+         * ConfigHistoryEntry
+         * @description One commit that changed a service config.
+         */
         ConfigHistoryEntry: {
             /** Commit */
             commit: string;
@@ -7081,7 +7165,10 @@ export interface components {
              */
             custom_env: string;
         };
-        /** CopyFilesRequest */
+        /**
+         * CopyFilesRequest
+         * @description Body for copying files to another instance.
+         */
         CopyFilesRequest: {
             /**
              * Target Instance
@@ -7095,7 +7182,10 @@ export interface components {
              */
             overwrite: boolean;
         };
-        /** CopyFilesResult */
+        /**
+         * CopyFilesResult
+         * @description The write result, with the files copied and the files skipped.
+         */
         CopyFilesResult: {
             /** Changed */
             changed: boolean;
@@ -7230,7 +7320,10 @@ export interface components {
             /** Peak Memory */
             peak_memory: number;
         };
-        /** CreateAPIKeyRequest */
+        /**
+         * CreateAPIKeyRequest
+         * @description Body for creating an API key.
+         */
         CreateAPIKeyRequest: {
             /**
              * Name
@@ -7309,7 +7402,10 @@ export interface components {
              */
             org: string;
         };
-        /** CreateArtifactRequest */
+        /**
+         * CreateArtifactRequest
+         * @description Body for creating an artefact, optionally publishing version 1.
+         */
         CreateArtifactRequest: {
             /** Name */
             name: string;
@@ -7344,7 +7440,10 @@ export interface components {
              */
             message: string;
         };
-        /** CreateGroupRequest */
+        /**
+         * CreateGroupRequest
+         * @description Body for creating a group.
+         */
         CreateGroupRequest: {
             /**
              * Name
@@ -7386,7 +7485,10 @@ export interface components {
              */
             source_provider: string;
         };
-        /** CreateInstanceRequest */
+        /**
+         * CreateInstanceRequest
+         * @description Body for creating an app instance with initial helm values.
+         */
         CreateInstanceRequest: {
             /** Instance */
             instance: string;
@@ -7398,7 +7500,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** CreateOrgRequest */
+        /**
+         * CreateOrgRequest
+         * @description Body for creating an org.
+         */
         CreateOrgRequest: {
             /**
              * Name
@@ -7417,7 +7522,10 @@ export interface components {
              */
             org_ids?: string[];
         };
-        /** CreateProviderRequest */
+        /**
+         * CreateProviderRequest
+         * @description Body for registering an OIDC provider.
+         */
         CreateProviderRequest: {
             /**
              * Name
@@ -7479,7 +7587,10 @@ export interface components {
             scopes?: string[] | null;
             groups?: components["schemas"]["GroupResolutionRequest"];
         };
-        /** CreateRequest */
+        /**
+         * CreateRequest
+         * @description Body for an AI query drafted from a prompt.
+         */
         CreateRequest: {
             /** Prompt */
             prompt: string;
@@ -7490,7 +7601,10 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
-        /** CreateRoleRequest */
+        /**
+         * CreateRoleRequest
+         * @description Body for creating a custom role.
+         */
         CreateRoleRequest: {
             /**
              * Name
@@ -7851,7 +7965,10 @@ export interface components {
              */
             index?: string | null;
         };
-        /** DetachResponse */
+        /**
+         * DetachResponse
+         * @description What detaching a provider deleted, orphaned and disabled.
+         */
         DetachResponse: {
             /** Deleted */
             deleted: string;
@@ -8048,7 +8165,10 @@ export interface components {
             /** Events */
             events?: components["schemas"]["DryRunEventModel"][];
         };
-        /** EmittedRecord */
+        /**
+         * EmittedRecord
+         * @description One record a transform emitted.
+         */
         EmittedRecord: {
             /** Key */
             key: string;
@@ -8179,7 +8299,10 @@ export interface components {
                 [key: string]: string;
             };
         };
-        /** FieldMapSummary */
+        /**
+         * FieldMapSummary
+         * @description A field map in a listing.
+         */
         FieldMapSummary: {
             /** Standard */
             standard: string;
@@ -8223,7 +8346,10 @@ export interface components {
             /** Reason */
             reason: string;
         };
-        /** FileDetail */
+        /**
+         * FileDetail
+         * @description One file with its content and etag.
+         */
         FileDetail: {
             /** Name */
             name: string;
@@ -8239,7 +8365,10 @@ export interface components {
              */
             etag?: string | null;
         };
-        /** FileSetSummary */
+        /**
+         * FileSetSummary
+         * @description One file set an app consumes.
+         */
         FileSetSummary: {
             /** Name */
             name: string;
@@ -8252,7 +8381,10 @@ export interface components {
             /** Directory Setting */
             directory_setting: string;
         };
-        /** FileSummary */
+        /**
+         * FileSummary
+         * @description One file in an instance's file set.
+         */
         FileSummary: {
             /** Name */
             name: string;
@@ -8314,7 +8446,10 @@ export interface components {
              */
             topics?: string[] | null;
         };
-        /** FromHyperdxRequest */
+        /**
+         * FromHyperdxRequest
+         * @description Body for turning a HyperDX query into rule SQL.
+         */
         FromHyperdxRequest: {
             /** Query */
             query: string;
@@ -8479,7 +8614,10 @@ export interface components {
              */
             okta_domain: string;
         };
-        /** GroupResolutionRequest */
+        /**
+         * GroupResolutionRequest
+         * @description How a provider's groups resolve: by hand, from a token claim, or from its API.
+         */
         GroupResolutionRequest: {
             /**
              * Mode
@@ -8563,7 +8701,10 @@ export interface components {
              */
             okta_domain: string;
         };
-        /** GroupResolutionResponse */
+        /**
+         * GroupResolutionResponse
+         * @description A provider's group resolution, with secret paths in place of values.
+         */
         GroupResolutionResponse: {
             /** Mode */
             mode: string;
@@ -8594,7 +8735,10 @@ export interface components {
             /** Okta Domain */
             okta_domain: string;
         };
-        /** GroupResponse */
+        /**
+         * GroupResponse
+         * @description A group as the API returns it.
+         */
         GroupResponse: {
             /** Name */
             name: string;
@@ -8611,7 +8755,10 @@ export interface components {
             /** Source Provider */
             source_provider: string;
         };
-        /** GroupedLogResponse */
+        /**
+         * GroupedLogResponse
+         * @description The audit log grouped by key.
+         */
         GroupedLogResponse: {
             /** Groups */
             groups: components["schemas"]["LogGroup"][];
@@ -8621,7 +8768,10 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** HistoryEntry */
+        /**
+         * HistoryEntry
+         * @description One commit that changed an instance.
+         */
         HistoryEntry: {
             /** Sha */
             sha: string;
@@ -8643,7 +8793,10 @@ export interface components {
              */
             state: string;
         };
-        /** HuntCreateRequest */
+        /**
+         * HuntCreateRequest
+         * @description Body for creating a hunt under a new name.
+         */
         HuntCreateRequest: {
             /**
              * Display Name
@@ -8937,7 +9090,10 @@ export interface components {
              */
             rules: string[];
         };
-        /** HyperDXConfig */
+        /**
+         * HyperDXConfig
+         * @description Whether the UI links to HyperDX, and where.
+         */
         HyperDXConfig: {
             /**
              * Enabled
@@ -9184,7 +9340,10 @@ export interface components {
              */
             paths: components["schemas"]["JsonPathInfo"][];
         };
-        /** KindModel */
+        /**
+         * KindModel
+         * @description An artefact kind the app manifest declares.
+         */
         KindModel: {
             /** Name */
             name: string;
@@ -9195,11 +9354,17 @@ export interface components {
             /** Encoding */
             encoding: string;
         };
-        /** LifecycleRequest */
+        /**
+         * LifecycleRequest
+         * @description Body for setting a service's lifecycle state.
+         */
         LifecycleRequest: {
             state: components["schemas"]["LifecycleState"];
         };
-        /** LifecycleResponse */
+        /**
+         * LifecycleResponse
+         * @description The outcome of a lifecycle change, which applies once Argo reconciles it.
+         */
         LifecycleResponse: {
             /** Name */
             name: string;
@@ -9221,7 +9386,10 @@ export interface components {
          * @enum {string}
          */
         LifecycleState: "running" | "paused" | "stopped";
-        /** LinkModel */
+        /**
+         * LinkModel
+         * @description A file's link to a library artefact version.
+         */
         LinkModel: {
             /** Name */
             name: string;
@@ -9237,7 +9405,10 @@ export interface components {
              */
             tag: string;
         };
-        /** LinkRequest */
+        /**
+         * LinkRequest
+         * @description Body for linking a library artefact into a file.
+         */
         LinkRequest: {
             /**
              * Name
@@ -9258,7 +9429,10 @@ export interface components {
              */
             tag: string;
         };
-        /** LinkResult */
+        /**
+         * LinkResult
+         * @description The write result, with the link it made.
+         */
         LinkResult: {
             /** Changed */
             changed: boolean;
@@ -9289,7 +9463,10 @@ export interface components {
             restart_required?: string[];
             link?: components["schemas"]["LinkModel"] | null;
         };
-        /** LinkStatusModel */
+        /**
+         * LinkStatusModel
+         * @description A link, with how the content in the file set compares to the artefact.
+         */
         LinkStatusModel: {
             /** Name */
             name: string;
@@ -9330,7 +9507,10 @@ export interface components {
              */
             outdated: boolean;
         };
-        /** LogEntryModel */
+        /**
+         * LogEntryModel
+         * @description One commit in the deploy repo's audit log.
+         */
         LogEntryModel: {
             /** Sha */
             sha: string;
@@ -9359,7 +9539,10 @@ export interface components {
             /** State */
             state: string;
         };
-        /** LogGroup */
+        /**
+         * LogGroup
+         * @description Audit log entries sharing a key, with the latest of them.
+         */
         LogGroup: {
             /** Key */
             key: string;
@@ -9367,7 +9550,10 @@ export interface components {
             count: number;
             latest: components["schemas"]["LogEntryModel"];
         };
-        /** LogResponse */
+        /**
+         * LogResponse
+         * @description A page of the audit log, with the cursor for the next page.
+         */
         LogResponse: {
             /** Entries */
             entries: components["schemas"]["LogEntryModel"][];
@@ -9402,7 +9588,10 @@ export interface components {
             /** Checks */
             checks: components["schemas"]["LoginConfigCheck"][];
         };
-        /** LoginRequest */
+        /**
+         * LoginRequest
+         * @description Body for a local login.
+         */
         LoginRequest: {
             /**
              * Username
@@ -9811,7 +10000,10 @@ export interface components {
              */
             versions: string[];
         };
-        /** MetricsResponse */
+        /**
+         * MetricsResponse
+         * @description An instance's current gauges and rates over a window.
+         */
         MetricsResponse: {
             /** Telemetry Name */
             telemetry_name: string;
@@ -10136,7 +10328,10 @@ export interface components {
              */
             updated_at: string;
         };
-        /** OrgResponse */
+        /**
+         * OrgResponse
+         * @description An org as the API returns it.
+         */
         OrgResponse: {
             /** Name */
             name: string;
@@ -10151,7 +10346,10 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
-        /** OrphanedGroupInfo */
+        /**
+         * OrphanedGroupInfo
+         * @description A group its provider no longer backs.
+         */
         OrphanedGroupInfo: {
             /** Name */
             name: string;
@@ -10214,11 +10412,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[AccountResponse] */
@@ -10240,11 +10447,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[AlertDestinationSummary] */
@@ -10266,11 +10482,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[BindingSummary] */
@@ -10292,11 +10517,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[CatalogRuleSummary] */
@@ -10318,11 +10552,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[CatalogueEntryObject] */
@@ -10344,11 +10587,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[DerivedSchemaSummary] */
@@ -10370,11 +10622,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[FieldMapSummary] */
@@ -10396,11 +10657,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[GroupResponse] */
@@ -10422,11 +10692,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[HuntSummary] */
@@ -10448,11 +10727,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[OrgResponse] */
@@ -10474,11 +10762,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[ProviderResponse] */
@@ -10500,11 +10797,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[RoleResponse] */
@@ -10526,11 +10832,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[RuleSummary] */
@@ -10552,11 +10867,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[ServiceConfigSummary] */
@@ -10578,11 +10902,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[SigmaViewSummary] */
@@ -10604,11 +10937,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[SourceDefaultDrift] */
@@ -10630,11 +10972,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[TableEngineObject] */
@@ -10656,11 +11007,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /**
@@ -10687,11 +11047,20 @@ export interface components {
             per_page: number;
             /** @description Full matching collection view (not limited to current page) */
             objects: components["schemas"]["PathTree_SchemaSummaryObject_"];
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /**
@@ -10718,11 +11087,20 @@ export interface components {
             per_page: number;
             /** @description Full matching collection view (not limited to current page) */
             objects: components["schemas"]["PathTree_SourceSummaryObject_"];
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /**
@@ -10753,7 +11131,10 @@ export interface components {
              */
             description: string;
         };
-        /** PatchArtifactRequest */
+        /**
+         * PatchArtifactRequest
+         * @description Body for changing an artefact's metadata, where an omitted field keeps its value.
+         */
         PatchArtifactRequest: {
             /** Description */
             description?: string | null;
@@ -10794,7 +11175,10 @@ export interface components {
                 [key: string]: components["schemas"]["PathTree_SourceSummaryObject_"];
             };
         };
-        /** PermissionsResponse */
+        /**
+         * PermissionsResponse
+         * @description The calling user's roles and the permissions they resolve to.
+         */
         PermissionsResponse: {
             /**
              * Roles
@@ -11226,7 +11610,10 @@ export interface components {
             /** Sync Error */
             sync_error: string;
         };
-        /** PublishVersionRequest */
+        /**
+         * PublishVersionRequest
+         * @description Body for publishing a new version of an artefact.
+         */
         PublishVersionRequest: {
             /** Content */
             content: string;
@@ -11391,7 +11778,10 @@ export interface components {
             /** @description Execution options (limit, timeout, etc.) */
             options?: components["schemas"]["QueryOptions"] | null;
         };
-        /** RelinkResult */
+        /**
+         * RelinkResult
+         * @description The write result, with the links it moved.
+         */
         RelinkResult: {
             /** Changed */
             changed: boolean;
@@ -11423,7 +11813,10 @@ export interface components {
             /** Relinked */
             relinked?: components["schemas"]["LinkModel"][];
         };
-        /** ResetPasswordRequest */
+        /**
+         * ResetPasswordRequest
+         * @description Body for setting an account's new password.
+         */
         ResetPasswordRequest: {
             /**
              * New Password
@@ -11444,7 +11837,10 @@ export interface components {
             /** @description Durability state: merged straight away, or a pending PR/command. */
             git: components["schemas"]["AccountGitState"];
         };
-        /** ResourceBucketModel */
+        /**
+         * ResourceBucketModel
+         * @description One time bucket of a metric across an instance's pods.
+         */
         ResourceBucketModel: {
             /** Metric */
             metric: string;
@@ -11477,7 +11873,10 @@ export interface components {
              */
             version: string;
         };
-        /** ResourceSeriesResponse */
+        /**
+         * ResourceSeriesResponse
+         * @description An instance's resource metrics over a window, in time buckets.
+         */
         ResourceSeriesResponse: {
             /** Telemetry Name */
             telemetry_name: string;
@@ -11593,7 +11992,10 @@ export interface components {
             editable: boolean;
             reconcile: components["schemas"]["RetentionReconcileSummary"];
         };
-        /** ReviewRequest */
+        /**
+         * ReviewRequest
+         * @description Body for an AI review of rule SQL.
+         */
         ReviewRequest: {
             /** Sql */
             sql: string;
@@ -11602,7 +12004,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** RoleResponse */
+        /**
+         * RoleResponse
+         * @description A role as the API returns it.
+         */
         RoleResponse: {
             /** Name */
             name: string;
@@ -11618,7 +12023,10 @@ export interface components {
              */
             resource_type: string;
         };
-        /** RollbackRequest */
+        /**
+         * RollbackRequest
+         * @description Body for pointing an artefact back at an earlier version.
+         */
         RollbackRequest: {
             /** Version */
             version: number;
@@ -11762,7 +12170,10 @@ export interface components {
              */
             source_type: "raw" | "hyperdx";
         };
-        /** RuleCreateResponse */
+        /**
+         * RuleCreateResponse
+         * @description The created rule, what sanitising changed, and what the rule is estimated to cost.
+         */
         RuleCreateResponse: {
             rule: components["schemas"]["RuleResponse"];
             /** Sanitize Summary */
@@ -11823,7 +12234,10 @@ export interface components {
              */
             source?: string | null;
         };
-        /** RuleFromHyperdxResponse */
+        /**
+         * RuleFromHyperdxResponse
+         * @description The rule created from a HyperDX query.
+         */
         RuleFromHyperdxResponse: {
             /**
              * Id
@@ -11841,7 +12255,10 @@ export interface components {
             /** Sql Errors */
             sql_errors?: components["schemas"]["SqlValidationError"][];
         };
-        /** RuleResponse */
+        /**
+         * RuleResponse
+         * @description A detection rule as the API returns it.
+         */
         RuleResponse: {
             /**
              * Name
@@ -11876,7 +12293,10 @@ export interface components {
             /** Created At */
             created_at: string;
         };
-        /** RuleSummary */
+        /**
+         * RuleSummary
+         * @description A detection rule in a listing.
+         */
         RuleSummary: {
             /**
              * Name
@@ -11964,7 +12384,10 @@ export interface components {
          * @enum {string}
          */
         SampleMode: "recent" | "random" | "smart" | "anomaly";
-        /** SampleRecord */
+        /**
+         * SampleRecord
+         * @description One input record for a transform test.
+         */
         SampleRecord: {
             /**
              * Key
@@ -12180,7 +12603,10 @@ export interface components {
              */
             error?: string | null;
         };
-        /** ScaffoldRequest */
+        /**
+         * ScaffoldRequest
+         * @description Body for a starter SELECT over a table's columns.
+         */
         ScaffoldRequest: {
             /** Table */
             table: string;
@@ -12194,7 +12620,10 @@ export interface components {
              */
             limit: number;
         };
-        /** ScalingRequest */
+        /**
+         * ScalingRequest
+         * @description Body for setting an instance's scaling dials.
+         */
         ScalingRequest: {
             /**
              * Replica Count
@@ -12216,7 +12645,10 @@ export interface components {
             /** Memory Limit */
             memory_limit?: string | null;
         };
-        /** ScalingResponse */
+        /**
+         * ScalingResponse
+         * @description An instance's scaling dials, or why it cannot be scaled.
+         */
         ScalingResponse: {
             /** Supported */
             supported: boolean;
@@ -12574,10 +13006,10 @@ export interface components {
              */
             engine_version: string;
             /**
-             * Topology
-             * @description single, replicated or replicated_on_cluster
+             * Platform
+             * @description cloud or self_hosted, probed from the server
              */
-            topology: string;
+            platform: string;
             /**
              * Database
              * @description The one database every DFE object lands in
@@ -12631,7 +13063,10 @@ export interface components {
              */
             topics_drift?: string[];
         };
-        /** SchemaSuggestRequest */
+        /**
+         * SchemaSuggestRequest
+         * @description Body for AI meta-schema suggestions for a source.
+         */
         SchemaSuggestRequest: {
             /** Source Name */
             source_name: string;
@@ -12807,7 +13242,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** ServiceConfigSummary */
+        /**
+         * ServiceConfigSummary
+         * @description One service config instance in a listing.
+         */
         ServiceConfigSummary: {
             /** Service */
             service: string;
@@ -12816,7 +13254,10 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
-        /** ServiceInfo */
+        /**
+         * ServiceInfo
+         * @description A service, its tier and its lifecycle state.
+         */
         ServiceInfo: {
             /** Name */
             name: string;
@@ -12825,7 +13266,10 @@ export interface components {
             /** State */
             state: string;
         };
-        /** SetVarRequest */
+        /**
+         * SetVarRequest
+         * @description Body for setting one helm var.
+         */
         SetVarRequest: {
             /** Value */
             value: unknown;
@@ -12837,14 +13281,14 @@ export interface components {
         SettingsChange: {
             /**
              * Assignments
-             * @description 'name = value' for each setting the move sets
+             * @description 'name = value' for each setting the move sets, 'reset name' for each it resets
              */
             assignments: string[];
             /**
-             * Statement
-             * @description The ALTER TABLE that makes the move
+             * Statements
+             * @description The ALTER TABLE statements that make the move: a MODIFY SETTING, then a RESET SETTING, each present only when it has work
              */
-            statement: string;
+            statements: string[];
         };
         /**
          * SettingsSummary
@@ -12927,7 +13371,7 @@ export interface components {
             default_ttl_days: number;
             /**
              * Default Engine
-             * @description MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The topology prefix (Replicated, Shared) is resolved against the server at DDL time, not here.
+             * @description MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The Replicated prefix every DFE table takes is added at DDL time, not here.
              * @default MergeTree
              */
             default_engine: string;
@@ -13744,7 +14188,7 @@ export interface components {
             ttl_days?: number | null;
             /**
              * Engine
-             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the topology (single vs Replicated/Shared/Cloud) is resolved at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).
+             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).
              * @default
              */
             engine: string;
@@ -13778,11 +14222,20 @@ export interface components {
              * @enum {string}
              */
             resource_type: "core" | "custom";
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /**
@@ -14177,7 +14630,10 @@ export interface components {
              */
             views?: components["schemas"]["SourceView"][] | null;
         };
-        /** SqlValidationError */
+        /**
+         * SqlValidationError
+         * @description One error in rule SQL, with where it is and a suggested fix.
+         */
         SqlValidationError: {
             /** Message */
             message: string;
@@ -14186,7 +14642,10 @@ export interface components {
             /** Suggestion */
             suggestion?: string | null;
         };
-        /** SqlValidationRequest */
+        /**
+         * SqlValidationRequest
+         * @description Body for validating a rule's SQL.
+         */
         SqlValidationRequest: {
             /**
              * Sql
@@ -14194,14 +14653,20 @@ export interface components {
              */
             sql: string;
         };
-        /** SqlValidationResponse */
+        /**
+         * SqlValidationResponse
+         * @description Whether rule SQL is valid, and its errors.
+         */
         SqlValidationResponse: {
             /** Valid */
             valid: boolean;
             /** Errors */
             errors?: components["schemas"]["SqlValidationError"][];
         };
-        /** StateRequest */
+        /**
+         * StateRequest
+         * @description Body for changing an artefact's lifecycle state.
+         */
         StateRequest: {
             /**
              * State
@@ -14209,7 +14674,10 @@ export interface components {
              */
             state: string;
         };
-        /** StatusResponse */
+        /**
+         * StatusResponse
+         * @description Whether an instance is reporting telemetry, and since when.
+         */
         StatusResponse: {
             /** Telemetry Name */
             telemetry_name: string;
@@ -14377,7 +14845,7 @@ export interface components {
             ttl_days: components["schemas"]["IntDefault"];
             common_header_type: components["schemas"]["StrDefault"];
             common_header_version: components["schemas"]["StrDefault"];
-            /** @description MergeTree-family variant, without a topology prefix. */
+            /** @description MergeTree-family variant, without the Replicated or Shared prefix. */
             engine: components["schemas"]["StrDefault"];
             /**
              * Editable
@@ -14419,7 +14887,7 @@ export interface components {
             ttl_days: components["schemas"]["IntDefault"];
             common_header_type: components["schemas"]["StrDefault"];
             common_header_version: components["schemas"]["StrDefault"];
-            /** @description MergeTree-family variant, without a topology prefix. */
+            /** @description MergeTree-family variant, without the Replicated or Shared prefix. */
             engine: components["schemas"]["StrDefault"];
             /**
              * Editable
@@ -14496,7 +14964,10 @@ export interface components {
              */
             comment: string;
         };
-        /** TagRequest */
+        /**
+         * TagRequest
+         * @description Body for pointing a tag at a version.
+         */
         TagRequest: {
             /** Version */
             version: number;
@@ -14555,7 +15026,10 @@ export interface components {
          * @enum {string}
          */
         TaskStatus: "pending" | "running" | "completed" | "failed" | "cancelled";
-        /** TestRequest */
+        /**
+         * TestRequest
+         * @description Body for running a compiled transform over sample records.
+         */
         TestRequest: {
             /**
              * Wasm Base64
@@ -14568,7 +15042,10 @@ export interface components {
              */
             records: components["schemas"]["SampleRecord"][];
         };
-        /** TokenResponse */
+        /**
+         * TokenResponse
+         * @description The token a login issues, with the flags the UI acts on.
+         */
         TokenResponse: {
             /**
              * Access Token
@@ -14634,6 +15111,22 @@ export interface components {
             name: string;
             /** Error */
             error: string;
+        };
+        /**
+         * TopicNotCreated
+         * @description One Kafka topic a source deploy needed and the broker did not create.
+         */
+        TopicNotCreated: {
+            /**
+             * Topic
+             * @description The topic name
+             */
+            topic: string;
+            /**
+             * Reason
+             * @description Why, naming the broker's error code where it gave one and never its text
+             */
+            reason: string;
         };
         /**
          * TopicRemoveResponse
@@ -14724,6 +15217,45 @@ export interface components {
             dry_run: boolean;
         };
         /**
+         * TopicsNotCreatedContext
+         * @description Structured context for a source deploy refused because its topics were not created.
+         */
+        TopicsNotCreatedContext: {
+            /**
+             * Source
+             * @description The source being deployed
+             */
+            source: string;
+            /**
+             * Topics
+             * @description Every topic the broker did not create
+             */
+            topics: components["schemas"]["TopicNotCreated"][];
+        };
+        /**
+         * TopicsNotCreatedErrorResponse
+         * @description 502 when a source on the bus transport is deployed and the broker did not create its topics.
+         *
+         *     The source is not marked deployed. Its ClickHouse table is already in place,
+         *     and a later deploy re-runs both steps.
+         */
+        TopicsNotCreatedErrorResponse: {
+            /**
+             * Code
+             * @default topics_not_created
+             * @constant
+             */
+            code: "topics_not_created";
+            /**
+             * Message
+             * @description Human-readable explanation, naming each topic and reason
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["TopicsNotCreatedContext"];
+        };
+        /**
          * TransportFacts
          * @description What this deployment can carry a source's records on, between its stages.
          */
@@ -14770,7 +15302,10 @@ export interface components {
             /** Value */
             value?: unknown;
         };
-        /** UpdateAccountRequest */
+        /**
+         * UpdateAccountRequest
+         * @description Body for updating an account, where an omitted field keeps its value.
+         */
         UpdateAccountRequest: {
             /**
              * Groups
@@ -14808,7 +15343,10 @@ export interface components {
              */
             org?: string | null;
         };
-        /** UpdateGroupRequest */
+        /**
+         * UpdateGroupRequest
+         * @description Body for updating a group, where an omitted field keeps its value.
+         */
         UpdateGroupRequest: {
             /**
              * Roles
@@ -14836,7 +15374,10 @@ export interface components {
              */
             source_provider?: string | null;
         };
-        /** UpdateOrgRequest */
+        /**
+         * UpdateOrgRequest
+         * @description Body for updating an org, where an omitted field keeps its value.
+         */
         UpdateOrgRequest: {
             /**
              * Display Name
@@ -14875,7 +15416,10 @@ export interface components {
              */
             name?: string | null;
         };
-        /** UpdateProviderRequest */
+        /**
+         * UpdateProviderRequest
+         * @description Body for updating a provider, where an omitted field keeps its value.
+         */
         UpdateProviderRequest: {
             /**
              * Enabled
@@ -14915,7 +15459,10 @@ export interface components {
             /** @description Group resolution config */
             groups?: components["schemas"]["GroupResolutionRequest"] | null;
         };
-        /** UpdateRoleRequest */
+        /**
+         * UpdateRoleRequest
+         * @description Body for updating a custom role, where an omitted field keeps its value.
+         */
         UpdateRoleRequest: {
             /**
              * Description
@@ -14933,7 +15480,10 @@ export interface components {
              */
             scoped?: boolean | null;
         };
-        /** UsageModel */
+        /**
+         * UsageModel
+         * @description One file that links an artefact.
+         */
         UsageModel: {
             /** Service */
             service: string;
@@ -14951,7 +15501,10 @@ export interface components {
              */
             tag: string;
         };
-        /** UserResponse */
+        /**
+         * UserResponse
+         * @description The calling user, their roles, permissions and org access.
+         */
         UserResponse: {
             /** Org Id */
             org_id: string;
@@ -15036,7 +15589,10 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
-        /** ValidationModel */
+        /**
+         * ValidationModel
+         * @description What the validation backend said about the content written.
+         */
         ValidationModel: {
             /**
              * Status
@@ -15056,7 +15612,10 @@ export interface components {
             /** Errors */
             errors?: string[];
         };
-        /** ValidationResult */
+        /**
+         * ValidationResult
+         * @description Whether a service config is valid, and its errors.
+         */
         ValidationResult: {
             /** Valid */
             valid: boolean;
@@ -15108,7 +15667,10 @@ export interface components {
             /** Protected */
             protected: boolean;
         };
-        /** VersionDetail */
+        /**
+         * VersionDetail
+         * @description One version of an artefact, with its content.
+         */
         VersionDetail: {
             /** Version */
             version: number;
@@ -15187,7 +15749,10 @@ export interface components {
              */
             python_version: string;
         };
-        /** VersionSummary */
+        /**
+         * VersionSummary
+         * @description One published version of an artefact.
+         */
         VersionSummary: {
             /** Version */
             version: number;
@@ -15359,7 +15924,10 @@ export interface components {
          * @enum {string}
          */
         VolumeBand: "ok" | "guidance" | "warn" | "plainly_bad" | "unmeasured";
-        /** VrlRequest */
+        /**
+         * VrlRequest
+         * @description Body for AI VRL drafted from raw log samples.
+         */
         VrlRequest: {
             /** Samples */
             samples: string[];
@@ -15385,11 +15953,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /** PaginatedResponse[SchemaColumn] */
@@ -15411,11 +15988,20 @@ export interface components {
              * @description Items per page
              */
             per_page: number;
-            /** Total Pages */
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
             readonly total_pages: number;
-            /** Next Page */
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
             readonly next_page: number | null;
-            /** Prev Page */
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
             readonly prev_page: number | null;
         };
         /**
@@ -15438,7 +16024,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** WriteResult */
+        /**
+         * WriteResult
+         * @description The outcome of a write: its commit, review routing, validation and reload.
+         */
         dfe_engine__api__v1__apps__WriteResult: {
             /** Changed */
             changed: boolean;
@@ -15468,12 +16057,18 @@ export interface components {
              */
             restart_required?: string[];
         };
-        /** SeedResponse */
+        /**
+         * SeedResponse
+         * @description How many default field maps were seeded.
+         */
         dfe_engine__api__v1__fieldmaps__SeedResponse: {
             /** Seeded */
             seeded: number;
         };
-        /** WriteResult */
+        /**
+         * WriteResult
+         * @description The outcome of a helm var write: its commit, or the review PR it went to.
+         */
         dfe_engine__api__v1__helm__WriteResult: {
             /** Changed */
             changed: boolean;
@@ -15492,7 +16087,10 @@ export interface components {
             /** Pr Url */
             pr_url?: string | null;
         };
-        /** WriteResult */
+        /**
+         * WriteResult
+         * @description The outcome of a library write: its commit, version and validation.
+         */
         dfe_engine__api__v1__library__WriteResult: {
             /** Changed */
             changed: boolean;
@@ -15517,7 +16115,10 @@ export interface components {
             version?: number | null;
             validation?: components["schemas"]["ValidationModel"] | null;
         };
-        /** SyncResponse */
+        /**
+         * SyncResponse
+         * @description The outcome of a group sync.
+         */
         dfe_engine__api__v1__oidc_providers__SyncResponse: {
             /** Created */
             created: number;
@@ -15545,7 +16146,10 @@ export interface components {
              */
             status: "ok" | "partial" | "error" | "not_configured" | "user_token" | "skipped";
         };
-        /** TestResponse */
+        /**
+         * TestResponse
+         * @description Whether the provider answered the connection test.
+         */
         dfe_engine__api__v1__oidc_providers__TestResponse: {
             /** Success */
             success: boolean;
@@ -15595,7 +16199,10 @@ export interface components {
              */
             _field_type?: string | null;
         };
-        /** SeedResponse */
+        /**
+         * SeedResponse
+         * @description How many default service configs were seeded.
+         */
         dfe_engine__api__v1__services__SeedResponse: {
             /** Seeded */
             seeded: number;
@@ -15680,7 +16287,10 @@ export interface components {
              */
             seeded: number;
         };
-        /** TestResponse */
+        /**
+         * TestResponse
+         * @description What a transform emitted, and the time and memory it used.
+         */
         dfe_engine__api__v1__transforms__TestResponse: {
             /** Emitted */
             emitted: components["schemas"]["EmittedRecord"][];
@@ -19184,6 +19794,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A backing service refused the deploy: ClickHouse rejected the DDL, or the source rides the bus and the broker did not create its topics (code topics_not_created, naming each topic and the broker's error code) */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicsNotCreatedErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -30795,7 +31414,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                scope: string;
+                scope: "system" | "org" | "group" | "user";
                 scope_id: string;
                 namespace: string;
             };
@@ -30846,7 +31465,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                scope: string;
+                scope: "system" | "org" | "group" | "user";
                 scope_id: string;
                 namespace: string;
                 key: string;
@@ -30900,7 +31519,7 @@ export interface operations {
                 "If-Match"?: string | null;
             };
             path: {
-                scope: string;
+                scope: "system" | "org" | "group" | "user";
                 scope_id: string;
                 namespace: string;
                 key: string;
@@ -30952,7 +31571,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                scope: string;
+                scope: "system" | "org" | "group" | "user";
                 scope_id: string;
                 namespace: string;
                 key: string;

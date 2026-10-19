@@ -117,6 +117,11 @@ export const sources = {
               transforms: ['default'],
               beats: { module: 'okta', fileset: 'system' },
               source: 'okta',
+              schema_layers: {
+                resolves: true,
+                missing_layer: null,
+                missing_reference: '',
+              },
             },
           ],
           total: 1,
