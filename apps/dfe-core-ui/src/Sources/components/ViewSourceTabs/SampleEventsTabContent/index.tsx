@@ -21,8 +21,9 @@ export const SampleEventsTabContent = () => {
   const showPromoteBanner =
     fieldsToPromote.size > 0 && (isMainSource || canPromoteFields);
 
+  const promoteBannerHeight = showPromoteBanner ? 80 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 320,
+    offset: 200 + promoteBannerHeight,
   });
 
   if (isLoadingSampleRows) {
