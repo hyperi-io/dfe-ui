@@ -67,9 +67,17 @@ export const Sidebar = () => {
           </CustomScrollbar>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background">
+        <div
+          className={cn(
+            'absolute bottom-0 left-0 right-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background',
+            collapsed && 'justify-center flex-col-reverse',
+          )}
+        >
           {!collapsed && <SuiteVersion className="mr-auto" />}
-          <ThemeToggle className="mr-2" collapsed={collapsed} />
+          <ThemeToggle
+            className={cn('mr-2', collapsed && 'mr-0')}
+            collapsed={collapsed}
+          />
           <SettingsActionButton />
         </div>
       </div>
