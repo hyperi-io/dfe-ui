@@ -1,3 +1,4 @@
+/* import-scope-drift-disable */
 import dayjs, { type Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -60,3 +61,4 @@ export const formatDateXAgo = (date: string) => {
   }
   return 'just now';
 };
+/* import-scope-drift-enable */

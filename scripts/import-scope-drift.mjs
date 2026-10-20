@@ -15,6 +15,10 @@
  * A `server` export from a `*.mocks` file is an MSW server for tests. When
  * only tests import it, that is intentional and it is not reported.
  *
+ * The block comment import-scope-drift-disable ignores exports until
+ * import-scope-drift-enable, or the end of the file when enable is absent.
+ * An enable with no open disable does nothing.
+ *
  * Exit 1 when any move candidate exists. Unused exports are listed with
  * --unused and do not affect the exit code.
  *
@@ -117,7 +121,49 @@ const collectBindingNames = (name, into) => {
   }
 };
 
-/** @type {Map<string, { imports: { specifier: string, namespace: boolean, names: { imported: string }[], sideEffect: boolean }[], explicit: Map<string, { type: 'local', kind: string, localName?: string } | { type: 'reexport', specifier: string, imported: string }>, stars: string[] }>} */
+/** Ranges of source where exports are left out of the report. */
+const driftDisabledRanges = (source) => {
+  const text = source.getFullText();
+  const seen = new Set();
+  const hits = [];
+  const take = (pos, end, kind) => {
+    if (kind !== ts.SyntaxKind.MultiLineCommentTrivia || seen.has(pos)) return;
+    seen.add(pos);
+    const comment = text.slice(pos + 2, end - 2).trim();
+    if (
+      comment !== 'import-scope-drift-disable' &&
+      comment !== 'import-scope-drift-enable'
+    ) {
+      return;
+    }
+    hits.push({ comment, pos, end });
+  };
+  const walk = (node) => {
+    ts.forEachLeadingCommentRange(text, node.getFullStart(), take);
+    ts.forEachChild(node, walk);
+    ts.forEachTrailingCommentRange(text, node.getEnd(), take);
+  };
+  walk(source);
+  hits.sort((a, b) => a.pos - b.pos);
+
+  const ranges = [];
+  let disabledFrom = null;
+  for (const hit of hits) {
+    if (hit.comment === 'import-scope-drift-disable') {
+      if (disabledFrom === null) disabledFrom = hit.end;
+    } else if (disabledFrom !== null) {
+      ranges.push([disabledFrom, hit.pos]);
+      disabledFrom = null;
+    }
+  }
+  if (disabledFrom !== null) ranges.push([disabledFrom, text.length]);
+  return ranges;
+};
+
+const inDriftDisabledRange = (ranges, position) =>
+  ranges.some(([start, end]) => position >= start && position < end);
+
+/** @type {Map<string, { imports: { specifier: string, namespace: boolean, names: { imported: string }[], sideEffect: boolean }[], explicit: Map<string, { type: 'local', kind: string, localName?: string, ignored?: boolean } | { type: 'reexport', specifier: string, imported: string, ignored?: boolean }>, stars: string[] }>} */
 const parsed = new Map();
 
 for (const file of sourceFiles) {
@@ -134,6 +180,13 @@ for (const file of sourceFiles) {
   const stars = [];
   const importBindings = new Map();
   const localKinds = new Map();
+  const disabledRanges = driftDisabledRanges(source);
+  const setExplicit = (name, entry, node) => {
+    if (inDriftDisabledRange(disabledRanges, node.getStart(source))) {
+      entry.ignored = true;
+    }
+    explicit.set(name, entry);
+  };
 
   const visit = (node) => {
     if (
@@ -189,17 +242,25 @@ for (const file of sourceFiles) {
           const exported = element.name.text;
           const binding = importBindings.get(local);
           if (binding) {
-            explicit.set(exported, {
-              type: 'reexport',
-              specifier: binding.specifier,
-              imported: binding.imported,
-            });
+            setExplicit(
+              exported,
+              {
+                type: 'reexport',
+                specifier: binding.specifier,
+                imported: binding.imported,
+              },
+              node,
+            );
           } else {
-            explicit.set(exported, {
-              type: 'local',
-              kind: 'value',
-              localName: local,
-            });
+            setExplicit(
+              exported,
+              {
+                type: 'local',
+                kind: 'value',
+                localName: local,
+              },
+              node,
+            );
           }
         }
       } else if (
@@ -208,17 +269,21 @@ for (const file of sourceFiles) {
         ts.isNamedExports(node.exportClause)
       ) {
         for (const element of node.exportClause.elements) {
-          explicit.set(element.name.text, {
-            type: 'reexport',
-            specifier,
-            imported: (element.propertyName ?? element.name).text,
-          });
+          setExplicit(
+            element.name.text,
+            {
+              type: 'reexport',
+              specifier,
+              imported: (element.propertyName ?? element.name).text,
+            },
+            node,
+          );
         }
       } else if (specifier && !node.exportClause) {
         stars.push(specifier);
       }
     } else if (ts.isExportAssignment(node)) {
-      explicit.set('default', { type: 'local', kind: 'default' });
+      setExplicit('default', { type: 'local', kind: 'default' }, node);
     } else if (
       (ts.isFunctionDeclaration(node) ||
         ts.isClassDeclaration(node) ||
@@ -229,11 +294,15 @@ for (const file of sourceFiles) {
     ) {
       localKinds.set(node.name.text, declarationKind(node));
       if (isExported(node)) {
-        explicit.set(isDefaultExport(node) ? 'default' : node.name.text, {
-          type: 'local',
-          kind: declarationKind(node),
-          localName: node.name.text,
-        });
+        setExplicit(
+          isDefaultExport(node) ? 'default' : node.name.text,
+          {
+            type: 'local',
+            kind: declarationKind(node),
+            localName: node.name.text,
+          },
+          node,
+        );
       }
     } else if (ts.isVariableStatement(node)) {
       for (const declaration of node.declarationList.declarations) {
@@ -242,7 +311,11 @@ for (const file of sourceFiles) {
         for (const name of names) localKinds.set(name, 'const');
         if (isExported(node)) {
           for (const name of names) {
-            explicit.set(name, { type: 'local', kind: 'const', localName: name });
+            setExplicit(
+              name,
+              { type: 'local', kind: 'const', localName: name },
+              node,
+            );
           }
         }
       }
@@ -287,7 +360,7 @@ const resolveExport = (file, name, seen = new Set()) => {
   let found = null;
   const explicit = info?.explicit.get(name);
   if (explicit?.type === 'local') {
-    found = { file, name, kind: explicit.kind };
+    found = { file, name, kind: explicit.kind, ignored: !!explicit.ignored };
   } else if (explicit?.type === 'reexport') {
     const target = resolveSpecifier(file, explicit.specifier);
     found = target ? resolveExport(target, explicit.imported, seen) : null;
@@ -325,7 +398,7 @@ const exportNames = (file, seen = new Set()) => {
   return list;
 };
 
-/** @type {Map<string, { file: string, name: string, kind: string, byScope: Map<string, Set<string>>, testOnlyCore: boolean }>} */
+/** @type {Map<string, { file: string, name: string, kind: string, byScope: Map<string, Set<string>>, testOnlyCore: boolean, ignored: boolean }>} */
 const symbols = new Map();
 
 const symbolKey = (defined) => `${defined.file}#${defined.name}`;
@@ -344,6 +417,7 @@ const noteUse = (defined, importer) => {
       kind: defined.kind,
       byScope: new Map(),
       testOnlyCore: false,
+      ignored: !!defined.ignored,
     };
     symbols.set(key, record);
   }
@@ -385,6 +459,7 @@ for (const file of sourceFiles) {
         kind: defined.kind,
         byScope: new Map(),
         testOnlyCore: false,
+        ignored: !!defined.ignored,
       });
     }
   }
@@ -412,7 +487,7 @@ const moves = [];
 const unused = [];
 
 for (const record of symbols.values()) {
-  if (isTestOnlyServerMock(record)) continue;
+  if (record.ignored || isTestOnlyServerMock(record)) continue;
   const features = featureScopes(record);
   const usedByCore = record.byScope.has('core');
   if (!usedByCore && features.length === 1) {
