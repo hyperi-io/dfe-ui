@@ -1,4 +1,4 @@
-import { GOVERNANCE_POLICIES_QUERY_KEY } from '@/Platform/hooks/governance/useFetchGovernancePolicies';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteGovernancePolicyApi } from './api';
 
@@ -16,7 +16,7 @@ export const useDeleteGovernancePolicy = ({
       deleteGovernancePolicyApi({ pathParams: { name: name } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: GOVERNANCE_POLICIES_QUERY_KEY(),
+        queryKey: QUERY_KEYS.governance.policies(),
       });
 
       onSuccess?.();

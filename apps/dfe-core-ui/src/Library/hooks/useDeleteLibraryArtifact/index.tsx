@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLibraryArtifactApi } from './api';
 import { TDeleteLibraryArtifactResponse } from './types';
@@ -19,7 +20,9 @@ export const useDeleteLibraryArtifact = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: () => deleteLibraryArtifactApi({ pathParams: { artifact } }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: ['library-artifacts'] });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.library.artifact(),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteAppFileApi } from './api';
 import { TDeleteAppFileResponse } from './types';
 
-import { APP_FILES_QUERY_KEY } from '@/core/hooks/apps/files/useFetchAppFiles';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /** Remove a file the app consumes, and any library link that produced it. */
 export const useDeleteAppFile = ({
@@ -29,7 +29,7 @@ export const useDeleteAppFile = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_FILES_QUERY_KEY(service, instance, setName),
+        queryKey: QUERY_KEYS.apps.file({ service, instance, setName }),
       });
       onSuccess?.(values);
     },

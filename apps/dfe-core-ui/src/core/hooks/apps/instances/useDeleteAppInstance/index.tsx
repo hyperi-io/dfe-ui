@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteAppInstanceApi } from './api';
 import { TDeleteAppInstanceResponse } from './types';
 
-import { APPS_QUERY_KEY } from '@/core/hooks/apps/instances/useFetchApps';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Undeploy an instance by removing its values overlay.
@@ -31,7 +31,7 @@ export const useDeleteAppInstance = ({
         headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.apps.instances() });
       onSuccess?.(values);
     },
     onError: (error) => {

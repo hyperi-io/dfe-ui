@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppsApi } from './api';
-
-export const APPS_QUERY_KEY = ['apps'];
 
 /**
  * The app catalogue and its deployed instances.
@@ -14,7 +13,7 @@ export const useFetchApps = ({
   queryEnabled = true,
 }: { queryEnabled?: boolean } = {}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APPS_QUERY_KEY,
+    queryKey: QUERY_KEYS.apps.instances(),
     queryFn: () => fetchAppsApi(),
     enabled: queryEnabled,
   });

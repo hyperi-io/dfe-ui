@@ -1,4 +1,4 @@
-import { API_KEYS_QUERY_KEY } from '@/Settings/hooks/apiKeys/useFetchInfiniteFilteredApiKeys';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { revokeApiKey } from './api';
 
@@ -18,7 +18,7 @@ export const useRevokeApiKey = ({
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: API_KEYS_QUERY_KEY(),
+        queryKey: QUERY_KEYS.apiKeys.default(),
       });
 
       onSuccess?.();

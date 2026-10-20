@@ -1,13 +1,10 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchHelmFileVariablesApi } from './api';
 
-export const HELM_FILE_VARIABLES_QUERY_KEY = ({
-  name,
-}: { name?: string } = {}) => ['helmFileVariables', ...(name ? [name] : [])];
-
 export const useFetchHelmFileVariables = ({ name }: { name: string }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: HELM_FILE_VARIABLES_QUERY_KEY({ name }),
+    queryKey: QUERY_KEYS.helm.fileVariables({ name }),
     queryFn: () =>
       fetchHelmFileVariablesApi({
         pathParams: { name },

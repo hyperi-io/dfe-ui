@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
@@ -11,10 +12,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import {
-  QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS,
-  useFetchInfiniteFilteredOidcProviders,
-} from '.';
+import { useFetchInfiniteFilteredOidcProviders } from '.';
 import { TOidcProviderListItem } from './types';
 import { server } from './useFetchInfiniteFilteredOidcProviders.mocks';
 
@@ -545,7 +543,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await testWrapper.queryClient?.invalidateQueries({
-        queryKey: QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS(),
+        queryKey: QUERY_KEYS.oidcProviders.default(),
       });
 
       await waitFor(() => expect(listRequests).toBe(2));

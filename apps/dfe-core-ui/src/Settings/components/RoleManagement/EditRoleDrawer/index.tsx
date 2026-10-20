@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/roles/useFetchRoleDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useUpdateRole } from '@/Settings/hooks/roles/useUpdateRole';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -36,7 +36,7 @@ export const EditRoleDrawer = ({
         placement: 'bottomLeft',
       });
       void queryClient.invalidateQueries({
-        queryKey: ROLE_DETAIL_QUERY_KEY(role_name),
+        queryKey: QUERY_KEYS.roles.role({ name: role_name }),
       });
     },
   });

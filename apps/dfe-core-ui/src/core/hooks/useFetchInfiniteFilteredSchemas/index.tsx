@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -6,20 +7,6 @@ import { UseFetchInfiniteFilteredSchemasProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const INFINITE_SCHEMAS_QUERY_KEY = ({
-  search,
-  schema_type,
-  sort_by,
-  sort_order,
-  per_page,
-}: UseFetchInfiniteFilteredSchemasProps = {}) => [
-  'schemas',
-  ...(search ? [search] : []),
-  ...(schema_type ? [schema_type] : []),
-  ...(sort_by ? [sort_by] : []),
-  ...(sort_order ? [sort_order] : []),
-  ...(per_page ? [per_page] : []),
-];
 /** useFetchInfiniteFilteredSchemas props */
 /**
  * @param search - The search query to filter the schemas by path, version and version ids.
@@ -50,7 +37,7 @@ export const useFetchInfiniteFilteredSchemas = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: INFINITE_SCHEMAS_QUERY_KEY({
+    queryKey: QUERY_KEYS.schemas.default({
       search: debouncedSearch,
       schema_type,
       sort_by,

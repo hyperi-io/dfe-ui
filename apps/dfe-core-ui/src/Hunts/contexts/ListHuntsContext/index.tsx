@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
 import type {
   HuntSortBy,
@@ -136,7 +137,7 @@ export const ListHuntsProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredHuntsProps) => {
-      void queryClient.cancelQueries({ queryKey: ['hunts'] });
+      void queryClient.cancelQueries({ queryKey: QUERY_KEYS.hunts.default() });
 
       const updated: ListHuntsQueryParams = {
         ...filters,

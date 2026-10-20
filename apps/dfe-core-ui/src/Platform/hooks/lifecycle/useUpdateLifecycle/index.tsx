@@ -1,4 +1,4 @@
-import { LIFECYCLE_QUERY_KEY } from '@/Platform/hooks/lifecycle/useFetchLifecycle';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateLifecycleApi } from './api';
 import {
@@ -34,7 +34,9 @@ export const useUpdateLifecycle = ({
         pathParams: { name },
       }),
     onSuccess: (values) => {
-      void queryClient.invalidateQueries({ queryKey: LIFECYCLE_QUERY_KEY() });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.lifecycle.default(),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

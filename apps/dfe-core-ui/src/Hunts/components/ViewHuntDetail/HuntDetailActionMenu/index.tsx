@@ -1,10 +1,10 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
-import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
@@ -47,7 +47,7 @@ export const HuntDetailActionMenu = ({
     setSelectedHuntName(hunt.name);
 
     void queryClient.invalidateQueries({
-      queryKey: HUNT_DETAIL_QUERY_KEY(hunt.name),
+      queryKey: QUERY_KEYS.hunts.hunt({ name: hunt.name }),
     });
 
     notification.success({

@@ -1,10 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchOrganisationDetail } from './api';
-
-export const ORGANISATION_DETAIL_QUERY_KEY = (org_name?: string | null) => [
-  'organisation',
-  ...(org_name ? [org_name] : []),
-];
 
 export const useFetchOrganisationDetail = ({
   org_name,
@@ -13,7 +9,7 @@ export const useFetchOrganisationDetail = ({
 }) => {
   const isQueryEnabled = !!org_name;
   const { data, isLoading, error } = useQuery({
-    queryKey: ORGANISATION_DETAIL_QUERY_KEY(org_name),
+    queryKey: QUERY_KEYS.orgs.org({ name: org_name }),
     queryFn: () =>
       fetchOrganisationDetail({
         pathParams: { name: org_name ?? '' },

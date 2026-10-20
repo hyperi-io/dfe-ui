@@ -2,8 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { relinkAppFilesApi } from './api';
 import { TRelinkAppFilesResponse } from './types';
 
-import { APP_FILES_QUERY_KEY } from '@/core/hooks/apps/files/useFetchAppFiles';
-import { APP_FILE_LINKS_QUERY_KEY } from '@/core/hooks/apps/files/useFetchAppFileLinks';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Re-resolve every link in the set to what its target now names.
@@ -35,10 +34,10 @@ export const useRelinkAppFiles = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_FILES_QUERY_KEY(service, instance, setName),
+        queryKey: QUERY_KEYS.apps.files({ service, instance, setName }),
       });
       queryClient.invalidateQueries({
-        queryKey: APP_FILE_LINKS_QUERY_KEY(service, instance, setName),
+        queryKey: QUERY_KEYS.apps.fileLinks({ service, instance, setName }),
       });
       onSuccess?.(values);
     },

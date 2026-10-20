@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -11,35 +12,6 @@ const TEXT_FILTER_DEBOUNCE_MS = 300;
 
 const optionalTextFilterParam = (value: string) =>
   value === '' ? undefined : value;
-
-export const INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY = ({
-  schema_path,
-  version,
-  search,
-  name,
-  type,
-  use_case,
-  expr,
-  comment,
-  attribute,
-  selectedSearchableColumns,
-  per_page,
-}: UseFetchInfiniteFilteredSchemaDetailColumnsProps & {
-  selectedSearchableColumns?: string[];
-}) => [
-  'schema-detail-columns',
-  schema_path,
-  version,
-  ...(search ? [search] : []),
-  ...(name ? [name] : []),
-  ...(type ? [type] : []),
-  ...(use_case ? [use_case] : []),
-  ...(expr ? [expr] : []),
-  ...(comment ? [comment] : []),
-  ...(attribute ? [attribute] : []),
-  ...(selectedSearchableColumns ? [selectedSearchableColumns] : []),
-  ...(per_page ? [per_page] : []),
-];
 
 /** useFetchInfiniteFilteredSchemas props */
 /**
@@ -107,7 +79,7 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     isFetchingNextPage,
   } = useInfiniteQuery({
     enabled: enabled && !!schema_path && !!version,
-    queryKey: INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY({
+    queryKey: QUERY_KEYS.schemas.schemaDetail({
       schema_path,
       version,
       search: optionalTextFilterParam(debouncedSearch),

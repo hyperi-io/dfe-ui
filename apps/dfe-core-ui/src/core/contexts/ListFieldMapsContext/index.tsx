@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredFieldMaps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps';
 import type {
   TFieldMapListResponse,
@@ -157,7 +158,9 @@ export const ListFieldMapsProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredFieldMapsProps) => {
-      void queryClient.cancelQueries({ queryKey: ['field-maps'] });
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.fieldMaps.default(),
+      });
 
       const updated: ListFieldMapsQueryParams = {
         ...filters,

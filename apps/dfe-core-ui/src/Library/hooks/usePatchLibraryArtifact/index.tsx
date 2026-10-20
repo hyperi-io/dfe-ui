@@ -5,7 +5,7 @@ import {
   TPatchLibraryArtifactResponse,
 } from './types';
 
-import { LIBRARY_ARTIFACT_QUERY_KEY } from '@/Library/hooks/useFetchLibraryArtifactDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Edit an artefact's description, labels or group.
@@ -27,9 +27,11 @@ export const usePatchLibraryArtifact = ({
     mutationFn: (body: TPatchLibraryArtifactRequest) =>
       patchLibraryArtifactApi({ body, pathParams: { artifact } }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: ['library-artifacts'] });
       queryClient.invalidateQueries({
-        queryKey: LIBRARY_ARTIFACT_QUERY_KEY(artifact),
+        queryKey: QUERY_KEYS.library.artifact(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.library.artifact({ artifact }),
       });
       onSuccess?.(values);
     },

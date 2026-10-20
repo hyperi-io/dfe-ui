@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/groups/useFetchGroupDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useUpdateGroup } from '@/Settings/hooks/groups/useUpdateGroup';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -36,7 +36,7 @@ export const EditGroupDrawer = ({
       });
 
       void queryClient.invalidateQueries({
-        queryKey: GROUP_DETAIL_QUERY_KEY(group_name),
+        queryKey: QUERY_KEYS.groups.group({ name: group_name }),
       });
     },
   });

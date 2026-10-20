@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -33,14 +34,14 @@ export const useFetchInfiniteFilteredRules = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [
-      'rules',
-      debouncedSearch,
+    queryKey: QUERY_KEYS.rules.default({
+      search: debouncedSearch,
       severity,
+      source,
       sort_by,
       sort_order,
       per_page,
-    ],
+    }),
     queryFn: ({ pageParam = 1, signal }) =>
       fetchInfiniteRules({
         queryParams: {

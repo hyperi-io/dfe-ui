@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchInfiniteFieldMaps } from './api';
@@ -31,7 +32,13 @@ export const useFetchInfiniteFilteredFieldMaps = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['field-maps', search, standard, sort_by, sort_order, per_page],
+    queryKey: QUERY_KEYS.fieldMaps.default({
+      search,
+      standard,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFieldMaps({
         queryParams: {

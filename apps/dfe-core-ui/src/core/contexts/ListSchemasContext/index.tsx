@@ -5,6 +5,7 @@ import type {
   UseFetchInfiniteFilteredSchemasProps,
 } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -180,7 +181,9 @@ export const ListSchemasProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSchemasProps) => {
-      void queryClient.cancelQueries({ queryKey: ['schemas'] });
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.schemas.default(),
+      });
       const updated: ListSchemasQueryParams = {
         ...filters,
         ...newFilters,

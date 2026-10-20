@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { jsonPaths } from './api';
 
@@ -15,7 +16,13 @@ export const useFetchJsonPaths = ({
   version?: string;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['json-paths', source_name, samples, stats, paths, version],
+    queryKey: QUERY_KEYS.schemas.jsonPaths({
+      source_name,
+      samples,
+      stats,
+      paths,
+      version,
+    }),
     queryFn: () =>
       jsonPaths({
         pathParams: { source_name: source_name ?? '' },

@@ -1,4 +1,4 @@
-import { GOVERNANCE_ACTIONS_QUERY_KEY } from '@/Platform/hooks/governance/useFetchGovernanceActions/index';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createGovernanceActionApi } from './api';
 import {
@@ -20,7 +20,7 @@ export const useCreateGovernanceAction = ({
       createGovernanceActionApi({ body }),
     onSuccess: (values) => {
       void queryClient.invalidateQueries({
-        queryKey: GOVERNANCE_ACTIONS_QUERY_KEY(),
+        queryKey: QUERY_KEYS.governance.actions(),
       });
       onSuccess?.(values);
     },

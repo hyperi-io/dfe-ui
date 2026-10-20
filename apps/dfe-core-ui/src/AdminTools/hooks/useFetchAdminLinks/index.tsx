@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAdminLinksApi } from './api';
-
-export const ADMIN_LINKS_QUERY_KEY = ['deployment', 'admin-links'];
 
 /**
  * The admin UIs this deployment runs, in the order its deployer listed them.
@@ -11,7 +10,7 @@ export const ADMIN_LINKS_QUERY_KEY = ['deployment', 'admin-links'];
  */
 export const useFetchAdminLinks = () => {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ADMIN_LINKS_QUERY_KEY,
+    queryKey: QUERY_KEYS.deployment.adminLinks(),
     queryFn: () => fetchAdminLinksApi(),
     // A 403 is the engine's answer, and retrying it only delays saying so.
     retry: false,

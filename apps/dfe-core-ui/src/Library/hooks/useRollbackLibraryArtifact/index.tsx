@@ -5,8 +5,7 @@ import {
   TRollbackLibraryArtifactResponse,
 } from './types';
 
-import { LIBRARY_ARTIFACT_QUERY_KEY } from '@/Library/hooks/useFetchLibraryArtifactDetail';
-import { LIBRARY_VERSIONS_QUERY_KEY } from '@/Library/hooks/useFetchLibraryVersions';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Repoint `current` at an earlier version.
@@ -29,10 +28,10 @@ export const useRollbackLibraryArtifact = ({
       rollbackLibraryArtifactApi({ body, pathParams: { artifact } }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: LIBRARY_VERSIONS_QUERY_KEY(artifact),
+        queryKey: QUERY_KEYS.library.versions({ artifact }),
       });
       queryClient.invalidateQueries({
-        queryKey: LIBRARY_ARTIFACT_QUERY_KEY(artifact),
+        queryKey: QUERY_KEYS.library.artifact({ artifact }),
       });
       onSuccess?.(values);
     },

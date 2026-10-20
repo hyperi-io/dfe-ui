@@ -1,11 +1,10 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { governancePoliciesApi } from './api';
 
-export const GOVERNANCE_POLICIES_QUERY_KEY = () => ['governancePolicies'];
-
 export const useFetchGovernancePolicies = () => {
   const { data, isLoading, error } = useQuery({
-    queryKey: GOVERNANCE_POLICIES_QUERY_KEY(),
+    queryKey: QUERY_KEYS.governance.policies(),
     queryFn: () => governancePoliciesApi(),
   });
 

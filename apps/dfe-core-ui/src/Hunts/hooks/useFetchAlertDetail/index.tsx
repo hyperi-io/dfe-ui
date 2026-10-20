@@ -1,9 +1,10 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAlertDetail } from './api';
 
 export const useFetchAlertDetail = ({ name }: { name?: string | null }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['alert', name],
+    queryKey: QUERY_KEYS.alerts.destination({ name }),
     queryFn: ({ signal }) =>
       fetchAlertDetail({ pathParams: { name: name ?? '' }, signal }),
     enabled: !!name,

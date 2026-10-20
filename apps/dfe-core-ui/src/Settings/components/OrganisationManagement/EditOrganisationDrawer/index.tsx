@@ -4,8 +4,8 @@ import {
 } from '@/core/components/CreateUpdateOrganisationForm';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { TOrganisationListSummary } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
-import { ORGANISATION_DETAIL_QUERY_KEY } from '@/Settings/hooks/organisations/useFetchOrganisationDetail';
 import { useUpdateOrganisation } from '@/Settings/hooks/organisations/useUpdateOrganisation';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -38,7 +38,7 @@ export const EditOrganisationDrawer = ({
       });
       setOpen(false);
       void queryClient.invalidateQueries({
-        queryKey: ORGANISATION_DETAIL_QUERY_KEY(organisation.name),
+        queryKey: QUERY_KEYS.orgs.org({ name: organisation.name }),
       });
     },
   });

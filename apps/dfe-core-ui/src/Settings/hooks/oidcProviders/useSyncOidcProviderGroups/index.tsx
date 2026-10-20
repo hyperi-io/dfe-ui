@@ -1,4 +1,4 @@
-import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProviderGroups } from './api';
 import { TSyncOidcProviderGroupsResponse } from './types';
@@ -24,7 +24,7 @@ export const useSyncOidcProviderGroups = ({
     onSuccess: (data) => {
       // A sync that reaches the provider rewrites its last_sync_status, which the list carries.
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS(),
+        queryKey: QUERY_KEYS.oidcProviders.default(),
       });
       onSuccess?.(data);
     },

@@ -1,12 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppFileApi } from './api';
-
-export const APP_FILE_QUERY_KEY = (
-  service: string,
-  instance: string,
-  setName: string,
-  filename: string,
-) => ['app-file', service, instance, setName, filename];
 
 /** One authored file's content. */
 export const useFetchAppFile = ({
@@ -23,7 +17,7 @@ export const useFetchAppFile = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: APP_FILE_QUERY_KEY(service, instance, setName, filename),
+    queryKey: QUERY_KEYS.apps.file({ service, instance, setName, filename }),
     queryFn: () =>
       fetchAppFileApi({
         pathParams: { service, instance, set_name: setName, filename },

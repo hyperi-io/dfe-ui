@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { syncAppRoutingApi } from './api';
 import { TSyncAppRoutingResponse } from './types';
 
-import { APP_ROUTING_QUERY_KEY } from '@/core/hooks/apps/routing/useFetchAppRouting';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /** Rewrite the overlay's routing to what the sources currently compile to. */
 export const useSyncAppRouting = ({
@@ -27,7 +27,7 @@ export const useSyncAppRouting = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_ROUTING_QUERY_KEY(service, instance),
+        queryKey: QUERY_KEYS.apps.routingSync({ service, instance }),
       });
       onSuccess?.(values);
     },

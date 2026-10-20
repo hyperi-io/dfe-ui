@@ -6,8 +6,6 @@ import { fetchInfiniteFilteredOidcProvidersApi } from './api';
 import { UseFetchInfiniteFilteredOidcProvidersProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
-export const QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS =
-  QUERY_KEYS.oidcProviders.default;
 /** useFetchInfiniteFilteredOidcProviders props */
 /**
  * @param search - The search query to filter the oidc providers by name and description.
