@@ -4,7 +4,7 @@ import { decodeJwt } from 'jose';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 /** Session user minted from an engine token the OIDC callback handed back. */
-export type EngineTokenUser = {
+type EngineTokenUser = {
   id: string;
   name: string;
   email?: string;
@@ -15,6 +15,7 @@ export type EngineTokenUser = {
 
 const DEFAULT_EXPIRES_IN = 86400;
 
+/* import-scope-drift-disable - (exported for tests) */
 /**
  * Turn an engine token into a session user by asking the engine who it is.
  * The engine is the only verifier: a token it rejects on /auth/me is null here.
@@ -62,6 +63,7 @@ export async function authorizeEngineToken(
     roles: me.roles ?? [],
   };
 }
+/* import-scope-drift-enable */
 
 /**
  * NextAuth provider for the OIDC hand-back: the console's /login/oidc page

@@ -1,5 +1,6 @@
-// Current feature flags
+/* import-scope-drift-disable - (persist feature for future use) */
+/** Current feature flags */
 export enum FeatureFlags {
-  // Dev alerts
-  DevAlerts = 'DEV_ALERTS',
+  _None = 'NONE',
 }
+/* import-scope-drift-enable */

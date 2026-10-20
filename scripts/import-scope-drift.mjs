@@ -8,19 +8,22 @@
  * core, or by two or more of those directories, stays: core is the shared
  * kernel, and core is not allowed to import a feature scope.
  *
- * Co-located core tests, stories, and mocks do not count as core usage, or
- * every component would look used by core. Feature tests do count as that
- * feature using the symbol.
+ * Co-located core tests and mocks do not count as core usage, or every
+ * component would look used by core. Feature tests do count as that feature
+ * using the symbol. Storybook files (`*.stories.ts` and `*.stories.tsx`) are
+ * ignored entirely.
  *
  * A `server` export from a `*.mocks` file is an MSW server for tests. When
  * only tests import it, that is intentional and it is not reported.
  *
  * The block comment import-scope-drift-disable ignores exports until
  * import-scope-drift-enable, or the end of the file when enable is absent.
- * An enable with no open disable does nothing.
+ * An enable with no open disable does nothing. Either comment may carry a
+ * reason after the directive.
  *
  * Exit 1 when any move candidate exists. Unused exports are listed with
- * --unused and do not affect the exit code.
+ * --unused and do not affect the exit code. ESLint reports the same moves
+ * as warnings.
  *
  *   node scripts/import-scope-drift.mjs
  *   node scripts/import-scope-drift.mjs --unused
@@ -52,7 +55,11 @@ const walk = (dir) => {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(full);
-    } else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.d.ts')) {
+    } else if (
+      /\.(ts|tsx)$/.test(entry.name) &&
+      !entry.name.endsWith('.d.ts') &&
+      !/\.stories\.tsx?$/.test(entry.name)
+    ) {
       sourceFiles.push(full);
     }
   }
@@ -63,7 +70,7 @@ walk(SRC_ROOT);
 const fileSet = new Set(sourceFiles);
 
 const isTestFile = (file) =>
-  /\.(test|spec|stories|mocks)\.(ts|tsx)$/.test(file);
+  /\.(test|spec|mocks)\.(ts|tsx)$/.test(file);
 
 const scopeOf = (file) => {
   const [top] = path.relative(SRC_ROOT, file).split(path.sep);
@@ -130,13 +137,9 @@ const driftDisabledRanges = (source) => {
     if (kind !== ts.SyntaxKind.MultiLineCommentTrivia || seen.has(pos)) return;
     seen.add(pos);
     const comment = text.slice(pos + 2, end - 2).trim();
-    if (
-      comment !== 'import-scope-drift-disable' &&
-      comment !== 'import-scope-drift-enable'
-    ) {
-      return;
-    }
-    hits.push({ comment, pos, end });
+    const match = comment.match(/^import-scope-drift-(disable|enable)\b/);
+    if (!match) return;
+    hits.push({ directive: match[1], pos, end });
   };
   const walk = (node) => {
     ts.forEachLeadingCommentRange(text, node.getFullStart(), take);
@@ -149,7 +152,7 @@ const driftDisabledRanges = (source) => {
   const ranges = [];
   let disabledFrom = null;
   for (const hit of hits) {
-    if (hit.comment === 'import-scope-drift-disable') {
+    if (hit.directive === 'disable') {
       if (disabledFrom === null) disabledFrom = hit.end;
     } else if (disabledFrom !== null) {
       ranges.push([disabledFrom, hit.pos]);
@@ -519,43 +522,53 @@ moves.sort(
 );
 unused.sort((a, b) => a.file.localeCompare(b.file) || a.name.localeCompare(b.name));
 
-if (asJson) {
-  const payload = { moves };
-  if (showUnused) payload.unused = unused;
-  console.log(JSON.stringify(payload, null, 2));
-} else {
-  console.log(
-    'Core exports used by exactly one feature scope, and not by core. Move each into that scope.',
-  );
-  console.log(`${moves.length} to move.`);
-  let current = '';
-  for (const move of moves) {
-    if (move.scope !== current) {
-      current = move.scope;
-      console.log(`\n${current} (${moves.filter((item) => item.scope === current).length})`);
-    }
-    console.log(`  ${move.file}`);
-    console.log(
-      `    ${move.name}  ${move.kind}  ${move.importers.length} importer${move.importers.length === 1 ? '' : 's'}`,
-    );
-    for (const importer of move.importers) {
-      console.log(`      ${importer}`);
-    }
-  }
-  if (showUnused) {
-    console.log(
-      `\nUnused outside their own file: ${unused.length} (${unused.filter((item) => item.testsOnly).length} referenced only by core tests).`,
-    );
-    for (const item of unused) {
-      console.log(
-        `  ${item.file}  ${item.name}  ${item.kind}${item.testsOnly ? '  tests-only' : ''}`,
-      );
-    }
+export { APP_ROOT, moves, unused };
+
+const isDirectRun =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  if (asJson) {
+    const payload = { moves };
+    if (showUnused) payload.unused = unused;
+    console.log(JSON.stringify(payload, null, 2));
   } else {
     console.log(
-      `\n${unused.length} exports have no production importers. Pass --unused to list them.`,
+      'Core exports used by exactly one feature scope, and not by core. Move each into that scope.',
     );
+    console.log(`${moves.length} to move.`);
+    let current = '';
+    for (const move of moves) {
+      if (move.scope !== current) {
+        current = move.scope;
+        console.log(
+          `\n${current} (${moves.filter((item) => item.scope === current).length})`,
+        );
+      }
+      console.log(`  ${move.file}`);
+      console.log(
+        `    ${move.name}  ${move.kind}  ${move.importers.length} importer${move.importers.length === 1 ? '' : 's'}`,
+      );
+      for (const importer of move.importers) {
+        console.log(`      ${importer}`);
+      }
+    }
+    if (showUnused) {
+      console.log(
+        `\nUnused outside their own file: ${unused.length} (${unused.filter((item) => item.testsOnly).length} referenced only by core tests).`,
+      );
+      for (const item of unused) {
+        console.log(
+          `  ${item.file}  ${item.name}  ${item.kind}${item.testsOnly ? '  tests-only' : ''}`,
+        );
+      }
+    } else {
+      console.log(
+        `\n${unused.length} exports have no production importers. Pass --unused to list them.`,
+      );
+    }
   }
-}
 
-process.exit(moves.length > 0 ? 1 : 0);
+  process.exit(moves.length > 0 ? 1 : 0);
+}

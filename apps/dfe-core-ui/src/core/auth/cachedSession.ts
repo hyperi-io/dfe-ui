@@ -10,8 +10,6 @@ const isFresh = () =>
   lastFetchedAt != null &&
   Date.now() - lastFetchedAt < SESSION_AUTH_REFRESH_INTERVAL_MS;
 
-export const getCachedSession = (): Session | null => cachedSession;
-
 export const setCachedSession = (session: Session | null) => {
   cachedSession = session;
   lastFetchedAt = Date.now();

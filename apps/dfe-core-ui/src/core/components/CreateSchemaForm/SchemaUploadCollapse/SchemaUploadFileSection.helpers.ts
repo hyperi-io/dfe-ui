@@ -5,7 +5,7 @@ import {
 } from '@/core/components/CreateSchemaForm/types';
 import { v4 as uuidv4 } from 'uuid';
 
-export type UploadedSchemaImportSource = 'csv' | 'elastic';
+type UploadedSchemaImportSource = 'csv' | 'elastic';
 
 const fieldTypeForImportRow = (
   value: PreloadedSchema[number],

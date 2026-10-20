@@ -11,6 +11,7 @@ export const engineBaseUrl =
   process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
 const baseUrl = engineBaseUrl;
 
+/* import-scope-drift-disable - (exported for tests) */
 /** The browser's X-Forwarded-For chain, so the engine's login audit can name the client rather than this pod. */
 export function forwardedForHeader(
   headers: Record<string, unknown> | undefined,
@@ -21,6 +22,7 @@ export function forwardedForHeader(
     ? { 'X-Forwarded-For': chain.trim() }
     : {};
 }
+/* import-scope-drift-enable */
 
 /** Local-account flow: POST /auth/login then GET /me for roles. */
 const credentialsProvider = CredentialsProvider({

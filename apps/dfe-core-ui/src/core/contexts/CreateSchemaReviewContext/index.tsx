@@ -26,7 +26,7 @@ interface CreateSchemaReviewContextValue {
   setFormErrorMessage: (formErrorMessage: FormErrorMessage | null) => void;
 }
 
-export const CreateSchemaReviewContext =
+const CreateSchemaReviewContext =
   createContext<CreateSchemaReviewContextValue | null>(null);
 
 export const CreateSchemaReviewProvider = ({

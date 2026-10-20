@@ -2,6 +2,7 @@ import { TTableEngine } from '@/core/hooks/useFetchTableEngines/types';
 import { cn } from '@/core/utils/style';
 import { Input, Select, SelectProps } from 'antd';
 
+/* import-scope-drift-disable - (exported for tests) */
 /** An engine string split into its variant and the text inside its parentheses. */
 export const splitEngine = (engine: string | null | undefined) => {
   const value = engine ?? '';
@@ -15,7 +16,9 @@ export const splitEngine = (engine: string | null | undefined) => {
     args: value.slice(open + 1, close > open ? close : undefined),
   };
 };
+/* import-scope-drift-enable */
 
+/* import-scope-drift-disable - (exported for tests) */
 /** The engine string the API stores; a blank variant is blank so the DFE default applies. */
 export const composeEngine = (variant: string, args: string) => {
   if (!variant) {
@@ -23,6 +26,7 @@ export const composeEngine = (variant: string, args: string) => {
   }
   return args.trim() ? `${variant}(${args})` : variant;
 };
+/* import-scope-drift-enable */
 
 /** The error for an engine that breaks its variant's argument rule, if it does. */
 export const engineArgumentsError = (

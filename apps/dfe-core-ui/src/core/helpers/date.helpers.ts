@@ -1,4 +1,4 @@
-/* import-scope-drift-disable */
+/* import-scope-drift-disable - (exported for tests) */
 import dayjs, { type Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 

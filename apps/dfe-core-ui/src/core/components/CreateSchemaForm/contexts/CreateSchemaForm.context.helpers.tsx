@@ -67,7 +67,7 @@ export const UPLOADED_ROW_FIELD_KEYS = [
 
 const USER_EDITABLE_KEY_SET = new Set<string>(COLUMN_LIST_USER_EDITABLE_KEYS);
 
-export const rowPatchHasUserEditableField = (row: unknown): boolean => {
+const rowPatchHasUserEditableField = (row: unknown): boolean => {
   if (row == null || typeof row !== 'object' || Array.isArray(row)) {
     return false;
   }

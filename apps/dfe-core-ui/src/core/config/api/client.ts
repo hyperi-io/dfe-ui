@@ -57,7 +57,7 @@ function definedHeaders(
   return Object.fromEntries(entries.map(([k, v]) => [k, String(v)]));
 }
 
-export type ApiClientConfig = {
+type ApiClientConfig = {
   baseUrl: string;
   getAuthHeaders?: () => HeadersInit | Promise<HeadersInit>;
   onUnauthorized?: () => void | Promise<void>;
@@ -67,7 +67,7 @@ export type ApiClientConfig = {
 };
 
 /** The engine's code for an account refused until it changes an issued password. */
-export const PASSWORD_CHANGE_REQUIRED_CODE = 'password_change_required';
+const PASSWORD_CHANGE_REQUIRED_CODE = 'password_change_required';
 
 /**
  * Type-safe API client for the DFE Engine API.
@@ -256,6 +256,7 @@ export function createApiClient(config: ApiClientConfig) {
   };
 }
 
+/* import-scope-drift-disable - (exported for tests) */
 /** Extracts a user-facing message from an error detail */
 export function getErrorMessage(detail: unknown): string {
   if (detail != null) {
@@ -274,6 +275,7 @@ export function getErrorMessage(detail: unknown): string {
   }
   return String(detail);
 }
+/* import-scope-drift-enable */
 
 export class ApiError extends Error {
   constructor(
@@ -291,7 +293,7 @@ export class ApiError extends Error {
 }
 
 /** The engine's FieldError: which field was refused and why. */
-export type ApiErrorFieldDetail = {
+type ApiErrorFieldDetail = {
   /** Dotted path to the invalid field, empty when the whole body was refused. */
   field?: string;
   message: string;
@@ -391,5 +393,3 @@ export function getApiWriteConflict(error: unknown): ApiWriteConflict | null {
     ...(typeof current === 'string' && current !== '' && { current }),
   };
 }
-
-export type ApiClient = ReturnType<typeof createApiClient>;

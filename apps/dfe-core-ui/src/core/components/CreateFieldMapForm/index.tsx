@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import z from 'zod';
 import { MappingBuilder } from './MappingBuilder';
 
+/* import-scope-drift-disable - (exported for tests) */
 export const formSchema = z.object({
   standard: z
     .string({ message: 'Standard is required' })
@@ -28,6 +29,7 @@ export const formSchema = z.object({
     ]),
   ),
 });
+/* import-scope-drift-enable */
 
 export type CreateFieldMapFormData = z.infer<typeof formSchema>;
 

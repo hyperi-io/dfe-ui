@@ -334,11 +334,6 @@ export const USE_CASE_OPTIONS = [
   { label: 'Bloom', value: 'bloom' },
 ];
 
-export const TYPE_OPTIONS_SEMVER_MAP = {
-  model: 'Major',
-  addition: 'Minor',
-  revision: 'Patch',
-};
 export const TYPE_OPTIONS = [
   {
     label: (

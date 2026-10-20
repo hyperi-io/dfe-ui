@@ -7,7 +7,7 @@ import { Tag } from 'antd';
 import Link from 'next/link';
 
 /** One labelled fact inside a stage box. */
-export interface FlowStageDetail {
+interface FlowStageDetail {
   label: string;
   value: string;
   /** Renders in the monospace face, for a topic, an endpoint or a field. */

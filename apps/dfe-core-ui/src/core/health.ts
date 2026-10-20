@@ -1,3 +1,5 @@
+/* import-scope-drift-disable - (exported for tests) */
+
 // The DFE health probes, for the Node/Next side of the stack.
 //
 // This is scalo's health contract expressed in Next.js, so dfe-ui probes the same way
@@ -77,3 +79,5 @@ export function readiness(): Response {
     status: OK,
   });
 }
+
+/* import-scope-drift-enable */

@@ -1,29 +1,28 @@
-import { TAppConfigField } from '@/core/hooks/apps/config/useFetchAppConfig/types';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { TAppConfigField } from '@/core/hooks/apps/config/useFetchAppConfig/types';
 
 /** The overlay root every contract option is addressed under. */
-export const CONFIG_ROOT = 'config';
+const CONFIG_ROOT = 'config';
 
 /** The overlay root a custom environment key is addressed under. */
 export const ENV_ROOT = 'extraEnv';
 
 /** Options whose path carries no group of its own collect here. */
-export const GENERAL_SECTION = 'general';
+const GENERAL_SECTION = 'general';
 
 /** An environment name: upper case, digits and underscores, starting alpha. */
 export const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
-export type TConfigSection = {
+type TConfigSection = {
   name: string;
   fields: TAppConfigField[];
 };
 
-export type TParsed =
-  | { ok: true; value: unknown }
-  | { ok: false; reason: string };
+type TParsed = { ok: true; value: unknown } | { ok: false; reason: string };
 
 export type TFieldError = { path: string; message: string };
 
+/* import-scope-drift-disable - (exported for tests) */
 /**
  * The group an option belongs to, taken from its own path.
  *
@@ -38,6 +37,7 @@ export const sectionNameFor = (path: string): string => {
   const segments = rooted.split('.');
   return segments.length > 1 && segments[0] ? segments[0] : GENERAL_SECTION;
 };
+/* import-scope-drift-enable */
 
 /** Every option, grouped by its path's own section, each group path-sorted. */
 export const groupFields = (
@@ -102,7 +102,7 @@ export const placeholderFor = (field: TAppConfigField): string => {
 };
 
 /** Parse a structured option's JSON, reporting why rather than throwing. */
-export const parseStructured = (raw: string): TParsed => {
+const parseStructured = (raw: string): TParsed => {
   try {
     return { ok: true, value: JSON.parse(raw) };
   } catch (cause) {
@@ -120,7 +120,7 @@ const enumMemberFor = (field: TAppConfigField, value: unknown): unknown => {
   return match === undefined ? value : match;
 };
 
-export type TBuildResult =
+type TBuildResult =
   | { ok: true; changes: Record<string, unknown> }
   | { ok: false; path: string; reason: string };
 
