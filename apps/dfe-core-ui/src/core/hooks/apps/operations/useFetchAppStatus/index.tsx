@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppStatusApi } from './api';
-
-export const APP_STATUS_QUERY_KEY = (service: string, instance: string) => [
-  'app-status',
-  service,
-  instance,
-];
 
 /**
  * Whether the instance is reporting telemetry, and since when.
@@ -24,7 +19,7 @@ export const useFetchAppStatus = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APP_STATUS_QUERY_KEY(service, instance),
+    queryKey: QUERY_KEYS.apps.status({ service, instance }),
     queryFn: () => fetchAppStatusApi({ pathParams: { service, instance } }),
     enabled: !!service && !!instance && queryEnabled,
     retry: false,

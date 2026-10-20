@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppHistoryApi } from './api';
-
-export const APP_HISTORY_QUERY_KEY = (
-  service: string,
-  instance: string,
-  limit?: number,
-) => ['app-history', service, instance, ...(limit ? [String(limit)] : [])];
 
 /**
  * Every governed change to this instance, newest first.
@@ -25,7 +20,7 @@ export const useFetchAppHistory = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APP_HISTORY_QUERY_KEY(service, instance, limit),
+    queryKey: QUERY_KEYS.apps.history({ service, instance, limit }),
     queryFn: () =>
       fetchAppHistoryApi({
         pathParams: { service, instance },

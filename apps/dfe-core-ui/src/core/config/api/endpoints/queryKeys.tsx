@@ -1,4 +1,7 @@
 /* eslint-disable no-restricted-imports */
+import { TLibraryArtifactFilters } from '@/core/hooks/library/useFetchLibraryArtifacts/types';
+import { useFetchInfiniteFilteredGroupsProps } from '@/core/hooks/useFetchInfiniteFilteredGroups/types';
+import { UseFetchInfiniteFilteredOrganisationsProps } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { TFetchAccountsQueryParams } from '@/Settings/hooks/accounts/useFetchInfiniteFilteredAccounts/types';
@@ -42,7 +45,12 @@ export const QUERY_KEYS = Object.freeze({
         ...(version ? [version] : []),
       ];
     },
-    sourceFlow: () => ['sources', '{name}', 'flow'],
+    sourceFlow: ({ name }: { name?: string | null } = {}) => [
+      'sources',
+      '{name}',
+      'flow',
+      ...(name ? [name] : []),
+    ],
     sourceColumns: () => ['sources', '{name}', 'columns'],
     sourceBuild: () => ['sources', '{name}', 'build'],
     sourceVersion: () => ['sources', '{name}', 'versions', '{version}'],
@@ -115,11 +123,38 @@ export const QUERY_KEYS = Object.freeze({
     promoteField: () => ['schemas', '{source_name}', 'promote-field'],
   },
   orgs: {
-    default: () => ['orgs'],
+    default: ({
+      search,
+      sort_by,
+      sort_order,
+      page,
+      per_page,
+    }: UseFetchInfiniteFilteredOrganisationsProps = {}) => [
+      'orgs',
+      ...(search ? ['search', search] : []),
+      ...(sort_by ? ['sort_by', sort_by] : []),
+      ...(sort_order ? ['sort_order', sort_order] : []),
+      ...(page ? ['page', page] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
     org: () => ['orgs', '{name}'],
   },
   groups: {
-    default: () => ['auth', 'groups'],
+    default: ({
+      search,
+      sort_by,
+      sort_order,
+      page,
+      per_page,
+    }: useFetchInfiniteFilteredGroupsProps = {}) => [
+      'auth',
+      'groups',
+      ...(search ? ['search', search] : []),
+      ...(sort_by ? ['sort_by', sort_by] : []),
+      ...(sort_order ? ['sort_order', sort_order] : []),
+      ...(page ? ['page', page] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
     group: () => ['auth', 'groups', '{name}'],
     groupMembers: () => ['auth', 'groups', '{name}', 'members'],
     groupMember: () => ['auth', 'groups', '{name}', 'members', '{username}'],
@@ -182,10 +217,27 @@ export const QUERY_KEYS = Object.freeze({
       ...(page ? ['page', page] : []),
       ...(per_page ? ['per_page', per_page] : []),
     ],
-    provider: () => ['auth', 'oidc-providers', '{name}'],
+    provider: ({ name }: { name?: string | null } = {}) => [
+      'auth',
+      'oidc-providers',
+      '{name}',
+      ...(name ? [name] : []),
+    ],
     syncGroups: () => ['auth', 'oidc-providers', '{name}', 'sync'],
-    test: () => ['auth', 'oidc-providers', '{name}', 'test'],
-    verifyLogin: () => ['auth', 'oidc-providers', '{name}', 'verify-login'],
+    test: ({ name }: { name?: string | null } = {}) => [
+      'auth',
+      'oidc-providers',
+      '{name}',
+      'test',
+      ...(name ? [name] : []),
+    ],
+    verifyLogin: ({ name }: { name?: string | null } = {}) => [
+      'auth',
+      'oidc-providers',
+      '{name}',
+      'verify-login',
+      ...(name ? [name] : []),
+    ],
   },
   governance: {
     actions: () => ['governance', 'actions'],
@@ -210,16 +262,63 @@ export const QUERY_KEYS = Object.freeze({
     app: () => ['apps', '{service}', '{instance}'],
     config: () => ['apps', '{service}', '{instance}', 'config'],
     scaling: () => ['apps', '{service}', '{instance}', 'scaling'],
-    status: () => ['apps', '{service}', '{instance}', 'status'],
-    metrics: () => ['apps', '{service}', '{instance}', 'metrics'],
-    metricsSeries: () => [
+    status: ({
+      service,
+      instance,
+    }: { service?: string | null; instance?: string | null } = {}) => [
+      'apps',
+      '{service}',
+      '{instance}',
+      'status',
+      ...(service ? [service] : []),
+      ...(instance ? [instance] : []),
+    ],
+    metrics: ({
+      service,
+      instance,
+    }: { service?: string | null; instance?: string | null } = {}) => [
+      'apps',
+      '{service}',
+      '{instance}',
+      'metrics',
+      ...(service ? [service] : []),
+      ...(instance ? [instance] : []),
+    ],
+    metricsSeries: ({
+      service,
+      instance,
+      windowSeconds,
+    }: {
+      service?: string | null;
+      instance?: string | null;
+      windowSeconds?: number;
+    } = {}) => [
       'apps',
       '{service}',
       '{instance}',
       'metrics',
       'series',
+      ...(service ? [service] : []),
+      ...(instance ? [instance] : []),
+      ...(windowSeconds ? ['window_seconds', windowSeconds] : []),
     ],
-    history: () => ['apps', '{service}', '{instance}', 'history'],
+    history: ({
+      service,
+      instance,
+      limit,
+    }: {
+      service?: string | null;
+      instance?: string | null;
+      limit?: number;
+    } = {}) => [
+      'apps',
+      '{service}',
+      '{instance}',
+      'history',
+      ...(service ? [service] : []),
+      ...(instance ? [instance] : []),
+      ...(limit ? ['limit', limit] : []),
+    ],
     routing: () => ['apps', '{service}', '{instance}', 'routing'],
     routingSync: () => ['apps', '{service}', '{instance}', 'routing', 'sync'],
     files: () => ['apps', '{service}', '{instance}', 'files', '{set_name}'],
@@ -283,7 +382,20 @@ export const QUERY_KEYS = Object.freeze({
     ],
   },
   library: {
-    default: () => ['library'],
+    default: ({
+      kind,
+      group,
+      state,
+      label,
+      q,
+    }: TLibraryArtifactFilters = {}) => [
+      'library',
+      ...(kind ? ['kind', kind] : []),
+      ...(group ? ['group', group] : []),
+      ...(state ? ['state', state] : []),
+      ...(label?.length ? ['label', label.join(',')] : []),
+      ...(q ? ['q', q] : []),
+    ],
     kinds: () => ['library', 'kinds'],
     artifact: () => ['library', '{artifact}'],
     rollback: () => ['library', '{artifact}', 'rollback'],

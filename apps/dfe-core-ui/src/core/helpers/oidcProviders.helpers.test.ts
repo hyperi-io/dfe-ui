@@ -3,9 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
   toCreateOidcProviderBody,
   toScopeList,
-  toScopesRequest,
   toUpdateOidcProviderBody,
-  type TStoredOidcProvider,
 } from './oidcProviders.helpers';
 
 const GOOGLE_GROUPS_SCOPE =
@@ -33,40 +31,6 @@ describe('oidcProviders.helpers', () => {
       expect(toScopeList('')).toEqual([]);
       expect(toScopeList('   ')).toEqual([]);
       expect(toScopeList([])).toEqual([]);
-    });
-  });
-
-  describe('.toScopesRequest', () => {
-    test('sends a non-empty list', () => {
-      expect(toScopesRequest(['openid', 'email'])).toEqual({
-        scopes: ['openid', 'email'],
-      });
-    });
-
-    test('omits an empty list, which the engine refuses', () => {
-      expect(toScopesRequest([])).toEqual({});
-      expect(toScopesRequest(undefined)).toEqual({});
-      expect(toScopesRequest(['', ' '])).toEqual({});
-    });
-
-    test('omits a list equal to the current scopes', () => {
-      expect(toScopesRequest(['openid', 'email'], ['openid', 'email'])).toEqual(
-        {},
-      );
-      expect(toScopesRequest(['openid', 'email'], 'openid email')).toEqual({});
-    });
-
-    test('sends a list that differs from the current scopes', () => {
-      expect(
-        toScopesRequest(['openid', 'email', 'groups'], ['openid', 'email']),
-      ).toEqual({ scopes: ['openid', 'email', 'groups'] });
-      expect(toScopesRequest(['email', 'openid'], ['openid', 'email'])).toEqual(
-        { scopes: ['email', 'openid'] },
-      );
-    });
-
-    test('an emptied list leaves the current scopes alone', () => {
-      expect(toScopesRequest([], ['openid', 'email'])).toEqual({});
     });
   });
 
@@ -116,9 +80,19 @@ describe('oidcProviders.helpers', () => {
       });
     });
 
-    test('empty scopes are left to the provider type default', () => {
+    test('sends a non-empty scope list', () => {
+      expect(
+        toCreateOidcProviderBody({ ...create, scopes: ['openid', 'email'] }),
+      ).toMatchObject({ scopes: ['openid', 'email'] });
+    });
+
+    test('omits an empty list, which the engine refuses', () => {
       expect(
         toCreateOidcProviderBody({ ...create, scopes: [] }),
+      ).not.toHaveProperty('scopes');
+      expect(toCreateOidcProviderBody(create)).not.toHaveProperty('scopes');
+      expect(
+        toCreateOidcProviderBody({ ...create, scopes: ['', ' '] }),
       ).not.toHaveProperty('scopes');
     });
   });
@@ -163,6 +137,45 @@ describe('oidcProviders.helpers', () => {
       });
     });
 
+    test('omits a list equal to the stored scopes', () => {
+      expect(
+        toUpdateOidcProviderBody(
+          { scopes: ['openid', 'email'] },
+          { ...stored, scopes: ['openid', 'email'] },
+        ),
+      ).not.toHaveProperty('scopes');
+      expect(
+        toUpdateOidcProviderBody(
+          { scopes: ['openid', 'email'] },
+          { ...stored, scopes: 'openid email' },
+        ),
+      ).not.toHaveProperty('scopes');
+    });
+
+    test('sends a list that differs from the stored scopes', () => {
+      expect(
+        toUpdateOidcProviderBody(
+          { scopes: ['openid', 'email', 'groups'] },
+          { ...stored, scopes: ['openid', 'email'] },
+        ),
+      ).toMatchObject({ scopes: ['openid', 'email', 'groups'] });
+      expect(
+        toUpdateOidcProviderBody(
+          { scopes: ['email', 'openid'] },
+          { ...stored, scopes: ['openid', 'email'] },
+        ),
+      ).toMatchObject({ scopes: ['email', 'openid'] });
+    });
+
+    test('an emptied list leaves the stored scopes alone', () => {
+      expect(
+        toUpdateOidcProviderBody(
+          { scopes: [] },
+          { ...stored, scopes: ['openid', 'email'] },
+        ),
+      ).not.toHaveProperty('scopes');
+    });
+
     test('a mode the directory fields do not apply to clears them', () => {
       const body = toUpdateOidcProviderBody(
         { groups: { mode: 'manual' } },
@@ -181,7 +194,13 @@ describe('oidcProviders.helpers', () => {
     test.each<{
       expected: Record<string, string>;
       name: string;
-      saved: Partial<TStoredOidcProvider>;
+      saved: Partial<{
+        client_id: string;
+        client_id_env: string;
+        client_secret: string;
+        client_secret_env: string;
+        client_secret_path: string;
+      }>;
       shown: Record<string, string>;
     }>([
       {

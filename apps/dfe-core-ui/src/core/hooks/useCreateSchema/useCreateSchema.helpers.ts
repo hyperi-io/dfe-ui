@@ -4,7 +4,7 @@ import { RowFormSchema } from '@/core/validationSchemas/CreateSchemaForm/AddSche
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 
 /** Column shape sent on create / create-version (engine may accept ch_override ahead of type sync). */
-export type TCreateSchemaRequestColumnPayload = TCreateSchemaRequestColumn;
+type TCreateSchemaRequestColumnPayload = TCreateSchemaRequestColumn;
 
 export const mapFormColumnToRequestColumn = (
   column: RowFormSchema,

@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { useFetchInfiniteFilteredRules } from '.';
-import { RuleListRequestParams, TRuleListItem } from './types';
+import { TRuleListItem, UseFetchInfiniteFilteredRulesProps } from './types';
 import { server } from './useFetchInfiniteFilteredRules.mocks';
 
 class MockIntersectionObserver {
@@ -25,7 +25,7 @@ global.IntersectionObserver = MockIntersectionObserver as any;
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
-const DEFAULT_HOOK_PROPS: RuleListRequestParams = {
+const DEFAULT_HOOK_PROPS: UseFetchInfiniteFilteredRulesProps = {
   source: 'string',
   severity: 'low',
   sort_by: 'name',

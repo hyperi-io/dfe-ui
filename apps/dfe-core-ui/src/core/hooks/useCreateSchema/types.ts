@@ -16,9 +16,3 @@ export type TCreateSchemaRequestColumn =
 export type TCreateSchemaResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof createSchemaPath, 'post'>
 >;
-
-// TODO: API response type is not aligned, fix this
-export interface SchemaCreateValidationErrorResponse {
-  message: string;
-  errors: { message: string }[];
-}

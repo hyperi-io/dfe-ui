@@ -3,8 +3,6 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { TRuleListItem } from './types';
 
-export const MOCK_RULE_NAME = 'rule_name';
-
 const RULE_ITEM: TRuleListItem = {
   display_name: 'string',
   name: 'string',

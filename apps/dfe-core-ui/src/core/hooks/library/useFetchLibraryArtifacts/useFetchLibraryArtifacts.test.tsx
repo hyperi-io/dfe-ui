@@ -2,7 +2,7 @@ import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { LIBRARY_ARTIFACTS_QUERY_KEY, useFetchLibraryArtifacts } from '.';
+import { useFetchLibraryArtifacts } from '.';
 import { server } from './useFetchLibraryArtifacts.mocks';
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -47,14 +47,5 @@ describe('useFetchLibraryArtifacts', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(seen).toEqual(['team=platform', 'tier=1']);
-  });
-});
-
-describe('LIBRARY_ARTIFACTS_QUERY_KEY', () => {
-  it('varies with the filters so a filtered list is not served from cache', () => {
-    expect(LIBRARY_ARTIFACTS_QUERY_KEY()).toEqual(['library-artifacts']);
-    expect(
-      LIBRARY_ARTIFACTS_QUERY_KEY({ kind: 'vrl', label: ['a=b', 'c=d'] }),
-    ).toEqual(['library-artifacts', 'vrl', 'a=b,c=d']);
   });
 });

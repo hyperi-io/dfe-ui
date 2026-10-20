@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   clearPendingReview,
-  pendingReviewStorageKey,
   readPendingReview,
   savePendingReview,
 } from './pendingReviewStorage';
@@ -37,9 +36,7 @@ describe('pendingReviewStorage', () => {
     };
     savePendingReview('admin', responseWithMore);
 
-    const stored = window.localStorage.getItem(
-      pendingReviewStorageKey('admin'),
-    );
+    const stored = window.localStorage.getItem('dfe_pending_review:admin');
     expect(stored).not.toContain('must-never-be-stored');
     expect(JSON.parse(stored ?? '{}')).toEqual({
       pr_url: null,
@@ -62,7 +59,7 @@ describe('pendingReviewStorage', () => {
     ['null', 'null'],
     ['no instruction in it', '{"branch":"dfe/governance/admin/x"}'],
   ])('treats a stored value that is %s as nothing stored', (_, raw) => {
-    window.localStorage.setItem(pendingReviewStorageKey('admin'), raw);
+    window.localStorage.setItem('dfe_pending_review:admin', raw);
 
     expect(readPendingReview('admin')).toBeNull();
   });

@@ -1,33 +1,13 @@
 // Font families configuration
-export const fontFamily = {
+const fontFamily = {
   base: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   display: "'Inter', sans-serif",
   secondary: "'Inter', sans-serif",
   mono: "'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace",
 } as const;
 
-export const fontFamilyTw = {
-  base: [
-    'Inter',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Segoe UI',
-    'Roboto',
-    'sans-serif',
-  ],
-  display: ['Inter', 'sans-serif'],
-  secondary: ['Inter', 'sans-serif'],
-  hyper: [
-    'SF Mono',
-    'SFMono-Regular',
-    'Consolas',
-    'Liberation Mono',
-    'Menlo, monospace',
-  ],
-} as const;
-
 // Font size scale (in pixels)
-export const fontSize = {
+const fontSize = {
   xs: 12, // Small labels, captions
   sm: 14, // Body small
   base: 16, // Body default
@@ -41,7 +21,7 @@ export const fontSize = {
 } as const;
 
 // Font weights
-export const fontWeight = {
+const fontWeight = {
   light: 300,
   normal: 400,
   medium: 500,
@@ -51,7 +31,7 @@ export const fontWeight = {
 } as const;
 
 // Line heights
-export const lineHeight = {
+const lineHeight = {
   none: 1,
   tight: 1.25,
   snug: 1.375,
@@ -61,7 +41,7 @@ export const lineHeight = {
 } as const;
 
 // Letter spacing
-export const letterSpacing = {
+const letterSpacing = {
   tighter: '-0.05em',
   tight: '-0.025em',
   normal: '0',
@@ -98,5 +78,3 @@ export const typography = {
   fontFaces,
   ant: antTokens,
 } as const;
-
-export type Typography = typeof typography;
