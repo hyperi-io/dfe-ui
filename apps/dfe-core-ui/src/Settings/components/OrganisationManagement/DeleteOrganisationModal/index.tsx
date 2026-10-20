@@ -15,7 +15,6 @@ interface DeleteOrganisationModalProps {
   display_name: string;
   onSuccess?: () => void;
   disabled?: boolean;
-  refetch: () => void;
 }
 
 export const DeleteOrganisationModal = ({
@@ -23,7 +22,6 @@ export const DeleteOrganisationModal = ({
   display_name,
   onSuccess,
   disabled,
-  refetch,
 }: DeleteOrganisationModalProps) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
@@ -41,7 +39,6 @@ export const DeleteOrganisationModal = ({
         ),
         placement: 'bottomLeft',
       });
-      refetch();
     },
   });
   const handleDeleteOrganisation = (values: DeleteOrganisationFormData) => {

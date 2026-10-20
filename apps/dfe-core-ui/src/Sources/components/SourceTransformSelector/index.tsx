@@ -4,10 +4,8 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { SectionCard } from '@/core/components/SectionCard';
 import { getApiErrorResponseBody } from '@/core/config/api/client';
-import {
-  APPS_QUERY_KEY,
-  useFetchApps,
-} from '@/core/hooks/apps/instances/useFetchApps';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { cn } from '@/core/utils/style';
 import { AppInstancePanels } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/AppInstancePanels';
 import {
@@ -116,7 +114,9 @@ export const SourceTransformSelector = ({
       setPendingEngine(null);
       // The instance of a transform is derived from the source, so the
       // catalogue's instance list is stale the moment the source is written.
-      void queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.apps.default(),
+      });
       onSourceUpdated?.(response);
     },
     onError: (refused) => {

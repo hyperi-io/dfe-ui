@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBackingServicesApi } from './api';
-
-export const BACKING_SERVICES_QUERY_KEY = ['backing-services'];
 
 /**
  * The data layer's DECLARED deploy configuration, one entry per service.
@@ -15,7 +14,7 @@ export const useFetchBackingServices = ({
   queryEnabled = true,
 }: { queryEnabled?: boolean } = {}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: BACKING_SERVICES_QUERY_KEY,
+    queryKey: QUERY_KEYS.sources.default(),
     queryFn: () => fetchBackingServicesApi(),
     enabled: queryEnabled,
   });

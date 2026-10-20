@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createAppInstanceApi } from './api';
 import { TCreateAppInstanceRequest, TCreateAppInstanceResponse } from './types';
 
-import { APPS_QUERY_KEY } from '@/core/hooks/apps/instances/useFetchApps';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Deploy an instance by creating its values overlay.
@@ -30,7 +30,7 @@ export const useCreateAppInstance = ({
         headerParams: { 'If-Match': etag },
       }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.apps.instances() });
       onSuccess?.(values);
     },
     onError: (error) => {

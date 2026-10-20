@@ -1,10 +1,10 @@
 import { ActionsMenu } from '@/core/components/ActionsMenu';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { CloneHuntModal } from '@/Hunts/components/CloneHuntModal';
 import { DeleteHuntModal } from '@/Hunts/components/DeleteHuntModal';
 import { UpdateHuntDrawer } from '@/Hunts/components/UpdateHuntDrawer';
 import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
-import { HUNT_DETAIL_QUERY_KEY } from '@/Hunts/hooks/useFetchHuntDetail';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { THuntUpdateResponse } from '@/Hunts/hooks/useUpdateHunt/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
@@ -21,13 +21,12 @@ export const HuntDetailActionMenu = ({
   onEditSuccess: onEditSuccessProp,
 }: HuntDetailActionMenuProps) => {
   const { notification } = App.useApp();
-  const { refetch: refetchHunts, setSelectedHuntName } = useListHuntsContext();
+  const { setSelectedHuntName } = useListHuntsContext();
 
   const queryClient = useQueryClient();
 
   const onCloneSuccess = (hunt: THuntCreateResponse) => {
     setSelectedHuntName(hunt.name);
-    refetchHunts();
     notification.success({
       title: `Hunt ${hunt.name} cloned successfully`,
       placement: 'bottomLeft',
@@ -36,7 +35,6 @@ export const HuntDetailActionMenu = ({
 
   const onDeleteSuccess = () => {
     setSelectedHuntName(null);
-    refetchHunts();
     notification.success({
       title: `Hunt ${hunt.name} deleted successfully`,
       placement: 'bottomLeft',
@@ -47,7 +45,7 @@ export const HuntDetailActionMenu = ({
     setSelectedHuntName(hunt.name);
 
     void queryClient.invalidateQueries({
-      queryKey: HUNT_DETAIL_QUERY_KEY(hunt.name),
+      queryKey: QUERY_KEYS.hunts.hunt({ name: hunt.name }),
     });
 
     notification.success({

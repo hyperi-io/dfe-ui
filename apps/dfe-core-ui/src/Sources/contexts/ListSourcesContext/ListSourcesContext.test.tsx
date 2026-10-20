@@ -97,7 +97,6 @@ describe('ListSourcesContext', () => {
         isFetchingNextPage: false,
       });
       expect(result.current.setFilters).toBeInstanceOf(Function);
-      expect(result.current.refetch).toBeInstanceOf(Function);
       expect(result.current.fetchNextPage).toBeInstanceOf(Function);
       expect(result.current.loadMoreRef).toBeDefined();
     });

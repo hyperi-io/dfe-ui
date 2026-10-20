@@ -56,7 +56,7 @@ export const AppConfigCard = ({
     isLoading,
     isFetching,
     error,
-    refetch,
+    refetch: refetchAppConfigAfterConflict,
   } = useFetchAppConfig({ service, instance });
 
   const {
@@ -178,7 +178,7 @@ export const AppConfigCard = ({
 
   const reloadAfterConflict = () => {
     resetWriteResult();
-    void refetch();
+    void refetchAppConfigAfterConflict();
   };
 
   return (

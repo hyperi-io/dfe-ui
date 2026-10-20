@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -29,12 +30,16 @@ export const useFetchInfiniteFilteredHunts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['hunts', debouncedSearch, sort_by, sort_order, per_page],
+    queryKey: QUERY_KEYS.hunts.default({
+      search: debouncedSearch,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredHunts({
         queryParams: {
@@ -104,7 +109,6 @@ export const useFetchInfiniteFilteredHunts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

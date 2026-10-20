@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { ROLE_DETAIL_QUERY_KEY } from '@/Settings/hooks/roles/useFetchRoleDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useUpdateRole } from '@/Settings/hooks/roles/useUpdateRole';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,11 +11,9 @@ import { UpdateRoleForm, UpdateRoleFormData } from './UpdateRoleForm';
 export const EditRoleDrawer = ({
   disabled,
   role_name,
-  refetch,
 }: {
   disabled?: boolean;
   role_name: string;
-  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -30,13 +28,12 @@ export const EditRoleDrawer = ({
     role_name,
     onSuccess: () => {
       setOpen(false);
-      refetch();
       api.success({
         title: 'Role updated successfully',
         placement: 'bottomLeft',
       });
       void queryClient.invalidateQueries({
-        queryKey: ROLE_DETAIL_QUERY_KEY(role_name),
+        queryKey: QUERY_KEYS.roles.role({ name: role_name }),
       });
     },
   });

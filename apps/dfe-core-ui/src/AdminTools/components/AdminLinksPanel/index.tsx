@@ -16,7 +16,13 @@ import { Button, Spin } from 'antd';
  * never names a UI of its own.
  */
 export const AdminLinksPanel = () => {
-  const { data, isLoading, isFetching, error, refetch } = useFetchAdminLinks();
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error,
+    refetch: refetchAdminLinks,
+  } = useFetchAdminLinks();
 
   // The sidebar gate and the engine's gate can disagree, and the engine wins.
   if (error instanceof ApiError && error.status === 403) {
@@ -33,7 +39,7 @@ export const AdminLinksPanel = () => {
           icon={<IconRefresh />}
           loading={isFetching && !isLoading}
           disabled={isLoading}
-          onClick={() => void refetch()}
+          onClick={() => void refetchAdminLinks()}
         >
           Refresh
         </Button>

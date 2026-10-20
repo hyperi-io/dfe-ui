@@ -1,4 +1,5 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useCreateSchema } from '@/core/hooks/useCreateSchema';
 import {
   TCreateSchemaRequest,
@@ -7,6 +8,7 @@ import {
 import { CreateSchemaFormData } from '@/core/validationSchemas/CreateSchemaForm/CreateSchemaForm.schema';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 interface UseCloneSchemaProps {
@@ -36,6 +38,7 @@ export const useCloneSchema = ({
   schema_path,
   version,
 }: UseCloneSchemaProps) => {
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: schemaDetailData, isLoading: isFetchingSchemaDetail } =
@@ -50,7 +53,12 @@ export const useCloneSchema = ({
     isPending,
     error: createSourceError,
   } = useCreateSchema({
-    onSuccess,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.schemas.default(),
+      });
+      onSuccess?.(response);
+    },
     onError,
   });
 

@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import {
   GROUP_DRAWER_TEST_TIMEOUT_MS,
@@ -6,7 +7,6 @@ import {
   stubIntersectionObserver,
 } from '@/Settings/components/GroupManagement/CreateUpdateGroupForm/CreateUpdateGroupForm.mocks';
 import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroupDrawer';
-import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/groups/useFetchGroupDetail';
 import { TGroupDetailResponse } from '@/Settings/hooks/groups/useFetchGroupDetail/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -76,7 +76,7 @@ const openEditDrawer = async (group: TGroupDetailResponse = LINKED_GROUP) => {
     }),
   );
   const user = userEvent.setup();
-  render(<EditGroupDrawer group_name={LINKED_GROUP.name} refetch={vi.fn()} />, {
+  render(<EditGroupDrawer group_name={LINKED_GROUP.name} />, {
     wrapper,
   });
   await user.click(
@@ -148,14 +148,11 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
       }),
     );
     const user = userEvent.setup();
-    render(
-      <EditGroupDrawer group_name={LINKED_GROUP.name} refetch={vi.fn()} />,
-      {
-        wrapper,
-      },
-    );
+    render(<EditGroupDrawer group_name={LINKED_GROUP.name} />, {
+      wrapper,
+    });
     testWrapper.queryClient?.setQueryData(
-      GROUP_DETAIL_QUERY_KEY(LINKED_GROUP.name),
+      QUERY_KEYS.groups.group({ name: LINKED_GROUP.name }),
       LINKED_GROUP,
     );
 
@@ -170,7 +167,7 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
       () =>
         expect(
           testWrapper.queryClient?.getQueryData(
-            GROUP_DETAIL_QUERY_KEY(LINKED_GROUP.name),
+            QUERY_KEYS.groups.group({ name: LINKED_GROUP.name }),
           ),
         ).toEqual(movedGroup),
       { timeout: 15_000 },

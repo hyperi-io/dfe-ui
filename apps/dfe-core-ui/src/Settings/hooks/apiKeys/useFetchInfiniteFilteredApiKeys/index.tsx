@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -5,21 +6,6 @@ import { fetchApiKeys } from './api';
 import { useFetchInfiniteFilteredApiKeysProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-export const API_KEYS_QUERY_KEY = (
-  search?: string,
-  sort_by?: 'name' | 'scope',
-  sort_order?: 'asc' | 'desc',
-  page?: number,
-  per_page?: number,
-) => [
-  'api-keys',
-  ...(search ? [search] : []),
-  ...(sort_by ? [sort_by] : []),
-  ...(sort_order ? [sort_order] : []),
-  ...(page ? [page] : []),
-  ...(per_page ? [per_page] : []),
-];
 
 /** useFetchInfiniteFilteredApiKeys props */
 /**
@@ -46,18 +32,17 @@ export const useFetchInfiniteFilteredApiKeys = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: API_KEYS_QUERY_KEY(
-      debouncedSearch,
+    queryKey: QUERY_KEYS.apiKeys.default({
+      search: debouncedSearch,
       sort_by,
       sort_order,
       page,
       per_page,
-    ),
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchApiKeys({
         queryParams: {
@@ -128,7 +113,6 @@ export const useFetchInfiniteFilteredApiKeys = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import type {
   TSourceListResponse,
@@ -93,7 +94,6 @@ export interface ListSourcesContextValue {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -172,7 +172,6 @@ export const ListSourcesProvider = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,
@@ -181,7 +180,9 @@ export const ListSourcesProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
-      void queryClient.cancelQueries({ queryKey: ['sources'] });
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.sources.default(),
+      });
       const updated: ListSourcesQueryParams = {
         ...filters,
         ...newFilters,
@@ -246,7 +247,6 @@ export const ListSourcesProvider = ({
       isLoading,
       isError,
       error: error ?? null,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,
@@ -263,7 +263,6 @@ export const ListSourcesProvider = ({
       isLoading,
       isError,
       error,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,

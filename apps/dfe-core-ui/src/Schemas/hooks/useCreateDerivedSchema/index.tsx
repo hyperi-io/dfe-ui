@@ -1,4 +1,4 @@
-import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createDerivedSchema } from './api';
 import {
@@ -48,7 +48,7 @@ export const useCreateDerivedSchema = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
+        queryKey: QUERY_KEYS.schemas.default(),
       });
       onSuccess?.(data);
     },

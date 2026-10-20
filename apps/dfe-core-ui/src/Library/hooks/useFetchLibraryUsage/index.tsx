@@ -1,10 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryUsageApi } from './api';
-
-export const LIBRARY_USAGE_QUERY_KEY = (artifact: string) => [
-  'library-usage',
-  artifact,
-];
 
 /**
  * Which instances link to this artefact, and at which version.
@@ -20,7 +16,7 @@ export const useFetchLibraryUsage = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: LIBRARY_USAGE_QUERY_KEY(artifact),
+    queryKey: QUERY_KEYS.library.usage({ artifact }),
     queryFn: () => fetchLibraryUsageApi({ pathParams: { artifact } }),
     enabled: !!artifact && queryEnabled,
     retry: false,

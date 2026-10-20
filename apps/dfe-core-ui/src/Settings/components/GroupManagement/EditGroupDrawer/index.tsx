@@ -1,6 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { GROUP_DETAIL_QUERY_KEY } from '@/Settings/hooks/groups/useFetchGroupDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useUpdateGroup } from '@/Settings/hooks/groups/useUpdateGroup';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,13 +8,7 @@ import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { UpdateGroupForm, UpdateGroupFormData } from './UpdateGroupForm';
 
-export const EditGroupDrawer = ({
-  group_name,
-  refetch,
-}: {
-  group_name: string;
-  refetch: () => void;
-}) => {
+export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -29,14 +23,13 @@ export const EditGroupDrawer = ({
     group_name,
     onSuccess: () => {
       setOpen(false);
-      refetch();
       api.success({
         title: 'Group updated successfully',
         placement: 'bottomLeft',
       });
 
       void queryClient.invalidateQueries({
-        queryKey: GROUP_DETAIL_QUERY_KEY(group_name),
+        queryKey: QUERY_KEYS.groups.group({ name: group_name }),
       });
     },
   });

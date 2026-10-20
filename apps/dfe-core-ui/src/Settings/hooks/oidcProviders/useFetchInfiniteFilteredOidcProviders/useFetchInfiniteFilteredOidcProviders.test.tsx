@@ -1,4 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
@@ -11,10 +12,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import {
-  QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS,
-  useFetchInfiniteFilteredOidcProviders,
-} from '.';
+import { useFetchInfiniteFilteredOidcProviders } from '.';
 import { TOidcProviderListItem } from './types';
 import { server } from './useFetchInfiniteFilteredOidcProviders.mocks';
 
@@ -142,7 +140,6 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
         isLoading: false,
         isError: false,
         error: null,
-        refetch: expect.any(Function),
         fetchNextPage: expect.any(Function),
         hasNextPage: expect.any(Boolean),
         isFetchingNextPage: false,
@@ -371,34 +368,6 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
     });
   });
 
-  describe('refetch functionality', () => {
-    it('should refetch data when refetch is called', async () => {
-      const { result } = renderHook(
-        () => useFetchInfiniteFilteredOidcProviders(),
-        {
-          wrapper,
-        },
-      );
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      const initialData = result.current.data;
-
-      // Call refetch
-      await result.current.refetch();
-
-      await waitFor(() => {
-        expect(result.current.data).toBeDefined();
-      });
-
-      // Data should be refreshed
-      expect(result.current.data).toBeDefined();
-      expect(result.current.data.items).toHaveLength(initialData.items.length);
-    });
-  });
-
   describe('loadMoreRef', () => {
     it('should provide a ref object for infinite scroll', async () => {
       const { result } = renderHook(
@@ -545,7 +514,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await testWrapper.queryClient?.invalidateQueries({
-        queryKey: QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS(),
+        queryKey: QUERY_KEYS.oidcProviders.default(),
       });
 
       await waitFor(() => expect(listRequests).toBe(2));

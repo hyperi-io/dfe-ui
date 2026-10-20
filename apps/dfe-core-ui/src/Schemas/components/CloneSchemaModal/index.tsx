@@ -4,7 +4,6 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
-import { useListSchemasContext } from '@/core/contexts/ListSchemasContext';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TSchemaListResponse } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
@@ -48,10 +47,7 @@ export const CloneSchemaModal = ({
 
   const version = Form.useWatch('version', form);
 
-  const { refetch: refetchSchemas } = useListSchemasContext();
-
   const onSuccess = (data: TCreateSchemaResponse) => {
-    refetchSchemas();
     onSuccessProp?.(data);
     setOpen(false);
   };

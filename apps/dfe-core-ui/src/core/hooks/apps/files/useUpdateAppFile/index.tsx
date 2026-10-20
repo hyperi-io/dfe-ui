@@ -2,8 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAppFileApi } from './api';
 import { TUpdateAppFileRequest, TUpdateAppFileResponse } from './types';
 
-import { APP_FILES_QUERY_KEY } from '@/core/hooks/apps/files/useFetchAppFiles';
-import { APP_FILE_QUERY_KEY } from '@/core/hooks/apps/files/useFetchAppFile';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Add or replace a file the app consumes.
@@ -39,10 +38,15 @@ export const useUpdateAppFile = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_FILES_QUERY_KEY(service, instance, setName),
+        queryKey: QUERY_KEYS.apps.files({ service, instance, setName }),
       });
       queryClient.invalidateQueries({
-        queryKey: APP_FILE_QUERY_KEY(service, instance, setName, filename),
+        queryKey: QUERY_KEYS.apps.file({
+          service,
+          instance,
+          setName,
+          filename,
+        }),
       });
       onSuccess?.(values);
     },

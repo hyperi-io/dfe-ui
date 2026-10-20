@@ -1,11 +1,7 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { sampleRows } from './api';
 
-export const SAMPLE_ROWS_QUERY_KEY = (source_name: string, version: string) => [
-  'sample-rows',
-  ...(source_name ? [source_name] : []),
-  ...(version ? [version] : []),
-];
 /**
  * useFetchSampleRows
  * @param source_name source pathname
@@ -32,7 +28,7 @@ export const useFetchSampleRows = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SAMPLE_ROWS_QUERY_KEY(source_name, version),
+    queryKey: QUERY_KEYS.schemas.sampleRows({ source_name, version }),
     queryFn: () =>
       sampleRows({
         pathParams: { source_name },

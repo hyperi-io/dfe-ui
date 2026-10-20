@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
 import type {
   HuntSortBy,
@@ -67,7 +68,6 @@ export interface ListHuntsContextValue {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -122,7 +122,6 @@ export const ListHuntsProvider = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,
@@ -136,7 +135,7 @@ export const ListHuntsProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredHuntsProps) => {
-      void queryClient.cancelQueries({ queryKey: ['hunts'] });
+      void queryClient.cancelQueries({ queryKey: QUERY_KEYS.hunts.default() });
 
       const updated: ListHuntsQueryParams = {
         ...filters,
@@ -170,7 +169,6 @@ export const ListHuntsProvider = ({
       isLoading,
       isError,
       error: error ?? null,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,
@@ -186,7 +184,6 @@ export const ListHuntsProvider = ({
       isLoading,
       isError,
       error,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,

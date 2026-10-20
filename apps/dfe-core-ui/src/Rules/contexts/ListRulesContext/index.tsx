@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredRules } from '@/core/hooks/useFetchInfiniteFilteredRules';
 import type {
   TRuleListItem,
@@ -74,7 +75,6 @@ export interface ListRulesContextValue {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -129,7 +129,6 @@ export const ListRulesProvider = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,
@@ -145,7 +144,7 @@ export const ListRulesProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredRulesProps) => {
-      void queryClient.cancelQueries({ queryKey: ['rules'] });
+      void queryClient.cancelQueries({ queryKey: QUERY_KEYS.rules.default() });
 
       const updated: ListRulesQueryParams = {
         ...filters,
@@ -179,7 +178,6 @@ export const ListRulesProvider = ({
       isLoading,
       isError,
       error: error ?? null,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,
@@ -195,7 +193,6 @@ export const ListRulesProvider = ({
       isLoading,
       isError,
       error,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,

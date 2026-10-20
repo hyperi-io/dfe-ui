@@ -4,7 +4,6 @@ import {
 } from '@/core/components/CreateFieldMapForm';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { useListFieldMapsContext } from '@/core/contexts/ListFieldMapsContext';
 import { useCreateFieldMap } from '@/core/hooks/useCreateFieldMap';
 import { TCreateFieldMapResponse } from '@/core/hooks/useCreateFieldMap/types';
 import { cn } from '@/core/utils/style';
@@ -35,7 +34,6 @@ export const CreateFieldMapDrawer = ({
   const [api, contextHolder] = notification.useNotification();
 
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const { refetch: refetchFieldMaps } = useListFieldMapsContext();
   const {
     mutate: createFieldMapMutation,
     isPending,
@@ -43,7 +41,6 @@ export const CreateFieldMapDrawer = ({
     reset: resetCreateFieldMap,
   } = useCreateFieldMap({
     onSuccess: (data) => {
-      refetchFieldMaps();
       setIsDrawerVisible(false);
       onSuccess?.(data);
       api.success({

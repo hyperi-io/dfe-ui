@@ -1,9 +1,9 @@
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchCurrentUser } from '@/core/hooks/useFetchCurrentUser';
 import { UpdateAccountForm } from '@/Settings/components/AccountManagement/UpdateAccountForm';
-import { ACCOUNT_DETAIL_QUERY_KEY } from '@/Settings/hooks/accounts/useFetchAccountDetail';
 import { useUpdateAccount } from '@/Settings/hooks/accounts/useUpdateAccount';
 import { IconEdit } from '@repo/dfe-icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,7 +40,7 @@ export const EditAccountDrawer = ({
         placement: 'bottomLeft',
       });
       void queryClient.invalidateQueries({
-        queryKey: ACCOUNT_DETAIL_QUERY_KEY(username),
+        queryKey: QUERY_KEYS.accounts.account({ username }),
       });
     },
   });

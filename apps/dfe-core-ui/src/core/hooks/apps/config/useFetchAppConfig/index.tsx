@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppConfigApi } from './api';
-
-export const APP_CONFIG_QUERY_KEY = (service: string, instance: string) => [
-  'app-config',
-  service,
-  instance,
-];
 
 /**
  * Every option the app's container contract declares, with this instance's
@@ -27,7 +22,7 @@ export const useFetchAppConfig = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: APP_CONFIG_QUERY_KEY(service, instance),
+    queryKey: QUERY_KEYS.apps.config({ service, instance }),
     queryFn: () => fetchAppConfigApi({ pathParams: { service, instance } }),
     enabled: !!service && !!instance && queryEnabled,
     retry: false,

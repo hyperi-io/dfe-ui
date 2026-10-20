@@ -1,4 +1,4 @@
-import { HELM_FILE_VARIABLES_QUERY_KEY } from '@/Platform/hooks/helm/useFetchHelmFileVariables';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteHelmFileVariableApi } from './api';
 
@@ -16,7 +16,7 @@ export const useDeleteHelmFileVariable = ({
       deleteHelmFileVariableApi({ pathParams: { name, path } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: HELM_FILE_VARIABLES_QUERY_KEY(),
+        queryKey: QUERY_KEYS.helm.fileVariables(),
       });
       onSuccess?.();
     },

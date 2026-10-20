@@ -18,7 +18,6 @@ import {
 
 vi.mock('@/Hunts/contexts/ListHuntsContext', () => ({
   useListHuntsContext: () => ({
-    refetch: vi.fn(),
     setSelectedHuntName: vi.fn(),
   }),
 }));
