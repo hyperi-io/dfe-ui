@@ -8,6 +8,10 @@
  * core, or by two or more of those directories, stays: core is the shared
  * kernel, and core is not allowed to import a feature scope.
  *
+ * src/app and files that sit directly in src (scope "(root)", such as proxy.ts)
+ * are the Next.js shell. Neither is a feature scope. Imports from them never
+ * move a symbol and never count as the symbol being unused.
+ *
  * A hook, its types, and its api live in one directory and stay together. If
  * any export in that directory is used by core, none of the others are drift.
  *
@@ -44,7 +48,7 @@ const APP_ROOT = path.resolve(
 const SRC_ROOT = path.join(APP_ROOT, 'src');
 
 /** Same exclusions as eslint/import-scope.mjs: not feature scopes. */
-const NOT_A_FEATURE = new Set(['core', 'types']);
+const NOT_A_FEATURE = new Set(['(root)', 'app', 'core', 'types']);
 
 const args = new Set(process.argv.slice(2));
 const asJson = args.has('--json');
@@ -528,6 +532,8 @@ for (const record of symbols.values()) {
   if (record.ignored || isTestOnlyServerMock(record)) continue;
   const features = featureScopes(record);
   const usedByCore = record.byScope.has('core');
+  const usedByShell =
+    record.byScope.has('app') || record.byScope.has('(root)');
   if (!usedByCore && features.length === 1 && !staysWithCoreSibling(record)) {
     const scope = features[0];
     moves.push({
@@ -539,7 +545,7 @@ for (const record of symbols.values()) {
     });
     continue;
   }
-  if (!usedByCore && features.length === 0) {
+  if (!usedByCore && !usedByShell && features.length === 0) {
     unused.push({
       name: record.name,
       kind: record.kind,

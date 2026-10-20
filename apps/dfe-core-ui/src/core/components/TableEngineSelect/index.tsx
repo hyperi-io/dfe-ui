@@ -28,6 +28,7 @@ export const composeEngine = (variant: string, args: string) => {
 };
 /* import-scope-drift-enable */
 
+/* import-scope-drift-disable - (co-located with component as it relates to it) */
 /** The error for an engine that breaks its variant's argument rule, if it does. */
 export const engineArgumentsError = (
   engine: string | null | undefined,
@@ -46,6 +47,7 @@ export const engineArgumentsError = (
   }
   return undefined;
 };
+/* import-scope-drift-enable */
 
 interface TableEngineInputProps extends SelectProps {
   engines: TTableEngine[];
