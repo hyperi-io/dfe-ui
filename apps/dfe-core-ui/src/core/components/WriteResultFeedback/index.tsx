@@ -16,7 +16,7 @@ import { Tag } from 'antd';
  * different costs, so both sets live here rather than being flattened into one
  * vocabulary that would blur a pod roll into a StatefulSet recreation.
  */
-export const RELOAD_LABEL: Record<string, string> = {
+const RELOAD_LABEL: Record<string, string> = {
   // App file and dial writes.
   hot: 'Applied without a restart',
   roll: 'Takes effect when the pod rolls',
@@ -34,7 +34,7 @@ export const RELOAD_LABEL: Record<string, string> = {
  */
 const DISRUPTIVE_RELOAD = new Set(['recreate', 'redeploy']);
 
-export type TWriteResult = {
+type TWriteResult = {
   changed: boolean;
   commit_sha?: string | null;
   auto_merged?: boolean;

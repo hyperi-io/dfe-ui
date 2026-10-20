@@ -62,7 +62,7 @@ const hasAnyFilters = (f: ListFieldMapsQueryParams) =>
   f.sort_by !== undefined ||
   f.sort_order !== undefined;
 
-export interface ListFieldMapsContextValue {
+interface ListFieldMapsContextValue {
   data: TFieldMapListResponse;
   filters: UseFetchInfiniteFilteredFieldMapsProps;
   hasFilters: boolean;
@@ -102,7 +102,7 @@ const ListFieldMapsContext = createContext<ListFieldMapsContextValue | null>(
   null,
 );
 
-export interface ListFieldMapsProviderProps {
+interface ListFieldMapsProviderProps {
   children: ReactNode;
   defaultFilters?: UseFetchInfiniteFilteredFieldMapsProps;
 }

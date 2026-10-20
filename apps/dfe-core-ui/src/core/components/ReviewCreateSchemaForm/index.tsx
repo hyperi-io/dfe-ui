@@ -6,11 +6,11 @@ import { useState } from 'react';
 import { TableLayout } from './TableLayout';
 import { YamlLayout } from './YamlLayout';
 
-export type ReviewFormTransform = (values: CreateSchemaFormData) => {
+type ReviewFormTransform = (values: CreateSchemaFormData) => {
   requestBody: TCreateSchemaRequest;
 };
 
-export interface ReviewFormProps {
+interface ReviewFormProps {
   values: CreateSchemaFormData | null;
   onFinish?: (values: CreateSchemaFormData) => void;
   buttonLabel: string;

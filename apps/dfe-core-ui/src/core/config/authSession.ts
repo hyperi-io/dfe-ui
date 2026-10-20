@@ -19,17 +19,21 @@ const parsePositiveInt = (
   return parsed;
 };
 
+/* import-scope-drift-disable - (exported for tests) */
 /** Refresh the access token this long before it expires (also on focus via session refetch). */
 export const ACCESS_TOKEN_REFRESH_BUFFER_MS = parsePositiveInt(
   process.env.NEXT_PUBLIC_ACCESS_TOKEN_REFRESH_BUFFER_MS,
   DEFAULT_ACCESS_TOKEN_REFRESH_BUFFER_MS,
 );
+/* import-scope-drift-enable */
 
+/* import-scope-drift-disable - (exported for tests) */
 /** Minimum time between refresh API calls (avoids loops while session catches up). */
 export const MIN_ACCESS_TOKEN_REFRESH_INTERVAL_MS = parsePositiveInt(
   process.env.NEXT_PUBLIC_ACCESS_TOKEN_MIN_REFRESH_INTERVAL_MS,
   DEFAULT_MIN_ACCESS_TOKEN_REFRESH_INTERVAL_MS,
 );
+/* import-scope-drift-enable */
 
 /** How often AuthSessionMonitor re-evaluates whether a refresh is needed. */
 export const SESSION_CHECK_INTERVAL_MS = parsePositiveInt(
@@ -38,7 +42,7 @@ export const SESSION_CHECK_INTERVAL_MS = parsePositiveInt(
 );
 
 /** NextAuth SessionProvider poll interval (seconds). */
-export const SESSION_REFETCH_INTERVAL_SECONDS = parsePositiveInt(
+const SESSION_REFETCH_INTERVAL_SECONDS = parsePositiveInt(
   process.env.NEXT_PUBLIC_SESSION_REFETCH_INTERVAL_SECONDS,
   DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS,
 );

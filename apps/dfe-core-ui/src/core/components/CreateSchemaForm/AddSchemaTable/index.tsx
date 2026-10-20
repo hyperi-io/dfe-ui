@@ -33,6 +33,7 @@ type SchemaColumnListRow = FormListFieldData & {
   fieldKey?: number;
 };
 
+/* import-scope-drift-disable - (exported for tests) */
 export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   initialValues?: UploadedSchemaRow[];
   /** When the list is empty, clear this Form.List field (default leaves the form store unchanged). */
@@ -51,6 +52,7 @@ export interface AddSchemaTableProps extends TableProps<SchemaColumnListRow> {
   visibleColumns?: string[];
   lockedColumns?: string[];
 }
+/* import-scope-drift-enable */
 
 const defaultEmptyRow = (): z.infer<typeof rowSchema> => ({
   id: '',
@@ -87,7 +89,7 @@ export const isBlankSchemaListRow = (row: unknown): boolean => {
   );
 };
 
-export const AT_LEAST_ONE_SCHEMA_ROW_MESSAGE =
+const AT_LEAST_ONE_SCHEMA_ROW_MESSAGE =
   'At least one schema column is required';
 
 const atLeastOneNonBlankSchemaRowRule = (): ValidatorRule => ({

@@ -1,4 +1,4 @@
-import type { FlowStageProps } from '@/core/components/flow/FlowStage';
+import type { FlowStageProps } from '@/Sources/components/FlowStage';
 import type { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 
 /** Where a source's per-source app instances are managed. */

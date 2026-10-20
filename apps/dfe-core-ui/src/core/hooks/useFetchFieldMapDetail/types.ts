@@ -4,7 +4,7 @@ import {
 } from '@/core/config/api/client.types';
 import { fetchSourceFieldMapPath, fetchStandardFieldMapPath } from './api';
 
-export type TFetchSourceFieldMapResponse = DfeClientSuccessResponseBody<
+type TFetchSourceFieldMapResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof fetchSourceFieldMapPath, 'get'>
 >;
 export type TFetchStandardFieldMapResponse = DfeClientSuccessResponseBody<

@@ -5,14 +5,14 @@ import { Button, Input, Tag } from 'antd';
 import { useState } from 'react';
 import { ENV_NAME, ENV_ROOT } from './appConfig';
 
-export const CUSTOM_LABEL = 'custom';
-export const ENV_NAME_HINT =
+const CUSTOM_LABEL = 'custom';
+const ENV_NAME_HINT =
   'Upper case, digits and underscores, starting with a letter.';
 
-export type TEnvRow = { path: string; name: string; value: unknown };
+type TEnvRow = { path: string; name: string; value: unknown };
 
 /** Server-held keys first, then the ones added but not yet committed. */
-export const envRows = (
+const envRows = (
   custom: readonly TAppCustomEnv[],
   added: readonly string[],
 ): TEnvRow[] => [

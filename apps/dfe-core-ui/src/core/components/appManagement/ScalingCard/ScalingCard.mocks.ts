@@ -2,7 +2,7 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import { setupServer } from 'msw/node';
 
-export const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
+const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   org_id: 'string',
   user_id: 'string',
   roles: ['role'],
@@ -17,7 +17,7 @@ export const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {
   hyperdx_identity: 'string',
 };
 
-export const authHandler = API_CONFIG_MOCKS.auth.me.get.success({
+const authHandler = API_CONFIG_MOCKS.auth.me.get.success({
   mockedResponse: ADMIN_MOCKED_RESPONSE,
 });
 

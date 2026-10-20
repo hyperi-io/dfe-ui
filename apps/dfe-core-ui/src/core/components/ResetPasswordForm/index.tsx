@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import z from 'zod';
 
 /** The engine's answer when the current password given with a self change is wrong. */
-export const INVALID_CURRENT_PASSWORD_CODE = 'invalid_current_password';
+const INVALID_CURRENT_PASSWORD_CODE = 'invalid_current_password';
 
 const CURRENT_PASSWORD_REFUSED = 'That is not your current password.';
 

@@ -1,7 +1,7 @@
 import { App, ModalFuncProps } from 'antd';
 import { ReactNode, useCallback, useEffect } from 'react';
 
-export type UsePreventNavigateOptions = {
+type UsePreventNavigateOptions = {
   /** When true, warns on tab close/refresh and gates in-app leave via confirmLeave */
   enabled: boolean;
   /** Trap the browser back button while enabled */

@@ -5,8 +5,8 @@ import {
 } from '@/core/helpers/oidcProviderFieldRules';
 import {
   CreateUpdateOidcProviderFormData,
-  DEFAULT_GROUP_RESOLUTION,
   defaultGroupResolution,
+  TGroupResolutionFormData,
 } from '@/core/validationSchemas/oidcProviders.schema';
 import { describe, expect, test } from 'vitest';
 import { presetFieldsForType } from './oidcProviderPresets';
@@ -19,6 +19,23 @@ const GOOGLE_UNTOUCHED: Partial<CreateUpdateOidcProviderFormData> = {
   client_id_env: 'DFE_OIDC_GOOGLE_CLIENT_ID',
   client_secret_env: 'DFE_OIDC_GOOGLE_CLIENT_SECRET',
   groups: defaultGroupResolution('google'),
+};
+
+const DEFAULT_GROUP_RESOLUTION: TGroupResolutionFormData = {
+  mode: 'manual',
+  claim_name: 'groups',
+  sync_interval: 3600,
+  service_account_json_env: '',
+  enrich_on_login: false,
+  domain: '',
+  tenant_id_env: '',
+  client_secret_env: '',
+  api_token_env: '',
+  okta_domain: '',
+  service_account_json: '',
+  client_secret: '',
+  api_token: '',
+  tenant_id: '',
 };
 
 const withGroups = (groups: Partial<typeof DEFAULT_GROUP_RESOLUTION>) => ({

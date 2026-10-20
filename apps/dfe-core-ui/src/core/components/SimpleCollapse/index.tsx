@@ -4,7 +4,7 @@ import { cn } from '@/core/utils/style';
 import { IconChevronDown, IconChevronUp } from '@repo/dfe-icons';
 import { useEffect, useState, type ReactNode } from 'react';
 
-export interface SimpleCollapseRenderProps {
+interface SimpleCollapseRenderProps {
   setOpen: (open: boolean) => void;
 }
 

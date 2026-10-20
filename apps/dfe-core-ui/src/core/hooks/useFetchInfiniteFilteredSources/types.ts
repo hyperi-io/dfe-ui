@@ -10,7 +10,7 @@ export type TSourceListResponse = DfeClientSuccessResponseBody<
 
 export type TSourceSummary = TSourceListResponse['objects'];
 export type TSourceListSummary = TSourceListResponse['items'][number];
-export interface SourceListRequestParams {
+interface SourceListRequestParams {
   search?: string;
   status?: 'enabled' | 'disabled';
   sort_by?: string;

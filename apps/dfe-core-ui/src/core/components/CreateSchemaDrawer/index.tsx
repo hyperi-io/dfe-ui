@@ -22,7 +22,7 @@ interface CreateSchemaDrawerProps {
   onSuccess?: (response: TCreateSchemaResponse) => void;
 }
 
-export const CreateSchemaDrawerBase = ({
+const CreateSchemaDrawerBase = ({
   open,
   onClose,
   onSuccess,

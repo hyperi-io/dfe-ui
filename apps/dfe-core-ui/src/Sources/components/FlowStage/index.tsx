@@ -7,7 +7,7 @@ import { Tag } from 'antd';
 import Link from 'next/link';
 
 /** One labelled fact inside a stage box. */
-export interface FlowStageDetail {
+interface FlowStageDetail {
   label: string;
   value: string;
   /** Renders in the monospace face, for a topic, an endpoint or a field. */
@@ -55,7 +55,7 @@ export const FlowStage = ({
       {stage}
     </span>
 
-    <p className="m-0 break-words text-sm font-medium">
+    <p className="m-0 wrap-break-word text-sm font-medium">
       {href ? <Link href={href}>{title}</Link> : title}
     </p>
 
@@ -70,7 +70,7 @@ export const FlowStage = ({
               {detail.label}
             </dt>
             <dd
-              className={cn('m-0 break-words', detail.code && 'font-mono')}
+              className={cn('m-0 wrap-break-word', detail.code && 'font-mono')}
               title={detail.value}
             >
               {detail.value}

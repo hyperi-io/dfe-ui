@@ -1,17 +1,15 @@
-import { TAppFileDetail } from '@/core/hooks/apps/files/useFetchAppFile/types';
-import { TAppFilesResponse } from '@/core/hooks/apps/files/useFetchAppFiles/types';
-import { TAppFileLinksResponse } from '@/core/hooks/apps/files/useFetchAppFileLinks/types';
-import { TCopyAppFilesResponse } from '@/core/hooks/apps/files/useCopyAppFiles/types';
+import { TAppConfigResponse } from '@/core/hooks/apps/config/useFetchAppConfig/types';
+import { TUpdateAppConfigResponse } from '@/core/hooks/apps/config/useUpdateAppConfig/types';
 import { TDeleteAppFileResponse } from '@/core/hooks/apps/files/useDeleteAppFile/types';
 import { TDryRunAppFileResponse } from '@/core/hooks/apps/files/useDryRunAppFile/types';
+import { TAppFileDetail } from '@/core/hooks/apps/files/useFetchAppFile/types';
+import { TAppFileLinksResponse } from '@/core/hooks/apps/files/useFetchAppFileLinks/types';
+import { TAppFilesResponse } from '@/core/hooks/apps/files/useFetchAppFiles/types';
 import { TLinkAppFileResponse } from '@/core/hooks/apps/files/useLinkAppFile/types';
 import { TRelinkAppFilesResponse } from '@/core/hooks/apps/files/useRelinkAppFiles/types';
 import { TUpdateAppFileResponse } from '@/core/hooks/apps/files/useUpdateAppFile/types';
 import { TCreateAppInstanceResponse } from '@/core/hooks/apps/instances/useCreateAppInstance/types';
 import { TDeleteAppInstanceResponse } from '@/core/hooks/apps/instances/useDeleteAppInstance/types';
-import { TAppConfigResponse } from '@/core/hooks/apps/config/useFetchAppConfig/types';
-import { TUpdateAppConfigResponse } from '@/core/hooks/apps/config/useUpdateAppConfig/types';
-import { TAppDetailResponse } from '@/core/hooks/apps/instances/useFetchAppDetail/types';
 import { TAppHistoryResponse } from '@/core/hooks/apps/instances/useFetchAppHistory/types';
 import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { TAppMetricsResponse } from '@/core/hooks/apps/operations/useFetchAppMetrics/types';
@@ -339,28 +337,9 @@ export const apps = {
   app: {
     mockedUrl: '/api/v1/apps/{service}/{instance}',
     get: {
-      success: ({
-        mockedResponse = {
-          service: 'dfe-transform-vrl',
-          instance: 'syslog',
-          telemetry_name: 'dfe-transform-vrl-syslog',
-          scale_deployed: true,
-          multiplicity: 'per_config',
-          has_compiled_routing: false,
-          routing_scope: 'stack',
-          optional: false,
-          file_sets: [],
-        },
-        service = 'service',
-        instance = 'instance',
-      }: {
-        mockedResponse?: TAppDetailResponse;
-        service?: string;
-        instance?: string;
-      } = {}) =>
-        http.get(withInstance(apps.app.mockedUrl, service, instance), () =>
-          HttpResponse.json(mockedResponse),
-        ),
+      success: () => {
+        return console.error('Not implemented');
+      },
     },
     delete: {
       success: ({
@@ -885,25 +864,9 @@ export const apps = {
   fileCopy: {
     mockedUrl: '/api/v1/apps/{service}/{instance}/files/{set_name}/copy',
     post: {
-      success: ({
-        mockedResponse = {
-          ...DEFAULT_WRITE_RESULT,
-          copied: ['000_parse.vrl'],
-          skipped: [],
-        },
-        service = 'service',
-        instance = 'instance',
-        setName = 'set_name',
-      }: {
-        mockedResponse?: TCopyAppFilesResponse;
-        service?: string;
-        instance?: string;
-        setName?: string;
-      } = {}) =>
-        http.post(
-          withFileSet(apps.fileCopy.mockedUrl, service, instance, setName),
-          () => HttpResponse.json(mockedResponse),
-        ),
+      success: () => {
+        return console.error('Not implemented');
+      },
     },
   },
   fileDryRun: {

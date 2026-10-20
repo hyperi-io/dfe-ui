@@ -5,6 +5,7 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import { antdImportRejectOverrides } from './eslint/antd-import-reject.mjs';
+import { importScopeDriftOverrides } from './eslint/import-scope-drift.mjs';
 import { importScopeOverrides } from './eslint/import-scope.mjs';
 
 const ERROR = 'error';
@@ -28,6 +29,7 @@ const eslintConfig = defineConfig([
     },
   },
   ...importScopeOverrides,
+  ...importScopeDriftOverrides,
   ...antdImportRejectOverrides,
   {
     // Mock generator: may import types from any scope; runs after import-scope overrides.

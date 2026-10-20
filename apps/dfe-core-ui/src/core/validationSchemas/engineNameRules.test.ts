@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import {
-  MAX_NAME_LENGTH,
   ORG_NAME_VALIDATOR,
   RULE_HUNT_NAME_VALIDATOR,
   STORE_NAME_VALIDATOR,
@@ -78,7 +77,7 @@ describe('the console name rules match the engine spec', () => {
       const rule = CONSOLE_RULES[field]?.regex;
       expect(rule?.test('a'.repeat(maxLength))).toBe(true);
       expect(rule?.test('a'.repeat(maxLength + 1))).toBe(false);
-      expect(maxLength).toBe(MAX_NAME_LENGTH);
+      expect(maxLength).toBe(128);
     },
   );
 });

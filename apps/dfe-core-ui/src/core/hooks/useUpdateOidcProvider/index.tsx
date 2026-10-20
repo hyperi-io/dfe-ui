@@ -1,5 +1,4 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { QUERY_KEY_OIDC_PROVIDER_DETAIL } from '@/core/hooks/useFetchOidcProviderDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateOidcProvider } from './api';
 import {
@@ -28,8 +27,8 @@ export const useUpdateOidcProvider = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEY_OIDC_PROVIDER_DETAIL({
-          name: name,
+        queryKey: QUERY_KEYS.oidcProviders.provider({
+          name,
         }),
       });
 

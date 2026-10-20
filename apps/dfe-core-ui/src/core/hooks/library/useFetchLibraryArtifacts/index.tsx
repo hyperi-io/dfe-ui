@@ -1,21 +1,7 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryArtifactsApi } from './api';
 import { TLibraryArtifactFilters } from './types';
-
-export const LIBRARY_ARTIFACTS_QUERY_KEY = ({
-  kind,
-  group,
-  state,
-  label,
-  q,
-}: TLibraryArtifactFilters = {}) => [
-  'library-artifacts',
-  ...(kind ? [kind] : []),
-  ...(group ? [group] : []),
-  ...(state ? [state] : []),
-  ...(label?.length ? [label.join(',')] : []),
-  ...(q ? [q] : []),
-];
 
 /**
  * The artefact library, filtered by label-style metadata.
@@ -32,7 +18,7 @@ export const useFetchLibraryArtifacts = ({
 } = {}) => {
   const { kind, group, state, label, q } = filters;
   const { data, isLoading, error } = useQuery({
-    queryKey: LIBRARY_ARTIFACTS_QUERY_KEY(filters),
+    queryKey: QUERY_KEYS.library.default(filters),
     queryFn: () =>
       fetchLibraryArtifactsApi({
         queryParams: {
