@@ -26,6 +26,9 @@ export const useUpdateAccount = ({
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.accounts.default(),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.accounts.account({ username }),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

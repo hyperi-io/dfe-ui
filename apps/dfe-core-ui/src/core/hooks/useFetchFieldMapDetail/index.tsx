@@ -1,5 +1,6 @@
-import { fetchSourceFieldMap, fetchStandardFieldMap } from './api';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
+import { fetchSourceFieldMap, fetchStandardFieldMap } from './api';
 
 export const useFetchFieldMapDetail = ({
   standard,
@@ -9,7 +10,7 @@ export const useFetchFieldMapDetail = ({
   source?: string | null;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['field-map', standard, source],
+    queryKey: QUERY_KEYS.fieldMaps.source({ standard, source }),
     queryFn: () =>
       source
         ? fetchSourceFieldMap(standard ?? '', source ?? '')

@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { oidcLogin } from './api';
 
@@ -10,7 +11,7 @@ export const useOidcLogin = ({
   returnTo: string;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['oidcLogin', provider, returnTo],
+    queryKey: QUERY_KEYS.oidc.login({ provider, returnTo }),
     queryFn: async () =>
       oidcLogin({
         pathParams: { provider },

@@ -5,7 +5,7 @@ import {
   TUpdateBackingServiceVarResponse,
 } from './types';
 
-import { BACKING_SERVICES_QUERY_KEY } from '@/Apps/hooks/backingServices/useFetchBackingServices';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Set one value in a backing service's overlay, through the governed path.
@@ -37,7 +37,9 @@ export const useUpdateBackingServiceVar = ({
         pathParams: { name: overlayName, path },
       }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: BACKING_SERVICES_QUERY_KEY });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.backingServices.default(),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

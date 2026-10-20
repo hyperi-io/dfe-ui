@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -25,12 +26,14 @@ export const useFetchInfiniteFilteredRoleScopes = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['role-scopes', debouncedSearch, per_page],
+    queryKey: QUERY_KEYS.roles.scopes({
+      search: debouncedSearch,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredRoleScopes({
         queryParams: {
@@ -99,7 +102,6 @@ export const useFetchInfiniteFilteredRoleScopes = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

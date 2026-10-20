@@ -63,11 +63,7 @@ export const ViewSchemaDetails = ({
   showSearchableColumns,
   resource_type,
 }: ViewSchemaDetailsProps) => {
-  const {
-    selectedSchemaVersion,
-    setSelectedSchema,
-    refetch: refetchListSchemas,
-  } = useListSchemasContext();
+  const { selectedSchemaVersion, setSelectedSchema } = useListSchemasContext();
   const handleSetSelectedSchema = useCallback(
     (version: string) => {
       setSelectedSchema({
@@ -271,7 +267,6 @@ export const ViewSchemaDetails = ({
                   currentVersion={currentVersion}
                   onSuccess={(values) => {
                     handleSetSelectedSchema(values.current);
-                    void refetchListSchemas();
                     onSuccess?.();
                   }}
                 />
@@ -284,7 +279,6 @@ export const ViewSchemaDetails = ({
                   currentVersion={currentVersion}
                   onSuccess={(values) => {
                     handleSetSelectedSchema(values.current);
-                    void refetchListSchemas();
                     onSuccess?.();
                   }}
                 />

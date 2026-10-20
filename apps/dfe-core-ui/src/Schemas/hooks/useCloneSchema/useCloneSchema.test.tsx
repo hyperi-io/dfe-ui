@@ -1,5 +1,6 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -52,7 +53,12 @@ describe('.useCloneSchema', () => {
         expect(testWrapper.queryClient).not.toBeNull();
         const schemaDetailQuery = testWrapper
           .queryClient!.getQueryCache()
-          .findAll({ queryKey: ['schema-detail-columns', 'source', '1.0.0'] })
+          .findAll({
+            queryKey: QUERY_KEYS.schemas.schemaDetail({
+              schema_path: 'source',
+              version: '1.0.0',
+            }),
+          })
           .at(0);
         expect(schemaDetailQuery?.state.status).toBe('success');
       });

@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -31,12 +32,17 @@ export const useFetchInfiniteFilteredAlerts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['alerts', debouncedSearch, hunt, sort_by, sort_order, per_page],
+    queryKey: QUERY_KEYS.alerts.destinations({
+      search: debouncedSearch,
+      hunt,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchInfiniteFilteredAlerts({
         queryParams: {
@@ -107,7 +113,6 @@ export const useFetchInfiniteFilteredAlerts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

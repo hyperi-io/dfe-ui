@@ -11,13 +11,7 @@ import { IconLockFilled } from '@repo/dfe-icons';
 
 const PERMISSION_LIMIT = 4;
 
-export const RoleCard = ({
-  role,
-  refetch,
-}: {
-  role: TRoleListItem;
-  refetch: () => void;
-}) => {
+export const RoleCard = ({ role }: { role: TRoleListItem }) => {
   const isCoreRole = role.resource_type === RESOURCE_TYPES.CORE;
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
@@ -36,22 +30,16 @@ export const RoleCard = ({
                     key="edit-role"
                     disabled={isCoreRole}
                     role_name={role.name}
-                    refetch={refetch}
                   />,
                 ]
               : []),
-            <CloneRoleModal
-              key="clone-role"
-              role_name={role.name}
-              refetch={refetch}
-            />,
+            <CloneRoleModal key="clone-role" role_name={role.name} />,
             ...(!isCoreRole
               ? [
                   <DeleteRoleModal
                     key="delete-role"
                     disabled={isCoreRole}
                     role_name={role.name}
-                    refetch={refetch}
                   />,
                 ]
               : []),

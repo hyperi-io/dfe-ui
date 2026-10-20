@@ -9,11 +9,7 @@ import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const CreateOrganisationDrawer = ({
-  refetch,
-}: {
-  refetch: () => void;
-}) => {
+export const CreateOrganisationDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -27,7 +23,6 @@ export const CreateOrganisationDrawer = ({
         title: 'Organisation created successfully',
         placement: 'bottomLeft',
       });
-      refetch();
       setIsOpen(false);
     },
   });

@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { removeGroupMember } from './api';
 import { TRemoveGroupMemberResponse } from './types';
 
@@ -13,12 +14,22 @@ export const useRemoveGroupMember = ({
   onSuccess,
   onError,
 }: UseRemoveGroupMemberProps) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (username: string) =>
       removeGroupMember({
         pathParams: { name: group_name, username },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.groups.default(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.groups.group({ name: group_name }),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.accounts.default(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

@@ -55,7 +55,6 @@ export const MetaSchemaSelectCreate = ({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch: refetchSchemas,
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
     schema_type: ['meta'],
@@ -196,7 +195,6 @@ export const MetaSchemaSelectCreate = ({
       <ListSchemasProvider schemaTypes={['meta']}>
         <CreateSchemaDrawer
           onSuccess={(response) => {
-            void refetchSchemas();
             applySchemaSelection(
               response.path ?? '',
               versionsFromMetaSchemaOutput(response),

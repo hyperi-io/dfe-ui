@@ -1,4 +1,4 @@
-import { INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateSchema } from './api';
 import {
@@ -78,7 +78,7 @@ export const useUpdateSchema = ({
     },
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SCHEMA_DETAIL_COLUMNS_QUERY_KEY({
+        queryKey: QUERY_KEYS.schemas.schemaDetail({
           schema_path: data.path,
           version: data.current,
         }),

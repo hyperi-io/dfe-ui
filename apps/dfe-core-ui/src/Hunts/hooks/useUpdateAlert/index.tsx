@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAlert } from './api';
 import { TAlertUpdateRequest, TAlertUpdateResponse } from './types';
 
@@ -11,6 +12,7 @@ export const useUpdateAlert = ({
   onError?: (error: Error) => void;
   name: string;
 }) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     // The engine ignores a written url_scheme, so the empty default is sent.
     mutationFn: (alert: TAlertUpdateRequest) =>
@@ -19,6 +21,9 @@ export const useUpdateAlert = ({
         pathParams: { name },
       }),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.alerts.destinations(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

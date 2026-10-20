@@ -19,11 +19,7 @@ export const DeleteSchemaModal = ({
 }: DeleteSchemaModalProps) => {
   const [open, setOpen] = useState(false);
 
-  const {
-    refetch: refetchSchemas,
-    setSelectedSchema,
-    selectedSchemaPath,
-  } = useListSchemasContext();
+  const { setSelectedSchema, selectedSchemaPath } = useListSchemasContext();
 
   const {
     mutate: deleteSchemaMutation,
@@ -32,7 +28,6 @@ export const DeleteSchemaModal = ({
   } = useDeleteSchema({
     onSuccess: () => {
       setOpen(false);
-      refetchSchemas();
       onSuccess?.(schemaPath);
       if (selectedSchemaPath === schemaPath) {
         setSelectedSchema({

@@ -1,6 +1,6 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   afterAll,
@@ -78,7 +78,7 @@ describe('.useSyncOidcProviderGroups', () => {
       const { result } = renderHook(() => useSyncOidcProviderGroups({ name }), {
         wrapper: testWrapper.wrapper,
       });
-      const listKey = QUERY_KEY_INFINITE_FILTERED_OIDC_PROVIDERS({
+      const listKey = QUERY_KEYS.oidcProviders.default({
         per_page: 10,
       });
       testWrapper.queryClient?.setQueryData(listKey, { pages: [] });

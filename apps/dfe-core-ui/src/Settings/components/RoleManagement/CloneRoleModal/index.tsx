@@ -7,20 +7,13 @@ import { App, Button } from 'antd';
 import { useState } from 'react';
 import { CloneRoleForm } from './CloneRoleForm';
 
-export const CloneRoleModal = ({
-  role_name,
-  refetch,
-}: {
-  role_name: string;
-  refetch: () => void;
-}) => {
+export const CloneRoleModal = ({ role_name }: { role_name: string }) => {
   const [open, setOpen] = useState(false);
 
   const { notification } = App.useApp();
 
   const { mutate, isPending, error } = useCreateRole({
     onSuccess: () => {
-      refetch();
       notification.success({
         title: `Role ${role_name} cloned successfully`,
         placement: 'bottomLeft',

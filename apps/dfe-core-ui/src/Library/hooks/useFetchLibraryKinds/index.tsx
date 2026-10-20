@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryKindsApi } from './api';
-
-export const LIBRARY_KINDS_QUERY_KEY = ['library-kinds'];
 
 /**
  * What KIND of thing an artefact may be.
@@ -13,7 +12,7 @@ export const useFetchLibraryKinds = ({
   queryEnabled = true,
 }: { queryEnabled?: boolean } = {}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: LIBRARY_KINDS_QUERY_KEY,
+    queryKey: QUERY_KEYS.library.kinds(),
     queryFn: () => fetchLibraryKindsApi(),
     enabled: queryEnabled,
   });

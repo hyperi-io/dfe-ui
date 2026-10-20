@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { gitOpsLogApi } from './api';
@@ -8,17 +9,6 @@ import {
 } from './types';
 
 export const DEFAULT_GIT_OPS_LOG_LIMIT = 50;
-
-export const GIT_OPS_LOG_QUERY_KEY = ({
-  limit,
-  group_by,
-  applied_revision,
-}: UseFetchGitOpsLogProps = {}) => [
-  'gitOpsLog',
-  ...(limit !== undefined ? [limit] : []),
-  ...(group_by ? [group_by] : []),
-  ...(applied_revision ? [applied_revision] : []),
-];
 
 const getGitOpsLogPageEntries = (page: TGitOpsLogResponse) => {
   if ('entries' in page) {
@@ -42,7 +32,7 @@ export const useFetchGitOpsLog = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: GIT_OPS_LOG_QUERY_KEY({ limit, group_by, applied_revision }),
+    queryKey: QUERY_KEYS.gitops.log({ limit, group_by, applied_revision }),
     queryFn: async ({ pageParam, signal }) =>
       gitOpsLogApi({
         queryParams: {

@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gitOpsAutoMergeApi } from './api';
 import { TGitOpsAutoMergeRequest, TGitOpsAutoMergeResponse } from './types';
@@ -14,7 +15,9 @@ export const useUpdateGitOpsAutoMerge = ({
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: TGitOpsAutoMergeRequest) => gitOpsAutoMergeApi({ body }),
     onSuccess: (values) => {
-      queryClient.invalidateQueries({ queryKey: ['gitOpsAutoMerge'] });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.gitops.autoMerge(),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

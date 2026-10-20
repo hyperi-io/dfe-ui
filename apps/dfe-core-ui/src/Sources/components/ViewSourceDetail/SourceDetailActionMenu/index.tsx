@@ -106,8 +106,7 @@ export const SourceDetailActionMenu = ({
   source,
   onEditSuccess,
 }: SourceDetailActionMenuProps) => {
-  const { refetch: refetchSources, setSelectedSource } =
-    useListSourcesContext();
+  const { setSelectedSource } = useListSourcesContext();
   // The engine owns a core source and reconciles it, so it refuses every write to one.
   const coreResource = source.resource_type === RESOURCE_TYPES.CORE;
   const mainSource = source.source === 'main';
@@ -120,7 +119,6 @@ export const SourceDetailActionMenu = ({
         source_name: null,
         source_version: null,
       });
-      refetchSources();
     },
     coreResource,
     mainSource,

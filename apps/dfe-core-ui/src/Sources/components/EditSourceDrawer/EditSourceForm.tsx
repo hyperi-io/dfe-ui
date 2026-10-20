@@ -27,7 +27,6 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
   const {
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
-    refetch: refetchSources,
     setSelectedSource,
   } = useListSourcesContext();
 
@@ -54,7 +53,6 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
           version: source_version,
         }),
       });
-      refetchSources();
       onSuccess?.(response);
     },
   });

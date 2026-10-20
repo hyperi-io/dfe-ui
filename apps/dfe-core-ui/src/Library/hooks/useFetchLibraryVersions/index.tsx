@@ -1,10 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryVersionsApi } from './api';
-
-export const LIBRARY_VERSIONS_QUERY_KEY = (artifact: string) => [
-  'library-versions',
-  artifact,
-];
 
 /** An artefact's immutable version history. */
 export const useFetchLibraryVersions = ({
@@ -15,7 +11,7 @@ export const useFetchLibraryVersions = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: LIBRARY_VERSIONS_QUERY_KEY(artifact),
+    queryKey: QUERY_KEYS.library.versions({ artifact }),
     queryFn: () => fetchLibraryVersionsApi({ pathParams: { artifact } }),
     enabled: !!artifact && queryEnabled,
     retry: false,

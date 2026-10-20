@@ -109,7 +109,6 @@ describe('useFetchInfiniteFilteredHunts', () => {
         isLoading: false,
         isError: false,
         error: null,
-        refetch: expect.any(Function),
         fetchNextPage: expect.any(Function),
         hasNextPage: expect.any(Boolean),
         isFetchingNextPage: false,
@@ -322,31 +321,6 @@ describe('useFetchInfiniteFilteredHunts', () => {
       });
 
       expect(result.current.data.items).toBeDefined();
-    });
-  });
-
-  describe('refetch functionality', () => {
-    it('should refetch data when refetch is called', async () => {
-      const { result } = renderHook(() => useFetchInfiniteFilteredHunts(), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      const initialData = result.current.data;
-
-      // Call refetch
-      await result.current.refetch();
-
-      await waitFor(() => {
-        expect(result.current.data).toBeDefined();
-      });
-
-      // Data should be refreshed
-      expect(result.current.data).toBeDefined();
-      expect(result.current.data.items).toHaveLength(initialData.items.length);
     });
   });
 

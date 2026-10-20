@@ -1,11 +1,10 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchClientConfigApi } from './api';
 
-export const CLIENT_CONFIG_QUERY_KEY = () => ['clientConfig'];
-
 export const useFetchClientConfig = () => {
   const { data, isLoading, error } = useQuery({
-    queryKey: CLIENT_CONFIG_QUERY_KEY(),
+    queryKey: QUERY_KEYS.clientConfig.default(),
     queryFn: () => fetchClientConfigApi(),
   });
 

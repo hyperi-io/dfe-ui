@@ -19,7 +19,6 @@ export const RoleManagement = () => {
     data: { items: customRoles, total: customRolesTotal },
     fetchNextPage: fetchCustomRolesNextPage,
     isLoading: isLoadingCustomRoles,
-    refetch: refetchCustomRoles,
     error: errorCustomRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'custom',
@@ -32,7 +31,6 @@ export const RoleManagement = () => {
     data: { items: coreRoles, total: coreRolesTotal },
     fetchNextPage: fetchCoreRolesNextPage,
     isLoading: isLoadingCoreRoles,
-    refetch: refetchCoreRoles,
     error: errorCoreRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: RESOURCE_TYPES.CORE,
@@ -48,7 +46,7 @@ export const RoleManagement = () => {
       <SectionCard
         title="Configure a custom role"
         description="Configure a custom role and its permissions."
-        rightTitleSlot={<CreateRoleDrawer refetch={refetchCustomRoles} />}
+        rightTitleSlot={<CreateRoleDrawer />}
       />
       <SectionCard
         title="Manage roles"
@@ -85,7 +83,7 @@ export const RoleManagement = () => {
               <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {customRoles?.map((role) => (
                   <li key={role.name.replaceAll(' ', '-')}>
-                    <RoleCard refetch={refetchCustomRoles} role={role} />
+                    <RoleCard role={role} />
                   </li>
                 ))}
               </ul>
@@ -160,13 +158,7 @@ export const RoleManagement = () => {
               <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {coreRoles?.map((role) => (
                   <li key={role.name.replaceAll(' ', '-')}>
-                    <RoleCard
-                      refetch={() => {
-                        refetchCoreRoles();
-                        refetchCustomRoles();
-                      }}
-                      role={role}
-                    />
+                    <RoleCard role={role} />
                   </li>
                 ))}
               </ul>

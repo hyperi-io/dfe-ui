@@ -7,8 +7,6 @@ import { useFetchInfiniteFilteredAccountsProps } from './types';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const ACCOUNTS_QUERY_KEY = QUERY_KEYS.accounts.default;
-
 /** useFetchInfiniteFilteredAccounts props */
 /**
  * @param search - The search query to filter the accounts.
@@ -37,12 +35,11 @@ export const useFetchInfiniteFilteredAccounts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ACCOUNTS_QUERY_KEY({
+    queryKey: QUERY_KEYS.accounts.default({
       search: debouncedSearch,
       oidc_id,
       include_core,
@@ -125,7 +122,6 @@ export const useFetchInfiniteFilteredAccounts = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

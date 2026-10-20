@@ -7,10 +7,8 @@ import { IconLockFilled } from '@repo/dfe-icons';
 
 export const OrganisationCard = ({
   organisation,
-  refetch,
 }: {
   organisation: TOrganisationListSummary;
-  refetch: () => void;
 }) => {
   const isParentOrganisation = (organisation.org_ids?.length ?? 0) > 0;
   const orgIcon =
@@ -30,14 +28,12 @@ export const OrganisationCard = ({
           <EditOrganisationDrawer
             key="edit-organisation"
             organisation={organisation}
-            refetch={refetch}
           />,
           <DeleteOrganisationModal
             key="delete-organisation"
             disabled={isParentOrganisation}
             org_name={organisation.name}
             display_name={organisation.display_name}
-            refetch={refetch}
           />,
         ]}
       />

@@ -1,5 +1,6 @@
 'use client';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredFieldMaps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps';
 import type {
   TFieldMapListResponse,
@@ -70,7 +71,6 @@ interface ListFieldMapsContextValue {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -143,7 +143,6 @@ export const ListFieldMapsProvider = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,
@@ -157,7 +156,9 @@ export const ListFieldMapsProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredFieldMapsProps) => {
-      void queryClient.cancelQueries({ queryKey: ['field-maps'] });
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.fieldMaps.default(),
+      });
 
       const updated: ListFieldMapsQueryParams = {
         ...filters,
@@ -200,7 +201,6 @@ export const ListFieldMapsProvider = ({
       isLoading,
       isError,
       error: error ?? null,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,
@@ -216,7 +216,6 @@ export const ListFieldMapsProvider = ({
       isLoading,
       isError,
       error,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,

@@ -1,5 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { RepositoryScope } from '@/Platform/hooks/repository/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateRepositoryObjectApi } from './api';
 import {
   TUpdateRepositoryObjectRequest,
@@ -21,6 +22,7 @@ export const useUpdateRepositoryObject = ({
   onSuccess?: (values: TUpdateRepositoryObjectResponse) => void;
   onError?: (error: Error) => void;
 }) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (body: TUpdateRepositoryObjectRequest) =>
       updateRepositoryObjectApi({
@@ -28,6 +30,12 @@ export const useUpdateRepositoryObject = ({
         pathParams: { scope, scope_id, namespace, key },
       }),
     onSuccess: (values) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.repository.objects(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.repository.object({ scope, scope_id, namespace }),
+      });
       onSuccess?.(values);
     },
     onError: (error) => {

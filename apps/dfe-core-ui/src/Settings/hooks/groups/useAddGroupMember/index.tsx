@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addGroupMember } from './api';
 import { TAddGroupMemberRequestBody, TAddGroupMemberResponse } from './types';
 
@@ -13,6 +14,7 @@ export const useAddGroupMember = ({
   onSuccess,
   onError,
 }: UseAddGroupMemberProps) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (member: TAddGroupMemberRequestBody) =>
       addGroupMember({
@@ -20,6 +22,15 @@ export const useAddGroupMember = ({
         pathParams: { name: group_name },
       }),
     onSuccess: (data) => {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.groups.default(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.groups.group({ name: group_name }),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.accounts.default(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

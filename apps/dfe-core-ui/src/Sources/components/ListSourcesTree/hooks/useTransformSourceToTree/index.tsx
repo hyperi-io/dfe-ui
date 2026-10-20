@@ -150,7 +150,6 @@ const sourceSummaryToTreeData = ({
   selectedSourceVersion,
   apiNotification,
   expandTreeNode,
-  refetchSources,
 }: {
   node: TSourceSummary;
   pathSegments: string[];
@@ -159,7 +158,6 @@ const sourceSummaryToTreeData = ({
   selectedSourceVersion: string | null;
   apiNotification: NotificationInstance;
   expandTreeNode: (key: string) => void;
-  refetchSources: () => void;
 }): TreeDataNode[] => {
   const out: TreeDataNode[] = [];
 
@@ -389,7 +387,6 @@ const sourceSummaryToTreeData = ({
       selectedSourceVersion,
       apiNotification,
       expandTreeNode,
-      refetchSources,
     });
 
     if (nested.length === 0) {
@@ -419,14 +416,12 @@ export const useTransformSourceToTree = ({
   selectedSourceName,
   selectedSourceVersion,
   expandTreeNode,
-  refetchSources,
 }: {
   sourceObjects: TSourceSummary;
   setSelectedSource: SelectSource;
   selectedSourceName: string | null;
   selectedSourceVersion: string | null;
   expandTreeNode: (key: string) => void;
-  refetchSources: () => void;
 }) => {
   const [apiNotification, notificationContextHolder] =
     notification.useNotification();
@@ -441,7 +436,6 @@ export const useTransformSourceToTree = ({
         selectedSourceVersion,
         apiNotification,
         expandTreeNode,
-        refetchSources,
       }),
     [
       sourceObjects,
@@ -450,7 +444,6 @@ export const useTransformSourceToTree = ({
       selectedSourceVersion,
       apiNotification,
       expandTreeNode,
-      refetchSources,
     ],
   );
 

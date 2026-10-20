@@ -21,7 +21,6 @@ export const OrganisationManagement = () => {
     loadMoreRef,
     isLoading,
     error,
-    refetch,
   } = useFetchInfiniteFilteredOrganisations({ search, per_page: 12 });
   const { componentHeight: outerComponentHeight } = useSetComponentHeight({
     offset: 100,
@@ -36,7 +35,7 @@ export const OrganisationManagement = () => {
       <SectionCard
         title="Configure a new organisation"
         description="Create and configure a new organisation and manage user, role defaults and more."
-        rightTitleSlot={<CreateOrganisationDrawer refetch={refetch} />}
+        rightTitleSlot={<CreateOrganisationDrawer />}
       />
       <SectionCard
         title="Manage existing organisations"
@@ -82,7 +81,6 @@ export const OrganisationManagement = () => {
                       <OrganisationCard
                         key={organisation.name}
                         organisation={organisation}
-                        refetch={refetch}
                       />
                     </li>
                   ))}

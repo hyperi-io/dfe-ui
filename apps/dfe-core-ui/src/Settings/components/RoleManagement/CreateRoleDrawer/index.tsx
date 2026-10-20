@@ -9,7 +9,7 @@ import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
+export const CreateRoleDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -20,7 +20,6 @@ export const CreateRoleDrawer = ({ refetch }: { refetch: () => void }) => {
   } = useCreateRole({
     onSuccess: () => {
       setIsOpen(false);
-      refetch();
       api.success({
         title: 'Role created successfully',
         placement: 'bottomLeft',

@@ -10,14 +10,12 @@ interface DeleteRoleModalProps {
   role_name: string;
   onSuccess?: () => void;
   disabled?: boolean;
-  refetch: () => void;
 }
 
 export const DeleteRoleModal = ({
   role_name,
   onSuccess,
   disabled,
-  refetch,
 }: DeleteRoleModalProps) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
@@ -35,7 +33,6 @@ export const DeleteRoleModal = ({
         ),
         placement: 'bottomLeft',
       });
-      refetch();
     },
   });
   const handleDeleteRole = (values: DeleteRoleFormData) => {

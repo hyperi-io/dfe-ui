@@ -5,7 +5,6 @@ import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
-import { useListHuntsContext } from '@/Hunts/contexts/ListHuntsContext';
 import { useCreateHunt } from '@/Hunts/hooks/useCreateHunt';
 import { THuntCreateResponse } from '@/Hunts/hooks/useCreateHunt/types';
 import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
@@ -42,10 +41,7 @@ export const CloneHuntModal = ({
   const formValidation = useAntdZodResolver<FormData>(formSchema);
   const [open, setOpen] = useState(false);
 
-  const { refetch: refetchHunts } = useListHuntsContext();
-
   const onSuccess = (data: THuntCreateResponse) => {
-    refetchHunts();
     onSuccessProp?.(data);
     setOpen(false);
   };

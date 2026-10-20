@@ -16,7 +16,6 @@ vi.mock('@/Sources/components/DeleteSourceModal', () => ({
 }));
 vi.mock('@/Sources/contexts/ListSourcesContext', () => ({
   useListSourcesContext: () => ({
-    refetch: vi.fn(),
     setSelectedSource: vi.fn(),
   }),
 }));

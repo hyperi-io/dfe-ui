@@ -57,8 +57,7 @@ export const ViewSourceDetailTabs = ({
   const pathname = usePathname();
 
   const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
-  const { setSelectedSource, refetch: refetchSources } =
-    useListSourcesContext();
+  const { setSelectedSource } = useListSourcesContext();
 
   const isMainSource = selectedSourceName === 'main';
 
@@ -133,9 +132,8 @@ export const ViewSourceDetailTabs = ({
         source_name: response.source,
         source_version: response.current,
       });
-      refetchSources();
     },
-    [refetchSources, setSelectedSource],
+    [setSelectedSource],
   );
 
   return (

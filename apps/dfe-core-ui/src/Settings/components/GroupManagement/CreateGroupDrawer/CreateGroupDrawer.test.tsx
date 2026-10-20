@@ -57,7 +57,7 @@ const { wrapper } = buildTestWrapper().withReactQuery().withTheme();
 
 const openCreateDrawer = async () => {
   const user = userEvent.setup();
-  render(<CreateGroupDrawer refetch={vi.fn()} />, { wrapper });
+  render(<CreateGroupDrawer />, { wrapper });
   await user.click(
     await screen.findByRole(
       'button',

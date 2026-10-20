@@ -1,11 +1,7 @@
 import { ApiError } from '@/core/config/api/client';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { fetchAccountDetail } from '@/Settings/hooks/accounts/useFetchAccountDetail/api';
 import { useQuery } from '@tanstack/react-query';
-
-export const SECURITY_ACCOUNT_QUERY_KEY = (username?: string | null) => [
-  'security-account',
-  ...(username ? [username] : []),
-];
 
 /**
  * One of the deployment's recovery accounts, or null when it has none by that name.
@@ -19,7 +15,7 @@ export const useFetchSecurityAccount = ({
   username?: string | null;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SECURITY_ACCOUNT_QUERY_KEY(username),
+    queryKey: QUERY_KEYS.accounts.account({ username }),
     queryFn: async () => {
       try {
         return await fetchAccountDetail({

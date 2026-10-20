@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppRoutingApi } from './api';
-
-export const APP_ROUTING_QUERY_KEY = (service: string, instance: string) => [
-  'app-routing',
-  service,
-  instance,
-];
 
 /**
  * What the source definitions compile to, against what the overlay carries.
@@ -25,7 +20,7 @@ export const useFetchAppRouting = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APP_ROUTING_QUERY_KEY(service, instance),
+    queryKey: QUERY_KEYS.apps.routing({ service, instance }),
     queryFn: () => fetchAppRoutingApi({ pathParams: { service, instance } }),
     enabled: !!service && !!instance && queryEnabled,
     retry: false,

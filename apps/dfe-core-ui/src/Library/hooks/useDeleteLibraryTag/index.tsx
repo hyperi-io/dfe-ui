@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLibraryTagApi } from './api';
 import { TDeleteLibraryTagResponse } from './types';
 
-import { LIBRARY_ARTIFACT_QUERY_KEY } from '@/Library/hooks/useFetchLibraryArtifactDetail';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /** Remove a tag. The versions it pointed at are untouched. */
 export const useDeleteLibraryTag = ({
@@ -20,7 +20,7 @@ export const useDeleteLibraryTag = ({
       deleteLibraryTagApi({ pathParams: { artifact, tag } }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: LIBRARY_ARTIFACT_QUERY_KEY(artifact),
+        queryKey: QUERY_KEYS.library.artifact({ artifact }),
       });
       onSuccess?.(values);
     },

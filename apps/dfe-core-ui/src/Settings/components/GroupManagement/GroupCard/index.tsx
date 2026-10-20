@@ -6,13 +6,7 @@ import { EditGroupDrawer } from '@/Settings/components/GroupManagement/EditGroup
 import { ViewGroupDetailsDrawer } from '@/Settings/components/GroupManagement/ViewGroupDetailsDrawer';
 import { TAG_LIMIT, TagList } from './TagList';
 
-export const GroupCard = ({
-  group,
-  refetch,
-}: {
-  group: TGroupsItemSummary;
-  refetch: () => void;
-}) => {
+export const GroupCard = ({ group }: { group: TGroupsItemSummary }) => {
   return (
     <div className="rounded-md p-4 border border-foreground/10 dark:border-dark-foreground/10 relative h-full">
       <div className="flex flex-col gap-1">
@@ -24,16 +18,8 @@ export const GroupCard = ({
               group_name={group.name}
               key="view-group-details"
             />,
-            <EditGroupDrawer
-              key="edit-group"
-              group_name={group.name}
-              refetch={refetch}
-            />,
-            <DeleteGroupModal
-              key="delete-group"
-              group_name={group.name}
-              refetch={refetch}
-            />,
+            <EditGroupDrawer key="edit-group" group_name={group.name} />,
+            <DeleteGroupModal key="delete-group" group_name={group.name} />,
           ]}
         />
 

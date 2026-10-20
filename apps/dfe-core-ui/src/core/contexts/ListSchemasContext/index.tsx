@@ -5,6 +5,7 @@ import type {
   UseFetchInfiniteFilteredSchemasProps,
 } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredSchemas } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -89,7 +90,6 @@ interface ListSchemasContextValue {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
@@ -168,7 +168,6 @@ export const ListSchemasProvider = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,
@@ -180,7 +179,9 @@ export const ListSchemasProvider = ({
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSchemasProps) => {
-      void queryClient.cancelQueries({ queryKey: ['schemas'] });
+      void queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.schemas.default(),
+      });
       const updated: ListSchemasQueryParams = {
         ...filters,
         ...newFilters,
@@ -221,7 +222,6 @@ export const ListSchemasProvider = ({
       isLoading,
       isError,
       error: error ?? null,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,
@@ -239,7 +239,6 @@ export const ListSchemasProvider = ({
       isLoading,
       isError,
       error,
-      refetch,
       fetchNextPage,
       hasNextPage,
       loadMoreRef,

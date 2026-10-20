@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOrganisation } from './api';
 import {
   TOrganisationCreateRequestBody,
@@ -14,12 +15,16 @@ export const useCreateOrganisation = ({
   onSuccess,
   onError,
 }: UseCreateOrganisationProps = {}) => {
+  const queryClient = useQueryClient();
   const { data, mutate, isPending, error } = useMutation({
     mutationFn: (organisation: TOrganisationCreateRequestBody) =>
       createOrganisation({
         body: organisation,
       }),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.orgs.default(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

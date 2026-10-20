@@ -10,7 +10,7 @@ import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
 import { useState } from 'react';
 
-export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
+export const CreateGroupDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -22,7 +22,6 @@ export const CreateGroupDrawer = ({ refetch }: { refetch: () => void }) => {
   } = useCreateGroup({
     onSuccess: () => {
       setIsOpen(false);
-      refetch();
       api.success({
         title: 'Group created successfully',
         placement: 'bottomLeft',

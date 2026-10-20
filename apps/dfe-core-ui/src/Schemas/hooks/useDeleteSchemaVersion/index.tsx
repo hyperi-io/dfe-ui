@@ -1,4 +1,4 @@
-import { INFINITE_SCHEMAS_QUERY_KEY } from '@/core/hooks/useFetchInfiniteFilteredSchemas';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteSchemaVersion } from './api';
 
@@ -25,7 +25,7 @@ export const useDeleteSchemaVersion = ({
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: INFINITE_SCHEMAS_QUERY_KEY(),
+        queryKey: QUERY_KEYS.schemas.default(),
       });
       onSuccess?.();
     },

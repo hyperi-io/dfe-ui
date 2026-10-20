@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAppConfigApi } from './api';
 import { TUpdateAppConfigRequest, TUpdateAppConfigResponse } from './types';
 
-import { APP_CONFIG_QUERY_KEY } from '@/core/hooks/apps/config/useFetchAppConfig';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Write options the app declares, and environment keys it does not.
@@ -38,7 +38,7 @@ export const useUpdateAppConfig = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_CONFIG_QUERY_KEY(service, instance),
+        queryKey: QUERY_KEYS.apps.config({ service, instance }),
       });
       onSuccess?.(values);
     },

@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createRule } from './api';
 import { TRuleCreateRequest, TRuleCreateResponse } from './types';
 
@@ -11,9 +12,13 @@ export const useCreateRule = ({
   onSuccess,
   onError,
 }: UseCreateRuleProps = {}) => {
+  const queryClient = useQueryClient();
   const { data, mutate, reset, isPending, error } = useMutation({
     mutationFn: (rule: TRuleCreateRequest) => createRule({ body: rule }),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.rules.default(),
+      });
       onSuccess?.(data);
     },
     onError: (error) => {

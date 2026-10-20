@@ -1,10 +1,10 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
 } from '@/Rules/components/CreateUpdateRuleForm';
-import { RULE_DETAIL_QUERY_KEY } from '@/Rules/hooks/useFetchRuleDetail';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { useUpdateRule } from '@/Rules/hooks/useUpdateRule';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
@@ -30,7 +30,7 @@ export const UpdateRuleForm = ({ rule, onSuccess }: UpdateRuleFormProps) => {
   } = useUpdateRule({
     onSuccess: (response) => {
       queryClient.invalidateQueries({
-        queryKey: RULE_DETAIL_QUERY_KEY(rule.name),
+        queryKey: QUERY_KEYS.rules.rule({ name: rule.name }),
       });
       onSuccess?.(response);
     },

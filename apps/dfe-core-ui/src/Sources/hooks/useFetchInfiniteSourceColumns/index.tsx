@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { sourceColumns } from './api';
@@ -22,12 +23,15 @@ export const useFetchInfiniteSourceColumns = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['source-columns', source_name, version],
+    queryKey: QUERY_KEYS.sources.sourceColumns({
+      source_name,
+      version,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       sourceColumns({
         pathParams: { name: source_name ?? '' },
@@ -94,7 +98,6 @@ export const useFetchInfiniteSourceColumns = ({
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

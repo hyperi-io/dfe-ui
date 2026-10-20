@@ -28,7 +28,7 @@ export const CreateHuntDrawer = ({
     onClose?.();
   };
 
-  const { refetch: refetchHunts, setSelectedHuntName } = useListHuntsContext();
+  const { setSelectedHuntName } = useListHuntsContext();
   const {
     mutate: createHuntMutation,
     isPending,
@@ -36,7 +36,6 @@ export const CreateHuntDrawer = ({
   } = useCreateHunt({
     onSuccess: (response) => {
       setSelectedHuntName(response.name);
-      refetchHunts();
       setIsDrawerVisible(false);
       api.success({
         title: 'Hunt created successfully',

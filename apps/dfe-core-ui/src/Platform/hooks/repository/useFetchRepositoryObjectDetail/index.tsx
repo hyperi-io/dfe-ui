@@ -1,26 +1,7 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { RepositoryScope } from '@/Platform/hooks/repository/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRepositoryObjectDetailApi } from './api';
-
-export const REPOSITORY_OBJECT_DETAIL_QUERY_KEY = ({
-  scope,
-  scope_id,
-  namespace,
-  key,
-}: {
-  scope?: RepositoryScope;
-  scope_id?: string;
-  namespace?: string;
-  key?: string;
-} = {}) => [
-  'repository',
-  'object',
-  'detail',
-  ...(scope ? [scope] : []),
-  ...(scope_id ? [scope_id] : []),
-  ...(namespace ? [namespace] : []),
-  ...(key ? [key] : []),
-];
 
 export const useFetchRepositoryObjectDetail = ({
   scope,
@@ -34,7 +15,7 @@ export const useFetchRepositoryObjectDetail = ({
   key: string;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: REPOSITORY_OBJECT_DETAIL_QUERY_KEY(),
+    queryKey: QUERY_KEYS.repository.object({ scope, scope_id, namespace, key }),
     queryFn: () =>
       fetchRepositoryObjectDetailApi({
         pathParams: { scope, scope_id, namespace, key },

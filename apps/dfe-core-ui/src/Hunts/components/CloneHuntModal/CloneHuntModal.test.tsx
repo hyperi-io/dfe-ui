@@ -10,20 +10,8 @@ import { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { CloneHuntModal } from '.';
-
-vi.mock('@/Hunts/contexts/ListHuntsContext', () => ({
-  useListHuntsContext: () => ({ refetch: vi.fn() }),
-}));
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());

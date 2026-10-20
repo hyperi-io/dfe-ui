@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppScalingApi } from './api';
-
-export const APP_SCALING_QUERY_KEY = (service: string, instance: string) => [
-  'app-scaling',
-  service,
-  instance,
-];
 
 /**
  * The scaling dials, or why they do not apply here.
@@ -24,7 +19,7 @@ export const useFetchAppScaling = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: APP_SCALING_QUERY_KEY(service, instance),
+    queryKey: QUERY_KEYS.apps.scaling({ service, instance }),
     queryFn: () => fetchAppScalingApi({ pathParams: { service, instance } }),
     enabled: !!service && !!instance && queryEnabled,
     retry: false,

@@ -20,8 +20,6 @@ vi.mock('@/Sources/components/DeleteSourceModal', () => ({
   ),
 }));
 
-const refetchSources = vi.fn();
-
 const baseSource = (
   overrides: Partial<TSourceListSummary> & Pick<TSourceListSummary, 'name'>,
 ): TSourceListSummary => ({
@@ -43,7 +41,6 @@ const baseSource = (
 });
 
 const defaultSelection = {
-  refetchSources,
   selectedSourcePath: null as string | null,
   selectedSourceVersion: null as string | null,
   expandTreeNode: vi.fn(),
@@ -291,7 +288,6 @@ describe('useTransformSourceToTree', () => {
         selectedSourceName: 'syslog',
         selectedSourceVersion: 'v1',
         expandTreeNode: vi.fn(),
-        refetchSources,
       }),
     );
 
@@ -318,7 +314,6 @@ describe('useTransformSourceToTree', () => {
         selectedSourceName: 'main',
         selectedSourceVersion: 'v1',
         expandTreeNode: vi.fn(),
-        refetchSources,
       }),
     );
 
@@ -394,7 +389,6 @@ describe('useTransformSourceToTree', () => {
         onExpand: typeof expandTreeNode;
       }) =>
         useTransformSourceToTree({
-          refetchSources,
           sourceObjects: source,
           setSelectedSource: onSelect,
           selectedSourceName: null,

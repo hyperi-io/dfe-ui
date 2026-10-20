@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateAppScalingApi } from './api';
 import { TUpdateAppScalingRequest, TUpdateAppScalingResponse } from './types';
 
-import { APP_SCALING_QUERY_KEY } from '@/core/hooks/apps/scaling/useFetchAppScaling';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 
 /**
  * Set the scaling dials. Every field is optional, so a partial update leaves
@@ -35,7 +35,7 @@ export const useUpdateAppScaling = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: APP_SCALING_QUERY_KEY(service, instance),
+        queryKey: QUERY_KEYS.apps.scaling({ service, instance }),
       });
       onSuccess?.(values);
     },
