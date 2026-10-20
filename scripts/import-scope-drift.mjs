@@ -12,6 +12,9 @@
  * every component would look used by core. Feature tests do count as that
  * feature using the symbol.
  *
+ * A `server` export from a `*.mocks` file is an MSW server for tests. When
+ * only tests import it, that is intentional and it is not reported.
+ *
  * Exit 1 when any move candidate exists. Unused exports are listed with
  * --unused and do not affect the exit code.
  *
@@ -392,10 +395,24 @@ const rel = (file) => path.relative(APP_ROOT, file);
 const featureScopes = (record) =>
   [...record.byScope.keys()].filter((scope) => !NOT_A_FEATURE.has(scope));
 
+/** MSW `server` from a mocks module, reached only by tests. */
+const isTestOnlyServerMock = (record) => {
+  if (record.name !== 'server' || !/\.mocks\.(ts|tsx)$/.test(record.file)) {
+    return false;
+  }
+  for (const files of record.byScope.values()) {
+    for (const file of files) {
+      if (!isTestFile(file)) return false;
+    }
+  }
+  return true;
+};
+
 const moves = [];
 const unused = [];
 
 for (const record of symbols.values()) {
+  if (isTestOnlyServerMock(record)) continue;
   const features = featureScopes(record);
   const usedByCore = record.byScope.has('core');
   if (!usedByCore && features.length === 1) {
