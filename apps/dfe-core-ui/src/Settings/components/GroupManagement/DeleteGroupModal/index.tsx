@@ -6,13 +6,7 @@ import { App, Button } from 'antd';
 import { useState } from 'react';
 import { DeleteGroupForm, DeleteGroupFormData } from './DeleteGroupForm';
 
-export const DeleteGroupModal = ({
-  group_name,
-  refetch,
-}: {
-  group_name: string;
-  refetch: () => void;
-}) => {
+export const DeleteGroupModal = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
   const { notification } = App.useApp();
 
@@ -28,7 +22,6 @@ export const DeleteGroupModal = ({
         ),
         placement: 'bottomLeft',
       });
-      refetch();
     },
   });
 

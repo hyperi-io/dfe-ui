@@ -21,13 +21,12 @@ export const HuntDetailActionMenu = ({
   onEditSuccess: onEditSuccessProp,
 }: HuntDetailActionMenuProps) => {
   const { notification } = App.useApp();
-  const { refetch: refetchHunts, setSelectedHuntName } = useListHuntsContext();
+  const { setSelectedHuntName } = useListHuntsContext();
 
   const queryClient = useQueryClient();
 
   const onCloneSuccess = (hunt: THuntCreateResponse) => {
     setSelectedHuntName(hunt.name);
-    refetchHunts();
     notification.success({
       title: `Hunt ${hunt.name} cloned successfully`,
       placement: 'bottomLeft',
@@ -36,7 +35,6 @@ export const HuntDetailActionMenu = ({
 
   const onDeleteSuccess = () => {
     setSelectedHuntName(null);
-    refetchHunts();
     notification.success({
       title: `Hunt ${hunt.name} deleted successfully`,
       placement: 'bottomLeft',

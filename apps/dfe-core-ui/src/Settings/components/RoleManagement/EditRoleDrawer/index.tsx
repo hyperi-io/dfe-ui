@@ -11,11 +11,9 @@ import { UpdateRoleForm, UpdateRoleFormData } from './UpdateRoleForm';
 export const EditRoleDrawer = ({
   disabled,
   role_name,
-  refetch,
 }: {
   disabled?: boolean;
   role_name: string;
-  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -30,7 +28,6 @@ export const EditRoleDrawer = ({
     role_name,
     onSuccess: () => {
       setOpen(false);
-      refetch();
       api.success({
         title: 'Role updated successfully',
         placement: 'bottomLeft',

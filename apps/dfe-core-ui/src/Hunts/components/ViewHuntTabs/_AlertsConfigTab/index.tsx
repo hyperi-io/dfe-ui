@@ -11,7 +11,6 @@ export const AlertsConfigTab = ({ hunt }: { hunt: THuntDetailResponse }) => {
   const {
     data: { items: alerts },
     isLoading,
-    refetch,
     error,
   } = useFetchInfiniteFilteredAlerts({
     hunt: hunt.name,
@@ -39,14 +38,7 @@ export const AlertsConfigTab = ({ hunt }: { hunt: THuntDetailResponse }) => {
       <NotificationCard
         title="Create Alert"
         description="Create a new alert for this hunt"
-        action={
-          <CreateAlertModal
-            onSuccess={() => {
-              refetch();
-            }}
-            hunt_name={hunt.name}
-          />
-        }
+        action={<CreateAlertModal hunt_name={hunt.name} />}
       />
       {alerts.length === 0 && (
         <EmptyDetail

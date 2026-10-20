@@ -14,10 +14,8 @@ import { useState } from 'react';
 
 export const EditOrganisationDrawer = ({
   organisation,
-  refetch,
 }: {
   organisation: TOrganisationListSummary;
-  refetch: () => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
@@ -31,7 +29,6 @@ export const EditOrganisationDrawer = ({
   } = useUpdateOrganisation({
     org_name: organisation.name,
     onSuccess: () => {
-      refetch();
       api.success({
         title: 'Organisation updated successfully',
         placement: 'bottomLeft',

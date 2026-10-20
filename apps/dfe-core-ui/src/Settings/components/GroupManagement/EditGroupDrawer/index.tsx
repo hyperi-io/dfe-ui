@@ -8,13 +8,7 @@ import { Button, notification } from 'antd';
 import { useState } from 'react';
 import { UpdateGroupForm, UpdateGroupFormData } from './UpdateGroupForm';
 
-export const EditGroupDrawer = ({
-  group_name,
-  refetch,
-}: {
-  group_name: string;
-  refetch: () => void;
-}) => {
+export const EditGroupDrawer = ({ group_name }: { group_name: string }) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
 
@@ -29,7 +23,6 @@ export const EditGroupDrawer = ({
     group_name,
     onSuccess: () => {
       setOpen(false);
-      refetch();
       api.success({
         title: 'Group updated successfully',
         placement: 'bottomLeft',

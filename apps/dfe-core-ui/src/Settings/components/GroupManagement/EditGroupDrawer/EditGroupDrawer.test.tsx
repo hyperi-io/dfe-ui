@@ -76,7 +76,7 @@ const openEditDrawer = async (group: TGroupDetailResponse = LINKED_GROUP) => {
     }),
   );
   const user = userEvent.setup();
-  render(<EditGroupDrawer group_name={LINKED_GROUP.name} refetch={vi.fn()} />, {
+  render(<EditGroupDrawer group_name={LINKED_GROUP.name} />, {
     wrapper,
   });
   await user.click(
@@ -148,12 +148,9 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
       }),
     );
     const user = userEvent.setup();
-    render(
-      <EditGroupDrawer group_name={LINKED_GROUP.name} refetch={vi.fn()} />,
-      {
-        wrapper,
-      },
-    );
+    render(<EditGroupDrawer group_name={LINKED_GROUP.name} />, {
+      wrapper,
+    });
     testWrapper.queryClient?.setQueryData(
       QUERY_KEYS.groups.group({ name: LINKED_GROUP.name }),
       LINKED_GROUP,

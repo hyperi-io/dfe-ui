@@ -22,7 +22,6 @@ export const UserGroups = () => {
     loadMoreRef,
     isLoading,
     error,
-    refetch,
   } = useFetchInfiniteFilteredGroups({
     search,
     per_page: 12,
@@ -41,7 +40,7 @@ export const UserGroups = () => {
       <SectionCard
         title="Configure a new group"
         description="Create a group and assign roles to its members."
-        rightTitleSlot={<CreateGroupDrawer refetch={refetch} />}
+        rightTitleSlot={<CreateGroupDrawer />}
       />
       <SectionCard
         title="Manage groups"
@@ -83,7 +82,7 @@ export const UserGroups = () => {
                 <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {groups.map((group) => (
                     <li key={group.name}>
-                      <GroupCard group={group} refetch={refetch} />
+                      <GroupCard group={group} />
                     </li>
                   ))}
                   <div ref={loadMoreRef} className="h-4 flex justify-center">

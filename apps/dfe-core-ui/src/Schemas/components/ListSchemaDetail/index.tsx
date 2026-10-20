@@ -53,7 +53,6 @@ export const ListSchemaDetail = () => {
     setSelectedSearchableColumns,
     isLoading: isFetchingSchemaDetail,
     error: fetchSchemaDetailError,
-    refetch: refetchSchemaDetail,
     fetchNextPage: fetchNextPageSchemaDetail,
     hasNextPage: hasNextPageSchemaDetail,
     isFetchingNextPage: isFetchingNextPageSchemaDetail,
@@ -143,9 +142,6 @@ export const ListSchemaDetail = () => {
           }}
           onColumnFilterChange={handleColumnFilterChange}
           onClearAllFilters={handleClearAllFilters}
-          onSuccess={() => {
-            void refetchSchemaDetail();
-          }}
           isLoading={isFetchingSchemaDetail || isFetchingNextPageSchemaDetail}
           onScroll={handleScroll}
         />
