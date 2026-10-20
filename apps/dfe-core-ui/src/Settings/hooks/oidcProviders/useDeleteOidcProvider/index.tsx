@@ -20,6 +20,9 @@ export const useDeleteOidcProvider = ({
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.oidcProviders.default(),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.accounts.default(),
+      });
       onSuccess?.();
     },
     onError: (error) => {

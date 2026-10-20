@@ -27,7 +27,7 @@ export const useSyncAppRouting = ({
       }),
     onSuccess: (values) => {
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.apps.routingSync({ service, instance }),
+        queryKey: QUERY_KEYS.apps.routing({ service, instance }),
       });
       onSuccess?.(values);
     },

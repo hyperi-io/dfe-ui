@@ -39,6 +39,13 @@ export const useLinkAppFile = ({
         queryKey: QUERY_KEYS.apps.files({ service, instance, setName }),
       });
       queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.apps.file({
+          service,
+          instance,
+          setName,
+        }),
+      });
+      queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.apps.fileLinks({ service, instance, setName }),
       });
       onSuccess?.(values);
