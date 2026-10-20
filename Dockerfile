@@ -33,6 +33,8 @@ RUN corepack enable
 COPY package.json yarn.lock .yarnrc.yml turbo.json ./
 COPY apps/ apps/
 COPY packages/ packages/
+# The app's lint-rule tests import repo-root scripts, and `yarn build` type-checks them.
+COPY scripts/ scripts/
 
 # Every published arch's prebuilt packages, so the standalone trace carries each and app_tree keeps the target's.
 RUN yarn config set supportedArchitectures.cpu --json '["x64","arm64"]' \
