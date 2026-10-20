@@ -13,10 +13,10 @@ import {
   placeholderFor,
 } from './appConfig';
 
-export const OVERRIDE_LABEL = 'override';
-export const CHART_LABEL = 'set by the deployment';
-export const DEFAULT_LABEL = 'default';
-export const UNSET_LABEL = 'unset';
+const OVERRIDE_LABEL = 'override';
+const CHART_LABEL = 'set by the deployment';
+const DEFAULT_LABEL = 'default';
+const UNSET_LABEL = 'unset';
 
 const inputIdFor = (path: string) => `app-config-${path.replace(/\./g, '-')}`;
 

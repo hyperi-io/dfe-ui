@@ -10,7 +10,6 @@ import { useEffect } from 'react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   AddSchemaTable,
-  AT_LEAST_ONE_SCHEMA_ROW_MESSAGE,
   isBlankSchemaListRow,
   type AddSchemaTableProps,
   type RowSchema,
@@ -527,7 +526,9 @@ describe('AddSchemaTable', { timeout: 15_000 }, () => {
       errorFields: expect.arrayContaining([
         expect.objectContaining({
           name: ['columns'],
-          errors: expect.arrayContaining([AT_LEAST_ONE_SCHEMA_ROW_MESSAGE]),
+          errors: expect.arrayContaining([
+            'At least one schema column is required',
+          ]),
         }),
       ]),
     });

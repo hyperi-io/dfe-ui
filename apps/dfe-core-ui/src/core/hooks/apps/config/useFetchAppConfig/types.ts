@@ -12,7 +12,3 @@ export type TAppConfigResponse = DfeClientSuccessResponseBody<
 export type TAppConfigField = NonNullable<TAppConfigResponse['fields']>[number];
 
 export type TAppCustomEnv = NonNullable<TAppConfigResponse['custom']>[number];
-
-export type TAppUnknownField = NonNullable<
-  TAppConfigResponse['unknown']
->[number];

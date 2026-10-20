@@ -1,3 +1,4 @@
+/* import-scope-drift-disable */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Initialize ACE global before any ACE imports
 import ace from 'ace-builds/src-noconflict/ace';
@@ -31,3 +32,4 @@ if (typeof window !== 'undefined') {
 }
 
 export default ace;
+/* import-scope-drift-enable */

@@ -39,7 +39,7 @@ function hostOnPort(requestHost: string, port: string): string | undefined {
   return /^[a-z0-9.-]+$/i.test(hostname) ? `${hostname}:${port}` : undefined;
 }
 
-export type TCspSources = {
+type TCspSources = {
   /** Origins fetch and XHR may reach beyond this one. */
   connect: string[];
   /** Origins the console may frame. */

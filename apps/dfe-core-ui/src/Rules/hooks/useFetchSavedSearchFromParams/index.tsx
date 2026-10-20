@@ -3,7 +3,7 @@
 import {
   RuleFromSearchDb,
   type RuleFromSearchType,
-} from '@/core/config/indexedDB';
+} from '@/Rules/config/indexedDB';
 import { notification } from 'antd';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';

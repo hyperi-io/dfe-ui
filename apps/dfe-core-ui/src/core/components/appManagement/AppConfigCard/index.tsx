@@ -25,8 +25,8 @@ import {
   TFieldError,
 } from './appConfig';
 
-export const NO_CONTRACT_TITLE = 'No options are declared for this app';
-export const NO_CONTRACT_BODY =
+const NO_CONTRACT_TITLE = 'No options are declared for this app';
+const NO_CONTRACT_BODY =
   'This deployment ships no list of options for the app, so there is nothing to show.';
 
 /**

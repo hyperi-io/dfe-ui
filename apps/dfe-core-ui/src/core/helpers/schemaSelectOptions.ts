@@ -2,7 +2,7 @@ import { TCreateSchemaResponse } from '@/core/hooks/useCreateSchema/types';
 import { TSchemaSummary } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import type { SelectProps } from 'antd';
 
-export type SchemaSelectOption = NonNullable<SelectProps['options']>[number];
+type SchemaSelectOption = NonNullable<SelectProps['options']>[number];
 
 type TreeBuilderNode = {
   subfolders: Map<string, TreeBuilderNode>;

@@ -32,7 +32,7 @@ const DIRECTORY_FIELD_USERS = {
   tenant_id_env: ['entra_id:api', 'entra_id:token_claim'],
 } as const satisfies Record<string, readonly TTypeMode[]>;
 
-export type TDirectoryField = keyof typeof DIRECTORY_FIELD_USERS;
+type TDirectoryField = keyof typeof DIRECTORY_FIELD_USERS;
 type TDirectoryTextField = Exclude<TDirectoryField, 'enrich_on_login'>;
 
 const DIRECTORY_TEXT_FIELDS = Object.keys(DIRECTORY_FIELD_USERS).filter(
@@ -45,15 +45,14 @@ const MODE_SETTING_USERS = {
   sync_interval: ['api'],
 } as const satisfies Record<string, readonly TGroupMode[]>;
 
-export type TModeSetting = keyof typeof MODE_SETTING_USERS;
+type TModeSetting = keyof typeof MODE_SETTING_USERS;
 
-export const PROVIDER_TYPE_LABELS: Readonly<Record<TOidcProviderType, string>> =
-  {
-    entra_id: 'Entra ID',
-    generic: 'custom OIDC',
-    google: 'Google',
-    okta: 'Okta',
-  };
+const PROVIDER_TYPE_LABELS: Readonly<Record<TOidcProviderType, string>> = {
+  entra_id: 'Entra ID',
+  generic: 'custom OIDC',
+  google: 'Google',
+  okta: 'Okta',
+};
 
 export const isOidcProviderType = (
   value: unknown,
@@ -134,7 +133,7 @@ export interface TStoredSecretPaths {
   groups?: { api_token_path?: string; client_secret_path?: string };
 }
 
-export interface TProviderValues {
+interface TProviderValues {
   type: TOidcProviderType;
   client_id?: string;
   client_id_env?: string;
@@ -143,7 +142,7 @@ export interface TProviderValues {
   groups?: TGroupsValues;
 }
 
-export interface TFieldProblem {
+interface TFieldProblem {
   path: string[];
   message: string;
 }

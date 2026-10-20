@@ -13,7 +13,3 @@ export type TDryRunAppFileRequest = DfeClientRequestBody<
 export type TDryRunAppFileResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof appFileDryRunPath, 'post'>
 >;
-
-export type TDryRunEvent = NonNullable<
-  TDryRunAppFileResponse['events']
->[number];

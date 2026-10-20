@@ -9,7 +9,7 @@ export type TFieldMapListResponse = DfeClientSuccessResponseBody<
 >;
 
 export type TFieldMapSummary = TFieldMapListResponse['items'][number];
-export interface FieldMapListRequestParams {
+interface FieldMapListRequestParams {
   search?: string;
   standard?: string;
   sort_by?: string;

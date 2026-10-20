@@ -1,11 +1,11 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
-import { usePreventNavigate } from '@/core/hooks/usePreventNavigate';
 import {
   CreateApiKeyForm,
   CreateApiKeyFormSchema,
 } from '@/Settings/components/ApiKeyManagement/CreateApiKeyForm';
 import { TApiKeyCreateResponse } from '@/Settings/hooks/apiKeys/useCreateApiKey/types';
+import { usePreventNavigate } from '@/Settings/hooks/usePreventNavigate';
 import { IconCopy } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useCallback, useState } from 'react';

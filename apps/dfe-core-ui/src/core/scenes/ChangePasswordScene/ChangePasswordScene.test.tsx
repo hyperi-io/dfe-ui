@@ -17,11 +17,7 @@ import {
   test,
   vi,
 } from 'vitest';
-import {
-  pendingReviewStorageKey,
-  readPendingReview,
-  savePendingReview,
-} from './pendingReviewStorage';
+import { readPendingReview, savePendingReview } from './pendingReviewStorage';
 
 const { replace } = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -302,7 +298,7 @@ describe('ChangePasswordScene', () => {
     await submit();
 
     expect(await screen.findByText(commandBlock)).toBeInTheDocument();
-    const stored = window.localStorage.getItem(pendingReviewStorageKey(ADMIN));
+    const stored = window.localStorage.getItem('dfe_pending_review:admin');
     expect(stored).not.toContain(NEW_PASSWORD);
     expect(readPendingReview(ADMIN)).toEqual({
       pr_url: null,

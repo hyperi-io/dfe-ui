@@ -1,11 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppMetricsApi } from './api';
-
-export const APP_METRICS_QUERY_KEY = (service: string, instance: string) => [
-  'app-metrics',
-  service,
-  instance,
-];
 
 /**
  * Throughput, CPU, memory and saturation for the instance.
@@ -23,7 +18,7 @@ export const useFetchAppMetrics = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APP_METRICS_QUERY_KEY(service, instance),
+    queryKey: QUERY_KEYS.apps.metrics({ service, instance }),
     queryFn: () => fetchAppMetricsApi({ pathParams: { service, instance } }),
     enabled: !!service && !!instance && queryEnabled,
     retry: false,

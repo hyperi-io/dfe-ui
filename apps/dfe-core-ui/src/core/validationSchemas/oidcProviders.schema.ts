@@ -21,7 +21,7 @@ const envVarName = () =>
     })
     .default('');
 
-export const groupResolutionRequestSchema = z.object({
+const groupResolutionRequestSchema = z.object({
   mode: z.enum(['manual', 'token_claim', 'api']),
   claim_name: z.string().default('groups'),
   sync_interval: z
@@ -52,7 +52,7 @@ export type TGroupResolutionFormData = z.infer<
   typeof groupResolutionRequestSchema
 >;
 
-export const DEFAULT_GROUP_RESOLUTION: TGroupResolutionFormData = {
+const DEFAULT_GROUP_RESOLUTION: TGroupResolutionFormData = {
   mode: 'manual',
   claim_name: 'groups',
   sync_interval: 3600,
@@ -116,8 +116,6 @@ export const buildOidcProviderSchema = (stored: TStoredSecretPaths = {}) =>
       });
     }
   });
-
-export const createUpdateOidcProviderSchema = buildOidcProviderSchema();
 
 export type CreateUpdateOidcProviderFormData = z.infer<
   typeof oidcProviderShape

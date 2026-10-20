@@ -10,7 +10,7 @@ export const NAME_RULE_TEST_TIMEOUT_MS = 60_000;
  * message takes about 0.55s to leave (antd's 500ms motion deadline), so the 1s
  * findBy default leaves under half a second of slack.
  */
-export const NAME_RULE_BACKSTOP_MS = 15_000;
+const NAME_RULE_BACKSTOP_MS = 15_000;
 
 /**
  * Drives one name input through values the engine accepts and values it

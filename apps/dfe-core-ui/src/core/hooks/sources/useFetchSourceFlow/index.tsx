@@ -1,11 +1,7 @@
 import { ApiError } from '@/core/config/api/client';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSourceFlowApi } from './api';
-
-export const SOURCE_FLOW_QUERY_KEY = (source: string) => [
-  'source-flow',
-  source,
-];
 
 /**
  * The stages a source's records travel, resolved against this deployment.
@@ -25,7 +21,7 @@ export const useFetchSourceFlow = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SOURCE_FLOW_QUERY_KEY(source ?? ''),
+    queryKey: QUERY_KEYS.sources.sourceFlow({ name: source }),
     queryFn: () => fetchSourceFlowApi({ pathParams: { name: source ?? '' } }),
     enabled: !!source && queryEnabled,
     // A refusal is a stable property of the source and the deployment, so

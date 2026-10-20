@@ -1,8 +1,8 @@
 'use client';
 
+import { AppHistoryCard } from '@/Apps/components/AppHistoryCard';
 import { BackingServices } from '@/Apps/components/BackingServices';
 import { AppConfigCard } from '@/core/components/appManagement/AppConfigCard';
-import { AppHistoryCard } from '@/core/components/appManagement/AppHistoryCard';
 import { AppOperationalCard } from '@/core/components/appManagement/AppOperationalCard';
 import { ScalingCard } from '@/core/components/appManagement/ScalingCard';
 import { MainContentCard } from '@/core/components/ContentCard';

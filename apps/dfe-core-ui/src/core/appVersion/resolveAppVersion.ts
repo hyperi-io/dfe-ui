@@ -17,6 +17,7 @@ function versionFromFile(root: string): string | undefined {
   }
 }
 
+/* import-scope-drift-disable - (exported for tests) */
 /**
  * Prefer the VERSION file hyperi-ci stamps at release. Env is a local
  * fallback when the stamp is not on disk.
@@ -34,7 +35,9 @@ export function resolveAppVersion({
     usable(env.NEXT_PUBLIC_APP_VERSION)
   );
 }
+/* import-scope-drift-enable */
 
+/* import-scope-drift-disable - (exported for tests) */
 /**
  * The `env` block next.config hands Next to inline. Always defines the key so
  * consumers compile to a literal; '' means nothing was stamped.
@@ -45,3 +48,4 @@ export function appVersionEnv(options: {
 }): { NEXT_PUBLIC_APP_VERSION: string } {
   return { NEXT_PUBLIC_APP_VERSION: resolveAppVersion(options) ?? '' };
 }
+/* import-scope-drift-enable */

@@ -9,7 +9,7 @@ const LOGIN_NOTICES = {
   },
 } as const;
 
-export type TLoginNotice = keyof typeof LOGIN_NOTICES;
+type TLoginNotice = keyof typeof LOGIN_NOTICES;
 
 /** The login page, showing one notice. */
 export const loginWithNotice = (notice: TLoginNotice): string =>

@@ -1,7 +1,7 @@
 import type { AliasToken } from 'antd/es/theme/internal';
 
 // Base color palette
-export const brand = {
+const brand = {
   primary: '#000647', // Deep Navy Blue
   secondary: '#10398f', // Medium Blue
   tertiary: '#2ea4f6', // Light Blue
@@ -9,13 +9,13 @@ export const brand = {
 } as const;
 
 // Gradients
-export const gradient = {
+const gradient = {
   primary: `linear-gradient(90deg, ${brand.tertiary} 0%, ${brand.success} 100%)`,
   diagonal: `linear-gradient(135deg, ${brand.tertiary} 0%, ${brand.success} 100%)`,
 } as const;
 
 // Semantic Colors
-export const semantic = {
+const semantic = {
   success: brand.success,
   warning: '#faad14',
   error: '#ff4d4f',
@@ -23,7 +23,7 @@ export const semantic = {
 } as const;
 
 // Neutral Colors
-export const neutral = {
+const neutral = {
   0: '#ffffff', // Pure white
   50: '#fafafa', // Background alt
   100: '#f5f5f5', // Background
@@ -37,14 +37,8 @@ export const neutral = {
   900: '#000000', // Pure black
 } as const;
 
-// from Figma
-export const figmaColors = {
-  light_grey: '#F1F2F2', // Light Grey
-  dark_blue: '#000647', // Dark Blue
-} as const;
-
 // Functional Colors
-export const functional = {
+const functional = {
   link: brand.tertiary,
   linkHover: brand.secondary,
   selection: '#e6f4ff',
@@ -52,7 +46,7 @@ export const functional = {
 } as const;
 
 // Alpha colors for overlays and shadows
-export const alpha = {
+const alpha = {
   black: {
     5: 'rgba(0, 0, 0, 0.05)',
     10: 'rgba(0, 0, 0, 0.1)',
@@ -130,5 +124,3 @@ export const colors = {
   alpha,
   ant: antTokens,
 } as const;
-
-export type Colors = typeof colors;

@@ -1,6 +1,6 @@
 import { TCreateOidcProviderResponse } from '@/core/hooks/useCreateOidcProvider/types';
-import { TOidcProviderDetailResponse } from '@/core/hooks/useFetchOidcProviderDetail/types';
 import { TTestOidcProviderResponse } from '@/core/hooks/useTestOidcProvider/types';
+import { TOidcProviderUpdateResponse } from '@/core/hooks/useUpdateOidcProvider/types';
 import { TVerifyOidcLoginResponse } from '@/core/hooks/useVerifyOidcLogin/types';
 import { TListOidcProvidersResponse } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { TSyncOidcProviderGroupsResponse } from '@/Settings/hooks/oidcProviders/useSyncOidcProviderGroups/types';
@@ -133,66 +133,8 @@ export const oidcProviders = {
   provider: {
     mockedUrl: '/api/v1/auth/oidc-providers/{name}',
     get: {
-      success: ({
-        mockedResponse = {
-          name: 'name',
-          type: 'type',
-          enabled: true,
-          display_name: 'display_name',
-          issuer: 'issuer',
-          client_id_env: 'client_id_env',
-          client_secret_env: 'client_secret_env',
-          created_at: 'created_at',
-          last_sync_at: 'last_sync_at',
-          last_sync_status: 'last_sync_status',
-          sync_error: 'sync_error',
-          client_id: 'client_id',
-          client_secret_path: 'client_secret_path',
-          scopes: ['openid', 'email', 'profile'],
-          groups: {
-            mode: 'mode',
-            claim_name: 'claim_name',
-            sync_interval: 1,
-            enrich_on_login: true,
-            service_account_json_env: 'service_account_json_env',
-            domain: 'domain',
-            tenant_id_env: 'tenant_id_env',
-            client_secret_env: 'client_secret_env',
-            api_token_env: 'api_token_env',
-            okta_domain: 'okta_domain',
-            service_account_json_path: 'service_account_json_path',
-            client_secret_path: 'client_secret_path',
-            api_token_path: 'api_token_path',
-            tenant_id: 'tenant_id',
-          },
-        },
-        name = 'name',
-      }: {
-        mockedResponse?: TOidcProviderDetailResponse;
-        name?: string;
-      } = {}) => {
-        return http.get(
-          oidcProviders.provider.mockedUrl.replace('{name}', name),
-          () => {
-            return HttpResponse.json(mockedResponse);
-          },
-        );
-      },
-      error: ({
-        mockedResponse = DEFAULT_VALIDATION_ERROR,
-        status = 422,
-        name = 'name',
-      }: {
-        mockedResponse?: TValidationError;
-        status?: number;
-        name?: string;
-      } = {}) => {
-        return http.get(
-          oidcProviders.provider.mockedUrl.replace('{name}', name),
-          () => {
-            return HttpResponse.json(mockedResponse, { status });
-          },
-        );
+      success: () => {
+        return console.error('Not implemented');
       },
     },
     put: {
@@ -231,7 +173,7 @@ export const oidcProviders = {
         },
         name = 'name',
       }: {
-        mockedResponse?: TOidcProviderDetailResponse;
+        mockedResponse?: TOidcProviderUpdateResponse;
         name?: string;
       } = {}) => {
         return http.put(

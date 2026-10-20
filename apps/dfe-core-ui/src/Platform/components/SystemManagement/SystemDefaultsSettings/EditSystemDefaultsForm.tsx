@@ -1,8 +1,8 @@
 import { CommonHeaderSelect } from '@/core/components/CommonHeaderSelect';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
-import { SourceEngineSelect } from '@/core/components/SourceEngineSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { SourceEngineSelect } from '@/Platform/components/SourceEngineSelect';
 import { useUpdateSystemDefaults } from '@/Platform/hooks/system/useUpdateDefaults';
 import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { App, Button, InputNumber, Select } from 'antd';

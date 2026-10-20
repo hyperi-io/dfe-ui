@@ -11,7 +11,7 @@ export type TPendingReview = NonNullable<
 
 const KEY_PREFIX = 'dfe_pending_review:';
 
-export const pendingReviewStorageKey = (username: string) =>
+const pendingReviewStorageKey = (username: string) =>
   `${KEY_PREFIX}${username}`;
 
 const nonEmpty = (value: unknown): string | null =>

@@ -1,7 +1,9 @@
 import { getApiErrorResponseBody } from '@/core/config/api/client';
 
+/* import-scope-drift-disable - (exported for tests) */
 /** The engine's code for an organisation ID a hunt still reads for another organisation. */
 export const TENANT_ID_HELD_CODE = 'tenant_id_held';
+/* import-scope-drift-enable */
 
 export const ORG_IDS_FIELD = 'org_ids';
 

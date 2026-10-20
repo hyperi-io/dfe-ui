@@ -1,7 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSetupStatus } from './api';
-
-export const QUERY_KEY_SETUP_STATUS = () => ['setup-status'];
 
 export const useFetchSetupStatus = ({
   queryEnabled = true,
@@ -15,7 +14,7 @@ export const useFetchSetupStatus = ({
     | undefined;
 } = {}) => {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEY_SETUP_STATUS(),
+    queryKey: QUERY_KEYS.auth.setupStatus(),
     queryFn: () => fetchSetupStatus(),
     enabled: queryEnabled,
     refetchInterval,

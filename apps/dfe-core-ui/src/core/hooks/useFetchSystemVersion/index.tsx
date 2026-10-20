@@ -1,11 +1,10 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSystemVersionApi } from './api';
 
-export const SYSTEM_VERSION_QUERY_KEY = () => ['systemVersion'];
-
 export const useFetchSystemVersion = () => {
   const { data, isLoading, error } = useQuery({
-    queryKey: SYSTEM_VERSION_QUERY_KEY(),
+    queryKey: QUERY_KEYS.system.version(),
     queryFn: () => fetchSystemVersionApi(),
   });
 

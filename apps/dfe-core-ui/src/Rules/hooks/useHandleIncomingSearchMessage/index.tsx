@@ -3,7 +3,7 @@
 import {
   RuleFromSearchDb,
   type RuleFromSearchType,
-} from '@/core/config/indexedDB';
+} from '@/Rules/config/indexedDB';
 import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';

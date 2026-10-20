@@ -6,7 +6,7 @@ export const DB_NAME_VALIDATOR = {
 };
 
 /** The longest account, group, API key, role, rule or hunt name the engine takes (openapi.json maxLength). */
-export const MAX_NAME_LENGTH = 128;
+const MAX_NAME_LENGTH = 128;
 
 const COPY_SUFFIX = '_copy';
 

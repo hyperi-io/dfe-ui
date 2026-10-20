@@ -1,3 +1,4 @@
+/* import-scope-drift-disable - (exported for tests) */
 import { screen, waitFor } from '@testing-library/react';
 import { expect } from 'vitest';
 
@@ -8,3 +9,4 @@ export const expectFieldError = async (label: string, message: string) => {
   expect(item).not.toHaveClass('ant-form-item-hidden');
   await waitFor(() => expect(item).toHaveTextContent(message));
 };
+/* import-scope-drift-enable */

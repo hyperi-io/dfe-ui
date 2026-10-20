@@ -1,9 +1,9 @@
 'use client';
 
-import { FlowArrow, FlowStage } from '@/core/components/flow/FlowStage';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow';
+import { FlowArrow, FlowStage } from '@/Sources/components/FlowStage';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { Fragment } from 'react';

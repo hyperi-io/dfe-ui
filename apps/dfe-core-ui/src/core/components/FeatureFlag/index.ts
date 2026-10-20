@@ -1,5 +1,6 @@
-import type { ComponentType } from 'react';
+/* import-scope-drift-disable - (persist feature for future use) */
 import dynamic from 'next/dynamic';
+import type { ComponentType } from 'react';
 import type { FeatureFlagProps } from './FeatureFlag';
 import { Off } from './Off';
 import { On } from './On';
@@ -22,3 +23,4 @@ export const FeatureFlag: FeatureFlagCompound = Object.assign(FeatureFlagRoot, {
 });
 
 export { Off, On };
+/* import-scope-drift-enable */

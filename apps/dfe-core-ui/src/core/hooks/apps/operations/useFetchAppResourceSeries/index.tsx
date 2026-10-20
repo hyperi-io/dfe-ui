@@ -1,16 +1,6 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAppResourceSeriesApi } from './api';
-
-export const APP_RESOURCE_SERIES_QUERY_KEY = (
-  service: string,
-  instance: string,
-  windowSeconds?: number,
-) => [
-  'app-resource-series',
-  service,
-  instance,
-  ...(windowSeconds ? [String(windowSeconds)] : []),
-];
 
 /**
  * CPU and memory per time bucket, aggregated across every pod of the instance.
@@ -32,7 +22,11 @@ export const useFetchAppResourceSeries = ({
   queryEnabled?: boolean;
 }) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: APP_RESOURCE_SERIES_QUERY_KEY(service, instance, windowSeconds),
+    queryKey: QUERY_KEYS.apps.metricsSeries({
+      service,
+      instance,
+      windowSeconds,
+    }),
     queryFn: () =>
       fetchAppResourceSeriesApi({
         pathParams: { service, instance },

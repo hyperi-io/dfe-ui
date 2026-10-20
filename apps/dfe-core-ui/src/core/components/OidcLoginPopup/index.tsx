@@ -13,6 +13,7 @@ import { navigateWithReload } from '@/core/utils/navigation';
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
 
+/* import-scope-drift-disable - (exported for tests) */
 /** The console page the engine callback returns to; absolute, so it works split-origin too. */
 export const oidcReturnUrl = (
   origin: string,
@@ -25,6 +26,7 @@ export const oidcReturnUrl = (
   });
   return `${origin}${OIDC_CONSOLE_CALLBACK_PATH}?${query}`;
 };
+/* import-scope-drift-enable */
 
 export const OidcLoginPopup = ({
   closePopup,

@@ -29,7 +29,7 @@ export const toScopeList = (scopes: TScopes): string[] =>
  * the engine refuses one, and a list equal to `current` is omitted so a save
  * never pins the provider type's default scopes.
  */
-export const toScopesRequest = (
+const toScopesRequest = (
   scopes: TScopes,
   current?: TScopes,
 ): { scopes?: string[] } => {
@@ -53,7 +53,7 @@ export const toCreateOidcProviderBody = ({
 type TGroupsRequest = NonNullable<TOidcProviderUpdateRequestBody['groups']>;
 
 /** A saved provider as the provider list, the setup status or a create response carries it. */
-export interface TStoredOidcProvider {
+interface TStoredOidcProvider {
   type: string;
   scopes?: TScopes;
   client_id?: string;
@@ -78,7 +78,7 @@ export interface TStoredOidcProvider {
 }
 
 /** The form submits only the fields it rendered, so any of them may be absent. */
-export type TUpdateOidcProviderFormValues = Partial<
+type TUpdateOidcProviderFormValues = Partial<
   Omit<CreateUpdateOidcProviderFormData, 'groups'>
 > & {
   groups?: Partial<TGroupResolutionFormData>;

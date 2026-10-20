@@ -9,6 +9,3 @@ import { sourceFlowPath } from './api';
 export type TSourceFlow = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof sourceFlowPath, 'get'>
 >;
-
-export type TSourceFlowTransform = TSourceFlow['transform'];
-export type TSourceFlowOutputs = TSourceFlow['outputs'];

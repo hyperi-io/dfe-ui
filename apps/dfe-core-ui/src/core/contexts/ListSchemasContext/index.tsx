@@ -81,7 +81,7 @@ const hasSearchFilters = (f: ListSchemasQueryParams) => f.search !== undefined;
 const hasAnyFilters = (f: ListSchemasQueryParams) =>
   hasSearchFilters(f) || hasSortFilters(f);
 
-export interface ListSchemasContextValue {
+interface ListSchemasContextValue {
   data: TSchemaListResponse;
   filters: UseFetchInfiniteFilteredSchemasProps;
   hasFilters: boolean;
@@ -119,7 +119,7 @@ const DEFAULT_SCHEMA_LIST_RESPONSE: TSchemaListResponse = {
 
 const ListSchemasContext = createContext<ListSchemasContextValue | null>(null);
 
-export interface ListSchemasProviderProps {
+interface ListSchemasProviderProps {
   children: ReactNode;
   defaultFilters?: UseFetchInfiniteFilteredSchemasProps;
   schemaTypes: string[];

@@ -9,7 +9,7 @@ export type TRuleListResponse = DfeClientSuccessResponseBody<
 >;
 export type TRuleListItem = TRuleListResponse['items'][number];
 
-export interface RuleListRequestParams {
+interface RuleListRequestParams {
   search?: string;
   severity?: string;
   source?: string;

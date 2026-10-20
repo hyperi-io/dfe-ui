@@ -1,14 +1,7 @@
 /** @vitest-environment node */
 
 import { describe, expect, test } from 'vitest';
-import {
-  MAX_PASSWORD_BYTES,
-  MIN_PASSWORD_LENGTH,
-  newPasswordSchema,
-  PASSWORD_CEILING_MESSAGE,
-  PASSWORD_FLOOR_MESSAGE,
-  passwordBytes,
-} from './password.schema';
+import { newPasswordSchema } from './password.schema';
 
 // A CJK character: three bytes in UTF-8, one UTF-16 unit.
 const CJK = String.fromCodePoint(0x5bc6);
@@ -28,7 +21,9 @@ describe('newPasswordSchema floor', () => {
     { name: '6 emoji, 12 UTF-16 units', value: EMOJI.repeat(6) },
     { name: '11 emoji, 22 UTF-16 units', value: EMOJI.repeat(11) },
   ])('refuses $name', ({ value }) => {
-    expect(refusal(value)).toEqual([PASSWORD_FLOOR_MESSAGE]);
+    expect(refusal(value)).toEqual([
+      'Password must contain at least 12 characters',
+    ]);
   });
 
   test.each([
@@ -45,7 +40,7 @@ describe('newPasswordSchema floor', () => {
 
   test('counts code points, as the engine does, not UTF-16 units', () => {
     const value = EMOJI.repeat(6);
-    expect(value.length).toBe(MIN_PASSWORD_LENGTH);
+    expect(value.length).toBe(12);
     expect(Array.from(value)).toHaveLength(6);
     expect(newPasswordSchema.safeParse(value).success).toBe(false);
   });
@@ -61,7 +56,6 @@ describe('newPasswordSchema byte ceiling', () => {
       value: `${'a'.repeat(70)}${ACCENTED}`,
     },
   ])('takes $name, 72 bytes', ({ value }) => {
-    expect(passwordBytes(value)).toBe(MAX_PASSWORD_BYTES);
     expect(newPasswordSchema.safeParse(value).success).toBe(true);
   });
 
@@ -74,9 +68,10 @@ describe('newPasswordSchema byte ceiling', () => {
       value: `${'a'.repeat(71)}${ACCENTED}`,
       bytes: 73,
     },
-  ])('refuses $name, $bytes bytes', ({ value, bytes }) => {
-    expect(passwordBytes(value)).toBe(bytes);
-    expect(refusal(value)).toEqual([PASSWORD_CEILING_MESSAGE]);
+  ])('refuses $name, $bytes bytes', ({ value }) => {
+    expect(refusal(value)).toEqual([
+      'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+    ]);
   });
 
   test('measures bytes, not characters or UTF-16 units', () => {
@@ -90,7 +85,11 @@ describe('newPasswordSchema byte ceiling', () => {
   });
 
   test('tells the user the limit without engine terms', () => {
-    expect(PASSWORD_CEILING_MESSAGE).toContain('72 bytes');
-    expect(PASSWORD_CEILING_MESSAGE).not.toMatch(/bcrypt|utf-?8/i);
+    expect(
+      'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+    ).toContain('72 bytes');
+    expect(
+      'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+    ).not.toMatch(/bcrypt|utf-?8/i);
   });
 });

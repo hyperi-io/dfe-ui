@@ -15,6 +15,7 @@ export const isSetupWizardStep = (value: string): value is TSetupWizardStep =>
 type TPendingSteps =
   TFetchSetupStatusResponse['initial_setup']['pending_steps'];
 
+/* import-scope-drift-disable - (exported for tests) */
 // The cases are the engine's own step ids (state_machines/setup.py::STEP_*), so
 // a rename there has to be mirrored here.
 export const getSetupWizardStepFromStateStep = (
@@ -29,6 +30,7 @@ export const getSetupWizardStepFromStateStep = (
       return 'welcome';
   }
 };
+/* import-scope-drift-enable */
 
 // Welcome's Next target. A step id this build does not know maps to welcome, so
 // it falls back to the screen after welcome rather than looping on it.

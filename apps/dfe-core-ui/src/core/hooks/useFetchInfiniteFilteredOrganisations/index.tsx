@@ -1,22 +1,9 @@
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { fetchOrganisations } from './api';
 import { UseFetchInfiniteFilteredOrganisationsProps } from './types';
 
-export const ORGANISATIONS_QUERY_KEY = (
-  search?: string,
-  sort_by?: 'name' | 'display_name' | 'updated_at',
-  sort_order?: 'asc' | 'desc',
-  page?: number,
-  per_page?: number,
-) => [
-  'organisations',
-  ...(search ? [search] : []),
-  ...(sort_by ? [sort_by] : []),
-  ...(sort_order ? [sort_order] : []),
-  ...(page ? [page] : []),
-  ...(per_page ? [per_page] : []),
-];
 /** useFetchInfiniteFilteredOrganisations props */
 /**
  * @param search - The search query to filter the organisations by name and display_name.
@@ -43,7 +30,12 @@ export const useFetchInfiniteFilteredOrganisations = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ORGANISATIONS_QUERY_KEY(search, sort_by, sort_order, per_page),
+    queryKey: QUERY_KEYS.orgs.default({
+      search,
+      sort_by,
+      sort_order,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       fetchOrganisations({
         queryParams: { search, sort_by, sort_order, page: pageParam, per_page },
