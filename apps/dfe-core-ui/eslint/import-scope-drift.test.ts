@@ -6,10 +6,7 @@ import path from 'node:path';
 import { ESLint } from 'eslint';
 import { describe, expect, test } from 'vitest';
 import { APP_ROOT, moves } from '../../../scripts/import-scope-drift.mjs';
-import {
-  importScopeDriftOverrides,
-  RULE_ID,
-} from './import-scope-drift.mjs';
+import { importScopeDriftOverrides, RULE_ID } from './import-scope-drift.mjs';
 
 const createLinter = async () =>
   new ESLint({
