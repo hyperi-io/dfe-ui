@@ -486,7 +486,26 @@ const isTestOnlyServerMock = (record) => {
   return true;
 };
 
+/**
+ * @typedef {object} DriftMove
+ * @property {string} name
+ * @property {string} kind
+ * @property {string} file
+ * @property {string} scope
+ * @property {string[]} importers
+ */
+
+/**
+ * @typedef {object} DriftUnused
+ * @property {string} name
+ * @property {string} kind
+ * @property {string} file
+ * @property {boolean} testsOnly
+ */
+
+/** @type {DriftMove[]} */
 const moves = [];
+/** @type {DriftUnused[]} */
 const unused = [];
 
 for (const record of symbols.values()) {
