@@ -8,6 +8,9 @@
  * core, or by two or more of those directories, stays: core is the shared
  * kernel, and core is not allowed to import a feature scope.
  *
+ * A hook, its types, and its api live in one directory and stay together. If
+ * any export in that directory is used by core, none of the others are drift.
+ *
  * Co-located core tests and mocks do not count as core usage, or every
  * component would look used by core. Feature tests do count as that feature
  * using the symbol. Storybook files (`*.stories.ts` and `*.stories.tsx`) are
@@ -473,6 +476,19 @@ const rel = (file) => path.relative(APP_ROOT, file);
 const featureScopes = (record) =>
   [...record.byScope.keys()].filter((scope) => !NOT_A_FEATURE.has(scope));
 
+/**
+ * Directories where core already uses an export. The hook, types, and api in
+ * that directory stay put, so a sibling the features also import is not drift.
+ */
+const coreAnchoredDirs = new Set();
+for (const record of symbols.values()) {
+  if (record.ignored || !record.byScope.has('core')) continue;
+  coreAnchoredDirs.add(path.dirname(record.file));
+}
+
+const staysWithCoreSibling = (record) =>
+  coreAnchoredDirs.has(path.dirname(record.file));
+
 /** MSW `server` from a mocks module, reached only by tests. */
 const isTestOnlyServerMock = (record) => {
   if (record.name !== 'server' || !/\.mocks\.(ts|tsx)$/.test(record.file)) {
@@ -512,7 +528,7 @@ for (const record of symbols.values()) {
   if (record.ignored || isTestOnlyServerMock(record)) continue;
   const features = featureScopes(record);
   const usedByCore = record.byScope.has('core');
-  if (!usedByCore && features.length === 1) {
+  if (!usedByCore && features.length === 1 && !staysWithCoreSibling(record)) {
     const scope = features[0];
     moves.push({
       name: record.name,
