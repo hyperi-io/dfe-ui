@@ -5,7 +5,6 @@ import {
   expectNameRule,
   NAME_RULE_TEST_TIMEOUT_MS,
 } from '@/core/utils/test-utils/expectNameRule';
-import { PASSWORD_CEILING_MESSAGE } from '@/core/validationSchemas/password.schema';
 import { STORE_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -109,7 +108,9 @@ describe('CreateAccountForm password length', () => {
     await submit(SEVENTY_THREE_BYTES);
 
     expect(
-      await screen.findByText(PASSWORD_CEILING_MESSAGE),
+      await screen.findByText(
+        'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+      ),
     ).toBeInTheDocument();
     expect(sent).toEqual([]);
   });

@@ -1,6 +1,6 @@
 import {
   defaultGroupResolution,
-  DEFAULT_GROUP_RESOLUTION,
+  TGroupResolutionFormData,
 } from '@/core/validationSchemas/oidcProviders.schema';
 import { describe, expect, test } from 'vitest';
 import {
@@ -14,6 +14,22 @@ import {
 } from './oidcProviderFieldRules';
 
 const TYPES: TOidcProviderType[] = ['google', 'entra_id', 'okta', 'generic'];
+const DEFAULT_GROUP_RESOLUTION: TGroupResolutionFormData = {
+  mode: 'manual',
+  claim_name: 'groups',
+  sync_interval: 3600,
+  service_account_json_env: '',
+  enrich_on_login: false,
+  domain: '',
+  tenant_id_env: '',
+  client_secret_env: '',
+  api_token_env: '',
+  okta_domain: '',
+  service_account_json: '',
+  client_secret: '',
+  api_token: '',
+  tenant_id: '',
+};
 
 const groups = (overrides: Partial<typeof DEFAULT_GROUP_RESOLUTION>) => ({
   ...DEFAULT_GROUP_RESOLUTION,

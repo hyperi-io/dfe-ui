@@ -1,6 +1,5 @@
 import { ApiError } from '@/core/config/api/client';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { PASSWORD_CEILING_MESSAGE } from '@/core/validationSchemas/password.schema';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
@@ -38,11 +37,15 @@ describe('ResetPasswordForm', () => {
     await user.paste(SEVENTY_THREE_BYTES);
     await user.click(screen.getByRole('button', { name: 'Reset Password' }));
 
-    expect(await screen.findAllByText(PASSWORD_CEILING_MESSAGE)).toHaveLength(
-      2,
-    );
+    expect(
+      await screen.findAllByText(
+        'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+      ),
+    ).toHaveLength(2);
     expect(newPassword).toHaveAttribute('aria-invalid', 'true');
-    expect(newPassword).toHaveAccessibleDescription(PASSWORD_CEILING_MESSAGE);
+    expect(newPassword).toHaveAccessibleDescription(
+      'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
+    );
     expect(onFinish).not.toHaveBeenCalled();
   });
 
