@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.26](https://github.com/hyperi-io/dfe-ui/compare/v1.7.25...v1.7.26) (2026-10-21)
+
+### Bug Fixes
+
+* run audit and broad bug fixes ([#584](https://github.com/hyperi-io/dfe-ui/issues/584)) ([dd4bdc9](https://github.com/hyperi-io/dfe-ui/commit/dd4bdc916d7863a5f90ad8f027d34acb9f1ed01b))
+
 ## [1.7.25](https://github.com/hyperi-io/dfe-ui/compare/v1.7.24...v1.7.25) (2026-10-20)
 
 ### Bug Fixes
