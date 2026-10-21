@@ -5,6 +5,7 @@ import { IconExclamationCircle as ExclamationCircleOutlined } from '@repo/dfe-ic
 interface GenericErrorProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   description?: string;
+  action?: React.ReactNode;
 }
 
 export const GenericErrorPage = ({
@@ -12,6 +13,7 @@ export const GenericErrorPage = ({
   className,
   title = 'An unexpected error occurred',
   description = 'Please try again later or contact support if the problem persists.',
+  action
 }: GenericErrorProps) => {
   return (
     <div
@@ -34,6 +36,8 @@ export const GenericErrorPage = ({
         {description && <p className="text-sm text-gray-500">{description}</p>}
 
         {children}
+
+        {action}
       </div>
     </div>
   );
