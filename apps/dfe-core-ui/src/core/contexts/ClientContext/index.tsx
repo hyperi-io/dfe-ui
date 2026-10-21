@@ -1,9 +1,9 @@
 'use client';
 
-import '@/core/config/zodJitless';
 import { AuthSessionMonitor } from '@/core/components/AuthSessionMonitor';
 import { AuthStoreSync } from '@/core/components/AuthStoreSync';
 import { SessionAuthBridge } from '@/core/components/SessionAuthBridge';
+import '@/core/config/zodJitless';
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
@@ -11,12 +11,22 @@ import { CompatibleStyleWrapper } from './CompatibleStyleWrapper';
 
 import { ErrorBoundary } from '@/core/components/ErrorBoundary';
 import '@/core/config/AceEditor/init';
+import { IconHome } from '@repo/dfe-icons';
+import { Button } from 'antd';
+import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
 const client = new QueryClient();
 export const ClientContext = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
   return (
-    <ErrorBoundary>
+    <ErrorBoundary
+      action={
+        <Button icon={<IconHome />} onClick={() => router.push('/')}>
+          Home
+        </Button>
+      }
+    >
       <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
         <QueryClientProvider client={client}>
           <ThemeProvider>

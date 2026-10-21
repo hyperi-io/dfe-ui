@@ -108,6 +108,17 @@ describe('proxy (auth middleware)', () => {
     expect(response.headers.get('location')).toBe('http://localhost/login');
   });
 
+  test('lets the page through when the engine URL is not configured', async () => {
+    getSetupStatus.mockRejectedValue(
+      new Error('Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set'),
+    );
+    authMiddleware.mockResolvedValue(NextResponse.next());
+
+    const response = await proxy(request('/sources'), undefined as never);
+
+    expect(response.headers.get('location')).toBeNull();
+  });
+
   test('defers to withAuth when initial setup is complete', async () => {
     await proxy(request('/sources'), undefined as never);
 

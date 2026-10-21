@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorBoundary } from '.';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 const Thrower = ({ message }: { message: string }) => {
   throw new Error(message);
@@ -37,6 +41,7 @@ describe('ErrorBoundary', () => {
     );
 
     expect(screen.getByText('Schema load failed')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument();
     expect(
       screen.getByText(
         'Please try again later or contact support if the problem persists.',

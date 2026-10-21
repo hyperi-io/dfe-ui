@@ -3,9 +3,15 @@ import { LOGIN_CALLBACK_PATH_HEADER } from '@/core/config/loginCallback';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-vi.mock('@/core/server/actions/getSetupStatus', () => ({
-  getSetupStatus: vi.fn(),
-}));
+vi.mock('@/core/server/actions/getSetupStatus', async () => {
+  const actual = await vi.importActual<
+    typeof import('@/core/server/actions/getSetupStatus')
+  >('@/core/server/actions/getSetupStatus');
+  return {
+    ...actual,
+    getSetupStatus: vi.fn(),
+  };
+});
 
 vi.mock('next/headers', () => ({
   headers: vi.fn(),
@@ -22,12 +28,12 @@ const getServerSession = vi.mocked(
 );
 const redirect = vi.mocked((await import('next/navigation')).redirect);
 
-const getSetupStatus = vi.mocked(
-  (await import('@/core/server/actions/getSetupStatus')).getSetupStatus,
-);
+const { getSetupStatus, MissingApiUrlError } =
+  await import('@/core/server/actions/getSetupStatus');
+const getSetupStatusMock = vi.mocked(getSetupStatus);
 const headers = vi.mocked((await import('next/headers')).headers);
 
-const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
+const setupComplete: Awaited<ReturnType<typeof getSetupStatusMock>> = {
   initial_setup: {
     complete: true,
     current_step: null,
@@ -51,12 +57,12 @@ const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
 describe('Layout (auth)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getSetupStatus.mockResolvedValue(setupComplete);
+    getSetupStatusMock.mockResolvedValue(setupComplete);
     headers.mockResolvedValue(new Headers());
   });
 
   test('redirects to /setup when initial setup is required', async () => {
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       initial_setup: {
         complete: false,
         current_step: null,
@@ -97,7 +103,7 @@ describe('Layout (auth)', () => {
   test('redirects to /login, not /setup, when setup is required and the user is not authenticated', async () => {
     // The wizard's every call is an authenticated engine call, so handing it to
     // an anonymous visitor produces a form that 401s on submit (dfe-ui#206).
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       initial_setup: {
         complete: false,
         current_step: null,
@@ -203,7 +209,7 @@ describe('Layout (auth)', () => {
   });
 
   test('redirects to the change screen, not the wizard, while the password is still the issued one', async () => {
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       ...setupComplete,
       initial_setup: { ...setupComplete.initial_setup, complete: false },
     });
@@ -225,6 +231,31 @@ describe('Layout (auth)', () => {
 
     // The first call is the one that counts: the real redirect() stops the render there.
     expect(redirect.mock.calls[0]).toEqual(['/change-password']);
+  });
+
+  test('keeps the shell and explains a missing engine URL', async () => {
+    getSetupStatusMock.mockRejectedValue(new MissingApiUrlError());
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'test',
+        email: 'test@example.com',
+        accessToken: 'valid-token',
+      },
+      expires: '2025-12-31',
+    });
+
+    const element = await Layout({
+      children: <div>Dashboard content</div>,
+    });
+    render(<ThemeWrapper>{element}</ThemeWrapper>);
+
+    expect(
+      screen.getByText(
+        'Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText('Dashboard content')).not.toBeInTheDocument();
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   test('renders children when user is authenticated', async () => {

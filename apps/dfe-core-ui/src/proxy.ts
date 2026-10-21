@@ -13,10 +13,7 @@ import {
   LOGIN_CALLBACK_PATH_HEADER,
   pathWithSearch,
 } from '@/core/config/loginCallback';
-import {
-  getSetupStatus,
-  MissingApiUrlError,
-} from '@/core/server/actions/getSetupStatus';
+import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
 import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -85,17 +82,13 @@ const authMiddleware = withAuth({
   pages: { signIn: '/login' },
 });
 
-// A missing engine URL is a broken container, not a setup that is complete, so
-// it fails the request rather than routing to /login; an unreachable engine
-// still falls through.
+// A missing or unreachable engine must not fail the proxy. The authenticated
+// layout renders that inside the shell; failing here skips the sidebar.
 async function isInitialSetupIncomplete(): Promise<boolean> {
   try {
     const { initial_setup } = await getSetupStatus();
     return !initial_setup.complete;
-  } catch (error) {
-    if (error instanceof MissingApiUrlError) {
-      throw error;
-    }
+  } catch {
     return false;
   }
 }

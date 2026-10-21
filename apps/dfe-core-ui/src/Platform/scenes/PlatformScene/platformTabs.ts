@@ -1,4 +1,4 @@
-export const PLATFORM_BASE_PATH = '/platform';
+export const PLATFORM_BASE_PATH = '/settings/platform';
 
 export const PLATFORM_TAB_DETAILS = Object.freeze({
   system: {
