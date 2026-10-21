@@ -3,9 +3,15 @@ import { LOGIN_CALLBACK_PATH_HEADER } from '@/core/config/loginCallback';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-vi.mock('@/core/server/actions/getSetupStatus', () => ({
-  getSetupStatus: vi.fn(),
-}));
+vi.mock('@/core/server/actions/getSetupStatus', async () => {
+  const actual = await vi.importActual<
+    typeof import('@/core/server/actions/getSetupStatus')
+  >('@/core/server/actions/getSetupStatus');
+  return {
+    ...actual,
+    getSetupStatus: vi.fn(),
+  };
+});
 
 vi.mock('next/headers', () => ({
   headers: vi.fn(),
@@ -22,12 +28,12 @@ const getServerSession = vi.mocked(
 );
 const redirect = vi.mocked((await import('next/navigation')).redirect);
 
-const getSetupStatus = vi.mocked(
-  (await import('@/core/server/actions/getSetupStatus')).getSetupStatus,
-);
+const { getSetupStatus, MissingApiUrlError } =
+  await import('@/core/server/actions/getSetupStatus');
+const getSetupStatusMock = vi.mocked(getSetupStatus);
 const headers = vi.mocked((await import('next/headers')).headers);
 
-const setupComplete: Awaited<ReturnType<typeof getSetupStatus>> = {
+const setupComplete: Awaited<ReturnType<typeof getSetupStatusMock>> = {
   initial_setup: {
     complete: true,
     current_step: null,
@@ -225,6 +231,31 @@ describe('Layout (auth)', () => {
 
     // The first call is the one that counts: the real redirect() stops the render there.
     expect(redirect.mock.calls[0]).toEqual(['/change-password']);
+  });
+
+  test('keeps the shell and explains a missing engine URL', async () => {
+    getSetupStatus.mockRejectedValue(new MissingApiUrlError());
+    getServerSession.mockResolvedValue({
+      user: {
+        name: 'test',
+        email: 'test@example.com',
+        accessToken: 'valid-token',
+      },
+      expires: '2025-12-31',
+    });
+
+    const element = await Layout({
+      children: <div>Dashboard content</div>,
+    });
+    render(<ThemeWrapper>{element}</ThemeWrapper>);
+
+    expect(
+      screen.getByText(
+        'Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText('Dashboard content')).not.toBeInTheDocument();
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   test('renders children when user is authenticated', async () => {

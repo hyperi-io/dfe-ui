@@ -13,7 +13,7 @@ export const GenericErrorPage = ({
   className,
   title = 'An unexpected error occurred',
   description = 'Please try again later or contact support if the problem persists.',
-  action
+  action,
 }: GenericErrorProps) => {
   return (
     <div
