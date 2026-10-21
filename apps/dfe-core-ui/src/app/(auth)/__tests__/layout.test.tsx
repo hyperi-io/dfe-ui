@@ -57,12 +57,12 @@ const setupComplete: Awaited<ReturnType<typeof getSetupStatusMock>> = {
 describe('Layout (auth)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getSetupStatus.mockResolvedValue(setupComplete);
+    getSetupStatusMock.mockResolvedValue(setupComplete);
     headers.mockResolvedValue(new Headers());
   });
 
   test('redirects to /setup when initial setup is required', async () => {
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       initial_setup: {
         complete: false,
         current_step: null,
@@ -103,7 +103,7 @@ describe('Layout (auth)', () => {
   test('redirects to /login, not /setup, when setup is required and the user is not authenticated', async () => {
     // The wizard's every call is an authenticated engine call, so handing it to
     // an anonymous visitor produces a form that 401s on submit (dfe-ui#206).
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       initial_setup: {
         complete: false,
         current_step: null,
@@ -209,7 +209,7 @@ describe('Layout (auth)', () => {
   });
 
   test('redirects to the change screen, not the wizard, while the password is still the issued one', async () => {
-    getSetupStatus.mockResolvedValue({
+    getSetupStatusMock.mockResolvedValue({
       ...setupComplete,
       initial_setup: { ...setupComplete.initial_setup, complete: false },
     });
@@ -234,7 +234,7 @@ describe('Layout (auth)', () => {
   });
 
   test('keeps the shell and explains a missing engine URL', async () => {
-    getSetupStatus.mockRejectedValue(new MissingApiUrlError());
+    getSetupStatusMock.mockRejectedValue(new MissingApiUrlError());
     getServerSession.mockResolvedValue({
       user: {
         name: 'test',
