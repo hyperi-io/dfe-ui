@@ -995,11 +995,12 @@ export interface paths {
          *     ``header`` is optional: when omitted, no common-header profile is stored on the
          *     version (DDL compose uses meta/derived columns only until a header is set).
          *
-         *     A schema pin naming a schema that does not exist is ACCEPTED here and REFUSED
-         *     by ``/sources/import`` (#501), so the same stored document is valid or invalid
-         *     depending on how it arrived. That asymmetry is known and undecided -- #504.
-         *     Authoring a source before its schema is a real ordering, and making this path
-         *     as strict as import forbids it.
+         *     A schema pin naming nothing is accepted here so a source can be written before
+         *     its schema, while ``/sources/import`` refuses one because an exported bundle
+         *     brings every schema it pins.
+         *
+         *     201 when the apps follow the new source, 202 when the source is stored and the
+         *     reconcile that brings the apps into step with it did not complete.
          */
         post: operations["create_source_api_v1_sources_post"];
         delete?: never;
@@ -1224,8 +1225,9 @@ export interface paths {
          *     A field the body omits keeps its stored value (``header``, ``schema``, ``views``,
          *     ``transform``, ``transport``, ``archive``); ``null``, ``[]`` or ``false`` clears it.
          *
-         *     A schema pin naming nothing is accepted here and refused by ``/sources/import``.
-         *     See ``create_source`` and #504; the asymmetry is known and undecided.
+         *     A schema pin naming nothing is accepted here so a source can be written before
+         *     its schema, while ``/sources/import`` refuses one because an exported bundle
+         *     brings every schema it pins.
          */
         put: operations["update_source_api_v1_sources__name__put"];
         post?: never;
@@ -1235,6 +1237,10 @@ export interface paths {
          *
          *     An engine-owned source -- the landing table's own -- is refused with 409
          *     ``conflict``, the same answer PUT and PATCH give.
+         *
+         *     The answer reports the reconcile as a create or an update does: on a
+         *     deployment that renders the app config itself, ``restart_required`` names the
+         *     command that takes away the containers the source's instances ran in.
          */
         delete: operations["delete_source_api_v1_sources__name__delete"];
         options?: never;
@@ -1344,6 +1350,9 @@ export interface paths {
          *     ``enable`` / ``disable`` / ``dormant`` / ``delete`` apply immediately.
          *     ``deploy`` submits one ``source:deploy`` background task per accepted source
          *     (poll ``GET /tasks/{task_id}``); refused names land in ``failed``.
+         *
+         *     An action that applies immediately reports the one reconcile it ends with, as
+         *     a single-source write does.
          */
         post: operations["bulk_action_api_v1_sources_bulk_post"];
         delete?: never;
@@ -1368,7 +1377,8 @@ export interface paths {
          *     Recompiles every stack-scoped routing block (receiver, loader, archiver) and
          *     deploys, syncs or removes the instances of every instance-scoped app (a fetcher
          *     per active fetcher-based source). Every source write does this on its own; this
-         *     route is the retry when one reported ``apps_sync_error``.
+         *     route is the retry when one reported ``apps_sync_error``, and the pass that
+         *     deletes a stranded ``_load`` topic a deploy reported in ``topics_pending_removal``.
          */
         post: operations["reconcile_apps_api_v1_sources_reconcile_apps_post"];
         delete?: never;
@@ -1416,7 +1426,9 @@ export interface paths {
          *     and never written, so the read-only schema is not forked.
          *
          *     Every check runs before the first write: a bundle applied halfway would leave
-         *     the source's schema pins with no definitions behind them.
+         *     the source's schema pins with no definitions behind them. A schema pin, or a
+         *     version it pins, that neither the bundle nor this deployment defines is a 422
+         *     ``unresolved_reference``.
          */
         post: operations["import_source_api_v1_sources_import_post"];
         delete?: never;
@@ -1986,8 +1998,9 @@ export interface paths {
          *
          *     This is the operator's record of the schema apply, replacing the completed
          *     ArgoCD Job the engine took over from. ``state`` is what readiness follows:
-         *     converged or observed is ready, failed leaves the pod up and NotReady with
-         *     the stage that failed here and the cause in the engine log.
+         *     converged is ready, failed leaves the pod up and NotReady with the stage that
+         *     failed here and the cause in the engine log, and observed -- another applier
+         *     held the lease for the whole wait -- stays NotReady until a later pass converges.
          */
         get: operations["get_schema_status_api_v1_system_schema_get"];
         put?: never;
@@ -2845,7 +2858,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/discovery/databases": {
+    "/api/v1/usage/overview": {
         parameters: {
             query?: never;
             header?: never;
@@ -2853,10 +2866,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Databases
-         * @description List all ClickHouse databases.
+         * Get Usage Overview
+         * @description Every usage metric per UTC day over the last 30 days, and its highest in the last 7.
+         *
+         *     The whole deployment for a caller that reads every org, else the caller's own
+         *     orgs combined, with the two core counts ``not_permitted``. Events per second over
+         *     more than one tenant id is the busiest minute of their sum, read from the minute
+         *     table, which keeps 7 days.
          */
-        get: operations["list_databases_api_v1_discovery_databases_get"];
+        get: operations["get_usage_overview_api_v1_usage_overview_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2865,7 +2883,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/discovery/tables": {
+    "/api/v1/usage": {
         parameters: {
             query?: never;
             header?: never;
@@ -2873,30 +2891,13 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Tables
-         * @description List tables in a ClickHouse database.
+         * Get Usage
+         * @description One usage metric per UTC day over a range, for the whole deployment or one org.
+         *
+         *     Events per second over more than one tenant id is the busiest minute of their
+         *     sum, read from the minute table, which keeps 7 days.
          */
-        get: operations["list_tables_api_v1_discovery_tables_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/discovery/tables/{table_name}/columns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Columns
-         * @description List columns for a specific table.
-         */
-        get: operations["list_columns_api_v1_discovery_tables__table_name__columns_get"];
+        get: operations["get_usage_api_v1_usage_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4328,7 +4329,21 @@ export interface paths {
          */
         put: operations["set_app_config_api_v1_apps__service___instance__config_put"];
         post?: never;
-        delete?: never;
+        /**
+         * Clear App Config
+         * @description Remove options from the overlay, so the app runs its own default for each.
+         *
+         *     A cleared option reads back unset with provenance ``default``, so it follows the
+         *     default when the default next moves. Writing the default back would instead
+         *     leave an override that only matches it today, and a PUT of null stores null,
+         *     which many options take as a value of its own.
+         *
+         *     A path the overlay does not hold is already clear and commits nothing. Clearing
+         *     a field beside a stored credential in the same mapping is a 400
+         *     ``credential_reentry_required``, as the PUT of a new value there is, unless the
+         *     request clears that credential too.
+         */
+        delete: operations["clear_app_config_api_v1_apps__service___instance__config_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -6118,6 +6133,16 @@ export interface components {
              * @description One command per app whose running process cannot take this change where it stands.
              */
             restart_required?: string[];
+            /**
+             * Topics Removed
+             * @description Stranded _load topics deleted: no transform instance writing one was in the deploy repo before this pass, the transform's consumer group had no live member, and nothing on it was unread
+             */
+            topics_removed?: string[];
+            /**
+             * Topics Pending Removal
+             * @description Stranded _load topics kept, because a transform instance writing one was in the deploy repo before this pass, the transform's consumer group has a live member or cannot be named, or a consumer group has records left on it
+             */
+            topics_pending_removal?: string[];
         };
         /**
          * ArtifactModel
@@ -6440,6 +6465,21 @@ export interface components {
              * @description Deploy only: one ``source:deploy`` task per accepted source. Poll via GET /tasks/{task_id}.
              */
             deployments?: components["schemas"]["BulkDeployTask"][];
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step; reconcile-apps retries it
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app the change leaves to apply where this deployment renders the app config itself, including taking away the container of an instance a source no longer has. Empty where a GitOps controller applies it.
+             */
+            restart_required?: string[];
         };
         /**
          * BulkDeployTask
@@ -6982,31 +7022,6 @@ export interface components {
              * @default false
              */
             is_running: boolean;
-        };
-        /**
-         * ColumnInfo
-         * @description A column in a ClickHouse table.
-         */
-        ColumnInfo: {
-            /** Name */
-            name: string;
-            /** Type */
-            type: string;
-            /**
-             * Default Kind
-             * @default
-             */
-            default_kind: string;
-            /**
-             * Default Expression
-             * @default
-             */
-            default_expression: string;
-            /**
-             * Comment
-             * @default
-             */
-            comment: string;
         };
         /**
          * CompileRequest
@@ -7658,19 +7673,6 @@ export interface components {
             views?: {
                 [key: string]: string;
             };
-        };
-        /**
-         * DatabaseInfo
-         * @description Summary of a ClickHouse database.
-         */
-        DatabaseInfo: {
-            /** Name */
-            name: string;
-            /**
-             * Engine
-             * @default
-             */
-            engine: string;
         };
         /**
          * DeclaredValue
@@ -12875,10 +12877,15 @@ export interface components {
              */
             topics_failed?: string[];
             /**
-             * Topics Stranded
-             * @description Topics on the broker this version has no consumer for. A ``_load`` topic left by a version that dropped its transform suppresses the source's ``_land`` topic in the loader, so the source silently stops loading. Reported, never deleted: records may still be in flight on it.
+             * Topics Removed
+             * @description Kafka topics this deploy deleted: the ``_load`` topic an earlier version with a transform wrote, which stops the loader reading the source's ``_land`` topic. Deleted once the deploy repo carries no transform instance writing it, the transform's consumer group has no live member, and no consumer group has records left to read on it.
              */
-            topics_stranded?: string[];
+            topics_removed?: string[];
+            /**
+             * Topics Pending Removal
+             * @description Stranded ``_load`` topics kept because a transform instance writing them is still in the deploy repo, the transform's consumer group has a live member or cannot be named, or a consumer group has records left to read on them. The apps reconcile after a later source write, POST /api/v1/sources/reconcile-apps, or the engine's next start deletes each once all three clear. Without a deploy repo the engine cannot see the instance, so the topic is kept.
+             */
+            topics_pending_removal?: string[];
             /**
              * Apps Synced
              * @description Deploy-repo writes this deploy made so the apps follow the sources: the receiver and loader routing, and a fetcher instance for a fetcher-based source (service/instance: action)
@@ -13747,6 +13754,34 @@ export interface components {
             common_header_type: components["schemas"]["DefaultComparison"];
             common_header_version: components["schemas"]["DefaultComparison"];
             engine: components["schemas"]["DefaultComparison"];
+        };
+        /**
+         * SourceDeleteResponse
+         * @description A deleted source, and what the apps now need to follow the delete.
+         */
+        SourceDeleteResponse: {
+            /** Source */
+            source: string;
+            /**
+             * Message
+             * @default deleted
+             */
+            message: string;
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step; reconcile-apps retries it
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app the change leaves to apply where this deployment renders the app config itself, including taking away the container of an instance a source no longer has. Empty where a GitOps controller applies it.
+             */
+            restart_required?: string[];
         };
         /**
          * SourceDetailResponse
@@ -14941,30 +14976,6 @@ export interface components {
             argument_hint: string;
         };
         /**
-         * TableInfo
-         * @description Summary of a ClickHouse table.
-         */
-        TableInfo: {
-            /** Name */
-            name: string;
-            /** Database */
-            database: string;
-            /**
-             * Engine
-             * @default
-             */
-            engine: string;
-            /** Total Rows */
-            total_rows?: number | null;
-            /** Total Bytes */
-            total_bytes?: number | null;
-            /**
-             * Comment
-             * @default
-             */
-            comment: string;
-        };
-        /**
          * TagRequest
          * @description Body for pointing a tag at a version.
          */
@@ -15481,6 +15492,55 @@ export interface components {
             scoped?: boolean | null;
         };
         /**
+         * UsageDay
+         * @description One UTC day of one metric.
+         */
+        UsageDay: {
+            /**
+             * Day
+             * Format: date
+             * @description The UTC day
+             */
+            day: string;
+            /**
+             * Value
+             * @description The day's total for ingested_bytes, else the day's highest minute
+             */
+            value: number;
+        };
+        /**
+         * UsageMetricOverview
+         * @description One metric on the overview.
+         */
+        UsageMetricOverview: {
+            /**
+             * Metric
+             * @description The metric: cores_deployed, node_cores, ingested_bytes, events_per_second
+             */
+            metric: string;
+            /**
+             * Label
+             * @description What a tile showing the metric is titled
+             */
+            label: string;
+            /**
+             * Unit
+             * @description What value counts: cores, bytes or events/s
+             */
+            unit: string;
+            /** @description not_measured when the range holds no row for the metric, and not_permitted when the caller is held to its orgs and the metric is not kept per org */
+            status: components["schemas"]["UsageStatus"];
+            /** @description The highest day in the last 7 UTC days, today included, and when */
+            highest_7d: components["schemas"]["UsageDay"] | null;
+            /** @description The most recent day in the series */
+            latest: components["schemas"]["UsageDay"] | null;
+            /**
+             * Series
+             * @description One entry per UTC day with a row, oldest first
+             */
+            series: components["schemas"]["UsageDay"][];
+        };
+        /**
          * UsageModel
          * @description One file that links an artefact.
          */
@@ -15501,6 +15561,86 @@ export interface components {
              */
             tag: string;
         };
+        /**
+         * UsageOverviewResponse
+         * @description Every usage metric over the last 30 UTC days.
+         */
+        UsageOverviewResponse: {
+            /**
+             * Orgs
+             * @description The orgs the numbers cover, empty for the whole deployment
+             */
+            orgs: string[];
+            /**
+             * From
+             * Format: date
+             * @description The series' first UTC day
+             */
+            from: string;
+            /**
+             * To
+             * Format: date
+             * @description The series' last UTC day, today
+             */
+            to: string;
+            /**
+             * Highest 7D Label
+             * @description What the highest_7d number is captioned
+             */
+            highest_7d_label: string;
+            /** Metrics */
+            metrics: components["schemas"]["UsageMetricOverview"][];
+        };
+        /**
+         * UsageSeriesResponse
+         * @description One usage metric per UTC day over a range.
+         */
+        UsageSeriesResponse: {
+            /** Metric */
+            metric: string;
+            /** Label */
+            label: string;
+            /** Unit */
+            unit: string;
+            status: components["schemas"]["UsageStatus"];
+            /**
+             * Granularity
+             * @constant
+             */
+            granularity: "day";
+            /**
+             * Orgs
+             * @description The orgs the numbers cover, empty for the whole deployment
+             */
+            orgs: string[];
+            /**
+             * From
+             * Format: date
+             * @description The range's first UTC day
+             */
+            from: string;
+            /**
+             * To
+             * Format: date
+             * @description The range's last UTC day
+             */
+            to: string;
+            /** @description The highest day in the range, and when */
+            highest: components["schemas"]["UsageDay"] | null;
+            /** @description The most recent day in the series */
+            latest: components["schemas"]["UsageDay"] | null;
+            /**
+             * Series
+             * @description One entry per UTC day with a row, oldest first
+             */
+            series: components["schemas"]["UsageDay"][];
+        };
+        /**
+         * UsageStatus
+         * @description Whether a metric has a number for this caller.
+         * @enum {string}
+         */
+        UsageStatus: "measured" | "not_measured" | "not_permitted";
         /**
          * UserResponse
          * @description The calling user, their roles, permissions and org access.
@@ -19332,6 +19472,15 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
+            /** @description The source was stored and the apps were not brought into step with it: apps_sync_error says why, and POST /sources/reconcile-apps retries it */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
             401: {
                 headers: {
@@ -19491,6 +19640,15 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceResponse"];
+                };
+            };
+            /** @description The source was stored and the apps were not brought into step with it: apps_sync_error says why, and POST /sources/reconcile-apps retries it */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19930,11 +20088,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SourceDeleteResponse"];
+                };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
             401: {
@@ -24032,7 +24192,7 @@ export interface operations {
             };
         };
     };
-    list_databases_api_v1_discovery_databases_get: {
+    get_usage_overview_api_v1_usage_overview_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -24047,7 +24207,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DatabaseInfo"][];
+                    "application/json": components["schemas"]["UsageOverviewResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -24059,8 +24219,17 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description No usage:read, or the caller is held to its orgs and holds no registered one */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description ClickHouse could not read the usage tables */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -24070,13 +24239,19 @@ export interface operations {
             };
         };
     };
-    list_tables_api_v1_discovery_tables_get: {
+    get_usage_api_v1_usage_get: {
         parameters: {
-            query?: {
-                /** @description Database to list tables from */
-                database?: string;
-                /** @description Filter by engine type */
-                engine?: string | null;
+            query: {
+                /** @description The metric to read */
+                metric: "cores_deployed" | "node_cores" | "ingested_bytes" | "events_per_second";
+                /** @description The first UTC day, 29 days before `to` when absent */
+                from?: string | null;
+                /** @description The last UTC day, today when absent */
+                to?: string | null;
+                /** @description One org to read. Absent reads the whole deployment, or every org the caller holds */
+                org?: string | null;
+                /** @description Per UTC day, the only granularity the rollup keeps */
+                granularity?: "day";
             };
             header?: never;
             path?: never;
@@ -24090,7 +24265,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TableInfo"][];
+                    "application/json": components["schemas"]["UsageSeriesResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -24102,7 +24277,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            /** @description No usage:read, or the caller is held to its orgs and does not hold the one named */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -24111,42 +24286,8 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description An unknown metric or org, a range ending before it starts, or an org named for a metric kept only for the whole deployment */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_columns_api_v1_discovery_tables__table_name__columns_get: {
-        parameters: {
-            query?: {
-                /** @description Database containing the table */
-                database?: string;
-            };
-            header?: never;
-            path: {
-                table_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ColumnInfo"][];
-                };
-            };
-            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
-            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -24154,22 +24295,13 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
-            403: {
+            /** @description ClickHouse could not read the usage tables */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -28348,6 +28480,61 @@ export interface operations {
                 "application/json": components["schemas"]["ConfigWriteRequest"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfigWriteResult"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_app_config_api_v1_apps__service___instance__config_delete: {
+        parameters: {
+            query: {
+                /** @description An option to put back to the app's default, as the config route reports it: `config.<option>` or `extraEnv.<NAME>`. Repeat it to clear several in one commit. */
+                path: string[];
+            };
+            header?: {
+                "If-Match"?: string | null;
+            };
+            path: {
+                service: string;
+                instance: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
