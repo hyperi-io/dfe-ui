@@ -112,63 +112,73 @@ const { wrapper } = buildTestWrapper()
   .withWrapper(({ children }) => <App>{children}</App>);
 
 describe('AddFromCatalogueDrawer', () => {
-  it('lists what the catalogue offers and creates the source from an entry', async () => {
-    const user = userEvent.setup();
-    render(<AddFromCatalogueDrawer />, { wrapper });
+  // The 15s success backstop outlasts the 20s default once the suite is loaded.
+  it(
+    'lists what the catalogue offers and creates the source from an entry',
+    { timeout: 45_000 },
+    async () => {
+      const user = userEvent.setup();
+      render(<AddFromCatalogueDrawer />, { wrapper });
 
-    await user.click(
-      await screen.findByRole('button', { name: /Add from catalogue/ }),
-    );
+      await user.click(
+        await screen.findByRole('button', { name: /Add from catalogue/ }),
+      );
 
-    // The entry, the dataset the receiver matches on, and the intakes it offers.
-    expect(await screen.findByText('okta.system')).toBeInTheDocument();
-    expect(screen.getByText('Beats')).toBeInTheDocument();
-    expect(screen.getByText('Pulled by a fetcher')).toBeInTheDocument();
+      // The entry, the dataset the receiver matches on, and the intakes it offers.
+      expect(await screen.findByText('okta.system')).toBeInTheDocument();
+      expect(screen.getByText('Beats')).toBeInTheDocument();
+      expect(screen.getByText('Pulled by a fetcher')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Select okta' }));
+      await user.click(screen.getByRole('button', { name: 'Select okta' }));
 
-    // The CI runner renders the selection under load; the suite's component
-    // tests bound their waits at 15 s for the same reason.
-    await user.click(await screen.findByLabelText('Intake for this source'));
-    await user.click(await screen.findByTitle('Beats'));
-    await user.type(screen.getByLabelText(/^Source Name/), 'okta');
+      // The CI runner renders the selection under load; the suite's component
+      // tests bound their waits at 15 s for the same reason.
+      await user.click(await screen.findByLabelText('Intake for this source'));
+      await user.click(await screen.findByTitle('Beats'));
+      await user.type(screen.getByLabelText(/^Source Name/), 'okta');
 
-    await user.click(await screen.findByRole('button', { name: 'Add' }));
+      await user.click(await screen.findByRole('button', { name: 'Add' }));
 
-    expect(
-      await screen.findByText(
-        'Source okta created from the catalogue',
-        {},
-        { timeout: 15_000 },
-      ),
-    ).toBeInTheDocument();
-  });
+      expect(
+        await screen.findByText(
+          'Source okta created from the catalogue',
+          {},
+          { timeout: 15_000 },
+        ),
+      ).toBeInTheDocument();
+    },
+  );
 
-  it('reaches every entry a search matches, even when one page fills no scroll', async () => {
-    server.use(pagedCatalogue);
-    const user = userEvent.setup();
-    render(<AddFromCatalogueDrawer />, { wrapper });
+  // Paging three catalogue pages outlasts the 20s default once the suite is loaded.
+  it(
+    'reaches every entry a search matches, even when one page fills no scroll',
+    { timeout: 45_000 },
+    async () => {
+      server.use(pagedCatalogue);
+      const user = userEvent.setup();
+      render(<AddFromCatalogueDrawer />, { wrapper });
 
-    await user.click(
-      await screen.findByRole('button', { name: /Add from catalogue/ }),
-    );
-    expect(
-      await screen.findByText('20 of 53 entries shown'),
-    ).toBeInTheDocument();
+      await user.click(
+        await screen.findByRole('button', { name: /Add from catalogue/ }),
+      );
+      expect(
+        await screen.findByText('20 of 53 entries shown'),
+      ).toBeInTheDocument();
 
-    revealLoadMore();
-    expect(
-      await screen.findByText('40 of 53 entries shown'),
-    ).toBeInTheDocument();
+      revealLoadMore();
+      expect(
+        await screen.findByText('40 of 53 entries shown'),
+      ).toBeInTheDocument();
 
-    revealLoadMore();
-    expect(
-      await screen.findByText('53 of 53 entries shown'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Select aws_stream_52' }),
-    ).toBeInTheDocument();
-  });
+      revealLoadMore();
+      expect(
+        await screen.findByText('53 of 53 entries shown'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Select aws_stream_52' }),
+      ).toBeInTheDocument();
+    },
+  );
 
   it('pins the entry name and its Select, so a wide row scrolls only what is between', async () => {
     const user = userEvent.setup();

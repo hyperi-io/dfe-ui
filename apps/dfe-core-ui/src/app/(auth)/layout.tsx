@@ -1,4 +1,5 @@
 import { AppLayout } from '@/core/components/AppLayout';
+import { GenericErrorPage } from '@/core/components/GenericError';
 import { authOptions } from '@/core/config/auth';
 import {
   CHANGE_PASSWORD_PATH,
@@ -9,10 +10,14 @@ import {
   loginRedirectPath,
 } from '@/core/config/loginCallback';
 import { HyperdxPortProvider } from '@/core/contexts/HyperdxContext';
-import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
+import {
+  getSetupStatus,
+  MissingApiUrlError,
+} from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 // Authenticated pages are never static: prerendering them at build time runs
 // getSetupStatus with no deployment env and fails the build.
@@ -59,11 +64,6 @@ export default async function RootLayout({
     redirect(CHANGE_PASSWORD_PATH);
   }
 
-  const { initial_setup } = await getSetupStatus();
-  if (!initial_setup.complete) {
-    redirect('/setup');
-  }
-
   // Read at request time (this layout is dynamic via getServerSession) so both
   // are runtime/deployment values, never baked into the client bundle.
   // HYPERDX_URL wins (own-hostname deployments, e.g. the k8s gateway);
@@ -72,9 +72,31 @@ export default async function RootLayout({
   const hyperdxUrl = process.env.HYPERDX_URL || undefined;
   const hyperdxPort = process.env.HYPERDX_PORT || undefined;
 
-  return (
+  const shell = (content: ReactNode) => (
     <HyperdxPortProvider url={hyperdxUrl} port={hyperdxPort}>
-      <AppLayout>{children}</AppLayout>
+      <AppLayout>{content}</AppLayout>
     </HyperdxPortProvider>
   );
+
+  try {
+    const { initial_setup } = await getSetupStatus();
+    if (!initial_setup.complete) {
+      redirect('/setup');
+    }
+  } catch (error) {
+    // redirect() throws to stop the render. A missing engine URL should not:
+    // the shell stays up and the content column explains the configuration.
+    if (error instanceof MissingApiUrlError) {
+      return shell(
+        <GenericErrorPage
+          className="min-h-screen w-full"
+          title="The engine URL is not configured"
+          description="Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set."
+        />,
+      );
+    }
+    throw error;
+  }
+
+  return shell(children);
 }

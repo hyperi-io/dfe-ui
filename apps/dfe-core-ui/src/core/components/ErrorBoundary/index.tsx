@@ -1,15 +1,34 @@
 import { GenericErrorPage } from '@/core/components/GenericError';
 import { devLogger } from '@repo/dev-logger';
+import { IconHome } from '@repo/dfe-icons';
+import { Button } from 'antd';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
+
+const ErrorBoundaryHomeAction = () => {
+  const router = useRouter();
+  return (
+    <Button
+      icon={<IconHome />}
+      className="mt-6"
+      onClick={() => router.push('/')}
+    >
+      Home
+    </Button>
+  );
+};
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  action?: React.ReactNode | null;
 }
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  action?: React.ReactNode;
+  className?: string;
 }
 
 export const ErrorBoundary = class ErrorBoundary extends React.Component<
@@ -41,7 +60,8 @@ export const ErrorBoundary = class ErrorBoundary extends React.Component<
       return (
         this.props.fallback ?? (
           <GenericErrorPage
-            className="h-screen w-screen"
+            action={this.props.action ?? <ErrorBoundaryHomeAction />}
+            className={this.props.className ?? 'h-screen w-screen'}
             title={this.state.error?.message ?? 'An unexpected error occurred'}
             description="Please try again later or contact support if the problem persists."
           />

@@ -29,7 +29,7 @@
     "@opentelemetry/resources": "^2.11.0",
     "@opentelemetry/sdk-logs": "^0.222.0",
     "@opentelemetry/sdk-metrics": "^2.11.0",
-    "@opentelemetry/sdk-trace-base": "^2.11.0",
+    "@opentelemetry/sdk-trace-base": "npm:@opentelemetry/sdk-trace@2.12.0",
     "@prometheus-io/client": "0.16.1",
     "@repo/dev-logger": "*",
     "@repo/dfe-engine-types": "*",
@@ -88,7 +88,7 @@
     "storybook": "^10.5.10",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vite": "^7.0.0",
+    "vite": "^8.2.4",
     "webpack": "^5.105.4"
   }
 }
