@@ -787,8 +787,8 @@ __metadata:
   linkType: hard
 
 "@eslint/eslintrc@npm:^3.3.6":
-  version: 3.3.6
-  resolution: "@eslint/eslintrc@npm:3.3.6"
+  version: 3.3.7
+  resolution: "@eslint/eslintrc@npm:3.3.7"
   dependencies:
     ajv: "npm:^6.14.0"
     debug: "npm:^4.3.2"
@@ -796,10 +796,10 @@ __metadata:
     globals: "npm:^14.0.0"
     ignore: "npm:^5.2.0"
     import-fresh: "npm:^3.2.1"
-    js-yaml: "npm:^4.3.0"
+    js-yaml: "npm:^4.3.2"
     minimatch: "npm:^3.1.5"
     strip-json-comments: "npm:^3.1.1"
-  checksum: 10c0/349697171ee116f501a2f483bf47cd38937a61880aeb1c23481a69afc95e95859430a0947acbe1f5507f223180bf57530ecf2989e73bcbea763a6dcffdf1d010
+  checksum: 10c0/010fca3403489ff109cfb5b9996142a2a4b4be28bbb233eda3c30ed004826aeab84d6914d0c5c4b1cd80add7051525adb7818268e0fb4775ddb6dbc620f00c72
   languageName: node
   linkType: hard
 
@@ -1501,6 +1501,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/core@npm:2.12.0":
+  version: 2.12.0
+  resolution: "@opentelemetry/core@npm:2.12.0"
+  dependencies:
+    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.10.0"
+  checksum: 10c0/e0d0338d314ca827b4395acf8c7eb8f88a58fd63f1effc6068ba4dd8e3443e02e5796333ae6723fb926a7e6c18dd6d2102f5cc7e531b185618562dadbf6cad71
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/exporter-metrics-otlp-grpc@npm:^0.222.0":
   version: 0.222.0
   resolution: "@opentelemetry/exporter-metrics-otlp-grpc@npm:0.222.0"
@@ -1596,6 +1607,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/resources@npm:2.12.0":
+  version: 2.12.0
+  resolution: "@opentelemetry/resources@npm:2.12.0"
+  dependencies:
+    "@opentelemetry/core": "npm:2.12.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.3.0 <1.10.0"
+  checksum: 10c0/ef3f8470b9ada8406fa4e4a0f002ca31537c1b7fe61f06102fb9023c97a56b0d978c687dd392539f1e005c20f0467f6a1c66f9c43e8d31c2900023164529f2bc
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/sdk-logs@npm:0.222.0, @opentelemetry/sdk-logs@npm:^0.222.0":
   version: 0.222.0
   resolution: "@opentelemetry/sdk-logs@npm:0.222.0"
@@ -1622,17 +1645,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/sdk-trace-base@npm:^2.11.0":
-  version: 2.11.0
-  resolution: "@opentelemetry/sdk-trace-base@npm:2.11.0"
+"@opentelemetry/sdk-trace-base@npm:@opentelemetry/sdk-trace@2.12.0":
+  version: 2.12.0
+  resolution: "@opentelemetry/sdk-trace@npm:2.12.0"
   dependencies:
-    "@opentelemetry/core": "npm:2.11.0"
-    "@opentelemetry/resources": "npm:2.11.0"
-    "@opentelemetry/sdk-trace": "npm:2.11.0"
+    "@opentelemetry/core": "npm:2.12.0"
+    "@opentelemetry/resources": "npm:2.12.0"
     "@opentelemetry/semantic-conventions": "npm:^1.29.0"
   peerDependencies:
     "@opentelemetry/api": ">=1.3.0 <1.10.0"
-  checksum: 10c0/73c91d0cafcae29b2a1528108640a778cf60b5b9e3944dfcc4ce6d16f551863be453052b104ca19a435232a328862df8ef256d9d1c4fc2704e8d1f4bf9d0e4bb
+  checksum: 10c0/bc36d6c3c0a007e0e1f928a7e3c9e6e6d130e157efab8da36a07a624000c2fd25309c0a3d42d4e58f6b30ae233cddfbc6270c2a8566c9f611b9d964f5b7ea8a6
   languageName: node
   linkType: hard
 
@@ -2758,7 +2780,7 @@ __metadata:
     storybook: "npm:^10.5.10"
     svgo: "npm:^3.3.5"
     typescript: "npm:5.9.2"
-    vite: "npm:^7.3.5"
+    vite: "npm:^7.3.7"
   peerDependencies:
     react: ^19.2.0
   languageName: unknown
@@ -2775,7 +2797,7 @@ __metadata:
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
     typescript: "npm:5.9.2"
-    vite: "npm:^7.3.5"
+    vite: "npm:^7.3.7"
   peerDependencies:
     antd: ^5.22.0
     clsx: ^2.1.1
@@ -5779,7 +5801,7 @@ __metadata:
     "@opentelemetry/resources": "npm:^2.11.0"
     "@opentelemetry/sdk-logs": "npm:^0.222.0"
     "@opentelemetry/sdk-metrics": "npm:^2.11.0"
-    "@opentelemetry/sdk-trace-base": "npm:^2.11.0"
+    "@opentelemetry/sdk-trace-base": "npm:@opentelemetry/sdk-trace@2.12.0"
     "@playwright/test": "npm:^1.62.1"
     "@prometheus-io/client": "npm:0.16.1"
     "@repo/dev-logger": "npm:*"
@@ -5831,7 +5853,7 @@ __metadata:
     tailwindcss: "npm:^4"
     typescript: "npm:^5"
     uuid: "npm:^14.0.0"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^4.1.0"
     webpack: "npm:^5.105.4"
     yaml: "npm:^2.9.0"
@@ -11175,9 +11197,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.0.0, vite@npm:^7.3.5":
-  version: 7.3.6
-  resolution: "vite@npm:7.3.6"
+"vite@npm:^7.3.7":
+  version: 7.3.7
+  resolution: "vite@npm:7.3.7"
   dependencies:
     esbuild: "npm:^0.27.0 || ^0.28.0"
     fdir: "npm:^6.5.0"
@@ -11226,7 +11248,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/c6d359f84ad362f5c97ff7988b77c90add04162c60cdf6059375a7d9e3217848c53a8cb6b6c48517bef84b6bba4c9bc85319a889b5236acb7d5a2bc8cb7b9a8d
+  checksum: 10c0/6a3f868a33b849383e29c4e39550155563cf0522b5b6504ab60ff5e44dd07ad472ff87a4d5d2c08f1f70cc6602357f95c38d27371b7612d84801cb790f325a7e
   languageName: node
   linkType: hard
 
