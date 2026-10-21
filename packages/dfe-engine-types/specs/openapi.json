@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine -- configuration, scheduling, and query API",
-    "version": "1.22.47"
+    "version": "1.22.56"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -4422,7 +4422,7 @@
           "Sources"
         ],
         "summary": "Create Source",
-        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).\n\n``header`` is optional: when omitted, no common-header profile is stored on the\nversion (DDL compose uses meta/derived columns only until a header is set).\n\nA schema pin naming a schema that does not exist is ACCEPTED here and REFUSED\nby ``/sources/import`` (#501), so the same stored document is valid or invalid\ndepending on how it arrived. That asymmetry is known and undecided -- #504.\nAuthoring a source before its schema is a real ordering, and making this path\nas strict as import forbids it.",
+        "description": "Create a new source from a flat source definition (initial version ``1.0.0``).\n\n``header`` is optional: when omitted, no common-header profile is stored on the\nversion (DDL compose uses meta/derived columns only until a header is set).\n\nA schema pin naming nothing is accepted here so a source can be written before\nits schema, while ``/sources/import`` refuses one because an exported bundle\nbrings every schema it pins.",
         "operationId": "create_source_api_v1_sources_post",
         "requestBody": {
           "required": true,
@@ -5343,7 +5343,7 @@
           "Sources"
         ],
         "summary": "Update Source",
-        "description": "Update a source from a flat revision body.\n\nBefore the first deploy, edits update the working version in place. After deploy, a new\nmajor version is created only when ``current`` equals ``deployed_version`` and a\ntable-shaping field changes: schema pins (``meta_schema``, ``meta_schema_version``,\n``derived_schema``, ``additional_fields``), ``ttl_days``, ``engine``, common-header\ntype/version, ``views``, or ``transform``. Draft versions (``current`` not deployed)\nupdate in place.\n\nOrigin (receiver vs fetcher) cannot change, and a pinned ``meta_schema`` cannot be\ncleared: once a source owns its own table it cannot move back onto ``main``.\n\nA field the body omits keeps its stored value (``header``, ``schema``, ``views``,\n``transform``, ``transport``, ``archive``); ``null``, ``[]`` or ``false`` clears it.\n\nA schema pin naming nothing is accepted here and refused by ``/sources/import``.\nSee ``create_source`` and #504; the asymmetry is known and undecided.",
+        "description": "Update a source from a flat revision body.\n\nBefore the first deploy, edits update the working version in place. After deploy, a new\nmajor version is created only when ``current`` equals ``deployed_version`` and a\ntable-shaping field changes: schema pins (``meta_schema``, ``meta_schema_version``,\n``derived_schema``, ``additional_fields``), ``ttl_days``, ``engine``, common-header\ntype/version, ``views``, or ``transform``. Draft versions (``current`` not deployed)\nupdate in place.\n\nOrigin (receiver vs fetcher) cannot change, and a pinned ``meta_schema`` cannot be\ncleared: once a source owns its own table it cannot move back onto ``main``.\n\nA field the body omits keeps its stored value (``header``, ``schema``, ``views``,\n``transform``, ``transport``, ``archive``); ``null``, ``[]`` or ``false`` clears it.\n\nA schema pin naming nothing is accepted here so a source can be written before\nits schema, while ``/sources/import`` refuses one because an exported bundle\nbrings every schema it pins.",
         "operationId": "update_source_api_v1_sources__name__put",
         "parameters": [
           {
@@ -5898,7 +5898,7 @@
           "Sources"
         ],
         "summary": "Reconcile Apps",
-        "description": "Bring the deploy repo's derived app state into step with the sources.\n\nRecompiles every stack-scoped routing block (receiver, loader, archiver) and\ndeploys, syncs or removes the instances of every instance-scoped app (a fetcher\nper active fetcher-based source). Every source write does this on its own; this\nroute is the retry when one reported ``apps_sync_error``.",
+        "description": "Bring the deploy repo's derived app state into step with the sources.\n\nRecompiles every stack-scoped routing block (receiver, loader, archiver) and\ndeploys, syncs or removes the instances of every instance-scoped app (a fetcher\nper active fetcher-based source). Every source write does this on its own; this\nroute is the retry when one reported ``apps_sync_error``, and the pass that\ndeletes a stranded ``_load`` topic a deploy reported in ``topics_pending_removal``.",
         "operationId": "reconcile_apps_api_v1_sources_reconcile_apps_post",
         "responses": {
           "200": {
@@ -8619,7 +8619,7 @@
           "System"
         ],
         "summary": "Get Schema Status",
-        "description": "What the last schema bootstrap pass did, object by object.\n\nThis is the operator's record of the schema apply, replacing the completed\nArgoCD Job the engine took over from. ``state`` is what readiness follows:\nconverged or observed is ready, failed leaves the pod up and NotReady with\nthe stage that failed here and the cause in the engine log.",
+        "description": "What the last schema bootstrap pass did, object by object.\n\nThis is the operator's record of the schema apply, replacing the completed\nArgoCD Job the engine took over from. ``state`` is what readiness follows:\nconverged is ready, failed leaves the pod up and NotReady with the stage that\nfailed here and the cause in the engine log, and observed -- another applier\nheld the lease for the whole wait -- stays NotReady until a later pass converges.",
         "operationId": "get_schema_status_api_v1_system_schema_get",
         "responses": {
           "200": {
@@ -11483,25 +11483,21 @@
         ]
       }
     },
-    "/api/v1/discovery/databases": {
+    "/api/v1/usage/overview": {
       "get": {
         "tags": [
-          "discovery"
+          "usage"
         ],
-        "summary": "List Databases",
-        "description": "List all ClickHouse databases.",
-        "operationId": "list_databases_api_v1_discovery_databases_get",
+        "summary": "Get Usage Overview",
+        "description": "Every usage metric per UTC day over the last 30 days, and its highest in the last 7.\n\nThe whole deployment for a caller that reads every org, else the caller's own\norgs combined, with the two core counts ``not_permitted``. Events per second over\nmore than one tenant id is the busiest minute of their sum, read from the minute\ntable, which keeps 7 days.",
+        "operationId": "get_usage_overview_api_v1_usage_overview_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/DatabaseInfo"
-                  },
-                  "type": "array",
-                  "title": "Response List Databases Api V1 Discovery Databases Get"
+                  "$ref": "#/components/schemas/UsageOverviewResponse"
                 }
               }
             }
@@ -11517,7 +11513,17 @@
             }
           },
           "403": {
-            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first",
+            "description": "No usage:read, or the caller is held to its orgs and holds no registered one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ClickHouse could not read the usage tables",
             "content": {
               "application/json": {
                 "schema": {
@@ -11534,128 +11540,101 @@
         ]
       }
     },
-    "/api/v1/discovery/tables": {
+    "/api/v1/usage": {
       "get": {
         "tags": [
-          "discovery"
+          "usage"
         ],
-        "summary": "List Tables",
-        "description": "List tables in a ClickHouse database.",
-        "operationId": "list_tables_api_v1_discovery_tables_get",
+        "summary": "Get Usage",
+        "description": "One usage metric per UTC day over a range, for the whole deployment or one org.\n\nEvents per second over more than one tenant id is the busiest minute of their\nsum, read from the minute table, which keeps 7 days.",
+        "operationId": "get_usage_api_v1_usage_get",
         "parameters": [
           {
-            "name": "database",
+            "name": "metric",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
-              "description": "Database to list tables from",
-              "default": "default",
-              "title": "Database"
+              "description": "The metric to read",
+              "enum": [
+                "cores_deployed",
+                "node_cores",
+                "ingested_bytes",
+                "events_per_second"
+              ],
+              "title": "Metric"
             },
-            "description": "Database to list tables from"
+            "description": "The metric to read"
           },
           {
-            "name": "engine",
+            "name": "from",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "type": "string",
+                  "format": "date"
                 },
                 {
                   "type": "null"
                 }
               ],
-              "description": "Filter by engine type",
-              "title": "Engine"
+              "description": "The first UTC day, 29 days before `to` when absent",
+              "title": "From"
             },
-            "description": "Filter by engine type"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TableInfo"
-                  },
-                  "title": "Response List Tables Api V1 Discovery Tables Get"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/v1/discovery/tables/{table_name}/columns": {
-      "get": {
-        "tags": [
-          "discovery"
-        ],
-        "summary": "List Columns",
-        "description": "List columns for a specific table.",
-        "operationId": "list_columns_api_v1_discovery_tables__table_name__columns_get",
-        "parameters": [
-          {
-            "name": "table_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Table Name"
-            }
+            "description": "The first UTC day, 29 days before `to` when absent"
           },
           {
-            "name": "database",
+            "name": "to",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "description": "Database containing the table",
-              "default": "default",
-              "title": "Database"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The last UTC day, today when absent",
+              "title": "To"
             },
-            "description": "Database containing the table"
+            "description": "The last UTC day, today when absent"
+          },
+          {
+            "name": "org",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "One org to read. Absent reads the whole deployment, or every org the caller holds",
+              "title": "Org"
+            },
+            "description": "One org to read. Absent reads the whole deployment, or every org the caller holds"
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "const": "day",
+              "type": "string",
+              "description": "Per UTC day, the only granularity the rollup keeps",
+              "default": "day",
+              "title": "Granularity"
+            },
+            "description": "Per UTC day, the only granularity the rollup keeps"
           }
         ],
         "responses": {
@@ -11664,11 +11643,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ColumnInfo"
-                  },
-                  "title": "Response List Columns Api V1 Discovery Tables  Table Name  Columns Get"
+                  "$ref": "#/components/schemas/UsageSeriesResponse"
                 }
               }
             }
@@ -11684,7 +11659,7 @@
             }
           },
           "403": {
-            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first",
+            "description": "No usage:read, or the caller is held to its orgs and does not hold the one named",
             "content": {
               "application/json": {
                 "schema": {
@@ -11694,11 +11669,21 @@
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "An unknown metric or org, a range ending before it starts, or an org named for a metric kept only for the whole deployment",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ClickHouse could not read the usage tables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -24280,6 +24265,22 @@
             "type": "array",
             "title": "Restart Required",
             "description": "One command per app whose running process cannot take this change where it stands."
+          },
+          "topics_removed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Removed",
+            "description": "Stranded _load topics deleted: no transform instance writing one was in the deploy repo before this pass, the transform's consumer group had no live member, and nothing on it was unread"
+          },
+          "topics_pending_removal": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Pending Removal",
+            "description": "Stranded _load topics kept, because a transform instance writing one was in the deploy repo before this pass, the transform's consumer group has a live member or cannot be named, or a consumer group has records left on it"
           }
         },
         "type": "object",
@@ -25753,40 +25754,6 @@
         "title": "CloudServiceStateResponse",
         "description": "CH Cloud service control-plane state."
       },
-      "ColumnInfo": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "type": {
-            "type": "string",
-            "title": "Type"
-          },
-          "default_kind": {
-            "type": "string",
-            "title": "Default Kind",
-            "default": ""
-          },
-          "default_expression": {
-            "type": "string",
-            "title": "Default Expression",
-            "default": ""
-          },
-          "comment": {
-            "type": "string",
-            "title": "Comment",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "type"
-        ],
-        "title": "ColumnInfo",
-        "description": "A column in a ClickHouse table."
-      },
       "CompileRequest": {
         "properties": {
           "language": {
@@ -26817,25 +26784,6 @@
         ],
         "title": "DDLResult",
         "description": "Generated DDL output."
-      },
-      "DatabaseInfo": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "engine": {
-            "type": "string",
-            "title": "Engine",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "DatabaseInfo",
-        "description": "Summary of a ClickHouse database."
       },
       "DeclaredValue": {
         "properties": {
@@ -36184,13 +36132,21 @@
             "title": "Topics Failed",
             "description": "Kafka topics that could not be created. Never fails the deploy - the schema is live and Kafka may not be in the path at all."
           },
-          "topics_stranded": {
+          "topics_removed": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Topics Stranded",
-            "description": "Topics on the broker this version has no consumer for. A ``_load`` topic left by a version that dropped its transform suppresses the source's ``_land`` topic in the loader, so the source silently stops loading. Reported, never deleted: records may still be in flight on it."
+            "title": "Topics Removed",
+            "description": "Kafka topics this deploy deleted: the ``_load`` topic an earlier version with a transform wrote, which stops the loader reading the source's ``_land`` topic. Deleted once the deploy repo carries no transform instance writing it, the transform's consumer group has no live member, and no consumer group has records left to read on it."
+          },
+          "topics_pending_removal": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics Pending Removal",
+            "description": "Stranded ``_load`` topics kept because a transform instance writing them is still in the deploy repo, the transform's consumer group has a live member or cannot be named, or a consumer group has records left to read on them. The apps reconcile after a later source write, POST /api/v1/sources/reconcile-apps, or the engine's next start deletes each once all three clear. Without a deploy repo the engine cannot see the instance, so the topic is kept."
           },
           "apps_synced": {
             "items": {
@@ -39905,57 +39861,6 @@
         "title": "TableEngineObject",
         "description": "One table engine a source may select, as the console offers it."
       },
-      "TableInfo": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
-          },
-          "engine": {
-            "type": "string",
-            "title": "Engine",
-            "default": ""
-          },
-          "total_rows": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total Rows"
-          },
-          "total_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total Bytes"
-          },
-          "comment": {
-            "type": "string",
-            "title": "Comment",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "database"
-        ],
-        "title": "TableInfo",
-        "description": "Summary of a ClickHouse table."
-      },
       "TagRequest": {
         "properties": {
           "version": {
@@ -40947,6 +40852,93 @@
         "title": "UpdateRoleRequest",
         "description": "Body for updating a custom role, where an omitted field keeps its value."
       },
+      "UsageDay": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day",
+            "description": "The UTC day"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value",
+            "description": "The day's total for ingested_bytes, else the day's highest minute"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day",
+          "value"
+        ],
+        "title": "UsageDay",
+        "description": "One UTC day of one metric."
+      },
+      "UsageMetricOverview": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "title": "Metric",
+            "description": "The metric: cores_deployed, node_cores, ingested_bytes, events_per_second"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "What a tile showing the metric is titled"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "description": "What value counts: cores, bytes or events/s"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UsageStatus",
+            "description": "not_measured when the range holds no row for the metric, and not_permitted when the caller is held to its orgs and the metric is not kept per org"
+          },
+          "highest_7d": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UsageDay"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The highest day in the last 7 UTC days, today included, and when"
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UsageDay"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The most recent day in the series"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/UsageDay"
+            },
+            "type": "array",
+            "title": "Series",
+            "description": "One entry per UTC day with a row, oldest first"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "label",
+          "unit",
+          "status",
+          "highest_7d",
+          "latest",
+          "series"
+        ],
+        "title": "UsageMetricOverview",
+        "description": "One metric on the overview."
+      },
       "UsageModel": {
         "properties": {
           "service": {
@@ -40985,6 +40977,152 @@
         ],
         "title": "UsageModel",
         "description": "One file that links an artefact."
+      },
+      "UsageOverviewResponse": {
+        "properties": {
+          "orgs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Orgs",
+            "description": "The orgs the numbers cover, empty for the whole deployment"
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "title": "From",
+            "description": "The series' first UTC day"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "title": "To",
+            "description": "The series' last UTC day, today"
+          },
+          "highest_7d_label": {
+            "type": "string",
+            "title": "Highest 7D Label",
+            "description": "What the highest_7d number is captioned"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/UsageMetricOverview"
+            },
+            "type": "array",
+            "title": "Metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "orgs",
+          "from",
+          "to",
+          "highest_7d_label",
+          "metrics"
+        ],
+        "title": "UsageOverviewResponse",
+        "description": "Every usage metric over the last 30 UTC days."
+      },
+      "UsageSeriesResponse": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "title": "Metric"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UsageStatus"
+          },
+          "granularity": {
+            "type": "string",
+            "const": "day",
+            "title": "Granularity"
+          },
+          "orgs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Orgs",
+            "description": "The orgs the numbers cover, empty for the whole deployment"
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "title": "From",
+            "description": "The range's first UTC day"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "title": "To",
+            "description": "The range's last UTC day"
+          },
+          "highest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UsageDay"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The highest day in the range, and when"
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UsageDay"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The most recent day in the series"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/UsageDay"
+            },
+            "type": "array",
+            "title": "Series",
+            "description": "One entry per UTC day with a row, oldest first"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "label",
+          "unit",
+          "status",
+          "granularity",
+          "orgs",
+          "from",
+          "to",
+          "highest",
+          "latest",
+          "series"
+        ],
+        "title": "UsageSeriesResponse",
+        "description": "One usage metric per UTC day over a range."
+      },
+      "UsageStatus": {
+        "type": "string",
+        "enum": [
+          "measured",
+          "not_measured",
+          "not_permitted"
+        ],
+        "title": "UsageStatus",
+        "description": "Whether a metric has a number for this caller."
       },
       "UserResponse": {
         "properties": {
