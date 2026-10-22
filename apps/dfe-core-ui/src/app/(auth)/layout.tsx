@@ -1,5 +1,4 @@
 import { AppLayout } from '@/core/components/AppLayout';
-import { GenericErrorPage } from '@/core/components/GenericError';
 import { authOptions } from '@/core/config/auth';
 import {
   CHANGE_PASSWORD_PATH,
@@ -10,6 +9,7 @@ import {
   loginRedirectPath,
 } from '@/core/config/loginCallback';
 import { HyperdxPortProvider } from '@/core/contexts/HyperdxContext';
+import { MissingApiUrlScene } from '@/core/scenes/MissingApiUrlScene';
 import {
   getSetupStatus,
   MissingApiUrlError,
@@ -87,13 +87,7 @@ export default async function RootLayout({
     // redirect() throws to stop the render. A missing engine URL should not:
     // the shell stays up and the content column explains the configuration.
     if (error instanceof MissingApiUrlError) {
-      return shell(
-        <GenericErrorPage
-          className="min-h-screen w-full"
-          title="The engine URL is not configured"
-          description="Neither INTERNAL_API_URL nor NEXT_PUBLIC_API_URL is set."
-        />,
-      );
+      return shell(<MissingApiUrlScene />);
     }
     throw error;
   }

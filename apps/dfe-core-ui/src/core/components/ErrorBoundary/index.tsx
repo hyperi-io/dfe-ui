@@ -18,9 +18,12 @@ const ErrorBoundaryHomeAction = () => {
   );
 };
 
+// Next stamps a server-render failure with a digest that matches the server log.
+type DigestedError = Error & { digest?: unknown };
+
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
+  error: DigestedError | null;
   action?: React.ReactNode | null;
 }
 
@@ -45,26 +48,34 @@ export const ErrorBoundary = class ErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  componentDidCatch(error: DigestedError, info: React.ErrorInfo) {
     devLogger({
       level: 'error',
       label: 'ErrorBoundary',
-      message: JSON.stringify({ error: error.message, info }),
+      message: JSON.stringify({
+        error: error.message,
+        digest: error.digest,
+        info,
+      }),
     });
   }
 
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
-      // Display a generic error component if no fallback supplied
+      // The message is never shown: a production server-render failure arrives
+      // as React's scrubbed "Minified React error #441".
+      const digest = this.state.error?.digest;
       return (
         this.props.fallback ?? (
           <GenericErrorPage
             action={this.props.action ?? <ErrorBoundaryHomeAction />}
             className={this.props.className ?? 'h-screen w-screen'}
-            title={this.state.error?.message ?? 'An unexpected error occurred'}
             description="Please try again later or contact support if the problem persists."
-          />
+          >
+            {typeof digest === 'string' && digest !== '' && (
+              <p className="text-sm text-gray-500">Reference: {digest}</p>
+            )}
+          </GenericErrorPage>
         )
       );
     }

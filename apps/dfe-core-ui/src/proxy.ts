@@ -93,8 +93,8 @@ const authMiddleware = withAuth({
 type SetupProbe = 'complete' | 'incomplete' | 'unreachable' | 'unknown';
 
 // Only an engine that did not answer is answered here, with the 503 page. A
-// missing URL passes through for the authenticated layout to name inside the
-// shell, and any other failure is left to the page.
+// missing URL passes through for the login page or the authenticated layout to
+// name, and any other failure is left to the page.
 async function probeSetup(): Promise<SetupProbe> {
   try {
     const { initial_setup } = await getSetupStatus();

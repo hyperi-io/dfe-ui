@@ -1,4 +1,5 @@
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import { ENGINE_CALL_TIMEOUT_MS } from '@/core/config/engineTimeout';
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 
 /** No engine URL configured: a broken deployment, never a transient failure. */
@@ -10,9 +11,9 @@ export class MissingApiUrlError extends Error {
 }
 
 /**
- * The engine did not answer: the connection failed, or the gateway in front of
- * it returned 502, 503 or 504. The message carries no address, because it can
- * reach the screen.
+ * The engine did not answer: the connection failed, it said nothing within
+ * ENGINE_CALL_TIMEOUT_MS, or the gateway in front of it returned 502, 503 or
+ * 504. The message carries no address, because it can reach the screen.
  */
 export class EngineUnreachableError extends Error {
   constructor(options?: ErrorOptions) {
@@ -32,10 +33,15 @@ export const getSetupStatus = async (): Promise<TFetchSetupStatusResponse> => {
     throw new MissingApiUrlError();
   }
 
+  // One deadline for the headers and the body, so an engine that stalls after
+  // its status line is cut off too.
+  const signal = AbortSignal.timeout(ENGINE_CALL_TIMEOUT_MS);
+
   let response: Response;
   try {
     response = await fetch(`${baseUrl}${API_CONFIG.auth.setupStatus}`, {
       cache: 'no-store',
+      signal,
     });
   } catch (cause) {
     throw new EngineUnreachableError({ cause });
@@ -51,5 +57,12 @@ export const getSetupStatus = async (): Promise<TFetchSetupStatusResponse> => {
     );
   }
 
-  return response.json() as Promise<TFetchSetupStatusResponse>;
+  try {
+    return (await response.json()) as TFetchSetupStatusResponse;
+  } catch (cause) {
+    if (signal.aborted) {
+      throw new EngineUnreachableError({ cause });
+    }
+    throw cause;
+  }
 };

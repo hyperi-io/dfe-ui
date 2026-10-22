@@ -1,12 +1,11 @@
 import { API_CONFIG } from '@/core/config/api/endpoints';
-
-// A sign-out must not hang on an engine that is down; the local sign-out goes ahead regardless.
-const LOGOUT_TIMEOUT_MS = 5000;
+import { ENGINE_CALL_TIMEOUT_MS } from '@/core/config/engineTimeout';
 
 /**
  * Asks the engine to end every session of the token's account. Best-effort:
  * true only on the engine's 2xx, false on a refusal, an old engine without the
- * route, or no answer in time.
+ * route, or no answer in time. A sign-out must not hang on an engine that is
+ * down: the local sign-out goes ahead regardless.
  */
 export async function endEngineSessions(
   accessToken: string,
@@ -17,7 +16,7 @@ export async function endEngineSessions(
     const res = await fetchImpl(`${baseUrl}${API_CONFIG.auth.logout}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${accessToken}` },
-      signal: AbortSignal.timeout(LOGOUT_TIMEOUT_MS),
+      signal: AbortSignal.timeout(ENGINE_CALL_TIMEOUT_MS),
     });
     return res.ok;
   } catch {
