@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.28](https://github.com/hyperi-io/dfe-ui/compare/v1.7.27...v1.7.28) (2026-10-22)
+
+### Bug Fixes
+
+* answer 503 when the engine is unreachable and serve /brand without login ([#592](https://github.com/hyperi-io/dfe-ui/issues/592)) ([100de14](https://github.com/hyperi-io/dfe-ui/commit/100de14b3c000d869da62b4038ec7e04dd94b6f8))
+* time out the engine probe, tidy error pages ([#593](https://github.com/hyperi-io/dfe-ui/issues/593)) ([db54bcb](https://github.com/hyperi-io/dfe-ui/commit/db54bcb619ef9dcc4b2e9015e57513e256b177ba))
+
 ## [1.7.27](https://github.com/hyperi-io/dfe-ui/compare/v1.7.26...v1.7.27) (2026-10-22)
 
 ### Bug Fixes
