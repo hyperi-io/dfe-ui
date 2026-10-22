@@ -7,7 +7,11 @@ import {
 import { safeRedirectPath } from '@/core/config/loginCallback';
 import { LOGIN_NOTICE_PARAM } from '@/core/config/loginNotice';
 import { LoginScene } from '@/core/scenes/LoginScene';
-import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
+import { MissingApiUrlScene } from '@/core/scenes/MissingApiUrlScene';
+import {
+  getSetupStatus,
+  MissingApiUrlError,
+} from '@/core/server/actions/getSetupStatus';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
@@ -30,7 +34,17 @@ export default async function Login({
   // reachable while setup is incomplete -- only signed-in users are
   // herded into the wizard.
   const session = await getServerSession(authOptions);
-  const { initial_setup } = await getSetupStatus();
+  // A missing engine URL is a deployment fault: name it rather than answer 500.
+  const setup = await getSetupStatus().catch((error: unknown) => {
+    if (error instanceof MissingApiUrlError) {
+      return null;
+    }
+    throw error;
+  });
+  if (setup === null) {
+    return <MissingApiUrlScene />;
+  }
+  const { initial_setup } = setup;
 
   if (isAppShellSession(session) && isPasswordChangeRequired(session)) {
     redirect(CHANGE_PASSWORD_PATH);

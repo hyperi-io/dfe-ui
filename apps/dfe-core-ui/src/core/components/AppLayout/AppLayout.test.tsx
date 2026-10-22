@@ -46,7 +46,10 @@ describe('AppLayout error boundary', () => {
     );
 
     expect(screen.getByText('Platform')).toBeInTheDocument();
-    expect(screen.getByText('Schema load failed')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /An unexpected error occurred/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Schema load failed')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument();
   });
 

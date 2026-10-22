@@ -22,7 +22,11 @@ export const ClientContext = ({ children }: { children: React.ReactNode }) => {
   return (
     <ErrorBoundary
       action={
-        <Button icon={<IconHome />} onClick={() => router.push('/')}>
+        <Button
+          className="mt-6"
+          icon={<IconHome />}
+          onClick={() => router.push('/')}
+        >
           Home
         </Button>
       }
