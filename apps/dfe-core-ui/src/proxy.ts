@@ -44,7 +44,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  *
  * A page cannot set its own status, so an engine that does not answer is met
  * here: /login, /setup and every authenticated page are rewritten to
- * /engine-unavailable with a 503 instead of throwing on render.
+ * /engine-unavailable. Next serves a rewrite as 200 whatever status it asks.
  */
 
 // Mirror the session's engine access token into the dfe_token cookie so the
@@ -92,9 +92,9 @@ const authMiddleware = withAuth({
 
 type SetupProbe = 'complete' | 'incomplete' | 'unreachable' | 'unknown';
 
-// Only an engine that did not answer is answered here, with the 503 page. A
-// missing URL passes through for the authenticated layout to name inside the
-// shell, and any other failure is left to the page.
+// Only an engine that did not answer is answered here, with the unavailable page. A
+// missing URL passes through for the login page or the authenticated layout to
+// name, and any other failure is left to the page.
 async function probeSetup(): Promise<SetupProbe> {
   try {
     const { initial_setup } = await getSetupStatus();

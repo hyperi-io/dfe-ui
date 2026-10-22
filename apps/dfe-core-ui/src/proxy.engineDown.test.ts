@@ -4,9 +4,10 @@ import { createServer, type Server } from 'node:http';
 import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-const { authMiddleware, getToken } = vi.hoisted(() => ({
+const { authMiddleware, getToken, TEST_BUDGET_MS } = vi.hoisted(() => ({
   authMiddleware: vi.fn(),
   getToken: vi.fn(),
+  TEST_BUDGET_MS: 300,
 }));
 
 vi.mock('next-auth/middleware', () => ({
@@ -16,6 +17,15 @@ vi.mock('next-auth/middleware', () => ({
 vi.mock('next-auth/jwt', () => ({
   getToken,
 }));
+
+// The budget is config, so a short one keeps the silent-engine cases quick.
+// The listeners and the sockets stay real.
+vi.mock('@/core/config/engineTimeout', () => ({
+  ENGINE_CALL_TIMEOUT_MS: TEST_BUDGET_MS,
+}));
+
+// Well past the budget, so a missing timeout fails the test instead of hanging it.
+const NO_TIMEOUT_FAILS_AFTER_MS = 3000;
 
 // getSetupStatus is the real one: the engine is a real listener, or a port
 // nothing listens on, so the proxy meets the failure the way production does.
@@ -44,6 +54,15 @@ const engineAnswering = async (
   return urlOf(server);
 };
 
+// Accepts the connection and never writes a byte: a blackholed engine, which
+// a refused port is not.
+const engineSilent = async (): Promise<string> => {
+  const server = createServer(() => undefined);
+  servers.push(server);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return urlOf(server);
+};
+
 const engineDown = async (): Promise<string> => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -63,12 +82,11 @@ const passesThrough = (response: Response) =>
 
 const closeServers = async () => {
   await Promise.all(
-    servers
-      .splice(0)
-      .map(
-        (server) =>
-          new Promise<void>((resolve) => server.close(() => resolve())),
-      ),
+    servers.splice(0).map((server) => {
+      // A silent engine holds its socket open, and close() waits for it.
+      server.closeAllConnections();
+      return new Promise<void>((resolve) => server.close(() => resolve()));
+    }),
   );
 };
 
@@ -148,6 +166,51 @@ describe('proxy with the engine unreachable', () => {
     expect(response.status).toBe(200);
     expect(authMiddleware).not.toHaveBeenCalled();
   });
+});
+
+describe('proxy with an engine that accepts the connection and never answers', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    vi.stubEnv('INTERNAL_API_URL', await engineSilent());
+    getToken.mockResolvedValue(null);
+    authMiddleware.mockResolvedValue(
+      NextResponse.redirect(new URL('http://localhost/login')),
+    );
+  });
+
+  afterEach(closeServers);
+
+  test.each(['/login', '/setup'])(
+    'answers %s with the 503 once the budget is spent',
+    { timeout: NO_TIMEOUT_FAILS_AFTER_MS },
+    async (path) => {
+      const started = Date.now();
+
+      const response = await proxy(request(path), undefined as never);
+
+      expect(response.status).toBe(503);
+      expect(rewriteOf(response)).toBe('http://localhost/engine-unavailable');
+      expect(Date.now() - started).toBeLessThan(NO_TIMEOUT_FAILS_AFTER_MS);
+    },
+  );
+
+  test(
+    'answers an authenticated page with the 503 as well',
+    { timeout: NO_TIMEOUT_FAILS_AFTER_MS },
+    async () => {
+      authMiddleware.mockResolvedValue(NextResponse.next());
+      getToken.mockResolvedValue({
+        accessToken: 'engine-jwt',
+        passwordChangeRequired: false,
+      });
+
+      const response = await proxy(request('/sources'), undefined as never);
+
+      expect(response.status).toBe(503);
+      expect(rewriteOf(response)).toBe('http://localhost/engine-unavailable');
+    },
+  );
 });
 
 describe('proxy with an engine that answers', () => {

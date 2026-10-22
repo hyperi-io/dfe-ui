@@ -114,7 +114,7 @@ in the app (the `/setup` wizard on a fresh engine).
   engine's setup-status on every request. Until initial setup completes,
   everything except `/login` and `/setup` redirects to the wizard -- that is
   first-run behaviour, not a fault.
-- With no engine running, `/login`, `/setup` and every signed-in page answer 503 and read "Cannot reach the DFE engine", with a Try again button. A page cannot set its own status, so `src/proxy.ts` rewrites the request to `/engine-unavailable`. A refused connection and a 502, 503 or 504 count as no answer. A missing `INTERNAL_API_URL` is a different fault and keeps its own message inside the signed-in shell.
+- With no engine running, `/login`, `/setup` and every signed-in page read "Cannot reach the DFE engine", with a Try again button. A page cannot set its own status, so `src/proxy.ts` rewrites the request to `/engine-unavailable`. The rewrite asks for a 503, but Next serves a rewrite with the target page's status, so the HTTP answer is 200. Monitor the engine itself, not this page. A refused connection, an engine that says nothing for 5 seconds (`src/core/config/engineTimeout.ts`) and a 502, 503 or 504 count as no answer. A missing `INTERNAL_API_URL` is a different fault. `/login` and the signed-in shell both name it ("The engine URL is not configured") instead of failing.
 - **One dev server per checkout.** Next.js refuses a second `next dev` for
   the same app directory and exits with "Another next dev server is already
   running".

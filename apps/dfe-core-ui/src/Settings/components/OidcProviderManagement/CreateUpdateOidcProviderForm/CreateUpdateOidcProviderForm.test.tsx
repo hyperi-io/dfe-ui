@@ -395,7 +395,9 @@ describe(
         await screen.findByText('Okta Domain is required in API mode'),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('Enter an API token or its environment variable'),
+        await screen.findByText(
+          'Enter an API token or its environment variable',
+        ),
       ).toBeInTheDocument();
       expect(onFinish).not.toHaveBeenCalled();
     });
