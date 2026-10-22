@@ -3,6 +3,15 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.27](https://github.com/hyperi-io/dfe-ui/compare/v1.7.26...v1.7.27) (2026-10-22)
+
+### Bug Fixes
+
+* **deps:** dedupe vite onto 8.3.4 so no 8.2.x launch-editor remains ([#585](https://github.com/hyperi-io/dfe-ui/issues/585)) ([90bb40f](https://github.com/hyperi-io/dfe-ui/commit/90bb40f3f8cac67ce7498ed86d785c187396a8a0)), closes [#153](https://github.com/hyperi-io/dfe-ui/issues/153) [#154](https://github.com/hyperi-io/dfe-ui/issues/154) [#155](https://github.com/hyperi-io/dfe-ui/issues/155)
+* **deps:** update storybook to 10.6.2 for CVE-2026-114125 ([#586](https://github.com/hyperi-io/dfe-ui/issues/586)) ([cee0c99](https://github.com/hyperi-io/dfe-ui/commit/cee0c991aecec6759d253eb25e952a2d6f8efb6e)), closes [#156](https://github.com/hyperi-io/dfe-ui/issues/156)
+* **security:** update next to 16.4.1 for two RCEs ([#591](https://github.com/hyperi-io/dfe-ui/issues/591)) ([2f2eb1c](https://github.com/hyperi-io/dfe-ui/commit/2f2eb1c4bd67d4d0ad421a6990976b7f6867777b))
+* **security:** update vitest to 4.1.12 for the @vitest/mocker advisories ([#590](https://github.com/hyperi-io/dfe-ui/issues/590)) ([a3489eb](https://github.com/hyperi-io/dfe-ui/commit/a3489eb4da5dd0ec3513f6501f4fe7af3aa4d6cb)), closes [#157](https://github.com/hyperi-io/dfe-ui/issues/157) [#158](https://github.com/hyperi-io/dfe-ui/issues/158)
+
 ## [1.7.26](https://github.com/hyperi-io/dfe-ui/compare/v1.7.25...v1.7.26) (2026-10-21)
 
 ### Bug Fixes
