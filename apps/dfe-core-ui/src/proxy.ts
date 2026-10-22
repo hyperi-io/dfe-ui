@@ -9,11 +9,15 @@ import {
   DFE_TOKEN_COOKIE,
   engineTokenCookieDomain,
 } from '@/core/config/engineTokenCookie';
+import { ENGINE_UNAVAILABLE_PATH } from '@/core/config/engineUnavailable';
 import {
   LOGIN_CALLBACK_PATH_HEADER,
   pathWithSearch,
 } from '@/core/config/loginCallback';
-import { getSetupStatus } from '@/core/server/actions/getSetupStatus';
+import {
+  EngineUnreachableError,
+  getSetupStatus,
+} from '@/core/server/actions/getSetupStatus';
 import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -37,6 +41,10 @@ import { NextResponse, type NextRequest } from 'next/server';
  *
  * Every page, the self-guarded ones included, leaves here carrying a fresh
  * Content-Security-Policy nonce (src/core/config/contentSecurityPolicy.ts).
+ *
+ * A page cannot set its own status, so an engine that does not answer is met
+ * here: /login, /setup and every authenticated page are rewritten to
+ * /engine-unavailable with a 503 instead of throwing on render.
  */
 
 // Mirror the session's engine access token into the dfe_token cookie so the
@@ -82,14 +90,17 @@ const authMiddleware = withAuth({
   pages: { signIn: '/login' },
 });
 
-// A missing or unreachable engine must not fail the proxy. The authenticated
-// layout renders that inside the shell; failing here skips the sidebar.
-async function isInitialSetupIncomplete(): Promise<boolean> {
+type SetupProbe = 'complete' | 'incomplete' | 'unreachable' | 'unknown';
+
+// Only an engine that did not answer is answered here, with the 503 page. A
+// missing URL passes through for the authenticated layout to name inside the
+// shell, and any other failure is left to the page.
+async function probeSetup(): Promise<SetupProbe> {
   try {
     const { initial_setup } = await getSetupStatus();
-    return !initial_setup.complete;
-  } catch {
-    return false;
+    return initial_setup.complete ? 'complete' : 'incomplete';
+  } catch (error) {
+    return error instanceof EngineUnreachableError ? 'unreachable' : 'unknown';
   }
 }
 
@@ -102,17 +113,27 @@ async function isPasswordChangeRequired(req: NextRequest): Promise<boolean> {
 }
 
 // Pages that guard themselves in their own layout, so the proxy only adds the policy.
+// The unavailable page is here so a rewrite to it can never be sent to /login or rewritten again.
 function isSelfGuardedPage(pathname: string): boolean {
-  return ['/login', '/setup', '/change-password'].some((prefix) =>
-    pathname.startsWith(prefix),
+  return ['/login', '/setup', '/change-password', ENGINE_UNAVAILABLE_PATH].some(
+    (prefix) => pathname.startsWith(prefix),
+  );
+}
+
+// The self-guarded pages that call getSetupStatus on render and so fail without the engine.
+function readsSetupStatusOnRender(pathname: string): boolean {
+  return (
+    pathname === '/login' ||
+    pathname === '/setup' ||
+    pathname.startsWith('/setup/')
   );
 }
 
 // Next stamps the nonce onto its scripts only when the forwarded request carries the policy too.
-function nextWithPolicy(
+function policyFor(
   req: NextRequest,
   extraRequestHeaders: Record<string, string> = {},
-): NextResponse {
+) {
   const policy = contentSecurityPolicy({
     nonce: createNonce(),
     dev: process.env.NODE_ENV === 'development',
@@ -131,8 +152,28 @@ function nextWithPolicy(
   for (const [name, value] of Object.entries(extraRequestHeaders)) {
     requestHeaders.set(name, value);
   }
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  return { policy, request: { headers: requestHeaders } };
+}
+
+function nextWithPolicy(
+  req: NextRequest,
+  extraRequestHeaders: Record<string, string> = {},
+): NextResponse {
+  const { policy, request } = policyFor(req, extraRequestHeaders);
+  const response = NextResponse.next({ request });
   response.headers.set('Content-Security-Policy', policy);
+  return response;
+}
+
+// Rewritten, not redirected: the URL stays, so a reload retries the page the user asked for.
+function engineUnavailable(req: NextRequest): NextResponse {
+  const { policy, request } = policyFor(req);
+  const url = req.nextUrl.clone();
+  url.pathname = ENGINE_UNAVAILABLE_PATH;
+  url.search = '';
+  const response = NextResponse.rewrite(url, { request, status: 503 });
+  response.headers.set('Content-Security-Policy', policy);
+  response.headers.set('Cache-Control', 'no-store');
   return response;
 }
 
@@ -149,7 +190,15 @@ export default async function proxy(
   req: NextRequest,
   event: Parameters<typeof authMiddleware>[1],
 ) {
-  if (isSelfGuardedPage(req.nextUrl.pathname)) {
+  const { pathname } = req.nextUrl;
+
+  if (isSelfGuardedPage(pathname)) {
+    if (
+      readsSetupStatusOnRender(pathname) &&
+      (await probeSetup()) === 'unreachable'
+    ) {
+      return engineUnavailable(req);
+    }
     return nextWithPolicy(req);
   }
 
@@ -174,7 +223,11 @@ export default async function proxy(
   }
 
   // Authenticated from here, so the setup status is worth the engine round trip.
-  if (await isInitialSetupIncomplete()) {
+  const setup = await probeSetup();
+  if (setup === 'unreachable') {
+    return engineUnavailable(req);
+  }
+  if (setup === 'incomplete') {
     const url = req.nextUrl.clone();
     url.pathname = '/setup';
     url.search = '';
@@ -208,7 +261,11 @@ export const config = {
      * app state. Probes and scrapes are unauthenticated by definition; if this
      * namespace is ever open enough for that to matter, the fix is a NetworkPolicy,
      * not an auth redirect on a health check.
+     *
+     * brand/ is the logos in public/, which an anonymous client fetches (and
+     * /_next/image fetches on its behalf). Behind withAuth they answered 307 to
+     * /login. The trailing slash keeps /brandy and /brand-new guarded.
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|livez|readyz|metrics|brand/).*)',
   ],
 };

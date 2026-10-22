@@ -1,5 +1,6 @@
 /** @vitest-environment node */
 
+import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
@@ -19,11 +20,14 @@ vi.mock('next-auth/jwt', () => ({
   getToken,
 }));
 
-vi.mock('@/core/server/actions/getSetupStatus', () => ({
+vi.mock('@/core/server/actions/getSetupStatus', async () => ({
+  ...(await vi.importActual<
+    typeof import('@/core/server/actions/getSetupStatus')
+  >('@/core/server/actions/getSetupStatus')),
   getSetupStatus,
 }));
 
-const { default: proxy } = await import('./proxy');
+const { default: proxy, config } = await import('./proxy');
 
 const setupStatus = (complete: boolean): TFetchSetupStatusResponse => ({
   initial_setup: {
@@ -172,6 +176,37 @@ describe('proxy (auth middleware)', () => {
     expect(expiredEngineTokenCookies(false)[0]).toMatch(
       /^dfe_token=; Domain=example\.com; Path=\/;/,
     );
+  });
+});
+
+describe('proxy matcher', () => {
+  const guards = (url: string) =>
+    unstable_doesMiddlewareMatch({ config, url: `http://localhost${url}` });
+
+  // An anonymous browser, an email client or an uptime check fetches these with no session.
+  test.each(['/brand/dfe-logo-dark.svg', '/brand/dfe-logo-light.svg'])(
+    '%s is served without the auth guard',
+    (path) => {
+      expect(guards(path)).toBe(false);
+    },
+  );
+
+  test.each(['/', '/login', '/sources', '/brand', '/brandy', '/brand-new'])(
+    '%s still goes through the proxy',
+    (path) => {
+      expect(guards(path)).toBe(true);
+    },
+  );
+
+  test.each([
+    '/livez',
+    '/readyz',
+    '/metrics',
+    '/favicon.ico',
+    '/_next/static/chunks/app.js',
+    '/api/auth/session',
+  ])('%s stays outside the proxy', (path) => {
+    expect(guards(path)).toBe(false);
   });
 });
 
