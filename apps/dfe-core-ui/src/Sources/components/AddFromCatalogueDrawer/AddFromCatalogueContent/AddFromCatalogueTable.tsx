@@ -13,6 +13,18 @@ import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
+const toSelectedEntry = (
+  row: TSourceCatalogueItem,
+): AddFromCatalogueFormValues => ({
+  entry: row.name,
+  name: row.name,
+  intake: row.intakes?.[0] as AddFromCatalogueFormValues['intake'],
+  transform: 'default',
+  transport: 'bus',
+  archive: false,
+  intakeOptions: row.intakes,
+});
+
 export const AddFromCatalogueTable = ({
   selectedEntries,
   onSelectedEntriesChange = () => {},
@@ -24,6 +36,7 @@ export const AddFromCatalogueTable = ({
 }) => {
   const [search, setSearch] = useState('');
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
+  const [keptRows, setKeptRows] = useState<TSourceCatalogueItem[]>([]);
 
   const { componentHeight } = useSetComponentHeight({
     offset: 300,
@@ -41,8 +54,22 @@ export const AddFromCatalogueTable = ({
     per_page: 20,
   });
 
+  const selectedNames = new Set(selectedEntries.map((entry) => entry.name));
+  const entriesByName = new Map(
+    (entries ?? []).map((entry) => [entry.name, entry]),
+  );
+  const keptByName = new Map(keptRows.map((entry) => [entry.name, entry]));
+  const pinned = selectedEntries.flatMap((entry) => {
+    const row = entriesByName.get(entry.name) ?? keptByName.get(entry.name);
+    return row ? [row] : [];
+  });
+  const rows = [
+    ...pinned,
+    ...(entries ?? []).filter((entry) => !selectedNames.has(entry.name)),
+  ];
+
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
-  const columns: ColumnsType<TSourceCatalogueItem> = entries?.length
+  const columns: ColumnsType<TSourceCatalogueItem> = rows.length
     ? [
         {
           title: 'Entry',
@@ -122,24 +149,28 @@ export const AddFromCatalogueTable = ({
         }}
         rowSelection={{
           selectedRowKeys: selectedEntries.map((entry) => entry.name),
+          preserveSelectedRowKeys: true,
           onChange: (_selectedRowKeys, selectedRows) => {
-            onSelectedEntriesChange(
-              selectedRows.map((row) => ({
-                entry: row.name,
-                name: row.name,
-                intake: row.intakes?.[0] as 'beats' | 'fetcher' | 'receiver',
-                transform: 'default',
-                transport: 'bus',
-                archive: false,
-                intakeOptions: row.intakes,
-              })),
+            const previous = new Map(
+              selectedEntries.map((entry) => [entry.name, entry]),
             );
+            const seen = new Set<string>();
+            const next: AddFromCatalogueFormValues[] = [];
+            const rows: TSourceCatalogueItem[] = [];
+            for (const row of selectedRows) {
+              if (!row?.name || seen.has(row.name)) continue;
+              seen.add(row.name);
+              rows.push(row);
+              next.push(previous.get(row.name) ?? toSelectedEntry(row));
+            }
+            setKeptRows(rows);
+            onSelectedEntriesChange(next);
           },
         }}
         title={() => (
           <div className="flex justify-between items-center gap-4">
             <span className="font-medium whitespace-nowrap">
-              {entries?.length} of {total} entries shown
+              {rows.length} of {Math.max(total ?? 0, rows.length)} entries shown
             </span>
             <div className="flex items-center gap-2">
               <Input.Search
@@ -162,7 +193,7 @@ export const AddFromCatalogueTable = ({
         )}
         rowKey="name"
         columns={columns}
-        dataSource={entries}
+        dataSource={rows}
         summary={() =>
           hasNextPage ? (
             <tr>
