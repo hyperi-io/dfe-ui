@@ -13,11 +13,31 @@ import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
+const DIGIT_WORDS = [
+  'zero',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+] as const;
+
+export const toSourceName = (entryName: string) =>
+  entryName
+    .replaceAll('_', '-')
+    .replace(/\d/g, (digit) => DIGIT_WORDS[Number(digit)] ?? digit)
+    .toLowerCase()
+    .slice(0, 40);
+
 const toSelectedEntry = (
   row: TSourceCatalogueItem,
 ): AddFromCatalogueFormValues => ({
   entry: row.name,
-  name: row.name,
+  name: toSourceName(row.name),
   intake: row.intakes?.[0] as AddFromCatalogueFormValues['intake'],
   transform: 'default',
   transport: 'bus',
@@ -148,11 +168,11 @@ export const AddFromCatalogueTable = ({
           ),
         }}
         rowSelection={{
-          selectedRowKeys: selectedEntries.map((entry) => entry.name),
+          selectedRowKeys: selectedEntries.map((entry) => entry.entry),
           preserveSelectedRowKeys: true,
           onChange: (_selectedRowKeys, selectedRows) => {
             const previous = new Map(
-              selectedEntries.map((entry) => [entry.name, entry]),
+              selectedEntries.map((entry) => [entry.entry, entry]),
             );
             const seen = new Set<string>();
             const next: AddFromCatalogueFormValues[] = [];

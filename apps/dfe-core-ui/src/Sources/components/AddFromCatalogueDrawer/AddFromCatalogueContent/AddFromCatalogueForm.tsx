@@ -8,7 +8,7 @@ import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { SOURCE_TRANSPORT_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { sourceNameValidator } from '@/Sources/utils/validation';
-import { IconChevronLeft } from '@repo/dfe-icons';
+import { IconChevronLeft, IconTrash } from '@repo/dfe-icons';
 import { Button, FormProps } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
 import { ColumnsType } from 'antd/es/table';
@@ -29,9 +29,13 @@ const formSchema = z.object({
 export type AddFromCatalogueFormValues = z.infer<typeof formSchema> & {
   intakeOptions?: string[] | null;
 };
-type AddFromCatalogueFormStore = {
-  entries: AddFromCatalogueFormValues[];
-};
+
+/** The list the field rules check, so an issue path is `entries`, the row, then the cell. */
+const storeSchema = z.object({
+  entries: z.array(formSchema),
+});
+
+type AddFromCatalogueFormStore = z.infer<typeof storeSchema>;
 
 /** Cells a person can change. Entry and transform stay labels. */
 const EDITABLE_FIELDS = ['name', 'intake', 'transport'] as const;
@@ -54,10 +58,6 @@ const editableIssues = (
   return [...fields];
 };
 
-/** The list the field rules check, so an issue path is `entries`, the row, then the cell. */
-const storeSchema = z.object({
-  entries: z.array(formSchema),
-});
 interface AddFromCatalogueFormProps extends Omit<
   FormProps<AddFromCatalogueFormStore>,
   'initialValues' | 'onFinish'
@@ -65,6 +65,7 @@ interface AddFromCatalogueFormProps extends Omit<
   onCancel?: () => void;
   initialValues: AddFromCatalogueFormValues[];
   onFinish?: (entries: AddFromCatalogueFormValues[]) => void;
+  onSelectedEntriesChange?: (entries: AddFromCatalogueFormValues[]) => void;
   error?: Error | null;
   isPending?: boolean;
 }
@@ -73,6 +74,7 @@ export const AddFromCatalogueForm = ({
   initialValues,
   onCancel,
   onFinish,
+  onSelectedEntriesChange,
   error,
   isPending,
   ...props
@@ -170,8 +172,29 @@ export const AddFromCatalogueForm = ({
       {error && <ApiErrorNotification error={error} />}
 
       <Form.List name="entries">
-        {(fields) => {
+        {(fields, { remove }) => {
           const columns: ColumnsType<FormListFieldData> = [
+            {
+              key: 'action',
+              width: 40,
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex } = record;
+                return (
+                  <Button
+                    icon={<IconTrash />}
+                    aria-label={`Remove ${initialValues[rowIndex].entry}`}
+                    shape="circle"
+                    size="small"
+                    onClick={() => {
+                      remove(rowIndex);
+                      onSelectedEntriesChange?.(
+                        initialValues.filter((_, index) => index !== rowIndex),
+                      );
+                    }}
+                  />
+                );
+              },
+            },
             {
               title: 'Catalogue Entry',
               key: 'entry',

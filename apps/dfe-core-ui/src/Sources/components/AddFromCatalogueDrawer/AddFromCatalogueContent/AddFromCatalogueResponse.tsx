@@ -1,9 +1,18 @@
+import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
-import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconCircleCheck,
+  IconCircleX,
+  IconLink,
+} from '@repo/dfe-icons';
 import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const formatCountTitleMessage = (created: number) => {
   return `${created} source${created === 1 ? '' : 's'}`;
@@ -15,6 +24,13 @@ export const AddFromCatalogueResponse = ({
 }) => {
   const failedCount = data?.failed.length ?? 0;
   const createdCount = data?.created.length ?? 0;
+
+  const [showSuccessful, setShowSuccessful] = useState(false);
+  const [showFailed, setShowFailed] = useState(false);
+
+  const { componentHeight: scrollHeight } = useSetComponentHeight({
+    offset: 120,
+  });
 
   const createdColumns: ColumnsType<
     TCatalogueBulkSourceResponse['created'][number]
@@ -78,11 +94,23 @@ export const AddFromCatalogueResponse = ({
   ];
 
   return (
-    <div className="flex flex-col gap-2">
+    <CustomScrollbar height={scrollHeight} className="flex flex-col gap-2">
       {failedCount > 0 && (
         <NotificationCard
           type="error"
-          title={`${formatCountTitleMessage(failedCount)} failed`}
+          title={
+            <button
+              className="ml-auto mr-0 font-medium flex justify-between w-full items-center"
+              onClick={() => setShowFailed(!showFailed)}
+              aria-label="Toggle failed sources"
+            >
+              <span className="mr-2">
+                {showFailed ? <IconChevronUp /> : <IconChevronDown />}
+              </span>
+              {`${formatCountTitleMessage(failedCount)} failed`}
+            </button>
+          }
+          showChildren={showFailed}
         >
           <Table
             rowKey="entry"
@@ -96,7 +124,19 @@ export const AddFromCatalogueResponse = ({
       {createdCount > 0 && (
         <NotificationCard
           type="success"
-          title={`${formatCountTitleMessage(createdCount)} created`}
+          title={
+            <button
+              className="ml-auto mr-0 font-medium flex justify-between w-full items-center"
+              onClick={() => setShowSuccessful(!showSuccessful)}
+              aria-label="Toggle created sources"
+            >
+              <span className="mr-2">
+                {showSuccessful ? <IconChevronUp /> : <IconChevronDown />}
+              </span>
+              {`${formatCountTitleMessage(createdCount)} created`}
+            </button>
+          }
+          showChildren={showSuccessful}
         >
           <Table
             rowKey="entry"
@@ -106,6 +146,6 @@ export const AddFromCatalogueResponse = ({
           />
         </NotificationCard>
       )}
-    </div>
+    </CustomScrollbar>
   );
 };

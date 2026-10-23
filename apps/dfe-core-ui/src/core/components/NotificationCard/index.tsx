@@ -15,6 +15,7 @@ export const NotificationCard = ({
   classNames,
   variant = 'default',
   children,
+  showChildren = true,
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
@@ -31,6 +32,7 @@ export const NotificationCard = ({
   };
   variant?: DisplayVariant;
   children?: React.ReactNode;
+  showChildren?: boolean;
 }) => {
   const displayType = {
     default: cn(
@@ -120,7 +122,7 @@ export const NotificationCard = ({
           <div className={cn('ml-auto', classNames?.action)}>{action}</div>
         )}
       </div>
-      {children}
+      {showChildren && children}
     </div>
   );
 };

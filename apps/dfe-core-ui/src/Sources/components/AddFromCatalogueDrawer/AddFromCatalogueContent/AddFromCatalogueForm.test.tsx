@@ -93,4 +93,40 @@ describe('AddFromCatalogueForm', () => {
     const { intakeOptions: _intakeOptions, ...submitted } = entries[0];
     await waitFor(() => expect(onFinish).toHaveBeenCalledWith([submitted]));
   });
+
+  it('drops a removed row from the selection', async () => {
+    const user = userEvent.setup();
+    const onSelectedEntriesChange = vi.fn();
+    const entries = [
+      {
+        entry: 'okta',
+        name: 'okta',
+        intake: 'beats' as const,
+        transform: 'default',
+        transport: 'bus' as const,
+        archive: false,
+      },
+      {
+        entry: 'aws',
+        name: 'aws',
+        intake: 'fetcher' as const,
+        transform: 'default',
+        transport: 'bus' as const,
+        archive: false,
+      },
+    ];
+    render(
+      <AddFromCatalogueForm
+        initialValues={entries}
+        onSelectedEntriesChange={onSelectedEntriesChange}
+      />,
+      { wrapper },
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Remove okta' }));
+
+    expect(onSelectedEntriesChange).toHaveBeenCalledWith([entries[1]]);
+    expect(screen.queryByText('okta')).not.toBeInTheDocument();
+    expect(screen.getAllByText('aws').length).toBeGreaterThan(0);
+  });
 });

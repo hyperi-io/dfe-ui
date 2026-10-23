@@ -38,6 +38,7 @@ export const AddFromCatalogueContent = () => {
         <AddFromCatalogueForm
           initialValues={selectedEntries}
           onFinish={handleFinish}
+          onSelectedEntriesChange={setSelectedEntries}
           onCancel={() => setShowForm(false)}
           error={error}
           isPending={isPending}
