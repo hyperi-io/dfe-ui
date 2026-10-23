@@ -12,12 +12,9 @@ import { IconChevronLeft } from '@repo/dfe-icons';
 import { Button, FormProps } from 'antd';
 import type { FormListFieldData } from 'antd/es/form';
 import { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
 import z from 'zod';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
-
-const controlSchema = {
-  intakeOptions: z.array(z.string()).optional(),
-};
 
 const formSchema = z.object({
   entry: z.string().min(1),
@@ -26,13 +23,41 @@ const formSchema = z.object({
   transform: z.string().min(1),
   transport: z.enum(['bus', 'direct']),
   archive: z.boolean(),
-  ...controlSchema,
 });
 
-export type AddFromCatalogueFormValues = z.infer<typeof formSchema>;
+/** `intakeOptions` chooses the intake select. It is not a request field. */
+export type AddFromCatalogueFormValues = z.infer<typeof formSchema> & {
+  intakeOptions?: string[] | null;
+};
 type AddFromCatalogueFormStore = {
   entries: AddFromCatalogueFormValues[];
 };
+
+/** Cells a person can change. Entry and transform stay labels. */
+const EDITABLE_FIELDS = ['name', 'intake', 'transport'] as const;
+type EditableField = (typeof EDITABLE_FIELDS)[number];
+
+const isEditableField = (field: PropertyKey): field is EditableField =>
+  typeof field === 'string' &&
+  (EDITABLE_FIELDS as readonly string[]).includes(field);
+
+/** The editable cells a row's schema issues land on, the ones the table opens. */
+const editableIssues = (
+  result: ReturnType<typeof formSchema.safeParse>,
+): EditableField[] => {
+  if (result.success) return [];
+  const fields = new Set<EditableField>();
+  for (const issue of result.error.issues) {
+    const field = issue.path[0];
+    if (field !== undefined && isEditableField(field)) fields.add(field);
+  }
+  return [...fields];
+};
+
+/** The list the field rules check, so an issue path is `entries`, the row, then the cell. */
+const storeSchema = z.object({
+  entries: z.array(formSchema),
+});
 interface AddFromCatalogueFormProps extends Omit<
   FormProps<AddFromCatalogueFormStore>,
   'initialValues' | 'onFinish'
@@ -55,7 +80,8 @@ export const AddFromCatalogueForm = ({
   const { componentHeight } = useSetComponentHeight({ offset: 300 });
 
   const [form] = Form.useForm<AddFromCatalogueFormStore>();
-  const formValidation = useAntdZodResolver(formSchema);
+  const formValidation = useAntdZodResolver(storeSchema);
+  const [editingFields, setEditingFields] = useState<EditableField[][]>([]);
   const transportOptions = Object.entries(SOURCE_TRANSPORT_LABELS).map(
     ([value, label]) => ({
       value,
@@ -63,8 +89,43 @@ export const AddFromCatalogueForm = ({
     }),
   );
 
+  const fieldEditing = (rowIndex: number, field: EditableField) =>
+    editingFields[rowIndex]?.includes(field) ?? false;
+
+  /**
+   * Archive and the intake list are not cells, so a submit value is laid over
+   * the row that was selected before the schema sees it.
+   */
+  const rowsForParse = (
+    submitted: Partial<AddFromCatalogueFormValues>[] | undefined,
+  ) =>
+    (submitted ?? []).map((entry, index) => ({
+      ...initialValues[index],
+      ...entry,
+    }));
+
+  const rejectInvalidRows = (
+    submitted: Partial<AddFromCatalogueFormValues>[] | undefined,
+  ) => {
+    const results = rowsForParse(submitted).map((entry) =>
+      formSchema.safeParse(entry),
+    );
+    const parsed: AddFromCatalogueFormValues[] = [];
+    for (const result of results) {
+      if (!result.success) {
+        setEditingFields(results.map(editableIssues));
+        void form.validateFields().catch(() => undefined);
+        return null;
+      }
+      parsed.push(result.data);
+    }
+    return parsed;
+  };
+
   const handleFinish = (values: AddFromCatalogueFormStore) => {
-    onFinish?.(values.entries);
+    const parsed = rejectInvalidRows(values.entries);
+    if (!parsed) return;
+    onFinish?.(parsed);
   };
 
   return (
@@ -73,6 +134,9 @@ export const AddFromCatalogueForm = ({
       className="flex flex-col gap-2"
       form={form}
       onFinish={handleFinish}
+      onFinishFailed={() => {
+        rejectInvalidRows(form.getFieldsValue(true).entries);
+      }}
       initialValues={{ entries: initialValues }}
     >
       <NotificationCard
@@ -124,6 +188,7 @@ export const AddFromCatalogueForm = ({
               title: 'Source Name',
               dataIndex: 'name',
               key: 'name',
+              width: '30%',
               render: (_value, record) => {
                 const { key: _rowKey, name: rowIndex, ...restField } = record;
                 return (
@@ -131,8 +196,14 @@ export const AddFromCatalogueForm = ({
                     {...restField}
                     name={[rowIndex, 'name']}
                     rules={[formValidation]}
+                    className=""
                   >
-                    <InlineEditInput defaultEditing={false} />
+                    <InlineEditInput
+                      key={fieldEditing(rowIndex, 'name') ? 'editing' : 'view'}
+                      allowClear={false}
+                      className="max-w-48"
+                      defaultEditing={fieldEditing(rowIndex, 'name')}
+                    />
                   </Form.Item>
                 );
               },
@@ -152,9 +223,16 @@ export const AddFromCatalogueForm = ({
                       ],
                   })) ?? INTAKE_OPTIONS;
                 return (
-                  <Form.Item {...restField} name={[rowIndex, 'intake']}>
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'intake']}
+                    rules={[formValidation]}
+                  >
                     <InlineEditSelect
-                      defaultEditing={false}
+                      key={
+                        fieldEditing(rowIndex, 'intake') ? 'editing' : 'view'
+                      }
+                      defaultEditing={fieldEditing(rowIndex, 'intake')}
                       options={intakeOptions}
                     />
                   </Form.Item>
@@ -187,7 +265,10 @@ export const AddFromCatalogueForm = ({
                     rules={[formValidation]}
                   >
                     <InlineEditSelect
-                      defaultEditing={false}
+                      key={
+                        fieldEditing(rowIndex, 'transport') ? 'editing' : 'view'
+                      }
+                      defaultEditing={fieldEditing(rowIndex, 'transport')}
                       options={transportOptions}
                     />
                   </Form.Item>
