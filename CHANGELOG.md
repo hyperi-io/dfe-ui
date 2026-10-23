@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.29](https://github.com/hyperi-io/dfe-ui/compare/v1.7.28...v1.7.29) (2026-10-23)
+
+### Bug Fixes
+
+* offer catalogue sources by variant and availability ([#598](https://github.com/hyperi-io/dfe-ui/issues/598)) ([40a62f1](https://github.com/hyperi-io/dfe-ui/commit/40a62f1cf0fb5e9887f67639fd9c80f414fe488e))
+
 ## [1.7.28](https://github.com/hyperi-io/dfe-ui/compare/v1.7.27...v1.7.28) (2026-10-22)
 
 ### Bug Fixes
