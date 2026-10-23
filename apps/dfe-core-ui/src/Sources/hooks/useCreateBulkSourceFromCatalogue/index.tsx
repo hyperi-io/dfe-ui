@@ -21,7 +21,7 @@ export const useCreateBulkSourceFromCatalogue = ({
 } = {}) => {
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, error, reset } = useMutation({
+  const { data, mutate, isPending, error, reset } = useMutation({
     mutationFn: (body: TCatalogueBulkSourceRequestBody) =>
       createBulkSourceFromCatalogue({ body }),
     onSuccess: (data) => {
@@ -35,5 +35,5 @@ export const useCreateBulkSourceFromCatalogue = ({
     },
   });
 
-  return { mutate, isPending, error, reset };
+  return { data, mutate, isPending, error, reset };
 };

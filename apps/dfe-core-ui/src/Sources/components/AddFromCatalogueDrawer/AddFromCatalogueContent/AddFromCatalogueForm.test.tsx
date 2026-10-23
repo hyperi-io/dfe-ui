@@ -17,6 +17,7 @@ describe('AddFromCatalogueForm', () => {
             transform: 'parse-okta',
             transport: 'bus',
             intakeOptions: ['beats', 'fetcher'],
+            archive: false,
           },
         ]}
       />,

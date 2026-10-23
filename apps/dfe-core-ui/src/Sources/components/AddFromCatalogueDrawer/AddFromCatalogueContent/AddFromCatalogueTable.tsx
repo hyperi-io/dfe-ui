@@ -127,7 +127,7 @@ export const AddFromCatalogueTable = ({
               selectedRows.map((row) => ({
                 entry: row.name,
                 name: row.name,
-                intake: row.intakes?.[0],
+                intake: row.intakes?.[0] as 'beats' | 'fetcher' | 'receiver',
                 transform: 'default',
                 transport: 'bus',
                 archive: false,

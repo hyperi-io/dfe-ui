@@ -1,8 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
-import { OKTA_CATALOGUE_ENTRY } from '@/core/config/api/endpoints/generator/mocks/sources';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from 'antd';
 import { http, HttpResponse } from 'msw';
@@ -16,13 +15,7 @@ import {
   vi,
 } from 'vitest';
 import { AddFromCatalogueDrawer } from '.';
-import {
-  COREDNS_CATALOGUE_ENTRY,
-  listCatalogue,
-  MISSING_VARIANT_REASON,
-  recordCatalogueCreates,
-  server,
-} from './AddFromCatalogueDrawer.mocks';
+import { server } from './AddFromCatalogueDrawer.mocks';
 
 // The sources list context reads the URL to keep its filters shareable.
 vi.mock('next/navigation', () => ({
@@ -66,14 +59,15 @@ const revealLoadMore = () => {
 const ENTRIES = Array.from({ length: 53 }, (_, index) => {
   const stream = `stream_${String(index).padStart(2, '0')}`;
   return {
-    ...OKTA_CATALOGUE_ENTRY,
     name: `aws_${stream}`,
     package: 'aws',
     data_stream: stream,
     dataset: `aws.${stream}`,
+    intakes: ['beats', 'fetcher'],
+    framing: null,
+    transforms: ['default'],
     beats: { module: 'aws', fileset: stream },
-    variant: `filebeat.aws_${stream}.default`,
-    variants: [`filebeat.aws_${stream}.default`],
+    source: `aws_${stream}`,
   };
 });
 
@@ -97,6 +91,12 @@ const pagedCatalogue = http.get(
   },
 );
 
+const refuseCatalogueCreate = (body: object) =>
+  http.post(
+    API_CONFIG_MOCKS.sources.fromCatalogue.mockedUrl.replace('{entry}', 'okta'),
+    () => HttpResponse.json(body, { status: 422 }),
+  );
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   server.resetHandlers();
@@ -111,42 +111,47 @@ const { wrapper } = buildTestWrapper()
   // Success is an App notification. Without the holder it never mounts.
   .withWrapper(({ children }) => <App>{children}</App>);
 
+const openCatalogue = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(
+    await screen.findByRole('button', { name: /Add from catalogue/ }),
+  );
+};
+
+const selectCatalogueRow = async (
+  user: ReturnType<typeof userEvent.setup>,
+  name: RegExp,
+) => {
+  const row = await screen.findByRole('row', { name });
+  await user.click(within(row).getByRole('checkbox'));
+};
+
 describe('AddFromCatalogueDrawer', () => {
   // The 15s success backstop outlasts the 20s default once the suite is loaded.
   it(
     'lists what the catalogue offers and creates the source from an entry',
     { timeout: 45_000 },
     async () => {
-      const { bodies, handler } = recordCatalogueCreates('okta');
-      server.use(handler);
       const user = userEvent.setup();
       render(<AddFromCatalogueDrawer />, { wrapper });
 
-      await user.click(
-        await screen.findByRole('button', { name: /Add from catalogue/ }),
-      );
+      await openCatalogue(user);
 
       // The entry, the dataset the receiver matches on, and the intakes it offers.
       expect(await screen.findByText('okta.system')).toBeInTheDocument();
       expect(screen.getByText('Beats')).toBeInTheDocument();
       expect(screen.getByText('Pulled by a fetcher')).toBeInTheDocument();
 
-      await user.click(screen.getByRole('button', { name: 'Select okta' }));
-
-      // The CI runner renders the selection under load; the suite's component
-      // tests bound their waits at 15 s for the same reason.
-      await user.click(await screen.findByLabelText('Intake for this source'));
-      await user.click(await screen.findByTitle('Beats'));
-      await user.click(await screen.findByRole('button', { name: 'Add' }));
+      await selectCatalogueRow(user, /okta/);
+      await user.click(
+        await screen.findByRole('button', { name: 'Review Catalogues' }),
+      );
+      await user.click(
+        await screen.findByRole('button', { name: 'Upload Catalogues' }),
+      );
 
       expect(
-        await screen.findByText(
-          'Source okta created from the catalogue',
-          {},
-          { timeout: 15_000 },
-        ),
+        await screen.findByText('1 source created', {}, { timeout: 15_000 }),
       ).toBeInTheDocument();
-      expect(bodies).toEqual([{ intake: 'beats', archive: false }]);
     },
   );
 
@@ -175,65 +180,81 @@ describe('AddFromCatalogueDrawer', () => {
       expect(
         await screen.findByText('53 of 53 entries shown'),
       ).toBeInTheDocument();
-      expect(
-        screen.getByRole('button', { name: 'Select aws_stream_52' }),
-      ).toBeInTheDocument();
+      expect(screen.getByText('aws.stream_52')).toBeInTheDocument();
     },
   );
 
-  it('pins the entry name and its Select, so a wide row scrolls only what is between', async () => {
+  it('pins the entry name, so a wide row keeps it in view', async () => {
     const user = userEvent.setup();
     render(<AddFromCatalogueDrawer />, { wrapper });
 
-    await user.click(
-      await screen.findByRole('button', { name: /Add from catalogue/ }),
-    );
-    const select = await screen.findByRole('button', { name: 'Select okta' });
+    await openCatalogue(user);
+    const name = await screen.findByText('okta');
 
-    // jsdom lays nothing out, so the pin is read off the cells antd marks sticky.
-    expect(select.closest('td')).toHaveClass('ant-table-cell-fix-end');
-    expect(screen.getByText('okta').closest('td')).toHaveClass(
-      'ant-table-cell-fix-start',
-    );
+    // jsdom lays nothing out, so the pin is read off the cell antd marks sticky.
+    expect(name.closest('td')).toHaveClass('ant-table-cell-fix-start');
   });
 
-  it('marks an entry whose variant the deployed transform does not ship', async () => {
+  it('describes the catalogue intakes in words, not raw values', async () => {
+    const user = userEvent.setup();
+    render(<AddFromCatalogueDrawer />, { wrapper });
+
+    await openCatalogue(user);
+
+    expect(await screen.findByText('Beats')).toBeInTheDocument();
+    expect(screen.getByText('Pulled by a fetcher')).toBeInTheDocument();
+    expect(screen.queryByText(/"module"/)).not.toBeInTheDocument();
+  });
+
+  it('shows each field the engine refused, not only its count', async () => {
     server.use(
-      listCatalogue(OKTA_CATALOGUE_ENTRY, {
-        ...COREDNS_CATALOGUE_ENTRY,
-        availability: 'missing_variant',
-        availability_reason: MISSING_VARIANT_REASON,
+      refuseCatalogueCreate({
+        code: 'validation_error',
+        message: '1 validation error(s)',
+        errors: [
+          {
+            field: 'name',
+            message: 'String should match the source name rule',
+            code: 'string_pattern_mismatch',
+          },
+        ],
       }),
     );
     const user = userEvent.setup();
     render(<AddFromCatalogueDrawer />, { wrapper });
 
+    await openCatalogue(user);
+    await selectCatalogueRow(user, /okta/);
     await user.click(
-      await screen.findByRole('button', { name: /Add from catalogue/ }),
+      await screen.findByRole('button', { name: 'Review Catalogues' }),
+    );
+    await user.click(
+      await screen.findByRole('button', { name: 'Upload Catalogues' }),
     );
 
-    expect(await screen.findByText('coredns.log')).toBeInTheDocument();
-    expect(screen.getAllByText('Not shipped')).toHaveLength(1);
+    expect(
+      await screen.findByText('name: String should match the source name rule'),
+    ).toBeInTheDocument();
   });
 
-  it('says why the catalogue could not be read', async () => {
-    const unreadable =
-      'the source catalogue could not be read; the engine log has the reason';
+  it('shows the engine refusing an own-topic fetcher with no schema, word for word', async () => {
+    const refusal =
+      "source 'okta': a fetcher on its own topic needs a schema or it can never be deployed. Set its Topic to 'Shared table', or give it a Meta Schema";
     server.use(
-      http.get(API_CONFIG_MOCKS.sources.catalogue.mockedUrl, () =>
-        HttpResponse.json(
-          { code: 'catalogue_error', message: unreadable },
-          { status: 502 },
-        ),
-      ),
+      refuseCatalogueCreate({ code: 'validation_error', message: refusal }),
     );
     const user = userEvent.setup();
     render(<AddFromCatalogueDrawer />, { wrapper });
 
+    await openCatalogue(user);
+    await selectCatalogueRow(user, /okta/);
     await user.click(
-      await screen.findByRole('button', { name: /Add from catalogue/ }),
+      await screen.findByRole('button', { name: 'Review Catalogues' }),
+    );
+    await user.click(
+      await screen.findByRole('button', { name: 'Upload Catalogues' }),
     );
 
-    expect(await screen.findByText(unreadable)).toBeInTheDocument();
+    expect(await screen.findByText(refusal)).toBeInTheDocument();
   });
 });

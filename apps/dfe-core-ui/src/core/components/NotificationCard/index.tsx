@@ -14,6 +14,7 @@ export const NotificationCard = ({
   action,
   classNames,
   variant = 'default',
+  children,
 }: {
   icon?: React.ReactNode;
   description?: string | React.ReactNode;
@@ -29,6 +30,7 @@ export const NotificationCard = ({
     action?: string;
   };
   variant?: DisplayVariant;
+  children?: React.ReactNode;
 }) => {
   const displayType = {
     default: cn(
@@ -69,9 +71,7 @@ export const NotificationCard = ({
   return (
     <div
       className={cn(
-        // Layout
-        'flex items-center gap-2',
-        // Text
+        'flex flex-col gap-2', // Text
         'text-foreground/70 dark:text-dark-foreground border',
         // Card Shared Styles
         'rounded-lg px-3 py-2',
@@ -79,39 +79,48 @@ export const NotificationCard = ({
         displayVariant[variant],
         className,
         classNames?.root,
+        className,
       )}
     >
-      {icon && <div className="flex flex-start shrink-0">{icon}</div>}
-      <div className={cn('flex flex-col gap-1 ', classNames?.container)}>
-        {typeof title === 'string' ? (
-          <h3
-            className={cn(
-              'text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted',
-              classNames?.title,
-            )}
-          >
-            {title}
-          </h3>
-        ) : (
-          title
+      <div
+        className={cn(
+          // Layout
+          'flex items-center gap-2',
         )}
+      >
+        {icon && <div className="flex flex-start shrink-0">{icon}</div>}
+        <div className={cn('flex flex-col gap-1 ', classNames?.container)}>
+          {typeof title === 'string' ? (
+            <h3
+              className={cn(
+                'text-sm font-medium text-foreground-muted dark:text-dark-foreground-muted',
+                classNames?.title,
+              )}
+            >
+              {title}
+            </h3>
+          ) : (
+            title
+          )}
 
-        {typeof description === 'string' ? (
-          <p
-            className={cn(
-              'text-sm text-foreground-muted dark:text-dark-foreground-muted',
-              classNames?.description,
-            )}
-          >
-            {description}
-          </p>
-        ) : (
-          description
+          {typeof description === 'string' ? (
+            <p
+              className={cn(
+                'text-sm text-foreground-muted dark:text-dark-foreground-muted',
+                classNames?.description,
+              )}
+            >
+              {description}
+            </p>
+          ) : (
+            description
+          )}
+        </div>
+        {action && (
+          <div className={cn('ml-auto', classNames?.action)}>{action}</div>
         )}
       </div>
-      {action && (
-        <div className={cn('ml-auto', classNames?.action)}>{action}</div>
-      )}
+      {children}
     </div>
   );
 };

@@ -1,32 +1,46 @@
+import { useCreateBulkSourceFromCatalogue } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue';
 import { useState } from 'react';
 import {
   AddFromCatalogueForm,
   AddFromCatalogueFormValues,
 } from './AddFromCatalogueForm';
+import { AddFromCatalogueResponse } from './AddFromCatalogueResponse';
 import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 
-export const AddFromCatalogueContent = ({
-  onSuccess,
-}: {
-  onSuccess?: () => void;
-}) => {
+export const AddFromCatalogueContent = () => {
   const [selectedEntries, setSelectedEntries] = useState<
     AddFromCatalogueFormValues[]
   >([]);
-  const [showForm, setShowForm] = useState(false);
 
-  const handleSuccess = () => {
-    setSelectedEntries([]);
-    onSuccess?.();
+  const [showForm, setShowForm] = useState(false);
+  const [showResponse, setShowResponse] = useState(false);
+
+  const {
+    data: createBulkSourcesResponse,
+    mutate: createBulkSources,
+    isPending,
+    error,
+  } = useCreateBulkSourceFromCatalogue({
+    onSuccess: () => {
+      setShowResponse(true);
+    },
+  });
+
+  const handleFinish = (values: AddFromCatalogueFormValues[]) => {
+    createBulkSources({ entries: values });
   };
 
-  return (
+  return showResponse ? (
+    <AddFromCatalogueResponse data={createBulkSourcesResponse} />
+  ) : (
     <div className="flex flex-col gap-2">
       {selectedEntries.length > 0 && showForm ? (
         <AddFromCatalogueForm
           initialValues={selectedEntries}
-          onFinish={handleSuccess}
+          onFinish={handleFinish}
           onCancel={() => setShowForm(false)}
+          error={error}
+          isPending={isPending}
         />
       ) : (
         <AddFromCatalogueTable
