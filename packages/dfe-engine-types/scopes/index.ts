@@ -60,10 +60,6 @@ const deployment_scopes = {
   deployment_admin_links_read: "deployment:admin_links:read",
 } as const;
 
-const discovery_scopes = {
-  discovery_read: "discovery:read",
-} as const;
-
 const fieldmap_scopes = {
   fieldmap_read: "fieldmap:read",
   fieldmap_write: "fieldmap:write",
@@ -177,6 +173,10 @@ const transform_scopes = {
   transform_test: "transform:test",
 } as const;
 
+const usage_scopes = {
+  usage_read: "usage:read",
+} as const;
+
 const governance_scopes = {
   governance_read: "governance:read",
   governance_write: "governance:write",
@@ -215,7 +215,6 @@ export const scopes = {
   ...clickhouse_cloud_scopes,
   ...dashboard_scopes,
   ...deployment_scopes,
-  ...discovery_scopes,
   ...fieldmap_scopes,
   ...hunt_scopes,
   ...oidc_scopes,
@@ -236,6 +235,7 @@ export const scopes = {
   ...system_scopes,
   ...tasks_scopes,
   ...transform_scopes,
+  ...usage_scopes,
   ...governance_scopes,
   ...helmvars_scopes,
   ...library_scopes,
