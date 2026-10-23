@@ -1,3 +1,4 @@
+import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -10,7 +11,7 @@ import { Button, Input, Select, Spin, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import Highlighter from 'react-highlight-words';
-import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
+import { INTAKE_OPTIONS, intakeLabel } from './constants';
 
 export const AddFromCatalogueTable = ({
   onSelect,
@@ -27,6 +28,8 @@ export const AddFromCatalogueTable = ({
   const {
     data: { items: entries, total },
     isLoading,
+    isError,
+    error,
     hasNextPage,
     isFetchingNextPage,
     loadMoreRef,
@@ -35,6 +38,8 @@ export const AddFromCatalogueTable = ({
     intake: intakeFilter,
     per_page: 20,
   });
+
+  const intakeSearchWords = intakeFilter ? [intakeLabel(intakeFilter)] : [];
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
   const columns: ColumnsType<TSourceCatalogueItem> = entries?.length
@@ -45,8 +50,26 @@ export const AddFromCatalogueTable = ({
           key: 'name',
           width: '50%',
           fixed: 'start',
-          render: (name) => (
-            <Highlighter searchWords={[search]} textToHighlight={name} />
+          render: (name: string, entry: TSourceCatalogueItem) => (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Highlighter searchWords={[search]} textToHighlight={name} />
+                {entry.availability === 'missing_variant' && (
+                  <Tag
+                    color="orange"
+                    className="m-0"
+                    title={entry.availability_reason}
+                  >
+                    Not shipped
+                  </Tag>
+                )}
+              </div>
+              {entry.description && (
+                <span className="text-foreground/60 dark:text-dark-foreground/60 line-clamp-2 text-xs">
+                  {entry.description}
+                </span>
+              )}
+            </div>
           ),
         },
         {
@@ -65,20 +88,8 @@ export const AddFromCatalogueTable = ({
               {intakes.map((intake) => (
                 <Tag key={intake}>
                   <Highlighter
-                    searchWords={
-                      intakeFilter
-                        ? [
-                            INTAKE_OPTIONS_MAP[
-                              intakeFilter as keyof typeof INTAKE_OPTIONS_MAP
-                            ] ?? intake,
-                          ]
-                        : []
-                    }
-                    textToHighlight={
-                      INTAKE_OPTIONS_MAP[
-                        intake as keyof typeof INTAKE_OPTIONS_MAP
-                      ] ?? intake
-                    }
+                    searchWords={intakeSearchWords}
+                    textToHighlight={intakeLabel(intake)}
                   />
                 </Tag>
               ))}
@@ -109,12 +120,16 @@ export const AddFromCatalogueTable = ({
       loading={isLoading}
       scroll={{ y: componentHeight, x: 'max-content' }}
       locale={{
-        emptyText: !isLoading && (
-          <NotificationCard
-            type="default"
-            title="No catalogue is mounted on this deployment, or nothing matches the filter."
-          />
-        ),
+        emptyText:
+          !isLoading &&
+          (isError ? (
+            <ApiErrorNotification error={error} />
+          ) : (
+            <NotificationCard
+              type="default"
+              title="Nothing in the catalogue matches the filter."
+            />
+          )),
       }}
       title={() => (
         <div className="flex justify-between items-center gap-4">
@@ -123,7 +138,7 @@ export const AddFromCatalogueTable = ({
           </span>
           <div className="flex items-center gap-2">
             <Input.Search
-              placeholder="Search by name or dataset"
+              placeholder="Search by name, package or data stream"
               allowClear
               value={search}
               onChange={(e) => setSearch(e.target.value)}

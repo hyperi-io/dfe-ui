@@ -19,6 +19,27 @@ import {
   TValidationError,
 } from './endpoints.generator.mocks.types';
 
+export const OKTA_CATALOGUE_ENTRY: TSourceCataloguesResponse['items'][number] =
+  {
+    name: 'okta',
+    display_name: 'Okta system log',
+    description: 'The system data stream of the Elastic okta integration.',
+    package: 'okta',
+    data_stream: 'system',
+    dataset: 'okta.system',
+    intakes: ['beats', 'fetcher'],
+    default_intake: 'fetcher',
+    framing: null,
+    beats: { module: 'okta', fileset: 'system' },
+    has_schema: true,
+    engine: 'elastic',
+    variant: 'filebeat.okta.default',
+    variants: ['filebeat.okta.default'],
+    availability: 'available',
+    availability_reason:
+      "the deployed 'dfe-transform-elastic' ships 'filebeat.okta.default'",
+  };
+
 export const sources = {
   default: {
     mockedUrl: '/api/v1/sources',
@@ -106,24 +127,7 @@ export const sources = {
     get: {
       success: ({
         mockedResponse = {
-          items: [
-            {
-              name: 'okta',
-              package: 'okta',
-              data_stream: 'system',
-              dataset: 'okta.system',
-              intakes: ['beats', 'fetcher'],
-              framing: null,
-              transforms: ['default'],
-              beats: { module: 'okta', fileset: 'system' },
-              source: 'okta',
-              schema_layers: {
-                resolves: true,
-                missing_layer: null,
-                missing_reference: '',
-              },
-            },
-          ],
+          items: [OKTA_CATALOGUE_ENTRY],
           total: 1,
           page: 1,
           per_page: 20,

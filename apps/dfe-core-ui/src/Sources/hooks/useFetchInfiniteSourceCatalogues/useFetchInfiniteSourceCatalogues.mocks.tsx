@@ -3,21 +3,17 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { TSourceCatalogueItem } from './types';
 
-export const MOCK_SOURCE_NAME = 'source';
-
 export const SOURCE_CATALOGUE_ITEM: TSourceCatalogueItem = {
   name: 'string',
   package: 'string',
   data_stream: 'string',
   dataset: 'string',
-  intakes: ['string'],
-  transforms: ['string'],
-  source: 'string',
-  schema_layers: {
-    resolves: true,
-    missing_layer: null,
-    missing_reference: '',
-  },
+  intakes: ['beats'],
+  default_intake: 'beats',
+  has_schema: true,
+  variants: ['string'],
+  availability: 'available',
+  availability_reason: 'string',
 };
 
 const TOTAL_ITEMS = 25;
@@ -27,10 +23,7 @@ const ALL_ITEMS = Array.from({ length: TOTAL_ITEMS }, () => ({
 
 function createPaginatedSourceCataloguesHandler() {
   return http.get(
-    API_CONFIG_MOCKS.sources.catalogue.mockedUrl.replace(
-      '{name}',
-      MOCK_SOURCE_NAME,
-    ),
+    API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
     ({ request }) => {
       const url = new URL(request.url);
       const page = Math.max(

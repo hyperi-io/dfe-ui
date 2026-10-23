@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -17,20 +18,18 @@ import {
   server,
 } from './useFetchInfiniteSourceCatalogues.mocks';
 
+// jsdom has no IntersectionObserver, and the hook pages on one.
 class MockIntersectionObserver {
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();
 }
-
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-global.IntersectionObserver = MockIntersectionObserver as any;
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
 const { wrapper } = buildTestWrapper().withReactQuery();
 
 const DEFAULT_HOOK_PROPS: UseFetchInfiniteSourceCataloguesProps = {
   search: '',
-  intake: '',
   per_page: 10,
 };
 
@@ -314,12 +313,30 @@ describe('useFetchInfiniteSourceCatalogues', () => {
       expect(result.current.data.items).toBeDefined();
     });
 
-    it('should include intake filter in query', async () => {
+    it('should send the intake filter to the engine', async () => {
+      const intakesAsked: (string | null)[] = [];
+      server.use(
+        http.get(
+          API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
+          ({ request }) => {
+            intakesAsked.push(new URL(request.url).searchParams.get('intake'));
+            return HttpResponse.json({
+              items: [SOURCE_CATALOGUE_ITEM],
+              total: 1,
+              page: 1,
+              per_page: 10,
+              total_pages: 1,
+              next_page: null,
+              prev_page: null,
+            });
+          },
+        ),
+      );
       const { result } = renderHook(
         () =>
           useFetchInfiniteSourceCatalogues({
             ...DEFAULT_HOOK_PROPS,
-            intake: 'test',
+            intake: 'beats',
           }),
         {
           wrapper,
@@ -330,7 +347,8 @@ describe('useFetchInfiniteSourceCatalogues', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.items).toBeDefined();
+      expect(intakesAsked).toEqual(['beats']);
+      expect(result.current.data.items).toEqual([SOURCE_CATALOGUE_ITEM]);
     });
 
     it('should include per_page filter in query', async () => {
