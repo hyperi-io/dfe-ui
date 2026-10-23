@@ -22,17 +22,11 @@ export const useCreateSourceFromCatalogue = ({
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: ({ entry, body }: CreateSourceFromCatalogueRequest) =>
-      createSourceFromCatalogue({ pathParams: { entry }, body }),
+    mutationFn: ({ body }: CreateSourceFromCatalogueRequest) =>
+      createSourceFromCatalogue({ body }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.sources.default(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.source({
-          name: data.source,
-          version: data.current,
-        }),
       });
       onSuccess?.(data);
     },

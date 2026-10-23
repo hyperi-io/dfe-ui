@@ -1,6 +1,8 @@
-import { TSourceCatalogueItem } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { useState } from 'react';
-import { AddFromCatalogueForm } from './AddFromCatalogueForm';
+import {
+  AddFromCatalogueForm,
+  AddFromCatalogueFormValues,
+} from './AddFromCatalogueForm';
 import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 
 export const AddFromCatalogueContent = ({
@@ -8,18 +10,31 @@ export const AddFromCatalogueContent = ({
 }: {
   onSuccess?: () => void;
 }) => {
-  const [selectedEntry, setSelectedEntry] = useState<TSourceCatalogueItem>();
+  const [selectedEntries, setSelectedEntries] = useState<
+    AddFromCatalogueFormValues[]
+  >([]);
+  const [showForm, setShowForm] = useState(false);
+
   const handleSuccess = () => {
-    setSelectedEntry(undefined);
+    setSelectedEntries([]);
     onSuccess?.();
   };
-  return selectedEntry ? (
-    <AddFromCatalogueForm
-      entry={selectedEntry}
-      onCancel={() => setSelectedEntry(undefined)}
-      onSuccess={handleSuccess}
-    />
-  ) : (
-    <AddFromCatalogueTable onSelect={(entry) => setSelectedEntry(entry)} />
+
+  return (
+    <div className="flex flex-col gap-2">
+      {selectedEntries.length > 0 && showForm ? (
+        <AddFromCatalogueForm
+          initialValues={selectedEntries}
+          onFinish={handleSuccess}
+          onCancel={() => setShowForm(false)}
+        />
+      ) : (
+        <AddFromCatalogueTable
+          selectedEntries={selectedEntries}
+          onSelectedEntriesChange={(entries) => setSelectedEntries(entries)}
+          onUpload={() => setShowForm(true)}
+        />
+      )}
+    </div>
   );
 };
