@@ -10,11 +10,11 @@ export type TSourceCataloguesResponse = DfeClientSuccessResponseBody<
 
 export type TSourceCatalogueItem = TSourceCataloguesResponse['items'][number];
 
-export type TSourceCatalogueIntake =
-  TSourceCataloguesResponse['items'][number]['intakes'][number];
+/** The intakes the engine knows: an entry's `intakes` are plain strings, its default is this enum. */
+export type TSourceCatalogueIntake = TSourceCatalogueItem['default_intake'];
 
 export interface UseFetchInfiniteSourceCataloguesProps {
   search?: string;
-  intake?: string;
+  intake?: TSourceCatalogueIntake;
   per_page?: number;
 }
