@@ -1,9 +1,9 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createSourceFromCatalogue } from './api';
+import { createBulkSourceFromCatalogue } from './api';
 import {
-  CreateSourceFromCatalogueRequest,
-  TCatalogueSourceResponse,
+  TCatalogueBulkSourceRequestBody,
+  TCatalogueBulkSourceResponse,
 } from './types';
 
 /**
@@ -12,18 +12,18 @@ import {
  * The engine compiles the entry into the same write body the source form
  * produces, so the response and the caches it invalidates are the create's.
  */
-export const useCreateSourceFromCatalogue = ({
+export const useCreateBulkSourceFromCatalogue = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (data: TCatalogueSourceResponse) => void;
+  onSuccess?: (data: TCatalogueBulkSourceResponse) => void;
   onError?: (error: Error) => void;
 } = {}) => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error, reset } = useMutation({
-    mutationFn: ({ body }: CreateSourceFromCatalogueRequest) =>
-      createSourceFromCatalogue({ body }),
+    mutationFn: (body: TCatalogueBulkSourceRequestBody) =>
+      createBulkSourceFromCatalogue({ body }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.sources.default(),
