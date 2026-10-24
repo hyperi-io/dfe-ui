@@ -9,5 +9,21 @@
 # untrusted input, so only an advisory that reaches no shipped code is accepted.
 
 [[IgnoredVulns]]
-id = "GHSA-vfj7-8cjw-p6xm"
-reason = "braces 3.0.3, pulled only by micromatch 4 under fast-glob 3.3.1 under @next/eslint-plugin-next: lint-time tooling that matches our own source globs, never in the Next.js server or browser bundle, so no request input reaches it. No fixed braces release exists. Drop when @next/eslint-plugin-next moves off fast-glob 3.3.1 or braces ships a fix."
+id = "GHSA-w74x-v6f9-j3xg"
+ignoreUntil = 2026-10-27
+reason = "fast-uri 3.1.8, pulled only by ajv 8 under schema-utils: webpack build tooling that validates our own loader options, never in the server or browser bundle. The fix, 3.1.9, clears the 7d yarn install gate on 2026-10-26."
+
+[[IgnoredVulns]]
+id = "GHSA-wjr9-j795-jxcr"
+ignoreUntil = 2026-10-27
+reason = "fast-uri 3.1.8, build-time only, as GHSA-w74x-v6f9-j3xg."
+
+[[IgnoredVulns]]
+id = "GHSA-333x-w4r6-6crp"
+ignoreUntil = 2026-10-27
+reason = "fast-uri 3.1.8, build-time only, as GHSA-w74x-v6f9-j3xg."
+
+[[IgnoredVulns]]
+id = "GHSA-xhq7-xmqj-769h"
+ignoreUntil = 2026-10-27
+reason = "fast-uri 3.1.8, build-time only, as GHSA-w74x-v6f9-j3xg."
