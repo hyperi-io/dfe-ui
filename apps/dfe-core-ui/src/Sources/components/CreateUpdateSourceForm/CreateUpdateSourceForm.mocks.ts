@@ -2,9 +2,12 @@ import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hoo
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { setupServer } from 'msw/node';
 
-// The form sits inside the field-maps provider, which lists on mount.
+// The form sits inside the field-maps provider, which lists on mount, and a
+// receiver source reads the compatibility profiles it may bind.
 export const server = setupServer(
   API_CONFIG_MOCKS.fieldMaps.default.get.success(),
+  API_CONFIG_MOCKS.ingest.compatProfiles.get.success(),
+  API_CONFIG_MOCKS.ingest.compat.get.success(),
 );
 
 /** What the Table Settings, Transform and Views tabs read on an own-table source. */

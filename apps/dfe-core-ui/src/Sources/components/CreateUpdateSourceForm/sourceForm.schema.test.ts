@@ -81,6 +81,17 @@ describe('formSchema origin', () => {
     ]);
   });
 
+  test('alias fields left empty still let the match be checked', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      origin: 'receiver',
+      match: { field: '_json.app', operator: 'equals', value: '' },
+      aliases: { 'dfe-legacy-2x': undefined, 'elastic-agent': null },
+    };
+
+    expect(messagesAt(data, ['match', 'value'])).toEqual(['Value is required']);
+  });
+
   test('the exists operator needs no value; every other operator does', () => {
     const exists: CreateUpdateSourceFormData = {
       ...BASE,
@@ -176,5 +187,92 @@ describe('formSchema origin', () => {
     expect(messagesAt(data, ['fetcher', 'config'])).toEqual([
       'The engine sets enabled and topic; remove them from the config',
     ]);
+  });
+});
+
+describe('formSchema grouped conditions', () => {
+  const receiver = (
+    match: CreateUpdateSourceFormData['match'],
+  ): CreateUpdateSourceFormData => ({ ...BASE, origin: 'receiver', match });
+
+  test('each blank in a nested condition is refused where the form shows it', () => {
+    const data = receiver({
+      join: 'all',
+      parts: [
+        { field: 'data_stream.dataset', operator: 'equals', value: '' },
+        {
+          join: 'any',
+          parts: [{ field: '', operator: 'exists', value: '' }],
+        },
+      ],
+    });
+
+    expect(messagesAt(data, ['match', 'parts', 0, 'value'])).toEqual([
+      'Value is required',
+    ]);
+    expect(
+      messagesAt(data, ['match', 'parts', 1, 'parts', 0, 'field']),
+    ).toEqual(['Field is required']);
+    // exists compares nothing, so its empty value is not a blank.
+    expect(
+      messagesAt(data, ['match', 'parts', 1, 'parts', 0, 'value']),
+    ).toEqual([]);
+  });
+
+  test('a group with no condition is refused', () => {
+    expect(
+      messagesAt(receiver({ join: 'any', parts: [] }), ['match', 'parts']),
+    ).toEqual(['A group needs at least one condition']);
+  });
+
+  test('groups nested past the engine limit are refused', () => {
+    let node: NonNullable<CreateUpdateSourceFormData['match']> = {
+      field: 'a',
+      operator: 'equals',
+      value: 'b',
+    };
+    for (let level = 0; level < 5; level += 1) {
+      node = { join: 'all', parts: [node] };
+    }
+
+    expect(messagesAt(receiver(node), ['match', 'parts'])).toEqual([
+      'Groups nest at most 4 deep',
+    ]);
+  });
+
+  test('a complete grouped match passes', () => {
+    const data = receiver({
+      join: 'all',
+      parts: [
+        {
+          field: 'data_stream.dataset',
+          operator: 'equals',
+          value: 'cisco_ios.log',
+        },
+        {
+          field: 'agent.type',
+          operator: 'equals',
+          value: 'winlogbeat',
+          negate: true,
+        },
+      ],
+    });
+
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+});
+
+describe('formSchema expression', () => {
+  test('an expression source needs its expression and leaves the conditions alone', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      origin: 'receiver',
+      receiver_ui_config: { match_mode: 'expression' },
+      match: { field: '', operator: 'equals', value: '' },
+      when: '   ',
+    };
+
+    expect(messagesAt(data, ['when'])).toEqual(['Expression is required']);
+    expect(messagesAt(data, ['match', 'field'])).toEqual([]);
   });
 });

@@ -24,6 +24,15 @@ export const API_CONFIG = Object.freeze({
     fromCatalogue: '/api/v1/sources/from-catalogue/{entry}',
     engines: '/api/v1/sources/engines',
   },
+  ingest: {
+    rules: '/api/v1/ingest/rules',
+    rulesOrder: '/api/v1/ingest/rules/order',
+    compat: '/api/v1/ingest/compat',
+    compatProfiles: '/api/v1/ingest/compat-profiles',
+  },
+  usage: {
+    overview: '/api/v1/usage/overview',
+  },
   deployment: {
     adminLinks: '/api/v1/deployment/admin-links',
   },

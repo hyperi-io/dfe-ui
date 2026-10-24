@@ -93,6 +93,15 @@ export const QUERY_KEYS = Object.freeze({
     fromCatalogue: () => ['sources', 'from-catalogue', '{entry}'],
     engines: () => ['sources', 'engines'],
   },
+  ingest: {
+    rules: () => ['ingest', 'rules'],
+    rulesOrder: () => ['ingest', 'rules', 'order'],
+    compat: () => ['ingest', 'compat'],
+    compatProfiles: () => ['ingest', 'compat-profiles'],
+  },
+  usage: {
+    overview: () => ['usage', 'overview'],
+  },
   deployment: {
     adminLinks: () => ['deployment', 'admin-links'],
   },

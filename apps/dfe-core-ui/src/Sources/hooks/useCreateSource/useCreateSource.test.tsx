@@ -43,7 +43,12 @@ describe('.useCreateSource', () => {
       meta_schema_version: '',
       engine: 'engine',
     },
-    match: { field: 'string', operator: 'equals', value: 'string' },
+    match: {
+      field: 'string',
+      operator: 'equals',
+      value: 'string',
+      negate: false,
+    },
     transform: {
       engine: 'engine',
       config_file: null,

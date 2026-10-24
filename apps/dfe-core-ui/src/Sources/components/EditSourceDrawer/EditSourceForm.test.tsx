@@ -75,6 +75,7 @@ const sharedTableSource: TSourceVersionDetail = {
       field: 'data_stream.dataset',
       operator: 'equals',
       value: 'probe.log',
+      negate: false,
     },
   },
 };
@@ -87,6 +88,8 @@ const server = setupServer(
   }),
   API_CONFIG_MOCKS.sources.default.get.success(),
   API_CONFIG_MOCKS.fieldMaps.default.get.success(),
+  API_CONFIG_MOCKS.ingest.compatProfiles.get.success(),
+  API_CONFIG_MOCKS.ingest.compat.get.success(),
   API_CONFIG_MOCKS.sources.sourceVersion.get.success({
     mockedResponse: sharedTableSource,
     name: 'shared-probe',
@@ -132,5 +135,12 @@ describe('EditSourceForm', () => {
     // A body without them reads as a clear to an older engine, and its pins must match the stored ones.
     expect(sentBodies[0]?.header).toEqual(storedHeader);
     expect(sentBodies[0]?.schema).toEqual(storedSchema);
+    // One condition saves as the three keys it always has.
+    expect(sentBodies[0]?.match).toStrictEqual({
+      field: 'data_stream.dataset',
+      operator: 'equals',
+      value: 'probe.log',
+    });
+    expect(sentBodies[0]).not.toHaveProperty('when');
   });
 });

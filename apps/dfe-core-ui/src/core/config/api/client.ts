@@ -82,16 +82,17 @@ export function createApiClient(config: ApiClientConfig) {
     fetch: customFetch,
   } = config;
 
-  async function request<
+  async function send<
     Path extends keyof paths,
     Method extends DfeClientHttpMethod,
   >(
     path: Path,
     method: Method,
     options?: DfeClientRequestOptions<Path, Method>,
-  ): Promise<
-    DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-  > {
+  ): Promise<{
+    data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>;
+    headers: Headers;
+  }> {
     const { pathParams, queryParams, headerParams, body, signal } =
       options ?? {};
     if (signal?.aborted) {
@@ -138,12 +139,14 @@ export function createApiClient(config: ApiClientConfig) {
 
     const fetchFn = customFetch ?? globalThis.fetch;
     const res = await fetchFn(url, init);
+    type Body = DfeClientSuccessResponseBody<
+      DfeClientOperationFor<Path, Method>
+    >;
+    const empty = { data: undefined as unknown as Body, headers: res.headers };
 
     // 204 No Content - no body to parse
     if (res.status === 204) {
-      return undefined as unknown as Promise<
-        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-      >;
+      return empty;
     }
 
     if (!res.ok) {
@@ -186,18 +189,14 @@ export function createApiClient(config: ApiClientConfig) {
 
     const contentType = res.headers.get('Content-Type');
     if (contentType?.includes('application/json')) {
-      return res.json() as Promise<
-        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-      >;
+      return { data: (await res.json()) as Body, headers: res.headers };
     }
 
     // Every engine 2xx is JSON or an empty body, so a page here is the proxy
     // answering in its place.
     const text = await res.text();
     if (text.trim() === '') {
-      return undefined as unknown as Promise<
-        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
-      >;
+      return empty;
     }
 
     throw new ApiError(res.status, res.statusText, {
@@ -206,8 +205,38 @@ export function createApiClient(config: ApiClientConfig) {
     });
   }
 
+  async function request<
+    Path extends keyof paths,
+    Method extends DfeClientHttpMethod,
+  >(
+    path: Path,
+    method: Method,
+    options?: DfeClientRequestOptions<Path, Method>,
+  ): Promise<
+    DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>
+  > {
+    return (await send(path, method, options)).data;
+  }
+
   return {
     request,
+
+    /**
+     * A read whose revision travels in the `ETag` header rather than the body.
+     *
+     * `etag` is null when the header is absent or the browser may not read it,
+     * which a cross-origin engine that does not expose `ETag` causes.
+     */
+    async getWithEtag<Path extends keyof paths>(
+      path: Path,
+      options?: DfeClientRequestOptions<Path, 'get'>,
+    ): Promise<{
+      data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'get'>>;
+      etag: string | null;
+    }> {
+      const { data, headers } = await send(path, 'get', options);
+      return { data, etag: headers.get('ETag') };
+    },
 
     get<Path extends keyof paths>(
       path: Path,
