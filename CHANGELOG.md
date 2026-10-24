@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.30](https://github.com/hyperi-io/dfe-ui/compare/v1.7.29...v1.7.30) (2026-10-24)
+
+### Bug Fixes
+
+* **security:** update zod to 4.6.7 and undici to 7.30.1 and 8.12.2 ([#602](https://github.com/hyperi-io/dfe-ui/issues/602)) ([f80b3d1](https://github.com/hyperi-io/dfe-ui/commit/f80b3d190147b87e9f5dbd89a4a01bdc1b0e2250))
+
 ## [1.7.29](https://github.com/hyperi-io/dfe-ui/compare/v1.7.28...v1.7.29) (2026-10-23)
 
 ### Bug Fixes
