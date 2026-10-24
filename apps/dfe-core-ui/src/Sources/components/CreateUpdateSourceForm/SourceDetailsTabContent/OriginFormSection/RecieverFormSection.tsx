@@ -1,18 +1,21 @@
 import { Form } from '@/core/components/Form';
+import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import {
   CreateUpdateSourceFormData,
   DisabledFields,
 } from '@/Sources/components/CreateUpdateSourceForm';
-import {
-  MATCH_OPERATORS,
-  RECEIVER_TABLE_LABELS,
-} from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { RECEIVER_TABLE_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { useSourceWriteErrors } from '@/Sources/components/CreateUpdateSourceForm/sourceWriteError.context';
 import { IconInfoCircle } from '@repo/dfe-icons';
-import { FormInstance, FormRule, Input, Radio, Select } from 'antd';
+import { FormInstance, FormRule, Radio } from 'antd';
+import { MatchConditions } from './MatchConditions';
+import { SourceCompatibility } from './SourceCompatibility';
+import { WhenExpression } from './WhenExpression';
 
 /** A label's `for` cannot name a radio group, so the group carries the same text itself. */
 const TABLE_LABEL = 'Table';
+const MATCH_MODE_LABEL = 'Match by';
 
 export const ReceiverFormSection = ({
   formValidation,
@@ -23,8 +26,12 @@ export const ReceiverFormSection = ({
   form: FormInstance<CreateUpdateSourceFormData>;
   disabledFields?: DisabledFields;
 }) => {
-  const operationType = Form.useWatch(['match', 'operator'], form);
-  const isMatchValueDisabled = operationType === 'exists';
+  const matchMode = Form.useWatch(['receiver_ui_config', 'match_mode'], form);
+  const isExpression = matchMode === 'expression';
+  const { ruleErrors, aliasConflict } = useSourceWriteErrors();
+  const matchRefusals = ruleErrors.filter((error) =>
+    error.field.startsWith('match'),
+  );
 
   // The schema holds these rules in its receiver refinement, so it derives no mark.
   return (
@@ -33,53 +40,38 @@ export const ReceiverFormSection = ({
         icon={<IconInfoCircle />}
         description="Incoming data that matches the following criteria will be processed by this source"
       />
-      <div className="flex gap-x-2">
-        <Form.Item
-          className="w-full"
-          name={['match', 'field']}
-          label="Field"
-          rules={[formValidation]}
-          required
-        >
-          <Input placeholder="Enter field" />
-        </Form.Item>
-        <Form.Item
-          name={['match', 'operator']}
-          label="Operator"
-          className="min-w-36"
-          rules={[formValidation]}
-          required
-        >
-          <Select
-            placeholder="Select operator"
-            onChange={(value) => {
-              if (value === 'exists') {
-                form.setFields([
-                  {
-                    name: ['match', 'value'],
-                    errors: [],
-                    value: '',
-                  },
-                ]);
-              }
-            }}
-            options={MATCH_OPERATORS.map((operator) => ({
-              label: operator,
-              value: operator,
-            }))}
-          />
-        </Form.Item>
-
-        <Form.Item
-          className="w-full"
-          name={['match', 'value']}
-          label="Value"
-          rules={[formValidation]}
-          required={!isMatchValueDisabled}
-        >
-          <Input disabled={isMatchValueDisabled} placeholder="Enter value" />
-        </Form.Item>
-      </div>
+      <Form.Item
+        name={['receiver_ui_config', 'match_mode']}
+        label={MATCH_MODE_LABEL}
+        rules={[formValidation]}
+      >
+        <Radio.Group
+          aria-label={MATCH_MODE_LABEL}
+          optionType="button"
+          options={[
+            { label: 'Conditions', value: 'conditions' },
+            { label: 'CEL Fast expression', value: 'expression' },
+          ]}
+        />
+      </Form.Item>
+      {isExpression ? (
+        <WhenExpression
+          form={form}
+          formValidation={formValidation}
+          ruleErrors={ruleErrors}
+        />
+      ) : (
+        <>
+          {matchRefusals.length > 0 && (
+            <FormNotification
+              type="error"
+              title="The receiver would refuse these conditions"
+              text={matchRefusals.map((error) => error.message).join(' ')}
+            />
+          )}
+          <MatchConditions form={form} formValidation={formValidation} />
+        </>
+      )}
       <Form.Item
         name={['receiver_ui_config', 'table']}
         label={TABLE_LABEL}
@@ -94,6 +86,11 @@ export const ReceiverFormSection = ({
           )}
         />
       </Form.Item>
+      <SourceCompatibility
+        form={form}
+        formValidation={formValidation}
+        aliasConflict={aliasConflict}
+      />
     </>
   );
 };

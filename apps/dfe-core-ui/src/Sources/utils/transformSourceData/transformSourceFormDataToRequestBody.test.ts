@@ -1,5 +1,4 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceFormDataToRequestBody } from './transformSourceFormDataToRequestBody';
 
@@ -18,15 +17,157 @@ describe('transformSourceFormDataToRequestBody', () => {
 
     const result = transformSourceFormDataToRequestBody(source);
 
-    const expectedResult: TSourceUpdateRequestBody = {
+    // A single condition sends the three keys it always has, and nothing else.
+    expect(result).toStrictEqual({
       source: 'source',
       display_name: 'display name',
       enabled: true,
       archive: false,
       fetcher: null,
       match: { field: 'field', operator: 'equals', value: 'value' },
+    });
+  });
+
+  test('grouped conditions send all or any, with negate only where it is set', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'cisco-ios',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      receiver_ui_config: { table: 'main', match_mode: 'conditions' },
+      match: {
+        join: 'all',
+        parts: [
+          {
+            field: 'data_stream.dataset',
+            operator: 'equals',
+            value: 'cisco_ios.log',
+            negate: false,
+          },
+          {
+            field: 'agent.type',
+            operator: 'equals',
+            value: 'winlogbeat',
+            negate: true,
+          },
+        ],
+      },
     };
-    expect(result).toEqual(expectedResult);
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.match).toStrictEqual({
+      all: [
+        {
+          field: 'data_stream.dataset',
+          operator: 'equals',
+          value: 'cisco_ios.log',
+        },
+        {
+          field: 'agent.type',
+          operator: 'equals',
+          value: 'winlogbeat',
+          negate: true,
+        },
+      ],
+    });
+    expect(result).not.toHaveProperty('when');
+  });
+
+  test('a none-of group is any with negate', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'quiet',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: {
+        join: 'any',
+        negate: true,
+        parts: [{ field: 'level', operator: 'equals', value: 'debug' }],
+      },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source).match).toStrictEqual({
+      any: [{ field: 'level', operator: 'equals', value: 'debug' }],
+      negate: true,
+    });
+  });
+
+  test('an expression sends when in place of match', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'okta',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      receiver_ui_config: { table: 'main', match_mode: 'expression' },
+      match: { field: 'stale', operator: 'equals', value: 'left over' },
+      when: "  data_stream.dataset == 'okta.system' ",
+    };
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.match).toBeNull();
+    expect(result.when).toBe("data_stream.dataset == 'okta.system'");
+  });
+
+  test('a fetcher source sends neither match nor when', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'crates',
+      enabled: true,
+      archive: false,
+      origin: 'fetcher',
+      receiver_ui_config: { match_mode: 'expression' },
+      when: 'true',
+      fetcher: { source_type: 'crates_io', topic: 'own', config: '' },
+    };
+
+    const result = transformSourceFormDataToRequestBody(source);
+
+    expect(result.match).toBeNull();
+    expect(result).not.toHaveProperty('when');
+  });
+
+  test('compatibility bindings travel by the mode the form chose', () => {
+    const base: CreateUpdateSourceFormData = {
+      source: 'legacy',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', operator: 'equals', value: 'value' },
+    };
+
+    expect(transformSourceFormDataToRequestBody(base)).not.toHaveProperty(
+      'compat_profiles',
+    );
+    expect(
+      transformSourceFormDataToRequestBody({
+        ...base,
+        receiver_ui_config: { compat_mode: 'inherit' },
+        compat_profiles: [{ profile: 'dfe-legacy-2x' }],
+      }).compat_profiles,
+    ).toBeNull();
+    expect(
+      transformSourceFormDataToRequestBody({
+        ...base,
+        receiver_ui_config: { compat_mode: 'own' },
+        compat_profiles: [{ profile: 'dfe-legacy-2x', version: '1.0.0' }],
+      }).compat_profiles,
+    ).toStrictEqual([{ profile: 'dfe-legacy-2x', version: '1.0.0' }]);
+  });
+
+  test('aliases send only the profiles that hold values', () => {
+    const result = transformSourceFormDataToRequestBody({
+      source: 'legacy',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', operator: 'equals', value: 'value' },
+      aliases: { 'dfe-legacy-2x': ['firewall', 'fw'], 'elastic-agent': [] },
+    });
+
+    expect(result.aliases).toStrictEqual({
+      'dfe-legacy-2x': ['firewall', 'fw'],
+    });
   });
 
   test('a blank engine is sent empty, which follows the DFE default', () => {

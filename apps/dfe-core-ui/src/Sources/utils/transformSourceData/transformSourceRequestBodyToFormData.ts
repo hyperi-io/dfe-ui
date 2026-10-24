@@ -1,5 +1,6 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { fromApiRootMatch, TSourceMatch } from '@/Sources/utils/sourceMatch';
 
 import { objectToObjectArray, stringifyFetcherConfig } from './helpers';
 
@@ -59,8 +60,9 @@ export const transformSourceRequestBodyToFormData = (
         }
       : null,
     match: source?.version?.match
-      ? { ...source.version.match }
+      ? fromApiRootMatch(source.version.match as TSourceMatch)
       : { field: '', value: '' },
+    when: source?.version?.when ?? null,
     views: source?.version?.views?.map((view) => {
       const { custom_mappings, ...viewRest } = view;
       const formCustomMappings = objectToObjectArray(custom_mappings);
@@ -73,6 +75,7 @@ export const transformSourceRequestBodyToFormData = (
       ? {
           receiver_ui_config: {
             table: hasMetaSchema ? 'own' : 'main',
+            match_mode: source?.version?.when ? 'expression' : 'conditions',
           },
         }
       : {}),
