@@ -11,7 +11,8 @@ import { Button, Spin, Tag } from 'antd';
 import {
   hasSourceRules,
   sourceRoutingRule,
-  TSourceRule,
+  TRuleMatch,
+  TRuleRow,
 } from './sourceRoutingRule';
 
 /**
@@ -26,14 +27,74 @@ const RoutingHeading = ({ service }: { service: string }) => (
   </h2>
 );
 
-const RuleSummary = ({ rule }: { rule: TSourceRule | null }) => {
-  if (!rule) return <span className="text-sm">no rule</span>;
+/** One native test: the field, how it is tested, and what it is tested against. */
+const MatchTest = ({ match }: { match: TRuleMatch }) => {
+  const operand = [match.value, match.prefix, match.suffix]
+    .filter((part): part is string => !!part)
+    .join(' ... ');
+  const range =
+    match.min != null || match.max != null
+      ? `${match.min ?? 0} to ${match.max ?? 'any'}`
+      : '';
   return (
     <span className="flex flex-wrap items-center gap-1">
-      <Tag className="font-mono">{rule.field}</Tag>
-      <Tag>{rule.mode}</Tag>
-      {rule.match_value && <Tag className="font-mono">{rule.match_value}</Tag>}
+      <Tag className="font-mono">{match.field}</Tag>
+      <Tag>{`${match.negate ? 'not ' : ''}${match.op}`}</Tag>
+      {(operand || range) && (
+        <Tag className="font-mono">{operand || range}</Tag>
+      )}
     </span>
+  );
+};
+
+/** A test, or every one of several, nested as the engine compiled it. */
+const MatchTree = ({ match }: { match: TRuleMatch }) => {
+  if (!match.all?.length) return <MatchTest match={match} />;
+  return (
+    <div className="flex flex-col gap-1">
+      <span>{match.negate ? 'Not all of these' : 'All of these'}</span>
+      <ul className="m-0 flex list-none flex-col gap-1 border-l border-foreground/15 pl-3 dark:border-dark-foreground/15">
+        {match.all.map((part, index) => (
+          <li key={index}>
+            <MatchTree match={part} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const RuleRow = ({ row }: { row: TRuleRow }) => {
+  if (row.when) {
+    return (
+      <span className="flex flex-wrap items-center gap-1">
+        <Tag>when</Tag>
+        <code className="font-mono">{row.when}</code>
+      </span>
+    );
+  }
+  return row.match ? (
+    <MatchTree match={row.match} />
+  ) : (
+    <span className="text-sm">no test</span>
+  );
+};
+
+/** A match that compiles to several rows labels the record when any one of them matches. */
+const RuleSummary = ({ rows }: { rows: TRuleRow[] }) => {
+  if (rows.length === 0) return <span className="text-sm">no rule</span>;
+  if (rows.length === 1) return <RuleRow row={rows[0]} />;
+  return (
+    <div className="flex flex-col gap-1">
+      <span>Any one of these rows</span>
+      <ul className="m-0 flex list-none flex-col gap-1 border-l border-foreground/15 pl-3 dark:border-dark-foreground/15">
+        {rows.map((row) => (
+          <li key={row.id}>
+            <RuleRow row={row} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
@@ -96,7 +157,7 @@ export const SourceRoutingCard = ({
     );
   }
 
-  // Some compilers emit a whole-app map rather than per-source rules, and only
+  // Some compilers emit a whole-app map rather than a rule set, and only
   // the latter has anything to say on a source page.
   if (!hasSourceRules(routing.compiled)) return null;
 
@@ -140,11 +201,11 @@ export const SourceRoutingCard = ({
       <dl className="grid grid-cols-[9rem_1fr] items-center gap-2 text-sm">
         <dt className="font-semibold">From the sources</dt>
         <dd>
-          <RuleSummary rule={state.compiled} />
+          <RuleSummary rows={state.compiled} />
         </dd>
         <dt className="font-semibold">On the receiver</dt>
         <dd>
-          <RuleSummary rule={state.deployed} />
+          <RuleSummary rows={state.deployed} />
         </dd>
         <dt className="font-semibold">State</dt>
         <dd>

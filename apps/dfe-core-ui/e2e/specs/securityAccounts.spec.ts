@@ -9,6 +9,7 @@ import {
   loginAs,
   textbox,
 } from '../config/login.helpers';
+import { logOut, openSettingsMenu } from '../config/settingsMenu.helpers';
 
 /*
  * The security accounts drawer against a real engine: every account it lists
@@ -70,16 +71,9 @@ const resetPassword = async (
   await expect(dialog).toBeHidden();
 };
 
-// The sidebar's menu: the account list's row menus carry the same label.
-const sidebarUserActions = (page: Page) =>
-  page
-    .getByRole('complementary')
-    .getByRole('button', { name: 'User actions', exact: true });
-
 const signOut = async (page: Page) => {
   await page.goto(`${BASE_URL}/sources`);
-  await sidebarUserActions(page).click();
-  await page.getByRole('button', { name: 'Logout', exact: true }).click();
+  await logOut(page);
   await expect(page).toHaveURL((url) => url.pathname === '/login');
 };
 
@@ -121,10 +115,8 @@ test.describe('security accounts', () => {
       await signOut(page);
       await signIn(page, username, password);
       await expectSourcesLanding(page);
-      await sidebarUserActions(page).click();
-      await expect(page.locator('dt:text-is("User ID:") + dd')).toHaveText(
-        username,
-      );
+      const menu = await openSettingsMenu(page);
+      await expect(menu.getByText(username, { exact: true })).toBeVisible();
       await page.keyboard.press('Escape');
     }
   });

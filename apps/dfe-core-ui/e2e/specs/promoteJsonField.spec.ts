@@ -212,7 +212,17 @@ test('the console promotes a path and the meta schema carries the column @docker
   );
 
   // The sample row is the console's own read of `_json`, so the tick is taken on
-  // the rendered path rather than on a path this spec supplies.
+  // the rendered path rather than on a path this spec supplies. A row opens
+  // collapsed, and so does each object inside it.
+  await page.getByRole('listitem').getByRole('button').first().click();
+  await page
+    .getByRole('button', { name: /^"_json":/ })
+    .first()
+    .click();
+  await page
+    .getByRole('button', { name: /^"client":/ })
+    .first()
+    .click();
   await page
     .getByRole('button', { name: `Actions for _json.${UI_PATH}` })
     .first()

@@ -5,80 +5,141 @@ import {
 import { describe, expect, it } from 'vitest';
 import { hasSourceRules, sourceRoutingRule } from './sourceRoutingRule';
 
-const rule = (source: string, value: string) => ({
-  field: 'event.dataset',
-  mode: 'key_value_set',
-  match_value: value,
-  source,
+const row = (id: string, source: string, value: string) => ({
+  id,
+  match: { field: 'event.dataset', op: 'equals', value },
+  set: { _source: { value: source } },
 });
 
 // The engine keys each derived block by name, so every fixture here nests the
-// rules one level down, as the receiver's compile writes them.
-const blocks = (...rules: ReturnType<typeof rule>[]) => ({
-  routing: { source_rules: rules },
-  destinations: { default: 'kafka', rules: [] },
+// rows under rules.rules, as the receiver's compile writes them.
+const blocks = (...rows: ReturnType<typeof row>[]) => ({
+  routing: { default_source: 'main' },
+  rules: { targets: ['_source', '_org_id'], rules: rows },
+  destinations: { default: 'kafka', sources: {} },
 });
 
 describe('sourceRoutingRule', () => {
-  it('picks out only this source rule from the whole receiver block', () => {
+  it('picks out only this source rows from the whole receiver rule set', () => {
     const compiled = blocks(
-      rule('syslog', 'syslog'),
-      rule('windows', 'windows'),
+      row('source.syslog', 'syslog', 'syslog'),
+      row('source.windows', 'windows', 'windows'),
     );
 
     const state = sourceRoutingRule(compiled, compiled, 'windows');
 
-    expect(state.compiled).toEqual(rule('windows', 'windows'));
-    expect(state.deployed).toEqual(rule('windows', 'windows'));
+    expect(state.compiled).toEqual([
+      row('source.windows', 'windows', 'windows'),
+    ]);
+    expect(state.deployed).toEqual(state.compiled);
     expect(state.drift).toBe(false);
   });
 
-  it('reports drift when the deployed rule differs from the compiled one', () => {
-    const compiled = blocks(rule('syslog', 'syslog'));
-    const deployed = blocks(rule('syslog', 'syslog-old'));
+  it('takes every numbered row a match compiles to, and no other source', () => {
+    const compiled = blocks(
+      row('source.edge.1', 'edge', 'a'),
+      row('source.edge.2', 'edge', 'b'),
+      row('source.edge-two', 'edge-two', 'c'),
+      row('source.edgy', 'edgy', 'd'),
+    );
+
+    const state = sourceRoutingRule(compiled, compiled, 'edge');
+
+    expect(state.compiled.map((r) => r.id)).toEqual([
+      'source.edge.1',
+      'source.edge.2',
+    ]);
+  });
+
+  it('leaves out compatibility rows, which set the org and the source for a profile', () => {
+    const compiled = {
+      rules: {
+        rules: [
+          row('source.syslog', 'syslog', 'syslog'),
+          {
+            id: 'compat.elastic-agent.dataset',
+            match: { field: 'data_stream.dataset', op: 'exists' },
+            set: { _org_id: { value: 'x' } },
+          },
+        ],
+      },
+    };
+
+    expect(
+      sourceRoutingRule(compiled, compiled, 'syslog').compiled,
+    ).toHaveLength(1);
+  });
+
+  it('reads a grouped match and a CEL when as the rows the engine compiled', () => {
+    const compiled = {
+      rules: {
+        rules: [
+          {
+            id: 'source.grouped',
+            match: {
+              all: [
+                { field: 'a', op: 'equals', value: '1' },
+                { field: 'b', op: 'equals', value: '2', negate: true },
+              ],
+            },
+            set: { _source: { value: 'grouped' } },
+          },
+          {
+            id: 'source.cel',
+            when: "a == 'x'",
+            set: { _source: { value: 'cel' } },
+          },
+        ],
+      },
+    };
+
+    expect(
+      sourceRoutingRule(compiled, compiled, 'grouped').compiled[0].match?.all,
+    ).toHaveLength(2);
+    expect(sourceRoutingRule(compiled, compiled, 'cel').compiled[0].when).toBe(
+      "a == 'x'",
+    );
+  });
+
+  it('reports drift when the deployed rows differ from the compiled ones', () => {
+    const compiled = blocks(row('source.syslog', 'syslog', 'syslog'));
+    const deployed = blocks(row('source.syslog', 'syslog', 'syslog-old'));
 
     expect(sourceRoutingRule(compiled, deployed, 'syslog').drift).toBe(true);
   });
 
-  it('reports drift when the receiver carries no rule for the source', () => {
+  it('reports drift when the receiver carries no row for the source', () => {
     const state = sourceRoutingRule(
-      blocks(rule('syslog', 'syslog')),
+      blocks(row('source.syslog', 'syslog', 'syslog')),
       blocks(),
       'syslog',
     );
 
-    expect(state.deployed).toBeNull();
+    expect(state.deployed).toEqual([]);
     expect(state.drift).toBe(true);
   });
 
   it('does not report drift when neither side names the source', () => {
     const state = sourceRoutingRule(
-      blocks(rule('other', 'other')),
-      blocks(rule('other', 'other')),
+      blocks(row('source.other', 'other', 'other')),
+      blocks(row('source.other', 'other', 'other')),
       'syslog',
     );
 
-    expect(state.compiled).toBeNull();
-    expect(state.deployed).toBeNull();
+    expect(state.compiled).toEqual([]);
+    expect(state.deployed).toEqual([]);
     expect(state.drift).toBe(false);
   });
 
-  it('treats a missing match_value and a null one as the same rule', () => {
-    const compiled = {
-      routing: {
-        source_rules: [
-          { field: 'host', mode: 'key_present', source: 'syslog' },
-        ],
-      },
-    };
+  it('does not tell key order from a difference', () => {
+    const compiled = blocks(row('source.syslog', 'syslog', 'syslog'));
     const deployed = {
-      routing: {
-        source_rules: [
+      rules: {
+        rules: [
           {
-            field: 'host',
-            mode: 'key_present',
-            match_value: null,
-            source: 'syslog',
+            set: { _source: { value: 'syslog' } },
+            match: { value: 'syslog', op: 'equals', field: 'event.dataset' },
+            id: 'source.syslog',
           },
         ],
       },
@@ -87,52 +148,52 @@ describe('sourceRoutingRule', () => {
     expect(sourceRoutingRule(compiled, deployed, 'syslog').drift).toBe(false);
   });
 
-  it('finds the rule in the live receiver response, nested under its block', () => {
+  it('finds the rows in the live receiver response, nested under their block', () => {
     const state = sourceRoutingRule(
       RECEIVER_ROUTING_BLOCKS,
       RECEIVER_ROUTING_BLOCKS,
       'syslog',
     );
 
-    expect(state.compiled).toMatchObject({
-      field: 'event.dataset',
-      source: 'syslog',
+    expect(state.compiled[0]).toMatchObject({
+      id: 'source.syslog',
+      match: { field: 'event.dataset', op: 'equals' },
     });
     expect(state.drift).toBe(false);
   });
 
-  it('finds no rule for any source in the loader whole-app map', () => {
+  it('finds no rows for any source in the loader whole-app map', () => {
     const state = sourceRoutingRule(
       LOADER_ROUTING_BLOCKS,
       LOADER_ROUTING_BLOCKS,
       'syslog',
     );
 
-    expect(state.compiled).toBeNull();
-    expect(state.deployed).toBeNull();
+    expect(state.compiled).toEqual([]);
+    expect(state.deployed).toEqual([]);
   });
 
   it('survives a block map that is not the shape it expects', () => {
     const state = sourceRoutingRule(null, 'nonsense', 'syslog');
 
-    expect(state.compiled).toBeNull();
-    expect(state.deployed).toBeNull();
+    expect(state.compiled).toEqual([]);
+    expect(state.deployed).toEqual([]);
   });
 
-  it('ignores a rules list nested one level too shallow', () => {
+  it('ignores rows nested one level too shallow', () => {
     // Guards the wrong depth from being read again: the engine never sends this.
     const state = sourceRoutingRule(
-      { source_rules: [rule('syslog', 'syslog')] },
-      { source_rules: [rule('syslog', 'syslog')] },
+      { rules: [row('source.syslog', 'syslog', 'syslog')] },
+      { rules: [row('source.syslog', 'syslog', 'syslog')] },
       'syslog',
     );
 
-    expect(state.compiled).toBeNull();
+    expect(state.compiled).toEqual([]);
   });
 });
 
 describe('hasSourceRules', () => {
-  it('is true for the receiver, whose rules sit in its routing block', () => {
+  it('is true for the receiver, whose rows sit in its rules block', () => {
     expect(hasSourceRules(RECEIVER_ROUTING_BLOCKS)).toBe(true);
   });
 
@@ -147,7 +208,7 @@ describe('hasSourceRules', () => {
     expect(hasSourceRules({})).toBe(false);
   });
 
-  it('is true for an empty rules list, which is a receiver with no sources', () => {
-    expect(hasSourceRules({ routing: { source_rules: [] } })).toBe(true);
+  it('is true for an empty rule set, which is a receiver with no sources', () => {
+    expect(hasSourceRules({ rules: { rules: [] } })).toBe(true);
   });
 });

@@ -51,6 +51,8 @@ export const MetaSchemaForm = ({
       <Form.Item
         className="w-full"
         name={['schema', 'meta_schema']}
+        // The schema leaves these optional, because only an own table needs them and this form shows for one.
+        required
         /**
          * Validate on blur to prevent form submission when clearing the meta schema
          */
@@ -89,6 +91,7 @@ export const MetaSchemaForm = ({
         className="w-full"
         name={['schema', 'meta_schema_version']}
         label="Meta Schema Version"
+        required
         rules={[formValidation]}
       >
         <Select

@@ -1,4 +1,6 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { useQueryClient } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { useFetchBackingServices } from '.';
@@ -22,6 +24,25 @@ describe('useFetchBackingServices', () => {
     ]);
     expect(result.current.data?.[0].chart).toBe('clickhouse-cluster');
     expect(result.current.data?.[0].overlay).toBe('clickhouse-cluster.yaml');
+  });
+
+  // Writing a value invalidates the backing-services key, so the list has to be cached under it.
+  it('caches the catalogue under the backing-services key, not the sources one', async () => {
+    const { result } = renderHook(
+      () => ({
+        backing: useFetchBackingServices(),
+        client: useQueryClient(),
+      }),
+      { wrapper },
+    );
+
+    await waitFor(() => expect(result.current.backing.isLoading).toBe(false));
+
+    const { client } = result.current;
+    expect(client.getQueryData(QUERY_KEYS.backingServices.default())).toEqual(
+      result.current.backing.data,
+    );
+    expect(client.getQueryData(QUERY_KEYS.sources.default())).toBeUndefined();
   });
 
   it('reports a values prefix that need not match the service or the chart', async () => {

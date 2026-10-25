@@ -274,7 +274,8 @@ test('the rule order saves a move, and refuses one made against a list that chan
   ).toBeVisible();
   await page.getByRole('button', { name: 'Save order' }).first().click();
   await expect(page.getByText('Order saved')).toBeVisible({ timeout: 30_000 });
-  expect((await order())[1]).toBe(`rule-block-${first}`);
+  // The toast shows before the list refetches, so wait for the stored order.
+  await expect.poll(async () => (await order())[1]).toBe(`rule-block-${first}`);
 
   // Another writer adds a source after the page read the list.
   await sourceRules

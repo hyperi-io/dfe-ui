@@ -2,7 +2,10 @@ import { Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
-import { seedAppManagement } from '../config/appManagement.helpers';
+import {
+  deploySeededSources,
+  seedAppManagement,
+} from '../config/appManagement.helpers';
 
 /**
  * One source per transform app.
@@ -29,14 +32,23 @@ const TRANSFORMS = [
   },
 ] as const;
 
-// dfe-fetcher is per-source as well, and it is the only one that deploys and
-// undeploys on its own: the transforms are one choice the source carries.
-const STANDALONE_PER_SOURCE_APPS = 1;
+// dfe-fetcher is the only per-source app that deploys and undeploys on its own,
+// and its card belongs to fetcher sources. These are receiver sources, so no
+// card reports itself undeployed and none offers a Deploy.
+const STANDALONE_PER_SOURCE_APPS = 0;
 
 test.beforeEach(async ({ playwright, page }) => {
+  // Deploying three sources applies three tables, which takes about 15s.
+  test.slow();
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
   await seedAppManagement({ playwright, seedScript: 'seed_three_transforms' });
+  // Processing shows only for a deployed source with a meta schema.
+  await deploySeededSources({
+    playwright,
+    sources: TRANSFORMS.map(({ source }) => source),
+    seedScript: 'seed_three_transforms',
+  });
   await loginAs(page, 'initial_user');
 });
 
@@ -64,8 +76,8 @@ for (const { engine, source, app } of TRANSFORMS) {
     await expect(page.getByRole('radio', { name: app })).toBeChecked();
     await expect(page.getByText('Running for this source.')).toHaveCount(1);
 
-    // Only dfe-fetcher reports itself undeployed, which is what proves the
-    // transform instances are bound one per source rather than shared.
+    // No card reports itself undeployed: the transform instances are bound
+    // one per source rather than shared.
     await expect(page.getByText('Not deployed for this source.')).toHaveCount(
       STANDALONE_PER_SOURCE_APPS,
     );
@@ -99,7 +111,7 @@ test('a transform offers no deploy, because the source carries the choice', asyn
 }) => {
   for (const { source } of TRANSFORMS) {
     await openProcessingTab(page, source);
-    // The one Deploy left on the page belongs to dfe-fetcher.
+    // A receiver source has no standalone app left to deploy.
     await expect(
       page.getByRole('button', { name: 'Deploy', exact: true }),
     ).toHaveCount(STANDALONE_PER_SOURCE_APPS);

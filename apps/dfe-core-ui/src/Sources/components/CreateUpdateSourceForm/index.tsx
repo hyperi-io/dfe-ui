@@ -9,6 +9,7 @@ import { isMatchGroup } from '@/Sources/utils/sourceMatch';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import {
+  getFirstTabWithErrors,
   getTabErrors,
   getTabsWithErrors,
   getValidationErrors,
@@ -90,6 +91,7 @@ export const CreateUpdateSourceFormBase = ({
       transform: [],
       views: [],
     });
+  const [activeTab, setActiveTab] = useState<string>('sourceDetails');
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateSourceFormData>(formSchema);
@@ -115,6 +117,11 @@ export const CreateUpdateSourceFormBase = ({
       formFields: errorInfo.errorFields ?? [],
     });
     setValidationErrors(validationErrors);
+    // A refused field may sit on a tab nobody has opened, so go to it.
+    const failedTab = getFirstTabWithErrors(validationErrors);
+    if (failedTab) {
+      setActiveTab(failedTab);
+    }
     onFinishFailed?.(errorInfo);
   };
 
@@ -255,7 +262,17 @@ export const CreateUpdateSourceFormBase = ({
       {...props}
     >
       <SourceWriteErrorProvider error={error}>
-        <Tabs destroyOnHidden={false} items={tabItems} />
+        <Tabs
+          destroyOnHidden={false}
+          items={tabItems}
+          // A tab that has left the dialog (Own table switched to Shared) falls back to the first.
+          activeKey={
+            tabItems.some((item) => item.key === activeTab)
+              ? activeTab
+              : tabItems[0]?.key
+          }
+          onChange={setActiveTab}
+        />
       </SourceWriteErrorProvider>
 
       {error &&
