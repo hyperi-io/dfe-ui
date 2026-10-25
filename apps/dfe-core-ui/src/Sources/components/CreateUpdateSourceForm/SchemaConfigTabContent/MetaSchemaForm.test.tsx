@@ -332,4 +332,17 @@ describe('MetaSchemaForm Engine', () => {
     const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
     expect(submitted.schema?.engine).toBe('ReplacingMergeTree(ver)');
   });
+
+  it('marks the meta schema and its version as required', async () => {
+    const { container } = render(<Harness onFinish={vi.fn()} />, { wrapper });
+
+    await screen.findByText('Meta Schema Version');
+
+    const required = [
+      ...container.querySelectorAll('label.ant-form-item-required'),
+    ].map((label) => label.textContent?.trim());
+    expect(required).toEqual(
+      expect.arrayContaining(['Meta Schema', 'Meta Schema Version']),
+    );
+  });
 });
