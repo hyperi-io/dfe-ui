@@ -53,7 +53,12 @@ describe('transformSourceRequestBodyToFormData', () => {
       version: {
         date_time: 'string',
         archive: false,
-        match: { field: 'field', value: 'value', operator: 'equals' },
+        match: {
+          field: 'field',
+          value: 'value',
+          operator: 'equals',
+          negate: false,
+        },
         origin: 'receiver',
       },
     };
@@ -61,11 +66,115 @@ describe('transformSourceRequestBodyToFormData', () => {
 
     expect(result.origin).toBe('receiver');
     expect(result.fetcher).toBeNull();
-    expect(result.match).toEqual({
+    expect(result.match).toStrictEqual({
       field: 'field',
       value: 'value',
       operator: 'equals',
     });
+    expect(result.receiver_ui_config?.match_mode).toBe('conditions');
+  });
+
+  test('a grouped match opens as a group of the same conditions', () => {
+    const source: TSourceVersionDetail = {
+      source: 'cisco-ios',
+      resource_type: 'custom',
+      enabled: true,
+      current: '1.0.0',
+      versions: ['1.0.0'],
+      selected: '1.0.0',
+      state: 'active',
+      current_table_topic_type: 'main',
+      version: {
+        date_time: 'string',
+        archive: false,
+        origin: 'receiver',
+        match: {
+          value: '',
+          negate: false,
+          all: [
+            {
+              field: 'data_stream.dataset',
+              operator: 'equals',
+              value: 'cisco_ios.log',
+              negate: false,
+            },
+            {
+              value: '',
+              negate: true,
+              any: [
+                {
+                  field: 'agent.type',
+                  operator: 'equals',
+                  value: 'winlogbeat',
+                  negate: false,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    const formData = transformSourceRequestBodyToFormData(source);
+    expect(formData.match).toStrictEqual({
+      join: 'all',
+      parts: [
+        {
+          field: 'data_stream.dataset',
+          operator: 'equals',
+          value: 'cisco_ios.log',
+        },
+        {
+          join: 'any',
+          negate: true,
+          parts: [
+            { field: 'agent.type', operator: 'equals', value: 'winlogbeat' },
+          ],
+        },
+      ],
+    });
+
+    expect(transformSourceFormDataToRequestBody(formData).match).toStrictEqual({
+      all: [
+        {
+          field: 'data_stream.dataset',
+          operator: 'equals',
+          value: 'cisco_ios.log',
+        },
+        {
+          any: [
+            { field: 'agent.type', operator: 'equals', value: 'winlogbeat' },
+          ],
+          negate: true,
+        },
+      ],
+    });
+  });
+
+  test('a CEL Fast source opens on the expression and saves it as when', () => {
+    const source: TSourceVersionDetail = {
+      source: 'okta',
+      resource_type: 'custom',
+      enabled: true,
+      current: '1.0.0',
+      versions: ['1.0.0'],
+      selected: '1.0.0',
+      state: 'active',
+      current_table_topic_type: 'main',
+      version: {
+        date_time: 'string',
+        archive: false,
+        origin: 'receiver',
+        when: "data_stream.dataset == 'okta.system'",
+      },
+    };
+
+    const formData = transformSourceRequestBodyToFormData(source);
+    expect(formData.receiver_ui_config?.match_mode).toBe('expression');
+
+    const body = transformSourceFormDataToRequestBody(formData);
+    expect(body.when).toBe("data_stream.dataset == 'okta.system'");
+    expect(body.match).toBeNull();
   });
 
   test('a fetcher stanza survives the round trip back to the API shape', () => {

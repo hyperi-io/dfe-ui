@@ -4,6 +4,8 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { TabLabel } from '@/core/components/TabLabel';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
+import { getRuleErrors } from '@/Sources/utils/ingestErrors';
+import { isMatchGroup } from '@/Sources/utils/sourceMatch';
 import { Button, FormProps, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import {
@@ -25,11 +27,24 @@ import {
   formSchema,
   type CreateUpdateSourceFormData,
 } from './sourceForm.schema';
+import { SourceWriteErrorProvider } from './sourceWriteError.context';
 import { TransformTabContent } from './TransformTabContent';
 import { getInitialAssignTransform } from './TransformTabContent/TransformTabContent.helpers';
 import { ViewsTabContent } from './ViewsTabContent';
 
 export { formSchema, type CreateUpdateSourceFormData };
+
+/** A rule refusal whose every reason the match section already shows, so the foot of the form points there instead. */
+const isShownAtTheMatch = (error: unknown) => {
+  const ruleErrors = getRuleErrors(error);
+  return (
+    ruleErrors.length > 0 &&
+    ruleErrors.every(
+      (ruleError) =>
+        ruleError.field === 'when' || ruleError.field.startsWith('match'),
+    )
+  );
+};
 
 export interface DisabledFields {
   source?: boolean;
@@ -219,10 +234,14 @@ export const CreateUpdateSourceFormBase = ({
         },
         ...initialValues,
         // Both blocks are seeded so switching origin lands on a usable form.
-        match: { ...EMPTY_MATCH, ...initialValues?.match },
+        match: isMatchGroup(initialValues?.match)
+          ? initialValues?.match
+          : { ...EMPTY_MATCH, ...initialValues?.match },
         fetcher: { ...EMPTY_FETCHER, ...initialValues?.fetcher },
         receiver_ui_config: {
           ...EMPTY_RECEIVER_UI_CONFIG,
+          match_mode: initialValues?.when ? 'expression' : 'conditions',
+          compat_mode: initialValues?.compat_profiles ? 'own' : 'inherit',
           ...initialValues?.receiver_ui_config,
         },
         transform_ui_config: {
@@ -235,13 +254,23 @@ export const CreateUpdateSourceFormBase = ({
       onFieldsChange={handleFieldsChange}
       {...props}
     >
-      <Tabs destroyOnHidden={false} items={tabItems} />
+      <SourceWriteErrorProvider error={error}>
+        <Tabs destroyOnHidden={false} items={tabItems} />
+      </SourceWriteErrorProvider>
 
-      {error && (
-        <Form.Item>
-          <ApiErrorNotification error={error} />
-        </Form.Item>
-      )}
+      {error &&
+        (isShownAtTheMatch(error) ? (
+          <Form.Item>
+            <FormNotification
+              type="error"
+              text="The receiver would refuse this match. The reason is marked on it above."
+            />
+          </Form.Item>
+        ) : (
+          <Form.Item>
+            <ApiErrorNotification error={error} />
+          </Form.Item>
+        ))}
 
       {tabsWithErrors.length > 0 && (
         <Form.Item>

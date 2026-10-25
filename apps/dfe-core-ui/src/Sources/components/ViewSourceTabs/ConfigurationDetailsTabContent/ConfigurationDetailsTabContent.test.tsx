@@ -1,6 +1,6 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import {
   afterAll,
   afterEach,
@@ -76,9 +76,94 @@ describe('ConfigurationDetailsTabContent defaults', () => {
 
 describe('ConfigurationDetailsTabContent', () => {
   it('shows Receiver for a source with a match rule', () => {
-    renderDetails({ match: { field: 'host', operator: 'equals', value: 'a' } });
+    renderDetails({
+      match: { field: 'host', operator: 'equals', value: 'a', negate: false },
+    });
 
     expect(originValue()).toHaveTextContent('Receiver');
+  });
+
+  it('keeps the field and value rows for a single condition', () => {
+    renderDetails({
+      match: { field: 'host', operator: 'equals', value: 'a', negate: false },
+    });
+
+    expect(rowValue('Field:')).toHaveTextContent('host');
+    expect(rowValue('Value:')).toHaveTextContent('a');
+    expect(screen.queryByText('Conditions:')).not.toBeInTheDocument();
+  });
+
+  it('reads out grouped conditions one to a line under their join', () => {
+    renderDetails({
+      match: {
+        value: '',
+        negate: false,
+        all: [
+          {
+            field: 'data_stream.dataset',
+            operator: 'equals',
+            value: 'cisco_ios.log',
+            negate: false,
+          },
+          {
+            field: 'agent.type',
+            operator: 'equals',
+            value: 'winlogbeat',
+            negate: true,
+          },
+        ],
+      },
+    });
+
+    expect(originValue()).toHaveTextContent('Receiver');
+    const conditions = rowValue('Conditions:') as HTMLElement;
+    expect(conditions).toHaveTextContent(/^All of these/);
+    expect(
+      within(conditions)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual([
+      'data_stream.dataset equals cisco_ios.log',
+      'not agent.type equals winlogbeat',
+    ]);
+  });
+
+  it('nests a negated any group as none of its parts', () => {
+    renderDetails({
+      match: {
+        value: '',
+        negate: false,
+        all: [
+          {
+            field: 'host',
+            operator: 'exists',
+            value: '',
+            negate: false,
+          },
+          {
+            value: '',
+            negate: true,
+            any: [
+              { field: 'a', operator: 'ends_with', value: '1', negate: false },
+            ],
+          },
+        ],
+      },
+    });
+
+    const conditions = rowValue('Conditions:') as HTMLElement;
+    const inner = within(conditions).getByText('None of these');
+    expect(inner.nextElementSibling).toHaveTextContent('a ends with 1');
+    expect(within(conditions).getByText('host exists')).toBeInTheDocument();
+  });
+
+  it('shows the expression of a source matched by CEL Fast', () => {
+    renderDetails({ when: "data_stream.dataset == 'okta.system'" });
+
+    expect(originValue()).toHaveTextContent('Receiver');
+    expect(rowValue('Expression:')).toHaveTextContent(
+      "data_stream.dataset == 'okta.system'",
+    );
   });
 
   it('shows Fetcher for a source with a fetcher', () => {

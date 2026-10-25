@@ -4,21 +4,38 @@ import {
   ENGINE_OWNED_FETCHER_KEYS,
   parseFetcherConfig,
 } from '@/Sources/utils/transformSourceData/helpers';
+import { TCompatBinding } from '@/Sources/hooks/useFetchCompat/types';
+import {
+  isMatchGroup,
+  MATCH_NESTING_LIMIT,
+  matchDepth,
+  operatorTakesValue,
+  TMatchFormNode,
+  TMatchOperator,
+} from '@/Sources/utils/sourceMatch';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 
 import z from 'zod';
 
-type TSourceMatch = NonNullable<TCreateSourceRequestBody['match']>;
 type TSourceFetcher = NonNullable<TCreateSourceRequestBody['fetcher']>;
 
-export const MATCH_OPERATORS = [
+/** `always` is the engine's own, reserved for the default source. */
+export const MATCH_OPERATORS: TMatchOperator[] = [
   'equals',
   'exists',
   'includes',
   'starts_with',
   'ends_with',
   'not_equals',
-] as TSourceMatch['operator'][];
+];
+
+/** How a receiver source picks its records: conditions, or one CEL Fast expression. */
+export const MATCH_MODES = ['conditions', 'expression'] as const;
+export type MatchMode = (typeof MATCH_MODES)[number];
+
+/** Whether a source takes the deployment's compatibility profiles or names its own. */
+export const COMPAT_MODES = ['inherit', 'own'] as const;
+export type CompatMode = (typeof COMPAT_MODES)[number];
 
 /** A source is receiver-based or fetcher-based; the engine refuses both or neither. */
 export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
@@ -71,14 +88,15 @@ const sourceDetailsTabSchema = {
 const originTabSchema = {
   origin: z.enum(SOURCE_ORIGINS, { message: 'Origin is required' }),
 
-  match: z
-    .object({
-      // Empties are fine here: the origin refinement below refuses a blank
-      // match only when this source is a receiver.
-      field: z.string().optional().nullable(),
-      operator: z.enum(MATCH_OPERATORS).optional().nullable(),
-      value: z.string().optional().nullable(),
-    })
+  // A tree of conditions and groups, checked by the origin refinement below,
+  // which refuses a blank one only when this source is a receiver.
+  match: z.custom<TMatchFormNode>().optional().nullable(),
+  // CEL Fast, in place of match. The engine checks it at save.
+  when: z.string().optional().nullable(),
+  compat_profiles: z.custom<TCompatBinding[]>().optional().nullable(),
+  // An alias field left empty holds undefined, and a type error here would skip the refinement below.
+  aliases: z
+    .record(z.string(), z.array(z.string()).optional().nullable())
     .optional()
     .nullable(),
   fetcher: z
@@ -94,9 +112,57 @@ const originTabSchema = {
   receiver_ui_config: z
     .object({
       table: z.enum(RECEIVER_TABLES).optional().nullable(),
+      match_mode: z.enum(MATCH_MODES).optional().nullable(),
+      compat_mode: z.enum(COMPAT_MODES).optional().nullable(),
     })
     .optional()
     .nullable(),
+};
+
+type IssueSink = Pick<z.RefinementCtx, 'addIssue'>;
+
+/** Refuse the first blank in each condition, and an empty group, at the path the form shows it on. */
+const checkMatchNode = (
+  node: TMatchFormNode | null | undefined,
+  path: (string | number)[],
+  ctx: IssueSink,
+) => {
+  if (isMatchGroup(node)) {
+    const parts = node?.parts ?? [];
+    if (parts.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'A group needs at least one condition',
+        path: [...path, 'parts'],
+      });
+    }
+    parts.forEach((part, index) =>
+      checkMatchNode(part, [...path, 'parts', index], ctx),
+    );
+    return;
+  }
+  if (!node?.field?.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Field is required',
+      path: [...path, 'field'],
+    });
+  }
+  if (!node?.operator) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Operator is required',
+      path: [...path, 'operator'],
+    });
+    return;
+  }
+  if (operatorTakesValue(node.operator) && !node.value?.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Value is required',
+      path: [...path, 'value'],
+    });
+  }
 };
 
 const schemaConfigTabSchema = {
@@ -220,26 +286,23 @@ export const formSchema = z
       return;
     }
 
-    if (!data.match?.field?.trim()) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Field is required',
-        path: ['match', 'field'],
-      });
-    }
-    if (!data.match?.operator) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Operator is required',
-        path: ['match', 'operator'],
-      });
+    if (data.receiver_ui_config?.match_mode === 'expression') {
+      if (!data.when?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Expression is required',
+          path: ['when'],
+        });
+      }
       return;
     }
-    if (data.match.operator !== 'exists' && !data.match.value?.trim()) {
+
+    checkMatchNode(data.match, ['match'], ctx);
+    if (matchDepth(data.match) > MATCH_NESTING_LIMIT) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Value is required',
-        path: ['match', 'value'],
+        message: `Groups nest at most ${MATCH_NESTING_LIMIT} deep`,
+        path: ['match', 'parts'],
       });
     }
   });

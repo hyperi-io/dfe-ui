@@ -13,6 +13,7 @@ import {
   COMMON_HEADER_DIR,
   commonHeaderName,
 } from '@/Sources/utils/commonHeader';
+import { describeMatch, TSourceMatch } from '@/Sources/utils/sourceMatch';
 import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { IconCircleCheck, IconCircleX, IconLink } from '@repo/dfe-icons';
 import Link from 'next/link';
@@ -25,6 +26,36 @@ const formCollapseTitleStyle =
 const EmptyData = () => (
   <span className="text-foreground/40 dark:text-dark-foreground/40">None</span>
 );
+
+/** How a group joins its parts, worded as the source editor's header reads. */
+const groupHeading = (match: TSourceMatch) => {
+  if (match.all?.length) {
+    return match.negate ? 'Not all of these' : 'All of these';
+  }
+  return match.negate ? 'None of these' : 'Any of these';
+};
+
+/** A match as nested lists, one condition a line, so a long tree reads the way it was built. */
+const MatchTree = ({ match }: { match: TSourceMatch }) => {
+  const parts = match.all?.length ? match.all : match.any;
+  if (!parts?.length) {
+    return (
+      <span className="font-mono break-words">{describeMatch(match)}</span>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span>{groupHeading(match)}</span>
+      <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">
+        {parts.map((part, index) => (
+          <li key={index}>
+            <MatchTree match={part} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 const formatDeployedDescription = ({
   sourceName,
@@ -75,13 +106,25 @@ export const ConfigurationDetailsTabContent = ({
   deployed_version,
 
   selected: selected_version,
-  version: { header, schema, transform, match, fetcher, source_build, views },
+  version: {
+    header,
+    schema,
+    transform,
+    match: storedMatch,
+    when,
+    fetcher,
+    source_build,
+    views,
+  },
 }: TSourceVersionDetail) => {
+  const match = storedMatch as TSourceMatch | null | undefined;
   const hasSchema = schema?.meta_schema || header?.type;
   const isFetcherOrigin = Object.keys(fetcher ?? {}).length > 0;
-  const hasOrigin = match?.field || isFetcherOrigin;
+  const isGrouped = !!match && !!(match.all?.length || match.any?.length);
+  const hasReceiverRule = !!match?.field || isGrouped || !!when;
+  const hasOrigin = hasReceiverRule || isFetcherOrigin;
   // A core source such as main has neither, and the engine reports no origin for it.
-  const receiverOrNone = match?.field ? 'Receiver' : null;
+  const receiverOrNone = hasReceiverRule ? 'Receiver' : null;
   const originLabel = isFetcherOrigin ? 'Fetcher' : receiverOrNone;
   const hasViews = views && views.length > 0;
   const fetcherConfig = stringifyFetcherConfig(fetcher?.config);
@@ -237,6 +280,16 @@ export const ConfigurationDetailsTabContent = ({
                 <EmptyData />
               )}
             </div>
+          ) : when ? (
+            <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1">
+              <dt className={dataListTermStyle}>Expression:</dt>
+              <dd className="font-mono break-all">{when}</dd>
+            </dl>
+          ) : isGrouped || match?.negate ? (
+            <dl className="grid grid-cols-[155px_1fr] gap-x-6 gap-y-1">
+              <dt className={dataListTermStyle}>Conditions:</dt>
+              <dd>{match ? <MatchTree match={match} /> : <EmptyData />}</dd>
+            </dl>
           ) : (
             <dl className="grid grid-cols-[155px_1fr_155px_1fr] gap-x-6 gap-y-1">
               <dt className={dataListTermStyle}>Field:</dt>

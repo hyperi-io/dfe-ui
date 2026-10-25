@@ -6,7 +6,9 @@ import { BASE_URL } from './e2e.client';
 // wizard, so a rotated deployment failed both at once (dfe-ui#206).
 // No default -- every deployment mints its own, so a literal here would be wrong.
 export const adminPassword = (): string => {
-  const password = process.env.E2E_ADMIN_PASSWORD;
+  // The engine's own name for it, so a deployment's env file feeds the suite as it stands.
+  const password =
+    process.env.E2E_ADMIN_PASSWORD || process.env.DFE_AUTH_LOCAL_ADMIN_PASSWORD;
   if (!password) {
     throw new Error(
       'E2E_ADMIN_PASSWORD is not set: put the admin password this deployment ' +

@@ -16,6 +16,11 @@ export const SourcesToolbar = () => {
       label: 'Sources',
       disabled: false,
     },
+    {
+      path: '/sources/ingest-rules',
+      label: 'Ingest rules',
+      disabled: false,
+    },
   ];
 
   const isSelected = (path: string) => pathname === path;

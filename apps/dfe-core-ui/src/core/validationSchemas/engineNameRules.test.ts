@@ -44,9 +44,19 @@ const CONSOLE_RULES: Record<string, Validator> = {
   'RuleCreateRequest.name': RULE_HUNT_NAME_VALIDATOR,
 };
 
+/**
+ * Patterned fields the console only ever fills from what the engine listed,
+ * never from typing, so there is no input of the console's to check.
+ */
+const ENGINE_CHOSEN: Record<string, string> = {
+  'CompatBinding.profile': 'a profile id from the compat-profiles list',
+  'CompatProfile.current': 'a profile document the console never authors',
+  'CompatProfileVersion.date': 'a profile document the console never authors',
+};
+
 const spec = JSON.parse(readFileSync(SPEC_PATH, 'utf8')) as Spec;
 
-const published = Object.entries(spec.components.schemas).flatMap(
+const allPublished = Object.entries(spec.components.schemas).flatMap(
   ([schema, { properties = {} }]) =>
     Object.entries(properties)
       .filter(([, property]) => property.pattern !== undefined)
@@ -57,11 +67,20 @@ const published = Object.entries(spec.components.schemas).flatMap(
       })),
 );
 
+const published = allPublished.filter(({ field }) => !(field in ENGINE_CHOSEN));
+
 describe('the console name rules match the engine spec', () => {
   test('every published name rule has a console rule, and no console rule is unpublished', () => {
     expect(published.map(({ field }) => field).sort()).toEqual(
       Object.keys(CONSOLE_RULES).sort(),
     );
+  });
+
+  test('every field taken from an engine list is still published', () => {
+    const fields = allPublished.map(({ field }) => field);
+    expect(
+      Object.keys(ENGINE_CHOSEN).filter((f) => !fields.includes(f)),
+    ).toEqual([]);
   });
 
   test.each(published)(

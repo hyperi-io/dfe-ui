@@ -453,6 +453,50 @@ describe('If-Match on a guarded write', () => {
   });
 });
 
+describe('getWithEtag', () => {
+  const RULES_URL = `${BASE_URL}/api/v1/ingest/rules`;
+  const page = { items: [], next_page_token: null, total_size: 0 };
+
+  test('returns the body and the ETag a guarded write sends back', async () => {
+    server.use(
+      http.get(RULES_URL, () =>
+        HttpResponse.json(page, { headers: { ETag: '"order-7"' } }),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const result = await client.getWithEtag('/api/v1/ingest/rules');
+
+    expect(result).toEqual({ data: page, etag: '"order-7"' });
+  });
+
+  test('reports no ETag as null rather than inventing one', async () => {
+    server.use(http.get(RULES_URL, () => HttpResponse.json(page)));
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+    const result = await client.getWithEtag('/api/v1/ingest/rules');
+
+    expect(result.etag).toBeNull();
+  });
+
+  test('a refused read still raises the ApiError', async () => {
+    server.use(
+      http.get(RULES_URL, () =>
+        HttpResponse.json(
+          { code: 'not_configured', message: 'no deploy repo' },
+          { status: 503 },
+        ),
+      ),
+    );
+
+    const client = createApiClient({ baseUrl: BASE_URL });
+
+    await expect(
+      client.getWithEtag('/api/v1/ingest/rules'),
+    ).rejects.toMatchObject({ status: 503, message: 'no deploy repo' });
+  });
+});
+
 describe('getApiWriteConflict', () => {
   test('reads the revision to retry against', () => {
     const conflict = getApiWriteConflict(

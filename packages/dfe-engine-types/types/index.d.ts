@@ -1301,7 +1301,9 @@ export interface paths {
          *     cleared: once a source owns its own table it cannot move back onto ``main``.
          *
          *     A field the body omits keeps its stored value (``header``, ``schema``, ``views``,
-         *     ``transform``, ``transport``, ``archive``); ``null``, ``[]`` or ``false`` clears it.
+         *     ``transform``, ``transport``, ``archive``, ``aliases``, ``compat_profiles``), and
+         *     ``null``, ``[]`` or ``false`` clears it. ``compat_profiles: null`` returns the source
+         *     to the deployment's profiles.
          *
          *     A schema pin naming nothing is accepted here so a source can be written before
          *     its schema, while ``/sources/import`` refuses one because an exported bundle
@@ -1509,6 +1511,121 @@ export interface paths {
          *     ``unresolved_reference``.
          */
         post: operations["sources.import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Rule Blocks
+         * @description List every rule block, ``_source`` first, each field's in the order it runs.
+         *
+         *     Its ``ETag`` is the ``If-Match`` a reorder takes. Takes no filter or order_by.
+         */
+        get: operations["ingest.rules.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/rules/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reorder Rule Blocks
+         * @description Set the order one field's rule blocks run in.
+         *
+         *     ``If-Match`` is required, and a stale one answers 412 with the current ETag.
+         *     The pinned ``default`` keeps its place last. A rules-only change is one the
+         *     receiver reloads where it stands, so ``reload`` answers ``hot``.
+         */
+        post: operations["ingest.rules.order"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/compat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Compat
+         * @description Get the profiles every source binds unless it names its own list. Its ``ETag`` is an apply's ``If-Match``.
+         */
+        get: operations["ingest.compat.get"];
+        /**
+         * Apply Compat
+         * @description Set the profiles every source binds unless it names its own list.
+         *
+         *     ``If-Match`` is required. Each binding must name a stored profile, a version it
+         *     publishes and only opt-in rows it offers, and one version of a profile compiles
+         *     per deployment, so a version another source binds differently is refused with
+         *     422 ``invalid_binding``. A rules-only change answers ``reload: hot``.
+         */
+        put: operations["ingest.compat.apply"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/compat-profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Compat Profiles
+         * @description List the stored compatibility profiles by id, each at its current version. Takes no filter or order_by.
+         */
+        get: operations["ingest.compat-profiles.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/compat-profiles/{profile}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Compat Profile
+         * @description Get one compatibility profile with every version it publishes.
+         */
+        get: operations["ingest.compat-profiles.get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -6003,6 +6120,51 @@ export interface components {
             url_scheme: string;
         };
         /**
+         * AliasConflictContext
+         * @description Structured context for an alias two enabled sources claim under one profile.
+         */
+        AliasConflictContext: {
+            /**
+             * Source
+             * @description Source identifier being saved
+             */
+            source: string;
+            /**
+             * Conflicting Source
+             * @description Other enabled source that already has the alias
+             */
+            conflicting_source: string;
+            /**
+             * Profile
+             * @description The compatibility profile both name it under
+             */
+            profile: string;
+            /**
+             * Alias
+             * @description The alias
+             */
+            alias: string;
+        };
+        /**
+         * AliasConflictErrorResponse
+         * @description 409 when two enabled sources claim one alias under the same compatibility profile.
+         */
+        AliasConflictErrorResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            code: "alias_conflict";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["AliasConflictContext"];
+        };
+        /**
          * AppConfigResponse
          * @description Every option an instance has, and the overlay keys none of them explain.
          */
@@ -7106,6 +7268,233 @@ export interface components {
              * @default false
              */
             is_running: boolean;
+        };
+        /**
+         * CompatBinding
+         * @description One compatibility profile bound to a source, or to every source by default.
+         */
+        CompatBinding: {
+            /**
+             * Profile
+             * @description The profile's id, e.g. dfe-legacy-2x
+             */
+            profile: string;
+            /**
+             * Version
+             * @description The profile version bound. Unset follows the profile's current
+             */
+            version?: string | null;
+            /**
+             * Opt In
+             * @description Rows the profile leaves off until a binding turns them on, by row id
+             */
+            opt_in?: string[];
+        };
+        /**
+         * CompatCover
+         * @description A sender a profile reads, shown as a chip.
+         */
+        CompatCover: {
+            /**
+             * Platform
+             * @description The platform, e.g. dfe or elastic-agent
+             */
+            platform: string;
+            /**
+             * Version
+             * @description The platform versions read, when only some
+             */
+            version?: string | null;
+        };
+        /**
+         * CompatProfile
+         * @description A compatibility profile: versioned rule rows reading another platform's header.
+         */
+        CompatProfile: {
+            /**
+             * Id
+             * @description The profile's id, its file name without .yaml
+             */
+            id: string;
+            /**
+             * Resource Type
+             * @description core ships in dfe-schemas and refuses edits, custom is an operator's
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
+             * Current
+             * @description The version a binding takes by default
+             */
+            current: string;
+            /** Versions */
+            versions: {
+                [key: string]: components["schemas"]["CompatProfileVersion"];
+            };
+        };
+        /**
+         * CompatProfileSummary
+         * @description A stored profile at its current version, as a list shows it.
+         */
+        CompatProfileSummary: {
+            /** Id */
+            id: string;
+            /**
+             * Resource Type
+             * @enum {string}
+             */
+            resource_type: "core" | "custom";
+            /**
+             * Current
+             * @description The version a binding takes when it names none
+             */
+            current: string;
+            /**
+             * Versions
+             * @description Every published version
+             */
+            versions: string[];
+            /** Title */
+            title: string;
+            /**
+             * Description
+             * @description What it reads and what it sets
+             */
+            description: string;
+            /**
+             * Covers
+             * @description The senders it reads
+             */
+            covers: components["schemas"]["CompatCover"][];
+            /**
+             * Targets
+             * @description The header fields its rows set
+             */
+            targets: ("_source" | "_org_id" | "_timestamp")[];
+            /**
+             * Opt In
+             * @description Rows left out until a binding opts in to them
+             */
+            opt_in: string[];
+        };
+        /**
+         * CompatProfileVersion
+         * @description One published version of a profile: a complete snapshot that never changes.
+         */
+        CompatProfileVersion: {
+            /**
+             * Date
+             * @description Publication date
+             */
+            date: string;
+            /**
+             * Type
+             * @description SchemaVer: model is a major change, addition a minor one, revision a patch
+             * @enum {string}
+             */
+            type: "model" | "addition" | "revision";
+            /** Summary */
+            summary: string;
+            /**
+             * Title
+             * @description The name the UI shows
+             */
+            title: string;
+            /**
+             * Description
+             * @description The UI tooltip: what it reads and sets
+             */
+            description: string;
+            /**
+             * Covers
+             * @description The senders it reads
+             */
+            covers: components["schemas"]["CompatCover"][];
+            /**
+             * Targets
+             * @description The header fields its rows set, in evaluation order
+             */
+            targets: ("_source" | "_org_id" | "_timestamp")[];
+            /**
+             * Lookups
+             * @description Lookup tables its rows read. A shipped aliases table is empty
+             */
+            lookups?: {
+                [key: string]: {
+                    [key: string]: string;
+                };
+            };
+            /**
+             * Rules
+             * @description The rows, in scalo.rules' format and in the order they fire
+             */
+            rules: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Opt In
+             * @description Rows left out until a binding opts in to them
+             */
+            opt_in?: string[];
+        };
+        /**
+         * CompatResponse
+         * @description The profiles every source binds unless it names its own list.
+         */
+        CompatResponse: {
+            /**
+             * Profiles
+             * @description The deployment's default bindings
+             */
+            profiles: components["schemas"]["CompatBinding"][];
+        };
+        /**
+         * CompatSetting
+         * @description The profiles every source binds unless it names its own list.
+         */
+        CompatSetting: {
+            /**
+             * Profiles
+             * @description The deployment's default bindings
+             */
+            profiles?: components["schemas"]["CompatBinding"][];
+        };
+        /**
+         * CompatWriteResponse
+         * @description The bindings an apply leaves, and what the apps did with them.
+         */
+        CompatWriteResponse: {
+            /**
+             * Dry Run
+             * @description Nothing was written: this is what the write would do
+             */
+            dry_run: boolean;
+            /**
+             * Reload
+             * @description hot where every app took the change where it stands, restart where restart_required names a command
+             * @enum {string}
+             */
+            reload: "hot" | "restart";
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow the change
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps were not brought into step, if not
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app that cannot take the change in place
+             */
+            restart_required?: string[];
+            /**
+             * Profiles
+             * @description The deployment's default bindings
+             */
+            profiles: components["schemas"]["CompatBinding"][];
         };
         /**
          * CompileRequest
@@ -8305,7 +8694,7 @@ export interface components {
          *     they get that source's table and transform instead.
          */
         FetcherRoute: {
-            /** @description Which fetched records take this route */
+            /** @description Which fetched records take this route: one test of a field equalling a value, which is all dfe-fetcher's routes compare */
             match: components["schemas"]["SourceMatch"];
             /**
              * Source
@@ -9435,6 +9824,42 @@ export interface components {
             deployment_default: number;
         };
         /**
+         * InvalidRuleContext
+         * @description Structured context for a source whose rule the receiver would refuse.
+         */
+        InvalidRuleContext: {
+            /**
+             * Source
+             * @description Source identifier being saved
+             */
+            source: string;
+            /**
+             * Rule Errors
+             * @description Every refusal, each with its span
+             */
+            rule_errors: components["schemas"]["RuleError"][];
+        };
+        /**
+         * InvalidRuleErrorResponse
+         * @description 422 when a source's match, when or profile bindings would not compile in the receiver.
+         */
+        InvalidRuleErrorResponse: {
+            /**
+             * Code
+             * @default invalid_rule
+             * @constant
+             */
+            code: "invalid_rule";
+            /**
+             * Message
+             * @description Human-readable explanation
+             */
+            message: string;
+            /** Errors */
+            errors?: components["schemas"]["FieldError"][];
+            context: components["schemas"]["InvalidRuleContext"];
+        };
+        /**
          * InvokeRequest
          * @description Optional invoke body: values for the action's declared params.
          */
@@ -9885,7 +10310,7 @@ export interface components {
         ManagedBy: "dfe" | "provider" | "external";
         /**
          * MatchConflictContext
-         * @description Structured context for duplicate receiver match (field + value).
+         * @description Structured context for a receiver condition another enabled source already has.
          */
         MatchConflictContext: {
             /**
@@ -9895,17 +10320,17 @@ export interface components {
             source: string;
             /**
              * Conflicting Source
-             * @description Other enabled source that already uses this (field, value) pair
+             * @description Other enabled source that already uses this condition
              */
             conflicting_source: string;
             /**
              * Field
-             * @description Receiver match JSON field name
+             * @description Receiver match JSON field name, empty for a group or a when
              */
             field: string;
             /**
              * Value
-             * @description Receiver match expected value
+             * @description Receiver match expected value, empty for a group or a when
              */
             value: string;
         };
@@ -10638,10 +11063,28 @@ export interface components {
              */
             hinted_columns: number;
         };
+        /** Page[CompatProfileSummary] */
+        Page_CompatProfileSummary_: {
+            /** Items */
+            items: components["schemas"]["CompatProfileSummary"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
         /** Page[IngestCredentialResponse] */
         Page_IngestCredentialResponse_: {
             /** Items */
             items: components["schemas"]["IngestCredentialResponse"][];
+            /** Next Page Token */
+            next_page_token?: string | null;
+            /** Total Size */
+            total_size?: number | null;
+        };
+        /** Page[RuleBlockResponse] */
+        Page_RuleBlockResponse_: {
+            /** Items */
+            items: components["schemas"]["RuleBlockResponse"][];
             /** Next Page Token */
             next_page_token?: string | null;
             /** Total Size */
@@ -12365,6 +12808,66 @@ export interface components {
             etag?: string | null;
         };
         /**
+         * RuleBlockResponse
+         * @description One block of the receiver's rule set: a source's rows, a profile's, or the default.
+         */
+        RuleBlockResponse: {
+            /**
+             * Id
+             * @description source.<name>, compat.<profile> or default
+             */
+            id: string;
+            /**
+             * Target
+             * @description The header field the block's rows set
+             * @enum {string}
+             */
+            target: "_source" | "_org_id";
+            /**
+             * Position
+             * @description Where it runs among the field's blocks, from 1
+             */
+            position: number;
+            /**
+             * Kind
+             * @description source, profile, or the receiver's own default
+             * @enum {string}
+             */
+            kind: "source" | "profile" | "default";
+            /**
+             * Name
+             * @description The source's name or the profile's id, empty for the default
+             */
+            name: string;
+            /**
+             * Version
+             * @description The profile version compiled
+             */
+            version?: string | null;
+            /**
+             * Pinned
+             * @description Runs last whatever the order says, and refuses a move
+             */
+            pinned: boolean;
+            /**
+             * Compiled
+             * @description Whether its rows are in the receiver's rule set. False where they do not compile
+             */
+            compiled: boolean;
+            /**
+             * Rules
+             * @description The rows as the receiver reads them, in the order they fire. Empty for the default
+             */
+            rules: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Warnings
+             * @description What is wrong with it: a row that does not compile, or one an earlier row shadows
+             */
+            warnings?: string[];
+        };
+        /**
          * RuleCreateRequest
          * @description Create a hunt rule via RuleCreationService.
          */
@@ -12451,6 +12954,40 @@ export interface components {
             title?: string | null;
         };
         /**
+         * RuleError
+         * @description One reason the receiver would refuse a source's rule.
+         */
+        RuleError: {
+            /**
+             * Field
+             * @description The body field at fault: when, match, aliases or compat_profiles
+             */
+            field: string;
+            /**
+             * Message
+             * @description What is wrong, as the receiver's rule engine reports it
+             */
+            message: string;
+            /** @description For when: the function name or character the check stopped at */
+            span?: components["schemas"]["RuleErrorSpan"] | null;
+        };
+        /**
+         * RuleErrorSpan
+         * @description Where in a CEL Fast condition a refusal points, in UTF-16 code units as a browser indexes.
+         */
+        RuleErrorSpan: {
+            /**
+             * Start
+             * @description First code unit of the text at fault
+             */
+            start: number;
+            /**
+             * End
+             * @description One past the last code unit
+             */
+            end: number;
+        };
+        /**
          * RuleFromHyperdxRequest
          * @description Create a hunt rule from the SQL a HyperDX view runs.
          *
@@ -12508,6 +13045,62 @@ export interface components {
             warnings?: string[];
             /** Sql Errors */
             sql_errors?: components["schemas"]["SqlValidationError"][];
+        };
+        /**
+         * RuleOrderRequest
+         * @description One field's blocks, every one of them, in the order they are to run.
+         */
+        RuleOrderRequest: {
+            /**
+             * Target
+             * @description The header field whose blocks are reordered
+             * @enum {string}
+             */
+            target: "_source" | "_org_id";
+            /**
+             * Blocks
+             * @description Every block id GET /ingest/rules lists for target bar the pinned default
+             */
+            blocks: string[];
+        };
+        /**
+         * RuleOrderResponse
+         * @description The field's blocks as the reorder leaves them.
+         */
+        RuleOrderResponse: {
+            /**
+             * Dry Run
+             * @description Nothing was written: this is what the write would do
+             */
+            dry_run: boolean;
+            /**
+             * Reload
+             * @description hot where every app took the change where it stands, restart where restart_required names a command
+             * @enum {string}
+             */
+            reload: "hot" | "restart";
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow the change
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps were not brought into step, if not
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app that cannot take the change in place
+             */
+            restart_required?: string[];
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "_source" | "_org_id";
+            /** Blocks */
+            blocks: components["schemas"]["RuleBlockResponse"][];
         };
         /**
          * RuleResponse
@@ -13879,6 +14472,23 @@ export interface components {
             state: "active" | "dormant" | "disabled";
             /** @description Receiver match rule (receiver-based sources) */
             routing?: components["schemas"]["SourceMatch"] | null;
+            /**
+             * When
+             * @description CEL Fast condition the receiver tests records with, in place of routing
+             */
+            when?: string | null;
+            /**
+             * Aliases
+             * @description Per compatibility profile, the values its lookup rows map to this source
+             */
+            aliases?: {
+                [key: string]: string[];
+            };
+            /**
+             * Compat Profiles
+             * @description The compatibility profiles the source binds. Absent takes the deployment's
+             */
+            compat_profiles?: components["schemas"]["CompatBinding"][] | null;
             /** @description Fetcher origin (fetcher-based sources) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /** @description Schema pins, header and the definitions they name */
@@ -13968,6 +14578,23 @@ export interface components {
             state: "active" | "dormant" | "disabled";
             /** @description Receiver match rule (receiver-based sources) */
             routing?: components["schemas"]["SourceMatch"] | null;
+            /**
+             * When
+             * @description CEL Fast condition the receiver tests records with, in place of routing
+             */
+            when?: string | null;
+            /**
+             * Aliases
+             * @description Per compatibility profile, the values its lookup rows map to this source
+             */
+            aliases?: {
+                [key: string]: string[];
+            };
+            /**
+             * Compat Profiles
+             * @description The compatibility profiles the source binds. Absent takes the deployment's
+             */
+            compat_profiles?: components["schemas"]["CompatBinding"][] | null;
             /** @description Fetcher origin (fetcher-based sources) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /** @description Schema pins, header and the definitions they name */
@@ -14096,6 +14723,11 @@ export interface components {
             readonly enabled: boolean;
             /** @description Receiver match rule on the deployed version (serialized for API compat). */
             readonly match: components["schemas"]["SourceMatch"] | null;
+            /**
+             * When
+             * @description The CEL Fast condition on the deployed version, in place of a match.
+             */
+            readonly when: string | null;
             /** @description Transform config on the deployed version (serialized for API compat). */
             readonly transform: components["schemas"]["SourceTransform"] | null;
             /**
@@ -14325,27 +14957,45 @@ export interface components {
         };
         /**
          * SourceMatch
-         * @description Receiver match rule: how the receiver identifies this source.
+         * @description How the receiver recognises this source's records: one test, or all or any of several.
+         *
+         *     A test compares one ``field`` with an ``operator``. ``all`` holds when every
+         *     part does and ``any`` when at least one does. Each part is a match of its
+         *     own, so groups nest, and ``negate`` inverts the test or group it sits on.
          */
         SourceMatch: {
             /**
              * Field
-             * @description Field to match on: a dotted path into the record as it arrives (e.g. 'tags.collector.type', or a bare '_source'). The receiver matches the JSON payload, not a ClickHouse column, so a '_json.' prefix would be read as a first segment no record has.
+             * @description Field a test reads: a dotted path into the record as it arrives (e.g. 'tags.collector.type', or a bare '_source'). The receiver matches the JSON payload, not a ClickHouse column, so a '_json.' prefix would be read as a first segment no record has. Absent on a group
              */
-            field: string;
+            field?: string | null;
             /**
              * Operator
-             * @description How to compare ``field`` to ``value``: equals (default), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source
-             * @default equals
-             * @enum {string}
+             * @description How a test compares ``field`` to ``value``: equals (the default for a test), exists, includes, starts_with, ends_with, not_equals, always. ``always`` matches every record and is reserved for the ``default`` source. Absent on a group
              */
-            operator: "equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with" | "always";
+            operator?: ("equals" | "not_equals" | "exists" | "includes" | "starts_with" | "ends_with" | "always") | null;
             /**
              * Value
              * @description Operand for the operator (not used by ``exists`` or ``always``)
              * @default
              */
             value: string;
+            /**
+             * Negate
+             * @description Invert this test or group
+             * @default false
+             */
+            negate: boolean;
+            /**
+             * All
+             * @description A group that holds when every part holds
+             */
+            all?: components["schemas"]["SourceMatch"][];
+            /**
+             * Any
+             * @description A group that holds when at least one part holds
+             */
+            any?: components["schemas"]["SourceMatch"][];
         };
         /**
          * SourceNameConflictErrorResponse
@@ -14718,6 +15368,23 @@ export interface components {
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /** @description Receiver match rule (receiver-based sources) */
             match?: components["schemas"]["SourceMatch"] | null;
+            /**
+             * When
+             * @description A CEL Fast condition the receiver tests each record with, in place of match. It is checked at save under the profile the receiver compiles it with
+             */
+            when?: string | null;
+            /**
+             * Aliases
+             * @description Per compatibility profile, the values its lookup rows map to this source, e.g. the DFE 2.x categories under dfe-legacy-2x. Read only while the source binds that profile
+             */
+            aliases?: {
+                [key: string]: string[];
+            };
+            /**
+             * Compat Profiles
+             * @description The compatibility profiles bound to this source. Unset takes the deployment's list, and an empty list binds none
+             */
+            compat_profiles?: components["schemas"]["CompatBinding"][] | null;
             /** @description Transform stage (optional) */
             transform?: components["schemas"]["SourceTransform"] | null;
             /**
@@ -14740,7 +15407,7 @@ export interface components {
              * @description Which way this version's data enters the platform, or None when nothing selects it.
              *
              *     Serialized on API responses (source detail ``versions`` and the single-version
-             *     GET). Derived from ``match`` / ``fetcher``, never stored in YAML.
+             *     GET). Derived from ``match`` / ``when`` / ``fetcher``, never stored in YAML.
              */
             readonly origin: ("receiver" | "fetcher") | null;
         };
@@ -14865,8 +15532,9 @@ export interface components {
          * @description Flat source definition for create/update API (no version tree).
          *
          *     On update, an omitted ``header``, ``schema``, ``views``, ``transform``,
-         *     ``transport`` or ``archive`` keeps the stored value; ``null`` (or ``[]``,
-         *     ``false``) clears it.
+         *     ``transport``, ``archive``, ``aliases`` or ``compat_profiles`` keeps the stored
+         *     value. ``null`` (or ``[]``, ``{}``, ``false``) clears it, and ``compat_profiles:
+         *     null`` returns the source to the deployment's list.
          */
         SourceWriteRequest: {
             /**
@@ -14895,15 +15563,32 @@ export interface components {
              * @description Tri-state lifecycle (active | dormant | disabled); overrides ``enabled``
              */
             state?: ("active" | "dormant" | "disabled") | null;
-            /** @description Receiver match rule; required unless ``fetcher`` is set */
+            /** @description Receiver match rule. One of match, when or fetcher is set */
             match?: components["schemas"]["SourceMatch"] | null;
+            /**
+             * When
+             * @description A CEL Fast condition the receiver tests each record with, in place of match. It is checked at save under the profile the receiver compiles it with
+             */
+            when?: string | null;
+            /**
+             * Aliases
+             * @description Per compatibility profile, the values its lookup rows map to this source, e.g. the DFE 2.x categories under dfe-legacy-2x. Read only while the source binds that profile
+             */
+            aliases?: {
+                [key: string]: string[];
+            };
+            /**
+             * Compat Profiles
+             * @description The compatibility profiles bound to this source. Unset takes the deployment's list, and an empty list binds none
+             */
+            compat_profiles?: components["schemas"]["CompatBinding"][] | null;
             /** @description Common schema header configuration for this revision */
             header?: components["schemas"]["SourceHeader"] | null;
             /** @description Schema configuration for this revision */
             schema?: components["schemas"]["SourceSchema"] | null;
             /** @description Transform stage (optional, top-level) */
             transform?: components["schemas"]["SourceTransform"] | null;
-            /** @description Fetcher-based origin; required unless ``match`` is set */
+            /** @description Fetcher-based origin. One of match, when or fetcher is set */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
             /**
              * Transport
@@ -20045,22 +20730,22 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Source name already exists (code conflict), the name is the core landing the engine owns and reconciles itself (code conflict), or receiver match duplicates another enabled source (code match_conflict) */
+            /** @description Source name already exists (code conflict), the name is the core landing the engine owns and reconciles itself (code conflict), receiver match duplicates another enabled source (code match_conflict), or an alias is another source's under the same profile (code alias_conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"];
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -20226,16 +20911,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["MissingVariantErrorResponse"];
+                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"] | components["schemas"]["MissingVariantErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -20602,22 +21287,22 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Receiver match duplicates another enabled source (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
+            /** @description Receiver match duplicates another enabled source (code match_conflict), an alias is another source's under the same profile (code alias_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -20722,22 +21407,22 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Enabling would duplicate another enabled source's receiver match (code match_conflict), or the source is engine-owned and no write path may change it (code conflict) */
+            /** @description Enabling would duplicate another enabled source's receiver match (code match_conflict) or alias (code alias_conflict), or the source is engine-owned and no write path may change it (code conflict) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"];
+                    "application/json": components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -21059,6 +21744,359 @@ export interface operations {
             };
             /** @description The source name already exists here, or a meta schema the bundle carries would land on an occupied path (code conflict) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "ingest.rules.list": {
+        parameters: {
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Filter expression */
+                filter?: string | null;
+                /** @description Ordering, such as `name desc` */
+                order_by?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_RuleBlockResponse_"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "ingest.rules.order": {
+        parameters: {
+            query?: {
+                /** @description Validate and report the change without committing it */
+                dry_run?: boolean;
+            };
+            header?: {
+                /** @description The current ETag: the write fails with 412 if it has changed */
+                "If-Match"?: string | null;
+                /** @description `*` to create: the write fails with 412 if the resource exists */
+                "If-None-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleOrderResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The list names other blocks than the field has now, because a source or a binding changed since it was read (code order_conflict, the current list in context.blocks), or the deploy repo kept moving (code conflict) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused, nothing written: a block named twice or a pinned block (code invalid_order), or a binding the receiver could not compile (code invalid_binding) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No deploy repo, where the ingest rules live */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ingest.compat.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompatResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ingest.compat.apply": {
+        parameters: {
+            query?: {
+                /** @description Validate and report the change without committing it */
+                dry_run?: boolean;
+            };
+            header?: {
+                /** @description The current ETag: the write fails with 412 if it has changed */
+                "If-Match"?: string | null;
+                /** @description `*` to create: the write fails with 412 if the resource exists */
+                "If-None-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompatSetting"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompatWriteResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused, nothing written: a block named twice or a pinned block (code invalid_order), or a binding the receiver could not compile (code invalid_binding) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No deploy repo, where the ingest rules live */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ingest.compat-profiles.list": {
+        parameters: {
+            query?: {
+                /** @description Items per page: 0 means 50, above 1000 is cut to it */
+                page_size?: number;
+                /** @description The next_page_token of the previous page */
+                page_token?: string | null;
+                /** @description Filter expression */
+                filter?: string | null;
+                /** @description Ordering, such as `name desc` */
+                order_by?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_CompatProfileSummary_"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "ingest.compat-profiles.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompatProfile"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No such profile is stored */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

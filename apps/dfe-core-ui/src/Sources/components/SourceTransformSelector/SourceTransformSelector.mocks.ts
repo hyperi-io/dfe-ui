@@ -70,7 +70,12 @@ export const SYSLOG_ON_VRL: TSourceVersionDetail = {
       engine: 'MergeTree',
     },
     transform: { engine: 'vrl', config_file: 'vrl.yaml', env: {}, files: [] },
-    match: { field: 'event.dataset', operator: 'equals', value: 'syslog' },
+    match: {
+      field: 'event.dataset',
+      operator: 'equals',
+      value: 'syslog',
+      negate: false,
+    },
   },
 };
 

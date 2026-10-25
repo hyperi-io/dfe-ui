@@ -6,6 +6,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
 import { useHyperdxUrl } from '@/core/contexts/HyperdxContext';
+import { UsageOverviewStrip } from '@/Usage/components/UsageOverviewStrip';
+
+/** The console path whose page carries the usage headline above the frame. */
+const USAGE_STRIP_PATH = 'dashboards';
 
 /**
  * DFE Observe - embeds the HyperDX fork as a seamless sibling inside the dfe-ui
@@ -106,7 +110,7 @@ export default function ObservePage() {
   query.set('theme', colorMode);
   const src = `${hyperdxUrl}/${feature}?${query.toString()}`;
 
-  return (
+  const iframe = (
     <iframe
       ref={iframeRef}
       src={src}
@@ -116,9 +120,21 @@ export default function ObservePage() {
       style={{
         display: 'block',
         width: '100%',
-        height: '100vh',
+        height: path === USAGE_STRIP_PATH ? '100%' : '100vh',
         border: 'none',
       }}
     />
   );
+
+  // The dashboards list opens on the usage headline, with the frame filling what is left.
+  if (path === USAGE_STRIP_PATH) {
+    return (
+      <div className="flex h-screen flex-col bg-background dark:bg-dark-background">
+        <UsageOverviewStrip />
+        <div className="min-h-0 flex-1">{iframe}</div>
+      </div>
+    );
+  }
+
+  return iframe;
 }
