@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.31](https://github.com/hyperi-io/dfe-ui/compare/v1.7.30...v1.7.31) (2026-10-25)
+
+### Bug Fixes
+
+* edit compound source matches and order the receiver's rule blocks ([#601](https://github.com/hyperi-io/dfe-ui/issues/601)) ([ee94ac7](https://github.com/hyperi-io/dfe-ui/commit/ee94ac709f3255e69c21401e67b0848e4a6d1df8))
+
 ## [1.7.30](https://github.com/hyperi-io/dfe-ui/compare/v1.7.29...v1.7.30) (2026-10-24)
 
 ### Bug Fixes
