@@ -48,15 +48,20 @@ test('Receiver routing', async ({ page }) => {
     page.getByRole('heading', { name: 'dfe-receiver routing', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText('Compiled by the receiver compiler into config.routing'),
+    page.getByText(
+      /Compiled by the receiver compiler into config\.routing, config\.rules/,
+    ),
   ).toBeVisible();
 
   /* Scoped: the source's own match rule is shown above the tabs as well.
      The seed's match field carries no `_json.` prefix -- the receiver splits on
-     '.' and walks the raw payload, so that prefix is a segment no record has. */
+     '.' and walks the raw payload, so that prefix is a segment no record has.
+     The engine compiles it to one `source.seedsource` row, `equals` on the
+     source's own name, shown once from the sources and once on the receiver. */
   const rule = page.locator('dl').filter({ hasText: 'From the sources' });
   await expect(rule.getByText('tags.collector.type')).toHaveCount(2);
-  await expect(rule.getByText('key_value_set')).toHaveCount(2);
+  await expect(rule.getByText('equals', { exact: true })).toHaveCount(2);
+  await expect(rule.getByText(SEED_SOURCE, { exact: true })).toHaveCount(2);
 
   /* The seeded routing is synced, so no sync action is offered */
   await expect(page.getByText('synced', { exact: true })).toBeVisible();

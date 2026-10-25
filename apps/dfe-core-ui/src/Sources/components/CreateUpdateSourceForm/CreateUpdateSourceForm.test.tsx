@@ -382,9 +382,9 @@ describe('CreateUpdateSourceForm views', () => {
 });
 
 describe('CreateUpdateSourceForm meta schema', () => {
-  // Its backstops (15s to render the own-topic tabs, 10s to submit) outlast the 20s default.
+  // Its backstops (15s to render the own-topic tabs, 10s to refuse) outlast the 20s default.
   it(
-    'submits a clone of an own-topic fetcher with no meta schema',
+    'stops a clone of an own-topic fetcher with no meta schema, and opens the tab that holds the error',
     { timeout: 45_000 },
     async () => {
       server.use(...ownTableHandlers);
@@ -409,23 +409,65 @@ describe('CreateUpdateSourceForm meta schema', () => {
         { wrapper },
       );
 
-      await screen.findByRole(
+      const tableSettings = await screen.findByRole(
         'tab',
         { name: /Table Settings/ },
         { timeout: 15_000 },
       );
+      expect(tableSettings).toHaveAttribute('aria-selected', 'false');
+      await user.click(screen.getByRole('button', { name: 'Clone Source' }));
+
+      expect(
+        await screen.findByText(
+          /validation errors in the following tabs: Table Settings/,
+          {},
+          { timeout: 10_000 },
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Meta schema is required')).toBeInTheDocument();
+      // The refused field is on a tab the user had not opened, so the form opens it.
+      expect(
+        screen.getByRole('tab', { name: /Table Settings/ }),
+      ).toHaveAttribute('aria-selected', 'true');
+      expect(onFinish).not.toHaveBeenCalled();
+    },
+  );
+
+  it(
+    'submits a clone of a shared-topic fetcher with no meta schema, and sends none',
+    { timeout: 45_000 },
+    async () => {
+      server.use(...ownTableHandlers);
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(
+        <CreateUpdateSourceForm
+          onFinish={onFinish}
+          isPending={false}
+          error={null}
+          buttonLabel="Clone Source"
+          initialValues={{
+            source: 'sharedfetch-copy',
+            enabled: true,
+            archive: false,
+            origin: 'fetcher',
+            fetcher: { source_type: 'crates_io', topic: 'main', config: '' },
+            schema: { meta_schema: '', meta_schema_version: '' },
+          }}
+        />,
+        { wrapper },
+      );
+
+      await screen.findByLabelText(/^Source Name/, {}, { timeout: 15_000 });
       await user.click(screen.getByRole('button', { name: 'Clone Source' }));
 
       await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
         timeout: 10_000,
       });
-      expect(
-        screen.queryByText('Meta schema is required'),
-      ).not.toBeInTheDocument();
       const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
       expect(
-        transformSourceFormDataToRequestBody(submitted).schema,
-      ).not.toHaveProperty('meta_schema');
+        transformSourceFormDataToRequestBody(submitted).schema?.meta_schema,
+      ).toBeUndefined();
     },
   );
 

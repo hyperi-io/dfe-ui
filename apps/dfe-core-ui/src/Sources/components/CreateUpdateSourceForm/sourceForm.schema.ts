@@ -168,35 +168,56 @@ const checkMatchNode = (
 /** A clone or an edit seeds an absent meta schema as '', so blank and unset mean the same. */
 const isBlank = (value: string | null | undefined) => !value?.trim();
 
+/**
+ * The engine gives a source its own table only when a meta schema is pinned, so
+ * a source the form puts on its own table (receiver Own table, fetcher own
+ * topic) names both. A shared-table source names neither, or both.
+ */
+const checkMetaSchema = (
+  data: {
+    origin?: string;
+    fetcher?: { topic?: string | null } | null;
+    receiver_ui_config?: { table?: string | null } | null;
+    schema?: {
+      meta_schema?: string | null;
+      meta_schema_version?: string | null;
+    } | null;
+  },
+  ctx: IssueSink,
+) => {
+  const ownsTable =
+    data.origin === 'fetcher'
+      ? data.fetcher?.topic === 'own'
+      : data.receiver_ui_config?.table === 'own';
+  const hasSchema = !isBlank(data.schema?.meta_schema);
+  const hasVersion = !isBlank(data.schema?.meta_schema_version);
+  if ((ownsTable || hasVersion) && !hasSchema) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Meta schema is required',
+      path: ['schema', 'meta_schema'],
+    });
+  }
+  if ((ownsTable || hasSchema) && !hasVersion) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Meta schema version is required',
+      path: ['schema', 'meta_schema_version'],
+    });
+  }
+};
+
 const schemaConfigTabSchema = {
   schema: z
     .object({
-      // The engine accepts a source with no meta schema, so neither is required
-      // until one of the two is named. The defaults patch ttl_days and engine
-      // into this object on every create, which must not make them so.
+      // Required only for a source that owns its table, which the form-level
+      // check below decides. The defaults patch ttl_days and engine into this
+      // object on every create, so the object being present proves nothing.
       meta_schema: z.string().optional().nullable(),
       meta_schema_version: z.string().optional().nullable(),
       ttl_days: z.number().optional().nullable(),
       // Blank follows the DFE default.
       engine: z.string().optional().nullable(),
-    })
-    .superRefine((schema, ctx) => {
-      const hasSchema = !isBlank(schema.meta_schema);
-      const hasVersion = !isBlank(schema.meta_schema_version);
-      if (hasVersion && !hasSchema) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Meta schema is required',
-          path: ['meta_schema'],
-        });
-      }
-      if (hasSchema && !hasVersion) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Meta schema version is required',
-          path: ['meta_schema_version'],
-        });
-      }
     })
     .optional(),
   header: z
@@ -273,6 +294,8 @@ export const formSchema = z
     ...viewsTabSchema,
   })
   .superRefine((data, ctx) => {
+    checkMetaSchema(data, ctx);
+
     if (data.origin === 'fetcher') {
       if (!data.fetcher?.source_type?.trim()) {
         ctx.addIssue({

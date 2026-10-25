@@ -240,28 +240,31 @@ const DEFAULT_WRITE_RESULT = {
 /**
  * The receiver's derived blocks, keyed by name as the engine sends them.
  *
- * Shape captured from `GET /api/v1/apps/dfe-receiver/default/routing`: the rules
- * are at `routing.source_rules`, not off the top of `compiled`, and the compile
- * writes a sibling `destinations` block. A fixture flattened to `source_rules`
- * passes a UI that reads the wrong depth (dfe-ui#330).
+ * Shape captured from `GET /api/v1/apps/dfe-receiver/default/routing`: the
+ * per-source rows are at `rules.rules`, each `source.<name>` (or
+ * `source.<name>.<n>`) setting `_source`, and the compile writes sibling
+ * `routing` and `destinations` blocks. A fixture flattened to `rules` passes a
+ * UI that reads the wrong depth (dfe-ui#330).
  */
 export const RECEIVER_ROUTING_BLOCKS = {
   routing: {
-    source_rules: [
-      {
-        field: 'event.dataset',
-        mode: 'key_value_set',
-        match_value: 'syslog',
-        source: 'syslog',
-      },
-    ],
     default_source: 'main',
+    default_org_id: 'default',
     topic_suffix: '_land',
     source_to_topic: {},
-    legacy_compat: false,
-    dlq: { enabled: true, topic: 'dlq_land' },
+    source_org_id: 'allow',
   },
-  destinations: { default: 'kafka', rules: [] },
+  rules: {
+    targets: ['_source', '_org_id'],
+    rules: [
+      {
+        id: 'source.syslog',
+        match: { field: 'event.dataset', op: 'equals', value: 'syslog' },
+        set: { _source: { value: 'syslog' } },
+      },
+    ],
+  },
+  destinations: { default: 'kafka', sources: {} },
 };
 
 /**

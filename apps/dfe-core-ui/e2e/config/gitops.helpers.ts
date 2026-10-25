@@ -17,7 +17,7 @@ export const openGitOpsTab = async (page: Page) => {
       new URL(response.url()).pathname === '/api/v1/gitops/auto-merge',
   );
   await page.getByRole('tab', { name: 'Git Operations' }).click();
-  await expect(page).toHaveURL(`${BASE_URL}/platform/gitops`);
+  await expect(page).toHaveURL(`${BASE_URL}/settings/platform/gitops`);
   return (await (await autoMerge).json()) as AutoMergeStatus;
 };
 

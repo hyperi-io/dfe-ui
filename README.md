@@ -151,16 +151,41 @@ port.
 `/api/e2e/seed-static` with no auth, and the hooks call `reset_all`, which
 wipes the seeded state. The engine's ready check is `GET /readyz`.
 
+#### Engine: a deployed stack
+
+A dfe-docker or cluster engine takes the same specs once it mounts the e2e
+helpers. Both settings are needed, because the helpers refuse to mount, and
+every seed call answers 500 (`e2e seed helpers require DFE_ENV=test`), unless
+the posture is exactly `test`:
+
+- `DFE_ENV=test`. `dev` is not enough. On dfe-docker it goes in `.env`.
+- `DFE_E2E_SERVER=true`. On dfe-docker it goes in `env/engine.env`, which
+  compose forwards to the engine container.
+
+Point `BASE_URL` at the console and `NEXT_PUBLIC_API_URL` at the engine, as
+above. A stack on non-default ports takes both, plus
+`DFE_LOADER_METRICS_URL` and `DFE_RECEIVER_URL` for the specs that read the
+loader and receiver directly.
+
+The seeds fix two passwords. Every account `seed_setup_complete` and the
+`seed_dfe_*` scripts make takes the engine's well-known e2e password, which
+`E2E_ADMIN_PASSWORD` has to be (`_WELL_KNOWN_E2E_PASSWORD` in the engine's
+`api/e2e/seed/accounts.py`). `admin` ends up on the password
+`_SETUP_ADMIN_PASSWORD` in `api/e2e/seed/base.py`. `ingestRules.spec.ts` signs
+in as `admin`, trying `E2E_ADMIN_PASSWORD` and then `E2E_ADMIN_NEW_PASSWORD`,
+so `E2E_ADMIN_NEW_PASSWORD` is that second value when the whole folder runs in
+one go. It is longer than 12 characters, as the engine requires.
+
 The suite loads `apps/dfe-core-ui/.env.local`, then `.env`, and leaves any name
 the shell already set alone. Put the acceptance-test names in `.env.local`.
 They are listed in `apps/dfe-core-ui/.env.example`.
 
-| Name                                                                 | Required for the folder                                                                                      |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `E2E_ADMIN_PASSWORD`                                                 | the password this engine minted for `admin`. There is no default.                                            |
-| `E2E_ADMIN_NEW_PASSWORD`                                             | the password the suite changes that issued one to. At least 12 characters, or the engine refuses the change. |
-| `DFE_OIDC_FIXTURE_PASSWORD`                                          | OIDC login only. A provider with no password is skipped. The user defaults to `dfe-test@dfe-oidc.test`.      |
-| `E2E_TEST_TIMEOUT_MS`, `E2E_EXPECT_TIMEOUT_MS`, `E2E_NAV_TIMEOUT_MS` | optional. Unset keeps Playwright's 30000, 5000 and 0. Raise them when the stack is slower than local docker. |
+| Name                                                                 | Required for the folder                                                                                                                                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `E2E_ADMIN_PASSWORD`                                                 | the password every seeded account logs in with. On a stack with the e2e helpers, the engine's well-known e2e password.                                                          |
+| `E2E_ADMIN_NEW_PASSWORD`                                             | the password the suite changes an issued one to, and the one `ingestRules.spec.ts` tries for `admin` after the seeds. At least 12 characters, or the engine refuses the change. |
+| `DFE_OIDC_FIXTURE_PASSWORD`                                          | OIDC login only. A provider with no password is skipped. The user defaults to `dfe-test@dfe-oidc.test`.                                                                         |
+| `E2E_TEST_TIMEOUT_MS`, `E2E_EXPECT_TIMEOUT_MS`, `E2E_NAV_TIMEOUT_MS` | optional. Unset keeps Playwright's 30000, 5000 and 0. Raise them when the stack is slower than local docker.                                                                    |
 
 Specs tagged `@docker-only` (`filebeatDataPath.spec.ts`,
 `promoteJsonField.spec.ts`, and the Compose scaling case in
