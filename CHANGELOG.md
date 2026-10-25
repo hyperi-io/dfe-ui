@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.33](https://github.com/hyperi-io/dfe-ui/compare/v1.7.32...v1.7.33) (2026-10-25)
+
+### Bug Fixes
+
+* **deps:** update the node base image digest to 43b9ba1 ([87d8d89](https://github.com/hyperi-io/dfe-ui/commit/87d8d89fbef6d65354c8e72b74e7963ad69de829))
+
 ## [1.7.32](https://github.com/hyperi-io/dfe-ui/compare/v1.7.31...v1.7.32) (2026-10-25)
 
 ### Bug Fixes
