@@ -3,6 +3,12 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.32](https://github.com/hyperi-io/dfe-ui/compare/v1.7.31...v1.7.32) (2026-10-25)
+
+### Bug Fixes
+
+* require a schema on Own table, read receiver rules, fix the e2e specs ([#603](https://github.com/hyperi-io/dfe-ui/issues/603)) ([0fa4dc5](https://github.com/hyperi-io/dfe-ui/commit/0fa4dc52b82d92bd9c97a3044aedf4132f227945))
+
 ## [1.7.31](https://github.com/hyperi-io/dfe-ui/compare/v1.7.30...v1.7.31) (2026-10-25)
 
 ### Bug Fixes
