@@ -36,8 +36,25 @@ describe('formSchema source details', () => {
 });
 
 describe('formSchema meta schema', () => {
+  const receiver = {
+    ...BASE,
+    origin: 'receiver',
+    match: { field: '_json.app', operator: 'equals', value: 'kv-proof' },
+  } as const;
+
+  // The engine accepts a source with no meta schema, and the create form patches
+  // ttl_days and engine into `schema` before the user opens its tab.
+  test('a source with only the patched defaults needs no meta schema', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...receiver,
+      schema: { ttl_days: 30, engine: 'MergeTree' },
+    };
+
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+
   // A clone or an edit seeds an absent meta schema as '', where a create leaves it unset.
-  test('an empty meta schema is refused as an unset one is', () => {
+  test('an empty meta schema and version are the same as unset ones', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
       origin: 'fetcher',
@@ -45,12 +62,31 @@ describe('formSchema meta schema', () => {
       schema: { meta_schema: '', meta_schema_version: '' },
     };
 
-    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
-      'Meta schema is required',
-    ]);
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+
+  test('a meta schema with no version is refused on the version', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...receiver,
+      schema: { meta_schema: 'meta/syslog', ttl_days: 30 },
+    };
+
     expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
       'Meta schema version is required',
     ]);
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([]);
+  });
+
+  test('a version with no meta schema is refused on the meta schema', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...receiver,
+      schema: { meta_schema: '', meta_schema_version: '1.0.0' },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([]);
   });
 });
 

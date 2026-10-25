@@ -143,6 +143,31 @@ test('A transform offers no deploy of its own', async ({ page }) => {
   ).toHaveCount(0);
 });
 
+test('A source with no meta schema, not deployed, offers no Processing tab', async ({
+  page,
+  playwright,
+}) => {
+  // The transform seed leaves its sources with no meta schema and undeployed.
+  await seedAppManagement({
+    playwright,
+    seedScript: 'seed_three_transforms',
+  });
+  await page.goto(`${BASE_URL}/sources`);
+  await page
+    .getByTestId('source-tree-item-filebeatvrl')
+    .click({ position: { x: 2, y: 2 } });
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get('source_name') === 'filebeatvrl',
+  );
+
+  await expect(
+    page.getByRole('tab', { name: 'Flow', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('tab', { name: 'Processing', exact: true }),
+  ).toHaveCount(0);
+});
+
 test('A fetcher source starts at its fetcher, with no receiver routing', async ({
   page,
 }) => {

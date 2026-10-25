@@ -382,9 +382,9 @@ describe('CreateUpdateSourceForm views', () => {
 });
 
 describe('CreateUpdateSourceForm meta schema', () => {
-  // Its backstops (15s to render the own-topic tabs, 10s to refuse) outlast the 20s default.
+  // Its backstops (15s to render the own-topic tabs, 10s to submit) outlast the 20s default.
   it(
-    'stops a clone of an own-topic fetcher with no meta schema, as a create stops',
+    'submits a clone of an own-topic fetcher with no meta schema',
     { timeout: 45_000 },
     async () => {
       server.use(...ownTableHandlers);
@@ -416,6 +416,51 @@ describe('CreateUpdateSourceForm meta schema', () => {
       );
       await user.click(screen.getByRole('button', { name: 'Clone Source' }));
 
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+        timeout: 10_000,
+      });
+      expect(
+        screen.queryByText('Meta schema is required'),
+      ).not.toBeInTheDocument();
+      const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+      expect(
+        transformSourceFormDataToRequestBody(submitted).schema,
+      ).not.toHaveProperty('meta_schema');
+    },
+  );
+
+  it(
+    'stops a meta schema with no version on the Table Settings tab',
+    { timeout: 45_000 },
+    async () => {
+      server.use(...ownTableHandlers);
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(
+        <CreateUpdateSourceForm
+          onFinish={onFinish}
+          isPending={false}
+          error={null}
+          buttonLabel="Clone Source"
+          initialValues={{
+            source: 'legacyfetch-copy',
+            enabled: true,
+            archive: false,
+            origin: 'fetcher',
+            fetcher: { source_type: 'crates_io', topic: 'own', config: '' },
+            schema: { meta_schema: 'meta/syslog', meta_schema_version: '' },
+          }}
+        />,
+        { wrapper },
+      );
+
+      await screen.findByRole(
+        'tab',
+        { name: /Table Settings/ },
+        { timeout: 15_000 },
+      );
+      await user.click(screen.getByRole('button', { name: 'Clone Source' }));
+
       expect(
         await screen.findByText(
           /validation errors in the following tabs: Table Settings/,
@@ -423,7 +468,9 @@ describe('CreateUpdateSourceForm meta schema', () => {
           { timeout: 10_000 },
         ),
       ).toBeInTheDocument();
-      expect(screen.getByText('Meta schema is required')).toBeInTheDocument();
+      expect(
+        screen.getByText('Meta schema version is required'),
+      ).toBeInTheDocument();
       expect(onFinish).not.toHaveBeenCalled();
     },
   );

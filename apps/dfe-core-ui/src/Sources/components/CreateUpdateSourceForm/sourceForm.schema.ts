@@ -165,19 +165,38 @@ const checkMatchNode = (
   }
 };
 
+/** A clone or an edit seeds an absent meta schema as '', so blank and unset mean the same. */
+const isBlank = (value: string | null | undefined) => !value?.trim();
+
 const schemaConfigTabSchema = {
   schema: z
     .object({
-      // A clone or an edit seeds an absent value as '', so empty is refused as unset is.
-      meta_schema: z
-        .string({ message: 'Meta schema is required' })
-        .min(1, { message: 'Meta schema is required' }),
-      meta_schema_version: z
-        .string({ message: 'Meta schema version is required' })
-        .min(1, { message: 'Meta schema version is required' }),
+      // The engine accepts a source with no meta schema, so neither is required
+      // until one of the two is named. The defaults patch ttl_days and engine
+      // into this object on every create, which must not make them so.
+      meta_schema: z.string().optional().nullable(),
+      meta_schema_version: z.string().optional().nullable(),
       ttl_days: z.number().optional().nullable(),
       // Blank follows the DFE default.
       engine: z.string().optional().nullable(),
+    })
+    .superRefine((schema, ctx) => {
+      const hasSchema = !isBlank(schema.meta_schema);
+      const hasVersion = !isBlank(schema.meta_schema_version);
+      if (hasVersion && !hasSchema) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Meta schema is required',
+          path: ['meta_schema'],
+        });
+      }
+      if (hasSchema && !hasVersion) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Meta schema version is required',
+          path: ['meta_schema_version'],
+        });
+      }
     })
     .optional(),
   header: z

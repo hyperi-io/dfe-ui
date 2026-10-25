@@ -190,6 +190,22 @@ describe('transformSourceFormDataToRequestBody', () => {
     });
   });
 
+  test('a blank meta schema and version are left out of the body', () => {
+    const source: CreateUpdateSourceFormData = {
+      source: 'source',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'field', value: 'value', operator: 'equals' },
+      schema: { meta_schema: '', meta_schema_version: '', ttl_days: 30 },
+    };
+
+    expect(transformSourceFormDataToRequestBody(source).schema).toEqual({
+      ttl_days: 30,
+      engine: '',
+    });
+  });
+
   test('a fetcher source sends its stanza as an object and no match', () => {
     const source: CreateUpdateSourceFormData = {
       source: 'source',
