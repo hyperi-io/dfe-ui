@@ -12,6 +12,7 @@ import { governance } from './mocks/governance';
 import { groups } from './mocks/groups';
 import { helm } from './mocks/helm';
 import { hunts } from './mocks/hunts';
+import { ingest } from './mocks/ingest';
 import { library } from './mocks/library';
 import { lifecycle } from './mocks/lifecycle';
 import { oidc } from './mocks/oidc';
@@ -24,6 +25,7 @@ import { schemas } from './mocks/schemas';
 import { sources } from './mocks/sources';
 import { system } from './mocks/system';
 import { transforms } from './mocks/transforms';
+import { usage } from './mocks/usage';
 
 export const API_CONFIG_MOCKS = Object.freeze({
   accounts,
@@ -40,6 +42,7 @@ export const API_CONFIG_MOCKS = Object.freeze({
   groups,
   helm,
   hunts,
+  ingest,
   library,
   lifecycle,
   oidc,
@@ -52,4 +55,5 @@ export const API_CONFIG_MOCKS = Object.freeze({
   sources,
   system,
   transforms,
+  usage,
 });

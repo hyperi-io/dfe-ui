@@ -4,6 +4,7 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { usePromoteRowsContext } from '@/Sources/components/ViewSourceTabs/contexts/PromoteRows.context';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
+import { isMatchNotSampleable } from '@/Sources/utils/ingestErrors';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { FieldPromoteBanner } from './FieldPromoteBanner';
@@ -32,6 +33,17 @@ export const SampleEventsTabContent = () => {
         <Spin />
         <p className="sr-only">Loading events</p>
       </div>
+    );
+  }
+  if (isMatchNotSampleable(errorSampleRows)) {
+    // The engine's own sentence: it names when a preview becomes possible.
+    return (
+      <NotificationCard
+        type="info"
+        icon={<IconInfoCircle className="w-4 h-4" />}
+        title="No preview yet"
+        description={errorSampleRows?.message}
+      />
     );
   }
   if (errorSampleRows) {

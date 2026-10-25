@@ -8,6 +8,7 @@ import { useFetchJsonPaths } from '@/Sources/hooks/useFetchJsonPaths';
 import { TJsonPathsResponse } from '@/Sources/hooks/useFetchJsonPaths/types';
 import { usePromoteFields } from '@/Sources/hooks/usePromoteFields';
 import { TPromoteFieldResponse } from '@/Sources/hooks/usePromoteFields/types';
+import { isMatchNotSampleable } from '@/Sources/utils/ingestErrors';
 import { Button, Spin } from 'antd';
 import { useEffect, useMemo } from 'react';
 
@@ -74,7 +75,10 @@ export const DiscoverJsonPathsDetails = ({
 
   if (errorJsonPaths) {
     return (
-      <NotificationCard description={errorJsonPaths.message} type="error" />
+      <NotificationCard
+        description={errorJsonPaths.message}
+        type={isMatchNotSampleable(errorJsonPaths) ? 'info' : 'error'}
+      />
     );
   }
 

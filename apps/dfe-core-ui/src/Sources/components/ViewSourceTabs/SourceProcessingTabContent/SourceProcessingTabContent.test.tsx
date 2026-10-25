@@ -82,7 +82,12 @@ const sourceOn = ({
         : null,
     match:
       origin === 'receiver'
-        ? { field: 'tags.collector.type', operator: 'equals', value: name }
+        ? {
+            field: 'tags.collector.type',
+            operator: 'equals',
+            value: name,
+            negate: false,
+          }
         : null,
   },
 });

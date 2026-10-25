@@ -74,6 +74,7 @@ describe('.useFetchSourceDetail', () => {
             field: 'string',
             operator: 'equals',
             value: 'string',
+            negate: false,
           },
         },
       };
