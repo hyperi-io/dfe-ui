@@ -14,7 +14,7 @@ export const useFetchBackingServices = ({
   queryEnabled = true,
 }: { queryEnabled?: boolean } = {}) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: QUERY_KEYS.sources.default(),
+    queryKey: QUERY_KEYS.backingServices.default(),
     queryFn: () => fetchBackingServicesApi(),
     enabled: queryEnabled,
   });

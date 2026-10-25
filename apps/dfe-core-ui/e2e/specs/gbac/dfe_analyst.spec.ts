@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { expectSettingsMenu, logOut } from '../../config/settingsMenu.helpers';
 import {
   expectLoggedOut,
   expectSourcesLanding,
@@ -35,7 +36,7 @@ test('Sidebar Navigation', async ({ page }) => {
     page.getByRole('link', { name: 'Hunts', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Settings', exact: true }),
+    page.getByRole('button', { name: 'Settings actions', exact: true }),
   ).toBeVisible();
 
   /* Does not show other sidebar navigation links */
@@ -60,32 +61,24 @@ test('Sidebar Navigation', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: 'Library', exact: true }),
   ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Platform', exact: true }),
-  ).toBeHidden();
 });
 
 test('User actions', async ({ page }) => {
   await page.goto(BASE_URL);
   await expectSourcesLanding(page);
 
-  await page.getByRole('button', { name: 'User actions', exact: true }).click();
-  await expect(page.getByText('User ID:')).toBeVisible();
-  /* Name also shows the username, so scope to the dd next to User ID */
-  await expect(page.locator('dt:text-is("User ID:") + dd')).toHaveText(
-    'dfe_analyst',
-  );
-  await expect(
-    page.getByRole('button', { name: 'Logout', exact: true }),
-  ).toBeVisible();
+  await expectSettingsMenu(page, {
+    user: 'dfe_analyst',
+    platformSettings: false,
+    adminSettings: true,
+  });
 });
 
 test('Logout', async ({ page }) => {
   await page.goto(BASE_URL);
   await expectSourcesLanding(page);
 
-  await page.getByRole('button', { name: 'User actions', exact: true }).click();
-  await page.getByRole('button', { name: 'Logout', exact: true }).click();
+  await logOut(page);
   await expectLoggedOut(page);
 });
 
@@ -303,11 +296,11 @@ test.describe('Settings', () => {
 
 test.describe('Platform', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/platform`);
+    await page.goto(`${BASE_URL}/settings/platform`);
   });
 
   test('Tabs', async ({ page }) => {
-    await expect(page).toHaveURL(`${BASE_URL}/platform`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
 
     await expect(
       page.getByRole('tab', { name: 'System Settings' }),
@@ -323,7 +316,7 @@ test.describe('Platform', () => {
 
   test('System Settings', async ({ page }) => {
     await page.getByRole('tab', { name: 'System Settings' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
 
     /* Three cards read system_read: ClickHouse Cloud, System Settings, Retention */
     await expect(
@@ -333,7 +326,7 @@ test.describe('Platform', () => {
 
   test('Git Operations', async ({ page }) => {
     await page.getByRole('tab', { name: 'Git Operations' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform/gitops`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/gitops`);
 
     await expect(
       page.getByText('You do not have sufficient permissions'),
@@ -348,7 +341,7 @@ test.describe('Platform', () => {
 
   test('Governance', async ({ page }) => {
     await page.getByRole('tab', { name: 'Governance' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform/governance`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/governance`);
 
     await expect(
       page.getByText('You do not have sufficient permissions'),
@@ -366,7 +359,7 @@ test.describe('Platform', () => {
 
   test('Lifecycle', async ({ page }) => {
     await page.getByRole('tab', { name: 'Lifecycle' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform/lifecycle`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/lifecycle`);
 
     await expect(
       page.getByText('You do not have sufficient permissions'),
@@ -375,7 +368,7 @@ test.describe('Platform', () => {
 
   test('Helm', async ({ page }) => {
     await page.getByRole('tab', { name: 'Helm' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/platform/helm`);
+    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/helm`);
 
     await expect(
       page.getByText('You do not have sufficient permissions'),

@@ -34,7 +34,8 @@ describe('SourceRoutingCard', () => {
 
     // Twice: what the sources compile to, and what the receiver carries.
     expect(await screen.findAllByText('event.dataset')).toHaveLength(2);
-    expect(screen.getAllByText('key_value_set')).toHaveLength(2);
+    expect(screen.getAllByText('equals')).toHaveLength(2);
+    expect(screen.getAllByText('syslog')).toHaveLength(2);
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
@@ -58,7 +59,7 @@ describe('SourceRoutingCard', () => {
           drift: true,
           absent: false,
           compiled: RECEIVER_ROUTING_BLOCKS,
-          deployed: { routing: { source_rules: [] } },
+          deployed: { rules: { rules: [] } },
         },
       }),
     );
@@ -71,6 +72,55 @@ describe('SourceRoutingCard', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows a grouped match as the tests it holds, and a CEL when as its text', async () => {
+    const compiled = {
+      rules: {
+        rules: [
+          {
+            id: 'source.grouped',
+            match: {
+              all: [
+                { field: 'host.name', op: 'starts_with', value: 'fw-' },
+                { field: 'agent.type', op: 'equals', value: 'x', negate: true },
+              ],
+            },
+            set: { _source: { value: 'grouped' } },
+          },
+          {
+            id: 'source.cel',
+            when: "data_stream.dataset == 'okta.system'",
+            set: { _source: { value: 'cel' } },
+          },
+        ],
+      },
+    };
+    server.use(
+      routing({
+        service: 'dfe-receiver',
+        instance: 'default',
+        mockedResponse: {
+          compiler: 'receiver',
+          values_paths: { rules: 'config.rules' },
+          drift: false,
+          absent: false,
+          compiled,
+          deployed: compiled,
+        },
+      }),
+    );
+
+    const { unmount } = renderCard('grouped');
+    expect(await screen.findAllByText('All of these')).toHaveLength(2);
+    expect(screen.getAllByText('host.name')).toHaveLength(2);
+    expect(screen.getAllByText('not equals')).toHaveLength(2);
+    unmount();
+
+    renderCard('cel');
+    expect(
+      await screen.findAllByText("data_stream.dataset == 'okta.system'"),
+    ).toHaveLength(2);
+  });
+
   it('calls out a receiver running on its built-in defaults', async () => {
     server.use(
       routing({
@@ -81,7 +131,7 @@ describe('SourceRoutingCard', () => {
           values_paths: { routing: 'config.routing' },
           drift: true,
           absent: true,
-          compiled: { routing: { source_rules: [] } },
+          compiled: { rules: { rules: [] } },
           deployed: {},
         },
       }),

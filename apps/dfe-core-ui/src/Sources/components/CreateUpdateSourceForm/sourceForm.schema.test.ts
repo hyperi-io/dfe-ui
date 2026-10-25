@@ -36,8 +36,59 @@ describe('formSchema source details', () => {
 });
 
 describe('formSchema meta schema', () => {
+  const match = {
+    field: '_json.app',
+    operator: 'equals' as const,
+    value: 'kv-proof',
+  };
+  const sharedTable = {
+    ...BASE,
+    origin: 'receiver',
+    match,
+    receiver_ui_config: { table: 'main' },
+  } as const;
+  const ownTable = {
+    ...BASE,
+    origin: 'receiver',
+    match,
+    receiver_ui_config: { table: 'own' },
+  } as const;
+
+  // The engine gives a source its own table only when a meta schema is pinned.
+  test('an own-table source with no meta schema is refused on both fields', () => {
+    const data: CreateUpdateSourceFormData = { ...ownTable };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
+      'Meta schema version is required',
+    ]);
+  });
+
+  // The create form patches ttl_days and engine into `schema` before the user opens its tab.
+  test('the patched defaults do not stand in for a meta schema on an own table', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...ownTable,
+      schema: { ttl_days: 30, engine: 'MergeTree' },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+  });
+
+  test('a shared-table source with only the patched defaults needs no meta schema', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...sharedTable,
+      schema: { ttl_days: 30, engine: 'MergeTree' },
+    };
+
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+
   // A clone or an edit seeds an absent meta schema as '', where a create leaves it unset.
-  test('an empty meta schema is refused as an unset one is', () => {
+  test('an empty meta schema is refused as an unset one is on an own topic', () => {
     const data: CreateUpdateSourceFormData = {
       ...BASE,
       origin: 'fetcher',
@@ -51,6 +102,41 @@ describe('formSchema meta schema', () => {
     expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
       'Meta schema version is required',
     ]);
+  });
+
+  test('an empty meta schema is accepted on the shared topic', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+      origin: 'fetcher',
+      fetcher: { source_type: 'crates_io', topic: 'main', config: '' },
+      schema: { meta_schema: '', meta_schema_version: '' },
+    };
+
+    expect(formSchema.safeParse(data).success).toBe(true);
+  });
+
+  test('a shared-table meta schema with no version is refused on the version', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...sharedTable,
+      schema: { meta_schema: 'meta/syslog', ttl_days: 30 },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([
+      'Meta schema version is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([]);
+  });
+
+  test('a shared-table version with no meta schema is refused on the meta schema', () => {
+    const data: CreateUpdateSourceFormData = {
+      ...sharedTable,
+      schema: { meta_schema: '', meta_schema_version: '1.0.0' },
+    };
+
+    expect(messagesAt(data, ['schema', 'meta_schema'])).toEqual([
+      'Meta schema is required',
+    ]);
+    expect(messagesAt(data, ['schema', 'meta_schema_version'])).toEqual([]);
   });
 });
 
@@ -119,7 +205,7 @@ describe('formSchema origin', () => {
       origin: 'fetcher',
       fetcher: {
         source_type: 'crates_io',
-        topic: 'own',
+        topic: 'main',
         config: 'crates:\n  - dfe-fetcher\n',
       },
     };

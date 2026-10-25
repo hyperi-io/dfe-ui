@@ -2,7 +2,10 @@ import { APIRequestContext, Page, expect, test } from '@playwright/test';
 
 import { BASE_URL, ENGINE_API_URL, e2eClient } from '../config/e2e.client';
 import { adminPassword, loginAs } from '../config/login.helpers';
-import { seedAppManagement } from '../config/appManagement.helpers';
+import {
+  deploySeededSources,
+  seedAppManagement,
+} from '../config/appManagement.helpers';
 
 /**
  * The transform a source runs is one choice out of the catalogued transforms.
@@ -16,9 +19,17 @@ const SOURCE = 'filebeatvrl';
 
 /** The seed that binds one transform per source, so all three are taken. */
 const seedThree = async (playwright: typeof import('playwright-core')) => {
+  // Deploying a source applies its table, which takes about 5s.
+  test.slow();
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
   await seedAppManagement({ playwright, seedScript: 'seed_three_transforms' });
+  // Processing shows only for a deployed source with a meta schema.
+  await deploySeededSources({
+    playwright,
+    sources: [SOURCE],
+    seedScript: 'seed_three_transforms',
+  });
 };
 
 const openProcessingTab = async (page: Page, source: string) => {
@@ -75,10 +86,11 @@ test.describe('every transform bound to a source of its own', () => {
       page.getByRole('radio', { name: /dfe-transform-vector/ }),
     ).not.toBeChecked();
 
-    // dfe-fetcher deploys and undeploys for real, so it keeps its own card.
+    // dfe-fetcher deploys and undeploys for real, but its card belongs to
+    // fetcher sources, so a receiver source shows none.
     await expect(
       page.getByRole('heading', { name: 'dfe-fetcher', exact: true }),
-    ).toBeVisible();
+    ).toBeHidden();
     await expect(page.getByRole('radio', { name: /dfe-fetcher/ })).toHaveCount(
       0,
     );
@@ -94,7 +106,7 @@ test.describe('every transform bound to a source of its own', () => {
       page.getByRole('button', { name: 'Undeploy', exact: true }),
     ).toHaveCount(0);
     // Every Deploy left on the page belongs to an app that reports itself
-    // undeployed, which is dfe-fetcher and never a transform.
+    // undeployed, and never to a transform.
     await expect(
       page.getByRole('button', { name: 'Deploy', exact: true }),
     ).toHaveCount(

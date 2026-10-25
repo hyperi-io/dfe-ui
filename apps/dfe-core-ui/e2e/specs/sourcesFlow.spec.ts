@@ -1,6 +1,9 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { seedAppManagement } from '../config/appManagement.helpers';
+import {
+  deploySeededSources,
+  seedAppManagement,
+} from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
 
@@ -10,7 +13,10 @@ import { loginAs } from '../config/login.helpers';
  * edge labels floating between them, and each of those is a number here.
  */
 
-/** A seeded source that binds a transform, so the flow draws all three stages. */
+/**
+ * A seeded source that binds a transform, so the flow draws all three stages.
+ * The Transform stage is drawn for a deployed source with a meta schema only.
+ */
 const SEED_SOURCE = 'filebeatvrl';
 
 /** The width the console is designed at, and the one the defect was filed at. */
@@ -20,6 +26,13 @@ test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
   await seedAppManagement({ playwright, seedScript: 'seed_three_transforms' });
+  // Deploying the source applies its table, which takes about 5s.
+  test.slow();
+  await deploySeededSources({
+    playwright,
+    sources: [SEED_SOURCE],
+    seedScript: 'seed_three_transforms',
+  });
   await loginAs(page, 'initial_user');
 });
 

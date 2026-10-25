@@ -50,6 +50,19 @@ export const getTabsWithErrors = (
     .filter((tab) => getTabErrors(validationErrors, tab).length > 0)
     .map((tab) => TAB_LABEL_MAP[tab]);
 
+const TAB_ORDER: readonly SourceFormTab[] = [
+  'sourceDetails',
+  'schemaConfig',
+  'transform',
+  'views',
+];
+
+/** The first tab, in the order the dialog lists them, that holds an error. */
+export const getFirstTabWithErrors = (
+  validationErrors: FormValidationErrors,
+): SourceFormTab | undefined =>
+  TAB_ORDER.find((tab) => getTabErrors(validationErrors, tab).length > 0);
+
 export const getValidationErrors = ({
   formFields,
 }: {

@@ -40,6 +40,22 @@ const aliasesBody = (source: CreateUpdateSourceFormData) => {
   return { aliases: Object.fromEntries(entries) };
 };
 
+type TFormSchema = NonNullable<CreateUpdateSourceFormData['schema']>;
+
+/** A blank meta schema or version is left out, since the engine reads one as pinned only when named. */
+const schemaBody = (
+  schema: TFormSchema,
+): TSourceUpdateRequestBody['schema'] => {
+  const { meta_schema, meta_schema_version, ...rest } = schema;
+  return {
+    ...rest,
+    // An empty engine is how the API is told to follow the DFE default.
+    engine: schema.engine ?? '',
+    ...(meta_schema?.trim() ? { meta_schema } : {}),
+    ...(meta_schema_version?.trim() ? { meta_schema_version } : {}),
+  };
+};
+
 /*
  * Transforms the source form data to a request body for the update source API.
  * The selected origin decides which of match, when and fetcher is sent, because
@@ -87,9 +103,7 @@ export const transformSourceFormDataToRequestBody = (
   const transformedSource: TSourceUpdateRequestBody = {
     ...apiRest,
     // An empty engine is how the API is told to follow the DFE default.
-    ...(schema != null
-      ? { schema: { ...schema, engine: schema.engine ?? '' } }
-      : {}),
+    ...(schema != null ? { schema: schemaBody(schema) } : {}),
     ...(views != null
       ? {
           views: views.map((view) => {
