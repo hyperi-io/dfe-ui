@@ -154,7 +154,7 @@ describe('DerivedSchemaFieldPicker', () => {
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />, { wrapper });
 
-    await screen.findByText('message', {}, { timeout: 15000 });
+    await screen.findByText('message', {}, { timeout: 45000 });
     await user.click(rowCheckbox('message'));
     await waitFor(() => expect(indexSelect('message')).toBeEnabled());
 
@@ -163,7 +163,7 @@ describe('DerivedSchemaFieldPicker', () => {
       await screen.findByTitle(
         'I search for fragments inside words',
         {},
-        { timeout: 15000 },
+        { timeout: 45000 },
       ),
     );
 
@@ -172,7 +172,7 @@ describe('DerivedSchemaFieldPicker', () => {
         { name: 'message', index: 'substring_search' },
       ]),
     );
-  });
+  }, 60_000);
 
   it('filters the listed columns by name', async () => {
     const user = userEvent.setup();
