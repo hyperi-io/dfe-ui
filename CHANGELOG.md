@@ -3,6 +3,17 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.34](https://github.com/hyperi-io/dfe-ui/compare/v1.7.33...v1.7.34) (2026-10-26)
+
+### Bug Fixes
+
+* **deps:** update dependency cronstrue to v3.33.0 ([#613](https://github.com/hyperi-io/dfe-ui/issues/613)) ([de3baf8](https://github.com/hyperi-io/dfe-ui/commit/de3baf8ca92456e861fd9e892ec1fdc497599903))
+* **deps:** update node-dependencies ([#607](https://github.com/hyperi-io/dfe-ui/issues/607)) ([3c78356](https://github.com/hyperi-io/dfe-ui/commit/3c7835631a8bb828a18bbf552f4dde5e8e88bd33))
+* hold ace-builds below 1.45 until the YAML worker shim is reviewed ([#612](https://github.com/hyperi-io/dfe-ui/issues/612)) ([70e43c7](https://github.com/hyperi-io/dfe-ui/commit/70e43c7a6cadd7c7fe55bb8004d47d22f0e26775))
+* release the multi-entry catalogue selection ([#619](https://github.com/hyperi-io/dfe-ui/issues/619)) ([31f581d](https://github.com/hyperi-io/dfe-ui/commit/31f581d5244cc73f676865e0c6cdda4e32e641e7)), closes [#618](https://github.com/hyperi-io/dfe-ui/issues/618)
+* source catalogue behaviour ([#618](https://github.com/hyperi-io/dfe-ui/issues/618)) ([1cd5671](https://github.com/hyperi-io/dfe-ui/commit/1cd56715ae0afefbcc1490191df9cc5f22cf00bd))
+* state the 7 day release age on the ace-builds renovate hold ([1f1d1e3](https://github.com/hyperi-io/dfe-ui/commit/1f1d1e3dccb38571e9246efac975f86fb3658b27))
+
 ## [1.7.33](https://github.com/hyperi-io/dfe-ui/compare/v1.7.32...v1.7.33) (2026-10-25)
 
 ### Bug Fixes
