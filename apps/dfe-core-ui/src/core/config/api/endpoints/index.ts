@@ -21,7 +21,7 @@ export const API_CONFIG = Object.freeze({
     plan: '/api/v1/sources/{name}/plan',
     deploy: '/api/v1/sources/{name}/deploy',
     catalogue: '/api/v1/sources/catalogue',
-    fromCatalogue: '/api/v1/sources/from-catalogue/{entry}',
+    fromCatalogue: '/api/v1/sources/from-catalogue',
     engines: '/api/v1/sources/engines',
   },
   ingest: {

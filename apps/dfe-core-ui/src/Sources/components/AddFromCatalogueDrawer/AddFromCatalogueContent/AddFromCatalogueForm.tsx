@@ -1,256 +1,309 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
-import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { Table } from '@/core/components/Table';
+import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
+import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useCreateSourceFromCatalogue } from '@/Sources/hooks/useCreateSourceFromCatalogue';
-import { TCatalogueSourceRequestBody } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
-import {
-  TSourceCatalogueIntake,
-  TSourceCatalogueItem,
-} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+import { SOURCE_TRANSPORT_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { sourceNameValidator } from '@/Sources/utils/validation';
-import { App, Button, Input, Select, Switch } from 'antd';
-import { Fragment } from 'react';
+import { IconChevronLeft, IconTrash } from '@repo/dfe-icons';
+import { Button, FormProps } from 'antd';
+import type { FormListFieldData } from 'antd/es/form';
+import { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
 import z from 'zod';
-import { intakeLabel, intakeOptionsFor, isKnownIntake } from './constants';
+import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
 const formSchema = z.object({
-  intake: z.custom<TSourceCatalogueIntake>(
-    (value) => typeof value === 'string' && isKnownIntake(value),
-    { message: 'Intake is required' },
-  ),
+  entry: z.string().min(1),
   name: sourceNameValidator,
-  variant: z.string().optional(),
+  intake: z.enum(['beats', 'fetcher', 'receiver']),
+  transport: z.enum(['bus', 'direct']),
   archive: z.boolean(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-/** The create body, naming only what differs from the entry's own defaults. */
-const toRequestBody = ({
-  defaultVariant,
-  entry,
-  values,
-}: {
-  defaultVariant: string | undefined;
-  entry: TSourceCatalogueItem;
-  values: FormValues;
-}): TCatalogueSourceRequestBody => {
-  const isDefaultIntake = values.intake === entry.default_intake;
-  const isDefaultName = values.name === entry.name;
-  const isDefaultVariant =
-    values.variant === undefined || values.variant === defaultVariant;
-  return {
-    ...(!isDefaultIntake && { intake: values.intake }),
-    ...(!isDefaultName && { name: values.name }),
-    ...(!isDefaultVariant && { variant: values.variant }),
-    archive: values.archive,
-  };
+/** `intakeOptions` chooses the intake select. It is not a request field. */
+export type AddFromCatalogueFormValues = z.infer<typeof formSchema> & {
+  intakeOptions?: string[] | null;
 };
 
-export const AddFromCatalogueForm = ({
-  entry,
-  onSuccess,
-  onCancel,
-}: {
-  entry: TSourceCatalogueItem;
-  onSuccess?: () => void;
+/** The list the field rules check, so an issue path is `entries`, the row, then the cell. */
+const storeSchema = z.object({
+  entries: z.array(formSchema),
+});
+
+type AddFromCatalogueFormStore = z.infer<typeof storeSchema>;
+
+/** Cells a person can change. The catalogue entry stays a label. */
+const EDITABLE_FIELDS = ['name', 'intake', 'transport'] as const;
+type EditableField = (typeof EDITABLE_FIELDS)[number];
+
+const isEditableField = (field: PropertyKey): field is EditableField =>
+  typeof field === 'string' &&
+  (EDITABLE_FIELDS as readonly string[]).includes(field);
+
+/** The editable cells a row's schema issues land on, the ones the table opens. */
+const editableIssues = (
+  result: ReturnType<typeof formSchema.safeParse>,
+): EditableField[] => {
+  if (result.success) return [];
+  const fields = new Set<EditableField>();
+  for (const issue of result.error.issues) {
+    const field = issue.path[0];
+    if (field !== undefined && isEditableField(field)) fields.add(field);
+  }
+  return [...fields];
+};
+
+interface AddFromCatalogueFormProps extends Omit<
+  FormProps<AddFromCatalogueFormStore>,
+  'initialValues' | 'onFinish'
+> {
   onCancel?: () => void;
-}) => {
-  const [form] = Form.useForm<FormValues>();
-  const formValidation = useAntdZodResolver(formSchema);
-  const { notification } = App.useApp();
-  const { setSelectedSource } = useListSourcesContext();
+  initialValues: AddFromCatalogueFormValues[];
+  onFinish?: (entries: AddFromCatalogueFormValues[]) => void;
+  onSelectedEntriesChange?: (entries: AddFromCatalogueFormValues[]) => void;
+  error?: Error | null;
+  isPending?: boolean;
+}
 
-  const variants = entry.variants ?? [];
-  const defaultVariant = variants[0];
-  const intakeOptions = intakeOptionsFor(entry.intakes);
+export const AddFromCatalogueForm = ({
+  initialValues,
+  onCancel,
+  onFinish,
+  onSelectedEntriesChange,
+  error,
+  isPending,
+  ...props
+}: AddFromCatalogueFormProps) => {
+  const { componentHeight } = useSetComponentHeight({ offset: 300 });
 
-  // Availability judges only the default variant, so another choice is left to the engine.
-  const chosenVariant = Form.useWatch('variant', form) ?? defaultVariant;
-  const isDefaultVariantChosen = chosenVariant === defaultVariant;
-  const isRefused =
-    entry.availability === 'missing_variant' && isDefaultVariantChosen;
-  const isUnchecked = entry.availability === 'unknown';
+  const [form] = Form.useForm<AddFromCatalogueFormStore>();
+  const formValidation = useAntdZodResolver(storeSchema);
+  const [editingFields, setEditingFields] = useState<EditableField[][]>([]);
+  const transportOptions = Object.entries(SOURCE_TRANSPORT_LABELS).map(
+    ([value, label]) => ({
+      value,
+      label,
+    }),
+  );
 
-  const {
-    mutate: createSourceFromCatalogue,
-    isPending,
-    error,
-    reset,
-  } = useCreateSourceFromCatalogue({
-    onSuccess: (response) => {
-      setSelectedSource({
-        source_name: response.source,
-        source_version: response.current,
-      });
+  const fieldEditing = (rowIndex: number, field: EditableField) =>
+    editingFields[rowIndex]?.includes(field) ?? false;
 
-      notification.success({
-        title: `Source ${response.source} created from the catalogue`,
-        placement: 'bottomLeft',
-      });
-      // The source is saved either way; only the deploy-repo follow-up failed.
-      if (response.apps_sync_error) {
-        notification.warning({
-          title: 'The apps did not follow this source',
-          description: response.apps_sync_error,
-          placement: 'bottomLeft',
-        });
+  /**
+   * Archive and the intake list are not cells, so a submit value is laid over
+   * the row that was selected before the schema sees it.
+   */
+  const rowsForParse = (
+    submitted: Partial<AddFromCatalogueFormValues>[] | undefined,
+  ) =>
+    (submitted ?? []).map((entry, index) => ({
+      ...initialValues[index],
+      ...entry,
+    }));
+
+  const rejectInvalidRows = (
+    submitted: Partial<AddFromCatalogueFormValues>[] | undefined,
+  ) => {
+    const results = rowsForParse(submitted).map((entry) =>
+      formSchema.safeParse(entry),
+    );
+    const parsed: AddFromCatalogueFormValues[] = [];
+    for (const result of results) {
+      if (!result.success) {
+        setEditingFields(results.map(editableIssues));
+        void form.validateFields().catch(() => undefined);
+        return null;
       }
-      reset();
-      onSuccess?.();
-    },
-  });
+      parsed.push(result.data);
+    }
+    return parsed;
+  };
 
-  const handleFinish = (values: FormValues) => {
-    createSourceFromCatalogue({
-      entry: entry.name,
-      body: toRequestBody({ defaultVariant, entry, values }),
-    });
+  const handleFinish = (values: AddFromCatalogueFormStore) => {
+    const parsed = rejectInvalidRows(values.entries);
+    if (!parsed) return;
+    onFinish?.(parsed);
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <Form
+      {...props}
+      className="flex flex-col gap-2"
+      form={form}
+      onFinish={handleFinish}
+      onFinishFailed={() => {
+        rejectInvalidRows(form.getFieldsValue(true).entries);
+      }}
+      initialValues={{ entries: initialValues }}
+    >
       <NotificationCard
-        classNames={{
-          description: 'w-full',
-        }}
-        title={`Adding ${entry.name} from catalogue`}
-        description={
-          <div className="flex flex-col gap-2">
-            {entry.description && (
-              <p className="mt-2 text-xs">{entry.description}</p>
-            )}
-            <dl className="mt-2 grid grid-cols-[auto_1fr_auto_1fr] gap-x-4 gap-y-1 text-xs items-center">
-              {entry.display_name && (
-                <>
-                  <dt>Display Name</dt>
-                  <dd>{entry.display_name}</dd>
-                </>
-              )}
-
-              {entry.data_stream && (
-                <>
-                  <dt>Data Stream</dt>
-                  <dd>{entry.data_stream}</dd>
-                </>
-              )}
-
-              {entry.package && (
-                <>
-                  <dt>Package</dt>
-                  <dd>{entry.package}</dd>
-                </>
-              )}
-
-              <dt>Intakes</dt>
-              <dd>{entry.intakes.map(intakeLabel).join(', ')}</dd>
-
-              {entry.framing && (
-                <>
-                  <dt>Framing</dt>
-                  <dd>{entry.framing}</dd>
-                </>
-              )}
-
-              {entry.engine && (
-                <>
-                  <dt>Engine</dt>
-                  <dd>{entry.engine}</dd>
-                </>
-              )}
-
-              {variants.length > 0 && (
-                <>
-                  <dt>Variants</dt>
-                  <dd>{variants.join(', ')}</dd>
-                </>
-              )}
-
-              <dt>Table Schema</dt>
-              <dd>{entry.has_schema ? 'Bound' : 'None'}</dd>
-
-              {Object.entries(entry.beats ?? {}).map(([key, value]) => (
-                <Fragment key={key}>
-                  <dt>{`Beats ${key}`}</dt>
-                  <dd>{value}</dd>
-                </Fragment>
-              ))}
-            </dl>
-          </div>
+        type="info"
+        title={
+          <span className="flex items-center gap-2">
+            <Button
+              className="p-0"
+              icon={<IconChevronLeft />}
+              onClick={onCancel}
+              type="text"
+              disabled={isPending}
+            >
+              Back
+            </Button>
+            {initialValues?.length ?? 0} entries selected
+          </span>
         }
-      />
-      <Form
-        onFinish={handleFinish}
-        form={form}
-        initialValues={{
-          intake: entry.default_intake,
-          name: entry.name,
-          variant: defaultVariant,
-          archive: false,
-        }}
-      >
-        <Form.Item name="intake" label="Intake" rules={[formValidation]}>
-          <Select<TSourceCatalogueIntake>
-            aria-label="Intake for this source"
-            options={intakeOptions}
-          />
-        </Form.Item>
-
-        {variants.length > 1 && (
-          <Form.Item name="variant" label="Variant" rules={[formValidation]}>
-            <Select
-              aria-label="Variant for this source"
-              options={variants.map((value) => ({ value, label: value }))}
-            />
-          </Form.Item>
-        )}
-
-        <Form.Item name="name" label="Source Name" rules={[formValidation]}>
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="archive"
-          label="Archive"
-          extra="Needs the bus."
-          rules={[formValidation]}
-        >
-          <Switch />
-        </Form.Item>
-
-        {isRefused && (
-          <FormNotification
-            type="warning"
-            title="The deployed transform does not ship this variant"
-            text={entry.availability_reason}
-          />
-        )}
-
-        {isUnchecked && <FormNotification text={entry.availability_reason} />}
-
-        {error && (
-          <Form.Item>
-            <ApiErrorNotification error={error} />
-          </Form.Item>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button type="default" htmlType="button" onClick={() => onCancel?.()}>
-            Cancel
-          </Button>
+        action={
           <Button
             type="primary"
             htmlType="submit"
             loading={isPending}
-            disabled={isRefused}
+            disabled={isPending}
           >
-            Add
+            Upload Catalogues
           </Button>
-        </div>
-      </Form>
-    </div>
+        }
+      />
+
+      {error && <ApiErrorNotification error={error} />}
+
+      <Form.List name="entries">
+        {(fields, { remove }) => {
+          const columns: ColumnsType<FormListFieldData> = [
+            {
+              key: 'action',
+              width: 40,
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex } = record;
+                return (
+                  <Button
+                    icon={<IconTrash />}
+                    aria-label={`Remove ${initialValues[rowIndex].entry}`}
+                    shape="circle"
+                    size="small"
+                    onClick={() => {
+                      remove(rowIndex);
+                      onSelectedEntriesChange?.(
+                        initialValues.filter((_, index) => index !== rowIndex),
+                      );
+                    }}
+                  />
+                );
+              },
+            },
+            {
+              title: 'Catalogue Entry',
+              key: 'entry',
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item {...restField} name={[rowIndex, 'entry']}>
+                    <InlineEditInput editable={false} defaultEditing={false} />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Source Name',
+              dataIndex: 'name',
+              key: 'name',
+              width: '30%',
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'name']}
+                    rules={[formValidation]}
+                    className=""
+                  >
+                    <InlineEditInput
+                      key={fieldEditing(rowIndex, 'name') ? 'editing' : 'view'}
+                      allowClear={false}
+                      className="max-w-48"
+                      defaultEditing={fieldEditing(rowIndex, 'name')}
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Intake',
+              key: 'intake',
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+
+                const intakeOptions =
+                  initialValues[rowIndex]?.intakeOptions?.map((option) => ({
+                    value: option,
+                    label:
+                      INTAKE_OPTIONS_MAP[
+                        option as keyof typeof INTAKE_OPTIONS_MAP
+                      ],
+                  })) ?? INTAKE_OPTIONS;
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'intake']}
+                    rules={[formValidation]}
+                  >
+                    <InlineEditSelect
+                      key={
+                        fieldEditing(rowIndex, 'intake') ? 'editing' : 'view'
+                      }
+                      defaultEditing={fieldEditing(rowIndex, 'intake')}
+                      options={intakeOptions}
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+            {
+              title: 'Transport',
+              dataIndex: 'transport',
+              key: 'transport',
+              render: (_value, record) => {
+                const { key: _rowKey, name: rowIndex, ...restField } = record;
+
+                return (
+                  <Form.Item
+                    {...restField}
+                    name={[rowIndex, 'transport']}
+                    rules={[formValidation]}
+                  >
+                    <InlineEditSelect
+                      key={
+                        fieldEditing(rowIndex, 'transport') ? 'editing' : 'view'
+                      }
+                      defaultEditing={fieldEditing(rowIndex, 'transport')}
+                      options={transportOptions}
+                    />
+                  </Form.Item>
+                );
+              },
+            },
+          ];
+          return (
+            <Table
+              scroll={{ y: componentHeight, x: 'max-content' }}
+              locale={{
+                emptyText: (
+                  <NotificationCard
+                    type="default"
+                    title="No entries selected."
+                  />
+                ),
+              }}
+              rowKey="name"
+              columns={columns}
+              dataSource={fields}
+            />
+          );
+        }}
+      </Form.List>
+    </Form>
   );
 };
