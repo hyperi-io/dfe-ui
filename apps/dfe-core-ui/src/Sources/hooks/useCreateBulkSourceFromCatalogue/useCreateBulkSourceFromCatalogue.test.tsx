@@ -35,9 +35,8 @@ describe('.useCreateSource', () => {
     entries: [
       {
         entry: 'okta',
-        intake: 'okta',
+        intake: 'beats',
         name: 'okta',
-        transform: 'default',
         transport: 'bus',
         archive: false,
       },
@@ -152,7 +151,7 @@ describe('.useCreateSource', () => {
         entries: [
           {
             ...requestBody.entries[0],
-            intake: 'not_okta',
+            intake: 'beats',
           },
         ],
       });

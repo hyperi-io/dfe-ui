@@ -39,7 +39,6 @@ const toSelectedEntry = (
   entry: row.name,
   name: toSourceName(row.name),
   intake: row.intakes?.[0] as AddFromCatalogueFormValues['intake'],
-  transform: 'default',
   transport: 'bus',
   archive: false,
   intakeOptions: row.intakes,

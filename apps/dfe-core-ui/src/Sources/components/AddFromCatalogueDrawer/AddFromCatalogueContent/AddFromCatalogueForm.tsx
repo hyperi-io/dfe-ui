@@ -20,7 +20,6 @@ const formSchema = z.object({
   entry: z.string().min(1),
   name: sourceNameValidator,
   intake: z.enum(['beats', 'fetcher', 'receiver']),
-  transform: z.string().min(1),
   transport: z.enum(['bus', 'direct']),
   archive: z.boolean(),
 });
@@ -258,18 +257,6 @@ export const AddFromCatalogueForm = ({
                       defaultEditing={fieldEditing(rowIndex, 'intake')}
                       options={intakeOptions}
                     />
-                  </Form.Item>
-                );
-              },
-            },
-            {
-              title: 'Transform',
-              key: 'transform',
-              render: (_value, record) => {
-                const { key: _rowKey, name: rowIndex, ...restField } = record;
-                return (
-                  <Form.Item {...restField} name={[rowIndex, 'transform']}>
-                    <InlineEditInput editable={false} defaultEditing={false} />
                   </Form.Item>
                 );
               },
