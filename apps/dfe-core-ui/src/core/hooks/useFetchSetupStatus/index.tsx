@@ -8,10 +8,7 @@ export const useFetchSetupStatus = ({
 }: {
   queryEnabled?: boolean;
   refetchInterval?:
-    | number
-    | false
-    | ((query?: unknown) => number | false)
-    | undefined;
+    number | false | ((query?: unknown) => number | false) | undefined;
 } = {}) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.auth.setupStatus(),

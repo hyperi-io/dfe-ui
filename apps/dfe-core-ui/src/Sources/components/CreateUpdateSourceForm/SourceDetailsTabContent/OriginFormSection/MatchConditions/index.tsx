@@ -328,8 +328,7 @@ const ConditionGroup = ({
  */
 export const MatchConditions = ({ form, formValidation }: EditorProps) => {
   const root = Form.useWatch('match', { form, preserve: true }) as
-    | TMatchFormNode
-    | undefined;
+    TMatchFormNode | undefined;
 
   const setRoot = (next: TMatchFormNode | null) => {
     const onlyPart = next?.parts?.length === 1 ? next.parts[0] : undefined;

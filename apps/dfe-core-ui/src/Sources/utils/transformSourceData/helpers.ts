@@ -1,8 +1,7 @@
 import yaml from 'yaml';
 
 export type ObjectArrayFormEntries =
-  | { key: string; value: string }[]
-  | undefined;
+  { key: string; value: string }[] | undefined;
 
 export const objectArrayToObject = (
   entries: ObjectArrayFormEntries,
@@ -31,8 +30,7 @@ export const objectToObjectArray = (
 export type FetcherConfig = Record<string, unknown>;
 
 export type FetcherConfigParseResult =
-  | { ok: true; config: FetcherConfig }
-  | { ok: false; message: string };
+  { ok: true; config: FetcherConfig } | { ok: false; message: string };
 
 /** The engine sets these two on the deployed stanza, so a hand-set one is a 422. */
 export const ENGINE_OWNED_FETCHER_KEYS = ['enabled', 'topic'] as const;

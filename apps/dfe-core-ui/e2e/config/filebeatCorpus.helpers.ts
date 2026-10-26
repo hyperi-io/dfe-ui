@@ -32,7 +32,7 @@ export const corpusAvailable = () =>
 const tarEntries = (buffer: Buffer) => {
   const entries: { name: string; body: Buffer }[] = [];
   const BLOCK = 512;
-  for (let at = 0; at + BLOCK <= buffer.length; ) {
+  for (let at = 0; at + BLOCK <= buffer.length;) {
     const name = buffer.toString('utf8', at, at + 100).replace(/\0.*$/, '');
     if (!name) {
       at += BLOCK;

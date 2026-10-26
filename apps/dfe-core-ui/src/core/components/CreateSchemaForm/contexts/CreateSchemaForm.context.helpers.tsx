@@ -12,9 +12,7 @@ import { FieldError } from '@rc-component/form/es/interface';
 import { type InvalidColumns } from './CreateSchemaForm.context.d';
 
 export type ColumnListFormKey =
-  | 'uploadedColumns'
-  | 'invalidColumns'
-  | 'schemaColumns';
+  'uploadedColumns' | 'invalidColumns' | 'schemaColumns';
 
 /**
  * Whether `onValuesChange` includes edits under column tabs (`schemaColumns` / upload lists).

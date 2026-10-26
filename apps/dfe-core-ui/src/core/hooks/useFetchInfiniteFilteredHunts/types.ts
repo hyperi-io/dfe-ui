@@ -10,10 +10,7 @@ export type THuntListResponse = DfeClientSuccessResponseBody<
 export type THuntListItem = THuntListResponse['items'][number];
 
 export type HuntSortBy =
-  | 'name'
-  | 'display_name'
-  | 'source_table'
-  | 'target_table';
+  'name' | 'display_name' | 'source_table' | 'target_table';
 
 export type UseFetchInfiniteFilteredHuntsProps = {
   search?: string;
