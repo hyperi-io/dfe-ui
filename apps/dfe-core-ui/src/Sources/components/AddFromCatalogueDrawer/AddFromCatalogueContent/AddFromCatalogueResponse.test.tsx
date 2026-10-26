@@ -1,12 +1,14 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { AddFromCatalogueResponse } from './AddFromCatalogueResponse';
 
 const { wrapper } = buildTestWrapper().withTheme();
 
 describe('AddFromCatalogueResponse', () => {
-  it('shows the created and failed rows', () => {
+  it('shows the created and failed rows', async () => {
+    const user = userEvent.setup();
     const { container } = render(
       <AddFromCatalogueResponse
         data={{
@@ -30,6 +32,15 @@ describe('AddFromCatalogueResponse', () => {
         }}
       />,
       { wrapper },
+    );
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Toggle failed sources' }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Toggle created sources' }),
     );
 
     expect(screen.getAllByRole('table')).toHaveLength(2);

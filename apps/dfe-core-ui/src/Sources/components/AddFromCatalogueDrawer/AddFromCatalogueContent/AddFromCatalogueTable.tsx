@@ -29,7 +29,7 @@ const DIGIT_WORDS = [
 export const toSourceName = (entryName: string) =>
   entryName
     .replaceAll('_', '-')
-    .replace(/\d/g, (digit) => DIGIT_WORDS[Number(digit)] ?? digit)
+    .replace(/\d/, (digit) => DIGIT_WORDS[Number(digit)] ?? digit)
     .toLowerCase()
     .slice(0, 40);
 
@@ -95,7 +95,7 @@ export const AddFromCatalogueTable = ({
           title: 'Entry',
           dataIndex: 'name',
           key: 'name',
-          width: '50%',
+          width: '40%',
           fixed: 'start',
           render: (name) => (
             <Highlighter searchWords={[search]} textToHighlight={name} />
@@ -105,13 +105,13 @@ export const AddFromCatalogueTable = ({
           title: 'Dataset',
           dataIndex: 'dataset',
           key: 'dataset',
-          width: '50%',
+          width: '40%',
         },
         {
           title: 'Arrives by',
           dataIndex: 'intakes',
           key: 'intakes',
-          width: '220px',
+          width: 220,
           render: (intakes: string[]) => (
             <div className="flex gap-2">
               {intakes.map((intake) => (
