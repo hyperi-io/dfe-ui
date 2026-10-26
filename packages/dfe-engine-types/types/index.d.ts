@@ -1151,7 +1151,7 @@ export interface paths {
          * Create Source From Catalogue
          * @description Create a source from a catalogue entry, on one of the intakes it arrives by.
          *
-         *     The entry's file is the write body for its default intake, and another intake swaps in the match rule that intake derives. A variant the deployed transform's contract does not list is refused with 409, and one whose contract is not mounted is allowed. Everything after that is the ordinary create, so the source is indistinguishable from a hand-written one.
+         *     The entry's file is the write body, and the intake chosen (the default when none is named) sets the match rule: the dataset a Beats event stamps, or the source's own label for a receiver intake. A variant the deployed transform's contract does not list is refused with 409, and one whose contract is not mounted is allowed. Everything after that is the ordinary create, so the source is indistinguishable from a hand-written one.
          */
         post: operations["sources.from-catalogue.post"];
         delete?: never;
@@ -6988,7 +6988,7 @@ export interface components {
             intakes: string[];
             /**
              * Default Intake
-             * @description The intake a create takes when it names none: the first of fetcher, receiver and beats the entry lists
+             * @description The intake a create takes when it names none: the first of fetcher, beats and receiver the entry lists
              * @enum {string}
              */
             default_intake: "beats" | "receiver" | "fetcher";
@@ -15328,6 +15328,13 @@ export interface components {
              */
             variant?: string | null;
             /**
+             * Mode
+             * @description agent runs the one program variant names. agentless detects the source of each event instead, takes no variant, and stamps each event with its detected source's label so the loader routes it per event. Unset leaves the app's own default, agent. Only an app whose manifest declares a mode_path takes it.
+             */
+            mode?: ("agent" | "agentless") | null;
+            /** @description How an agentless transform detects each event's source and what it does with one it cannot place. Read only when mode is agentless. Unset leaves the app's own defaults. */
+            detect?: components["schemas"]["TransformDetect"] | null;
+            /**
              * Config File
              * @description Path to engine-specific config
              */
@@ -16207,6 +16214,30 @@ export interface components {
             /** Errors */
             errors?: components["schemas"]["FieldError"][];
             context: components["schemas"]["TopicsNotCreatedContext"];
+        };
+        /**
+         * TransformDetect
+         * @description How an agentless transform decides which source each event belongs to.
+         */
+        TransformDetect: {
+            /**
+             * Unmatched
+             * @description What happens to an event nothing matches. passthrough emits it with no transform and no per-source label, so the loader lands it in the table the sink topic names. fallback runs the fallback source's transform on it. stop halts the service on it with the block unreleased.
+             * @default passthrough
+             * @enum {string}
+             */
+            unmatched: "passthrough" | "fallback" | "stop";
+            /**
+             * Fallback
+             * @description The registered source whose transform runs on an unmatched event, by registry name (e.g. filebeat.cisco_asa.default). Required when unmatched is fallback and refused otherwise.
+             * @default
+             */
+            fallback: string;
+            /**
+             * Candidates
+             * @description The registered sources detection may name, by registry name. Empty means every source the transform can detect.
+             */
+            candidates?: string[];
         };
         /**
          * TransportFacts
