@@ -3,12 +3,11 @@ import { TSourceCatalogueIntake } from '@/Sources/hooks/useFetchInfiniteSourceCa
 // Keyed by the engine's intake enum, so an intake it adds fails typecheck until it has a label.
 export const INTAKE_OPTIONS_MAP: Readonly<
   Record<TSourceCatalogueIntake, string>
-> =
-  Object.freeze({
-    beats: 'Beats',
-    receiver: 'Pushed to the receiver',
-    fetcher: 'Pulled by a fetcher',
-  });
+> = Object.freeze({
+  beats: 'Beats',
+  receiver: 'Pushed to the receiver',
+  fetcher: 'Pulled by a fetcher',
+});
 
 export const isKnownIntake = (
   intake: string,
