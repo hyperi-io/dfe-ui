@@ -4,8 +4,8 @@ import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/ty
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
+import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
-import { TCatalogueSourceResponse } from '@/Sources/hooks/useCreateSourceFromCatalogue/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceCataloguesResponse } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
@@ -197,26 +197,37 @@ export const sources = {
     },
   },
   fromCatalogue: {
-    mockedUrl: '/api/v1/sources/from-catalogue/{entry}',
+    mockedUrl: '/api/v1/sources/from-catalogue',
     post: {
       success: ({
         mockedResponse = {
-          source: 'okta',
-          message: 'created',
-          current: '1.0.0',
-          versions: ['1.0.0'],
+          created: [
+            {
+              entry: 'okta',
+              source: 'okta',
+              current: '1.0.0',
+              versions: ['1.0.0'],
+            },
+          ],
+          failed: [
+            {
+              entry: 'not_okta',
+              source: 'not_okta',
+              code: 'source_error',
+              message: 'source error',
+            },
+          ],
+          apps_synced: [],
+          apps_sync_error: null,
+          restart_required: ['okta'],
         },
-        entry = 'okta',
       }: {
-        mockedResponse?: TCatalogueSourceResponse;
+        mockedResponse?: TCatalogueBulkSourceResponse;
         entry?: string;
       } = {}) => {
-        return http.post(
-          sources.fromCatalogue.mockedUrl.replace('{entry}', entry),
-          () => {
-            return HttpResponse.json(mockedResponse);
-          },
-        );
+        return http.post(sources.fromCatalogue.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
       },
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,

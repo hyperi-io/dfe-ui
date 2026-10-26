@@ -30,10 +30,10 @@ export const AddFromCatalogueDrawer = () => {
       <Drawer
         title={TITLE}
         open={isOpen}
-        size="60%"
+        size="80%"
         onClose={() => setIsOpen(false)}
       >
-        <AddFromCatalogueContent onSuccess={() => setIsOpen(false)} />
+        <AddFromCatalogueContent />
       </Drawer>
     </>
   );

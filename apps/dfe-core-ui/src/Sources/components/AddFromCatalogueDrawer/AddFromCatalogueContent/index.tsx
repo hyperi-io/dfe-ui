@@ -1,25 +1,55 @@
-import { TSourceCatalogueItem } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+import { useCreateBulkSourceFromCatalogue } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue';
 import { useState } from 'react';
-import { AddFromCatalogueForm } from './AddFromCatalogueForm';
+import {
+  AddFromCatalogueForm,
+  AddFromCatalogueFormValues,
+} from './AddFromCatalogueForm';
+import { AddFromCatalogueResponse } from './AddFromCatalogueResponse';
 import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 
-export const AddFromCatalogueContent = ({
-  onSuccess,
-}: {
-  onSuccess?: () => void;
-}) => {
-  const [selectedEntry, setSelectedEntry] = useState<TSourceCatalogueItem>();
-  const handleSuccess = () => {
-    setSelectedEntry(undefined);
-    onSuccess?.();
+export const AddFromCatalogueContent = () => {
+  const [selectedEntries, setSelectedEntries] = useState<
+    AddFromCatalogueFormValues[]
+  >([]);
+
+  const [showForm, setShowForm] = useState(false);
+  const [showResponse, setShowResponse] = useState(false);
+
+  const {
+    data: createBulkSourcesResponse,
+    mutate: createBulkSources,
+    isPending,
+    error,
+  } = useCreateBulkSourceFromCatalogue({
+    onSuccess: () => {
+      setShowResponse(true);
+    },
+  });
+
+  const handleFinish = (values: AddFromCatalogueFormValues[]) => {
+    createBulkSources({ entries: values });
   };
-  return selectedEntry ? (
-    <AddFromCatalogueForm
-      entry={selectedEntry}
-      onCancel={() => setSelectedEntry(undefined)}
-      onSuccess={handleSuccess}
-    />
+
+  return showResponse ? (
+    <AddFromCatalogueResponse data={createBulkSourcesResponse} />
   ) : (
-    <AddFromCatalogueTable onSelect={(entry) => setSelectedEntry(entry)} />
+    <div className="flex flex-col gap-2">
+      {selectedEntries.length > 0 && showForm ? (
+        <AddFromCatalogueForm
+          initialValues={selectedEntries}
+          onFinish={handleFinish}
+          onSelectedEntriesChange={setSelectedEntries}
+          onCancel={() => setShowForm(false)}
+          error={error}
+          isPending={isPending}
+        />
+      ) : (
+        <AddFromCatalogueTable
+          selectedEntries={selectedEntries}
+          onSelectedEntriesChange={(entries) => setSelectedEntries(entries)}
+          onUpload={() => setShowForm(true)}
+        />
+      )}
+    </div>
   );
 };

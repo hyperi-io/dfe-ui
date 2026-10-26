@@ -90,7 +90,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(intake ? ['intake', intake] : []),
       ...(per_page ? ['per_page', per_page] : []),
     ],
-    fromCatalogue: () => ['sources', 'from-catalogue', '{entry}'],
+    fromCatalogue: () => ['sources', 'from-catalogue'],
     engines: () => ['sources', 'engines'],
   },
   ingest: {
