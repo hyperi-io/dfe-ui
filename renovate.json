@@ -19,7 +19,8 @@
       "matchPackageNames": [
         "ace-builds"
       ],
-      "allowedVersions": "<1.45.0"
+      "allowedVersions": "<1.45.0",
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
