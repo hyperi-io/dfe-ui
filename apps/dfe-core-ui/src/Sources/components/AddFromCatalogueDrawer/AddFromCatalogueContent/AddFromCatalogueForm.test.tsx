@@ -8,7 +8,7 @@ import { AddFromCatalogueForm } from './AddFromCatalogueForm';
 const { wrapper } = buildTestWrapper().withTheme();
 
 describe('AddFromCatalogueForm', () => {
-  it('shows the catalogue entry, its intake, and its transform', () => {
+  it('shows the catalogue entry and its intake', () => {
     render(
       <AddFromCatalogueForm
         initialValues={[
@@ -27,7 +27,6 @@ describe('AddFromCatalogueForm', () => {
 
     expect(screen.getByText('okta')).toBeInTheDocument();
     expect(screen.getByText('beats')).toBeInTheDocument();
-    expect(screen.getByText('parse-okta')).toBeInTheDocument();
   });
 
   it('opens an invalid source name for editing and keeps the upload', async () => {
@@ -75,7 +74,6 @@ describe('AddFromCatalogueForm', () => {
         entry: 'okta',
         name: 'okta-logs',
         intake: 'beats' as const,
-        transform: 'parse-okta',
         transport: 'bus' as const,
         intakeOptions: ['beats', 'fetcher'],
         archive: false,
@@ -100,7 +98,6 @@ describe('AddFromCatalogueForm', () => {
         entry: 'okta',
         name: 'okta',
         intake: 'beats' as const,
-        transform: 'default',
         transport: 'bus' as const,
         archive: false,
       },
@@ -108,7 +105,6 @@ describe('AddFromCatalogueForm', () => {
         entry: 'aws',
         name: 'aws',
         intake: 'fetcher' as const,
-        transform: 'default',
         transport: 'bus' as const,
         archive: false,
       },

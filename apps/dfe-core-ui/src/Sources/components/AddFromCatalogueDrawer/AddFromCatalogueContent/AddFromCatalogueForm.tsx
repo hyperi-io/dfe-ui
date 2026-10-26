@@ -36,7 +36,7 @@ const storeSchema = z.object({
 
 type AddFromCatalogueFormStore = z.infer<typeof storeSchema>;
 
-/** Cells a person can change. Entry and transform stay labels. */
+/** Cells a person can change. The catalogue entry stays a label. */
 const EDITABLE_FIELDS = ['name', 'intake', 'transport'] as const;
 type EditableField = (typeof EDITABLE_FIELDS)[number];
 
