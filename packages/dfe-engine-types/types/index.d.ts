@@ -1107,7 +1107,11 @@ export interface paths {
          * List Catalogue
          * @description List the sources the installed dfe-schemas catalogue ships ready to create.
          *
-         *     Each entry says whether the deployed transform ships its default variant, read off that app's mounted contract, so a console can hold back an entry the create would refuse.
+         *     An entry already stored as a source is left out, matched on the catalogue entry
+         *     name even when the source was given a different one. A source written by hand
+         *     does not hide an entry. Each entry says whether the deployed transform ships
+         *     its default variant, read off that app's mounted contract, so a console can
+         *     hold back an entry the create would refuse.
          */
         get: operations["sources.catalogue"];
         put?: never;
@@ -1138,7 +1142,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/sources/from-catalogue/{entry}": {
+    "/api/v1/sources/from-catalogue": {
         parameters: {
             query?: never;
             header?: never;
@@ -1148,12 +1152,24 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create Source From Catalogue
-         * @description Create a source from a catalogue entry, on one of the intakes it arrives by.
+         * Create Sources From Catalogue
+         * @description Create a source for each catalogue entry, on the intake it arrives by.
          *
-         *     The entry's file is the write body for its default intake, and another intake swaps in the match rule that intake derives. A variant the deployed transform's contract does not list is refused with 409, and one whose contract is not mounted is allowed. Everything after that is the ordinary create, so the source is indistinguishable from a hand-written one.
+         *     Each entry's file is the write body for its default intake, and another intake
+         *     swaps in the match rule that intake derives. A variant the deployed transform's
+         *     contract does not list is refused for that entry, and one whose contract is not
+         *     mounted is allowed. The source records the catalogue entry and the intake that
+         *     was selected, and a later edit leaves both in place.
+         *
+         *     At most 50 entries. A longer or empty selection is refused before anything is
+         *     stored, as ``{code, message}``. Entries are stored in the order given. One
+         *     entry's refusal is recorded in ``failed`` and the rest continue. The response
+         *     is 200 when any entry was refused for a reason other than a conflict, including
+         *     when nothing was stored. Nothing stored is 409 when every refusal is a conflict
+         *     or a missing variant. The apps are reconciled once, after the entries that
+         *     could be stored.
          */
-        post: operations["sources.from-catalogue.post"];
+        post: operations["sources.from-catalogue"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6883,6 +6899,34 @@ export interface components {
             selected: boolean;
         };
         /**
+         * CatalogueCreatedSource
+         * @description One source stored from a catalogue entry.
+         */
+        CatalogueCreatedSource: {
+            /**
+             * Entry
+             * @description Catalogue entry this source was compiled from
+             */
+            entry: string;
+            /** Source */
+            source: string;
+            /**
+             * Current
+             * @description Working version id after the create
+             */
+            current: string;
+            /**
+             * Deployed Version
+             * @description Version deployed to runtime (null until first deploy)
+             */
+            deployed_version?: string | null;
+            /**
+             * Versions
+             * @description All version ids on the source
+             */
+            versions: string[];
+        };
+        /**
          * CatalogueEntry
          * @description One app the catalogue offers.
          */
@@ -6988,7 +7032,7 @@ export interface components {
             intakes: string[];
             /**
              * Default Intake
-             * @description The intake a create takes when it names none: the first of fetcher, receiver and beats the entry lists
+             * @description The intake a create takes when it names none: the first of fetcher, beats and receiver the entry lists
              * @enum {string}
              */
             default_intake: "beats" | "receiver" | "fetcher";
@@ -7037,10 +7081,33 @@ export interface components {
             availability_reason: string;
         };
         /**
-         * CatalogueSourceRequest
-         * @description Create a source from a catalogue entry.
+         * CatalogueSourceFailure
+         * @description One catalogue entry that was not stored, and why.
          */
-        CatalogueSourceRequest: {
+        CatalogueSourceFailure: {
+            /** Entry */
+            entry: string;
+            /**
+             * Source
+             * @description Source name, once the entry compiled that far
+             * @default
+             */
+            source: string;
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+        };
+        /**
+         * CatalogueSourceItem
+         * @description One catalogue entry to compile into a source.
+         */
+        CatalogueSourceItem: {
+            /**
+             * Entry
+             * @description Catalogue entry name
+             */
+            entry: string;
             /**
              * Intake
              * @description How this source's data arrives, the entry's default intake when omitted
@@ -7067,6 +7134,46 @@ export interface components {
              * @default false
              */
             archive: boolean;
+        };
+        /**
+         * CatalogueSourcesRequest
+         * @description The catalogue entries to turn into sources, in one request.
+         */
+        CatalogueSourcesRequest: {
+            /**
+             * Entries
+             * @description Entries to create, in the order given. At most 50.
+             */
+            entries: components["schemas"]["CatalogueSourceItem"][];
+        };
+        /**
+         * CatalogueSourcesResponse
+         * @description What creating the requested catalogue entries did.
+         *
+         *     ``created`` is what was stored. ``failed`` is what was left unstored. A later
+         *     entry failing does not remove an earlier one. The apps are reconciled once,
+         *     for everything that was stored.
+         */
+        CatalogueSourcesResponse: {
+            /** Created */
+            created: components["schemas"]["CatalogueCreatedSource"][];
+            /** Failed */
+            failed: components["schemas"]["CatalogueSourceFailure"][];
+            /**
+             * Apps Synced
+             * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
+             */
+            apps_synced?: string[];
+            /**
+             * Apps Sync Error
+             * @description Why the apps could not be brought into step; reconcile-apps retries it
+             */
+            apps_sync_error?: string | null;
+            /**
+             * Restart Required
+             * @description One command per app the change leaves to apply where this deployment renders the app config itself, including taking away the container of an instance a source no longer has. Empty where a GitOps controller applies it.
+             */
+            restart_required?: string[];
         };
         /**
          * CelCheckBatchRequest
@@ -10651,42 +10758,6 @@ export interface components {
             rates: {
                 [key: string]: number;
             };
-        };
-        /**
-         * MissingVariantContext
-         * @description Structured context for a catalogue create naming a variant the deployed transform lacks.
-         */
-        MissingVariantContext: {
-            /**
-             * Transform
-             * @description The transform app the source's engine selects
-             */
-            transform: string;
-            /**
-             * Variant
-             * @description The variant the source would run
-             */
-            variant: string;
-        };
-        /**
-         * MissingVariantErrorResponse
-         * @description 409 when a catalogue create names a variant the deployed transform's contract does not list.
-         */
-        MissingVariantErrorResponse: {
-            /**
-             * Code
-             * @default missing_variant
-             * @constant
-             */
-            code: "missing_variant";
-            /**
-             * Message
-             * @description Human-readable explanation, naming the variant and transform
-             */
-            message: string;
-            /** Errors */
-            errors?: components["schemas"]["FieldError"][];
-            context: components["schemas"]["MissingVariantContext"];
         };
         NonEmptyDict_str_SchemaVersionCreate_: {
             [key: string]: components["schemas"]["SchemaVersionCreate"];
@@ -14690,6 +14761,16 @@ export interface components {
              */
             description?: string | null;
             /**
+             * From Catalogue Item
+             * @description Catalogue entry this source was created from; absent when written by hand
+             */
+            from_catalogue_item?: string | null;
+            /**
+             * From Catalogue Intake
+             * @description Intake selected for that catalogue entry: beats, receiver or fetcher
+             */
+            from_catalogue_intake?: ("beats" | "receiver" | "fetcher") | null;
+            /**
              * State
              * @description Lifecycle state: active (all on), dormant (schema pre-positioned, routing/transform off), disabled (all off, table reclaimed)
              * @default active
@@ -15328,6 +15409,13 @@ export interface components {
              */
             variant?: string | null;
             /**
+             * Mode
+             * @description agent runs the one program variant names. agentless detects the source of each event instead, takes no variant, and stamps each event with its detected source's label so the loader routes it per event. Unset leaves the app's own default, agent. Only an app whose manifest declares a mode_path takes it.
+             */
+            mode?: ("agent" | "agentless") | null;
+            /** @description How an agentless transform detects each event's source and what it does with one it cannot place. Read only when mode is agentless. Unset leaves the app's own defaults. */
+            detect?: components["schemas"]["TransformDetect"] | null;
+            /**
              * Config File
              * @description Path to engine-specific config
              */
@@ -15601,6 +15689,16 @@ export interface components {
              * @default false
              */
             archive: boolean;
+            /**
+             * From Catalogue Item
+             * @description Catalogue entry this source was created from; absent when written by hand
+             */
+            from_catalogue_item?: string | null;
+            /**
+             * From Catalogue Intake
+             * @description Intake selected for that catalogue entry: beats, receiver or fetcher
+             */
+            from_catalogue_intake?: ("beats" | "receiver" | "fetcher") | null;
             /**
              * Views
              * @description Naming-standard views for this revision (sigma, ecs, cim, ocsf)
@@ -16207,6 +16305,30 @@ export interface components {
             /** Errors */
             errors?: components["schemas"]["FieldError"][];
             context: components["schemas"]["TopicsNotCreatedContext"];
+        };
+        /**
+         * TransformDetect
+         * @description How an agentless transform decides which source each event belongs to.
+         */
+        TransformDetect: {
+            /**
+             * Unmatched
+             * @description What happens to an event nothing matches. passthrough emits it with no transform and no per-source label, so the loader lands it in the table the sink topic names. fallback runs the fallback source's transform on it. stop halts the service on it with the block unreleased.
+             * @default passthrough
+             * @enum {string}
+             */
+            unmatched: "passthrough" | "fallback" | "stop";
+            /**
+             * Fallback
+             * @description The registered source whose transform runs on an unmatched event, by registry name (e.g. filebeat.cisco_asa.default). Required when unmatched is fallback and refused otherwise.
+             * @default
+             */
+            fallback: string;
+            /**
+             * Candidates
+             * @description The registered sources detection may name, by registry name. Empty means every source the transform can detect.
+             */
+            candidates?: string[];
         };
         /**
          * TransportFacts
@@ -20854,37 +20976,44 @@ export interface operations {
             };
         };
     };
-    "sources.from-catalogue.post": {
+    "sources.from-catalogue": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                entry: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CatalogueSourceRequest"];
+                "application/json": components["schemas"]["CatalogueSourcesRequest"];
             };
         };
         responses: {
+            /** @description The request was accepted. created is what was stored and failed names each entry that was not, including when every entry was refused */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueSourcesResponse"];
+                };
+            };
             /** @description Successful Response */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceResponse"];
+                    "application/json": components["schemas"]["CatalogueSourcesResponse"];
                 };
             };
-            /** @description The source was stored and the apps were not brought into step with it: apps_sync_error says why, and POST /sources/reconcile-apps retries it */
+            /** @description The entries in created were stored, and the apps were not brought into step with them: apps_sync_error says why, and POST /sources/reconcile-apps retries it */
             202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceResponse"];
+                    "application/json": components["schemas"]["CatalogueSourcesResponse"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
@@ -20905,22 +21034,22 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description A source of that name already exists, the name is the core landing the engine owns and reconciles itself, its match duplicates another, or the deployed transform does not ship the variant (code missing_variant) */
+            /** @description Nothing was stored. Every entry was refused because it conflicts with a source that already exists, with the core landing, with another source's match, or with another source's alias under the same profile, or because the deployed transform does not ship its variant (code missing_variant) */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SourceNameConflictErrorResponse"] | components["schemas"]["CoreResourceConflictErrorResponse"] | components["schemas"]["MatchConflictErrorResponse"] | components["schemas"]["AliasConflictErrorResponse"] | components["schemas"]["MissingVariantErrorResponse"];
+                    "application/json": components["schemas"]["CatalogueSourcesResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error), or the receiver would refuse the source's rule (code invalid_rule): context.rule_errors names each field at fault and, for when, the span the check stopped at */
+            /** @description The request failed before any source could be written. The body is {code, message}: the selection is longer than 50, empty, or not a valid request */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvalidRuleErrorResponse"] | components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
