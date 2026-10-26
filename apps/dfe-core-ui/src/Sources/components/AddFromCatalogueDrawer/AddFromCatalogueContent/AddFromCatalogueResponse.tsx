@@ -25,7 +25,7 @@ export const AddFromCatalogueResponse = ({
   const failedCount = data?.failed.length ?? 0;
   const createdCount = data?.created.length ?? 0;
 
-  const [showSuccessful, setShowSuccessful] = useState(false);
+  const [showSuccessful, setShowSuccessful] = useState(failedCount === 0);
   const [showFailed, setShowFailed] = useState(false);
 
   const { componentHeight: scrollHeight } = useSetComponentHeight({
