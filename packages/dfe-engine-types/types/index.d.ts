@@ -1151,7 +1151,7 @@ export interface paths {
          * Create Source From Catalogue
          * @description Create a source from a catalogue entry, on one of the intakes it arrives by.
          *
-         *     The entry's file is the write body for its default intake, and another intake swaps in the match rule that intake derives. A variant the deployed transform's contract does not list is refused with 409, and one whose contract is not mounted is allowed. Everything after that is the ordinary create, so the source is indistinguishable from a hand-written one.
+         *     The entry's file is the write body, and the intake chosen (the default when none is named) sets the match rule: the dataset a Beats event stamps, or the source's own label for a receiver intake. A variant the deployed transform's contract does not list is refused with 409, and one whose contract is not mounted is allowed. Everything after that is the ordinary create, so the source is indistinguishable from a hand-written one.
          */
         post: operations["sources.from-catalogue.post"];
         delete?: never;
@@ -6988,7 +6988,7 @@ export interface components {
             intakes: string[];
             /**
              * Default Intake
-             * @description The intake a create takes when it names none: the first of fetcher, receiver and beats the entry lists
+             * @description The intake a create takes when it names none: the first of fetcher, beats and receiver the entry lists
              * @enum {string}
              */
             default_intake: "beats" | "receiver" | "fetcher";
