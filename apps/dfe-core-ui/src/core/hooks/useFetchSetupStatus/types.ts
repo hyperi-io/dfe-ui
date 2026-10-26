@@ -10,11 +10,9 @@ export type TFetchSetupStatusResponse = DfeClientSuccessResponseBody<
 >;
 
 export type TOidcProvider =
-  | NonNullable<TFetchSetupStatusResponse['oidc_providers']>[number]
-  | null;
+  NonNullable<TFetchSetupStatusResponse['oidc_providers']>[number] | null;
 export type TOrganisation =
-  | NonNullable<TFetchSetupStatusResponse['organisations']>[number]
-  | null;
+  NonNullable<TFetchSetupStatusResponse['organisations']>[number] | null;
 export type TSetupWizardProps = {
   oidcProvider: TOidcProvider;
   organisation: TOrganisation;

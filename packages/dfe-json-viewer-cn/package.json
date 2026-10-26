@@ -27,11 +27,11 @@
   "devDependencies": {
     "@repo/dfe-shared-ui": "*",
     "@repo/typescript-config": "*",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "typescript": "5.9.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
     "vite": "^8.2.4"
   }
 }

@@ -12,9 +12,7 @@ import { CreateSourceStep } from './CreateSourceStep';
 import { DiscoverPromoteStep } from './DiscoverPromoteStep';
 
 type StepKey =
-  | 'discover-promote'
-  | 'create-assign-source'
-  | 'build-deploy-source';
+  'discover-promote' | 'create-assign-source' | 'build-deploy-source';
 
 const STEP_INDEX_MAP: Record<
   'discoverPromote' | 'createAssign' | 'buildDeploy',

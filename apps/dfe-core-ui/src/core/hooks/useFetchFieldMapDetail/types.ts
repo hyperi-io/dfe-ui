@@ -12,5 +12,4 @@ export type TFetchStandardFieldMapResponse = DfeClientSuccessResponseBody<
 >;
 
 export type TSourceFieldMapResponse =
-  | TFetchSourceFieldMapResponse
-  | TFetchStandardFieldMapResponse;
+  TFetchSourceFieldMapResponse | TFetchStandardFieldMapResponse;
