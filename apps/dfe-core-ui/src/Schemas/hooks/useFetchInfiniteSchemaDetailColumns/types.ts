@@ -5,13 +5,7 @@ import {
 import { fetchInfiniteSchemaDetailColumnsPath } from './api';
 
 export type SchemaDetailColumnFilterField =
-  | 'search'
-  | 'name'
-  | 'type'
-  | 'attribute'
-  | 'use_case'
-  | 'expr'
-  | 'comment';
+  'search' | 'name' | 'type' | 'attribute' | 'use_case' | 'expr' | 'comment';
 
 export type SchemaDetailColumnFilters = Partial<
   Pick<

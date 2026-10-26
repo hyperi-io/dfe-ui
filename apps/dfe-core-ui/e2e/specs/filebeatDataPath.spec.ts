@@ -441,8 +441,8 @@ test('a source changes transform app and the data follows @docker-only', async (
   await expect(page).toHaveURL(
     (url) => url.searchParams.get('source_version') !== '1.0.0',
   );
-  const version = await page.evaluate(
-    () => new URL(window.location.href).searchParams.get('source_version')!,
+  const version = await page.evaluate(() =>
+    new URL(window.location.href).searchParams.get('source_version')!,
   );
   const deployed = await engine<{ restart_required: string[] }>(
     'POST',

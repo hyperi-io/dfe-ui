@@ -1,12 +1,7 @@
 import { cn } from '@/core/utils/style';
 
 type DisplayType =
-  | 'default'
-  | 'warning'
-  | 'error'
-  | 'info'
-  | 'action'
-  | 'success';
+  'default' | 'warning' | 'error' | 'info' | 'action' | 'success';
 
 type DisplayVariant = 'default' | 'subtle' | 'ghost';
 
