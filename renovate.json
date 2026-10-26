@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>hyperi-io/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "A workspace-wide major lands as one PR with a dozen or more majors in it (TypeScript, eslint, vitest, antd, msw and others at once), and a closed group PR is recreated at once. Majors are taken by hand, one package at a time.",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
   ]
 }
