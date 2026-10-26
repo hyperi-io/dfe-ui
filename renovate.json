@@ -6,9 +6,20 @@
   "packageRules": [
     {
       "description": "A workspace-wide major lands as one PR with a dozen or more majors in it (TypeScript, eslint, vitest, antd, msw and others at once), and a closed group PR is recreated at once. Majors are taken by hand, one package at a time.",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["major"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
+    },
+    {
+      "description": "ace-builds 1.45 stops the YAML worker requesting buffer.js and reports errors a row early, which breaks yamlWorkerShim. Held until the shim is reviewed against it.",
+      "matchPackageNames": [
+        "ace-builds"
+      ],
+      "allowedVersions": "<1.45.0"
     }
   ]
 }
