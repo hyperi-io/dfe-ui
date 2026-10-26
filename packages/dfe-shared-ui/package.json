@@ -16,7 +16,7 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "antd": "^5.22.0",
+    "antd": "^5.22.0 || ^6.0.0",
     "clsx": "^2.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -24,6 +24,6 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "typescript": "5.9.2"
+    "typescript": "7.0.2"
   }
 }
