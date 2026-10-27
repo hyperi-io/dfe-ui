@@ -20,6 +20,7 @@ export const AddFromCatalogueContent = () => {
     mutate: createBulkSources,
     isPending,
     error,
+    reset,
   } = useCreateBulkSourceFromCatalogue({
     onSuccess: () => {
       setShowResponse(true);
@@ -28,6 +29,11 @@ export const AddFromCatalogueContent = () => {
 
   const handleFinish = (values: AddFromCatalogueFormValues[]) => {
     createBulkSources({ entries: values });
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    reset();
   };
 
   return showResponse ? (
@@ -39,7 +45,7 @@ export const AddFromCatalogueContent = () => {
           initialValues={selectedEntries}
           onFinish={handleFinish}
           onSelectedEntriesChange={setSelectedEntries}
-          onCancel={() => setShowForm(false)}
+          onCancel={handleCancel}
           error={error}
           isPending={isPending}
         />

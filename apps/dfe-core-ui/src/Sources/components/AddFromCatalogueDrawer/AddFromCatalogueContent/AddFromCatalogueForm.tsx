@@ -127,6 +127,11 @@ export const AddFromCatalogueForm = ({
     onFinish?.(parsed);
   };
 
+  const handleCancel = () => {
+    onCancel?.();
+    form.resetFields();
+  };
+
   return (
     <Form
       {...props}
@@ -145,7 +150,7 @@ export const AddFromCatalogueForm = ({
             <Button
               className="p-0"
               icon={<IconChevronLeft />}
-              onClick={onCancel}
+              onClick={handleCancel}
               type="text"
               disabled={isPending}
             >
