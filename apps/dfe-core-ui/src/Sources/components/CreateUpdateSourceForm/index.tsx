@@ -3,6 +3,7 @@ import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { TabLabel } from '@/core/components/TabLabel';
 import { ListFieldMapsProvider } from '@/core/contexts/ListFieldMapsContext';
+import { useFetchDeployment } from '@/core/hooks/useFetchDeployment';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { getRuleErrors } from '@/Sources/utils/ingestErrors';
 import { isMatchGroup } from '@/Sources/utils/sourceMatch';
@@ -95,6 +96,9 @@ export const CreateUpdateSourceFormBase = ({
   const [form] = Form.useForm<CreateUpdateSourceFormData>();
   const formValidation =
     useAntdZodResolver<CreateUpdateSourceFormData>(formSchema);
+
+  const { data: { transports: { available = [] } = {} } = {} } =
+    useFetchDeployment();
 
   useEffect(() => {
     if (resetFormFields) {
@@ -255,6 +259,7 @@ export const CreateUpdateSourceFormBase = ({
           assign: getInitialAssignTransform(initialValues?.transform),
           ...initialValues?.transform_ui_config,
         },
+        transport: initialValues?.transport ?? available[0],
       }}
       layout="vertical"
       onFinishFailed={handleFinishFailed}
