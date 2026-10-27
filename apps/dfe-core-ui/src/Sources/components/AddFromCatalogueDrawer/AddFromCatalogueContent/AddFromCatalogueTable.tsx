@@ -13,6 +13,9 @@ import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
 
+/** The engine refuses a catalogue create longer than this. */
+export const MAX_CATALOGUE_ENTRIES = 50;
+
 const DIGIT_WORDS = [
   'zero',
   'one',
@@ -57,10 +60,6 @@ export const AddFromCatalogueTable = ({
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
   const [keptRows, setKeptRows] = useState<TSourceCatalogueItem[]>([]);
 
-  const { componentHeight } = useSetComponentHeight({
-    offset: 300,
-  });
-
   const {
     data: { items: entries, total },
     isLoading,
@@ -86,6 +85,12 @@ export const AddFromCatalogueTable = ({
     ...pinned,
     ...(entries ?? []).filter((entry) => !selectedNames.has(entry.name)),
   ];
+  const selectionExceedsLimit = selectedEntries.length > MAX_CATALOGUE_ENTRIES;
+
+  const selectionExceedsLimitOffset = selectionExceedsLimit ? 30 : 0;
+  const { componentHeight } = useSetComponentHeight({
+    offset: 300 + selectionExceedsLimitOffset,
+  });
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
   const columns: ColumnsType<TSourceCatalogueItem> = rows.length
@@ -141,16 +146,24 @@ export const AddFromCatalogueTable = ({
 
   return (
     <div className="flex flex-col gap-2">
+      {selectionExceedsLimit && (
+        <NotificationCard
+          type="warning"
+          title={`At most ${MAX_CATALOGUE_ENTRIES} entries can be created at once`}
+        />
+      )}
       {selectedEntries.length > 0 && (
         <NotificationCard
           type="info"
           title={`${selectedEntries.length} entries selected`}
           action={
-            selectedEntries.length > 0 ? (
-              <Button type="primary" onClick={onUpload}>
-                Review Catalogues
-              </Button>
-            ) : null
+            <Button
+              type="primary"
+              onClick={onUpload}
+              disabled={selectionExceedsLimit}
+            >
+              Review Catalogues
+            </Button>
           }
         />
       )}
