@@ -844,6 +844,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(per_page ? ['per_page', per_page] : []),
     ],
     applyDefaults: () => ['system', 'defaults', 'apply'],
+    deployment: () => ['system', 'deployment'],
   },
   apiKeys: {
     default: ({
