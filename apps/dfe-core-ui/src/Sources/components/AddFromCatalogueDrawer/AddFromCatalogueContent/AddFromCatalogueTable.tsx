@@ -147,7 +147,18 @@ export const AddFromCatalogueTable = ({
       {selectedEntries.length > 0 && (
         <NotificationCard
           type="info"
-          title={`${selectedEntries.length} entries selected`}
+          title={
+            <span className="whitespace-nowrap">
+              {`${selectedEntries.length} entries selected`}{' '}
+              <Button
+                type="link"
+                size="small"
+                onClick={() => onSelectedEntriesChange([])}
+              >
+                Clear Selection
+              </Button>
+            </span>
+          }
           action={
             <Button
               type="primary"
