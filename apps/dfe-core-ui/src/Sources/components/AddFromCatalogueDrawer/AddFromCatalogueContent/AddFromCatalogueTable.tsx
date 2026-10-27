@@ -57,7 +57,7 @@ export const AddFromCatalogueTable = ({
   onUpload?: () => void;
 }) => {
   const [search, setSearch] = useState('');
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
 
