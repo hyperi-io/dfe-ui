@@ -60,7 +60,6 @@ export const AddFromCatalogueTable = ({
   const [pageSize, setPageSize] = useState(50);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
-  const [keptRows, setKeptRows] = useState<TSourceCatalogueItem[]>([]);
 
   const {
     data: { items: entries, total },
@@ -73,24 +72,16 @@ export const AddFromCatalogueTable = ({
     page,
   });
 
-  const selectedNames = new Set(selectedEntries.map((entry) => entry.name));
-  const entriesByName = new Map(
-    (entries ?? []).map((entry) => [entry.name, entry]),
-  );
-  const keptByName = new Map(keptRows.map((entry) => [entry.name, entry]));
-  const pinned = selectedEntries.flatMap((entry) => {
-    const row = entriesByName.get(entry.name) ?? keptByName.get(entry.name);
-    return row ? [row] : [];
-  });
-  const rows = [
-    ...pinned,
-    ...(entries ?? []).filter((entry) => !selectedNames.has(entry.name)),
-  ];
+  // The server already returned this page. Selected rows stay checked via
+  // selectedRowKeys; mixing them into the page makes the list longer than
+  // pageSize, and Ant Design then slices it again.
+  const rows = entries ?? [];
   const selectionExceedsLimit = selectedEntries.length > MAX_CATALOGUE_ENTRIES;
 
+  const rowsSelectedOffset = selectedEntries?.length > 0 ? 60 : 0;
   const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 300 + selectionExceedsLimitOffset,
+    offset: 260 + selectionExceedsLimitOffset + rowsSelectedOffset,
   });
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
@@ -183,20 +174,24 @@ export const AddFromCatalogueTable = ({
         rowSelection={{
           selectedRowKeys: selectedEntries.map((entry) => entry.entry),
           preserveSelectedRowKeys: true,
-          onChange: (_selectedRowKeys, selectedRows) => {
+          onChange: (selectedRowKeys, selectedRows) => {
             const previous = new Map(
               selectedEntries.map((entry) => [entry.entry, entry]),
             );
             const seen = new Set<string>();
             const next: AddFromCatalogueFormValues[] = [];
-            const rows: TSourceCatalogueItem[] = [];
-            for (const row of selectedRows) {
-              if (!row?.name || seen.has(row.name)) continue;
-              seen.add(row.name);
-              rows.push(row);
-              next.push(previous.get(row.name) ?? toSelectedEntry(row));
-            }
-            setKeptRows(rows);
+            selectedRowKeys.forEach((key, index) => {
+              const id = String(key);
+              if (!id || seen.has(id)) return;
+              seen.add(id);
+              const existing = previous.get(id);
+              if (existing) {
+                next.push(existing);
+                return;
+              }
+              const row = selectedRows[index];
+              if (row?.name) next.push(toSelectedEntry(row));
+            });
             onSelectedEntriesChange(next);
           },
         }}
@@ -210,7 +205,10 @@ export const AddFromCatalogueTable = ({
                 placeholder="Search by name or dataset"
                 allowClear
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
               />
 
               <Select
@@ -218,7 +216,10 @@ export const AddFromCatalogueTable = ({
                 placeholder="Select intake"
                 allowClear
                 value={intakeFilter}
-                onChange={(value) => setIntakeFilter(value)}
+                onChange={(value) => {
+                  setIntakeFilter(value);
+                  setPage(1);
+                }}
                 options={INTAKE_OPTIONS}
               />
             </div>
