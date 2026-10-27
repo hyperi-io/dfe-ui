@@ -6,7 +6,7 @@ import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
-import { Button, Input, Select, Spin, Tag } from 'antd';
+import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import Highlighter from 'react-highlight-words';
@@ -57,19 +57,20 @@ export const AddFromCatalogueTable = ({
   onUpload?: () => void;
 }) => {
   const [search, setSearch] = useState('');
+  const [pageSize, setPageSize] = useState(50);
+  const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
   const [keptRows, setKeptRows] = useState<TSourceCatalogueItem[]>([]);
 
   const {
     data: { items: entries, total },
     isLoading,
-    hasNextPage,
     isFetchingNextPage,
-    loadMoreRef,
   } = useFetchInfiniteSourceCatalogues({
     search,
     intake: intakeFilter,
-    per_page: 20,
+    per_page: pageSize,
+    page,
   });
 
   const selectedNames = new Set(selectedEntries.map((entry) => entry.name));
@@ -87,7 +88,7 @@ export const AddFromCatalogueTable = ({
   ];
   const selectionExceedsLimit = selectedEntries.length > MAX_CATALOGUE_ENTRIES;
 
-  const selectionExceedsLimitOffset = selectionExceedsLimit ? 30 : 0;
+  const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
   const { componentHeight } = useSetComponentHeight({
     offset: 300 + selectionExceedsLimitOffset,
   });
@@ -169,7 +170,7 @@ export const AddFromCatalogueTable = ({
       )}
 
       <Table<TSourceCatalogueItem>
-        loading={isLoading}
+        loading={isLoading || isFetchingNextPage}
         scroll={{ y: componentHeight, x: 'max-content' }}
         locale={{
           emptyText: !isLoading && (
@@ -226,20 +227,19 @@ export const AddFromCatalogueTable = ({
         rowKey="name"
         columns={columns}
         dataSource={rows}
-        summary={() =>
-          hasNextPage ? (
-            <tr>
-              <td colSpan={columns.length}>
-                <div
-                  ref={loadMoreRef}
-                  className="flex h-8 items-center justify-center"
-                >
-                  {isFetchingNextPage && <Spin size="small" />}
-                </div>
-              </td>
-            </tr>
-          ) : null
-        }
+        onChange={({ current, pageSize }) => {
+          if (current) {
+            setPage(current);
+          }
+          if (pageSize) {
+            setPageSize(pageSize);
+          }
+        }}
+        pagination={{
+          pageSize: pageSize,
+          total: total ?? 0,
+          current: page,
+        }}
       />
     </div>
   );
