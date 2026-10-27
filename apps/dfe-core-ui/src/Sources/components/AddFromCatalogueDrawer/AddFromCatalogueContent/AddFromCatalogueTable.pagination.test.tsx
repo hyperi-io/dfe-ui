@@ -59,18 +59,21 @@ describe('AddFromCatalogueTable pagination', () => {
     render(<Harness />, { wrapper });
 
     expect(screen.getByText('entry-0')).toBeInTheDocument();
+    expect(screen.getByText('10 of 1064 entries shown')).toBeInTheDocument();
     await user.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
-    expect(screen.getByText('1 entries selected')).toBeInTheDocument();
+    expect(screen.getByText(/1 entries selected/)).toBeInTheDocument();
 
-    await user.click(screen.getByText('3', { selector: '.ant-pagination-item a' }));
+    await user.click(
+      screen.getByText('3', { selector: '.ant-pagination-item a' }),
+    );
 
-    expect(screen.getByText('entry-100')).toBeInTheDocument();
-    expect(screen.getByText('entry-149')).toBeInTheDocument();
+    expect(screen.getByText('entry-20')).toBeInTheDocument();
+    expect(screen.getByText('entry-29')).toBeInTheDocument();
     expect(
       screen.queryByText(
         'No catalogue is mounted on this deployment, or nothing matches the filter.',
       ),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('1 entries selected')).toBeInTheDocument();
+    expect(screen.getByText(/1 entries selected/)).toBeInTheDocument();
   });
 });
