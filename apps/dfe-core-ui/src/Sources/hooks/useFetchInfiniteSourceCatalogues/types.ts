@@ -17,4 +17,5 @@ export interface UseFetchInfiniteSourceCataloguesProps {
   search?: string;
   intake?: TSourceCatalogueIntake;
   per_page?: number;
+  page?: number;
 }
