@@ -18,7 +18,7 @@ export const SampleRowsCard = ({
           data={row}
           initialDepth={INITIAL_DEPTH}
           className="text-xs"
-          rootName={row._uuid as string}
+          rootName={row._timestamp_load as string}
         />
       </JsonViewerProvider>
     </Card>

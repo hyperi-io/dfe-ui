@@ -1,5 +1,5 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import { sourceCatalogues } from './api';
 import { UseFetchInfiniteSourceCataloguesProps } from './types';
@@ -17,6 +17,8 @@ export const useFetchInfiniteSourceCatalogues = ({
   search,
   intake,
   per_page = 10,
+  // Allow page control from the caller
+  page,
 }: UseFetchInfiniteSourceCataloguesProps = {}) => {
   const {
     data,
@@ -27,14 +29,14 @@ export const useFetchInfiniteSourceCatalogues = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: QUERY_KEYS.sources.catalogue({ search, intake, per_page }),
+    queryKey: QUERY_KEYS.sources.catalogue({ search, intake, per_page, page }),
     queryFn: async ({ pageParam = 1, signal }) =>
       sourceCatalogues({
         queryParams: {
           search: search,
           intake: intake,
           per_page: per_page ?? 10,
-          page: pageParam,
+          page: page ?? pageParam,
         },
         signal,
       }),
@@ -43,6 +45,7 @@ export const useFetchInfiniteSourceCatalogues = ({
       return nextPage != null && nextPage > 0 ? nextPage : undefined;
     },
     initialPageParam: 1,
+    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

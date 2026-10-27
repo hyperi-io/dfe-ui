@@ -297,6 +297,66 @@ describe('useFetchInfiniteSourceCatalogues', () => {
     });
   });
 
+  describe('refetch', () => {
+    it('keeps the previous catalogue until the next fetch resolves', async () => {
+      let releaseNextPage: () => void = () => {};
+      const nextPage = new Promise<void>((resolve) => {
+        releaseNextPage = resolve;
+      });
+
+      server.use(
+        http.get(
+          API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
+          async ({ request }) => {
+            const page = Number(
+              new URL(request.url).searchParams.get('page') ?? '1',
+            );
+            if (page > 1) {
+              await nextPage;
+            }
+            return HttpResponse.json({
+              items: [{ ...SOURCE_CATALOGUE_ITEM, name: `page-${page}` }],
+              total: 2,
+              page,
+              per_page: 10,
+              total_pages: 2,
+              next_page: page < 2 ? 2 : null,
+              prev_page: page > 1 ? 1 : null,
+            });
+          },
+        ),
+      );
+
+      const { result, rerender } = renderHook(
+        (props: UseFetchInfiniteSourceCataloguesProps) =>
+          useFetchInfiniteSourceCatalogues(props),
+        {
+          wrapper,
+          initialProps: { per_page: 10, page: 1 },
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.data.items[0]?.name).toBe('page-1');
+      });
+
+      rerender({ per_page: 10, page: 2 });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data.items.map((item) => item.name)).toEqual([
+        'page-1',
+      ]);
+
+      releaseNextPage();
+
+      await waitFor(() => {
+        expect(result.current.data.items[0]?.name).toBe('page-2');
+      });
+    });
+  });
+
   describe('search parameters', () => {
     it('should include search filter in query', async () => {
       const { result } = renderHook(

@@ -184,6 +184,7 @@ export const API_CONFIG = Object.freeze({
     defaults: '/api/v1/system/defaults',
     defaultsDrift: '/api/v1/system/defaults/drift',
     applyDefaults: '/api/v1/system/defaults/apply',
+    deployment: '/api/v1/system/deployment',
   },
   apiKeys: {
     default: '/api/v1/auth/api-keys',

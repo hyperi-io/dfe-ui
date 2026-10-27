@@ -4,6 +4,7 @@ import { TSystemClickhouseStatusResponse } from '@/Platform/hooks/system/useFetc
 import { TSystemStartStopClickhouseCloudResponse } from '@/Platform/hooks/system/useSystemStopStartClickhouseCloud/types';
 import { TUpdateSystemDefaultsResponse } from '@/Platform/hooks/system/useUpdateDefaults/types';
 import { TSystemDefaultsResponse } from '@/core/hooks/useFetchDefaults/types';
+import { TSystemDeploymentResponse } from '@/core/hooks/useFetchDeployment/types';
 import { TSystemSettingsResponse } from '@/core/hooks/useFetchSystemSettings/types';
 import { TSystemVersionResponse } from '@/core/hooks/useFetchSystemVersion/types';
 import { http, HttpResponse } from 'msw';
@@ -319,6 +320,51 @@ export const system = {
       } = {}) => {
         return http.post(system.applyDefaults.mockedUrl, () => {
           return HttpResponse.json(mockedResponse, { status });
+        });
+      },
+    },
+  },
+  deployment: {
+    mockedUrl: '/api/v1/system/deployment',
+    get: {
+      success: ({
+        mockedResponse = {
+          profile: 'single-kafka',
+          transports: {
+            default: 'kafka',
+            available: ['kafka', 'grpc'],
+          },
+          mesh: {
+            enabled: true,
+            namespace: 'default',
+          },
+          applies_routing: true,
+          stack: 'stack',
+          engine: 'MergeTree',
+          ui: 'ui',
+          apps: {
+            app1: 'app1',
+            app2: 'app2',
+          },
+          source: 'deployment',
+          backing: {
+            backing1: {
+              managed_by: 'provider',
+              provider: 'provider1',
+              tier: 'tier1',
+              region: 'region1',
+            },
+            backing2: {
+              managed_by: 'dfe',
+              provider: 'provider2',
+              tier: 'tier2',
+              region: 'region2',
+            },
+          },
+        },
+      }: { mockedResponse?: TSystemDeploymentResponse } = {}) => {
+        return http.get(system.deployment.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
         });
       },
     },

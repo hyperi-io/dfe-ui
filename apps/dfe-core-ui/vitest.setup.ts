@@ -6,6 +6,7 @@ import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
 import { afterEach, beforeEach, vi } from 'vitest';
 import './src/core/config/zodJitless';
+import { useSystemDeploymentStore } from './src/core/stores/system/systemDeploymentStore';
 
 // jsdom does not provide ResizeObserver - required by Ant Design
 class ResizeObserverMock {
@@ -95,10 +96,12 @@ afterEach(async () => {
     ] = await Promise.all([
       import('./src/core/auth/cachedSession'),
       import('./src/core/stores/authStore'),
-      import('./src/core/stores/systemDefaultsStore'),
+      import('./src/core/stores/system/systemDefaultsStore'),
+      import('./src/core/stores/system/systemDeploymentStore'),
     ]);
     useAuthStore.getState().reset();
     useSystemDefaultsStore.getState().reset();
+    useSystemDeploymentStore.getState().reset();
     resetCachedSession();
   } catch {
     // The file replaced a dependency this graph imports. Nothing shared to reset.

@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { AddFromCatalogueForm } from './AddFromCatalogueForm';
 
-const { wrapper } = buildTestWrapper().withTheme();
+const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
 describe('AddFromCatalogueForm', () => {
   it('shows the catalogue entry and its intake', () => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useFetchDefaults } from '@/core/hooks/useFetchDefaults';
-import { useSystemDefaultsStore } from '@/core/stores/systemDefaultsStore';
+import { useSystemDefaultsStore } from '@/core/stores/system/systemDefaultsStore';
 import { useEffect } from 'react';
 import type { TSystemDefaults } from './types';
 

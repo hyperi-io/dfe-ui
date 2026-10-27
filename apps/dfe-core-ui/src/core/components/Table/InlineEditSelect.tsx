@@ -17,6 +17,7 @@ interface InlineEditSelectProps extends Omit<SelectProps, 'classNames'> {
     editButton?: string;
     label?: string;
   };
+  component?: React.ComponentType<SelectProps>;
 }
 
 const valueSignature = (v: unknown) =>
@@ -57,6 +58,7 @@ export const InlineEditSelect = ({
   editable = true,
   options,
   defaultEditing = false,
+  component: Component = Select,
   ...props
 }: InlineEditSelectProps) => {
   const resolved = propValue ?? initialValue;
@@ -119,7 +121,7 @@ export const InlineEditSelect = ({
         <div
           className={cn('flex items-center gap-x-1', classNames?.editContainer)}
         >
-          <Select
+          <Component
             {...props}
             className={cn('w-full max-w-96', classNames?.select)}
             size="small"

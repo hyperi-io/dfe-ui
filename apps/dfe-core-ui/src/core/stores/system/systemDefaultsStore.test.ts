@@ -1,4 +1,4 @@
-import { useSystemDefaultsStore } from '@/core/stores/systemDefaultsStore';
+import { useSystemDefaultsStore } from '@/core/stores/system/systemDefaultsStore';
 import { afterEach, describe, expect, test } from 'vitest';
 
 afterEach(() => {

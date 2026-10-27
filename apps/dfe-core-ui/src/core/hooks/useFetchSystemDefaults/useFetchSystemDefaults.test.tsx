@@ -1,5 +1,5 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
-import { useSystemDefaultsStore } from '@/core/stores/systemDefaultsStore';
+import { useSystemDefaultsStore } from '@/core/stores/system/systemDefaultsStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
 import {

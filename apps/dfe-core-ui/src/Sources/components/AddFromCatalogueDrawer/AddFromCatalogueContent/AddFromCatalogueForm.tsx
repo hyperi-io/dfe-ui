@@ -4,9 +4,10 @@ import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { InlineEditInput } from '@/core/components/Table/InlineEditInput';
 import { InlineEditSelect } from '@/core/components/Table/InlineEditSelect';
+import { useFetchDeployment } from '@/core/hooks/useFetchDeployment';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
-import { SOURCE_TRANSPORT_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { TransportSelect } from '@/Sources/components/TransportSelect';
 import { sourceNameValidator } from '@/Sources/utils/validation';
 import { IconChevronLeft, IconTrash } from '@repo/dfe-icons';
 import { Button, FormProps } from 'antd';
@@ -83,12 +84,9 @@ export const AddFromCatalogueForm = ({
   const [form] = Form.useForm<AddFromCatalogueFormStore>();
   const formValidation = useAntdZodResolver(storeSchema);
   const [editingFields, setEditingFields] = useState<EditableField[][]>([]);
-  const transportOptions = Object.entries(SOURCE_TRANSPORT_LABELS).map(
-    ([value, label]) => ({
-      value,
-      label,
-    }),
-  );
+
+  const { data: { transports: { available = [] } = {} } = {} } =
+    useFetchDeployment();
 
   const fieldEditing = (rowIndex: number, field: EditableField) =>
     editingFields[rowIndex]?.includes(field) ?? false;
@@ -129,6 +127,11 @@ export const AddFromCatalogueForm = ({
     onFinish?.(parsed);
   };
 
+  const handleCancel = () => {
+    onCancel?.();
+    form.resetFields();
+  };
+
   return (
     <Form
       {...props}
@@ -147,7 +150,7 @@ export const AddFromCatalogueForm = ({
             <Button
               className="p-0"
               icon={<IconChevronLeft />}
-              onClick={onCancel}
+              onClick={handleCancel}
               type="text"
               disabled={isPending}
             >
@@ -256,6 +259,7 @@ export const AddFromCatalogueForm = ({
                       }
                       defaultEditing={fieldEditing(rowIndex, 'intake')}
                       options={intakeOptions}
+                      editable={intakeOptions.length > 1}
                     />
                   </Form.Item>
                 );
@@ -279,7 +283,8 @@ export const AddFromCatalogueForm = ({
                         fieldEditing(rowIndex, 'transport') ? 'editing' : 'view'
                       }
                       defaultEditing={fieldEditing(rowIndex, 'transport')}
-                      options={transportOptions}
+                      editable={available.length > 1}
+                      component={TransportSelect}
                     />
                   </Form.Item>
                 );

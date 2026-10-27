@@ -6,12 +6,15 @@ import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
-import { Button, Input, Select, Spin, Tag } from 'antd';
+import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
+
+/** The engine refuses a catalogue create longer than this. */
+export const MAX_CATALOGUE_ENTRIES = 50;
 
 const DIGIT_WORDS = [
   'zero',
@@ -54,38 +57,32 @@ export const AddFromCatalogueTable = ({
   onUpload?: () => void;
 }) => {
   const [search, setSearch] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
-  const [keptRows, setKeptRows] = useState<TSourceCatalogueItem[]>([]);
-
-  const { componentHeight } = useSetComponentHeight({
-    offset: 300,
-  });
 
   const {
     data: { items: entries, total },
     isLoading,
-    hasNextPage,
     isFetchingNextPage,
-    loadMoreRef,
   } = useFetchInfiniteSourceCatalogues({
     search,
     intake: intakeFilter,
-    per_page: 20,
+    per_page: pageSize,
+    page,
   });
 
-  const selectedNames = new Set(selectedEntries.map((entry) => entry.name));
-  const entriesByName = new Map(
-    (entries ?? []).map((entry) => [entry.name, entry]),
-  );
-  const keptByName = new Map(keptRows.map((entry) => [entry.name, entry]));
-  const pinned = selectedEntries.flatMap((entry) => {
-    const row = entriesByName.get(entry.name) ?? keptByName.get(entry.name);
-    return row ? [row] : [];
+  // The server already returned this page. Selected rows stay checked via
+  // selectedRowKeys; mixing them into the page makes the list longer than
+  // pageSize, and Ant Design then slices it again.
+  const rows = entries ?? [];
+  const selectionExceedsLimit = selectedEntries.length > MAX_CATALOGUE_ENTRIES;
+
+  const rowsSelectedOffset = selectedEntries?.length > 0 ? 60 : 0;
+  const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
+  const { componentHeight } = useSetComponentHeight({
+    offset: 260 + selectionExceedsLimitOffset + rowsSelectedOffset,
   });
-  const rows = [
-    ...pinned,
-    ...(entries ?? []).filter((entry) => !selectedNames.has(entry.name)),
-  ];
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
   const columns: ColumnsType<TSourceCatalogueItem> = rows.length
@@ -141,22 +138,41 @@ export const AddFromCatalogueTable = ({
 
   return (
     <div className="flex flex-col gap-2">
+      {selectionExceedsLimit && (
+        <NotificationCard
+          type="warning"
+          title={`At most ${MAX_CATALOGUE_ENTRIES} entries can be created at once`}
+        />
+      )}
       {selectedEntries.length > 0 && (
         <NotificationCard
           type="info"
-          title={`${selectedEntries.length} entries selected`}
-          action={
-            selectedEntries.length > 0 ? (
-              <Button type="primary" onClick={onUpload}>
-                Review Catalogues
+          title={
+            <span className="whitespace-nowrap">
+              {`${selectedEntries.length} entries selected`}{' '}
+              <Button
+                type="link"
+                size="small"
+                onClick={() => onSelectedEntriesChange([])}
+              >
+                Clear Selection
               </Button>
-            ) : null
+            </span>
+          }
+          action={
+            <Button
+              type="primary"
+              onClick={onUpload}
+              disabled={selectionExceedsLimit}
+            >
+              Review Catalogues
+            </Button>
           }
         />
       )}
 
       <Table<TSourceCatalogueItem>
-        loading={isLoading}
+        loading={isLoading || isFetchingNextPage}
         scroll={{ y: componentHeight, x: 'max-content' }}
         locale={{
           emptyText: !isLoading && (
@@ -169,20 +185,24 @@ export const AddFromCatalogueTable = ({
         rowSelection={{
           selectedRowKeys: selectedEntries.map((entry) => entry.entry),
           preserveSelectedRowKeys: true,
-          onChange: (_selectedRowKeys, selectedRows) => {
+          onChange: (selectedRowKeys, selectedRows) => {
             const previous = new Map(
               selectedEntries.map((entry) => [entry.entry, entry]),
             );
             const seen = new Set<string>();
             const next: AddFromCatalogueFormValues[] = [];
-            const rows: TSourceCatalogueItem[] = [];
-            for (const row of selectedRows) {
-              if (!row?.name || seen.has(row.name)) continue;
-              seen.add(row.name);
-              rows.push(row);
-              next.push(previous.get(row.name) ?? toSelectedEntry(row));
-            }
-            setKeptRows(rows);
+            selectedRowKeys.forEach((key, index) => {
+              const id = String(key);
+              if (!id || seen.has(id)) return;
+              seen.add(id);
+              const existing = previous.get(id);
+              if (existing) {
+                next.push(existing);
+                return;
+              }
+              const row = selectedRows[index];
+              if (row?.name) next.push(toSelectedEntry(row));
+            });
             onSelectedEntriesChange(next);
           },
         }}
@@ -196,7 +216,10 @@ export const AddFromCatalogueTable = ({
                 placeholder="Search by name or dataset"
                 allowClear
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
               />
 
               <Select
@@ -204,7 +227,10 @@ export const AddFromCatalogueTable = ({
                 placeholder="Select intake"
                 allowClear
                 value={intakeFilter}
-                onChange={(value) => setIntakeFilter(value)}
+                onChange={(value) => {
+                  setIntakeFilter(value);
+                  setPage(1);
+                }}
                 options={INTAKE_OPTIONS}
               />
             </div>
@@ -213,20 +239,19 @@ export const AddFromCatalogueTable = ({
         rowKey="name"
         columns={columns}
         dataSource={rows}
-        summary={() =>
-          hasNextPage ? (
-            <tr>
-              <td colSpan={columns.length}>
-                <div
-                  ref={loadMoreRef}
-                  className="flex h-8 items-center justify-center"
-                >
-                  {isFetchingNextPage && <Spin size="small" />}
-                </div>
-              </td>
-            </tr>
-          ) : null
-        }
+        onChange={({ current, pageSize }) => {
+          if (current) {
+            setPage(current);
+          }
+          if (pageSize) {
+            setPageSize(pageSize);
+          }
+        }}
+        pagination={{
+          pageSize: pageSize,
+          total: total ?? 0,
+          current: page,
+        }}
       />
     </div>
   );
