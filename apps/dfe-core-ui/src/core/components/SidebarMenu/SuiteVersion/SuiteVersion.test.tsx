@@ -33,12 +33,9 @@ describe('SuiteVersion', () => {
           source: 'deploy-repo',
           python_version: '3.12.12',
           apps: {
-            'dfe-core-ui': '1.0.0',
-            'dfe-core-api': '1.0.0',
-            'dfe-core-db': '1.0.0',
-            'dfe-core-auth': '1.0.0',
-            'dfe-core-storage': '1.0.0',
-            'dfe-core-messaging': '1.0.0',
+            'dfe-ui': 'v1.20.0@sha256:abc',
+            'dfe-receiver': '1.4.0',
+            'dfe-loader': '1.3.2',
           },
         },
       }),
@@ -53,8 +50,62 @@ describe('SuiteVersion', () => {
     await waitFor(() => {
       expect(screen.getByText('engine v1.19.12')).toBeInTheDocument();
     });
-    expect(screen.getByText('ui v1.20.0')).toBeInTheDocument();
+    expect(screen.getByText('dfe-ui v1.20.0')).toBeInTheDocument();
     expect(screen.getByText('console v1.6.2')).toBeInTheDocument();
+  });
+
+  // The engine reports the ui pin in both fields when the deploy repo pins it.
+  it.each<{
+    name: string;
+    apps: Record<string, string>;
+    ui?: string | null;
+    lines: string[];
+    absent: string[];
+  }>([
+    {
+      name: 'names the ui once when the apps map already pins dfe-ui',
+      apps: { 'dfe-ui': 'v1.20.0@sha256:abc' },
+      lines: ['dfe-ui v1.20.0'],
+      absent: ['ui v1.20.0'],
+    },
+    {
+      name: 'keeps the ui line when the apps map does not pin dfe-ui',
+      apps: { 'dfe-receiver': '1.4.0' },
+      lines: ['ui v1.20.0', 'dfe-receiver v1.4.0'],
+      absent: ['dfe-ui v1.20.0'],
+    },
+    {
+      name: 'shows no ui line when nothing pins one and the apps map is empty',
+      apps: {},
+      lines: ['engine v1.19.12'],
+      absent: ['ui v1.20.0', 'dfe-ui v1.20.0'],
+      ui: null,
+    },
+  ])('$name', async ({ apps, lines, absent, ui = 'v1.20.0@sha256:abc' }) => {
+    server.use(
+      API_CONFIG_MOCKS.system.version.get.success({
+        mockedResponse: {
+          stack: '2.2.0-rc.13',
+          engine: '1.19.12',
+          schemas: '1.9.4',
+          ui,
+          source: 'deploy-repo',
+          python_version: '3.12.12',
+          apps,
+        },
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderSuiteVersion();
+    await user.hover(await screen.findByText('2.2.0-rc.13'));
+
+    for (const line of lines) {
+      expect(await screen.findByText(line)).toBeInTheDocument();
+    }
+    for (const line of absent) {
+      expect(screen.queryByText(line)).not.toBeInTheDocument();
+    }
   });
 
   // Without a deploy repo there is no stack to name, so the engine is the answer.
@@ -69,12 +120,9 @@ describe('SuiteVersion', () => {
           source: 'engine',
           python_version: '3.12.12',
           apps: {
-            'dfe-core-ui': '1.0.0',
-            'dfe-core-api': '1.0.0',
-            'dfe-core-db': '1.0.0',
-            'dfe-core-auth': '1.0.0',
-            'dfe-core-storage': '1.0.0',
-            'dfe-core-messaging': '1.0.0',
+            'dfe-ui': 'v1.20.0@sha256:abc',
+            'dfe-receiver': '1.4.0',
+            'dfe-loader': '1.3.2',
           },
         },
       }),

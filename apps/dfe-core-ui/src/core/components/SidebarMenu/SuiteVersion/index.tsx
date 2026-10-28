@@ -5,6 +5,8 @@ import { Tooltip } from '@/core/components/Tooltip';
 import { useFetchSystemVersion } from '@/core/hooks/useFetchSystemVersion';
 import { cn } from '@/core/utils/style';
 
+const UI_APP = 'dfe-ui';
+
 interface SuiteVersionProps {
   className?: string;
 }
@@ -27,13 +29,16 @@ export const SuiteVersion = ({ className }: SuiteVersionProps) => {
     return null;
   }
 
-  const appEntries = Object.entries(data.apps ?? {}).map(([name, version]) =>
+  const appEntries = Object.entries(data.apps).map(([name, version]) =>
     componentLabel(name, version),
   );
+  // The apps map names dfe-ui when the deploy repo pins it, and ui then repeats it.
+  const uiLine =
+    data.ui && !(UI_APP in data.apps) ? componentLabel('ui', data.ui) : null;
 
   const tooltipLines = [
     componentLabel('engine', data.engine),
-    data.ui ? componentLabel('ui', data.ui) : null,
+    uiLine,
     consoleVersion ? componentLabel('console', consoleVersion) : null,
     ...appEntries,
   ].filter((line): line is string => Boolean(line));

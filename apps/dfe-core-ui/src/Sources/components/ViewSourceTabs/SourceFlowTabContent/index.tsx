@@ -7,6 +7,7 @@ import { FlowArrow, FlowStage } from '@/Sources/components/FlowStage';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { Fragment } from 'react';
+import { MAIN_SOURCE_NAME } from './defaultSource';
 import { flowStages } from './flowStages';
 
 const Heading = ({ title }: { title: string }) => (
@@ -77,7 +78,7 @@ export const SourceFlowTabContent = ({
 
   const { stages: rawStages, arrows } = flowStages(flow);
 
-  const isMainSource = source === 'main';
+  const isMainSource = source === MAIN_SOURCE_NAME;
 
   const stages =
     isMainSource || (isMetaSchemaDefined && !isDeployed) || !isMetaSchemaDefined
