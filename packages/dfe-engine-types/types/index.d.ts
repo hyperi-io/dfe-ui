@@ -12226,6 +12226,12 @@ export interface components {
             /** Warnings */
             warnings?: string[];
             /**
+             * Error
+             * @description Set when a write failed and the run stopped there: the report is what landed before it, with every review branch and PR already opened
+             * @default
+             */
+            error: string;
+            /**
              * Review Required
              * @description A generated rule or hunt was routed to a review branch, not to the branch the hunt runner syncs; nothing here runs until those branches merge
              * @default false
@@ -16528,6 +16534,11 @@ export interface components {
              * @description Human-readable label
              */
             display_name?: string | null;
+            /**
+             * Issuer
+             * @description OIDC issuer URL. An empty one is refused, since a login needs it
+             */
+            issuer?: string | null;
             /**
              * Client Id
              * @description OIDC client ID (not a secret)
