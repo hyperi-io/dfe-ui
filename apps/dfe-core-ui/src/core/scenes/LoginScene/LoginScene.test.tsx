@@ -34,3 +34,20 @@ describe('login notices', () => {
     },
   );
 });
+
+// Tailwind's bg-background is a fixed light value, and antd paints its labels white in dark mode.
+// A card without the dark pair leaves white labels on a white card.
+describe('dark mode', () => {
+  test('the card and the logo carry a dark pair, so the form stays readable', () => {
+    render(<LoginScene />);
+
+    const card = screen.getByText('login form').parentElement;
+    expect(card).toHaveClass(
+      'bg-background',
+      'dark:bg-dark-background',
+      'text-foreground',
+      'dark:text-dark-foreground',
+    );
+    expect(card?.querySelector('svg')).toHaveClass('dark:text-white');
+  });
+});

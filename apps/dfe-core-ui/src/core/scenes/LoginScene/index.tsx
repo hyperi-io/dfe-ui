@@ -28,9 +28,9 @@ const Login = ({
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground min-w-96 max-w-md flex flex-col items-center gap-4">
+      <div className="bg-background dark:bg-dark-background rounded-lg p-4 shadow-lg text-foreground dark:text-dark-foreground min-w-96 max-w-md flex flex-col items-center gap-4">
         <IconPrimaryLogoFull
-          className={cn('m-auto', 'text-brand-primary')}
+          className={cn('m-auto', 'text-brand-primary dark:text-white')}
           height={30}
           width={150}
         />

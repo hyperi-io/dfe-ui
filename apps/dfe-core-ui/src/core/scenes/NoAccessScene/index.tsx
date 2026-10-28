@@ -16,9 +16,9 @@ export const NoAccessScene = () => {
         'bg-tertiary bg-linear-to-r from-tertiary via-secondary to-brand-primary',
       )}
     >
-      <div className="bg-background rounded-lg p-8 shadow-lg text-foreground max-w-lg min-w-96 flex flex-col items-center gap-4 text-center">
+      <div className="bg-background dark:bg-dark-background rounded-lg p-8 shadow-lg text-foreground dark:text-dark-foreground max-w-lg min-w-96 flex flex-col items-center gap-4 text-center">
         <IconPrimaryLogoFull
-          className={cn('m-auto', 'text-brand-primary')}
+          className={cn('m-auto', 'text-brand-primary dark:text-white')}
           height={30}
           width={150}
         />
