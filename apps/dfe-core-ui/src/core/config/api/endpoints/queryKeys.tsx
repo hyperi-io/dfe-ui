@@ -6,6 +6,7 @@ import { UseFetchInfiniteFilteredHuntsProps } from '@/core/hooks/useFetchInfinit
 import { UseFetchInfiniteFilteredOrganisationsProps } from '@/core/hooks/useFetchInfiniteFilteredOrganisations/types';
 import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
 import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
+import { UseFetchInfiniteFilteredSourceCatalogueTagsProps } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { UseFetchInfiniteFilteredAlertsProps } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { UseFetchGitOpsLogProps } from '@/Platform/hooks/gitops/useFetchGitOpsLog/types';
@@ -82,6 +83,7 @@ export const QUERY_KEYS = Object.freeze({
     catalogue: ({
       search,
       intake,
+      tags,
       per_page,
       page,
     }: UseFetchInfiniteSourceCataloguesProps = {}) => [
@@ -89,11 +91,23 @@ export const QUERY_KEYS = Object.freeze({
       'catalogue',
       ...(search ? ['search', search] : []),
       ...(intake ? ['intake', intake] : []),
+      ...(tags ? ['tags', tags.join(',')] : []),
       ...(per_page ? ['per_page', per_page] : []),
       ...(page ? ['page', page] : []),
     ],
     fromCatalogue: () => ['sources', 'from-catalogue'],
     engines: () => ['sources', 'engines'],
+    catalogueTags: ({
+      name,
+      page,
+      per_page,
+    }: UseFetchInfiniteFilteredSourceCatalogueTagsProps = {}) => [
+      'sources',
+      'catalogue-tags',
+      ...(name ? [name] : []),
+      ...(page ? ['page', page] : []),
+      ...(per_page ? ['per_page', per_page] : []),
+    ],
   },
   ingest: {
     rules: () => ['ingest', 'rules'],
