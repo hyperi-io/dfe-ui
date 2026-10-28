@@ -8,3 +8,7 @@
 # Graded by reachability, per dfe-infra docs/THREAT-MODEL.md: dfe-ui takes
 # untrusted input, so only an advisory that reaches no shipped code is accepted.
 
+
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+reason = "deepmerge 4.3.1, pulled only by @svgr/plugin-svgo 8.1.0, a devDependency of packages/dfe-icons that runs in the icon generate script over our own committed SVG files. It is in no server or browser bundle, so no request input reaches mergeObject(). No fixed deepmerge release exists (4.3.1 is the latest, vulnerable range >= 4.2.0). Drop when deepmerge ships a fix or @svgr/plugin-svgo leaves it."
