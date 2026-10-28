@@ -47,7 +47,7 @@ const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 const SOURCE_TYPE_HINT =
   'No fetcher is deployed, so there are no source types to pick from';
 const CONFIG_HINT =
-  "The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals.";
+  'Only the sources.<type> block, such as region, credentials and services. The engine sets enabled and topic. Credentials must be env: or vault: references, never literals.';
 
 /**
  * The real source schema, with the top-level fields its other tabs own held
