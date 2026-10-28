@@ -334,10 +334,13 @@ describe('CreateUpdateSourceForm views', () => {
   ];
 
   // Its backstops (15s to render the name field, 10s to submit) outlast the 20s default.
-  it(
-    'keeps the views of a source whose Views tab is hidden',
+  it.each([
+    { name: 'with views', views: storedViews, tab: true },
+    { name: 'with no views', views: [], tab: false },
+  ])(
+    'a shared-table source $name shows the Views tab: $tab, and keeps its views',
     { timeout: 45_000 },
-    async () => {
+    async ({ views, tab }) => {
       const user = userEvent.setup();
       const onFinish = vi.fn();
       render(
@@ -357,15 +360,17 @@ describe('CreateUpdateSourceForm views', () => {
               value: 'probe.log',
             },
             receiver_ui_config: { table: 'main' },
-            views: storedViews,
+            views,
           }}
         />,
         { wrapper },
       );
 
       await screen.findByLabelText(/^Source Name/, {}, { timeout: 15_000 });
+      expect(!!screen.queryByRole('tab', { name: 'Views' })).toBe(tab);
+      // A shared-table source has no meta schema, so the Transform tab stays hidden.
       expect(
-        screen.queryByRole('tab', { name: 'Views' }),
+        screen.queryByRole('tab', { name: 'Transform' }),
       ).not.toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Update Source' }));
 
@@ -375,7 +380,7 @@ describe('CreateUpdateSourceForm views', () => {
       const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
       // The engine's update replaces the version, so a body without views clears them.
       expect(transformSourceFormDataToRequestBody(submitted).views).toEqual(
-        storedViews,
+        views,
       );
     },
   );

@@ -136,6 +136,7 @@ export const CreateUpdateSourceFormBase = ({
 
   const metaSchema = Form.useWatch(['schema'], form);
   const isMetaSchemaFormValueDefined = !!metaSchema?.meta_schema;
+  const hasStoredViews = (initialValues?.views?.length ?? 0) > 0;
 
   const watchFetcherTopic = Form.useWatch(['fetcher', 'topic'], form);
   const watchReceiverTable = Form.useWatch(
@@ -206,6 +207,11 @@ export const CreateUpdateSourceFormBase = ({
               />
             ),
           },
+        ]
+      : []),
+    // A source on the shared table has no meta schema but can still carry views.
+    ...(isMetaSchemaFormValueDefined || hasStoredViews
+      ? [
           {
             key: 'views',
             label: (
