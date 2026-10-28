@@ -14,6 +14,9 @@ export const SOURCE_CATALOGUE_ITEM: TSourceCatalogueItem = {
   variants: ['string'],
   availability: 'available',
   availability_reason: 'string',
+  runnable: true,
+  runnable_reason: 'string',
+  runnable_intakes: ['beats'],
 };
 
 const TOTAL_ITEMS = 25;
