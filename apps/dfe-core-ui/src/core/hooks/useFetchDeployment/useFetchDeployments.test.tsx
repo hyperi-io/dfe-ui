@@ -24,6 +24,7 @@ describe('.useFetchDeployment', () => {
       transports: {
         default: 'kafka',
         available: ['kafka', 'grpc'],
+        per_source_apps: true,
       },
       mesh: {
         enabled: true,

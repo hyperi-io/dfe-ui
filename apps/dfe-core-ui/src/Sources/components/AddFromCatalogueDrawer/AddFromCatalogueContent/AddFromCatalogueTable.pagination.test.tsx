@@ -39,6 +39,9 @@ const catalogueItem = (index: number): TSourceCatalogueItem => ({
   variants: [],
   availability: 'available',
   availability_reason: '',
+  runnable: true,
+  runnable_reason: 'string',
+  runnable_intakes: ['beats'],
 });
 
 const Harness = () => {

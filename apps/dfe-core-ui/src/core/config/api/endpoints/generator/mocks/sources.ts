@@ -38,6 +38,9 @@ export const OKTA_CATALOGUE_ENTRY: TSourceCataloguesResponse['items'][number] =
     availability: 'available',
     availability_reason:
       "the deployed 'dfe-transform-elastic' ships 'filebeat.okta.default'",
+    runnable: true,
+    runnable_reason: 'string',
+    runnable_intakes: ['beats'],
   };
 
 export const sources = {
