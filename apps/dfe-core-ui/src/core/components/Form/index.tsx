@@ -36,19 +36,11 @@ const FormItem = ({
   // return values. Our zod resolver is a shared RuleRender with no field
   // path, so the asterisk has to come from the Item `name` + schema instead.
   const zodRequired = zodRequiredFromRules(name, rules);
-  const canError = !!rules?.length || required === true;
 
   return (
     <AntdForm.Item
       layout={layout}
-      className={cn(
-        'm-0!',
-        // A field that can fail keeps one message line free under it, which
-        // the message takes over, so a one-line error moves nothing below.
-        canError &&
-          'pb-[calc(var(--ant-font-size)*var(--ant-line-height))] [&.ant-form-item-with-help]:pb-0',
-        className,
-      )}
+      className={cn('m-0!', className)}
       name={name}
       rules={rules}
       required={required ?? (zodRequired || undefined)}

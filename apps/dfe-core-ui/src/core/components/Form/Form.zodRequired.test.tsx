@@ -33,8 +33,6 @@ const Demo = () => {
   );
 };
 
-const RESERVE = 'pb-[calc(var(--ant-font-size)*var(--ant-line-height))]';
-
 describe('Form.Item zod required mark', () => {
   it('shows the asterisk for required zod fields and not for optional ones', () => {
     const { container } = render(<Demo />);
@@ -50,24 +48,7 @@ describe('Form.Item zod required mark', () => {
   });
 });
 
-describe('Form.Item error line', () => {
-  it.each([
-    { label: 'Source Name', reserves: true },
-    { label: 'Display Name', reserves: true },
-    { label: 'Note', reserves: false },
-  ])(
-    'a field that can fail keeps a message line free: $label',
-    ({ label, reserves }) => {
-      render(<Demo />);
-      const item = screen.getByLabelText(label).closest('.ant-form-item');
-      if (reserves) {
-        expect(item).toHaveClass(RESERVE);
-      } else {
-        expect(item).not.toHaveClass(RESERVE);
-      }
-    },
-  );
-
+describe('Form.Item field errors', () => {
   it('announces a field error as it appears, and only the failing field', async () => {
     const user = userEvent.setup();
     render(<Demo />);
