@@ -274,6 +274,66 @@ describe('formSchema origin', () => {
       'The engine sets enabled and topic; remove them from the config',
     ]);
   });
+
+  test.each([
+    {
+      name: 'a whole fetcher file is refused, naming its top-level keys',
+      source_type: 'aws',
+      config:
+        'accumulate:\n  max_rows: 10\nsources:\n  aws:\n    region: us-east-1\noutput:\n  type: kafka\ndlq:\n  enabled: true\n',
+      messages: [
+        'Config is the sources.aws block only; remove the fetcher-level keys sources, dlq, output, accumulate',
+      ],
+    },
+    {
+      name: 'one fetcher-level key is enough',
+      source_type: 'crates_io',
+      config: 'buffer:\n  max_bytes: 1\ncrates:\n  - scalo\n',
+      messages: [
+        'Config is the sources.crates_io block only; remove the fetcher-level key buffer',
+      ],
+    },
+    {
+      name: 'a fetcher file wins over the engine-owned keys nested in it',
+      source_type: 'aws',
+      config: 'sources:\n  aws:\n    enabled: true\n',
+      messages: [
+        'Config is the sources.aws block only; remove the fetcher-level key sources',
+      ],
+    },
+    {
+      name: 'the block itself is accepted',
+      source_type: 'aws',
+      config:
+        'region: us-east-1\naccess_key_id: env:AWS_KEY\nservices:\n  - name: cloudtrail\n',
+      messages: [],
+    },
+    {
+      name: 'a rest block may name an instance after a fetcher-level word',
+      source_type: 'rest',
+      config:
+        'output:\n  url: https://api.example.com\nmetrics:\n  url: https://m.example.com\n',
+      messages: [],
+    },
+    {
+      name: 'a rest block still refuses a pasted sources key',
+      source_type: 'rest',
+      config:
+        'sources:\n  rest:\n    api:\n      url: https://api.example.com\n',
+      messages: [
+        'Config is the sources.rest block only; remove the fetcher-level key sources',
+      ],
+    },
+  ])('$name', ({ source_type, config, messages }) => {
+    const data: CreateUpdateSourceFormData = {
+      ...BASE,
+
+      origin: 'fetcher',
+      fetcher: { source_type, topic: 'own', config },
+    };
+
+    expect(messagesAt(data, ['fetcher', 'config'])).toEqual(messages);
+  });
 });
 
 describe('formSchema grouped conditions', () => {
