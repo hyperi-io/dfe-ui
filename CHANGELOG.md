@@ -3,6 +3,19 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.35](https://github.com/hyperi-io/dfe-ui/compare/v1.7.34...v1.7.35) (2026-10-28)
+
+### Bug Fixes
+
+* close the rc.13 review follow-ups on the version list and the flow constant ([#630](https://github.com/hyperi-io/dfe-ui/issues/630)) ([cebafd2](https://github.com/hyperi-io/dfe-ui/commit/cebafd288af9fd10bddf58c3e524f065fbddc57d))
+* declare the repo classification as product ([#623](https://github.com/hyperi-io/dfe-ui/issues/623)) ([f35e152](https://github.com/hyperi-io/dfe-ui/commit/f35e15263dea37b89c780761606ba449123d1109))
+* **deps:** move fast-uri to 3.1.9 and drop its lapsed scanner ignores ([#622](https://github.com/hyperi-io/dfe-ui/issues/622)) ([1d55e00](https://github.com/hyperi-io/dfe-ui/commit/1d55e00f8f137747698b21ef4c84d936d5ddbb52))
+* keep the login, change-password and no-access cards readable in dark mode ([#626](https://github.com/hyperi-io/dfe-ui/issues/626)) ([0c9f308](https://github.com/hyperi-io/dfe-ui/commit/0c9f30887b6259287ee8ac2df28d359623c0f6bf))
+* open a source at its current version instead of assuming 1.0.0 ([#629](https://github.com/hyperi-io/dfe-ui/issues/629)) ([a90db09](https://github.com/hyperi-io/dfe-ui/commit/a90db09ab8227cad0e2344b7b6b5ff5689ec9c22))
+* refuse a whole fetcher file in a fetcher source's Config and say what belongs there ([#627](https://github.com/hyperi-io/dfe-ui/issues/627)) ([ff432b7](https://github.com/hyperi-io/dfe-ui/commit/ff432b7393276a34f502cb22e179b10a0f0c7028))
+* show the GitOps log as a readable record ([#628](https://github.com/hyperi-io/dfe-ui/issues/628)) ([1760ae9](https://github.com/hyperi-io/dfe-ui/commit/1760ae901dd0b30ecd1e14222e00f62e2949e1e9))
+* source catalogue tweaks ([#620](https://github.com/hyperi-io/dfe-ui/issues/620)) ([c4d48a1](https://github.com/hyperi-io/dfe-ui/commit/c4d48a1cda518d7088a7161c96b22043aefd0ec1))
+
 ## [1.7.34](https://github.com/hyperi-io/dfe-ui/compare/v1.7.33...v1.7.34) (2026-10-26)
 
 ### Bug Fixes
