@@ -1,6 +1,5 @@
 import { THelmFilesResponse } from '@/Platform/hooks/helm/useFetchHelmFiles/types';
 import { THelmFileVariablesResponse } from '@/Platform/hooks/helm/useFetchHelmFileVariables/types';
-import { TUpdateHelmFileVariableResponse } from '@/Platform/hooks/helm/useUpdateHelmFileVariable/types';
 import { http, HttpResponse } from 'msw';
 import {
   DEFAULT_VALIDATION_ERROR,
@@ -47,52 +46,6 @@ export const helm = {
   },
   fileVariable: {
     mockedUrl: '/api/v1/helm/files/{name}/vars/{path}',
-    put: {
-      success: ({
-        mockedResponse = {
-          changed: true,
-          commit_sha: 'string',
-          auto_merged: true,
-          review_required: true,
-          pr_url: 'string',
-        },
-        name = 'name',
-        path = 'path',
-      }: {
-        mockedResponse?: TUpdateHelmFileVariableResponse;
-        name?: string;
-        path?: string;
-      } = {}) => {
-        return http.put(
-          helm.fileVariable.mockedUrl
-            .replace('{name}', name)
-            .replace('{path}', path),
-          () => {
-            return HttpResponse.json(mockedResponse);
-          },
-        );
-      },
-      error: ({
-        mockedResponse = DEFAULT_VALIDATION_ERROR,
-        status = 422,
-        name = 'name',
-        path = 'path',
-      }: {
-        mockedResponse?: TValidationError;
-        status?: number;
-        name?: string;
-        path?: string;
-      } = {}) => {
-        return http.put(
-          helm.fileVariable.mockedUrl
-            .replace('{name}', name)
-            .replace('{path}', path),
-          () => {
-            return HttpResponse.json(mockedResponse, { status });
-          },
-        );
-      },
-    },
     delete: {
       success: ({
         status = 204,
