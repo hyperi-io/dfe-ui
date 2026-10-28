@@ -43,8 +43,11 @@ describe('.useReconcileGovernanceChRbac', () => {
       result.current.mutate();
 
       const expectedResponse: TReconcileGovernanceChRbacResponse = {
-        required_action: 'required_action',
-        changes: [{ cls: 'cls', name: 'name', path: 'path', value: 'value' }],
+        statements: 12,
+        dropped: 1,
+        minted: ['dfe_loader'],
+        errors: [],
+        projection_missing: [],
       };
 
       await waitFor(() => {
