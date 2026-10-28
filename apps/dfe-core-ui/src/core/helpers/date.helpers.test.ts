@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   formatDateToString,
   formatDateXAgo,
+  formatEpochSecondsLocal,
   parseValidDate,
 } from './date.helpers';
 
@@ -65,4 +66,32 @@ describe('ViewOrganisationDrawer.helpers', () => {
       expect(formatDateXAgo('not-a-date')).toBe('Invalid date');
     });
   });
+});
+
+describe('.formatEpochSecondsLocal', () => {
+  const originalTz = process.env.TZ;
+  afterEach(() => {
+    if (originalTz === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = originalTz;
+    }
+  });
+
+  test.each([
+    ['UTC', '27 Sep 2026, 13:42:44'],
+    ['Australia/Sydney', '27 Sep 2026, 23:42:44'],
+    ['America/New_York', '27 Sep 2026, 09:42:44'],
+  ])('shows the same instant in %s local time', (tz, expected) => {
+    process.env.TZ = tz;
+
+    expect(formatEpochSecondsLocal(1790516564)).toBe(expected);
+  });
+
+  test.each([Number.NaN, Number.POSITIVE_INFINITY])(
+    'a non-finite value (%s) reads as Invalid date',
+    (value) => {
+      expect(formatEpochSecondsLocal(value)).toBe('Invalid date');
+    },
+  );
 });
