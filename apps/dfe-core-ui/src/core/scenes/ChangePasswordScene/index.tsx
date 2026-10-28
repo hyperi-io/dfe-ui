@@ -204,9 +204,9 @@ export const ChangePasswordScene = () => {
         animation: 'gradient 20s ease infinite',
       }}
     >
-      <div className="bg-background rounded-lg p-4 shadow-lg text-foreground w-full max-w-[28rem] flex flex-col items-center gap-4">
+      <div className="bg-background dark:bg-dark-background rounded-lg p-4 shadow-lg text-foreground dark:text-dark-foreground w-full max-w-[28rem] flex flex-col items-center gap-4">
         <IconPrimaryLogoFull
-          className={cn('m-auto', 'text-brand-primary')}
+          className={cn('m-auto', 'text-brand-primary dark:text-white')}
           height={30}
           width={150}
         />
@@ -221,7 +221,7 @@ export const ChangePasswordScene = () => {
                   : 'Set your own password'}
               </h1>
               {view.kind === 'form' && (
-                <p className="text-sm text-foreground-muted">
+                <p className="text-sm text-foreground-muted dark:text-dark-foreground-muted">
                   You signed in with the password this deployment issued. Enter
                   it as your current password, then choose your own, at least 12
                   characters. The issued password stops working once you do, and

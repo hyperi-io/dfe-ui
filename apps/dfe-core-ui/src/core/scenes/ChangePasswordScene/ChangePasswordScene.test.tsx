@@ -462,3 +462,20 @@ describe('ChangePasswordScene', () => {
     );
   });
 });
+
+describe('dark mode', () => {
+  test('the card, its copy and the logo carry a dark pair, so the form stays readable', async () => {
+    render(<ChangePasswordScene />, { wrapper });
+
+    const intro = await screen.findByText(/You signed in with the password/);
+    const card = intro.closest('main')?.firstElementChild;
+    expect(card).toHaveClass(
+      'bg-background',
+      'dark:bg-dark-background',
+      'text-foreground',
+      'dark:text-dark-foreground',
+    );
+    expect(intro).toHaveClass('dark:text-dark-foreground-muted');
+    expect(card?.querySelector('svg')).toHaveClass('dark:text-white');
+  });
+});
