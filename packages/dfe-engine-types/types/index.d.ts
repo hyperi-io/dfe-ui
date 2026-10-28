@@ -16529,6 +16529,11 @@ export interface components {
              */
             display_name?: string | null;
             /**
+             * Issuer
+             * @description OIDC issuer URL. An empty one is refused, since a login needs it
+             */
+            issuer?: string | null;
+            /**
              * Client Id
              * @description OIDC client ID (not a secret)
              */

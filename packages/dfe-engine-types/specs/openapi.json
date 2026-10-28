@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine -- configuration, scheduling, and query API",
-    "version": "1.22.77"
+    "version": "1.22.78"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -48809,6 +48809,18 @@
             ],
             "title": "Display Name",
             "description": "Human-readable label"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer",
+            "description": "OIDC issuer URL. An empty one is refused, since a login needs it"
           },
           "client_id": {
             "anyOf": [
