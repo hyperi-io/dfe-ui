@@ -10,44 +10,74 @@ const { wrapper } = buildTestWrapper().withTheme();
 const FLOOR_MESSAGE = 'Password must contain at least 12 characters';
 // 72 characters and 73 bytes: the accented letter takes two.
 const SEVENTY_THREE_BYTES = `${'a'.repeat(71)}${String.fromCodePoint(0xe9)}`;
+const BYTES_MESSAGE =
+  'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.';
+const MISMATCH_MESSAGE = 'Passwords do not match';
 
 describe('ResetPasswordForm', () => {
-  test('refuses an 11-character password without submitting', async () => {
-    const onFinish = vi.fn();
-    const user = userEvent.setup();
-    render(<ResetPasswordForm onFinish={onFinish} />, { wrapper });
+  // Confirm checks only that it matches, so each refusal is reported once, on
+  // the field that caused it, and announced as it appears.
+  test.each([
+    {
+      case: 'an 11-character password',
+      newValue: 'eleven-char',
+      confirmValue: 'eleven-char',
+      field: 'New Password',
+      message: FLOOR_MESSAGE,
+    },
+    {
+      case: 'a 73-byte password',
+      newValue: SEVENTY_THREE_BYTES,
+      confirmValue: SEVENTY_THREE_BYTES,
+      field: 'New Password',
+      message: BYTES_MESSAGE,
+    },
+    {
+      case: 'a valid password with a shorter confirmation',
+      newValue: 'a-new-password!',
+      confirmValue: 'short',
+      field: 'Confirm Password',
+      message: MISMATCH_MESSAGE,
+    },
+    {
+      case: 'a valid password with no confirmation',
+      newValue: 'a-new-password!',
+      confirmValue: '',
+      field: 'Confirm Password',
+      message: MISMATCH_MESSAGE,
+    },
+  ])(
+    'refuses $case once, on $field, without submitting',
+    async ({ newValue, confirmValue, field, message }) => {
+      const onFinish = vi.fn();
+      const user = userEvent.setup();
+      render(<ResetPasswordForm onFinish={onFinish} />, { wrapper });
 
-    await user.type(screen.getByLabelText('New Password'), 'eleven-char');
-    await user.type(screen.getByLabelText('Confirm Password'), 'eleven-char');
-    await user.click(screen.getByRole('button', { name: 'Reset Password' }));
+      await user.click(screen.getByLabelText('New Password'));
+      await user.paste(newValue);
+      if (confirmValue) {
+        await user.click(screen.getByLabelText('Confirm Password'));
+        await user.paste(confirmValue);
+      }
+      await user.click(screen.getByRole('button', { name: 'Reset Password' }));
 
-    expect(await screen.findAllByText(FLOOR_MESSAGE)).toHaveLength(2);
-    expect(onFinish).not.toHaveBeenCalled();
-  });
-
-  test('refuses a 73-byte password without submitting, and describes why on the field', async () => {
-    const onFinish = vi.fn();
-    const user = userEvent.setup();
-    render(<ResetPasswordForm onFinish={onFinish} />, { wrapper });
-
-    const newPassword = screen.getByLabelText('New Password');
-    await user.click(newPassword);
-    await user.paste(SEVENTY_THREE_BYTES);
-    await user.click(screen.getByLabelText('Confirm Password'));
-    await user.paste(SEVENTY_THREE_BYTES);
-    await user.click(screen.getByRole('button', { name: 'Reset Password' }));
-
-    expect(
-      await screen.findAllByText(
-        'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
-      ),
-    ).toHaveLength(2);
-    expect(newPassword).toHaveAttribute('aria-invalid', 'true');
-    expect(newPassword).toHaveAccessibleDescription(
-      'Use at most 72 bytes. Most characters count as 1, but accented letters, other scripts and emoji count as 2 to 4.',
-    );
-    expect(onFinish).not.toHaveBeenCalled();
-  });
+      const alert = await screen.findByRole('alert');
+      expect(alert).toHaveTextContent(message);
+      expect(screen.getAllByText(message)).toHaveLength(1);
+      expect(screen.getByLabelText(field)).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      );
+      expect(screen.getByLabelText(field)).toHaveAccessibleDescription(message);
+      const other =
+        field === 'New Password' ? 'Confirm Password' : 'New Password';
+      expect(screen.getByLabelText(other)).not.toHaveAttribute(
+        'aria-invalid',
+        'true',
+      );
+      expect(onFinish).not.toHaveBeenCalled();
+    },
+  );
 
   test('names the refused field when the engine answers 422', () => {
     const error = new ApiError(422, 'Unprocessable Entity', {
