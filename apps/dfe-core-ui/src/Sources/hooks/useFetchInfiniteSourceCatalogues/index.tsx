@@ -16,6 +16,7 @@ import { UseFetchInfiniteSourceCataloguesProps } from './types';
 export const useFetchInfiniteSourceCatalogues = ({
   search,
   intake,
+  tags,
   per_page = 10,
   // Allow page control from the caller
   page,
@@ -29,12 +30,19 @@ export const useFetchInfiniteSourceCatalogues = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: QUERY_KEYS.sources.catalogue({ search, intake, per_page, page }),
+    queryKey: QUERY_KEYS.sources.catalogue({
+      search,
+      intake,
+      tags,
+      per_page,
+      page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
       sourceCatalogues({
         queryParams: {
           search: search,
           intake: intake,
+          tags: tags,
           per_page: per_page ?? 10,
           page: page ?? pageParam,
         },

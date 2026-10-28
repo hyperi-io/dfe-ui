@@ -1,3 +1,4 @@
+import { CatalogueTags } from '@/core/components/CatalogueTags';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
@@ -57,6 +58,7 @@ export const AddFromCatalogueTable = ({
   onUpload?: () => void;
 }) => {
   const [search, setSearch] = useState('');
+  const [searchTags, setSearchTags] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
@@ -69,6 +71,7 @@ export const AddFromCatalogueTable = ({
     search,
     intake: intakeFilter,
     per_page: pageSize,
+    tags: searchTags,
     page,
   });
 
@@ -170,6 +173,12 @@ export const AddFromCatalogueTable = ({
           }
         />
       )}
+
+      <CatalogueTags
+        onChange={(tags) => {
+          setSearchTags(tags);
+        }}
+      />
 
       <Table<TSourceCatalogueItem>
         loading={isLoading || isFetchingNextPage}

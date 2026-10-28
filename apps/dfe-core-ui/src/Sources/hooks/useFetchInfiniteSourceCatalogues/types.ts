@@ -16,6 +16,7 @@ export type TSourceCatalogueIntake = TSourceCatalogueItem['default_intake'];
 export interface UseFetchInfiniteSourceCataloguesProps {
   search?: string;
   intake?: TSourceCatalogueIntake;
+  tags?: string[];
   per_page?: number;
   page?: number;
 }
