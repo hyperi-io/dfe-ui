@@ -32,6 +32,14 @@ export const formatDateToString = (date: string) => {
   return parsed.utc().format('DD MMM YYYY, HH:mm');
 };
 
+/** Epoch seconds as the viewer's local date and time. */
+export const formatEpochSecondsLocal = (seconds: number) => {
+  const parsed = dayjs.unix(seconds);
+  return Number.isFinite(seconds) && parsed.isValid()
+    ? parsed.format('DD MMM YYYY, HH:mm:ss')
+    : INVALID_DATE_LABEL;
+};
+
 export const formatDateXAgo = (date: string) => {
   const parsed = parseValidDate(date);
   if (!parsed) {
