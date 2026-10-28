@@ -72,7 +72,7 @@ export const FetcherFormSection = ({
         name={['fetcher', 'config']}
         label="Config"
         rules={[formValidation]}
-        extra="The fetcher's own YAML stanza. Credentials must be env: or vault: references, never literals."
+        extra="Only the sources.<type> block, such as region, credentials and services. The engine sets enabled and topic. Credentials must be env: or vault: references, never literals."
       >
         <AceEditor name="fetcher_config" mode="yaml" height="300px" />
       </Form.Item>

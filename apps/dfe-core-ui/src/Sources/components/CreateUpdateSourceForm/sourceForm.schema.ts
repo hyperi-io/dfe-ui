@@ -2,6 +2,7 @@ import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabC
 import { TCreateSourceRequestBody } from '@/Sources/hooks/useCreateSource/types';
 import {
   ENGINE_OWNED_FETCHER_KEYS,
+  fetcherFileKeysIn,
   parseFetcherConfig,
 } from '@/Sources/utils/transformSourceData/helpers';
 import { TCompatBinding } from '@/Sources/hooks/useFetchCompat/types';
@@ -310,6 +311,19 @@ export const formSchema = z
         ctx.addIssue({
           code: 'custom',
           message: parsed.message,
+          path: ['fetcher', 'config'],
+        });
+        return;
+      }
+
+      const fileKeys = fetcherFileKeysIn(
+        data.fetcher?.source_type,
+        parsed.config,
+      );
+      if (fileKeys.length > 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Config is the sources.${data.fetcher?.source_type?.trim() || '<type>'} block only; remove the fetcher-level ${fileKeys.length > 1 ? 'keys' : 'key'} ${fileKeys.join(', ')}`,
           path: ['fetcher', 'config'],
         });
         return;
