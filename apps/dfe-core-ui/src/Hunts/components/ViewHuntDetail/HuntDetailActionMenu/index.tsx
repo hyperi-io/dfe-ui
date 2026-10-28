@@ -28,7 +28,7 @@ export const HuntDetailActionMenu = ({
   const onCloneSuccess = (hunt: THuntCreateResponse) => {
     setSelectedHuntName(hunt.name);
     notification.success({
-      title: `Hunt ${hunt.name} cloned successfully`,
+      title: `Hunt ${hunt.display_name || hunt.name} cloned successfully`,
       placement: 'bottomLeft',
     });
   };
@@ -36,7 +36,7 @@ export const HuntDetailActionMenu = ({
   const onDeleteSuccess = () => {
     setSelectedHuntName(null);
     notification.success({
-      title: `Hunt ${hunt.name} deleted successfully`,
+      title: `Hunt ${hunt.display_name || hunt.name} deleted successfully`,
       placement: 'bottomLeft',
     });
   };
@@ -48,10 +48,7 @@ export const HuntDetailActionMenu = ({
       queryKey: QUERY_KEYS.hunts.hunt({ name: hunt.name }),
     });
 
-    notification.success({
-      title: `Hunt ${hunt.name} updated successfully`,
-      placement: 'bottomLeft',
-    });
+    // The edit drawer raises the success notice itself.
     onEditSuccessProp?.(hunt);
   };
 

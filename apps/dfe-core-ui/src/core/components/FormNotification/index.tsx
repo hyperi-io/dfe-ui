@@ -15,6 +15,8 @@ export const FormNotification = ({
 }: FormNotificationProps) => {
   return (
     <div
+      // A refusal or warning is read out as it appears, any other notice when the reader is idle.
+      role={type === 'error' || type === 'warning' ? 'alert' : 'status'}
       className={cn(
         'border rounded-md p-2 text-sm flex flex-col gap-2',
         type === 'error' && 'border-error bg-error/10 text-error',
