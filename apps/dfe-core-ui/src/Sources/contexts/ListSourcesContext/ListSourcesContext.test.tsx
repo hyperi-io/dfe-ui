@@ -1,7 +1,12 @@
-import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import {
+  TSourceListResponse,
+  UseFetchInfiniteFilteredSourcesProps,
+} from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { server } from '@/core/hooks/useFetchInfiniteFilteredSources/useFetchInfiniteFilteredSources.mocks';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -330,5 +335,113 @@ describe('ListSourcesContext', () => {
         '/sources?tab=buildDeploy&source_name=azure&source_version=2.0.0',
       );
     });
+  });
+});
+
+describe('ListSourcesProvider selected version', () => {
+  /** Serve a list whose sources sit at the given current versions. */
+  const serveCurrent = (current: Record<string, string>) => {
+    const items = Object.entries(current).map(([name, version]) => ({
+      name,
+      resource_type: 'custom',
+      display_name: name,
+      enabled: true,
+      current: version,
+      deployed_version: version,
+      versions: [version],
+      updated_at: '2026-01-01T00:00:00Z',
+      has_transform: false,
+      has_fetcher: false,
+      origin: 'receiver',
+      state: 'active',
+      current_table_topic_type: 'own',
+    })) as TSourceListResponse['items'];
+    server.use(
+      http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () =>
+        HttpResponse.json({
+          items,
+          objects: Object.fromEntries(items.map((i) => [i.name, i])),
+          total: items.length,
+          page: 1,
+          per_page: 10,
+          total_pages: 1,
+          next_page: null,
+          prev_page: null,
+        } satisfies TSourceListResponse),
+      ),
+    );
+  };
+
+  it.each<{
+    name: string;
+    query: string;
+    current: Record<string, string>;
+    expected: string[];
+    waitsForList: boolean;
+  }>([
+    {
+      name: 'main opens at the version the list gives it, not a literal',
+      query: '',
+      current: { main: '1.3.0' },
+      expected: ['main', '1.3.0'],
+      waitsForList: true,
+    },
+    {
+      name: 'a named source with no version opens at its own current version',
+      query: 'source_name=syslog',
+      current: { main: '1.3.0', syslog: '2.4.0' },
+      expected: ['syslog', '2.4.0'],
+      waitsForList: true,
+    },
+    {
+      name: 'a version in the URL wins over the list',
+      query: 'source_name=main&source_version=1.0.0',
+      current: { main: '1.3.0' },
+      expected: ['main', '1.0.0'],
+      waitsForList: false,
+    },
+    {
+      name: 'a source the list does not carry falls back to the version every source starts at',
+      query: 'source_name=elsewhere',
+      current: { main: '1.3.0' },
+      expected: ['elsewhere', '1.0.0'],
+      waitsForList: true,
+    },
+  ])('$name', async ({ query, current, expected, waitsForList }) => {
+    serveCurrent(current);
+    searchParamsRef.current = new URLSearchParams(query);
+
+    const { result } = renderHook(() => useListSourcesContext(), { wrapper });
+
+    if (waitsForList) {
+      expect(result.current.selectedSourceVersion).toBeNull();
+    }
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    expect([
+      result.current.selectedSourceName,
+      result.current.selectedSourceVersion,
+    ]).toEqual(expected);
+  });
+
+  it('selecting a source with no version follows its current version', async () => {
+    serveCurrent({ main: '1.3.0', syslog: '2.4.0' });
+    searchParamsRef.current = new URLSearchParams(
+      'source_name=main&source_version=1.0.0',
+    );
+    const { result } = renderHook(() => useListSourcesContext(), { wrapper });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    act(() => {
+      result.current.setSelectedSource({
+        source_name: 'syslog',
+        source_version: null,
+      });
+    });
+
+    expect(result.current.selectedSourceVersion).toBe('2.4.0');
   });
 });

@@ -126,6 +126,9 @@ const DEFAULT_SOURCE_LIST_RESPONSE: TSourceListResponse = {
   prev_page: null,
 };
 
+/** The version every source is created at. Used only when the list does not carry the selected source. */
+const INITIAL_SOURCE_VERSION = '1.0.0';
+
 const ListSourcesContext = createContext<ListSourcesContextValue | null>(null);
 
 export interface ListSourcesProviderProps {
@@ -139,8 +142,7 @@ export const ListSourcesProvider = ({
 }: ListSourcesProviderProps) => {
   const queryClient = useQueryClient();
   const [selectedSourceName, setSelectedSourceName] = useState<string>('main');
-  const [selectedSourceVersion, setSelectedSourceVersion] =
-    useState<string>('1.0.0');
+  const [urlSourceVersion, setUrlSourceVersion] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -159,8 +161,8 @@ export const ListSourcesProvider = ({
       setSelectedSourceName(
         source_name && source_name !== '' ? source_name : 'main',
       );
-      setSelectedSourceVersion(
-        source_version && source_version !== '' ? source_version : '1.0.0',
+      setUrlSourceVersion(
+        source_version && source_version !== '' ? source_version : null,
       );
     });
   }, [searchParams]);
@@ -177,6 +179,12 @@ export const ListSourcesProvider = ({
     loadMoreRef,
     isFetchingNextPage,
   } = useFetchInfiniteFilteredSources(filters);
+
+  // A source named with no version opens at its current version from the list, and waits (null) until the list loads.
+  const selectedSourceVersion =
+    urlSourceVersion ??
+    data.items.find((source) => source.name === selectedSourceName)?.current ??
+    (isLoading ? null : INITIAL_SOURCE_VERSION);
 
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
@@ -206,7 +214,7 @@ export const ListSourcesProvider = ({
     }) => {
       const sourceChanged = source_name !== selectedSourceName;
       setSelectedSourceName(source_name ?? 'main');
-      setSelectedSourceVersion(source_version ?? '1.0.0');
+      setUrlSourceVersion(source_version);
       const keep = new URLSearchParams(searchParams.toString());
       // Processing and the later tabs are not on every source. Keeping a stale
       // tab when the source changes leaves the URL pointing at a strip that is
@@ -234,7 +242,7 @@ export const ListSourcesProvider = ({
       searchParams,
       selectedSourceName,
       setSelectedSourceName,
-      setSelectedSourceVersion,
+      setUrlSourceVersion,
     ],
   );
 

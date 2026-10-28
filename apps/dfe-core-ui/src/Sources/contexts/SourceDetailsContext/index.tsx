@@ -37,12 +37,16 @@ export const SourceDetailsProvider = ({
 
   const {
     data: sourceDetail,
-    isLoading: isLoadingSourceDetail,
+    isLoading: isFetchingSourceDetail,
     error: errorSourceDetail,
   } = useFetchSourceDetail({
     source_name: selectedSourceName,
     source_version: selectedSourceVersion,
   });
+
+  // No version yet means the list is still loading, and the detail cannot be asked for until it names one.
+  const isLoadingSourceDetail =
+    isFetchingSourceDetail || selectedSourceVersion === null;
 
   const isMetaSchemaDefined = useMemo(() => {
     return (

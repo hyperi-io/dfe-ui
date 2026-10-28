@@ -20,7 +20,7 @@ export const useFetchSourceDetail = ({
       sourceVersion({
         pathParams: { name: source_name ?? '', version: source_version ?? '' },
       }),
-    enabled: !!source_name && queryEnabled,
+    enabled: !!source_name && !!source_version && queryEnabled,
   });
   return { data, isLoading, error };
 };
