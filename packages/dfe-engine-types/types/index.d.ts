@@ -1111,7 +1111,9 @@ export interface paths {
          *     name even when the source was given a different one. A source written by hand
          *     does not hide an entry. Each entry says whether the deployed transform ships
          *     its default variant, read off that app's mounted contract, so a console can
-         *     hold back an entry the create would refuse.
+         *     hold back an entry the create would refuse. It also says whether this
+         *     deployment can run the entry at all: a source that needs a per-source app
+         *     (a fetcher or a transform) is refused on a gRPC deployment.
          */
         get: operations["sources.catalogue"];
         put?: never;
@@ -7079,6 +7081,21 @@ export interface components {
              * @description Why availability says what it does
              */
             availability_reason: string;
+            /**
+             * Runnable
+             * @description Whether this deployment can run a create on the default intake. False when the source needs a per-source app (a fetcher or a transform) and the deployment runs on gRPC, which a create would refuse
+             */
+            runnable: boolean;
+            /**
+             * Runnable Reason
+             * @description Why runnable is false; empty when it is true
+             */
+            runnable_reason: string;
+            /**
+             * Runnable Intakes
+             * @description The intakes of this entry a create can run here, a subset of intakes
+             */
+            runnable_intakes: string[];
         };
         /**
          * CatalogueSourceFailure
@@ -16345,6 +16362,11 @@ export interface components {
              * @description Every transport a source may name here. One entry: a deployment binds its stages to a single transport, and a source on the other is refused at save.
              */
             available: string[];
+            /**
+             * Per Source Apps
+             * @description Whether a source may need an app of its own (a fetcher or a transform). False on direct, which runs the receiver to loader path only, and such a source is refused at save.
+             */
+            per_source_apps: boolean;
         };
         /**
          * TtlChange
