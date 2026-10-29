@@ -1,3 +1,4 @@
+import { ApiError } from '@/core/config/api/client';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -69,6 +70,9 @@ export const useFetchInfiniteFilteredSources = ({
       return hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
+    // A 403 is the engine's answer, and retrying it only delays saying so.
+    retry: (failures, error) =>
+      !(error instanceof ApiError && error.status === 403) && failures < 3,
   });
 
   const flattenedData = useMemo(() => {

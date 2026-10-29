@@ -1,5 +1,6 @@
 import { GenericErrorCard } from '@/core/components/GenericError';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import { ApiError } from '@/core/config/api/client';
 import { ViewSourceDetailTabs } from '@/Sources/components/ViewSourceTabs';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
@@ -13,6 +14,7 @@ export const ViewSourceDetail = () => {
   const {
     selectedSourceName: source_name,
     selectedSourceVersion: source_version,
+    isDefaultSelection,
     setSelectedSource,
   } = useListSourcesContext();
 
@@ -29,7 +31,12 @@ export const ViewSourceDetail = () => {
         <Spin />
       </div>
     );
-  if (errorSourceDetail)
+  // The fallback `main` is not on every engine, and the reader has not asked for it.
+  const isMissingDefault =
+    isDefaultSelection &&
+    errorSourceDetail instanceof ApiError &&
+    errorSourceDetail.status === 404;
+  if (errorSourceDetail && !isMissingDefault)
     return (
       <GenericErrorCard
         title="Error fetching source detail"
@@ -37,7 +44,7 @@ export const ViewSourceDetail = () => {
       />
     );
 
-  if (!sourceDetailData) {
+  if (!sourceDetailData || isMissingDefault) {
     return <EmptyDetail />;
   }
 
