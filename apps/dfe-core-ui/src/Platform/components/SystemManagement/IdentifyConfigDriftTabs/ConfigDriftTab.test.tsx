@@ -16,7 +16,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import { ConfigDriftTab } from './ConfigDriftTab';
+import { createRef } from 'react';
+import { asShown, ConfigDriftTab } from './ConfigDriftTab';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -116,5 +117,55 @@ describe('ApplyDefaultsContent', () => {
       expect(screen.getByText('0 selected')).toBeInTheDocument();
     });
     expect(applyButton).toBeDisabled();
+  });
+
+  test.each([
+    ['common-header/timeseries', 'timeseries'],
+    ['timeseries', 'timeseries'],
+    ['my-common-header/x', 'my-common-header/x'],
+    [90, '90'],
+    [null, undefined],
+  ])('reads %s as %s', (value, shown) => {
+    expect(asShown(value)).toBe(shown);
+  });
+
+  test.each([
+    [
+      'the prefixed and bare names of one header',
+      'timeseries',
+      'common-header/timeseries',
+      false,
+    ],
+    ['two different headers', 'timeseries', 'common-header/syslog', true],
+  ])('treats %s as drift: %s', async (_case, stored, dflt, drifted) => {
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[
+          {
+            ...driftSource('custom_source', false),
+            ttl_days: { stored: '90', default: '90' },
+            common_header_type: { stored, default: dflt },
+          },
+        ]}
+      />,
+      { wrapper },
+    );
+
+    const row = await screen.findByRole('row', { name: /custom_source/ });
+    expect(within(row).queryAllByText('Drift').length > 0).toBe(drifted);
+  });
+
+  test('renders the element that loads the next page under the table', async () => {
+    const loadMoreRef = createRef<HTMLDivElement>();
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[driftSource('custom_source', false)]}
+        loadMoreRef={loadMoreRef}
+      />,
+      { wrapper },
+    );
+
+    await screen.findByRole('row', { name: /custom_source/ });
+    expect(loadMoreRef.current).toBeInstanceOf(HTMLDivElement);
   });
 });

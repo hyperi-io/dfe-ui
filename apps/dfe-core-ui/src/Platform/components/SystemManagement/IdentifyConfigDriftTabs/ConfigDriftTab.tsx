@@ -4,14 +4,18 @@ import { Tooltip } from '@/core/components/Tooltip';
 import { useApplyDefaults } from '@/Platform/hooks/system/useApplyDefaults';
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
-import { Button, Tag } from 'antd';
-import { useState } from 'react';
+import { Button, Spin, Tag } from 'antd';
+import { type RefObject, useState } from 'react';
 
 const NoDriftTag = () => {
   return (
     <span className="text-foreground/50 dark:text-foreground/50">No drift</span>
   );
 };
+// The engine reads common-header/<name> and <name> as one header, so they compare equal.
+export const asShown = (value: string | number | null) =>
+  value?.toString().replace(/^common-header\//, '');
+
 const DriftTag = ({
   current,
   defaultValue,
@@ -19,15 +23,15 @@ const DriftTag = ({
   current: string | number | null;
   defaultValue: string | number | null;
 }) => {
-  const isDrifted = current?.toString() !== defaultValue?.toString();
-  if (!isDrifted) {
+  const shownCurrent = asShown(current);
+  const shownDefault = asShown(defaultValue);
+  if (shownCurrent === shownDefault) {
     return <NoDriftTag />;
   }
   return (
     <span className="flex items-center gap-2">
       <Tag color="warning">Drift</Tag>
-      Current: {current?.toString().replace('common-header/', '')} | Default:{' '}
-      {defaultValue?.toString().replace('common-header/', '')}
+      Current: {shownCurrent} | Default: {shownDefault}
     </span>
   );
 };
@@ -35,9 +39,14 @@ const DriftTag = ({
 export const ConfigDriftTab = ({
   onSuccess,
   defaultsDriftSources,
+  loadMoreRef,
+  isFetchingNextPage = false,
 }: {
   onSuccess?: (response: TApplyDefaultsResponse) => void;
   defaultsDriftSources: TDefaultsDriftSourceItem[];
+  /** The element whose arrival in view fetches the next page; the table has no pager of its own. */
+  loadMoreRef?: RefObject<HTMLDivElement | null>;
+  isFetchingNextPage?: boolean;
 }) => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
 
@@ -149,6 +158,9 @@ export const ConfigDriftTab = ({
           },
         }}
       />
+      <div ref={loadMoreRef} className="h-4 flex justify-center">
+        {isFetchingNextPage && <Spin size="small" />}
+      </div>
       {applyError && (
         <NotificationCard type="error" title={applyError?.message} />
       )}
