@@ -1,7 +1,8 @@
 // jsdom 28+ provides its own fetch that MSW cannot intercept.
 // Restore Node's native fetch (undici) so MSW's setupServer interceptors work.
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
+import { createRequire } from 'node:module';
 import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
 import { afterEach, beforeEach, vi } from 'vitest';
@@ -31,6 +32,34 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
     dispatchEvent: () => false,
   })) as unknown as typeof window.matchMedia;
 }
+
+const requireFromHere = createRequire(import.meta.url);
+
+// antd writes every component's CSS into <style> tags. jsdom answers each
+// getComputedStyle call by matching all of those rules (24-85ms a call), and
+// user-event and Testing Library's role queries make thousands of calls, so a
+// drawer flow took 36s. Nothing here asserts on layout, so the tags are still
+// created and keyed as before but carry no rules.
+const cssinjsRequire = createRequire(
+  requireFromHere.resolve('@ant-design/cssinjs'),
+);
+const dynamicCSS = cssinjsRequire('@rc-component/util/lib/Dom/dynamicCSS') as {
+  updateCSS: (css: string, key: string, option?: object) => HTMLStyleElement;
+};
+// Setup runs once per test file in a shared worker, so wrap only once.
+const RULE_FREE = Symbol.for('dfe-ui.cssinjs.ruleFree');
+const patchedCSS = dynamicCSS as typeof dynamicCSS & { [RULE_FREE]?: true };
+if (!patchedCSS[RULE_FREE]) {
+  const updateCSSWithRules = dynamicCSS.updateCSS;
+  dynamicCSS.updateCSS = (_css, key, option) =>
+    updateCSSWithRules('', key, option);
+  patchedCSS[RULE_FREE] = true;
+}
+
+// findBy* and waitFor return the moment their condition holds, so this is only
+// the point a missing condition is declared failed. The 1s default is shorter
+// than the first render of an antd page on a loaded runner.
+configure({ asyncUtilTimeout: 15_000 });
 
 globalThis.fetch = fetch as unknown as typeof globalThis.fetch;
 globalThis.Headers = Headers as unknown as typeof globalThis.Headers;

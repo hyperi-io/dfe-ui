@@ -1,5 +1,6 @@
 import { CreateSourceDrawer } from '@/Sources/components/CreateSourceDrawer';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
@@ -15,6 +16,9 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredSourcesProps;
   className?: string;
 }) => {
+  const { isAuthorized: canCreate } = RbacProtected.useRbac({
+    action: RbacProtected.rbacActions.source_write,
+  });
   return (
     <div
       className={cn(
@@ -30,7 +34,9 @@ export const EmptyList = ({
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
           {hasFilters
             ? 'Please update your filters to see sources.'
-            : 'Please add a source to get started.'}
+            : canCreate
+              ? 'Please add a source to get started.'
+              : 'No source has been added yet.'}
         </p>
       </div>
       {hasFilters ? (

@@ -13,9 +13,10 @@ const INVALID_CURRENT_PASSWORD_CODE = 'invalid_current_password';
 
 const CURRENT_PASSWORD_REFUSED = 'That is not your current password.';
 
+// Confirm checks only that it matches, so a length rule is reported once, on New.
 const newPasswords = z.object({
   new_password: newPasswordSchema,
-  confirm_password: newPasswordSchema,
+  confirm_password: z.string(),
 });
 const passwordsMatch = {
   check: (data: { new_password: string; confirm_password: string }) =>
