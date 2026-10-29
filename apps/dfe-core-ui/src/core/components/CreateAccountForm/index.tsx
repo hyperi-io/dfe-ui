@@ -1,4 +1,5 @@
 import { AccountGroupSelect } from '@/core/components/AccountGroupSelect';
+import { AccountOrgFormItem } from '@/core/components/AccountOrgFormItem';
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { TAccountCreateRequestBody } from '@/core/hooks/useCreateAccount/types';
@@ -20,6 +21,7 @@ const formSchema = z.object({
   email: z.email({ message: 'Valid email is required' }),
   phone: z.string().optional().nullable(),
   name: z.string().optional().nullable(),
+  org: z.string().optional().nullable(),
 });
 
 export type CreateAccountFormData = z.infer<typeof formSchema>;
@@ -30,6 +32,7 @@ const USERNAME_HELP =
 export const CreateAccountForm = ({
   onFinish,
   disabledFields,
+  hiddenFields,
   error,
   isPending,
   buttonLabel = 'Create Account',
@@ -50,6 +53,10 @@ export const CreateAccountForm = ({
   disabledFields?: {
     groups?: boolean;
   };
+  /** The setup wizard's first account is a dfe-admins administrator, bound to no organisation. */
+  hiddenFields?: {
+    org?: boolean;
+  };
 }) => {
   const [form] = Form.useForm<CreateAccountFormData>();
   const formValidation = useAntdZodResolver<CreateAccountFormData>(formSchema);
@@ -62,7 +69,7 @@ export const CreateAccountForm = ({
       email: values.email,
       phone: values.phone ?? '',
       name: values.name ?? values.username,
-      org: '',
+      org: values.org ?? '',
     });
   };
 
@@ -110,6 +117,8 @@ export const CreateAccountForm = ({
       <Form.Item name="groups" label="Groups" rules={[formValidation]}>
         <AccountGroupSelect disabled={disabledFields?.groups} />
       </Form.Item>
+
+      {!hiddenFields?.org && <AccountOrgFormItem />}
 
       {error && (
         <Form.Item>
