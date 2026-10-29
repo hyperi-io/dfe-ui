@@ -4,6 +4,8 @@ import { Tooltip } from '@/core/components/Tooltip';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle, IconLock } from '@repo/dfe-icons';
 import { AbstractTooltipProps } from 'antd/es/tooltip';
+import type { UI_DISPLAY_ACTIONS_TYPE } from './hooks/rbac.constants';
+import { useRbac } from './hooks/useRbac';
 import { RbacProtectedContext } from './RbacProtected';
 
 interface TooltipProps extends AbstractTooltipProps {
@@ -15,15 +17,22 @@ interface RestrictedProps {
   children: React.ReactNode;
   tooltip?: TooltipProps;
   className?: string;
+  /** Render nothing for a user holding none of these, so a page they cannot read shows no disabled controls. */
+  visibleTo?: UI_DISPLAY_ACTIONS_TYPE | UI_DISPLAY_ACTIONS_TYPE[];
 }
 export const Restricted = ({
   children,
   tooltip = { show: false },
   className,
+  visibleTo = [],
 }: RestrictedProps) => {
   const { isAuthorized, isLoading, isError } = useContext(RbacProtectedContext);
+  const visibility = useRbac({ action: visibleTo });
+  const hidden =
+    (!Array.isArray(visibleTo) || visibleTo.length > 0) &&
+    !visibility.isAuthorized;
 
-  if (isLoading || isError) return null;
+  if (isLoading || isError || hidden) return null;
 
   if (!isAuthorized && !tooltip) return children;
 
