@@ -56,15 +56,17 @@ if (!patchedCSS[RULE_FREE]) {
   patchedCSS[RULE_FREE] = true;
 }
 
-// The emptied CSS above also drops the one rule antd uses to hide an element by
-// class alone (a hidden Form.Item, a collapsed panel, a closed dropdown or
-// tooltip). Without it role queries and toBeVisible see those elements as
-// shown, so a test of "this field is hidden" passes or fails for the wrong
-// reason. One rule restores it, and getComputedStyle still has next to nothing
-// to match.
+// The emptied CSS above also drops the rules antd uses to hide an element by
+// class alone. Without them role queries and toBeVisible see a hidden
+// Form.Item or a collapsed tab as shown, so a test of "this field is hidden"
+// passes or fails for the wrong reason. These are the classes the suite
+// renders, listed by name so a Tailwind `overflow-hidden` is left alone.
 if (typeof document !== 'undefined') {
   const hiddenRules = document.createElement('style');
-  hiddenRules.textContent = '[class*="ant-"][class*="-hidden"]{display:none}';
+  hiddenRules.textContent = [
+    '.ant-form-item-hidden, .ant-tabs-content-hidden { display: none }',
+    '.ant-tabs-nav-operations-hidden, .ant-input-clear-icon-hidden { visibility: hidden }',
+  ].join('\n');
   document.head.appendChild(hiddenRules);
 }
 
