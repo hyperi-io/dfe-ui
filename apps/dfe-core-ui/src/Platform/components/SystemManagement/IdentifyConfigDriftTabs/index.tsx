@@ -6,6 +6,7 @@ import { Spin, Steps, StepsProps } from 'antd';
 import { useEffect, useState } from 'react';
 import { BuildDeployTab } from './BuildDeployTab';
 import { ConfigDriftTab } from './ConfigDriftTab';
+import { LiveApplyResult, TLiveApply } from './LiveApplyResult';
 
 type CurrentStep = 'config-drift' | 'build-deploy';
 
@@ -33,7 +34,7 @@ const formatNotificationCardTitleAndDescription = (step: CurrentStep) => {
       return {
         title: 'Config Drift Identified',
         description:
-          'Configuration drift has been identified for sources in your environment. Applying defaults only updates the configuration files and will not cause any database changes. You will need to deploy these changes separately.',
+          'Configuration drift has been identified for sources in your environment. Applying defaults pins them in each source and alters the deployed table where it can: TTL moves and missing header columns are added straight away. An engine change needs a table rebuild, and the result below says so.',
       };
   }
 };
@@ -60,6 +61,9 @@ export const IdentifyConfigDriftTabs = ({
     TBulkActionSourcesRequestBody['sources']
   >([]);
 
+  // Latest result per source, so a second Apply replaces what the first reported.
+  const [liveResults, setLiveResults] = useState<TLiveApply[]>([]);
+
   const [appliedSuccessMessage, setAppliedSuccessMessage] =
     useState<string>('');
 
@@ -75,6 +79,11 @@ export const IdentifyConfigDriftTabs = ({
 
     setAppliedSources(nextAppliedSources);
     setUnchangedSources(nextUnchangedSources);
+    const reported = new Set(sources.live.map((entry) => entry.source));
+    setLiveResults((previous) => [
+      ...previous.filter((entry) => !reported.has(entry.source)),
+      ...sources.live,
+    ]);
     const message = appliedDefaultsMessage(
       nextAppliedSources,
       nextUnchangedSources,
@@ -143,6 +152,7 @@ export const IdentifyConfigDriftTabs = ({
             )}
           />
 
+          {liveResults.length > 0 && <LiveApplyResult live={liveResults} />}
           {currentStep === 'config-drift' && (
             <ConfigDriftTab
               onSuccess={handleConfigDriftSuccess}
