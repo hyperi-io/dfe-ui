@@ -2771,12 +2771,15 @@ __metadata:
     "@repo/typescript-config": "npm:*"
     "@types/react": "npm:19.3.0"
     "@types/react-dom": "npm:19.3.0"
+    antd: "npm:^6.3.1"
+    clsx: "npm:^2.1.1"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
+    tailwindcss: "npm:^4"
     typescript: "npm:5.9.3"
     vite: "npm:^8.2.4"
   peerDependencies:
-    antd: ^5.22.0
+    antd: ^6.3.1
     clsx: ^2.1.1
     react: ^19.2.0
     react-dom: ^19.2.0
@@ -2791,7 +2794,7 @@ __metadata:
     "@repo/typescript-config": "npm:*"
     typescript: "npm:5.9.3"
   peerDependencies:
-    antd: ^5.22.0
+    antd: ^6.3.1
     clsx: ^2.1.1
     react: ^19.2.0
     react-dom: ^19.2.0
@@ -5684,6 +5687,7 @@ __metadata:
     "@vitest/ui": "npm:^4.1.12"
     ace-builds: "npm:^1.43.6"
     antd: "npm:^6.3.1"
+    clsx: "npm:^2.1.1"
     cronstrue: "npm:^3.27.0"
     dayjs: "npm:^1.11.20"
     dexie: "npm:^4.3.0"
