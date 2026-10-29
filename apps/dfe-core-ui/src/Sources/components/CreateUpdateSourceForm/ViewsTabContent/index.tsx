@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import {
   HIDDEN_STANDARD_OPTIONS,
+  SIGMA_STANDARD,
   STANDARD_OPTIONS,
   standardLabel,
 } from './constants';
@@ -127,6 +128,8 @@ export const ViewsTabContent = ({
             <ul className="flex flex-col gap-2">
               {fields.map(({ key, name, ...restField }) => {
                 const standard = watchViews?.[name]?.standard;
+                // The engine reads the logsource binding on Sigma views alone.
+                const isSigma = standard === SIGMA_STANDARD;
                 return (
                   <li
                     className={cn(
@@ -158,18 +161,22 @@ export const ViewsTabContent = ({
                     />
                     <Form.Item
                       {...restField}
+                      className={cn(!isSigma && 'col-span-2')}
                       name={[name, 'field_map']}
                       label="Field Map"
                       rules={[formValidation]}
                     >
                       <FieldMapSelectCreate
                         source_name={form.getFieldValue('source')}
+                        standard={standard}
                       />
                     </Form.Item>
+                    {/* Hidden rather than unmounted, so a stored value is saved back unchanged and the save cuts no new version. */}
                     <Form.Item
                       {...restField}
                       name={[name, 'taxonomy']}
                       label="Taxonomy"
+                      hidden={!isSigma}
                     >
                       <Input placeholder="Enter taxonomy" />
                     </Form.Item>
@@ -177,6 +184,7 @@ export const ViewsTabContent = ({
                       {...restField}
                       name={[name, 'category']}
                       label="Category"
+                      hidden={!isSigma}
                     >
                       <Input placeholder="Enter category" />
                     </Form.Item>
@@ -184,6 +192,7 @@ export const ViewsTabContent = ({
                       {...restField}
                       name={[name, 'service']}
                       label="Service"
+                      hidden={!isSigma}
                     >
                       <Input placeholder="Enter service" />
                     </Form.Item>

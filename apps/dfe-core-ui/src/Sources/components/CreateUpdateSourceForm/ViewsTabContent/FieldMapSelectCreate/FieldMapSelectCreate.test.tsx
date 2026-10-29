@@ -21,18 +21,32 @@ vi.mock('@/core/components/FieldMapSelect', async (importOriginal) => ({
   >()),
   FieldMapSelect: () => null,
 }));
-// Stands in for a successful create: the drawer hands back the map the engine stored.
+// Stands in for the drawer: it shows what it was opened with and hands back the map the engine stored.
 vi.mock('@/core/components/CreateFieldMapDrawer', () => ({
   CreateFieldMapDrawer: ({
+    title,
+    disabled,
     onSuccess,
+    initialValues,
+    disabledFields,
   }: {
-    onSuccess: (fieldMap: { standard: string; source: string | null }) => void;
+    title: string;
+    disabled?: boolean;
+    onSuccess?: (fieldMap: { standard: string; source: string | null }) => void;
+    initialValues?: { standard: string; source: string };
+    disabledFields?: { standard?: boolean; source?: boolean };
   }) => (
     <>
-      <button onClick={() => onSuccess({ standard: 'ecs', source: 'winlog' })}>
+      <button disabled={disabled}>{title}</button>
+      <output aria-label="Drawer preset">
+        {JSON.stringify({ initialValues, disabledFields })}
+      </output>
+      <button
+        onClick={() => onSuccess?.({ standard: 'ecs', source: 'winlog' })}
+      >
         Created for a source
       </button>
-      <button onClick={() => onSuccess({ standard: 'ecs', source: null })}>
+      <button onClick={() => onSuccess?.({ standard: 'ecs', source: null })}>
         Created as the default
       </button>
     </>
@@ -41,32 +55,83 @@ vi.mock('@/core/components/CreateFieldMapDrawer', () => ({
 
 const { wrapper } = buildTestWrapper().withTheme();
 
+const preset = () =>
+  JSON.parse(
+    screen.getByRole('status', { name: 'Drawer preset' }).textContent ?? '{}',
+  );
+
 describe('FieldMapSelectCreate', () => {
-  it('pins a map it creates as standard/source, the form the engine resolves', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(<FieldMapSelectCreate source_name="winlog" onChange={onChange} />, {
-      wrapper,
-    });
+  it.each([
+    {
+      source_name: 'winlog',
+      button: 'Created for a source',
+      pin: 'ecs/winlog',
+    },
+    { source_name: '', button: 'Created as the default', pin: 'ecs/_default' },
+  ])(
+    'pins a map it creates as $pin, the form the engine resolves',
+    async ({ source_name, button, pin }) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <FieldMapSelectCreate
+          source_name={source_name}
+          standard="ecs"
+          onChange={onChange}
+        />,
+        { wrapper },
+      );
 
-    await user.click(
-      screen.getByRole('button', { name: 'Created for a source' }),
-    );
+      await user.click(screen.getByRole('button', { name: button }));
 
-    expect(onChange).toHaveBeenCalledWith('ecs/winlog');
-  });
+      expect(onChange).toHaveBeenCalledWith(pin);
+    },
+  );
 
-  it('pins a default map as standard/_default', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(<FieldMapSelectCreate source_name="" onChange={onChange} />, {
-      wrapper,
-    });
+  it.each([
+    {
+      source_name: 'winlog',
+      expected: {
+        initialValues: { standard: 'cim', source: 'winlog' },
+        disabledFields: { standard: true, source: true },
+      },
+    },
+    {
+      source_name: '',
+      expected: {
+        initialValues: { standard: 'cim', source: '' },
+        disabledFields: { standard: true, source: false },
+      },
+    },
+  ])(
+    'opens the drawer on the view standard, locked, for source "$source_name"',
+    ({ source_name, expected }) => {
+      render(
+        <FieldMapSelectCreate source_name={source_name} standard="cim" />,
+        { wrapper },
+      );
 
-    await user.click(
-      screen.getByRole('button', { name: 'Created as the default' }),
-    );
+      expect(
+        screen.getByRole('button', { name: 'Create Field Map' }),
+      ).toBeEnabled();
+      expect(preset()).toEqual(expected);
+    },
+  );
 
-    expect(onChange).toHaveBeenCalledWith('ecs/_default');
-  });
+  it.each([undefined, ''])(
+    'offers no create until the view has a standard (%j)',
+    (standard) => {
+      render(
+        <FieldMapSelectCreate source_name="winlog" standard={standard} />,
+        {
+          wrapper,
+        },
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Create Field Map' }),
+      ).toBeDisabled();
+      expect(preset()).toEqual({});
+    },
+  );
 });

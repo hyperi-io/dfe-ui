@@ -5,9 +5,12 @@ export const STANDARD_OPTIONS = [
   { label: 'Open Cybersecurity Schema Framework', value: 'ocsf' },
 ] as const;
 
+/** The one standard whose view carries a taxonomy, category and service. */
+export const SIGMA_STANDARD = 'sigma';
+
 /** Standards the engine still accepts but a new view cannot pick. An existing view keeps its own. */
 export const HIDDEN_STANDARD_OPTIONS = [
-  { label: 'Sigma', value: 'sigma' },
+  { label: 'Sigma', value: SIGMA_STANDARD },
 ] as const;
 
 /** One view per standard the engine accepts, with no duplicates. */

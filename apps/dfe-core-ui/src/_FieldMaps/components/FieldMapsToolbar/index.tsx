@@ -1,21 +1,28 @@
 'use client';
 
+import { CreateFieldMapDrawer } from '@/core/components/CreateFieldMapDrawer';
 import { Toolbar } from '@/core/components/Toolbar';
+import {
+  ListFieldMapsProvider,
+  useListFieldMapsContext,
+} from '@/core/contexts/ListFieldMapsContext';
 import { cn } from '@/core/utils/style';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export const FieldMapsToolbar = () => {
-  const pathname = usePathname();
-  const routes = [
-    {
-      path: '/field-maps',
-      label: 'Field Maps',
-      disabled: false,
-    },
-  ];
+const routes = [
+  {
+    path: '/field-maps',
+    label: 'Field Maps',
+    disabled: false,
+  },
+];
 
+export const FieldMapsToolbarBase = () => {
+  const pathname = usePathname();
   const isSelected = (path: string) => pathname === path;
+
+  const { setSelectedFieldMap } = useListFieldMapsContext();
 
   return (
     <Toolbar>
@@ -37,6 +44,23 @@ export const FieldMapsToolbar = () => {
           </Link>
         ))}
       </nav>
+      <CreateFieldMapDrawer
+        title="Add Field Map"
+        onSuccess={({ standard, source }) => {
+          setSelectedFieldMap({
+            map_source: source ?? null,
+            map_standard: standard,
+          });
+        }}
+      />
     </Toolbar>
+  );
+};
+
+export const FieldMapsToolbar = () => {
+  return (
+    <ListFieldMapsProvider>
+      <FieldMapsToolbarBase />
+    </ListFieldMapsProvider>
   );
 };
