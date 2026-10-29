@@ -101,14 +101,23 @@ export const oidcFixture = (provider: string): OidcFixture | undefined => {
   return password ? { user: oidcFixtureUser(provider), password } : undefined;
 };
 
+export const SOURCES_LANDING = '/sources';
+
+/** Where a reader who cannot change sources lands while HyperDX is configured. */
+export const OBSERVE_LANDING = '/observe/search';
+
 /**
- * The console landed on its sources page.
+ * The console landed on *path*.
  *
  * /sources redirects to whichever source the console selects by default, so the
  * landing is asserted by path and the query left to the app.
  */
+export const expectLanding = (page: Page, path: string) =>
+  expect(page).toHaveURL((url) => url.pathname === path);
+
+/** The console landed on its sources page. */
 export const expectSourcesLanding = (page: Page) =>
-  expect(page).toHaveURL((url) => url.pathname === '/sources');
+  expectLanding(page, SOURCES_LANDING);
 
 /**
  * The session ended and the console offered to return where it was.
@@ -116,14 +125,18 @@ export const expectSourcesLanding = (page: Page) =>
  * The callback carries whichever sources query the redirect produced, so it is
  * matched by prefix rather than by an encoded literal.
  */
-export const expectLoggedOut = (page: Page) =>
+export const expectLoggedOut = (page: Page, from = SOURCES_LANDING) =>
   expect(page).toHaveURL(
     (url) =>
       url.pathname === '/login' &&
-      (url.searchParams.get('callbackUrl') ?? '').startsWith('/sources'),
+      (url.searchParams.get('callbackUrl') ?? '').startsWith(from),
   );
 
-export const loginAs = async (page: Page, user: string) => {
+export const loginAs = async (
+  page: Page,
+  user: string,
+  landing = SOURCES_LANDING,
+) => {
   await page.goto(`${BASE_URL}/login`);
 
   await textbox(page, 'Username').fill(user);
@@ -131,11 +144,10 @@ export const loginAs = async (page: Page, user: string) => {
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   // Either the console lands, or the account is on an issued password and must change it first.
   await expect(page).toHaveURL(
-    (url) =>
-      url.pathname === '/sources' || url.pathname === CHANGE_PASSWORD_PATH,
+    (url) => url.pathname === landing || url.pathname === CHANGE_PASSWORD_PATH,
   );
   if (new URL(page.url()).pathname === CHANGE_PASSWORD_PATH) {
     await completeForcedPasswordChange(page, user);
   }
-  await expectSourcesLanding(page);
+  await expectLanding(page, landing);
 };

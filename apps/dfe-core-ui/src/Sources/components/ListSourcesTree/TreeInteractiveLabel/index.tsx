@@ -18,16 +18,16 @@ export const TreeInteractiveLabel = ({
   actions,
 }: TreeInteractiveLabelProps) => {
   return (
-    <div className="relative flex items-center w-full max-w-full min-w-0 group">
+    <div className="flex items-center w-full max-w-full min-w-0 gap-x-1 group">
       <Typography.Text
         onClick={onClick}
         className={cn(
-          'mb-0! flex w-full min-w-0 max-w-full flex-start p-1 gap-x-1 overflow-hidden cursor-pointer',
+          'mb-0! flex flex-1 min-w-0 flex-start p-1 gap-x-1 overflow-hidden cursor-pointer',
           selected && 'text-tertiary! dark:text-dark-foreground! font-semibold',
         )}
       >
         <span className="mt-1">{icon}</span>
-        <span className="flex items-center flex-1 min-w-0 overflow-hidden gap-x-1">
+        <span className="flex items-center flex-1 min-w-16 overflow-hidden gap-x-1">
           {typeof title === 'string' ? (
             <span className="min-w-0 truncate">{title}</span>
           ) : (
@@ -36,30 +36,15 @@ export const TreeInteractiveLabel = ({
         </span>
       </Typography.Text>
 
-      {hoverActions || actions ? (
-        <div
-          className={cn(
-            //Layout
-            'flex items-center gap-x-1',
-            // Position
-            'absolute  top-1/2 right-0 z-10 -translate-y-1/2',
-          )}
-        >
-          {hoverActions && (
-            <div
-              className={cn(
-                //Layout
-                'flex items-center gap-x-1',
-                //Visibility - Only show actions when hovering or focusing on the label
-                'pointer-events-none opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100',
-              )}
-            >
-              {hoverActions}
-            </div>
-          )}
-          {actions && <>{actions}</>}
+      {/* Beside the label, never over it, so a click on the name always selects. */}
+      {hoverActions && (
+        <div className="flex shrink-0 items-center gap-x-1 w-0 overflow-hidden group-hover:w-auto group-hover:overflow-visible group-focus-within:w-auto group-focus-within:overflow-visible">
+          {hoverActions}
         </div>
-      ) : null}
+      )}
+      {actions && (
+        <div className="flex shrink-0 items-center gap-x-1">{actions}</div>
+      )}
     </div>
   );
 };

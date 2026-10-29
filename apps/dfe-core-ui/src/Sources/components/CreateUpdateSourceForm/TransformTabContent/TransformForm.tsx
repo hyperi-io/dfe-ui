@@ -3,6 +3,10 @@ import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { FormRule, Input, Select } from 'antd';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
 import { getTransformEngines } from './TransformTabContent.helpers';
+import {
+  TransformVariantFormItem,
+  useEngineOffersVariants,
+} from './TransformVariantSelect';
 
 export const TransformForm = ({
   formValidation,
@@ -12,6 +16,8 @@ export const TransformForm = ({
   const { data: apps, isLoading } = useFetchApps();
   const engines = getTransformEngines(apps);
   const hasEngines = engines.length > 0;
+  const engine = Form.useWatch<string | undefined>(['transform', 'engine']);
+  const { offersVariants, isUnknown } = useEngineOffersVariants(engine);
 
   return (
     <>
@@ -45,17 +51,21 @@ export const TransformForm = ({
           <Input placeholder="Enter config file" allowClear />
         </Form.Item>
       </div>
-      <Form.Item
-        name={['transform', 'files']}
-        label="Files"
-        rules={[formValidation]}
-      >
-        <Select
-          placeholder="Select files"
-          mode="multiple"
-          options={[]}
-          allowClear
+      {engine && isUnknown && (
+        <Form.Item name={['transform', 'variant']} hidden>
+          <input type="hidden" />
+        </Form.Item>
+      )}
+      {engine && !isUnknown && offersVariants && (
+        <TransformVariantFormItem
+          name={['transform', 'variant']}
+          engine={engine}
+          rules={[formValidation]}
         />
+      )}
+      {/* No picker, since the Processing tab links files, but registered so an edit sends back the stored ones. */}
+      <Form.Item name={['transform', 'files']} hidden>
+        <input type="hidden" />
       </Form.Item>
       <EnvKeyValueBuilder formValidation={formValidation} />
     </>

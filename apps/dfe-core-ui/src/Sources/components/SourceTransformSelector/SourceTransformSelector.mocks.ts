@@ -47,6 +47,13 @@ export const TRANSFORM_APPS: TAppCatalogueEntry[] = [
   transformApp({ engine: 'elastic', instances: [], offered: false }),
 ];
 
+/** The same apps with elastic offered, so a source can move onto it. */
+export const TRANSFORM_APPS_WITH_ELASTIC: TAppCatalogueEntry[] = [
+  transformApp({ engine: 'vrl', instances: ['syslog'] }),
+  transformApp({ engine: 'vector', instances: [] }),
+  transformApp({ engine: 'elastic', instances: [] }),
+];
+
 export const SYSLOG_ON_VRL: TSourceVersionDetail = {
   source: 'syslog',
   resource_type: 'custom',
@@ -86,4 +93,5 @@ export const server = setupServer(
   API_CONFIG_MOCKS.apps.default.get.success({
     mockedResponse: TRANSFORM_APPS,
   }),
+  API_CONFIG_MOCKS.sources.catalogue.get.success(),
 );

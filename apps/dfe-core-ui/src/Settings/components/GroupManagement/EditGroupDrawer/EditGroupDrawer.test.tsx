@@ -174,8 +174,58 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
     );
     expect(onDetail).toHaveBeenCalled();
     expect(screen.getByLabelText('Source ID')).toHaveValue('dfe-viewers');
+    expect(
+      await screen.findByText('The saved link changed since this form opened'),
+    ).toBeInTheDocument();
 
     expect(await submitAndReadBody(user)).toEqual(UNCHANGED_BODY);
+  });
+
+  test('a moved link can be loaded into the form, and then saves as unchanged', async () => {
+    const movedGroup = {
+      ...LINKED_GROUP,
+      source_id: 'dfe-viewers-moved',
+      source_provider: 'entra',
+    };
+    server.use(http.get(groupUrl, () => HttpResponse.json(movedGroup)));
+    const user = userEvent.setup();
+    render(<EditGroupDrawer group_name={LINKED_GROUP.name} />, {
+      wrapper,
+    });
+    testWrapper.queryClient?.setQueryData(
+      QUERY_KEYS.groups.group({ name: LINKED_GROUP.name }),
+      LINKED_GROUP,
+    );
+    await user.click(
+      await screen.findByRole(
+        'button',
+        { name: /Edit Group/ },
+        { timeout: 15_000 },
+      ),
+    );
+
+    await user.click(
+      await screen.findByRole(
+        'button',
+        { name: 'Load saved link' },
+        { timeout: 15_000 },
+      ),
+    );
+
+    expect(screen.getByLabelText('Source ID')).toHaveValue('dfe-viewers-moved');
+    expect(screen.getByLabelText('Source Provider')).toHaveValue('entra');
+    expect(
+      screen.queryByText('The saved link changed since this form opened'),
+    ).not.toBeInTheDocument();
+    expect(await submitAndReadBody(user)).toEqual(UNCHANGED_BODY);
+  });
+
+  test('an unmoved link shows no notice', async () => {
+    await openEditDrawer();
+
+    expect(
+      screen.queryByText('The saved link changed since this form opened'),
+    ).not.toBeInTheDocument();
   });
 
   test('a refused save shows the engine reason until the drawer is closed', async () => {

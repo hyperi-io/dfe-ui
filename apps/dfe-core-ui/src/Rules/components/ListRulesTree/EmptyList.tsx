@@ -1,5 +1,6 @@
 import { CreateRuleDrawer } from '@/Rules/components/CreateRuleDrawer';
 import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfiniteFilteredRules/types';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
@@ -15,6 +16,9 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredRulesProps;
   className?: string;
 }) => {
+  const { isAuthorized: canCreate } = RbacProtected.useRbac({
+    action: RbacProtected.rbacActions.rule_write,
+  });
   return (
     <div
       className={cn(
@@ -30,7 +34,9 @@ export const EmptyList = ({
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
           {hasFilters
             ? 'Please update your filters to see rules.'
-            : 'Create a rule to start building hunts from saved searches.'}
+            : canCreate
+              ? 'Create a rule to start building hunts from saved searches.'
+              : 'No rule has been added yet.'}
         </p>
       </div>
       {hasFilters ? (

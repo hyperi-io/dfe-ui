@@ -61,6 +61,7 @@ export const CreateHuntDrawer = ({
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
+          visibleTo={RbacProtected.rbacActions.hunt_read}
           tooltip={{
             show: true,
             placement: 'bottom',
