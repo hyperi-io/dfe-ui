@@ -24,7 +24,11 @@ export const Helm = () => {
             </>
           )}
           {errorHelmFiles && (
-            <NotificationCard type="error" title="Error fetching helm files" />
+            <NotificationCard
+              type="error"
+              title="Could not list the helm files"
+              description={errorHelmFiles.message}
+            />
           )}
           {!isLoadingHelmFiles &&
             !errorHelmFiles &&
