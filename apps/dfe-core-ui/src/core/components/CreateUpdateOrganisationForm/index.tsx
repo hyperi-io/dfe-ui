@@ -1,6 +1,8 @@
 import { ApiErrorNotification } from '@/core/components/ApiErrorNotification';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { useFetchInfiniteFilteredHunts } from '@/core/hooks/useFetchInfiniteFilteredHunts';
+import { useFetchInfiniteFilteredOrganisations } from '@/core/hooks/useFetchInfiniteFilteredOrganisations';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { ORG_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { Button, Input, Select } from 'antd';
@@ -28,6 +30,33 @@ const formSchema = z.object({
 
 export type CreateUpdateOrganisationFormData = z.infer<typeof formSchema>;
 
+/** One hunt holding the IDs, named by its and its organisation's display names once the console can list them. */
+const HeldOrgIdsItem = ({ held }: { held: HeldOrgIds }) => {
+  const {
+    data: { items: hunts },
+  } = useFetchInfiniteFilteredHunts({ search: held.hunt });
+  const {
+    data: { items: orgs },
+  } = useFetchInfiniteFilteredOrganisations({ search: held.org });
+  const hunt =
+    hunts.find((item) => item.name === held.hunt)?.display_name || held.hunt;
+  const org =
+    orgs.find((item) => item.name === held.org)?.display_name || held.org;
+
+  return (
+    <li className="text-sm">
+      <Link
+        className="underline text-inherit!"
+        href={`/hunts?name=${encodeURIComponent(held.hunt)}`}
+      >
+        {hunt}
+      </Link>{' '}
+      reads {held.orgIds.join(', ')} for {org}
+      {held.branch && ` once review branch ${held.branch} merges`}
+    </li>
+  );
+};
+
 const HeldOrgIdsNotification = ({ held }: { held: HeldOrgIds[] }) => {
   const fixes = [
     held.some((h) => !h.branch) && 'edit those hunts',
@@ -42,16 +71,7 @@ const HeldOrgIdsNotification = ({ held }: { held: HeldOrgIds[] }) => {
         <>
           <ul className="list-disc pl-4">
             {held.map((h) => (
-              <li key={`${h.hunt}-${h.branch}`} className="text-sm">
-                <Link
-                  className="underline text-inherit!"
-                  href={`/hunts?name=${encodeURIComponent(h.hunt)}`}
-                >
-                  {h.hunt}
-                </Link>{' '}
-                reads {h.orgIds.join(', ')} for {h.org}
-                {h.branch && ` once review branch ${h.branch} merges`}
-              </li>
+              <HeldOrgIdsItem key={`${h.hunt}-${h.branch}`} held={h} />
             ))}
           </ul>
           <p className="text-sm">

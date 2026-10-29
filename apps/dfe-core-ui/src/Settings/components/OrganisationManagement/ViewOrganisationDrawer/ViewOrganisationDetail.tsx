@@ -70,7 +70,7 @@ export const ViewOrganisationDetail = ({
         </Tooltip>
       </div>
       <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-1">
-        <dt className={dataListTermStyle}>Organisation ID:</dt>
+        <dt className={dataListTermStyle}>Organisation name:</dt>
         <dd>{org_name}</dd>
         <dt className={dataListTermStyle}>Enabled:</dt>
         <dd className="flex items-center text-lg">

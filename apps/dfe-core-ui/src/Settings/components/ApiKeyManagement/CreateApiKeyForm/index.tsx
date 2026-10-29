@@ -1,3 +1,4 @@
+import { AccountOrgFormItem } from '@/core/components/AccountOrgFormItem';
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
 import { NotificationCard } from '@/core/components/NotificationCard';
@@ -46,6 +47,7 @@ const createApiKeyFormSchema = z.object({
     .string({ message: 'Description is required' })
     .min(1, { message: 'Description is required' }),
   groups: z.array(z.string()).optional(),
+  org: z.string().optional().nullable(),
   expires_at: z.preprocess(
     expiryAtEndOfSelectedDay,
     z
@@ -99,7 +101,7 @@ export const CreateApiKeyForm = ({
   const handleOnFinish = (values: CreateApiKeyFormSchema) => {
     generateApiKey({
       ...values,
-      org: '',
+      org: values.org ?? '',
       expires_at: values.expires_at
         ? dayjs(values.expires_at).toISOString()
         : null,
@@ -163,6 +165,8 @@ export const CreateApiKeyForm = ({
           <Form.Item name="groups" label="Groups" rules={[formValidation]}>
             <GroupRoleSelect />
           </Form.Item>
+
+          <AccountOrgFormItem />
 
           <Form.Item name="expires_at" label="Expires" rules={[formValidation]}>
             <DatePicker

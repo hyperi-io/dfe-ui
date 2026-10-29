@@ -59,6 +59,7 @@ export const ConfigureLocalUser = ({ goNext }: { goNext: () => void }) => {
           name: '',
         }}
         disabledFields={{ groups: true }}
+        hiddenFields={{ org: true }}
       />
 
       {isLoginPending && (

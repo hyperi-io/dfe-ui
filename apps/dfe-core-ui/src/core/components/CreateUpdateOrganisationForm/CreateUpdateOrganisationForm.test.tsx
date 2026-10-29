@@ -1,4 +1,5 @@
 import { ApiError } from '@/core/config/api/client';
+import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import {
   expectNameRule,
@@ -177,6 +178,118 @@ describe('CreateUpdateOrganisationForm refusals', () => {
     expect(
       screen.queryByText(/cannot take a tenant id/),
     ).not.toBeInTheDocument();
+  });
+
+  const listed = <T,>(items: T[]) => ({
+    items,
+    total: items.length,
+    page: 1,
+    per_page: 10,
+    total_pages: 1,
+    next_page: null,
+    prev_page: null,
+  });
+  const windowsHunt = {
+    name: 'windows',
+    display_name: 'Windows logons',
+    source_table: 's',
+    target_table: 't',
+    customer: '',
+    cron: '',
+    rules: [],
+    running: false,
+    too_aggressive: false,
+    run_requested: false,
+  };
+  const oldOrg = {
+    name: 'oldco',
+    display_name: 'Old Co',
+    org_ids: ['acme-1'],
+    enabled: true,
+    created_at: '',
+    updated_at: '',
+  };
+
+  test.each([
+    {
+      name: 'by display name once both are listed',
+      handlers: [
+        API_CONFIG_MOCKS.hunts.default.get.success({
+          mockedResponse: listed([windowsHunt]),
+        }),
+        API_CONFIG_MOCKS.orgs.default.get.success({
+          mockedResponse: listed([oldOrg]),
+        }),
+      ],
+      link: 'Windows logons',
+      line: 'Windows logons reads acme-1 for Old Co',
+    },
+    {
+      name: 'by the stored names when neither is listed',
+      handlers: [
+        API_CONFIG_MOCKS.hunts.default.get.success({
+          mockedResponse: listed([]),
+        }),
+        API_CONFIG_MOCKS.orgs.default.get.success({
+          mockedResponse: listed([]),
+        }),
+      ],
+      link: 'windows',
+      line: 'windows reads acme-1 for oldco',
+    },
+    {
+      name: 'by the stored names when the lists are refused',
+      handlers: [
+        API_CONFIG_MOCKS.hunts.default.get.error({ status: 403 }),
+        API_CONFIG_MOCKS.orgs.default.get.error({ status: 403 }),
+      ],
+      link: 'windows',
+      line: 'windows reads acme-1 for oldco',
+    },
+    {
+      name: 'by the stored name for a listed hunt with no display name',
+      handlers: [
+        API_CONFIG_MOCKS.hunts.default.get.success({
+          mockedResponse: listed([{ ...windowsHunt, display_name: '' }]),
+        }),
+        API_CONFIG_MOCKS.orgs.default.get.success({
+          mockedResponse: listed([oldOrg]),
+        }),
+      ],
+      link: 'windows',
+      line: 'windows reads acme-1 for Old Co',
+    },
+  ])(
+    'names the hunt and organisation $name',
+    async ({ handlers, link, line }) => {
+      server.use(...handlers);
+      renderForm(
+        heldRefusal([
+          {
+            hunt: 'windows',
+            org: 'oldco',
+            tenant_ids: ['acme-1'],
+            branch: null,
+          },
+        ]),
+      );
+
+      const hunt = await screen.findByRole('link', { name: link });
+      expect(hunt).toHaveAttribute('href', '/hunts?name=windows');
+      await waitFor(() => expect(hunt.closest('li')).toHaveTextContent(line));
+    },
+  );
+
+  test('announces the refusal to a screen reader', async () => {
+    renderForm(
+      heldRefusal([
+        { hunt: 'windows', org: 'oldco', tenant_ids: ['acme-1'], branch: null },
+      ]),
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Hunts still read these organisation IDs for another organisation',
+    );
   });
 
   test('says when the IDs come from a review not yet merged', async () => {
