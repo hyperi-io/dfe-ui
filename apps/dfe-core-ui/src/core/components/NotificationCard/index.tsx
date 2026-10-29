@@ -61,9 +61,30 @@ export const NotificationCard = ({
     ),
   };
 
+  // The subtle variant quiets the border and fill. Fading the whole card put
+  // its text at 2.7:1, under the 4.5:1 AA floor.
+  const subtleType = {
+    default: cn(
+      'border-foreground/20 bg-foreground/5 dark:border-dark-foreground/20 dark:bg-dark-foreground/5',
+    ),
+    warning: cn(
+      'border-warning/20 bg-warning/5 dark:border-dark-warning/15 dark:bg-dark-warning/15',
+    ),
+    error: cn(
+      'border-error/20 bg-error/5 dark:border-dark-error/15 dark:bg-dark-error/15',
+    ),
+    info: cn(
+      'border-info/20 bg-info/5 dark:border-dark-info/15 dark:bg-dark-info/15',
+    ),
+    action: cn('border-purple-500/30 bg-purple-500/5'),
+    success: cn(
+      'border-success/30 bg-success/5 dark:border-dark-success/15 dark:bg-dark-success/15',
+    ),
+  };
+
   const displayVariant = {
     default: cn(''),
-    subtle: cn('opacity-60'),
+    subtle: subtleType[type],
     ghost: cn(
       // Card Border & Background
       'bg-unset dark:bg-unset',
