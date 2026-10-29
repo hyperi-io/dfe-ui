@@ -2,6 +2,7 @@ import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { useAuthStore } from '@/core/stores/authStore';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   afterAll,
   afterEach,
@@ -186,6 +187,37 @@ describe('RbacProtected', () => {
           expect(screen.queryByText(text)).not.toBeInTheDocument();
         }
       }
+    });
+  });
+
+  describe('the reason a control is restricted', () => {
+    it('is a named button that shows the reason on keyboard focus', async () => {
+      const user = userEvent.setup();
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: { ...ADMIN_MOCKED_RESPONSE, permissions: [] },
+        }),
+      );
+      render(
+        <RbacProtected action={UI_DISPLAY_ACTIONS.hunt_write}>
+          <RbacProtected.Restricted tooltip={{ show: true }}>
+            <button type="button" disabled>
+              Add Hunt
+            </button>
+          </RbacProtected.Restricted>
+        </RbacProtected>,
+        { wrapper },
+      );
+
+      const reason = await screen.findByRole('button', {
+        name: 'Insufficient role permissions',
+      });
+      await user.tab();
+
+      expect(reason).toHaveFocus();
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Insufficient role permissions',
+      );
     });
   });
 });
