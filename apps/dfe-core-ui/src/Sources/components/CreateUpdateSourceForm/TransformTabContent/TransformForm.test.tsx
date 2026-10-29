@@ -256,4 +256,43 @@ describe('TransformForm', () => {
       expect(screen.queryByLabelText(/^Variant/)).not.toBeInTheDocument();
     });
   });
+
+  describe('files', () => {
+    it('offers no Files picker, since the Processing tab links files', async () => {
+      render(<Harness />, { wrapper });
+
+      await screen.findByLabelText(/^Transform Engine/);
+      expect(screen.queryByLabelText(/^Files/)).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['stored files', ['geo.mmdb', 'lookup.csv']],
+      ['no files', []],
+    ])('sends back %s on save', async (_case, files) => {
+      const onFinish = vi.fn();
+      const user = userEvent.setup();
+      const Stored = () => {
+        const [form] = Form.useForm<CreateUpdateSourceFormData>();
+        return (
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            initialValues={{ transform: { engine: 'vrl', files } }}
+          >
+            <TransformForm formValidation={acceptAll} />
+            <Button htmlType="submit">Submit</Button>
+          </Form>
+        );
+      };
+      render(<Stored />, { wrapper });
+
+      await screen.findByLabelText(/^Transform Engine/);
+      await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+      const values = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+      expect(values.transform?.files).toEqual(files);
+    });
+  });
 });
