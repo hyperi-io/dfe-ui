@@ -19,6 +19,8 @@ const semantic = {
   success: brand.success,
   warning: '#faad14',
   error: '#ff4d4f',
+  // 5.57:1 on white: error text on a light surface meets WCAG AA (4.5:1).
+  errorOnLight: '#cf1322',
   info: brand.tertiary,
 } as const;
 
