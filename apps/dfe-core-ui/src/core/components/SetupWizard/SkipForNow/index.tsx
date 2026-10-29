@@ -10,11 +10,7 @@ export const SkipForNow = ({
 }) => {
   return (
     <Tooltip destroyOnHidden title={title}>
-      <Button
-        type="text"
-        className="text-dark-foreground-muted text-light"
-        onClick={goNext}
-      >
+      <Button type="default" onClick={goNext}>
         Skip for now
       </Button>
     </Tooltip>
