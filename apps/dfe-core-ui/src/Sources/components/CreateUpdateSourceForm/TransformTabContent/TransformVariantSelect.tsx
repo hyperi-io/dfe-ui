@@ -1,6 +1,12 @@
+import { Form } from '@/core/components/Form';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useFetchInfiniteSourceCatalogues } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues';
-import { Select, type SelectProps } from 'antd';
+import {
+  Select,
+  type FormItemProps,
+  type FormRule,
+  type SelectProps,
+} from 'antd';
 import { useMemo, useState } from 'react';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -39,7 +45,7 @@ export const variantOptions = (
 
 /** Whether the catalogue offers compiled-in programs for *engine*, so a source on it must name one. */
 export const useEngineOffersVariants = (engine?: string | null) => {
-  const { data, isLoading, isError } = useFetchInfiniteSourceCatalogues({
+  const { data, isLoading, isError, error } = useFetchInfiniteSourceCatalogues({
     per_page: PAGE_SIZE,
   });
   return {
@@ -47,8 +53,29 @@ export const useEngineOffersVariants = (engine?: string | null) => {
       !!engine && data.items.some((entry) => entry.engine === engine),
     // Unknown until the catalogue answers, so a stored variant must survive the wait.
     isUnknown: isLoading || isError,
+    catalogueError: error,
   };
 };
+
+/** The required Variant field, the same wherever a source picks its transform engine. */
+export const TransformVariantFormItem = ({
+  name,
+  engine,
+  rules = [],
+}: {
+  name: FormItemProps['name'];
+  engine: string;
+  rules?: FormRule[];
+}) => (
+  <Form.Item
+    name={name}
+    label="Variant"
+    extra="The compiled-in program this transform runs. Without one it has nothing to run."
+    rules={[...rules, { required: true, message: 'Variant is required' }]}
+  >
+    <TransformVariantSelect engine={engine} />
+  </Form.Item>
+);
 
 /** The compiled-in program a transform runs, searched across the source catalogue. */
 export const TransformVariantSelect = ({
