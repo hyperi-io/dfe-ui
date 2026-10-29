@@ -152,6 +152,9 @@ export const IdentifyConfigDriftTabs = ({
             )}
           />
 
+          {appliedSuccessMessage && (
+            <NotificationCard title={appliedSuccessMessage} type="success" />
+          )}
           {liveResults.length > 0 && <LiveApplyResult live={liveResults} />}
           {currentStep === 'config-drift' && (
             <ConfigDriftTab
@@ -163,7 +166,6 @@ export const IdentifyConfigDriftTabs = ({
             <BuildDeployTab
               appliedSources={appliedSources}
               onSuccess={onSuccess}
-              appliedSuccessMessage={appliedSuccessMessage}
             />
           )}
         </div>

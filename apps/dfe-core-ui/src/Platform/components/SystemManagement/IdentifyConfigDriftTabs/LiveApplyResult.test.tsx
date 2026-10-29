@@ -28,8 +28,19 @@ describe('LiveApplyResult', () => {
     [
       'an altered table',
       entry({ ttl: '90 -> 91', columns_added: ['_org_id', 'host'] }),
-      ['Altered', 'dfe.firewall', '90 -> 91', '_org_id, host'],
+      ['Altered', 'dfe.firewall', '90 to 91 days', '_org_id, host'],
     ],
+    [
+      'a TTL added where the table had none',
+      entry({ ttl: 'none -> 30' }),
+      ['none to 30 days'],
+    ],
+    [
+      'a TTL moved from an interval',
+      entry({ ttl: '6 hour -> 90' }),
+      ['6 hour to 90 days'],
+    ],
+    ['a TTL removed', entry({ ttl: '90 -> none' }), ['90 days to none']],
     [
       'an unchanged table',
       entry({ status: 'unchanged' }),
@@ -63,6 +74,8 @@ describe('LiveApplyResult', () => {
     for (const text of texts) {
       expect(row.getAllByText(text).length).toBeGreaterThan(0);
     }
+    // The arrow is an icon, never ASCII punctuation in the cell.
+    expect(row.queryByText(/->/)).toBeNull();
   });
 
   test('lists one row per source in the order given', () => {

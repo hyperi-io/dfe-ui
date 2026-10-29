@@ -1,6 +1,7 @@
 import { Table } from '@/core/components/Table';
 import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults/types';
 import { Tag } from 'antd';
+import { ValueMove } from './ValueMove';
 
 export type TLiveApply = TApplyDefaultsResponse['live'][number];
 
@@ -23,12 +24,35 @@ const None = () => (
   <span className="text-foreground/50 dark:text-dark-foreground/50">None</span>
 );
 
+const WHOLE_DAYS = /^\d+$/;
+
+/** The engine reports a TTL move as `<live> -> <wanted>`, each whole days, `none`, or an interval such as `6 hour`. */
+const TtlMove = ({ ttl }: { ttl: string }) => {
+  const [from, to] = ttl.split(' -> ');
+  const days = (value: string) =>
+    WHOLE_DAYS.test(value) ? `${value} days` : value;
+  if (to === undefined) {
+    return days(from);
+  }
+  const shownFrom =
+    WHOLE_DAYS.test(from) && WHOLE_DAYS.test(to) ? from : days(from);
+  return (
+    <ValueMove
+      from={shownFrom}
+      to={days(to)}
+      label={`${shownFrom} to ${days(to)}`}
+    />
+  );
+};
+
 /** What each Apply did to the source's deployed table, as the engine reports it. */
 export const LiveApplyResult = ({ live }: { live: TLiveApply[] }) => (
   <section aria-label="What reached each table" className="flex flex-col gap-2">
     <h3 className="text-sm font-medium">What reached each table</h3>
+    {/* The reasons are prose, so they wrap rather than scroll the drawer sideways. */}
     <Table<TLiveApply>
       rowKey="source"
+      scroll={{}}
       dataSource={live}
       columns={[
         { title: 'Source', dataIndex: 'source' },
@@ -47,7 +71,8 @@ export const LiveApplyResult = ({ live }: { live: TLiveApply[] }) => (
         {
           title: 'TTL',
           dataIndex: 'ttl',
-          render: (ttl: TLiveApply['ttl']) => ttl ?? <None />,
+          render: (ttl: TLiveApply['ttl']) =>
+            ttl ? <TtlMove ttl={ttl} /> : <None />,
         },
         {
           title: 'Columns added',
