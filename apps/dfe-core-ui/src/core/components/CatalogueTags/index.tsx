@@ -1,8 +1,13 @@
 import { CollapsibleSearchInput } from '@/core/components/CollapsibleSearchInput';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchInfiniteFilteredSourceCatalogueTags } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags';
-import { Button, Spin } from 'antd';
-import { useState } from 'react';
+import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
+import { Spin } from 'antd';
+import { useRef, useState } from 'react';
+import { PaginatedTagsList } from './PaginatedTagsList';
+
+const TAGS_PER_REQUEST = 50;
+const NO_TAGS: TInfiniteFilteredSourceCatalogueTagsResponse['items'] = [];
 
 export const CatalogueTags = ({
   onChange,
@@ -11,58 +16,65 @@ export const CatalogueTags = ({
 }) => {
   const [search, setSearch] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const { data, isLoading, error } =
-    useFetchInfiniteFilteredSourceCatalogueTags({ name: search });
+
+  const pendingNext = useRef(false);
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useFetchInfiniteFilteredSourceCatalogueTags({
+    name: search,
+    per_page: TAGS_PER_REQUEST,
+  });
+
+  const items = data?.items ?? NO_TAGS;
 
   const handleTagClick = (tagId: string) => {
-    if (selectedTags.has(tagId)) {
-      setSelectedTags(new Set([...selectedTags].filter((id) => id !== tagId)));
-    } else {
-      setSelectedTags(new Set(selectedTags.add(tagId)));
-    }
-    onChange?.(Array.from(selectedTags));
+    const next = new Set(selectedTags);
+    if (next.has(tagId)) next.delete(tagId);
+    else next.add(tagId);
+    setSelectedTags(next);
+    onChange?.(Array.from(next));
   };
 
   return (
-    <div className="flex h-[32px] items-center gap-2 w-full">
+    <div className="flex min-h-[32px] w-full min-w-0 items-center gap-2 overflow-x-hidden">
       <CollapsibleSearchInput
         placeholder="Search tags"
         className="w-96"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(event) => {
+          pendingNext.current = false;
+          setSearch(event.target.value);
+        }}
         allowClear
       />
 
-      <div className="flex gap-2 w-full overflow-x-auto">
-        {isLoading && (
-          <span className="flex items-center gap-2 w-full justify-center">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {isLoading && items.length === 0 ? (
+          <span className="flex w-full items-center justify-center gap-2">
             <Spin /> <span className="sr-only">Loading...</span>
           </span>
-        )}
-        {error && (
+        ) : error ? (
           <NotificationCard
             type="error"
             title="Error loading tags"
             description={error.message}
           />
-        )}
-        {data?.items.length > 0 ? (
-          data?.items.map((item) => (
-            <Button
-              key={item.id}
-              onClick={() => handleTagClick(item.id)}
-              size="small"
-              className={
-                selectedTags.has(item.id)
-                  ? 'bg-tertiary/50 text-foreground-muted dark:text-dark-foreground'
-                  : ''
-              }
-            >
-              {item.name}
-            </Button>
-          ))
-        ) : (
+        ) : items.length === 0 ? (
           <NotificationCard title="No tags found" />
+        ) : (
+          <PaginatedTagsList
+            items={items}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            onChange={handleTagClick}
+            selectedTags={selectedTags}
+          />
         )}
       </div>
     </div>
