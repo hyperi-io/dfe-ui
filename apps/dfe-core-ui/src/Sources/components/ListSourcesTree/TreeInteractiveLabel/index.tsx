@@ -27,7 +27,7 @@ export const TreeInteractiveLabel = ({
         )}
       >
         <span className="mt-1">{icon}</span>
-        <span className="flex items-center flex-1 min-w-0 overflow-hidden gap-x-1">
+        <span className="flex items-center flex-1 min-w-16 overflow-hidden gap-x-1">
           {typeof title === 'string' ? (
             <span className="min-w-0 truncate">{title}</span>
           ) : (

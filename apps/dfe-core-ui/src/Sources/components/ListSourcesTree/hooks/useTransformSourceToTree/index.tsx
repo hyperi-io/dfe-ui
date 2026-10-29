@@ -57,6 +57,9 @@ const originTooltipTag = (origin: string) => {
 export const folderTreeKey = (pathSegments: string[]) =>
   `dir:${pathSegments.join('.')}`;
 
+/** Row actions appear on hover or focus, so the info-only badges step aside and the name keeps its room. */
+const BADGE_STEPS_ASIDE = 'group-hover:hidden group-focus-within:hidden';
+
 export const sourceTreeKey = (sourcePath: string) => `source:${sourcePath}`;
 
 /** The full path, not the leaf, so two sources of the same name in different folders stay distinct. */
@@ -274,7 +277,9 @@ const sourceSummaryToTreeData = ({
 
                 {isCurrentSharedTable && (
                   <Tooltip destroyOnHidden title="Lands in the shared table">
-                    <IconBucket className="opacity-80 shrink-0" />
+                    <IconBucket
+                      className={`opacity-80 shrink-0 ${BADGE_STEPS_ASIDE}`}
+                    />
                   </Tooltip>
                 )}
 
@@ -283,12 +288,16 @@ const sourceSummaryToTreeData = ({
                     destroyOnHidden
                     title="Shared table will be used until source is deployed"
                   >
-                    <IconBucketDroplet className="opacity-80 shrink-0" />
+                    <IconBucketDroplet
+                      className={`opacity-80 shrink-0 ${BADGE_STEPS_ASIDE}`}
+                    />
                   </Tooltip>
                 )}
                 {isDeployed && (
                   <Tooltip destroyOnHidden title="Is deployed">
-                    <IconRocket className="text-tertiary opacity-80 shrink-0" />
+                    <IconRocket
+                      className={`text-tertiary opacity-80 shrink-0 ${BADGE_STEPS_ASIDE}`}
+                    />
                   </Tooltip>
                 )}
               </span>
