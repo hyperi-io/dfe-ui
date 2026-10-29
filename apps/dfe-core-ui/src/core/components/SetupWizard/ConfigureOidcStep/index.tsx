@@ -127,32 +127,36 @@ export const ConfigureOidcStep = ({
           <IconArrowLeft /> Back
         </Button>
 
+        {/* One forward action: skip until the provider tests, then Next. */}
         <div className="flex flex-row gap-4 ml-auto">
-          <SkipForNow
-            goNext={goNext}
-            title={
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium">
-                  Skipping this step will enable local mode.
-                </p>
-                <p className="text-xs">
-                  You will need to manually add users to the system.
-                </p>
-                <p className="text-xs">
-                  You can always configure this later in the app.
-                </p>
-              </div>
-            }
-          />
+          {!isOidcTested && (
+            <SkipForNow
+              goNext={goNext}
+              title={
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium">
+                    Skipping this step will enable local mode.
+                  </p>
+                  <p className="text-xs">
+                    You will need to manually add users to the system.
+                  </p>
+                  <p className="text-xs">
+                    You can always configure this later in the app.
+                  </p>
+                </div>
+              }
+            />
+          )}
 
-          <Button
-            type="text"
-            className="text-light p-0 pl-2"
-            onClick={goNext}
-            disabled={!isOidcTested}
-          >
-            Next <IconArrowRight />
-          </Button>
+          {isOidcTested && (
+            <Button
+              type="text"
+              className="text-light p-0 pl-2"
+              onClick={goNext}
+            >
+              Next <IconArrowRight />
+            </Button>
+          )}
         </div>
       </div>
     </Card>

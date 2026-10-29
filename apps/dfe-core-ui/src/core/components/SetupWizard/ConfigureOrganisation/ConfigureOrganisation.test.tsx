@@ -11,6 +11,7 @@ import {
   test,
   vi,
 } from 'vitest';
+import type { TOrganisation } from '@/core/hooks/useFetchSetupStatus/types';
 import { ConfigureOrganisationStep } from '.';
 import { server } from './ConfigureOrganisation.mocks';
 
@@ -38,7 +39,7 @@ const submitAnOrganisation = async (goNext: () => void) => {
 
   await user.type(screen.getByPlaceholderText('Enter name'), 'acme');
   await user.type(screen.getByPlaceholderText('Enter display name'), 'Acme');
-  await user.click(screen.getByRole('button', { name: 'Save' }));
+  await user.click(screen.getByRole('button', { name: 'Save and continue' }));
 };
 
 describe('ConfigureOrganisationStep', () => {
@@ -67,4 +68,42 @@ describe('ConfigureOrganisationStep', () => {
       expect(goNext).toHaveBeenCalledTimes(1);
     });
   });
+
+  test.each([
+    ['no organisation yet', null, ['Save and continue'], ['Next']],
+    [
+      'an organisation already',
+      {
+        name: 'acme',
+        display_name: 'Acme',
+        enabled: true,
+        hyperdx_team_id: '',
+        hyperdx_team_api_key_env: '',
+        ch_password_env: '',
+        created_at: '',
+        updated_at: '',
+      } satisfies TOrganisation,
+      ['Next'],
+      ['Save and continue'],
+    ],
+  ])(
+    'offers one forward action with %s',
+    (_case, organisation, shown, absent) => {
+      render(
+        <ConfigureOrganisationStep
+          goNext={vi.fn()}
+          goPrevious={vi.fn()}
+          organisation={organisation}
+        />,
+        { wrapper },
+      );
+
+      for (const name of shown) {
+        expect(screen.getByRole('button', { name })).toBeInTheDocument();
+      }
+      for (const name of absent) {
+        expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+      }
+    },
+  );
 });

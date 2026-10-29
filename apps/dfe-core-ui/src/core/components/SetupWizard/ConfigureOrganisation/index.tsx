@@ -48,6 +48,7 @@ export const ConfigureOrganisationStep = ({
 
           <CreateUpdateOrganisationForm
             onFinish={handleFinish}
+            buttonLabel="Save and continue"
             hiddenFields={{
               org_ids: true,
             }}
@@ -76,16 +77,12 @@ export const ConfigureOrganisationStep = ({
         >
           <IconArrowLeft /> Back
         </Button>
-        <div className="flex flex-row gap-6">
-          <Button
-            type="text"
-            className="text-light p-0 pl-2"
-            onClick={goNext}
-            disabled={!organisation}
-          >
+        {/* Without an organisation the form's save is the one forward action. */}
+        {organisation && (
+          <Button type="text" className="text-light p-0 pl-2" onClick={goNext}>
             Next <IconArrowRight />
           </Button>
-        </div>
+        )}
       </div>
     </Card>
   );
