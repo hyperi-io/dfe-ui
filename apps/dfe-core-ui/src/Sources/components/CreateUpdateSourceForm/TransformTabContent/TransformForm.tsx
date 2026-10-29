@@ -4,7 +4,7 @@ import { FormRule, Input, Select } from 'antd';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
 import { getTransformEngines } from './TransformTabContent.helpers';
 import {
-  TransformVariantSelect,
+  TransformVariantFormItem,
   useEngineOffersVariants,
 } from './TransformVariantSelect';
 
@@ -57,17 +57,11 @@ export const TransformForm = ({
         </Form.Item>
       )}
       {engine && !isUnknown && offersVariants && (
-        <Form.Item
+        <TransformVariantFormItem
           name={['transform', 'variant']}
-          label="Variant"
-          extra="The compiled-in program this transform runs. Without one it has nothing to run."
-          rules={[
-            formValidation,
-            { required: true, message: 'Variant is required' },
-          ]}
-        >
-          <TransformVariantSelect engine={engine} />
-        </Form.Item>
+          engine={engine}
+          rules={[formValidation]}
+        />
       )}
       <Form.Item
         name={['transform', 'files']}
