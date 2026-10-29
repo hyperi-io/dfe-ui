@@ -1,6 +1,7 @@
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
+import { screen, within } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 
 export const BASE_SCHEMA_PATH = 'meta/filebeat';
@@ -59,3 +60,18 @@ export const server = setupServer(
     schema_path: BASE_SCHEMA_PATH,
   }),
 );
+
+/**
+ * The selection checkbox in the table row that names `columnName`.
+ *
+ * The row is found through its name cell. A role query with an accessible
+ * name works out the name of every row, and jsdom answers each style lookup
+ * in that by matching every antd rule, so it took 10s for four rows.
+ */
+export const columnCheckbox = (columnName: string): HTMLElement => {
+  const row = screen.getByText(columnName).closest('tr');
+  if (!row) {
+    throw new Error(`no table row holds "${columnName}"`);
+  }
+  return within(row).getByRole('checkbox', { hidden: true });
+};
