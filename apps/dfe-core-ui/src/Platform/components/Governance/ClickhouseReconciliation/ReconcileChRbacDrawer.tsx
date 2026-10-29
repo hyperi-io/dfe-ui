@@ -1,10 +1,10 @@
-import { AceEditor } from '@/core/components/AceEditor';
 import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { useReconcileGovernanceChRbac } from '@/Platform/hooks/governance/useReconcileGovernanceChRbac';
 import { Button, Spin } from 'antd';
 import { useState } from 'react';
+import { ReconcileChRbacResult } from './ReconcileChRbacResult';
 
 export const ReconcileChRbacDrawer = () => {
   const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export const ReconcileChRbacDrawer = () => {
       </RbacProtected>
 
       <Drawer
-        title="Reconcile Clickhouse RBAC"
+        title="Reconcile ClickHouse RBAC"
         open={open}
         onClose={() => setOpen(false)}
         footer={null}
@@ -47,7 +47,7 @@ export const ReconcileChRbacDrawer = () => {
         {isPending && (
           <>
             <Spin />{' '}
-            <span className="sr-only">Reconciling Clickhouse RBAC...</span>
+            <span className="sr-only">Reconciling ClickHouse RBAC...</span>
           </>
         )}
         {error && (
@@ -58,14 +58,7 @@ export const ReconcileChRbacDrawer = () => {
           />
         )}
 
-        {data && (
-          <AceEditor
-            value={JSON.stringify(data, null, 2)}
-            mode="json"
-            readOnly
-            height="100%"
-          />
-        )}
+        {data && <ReconcileChRbacResult data={data} />}
       </Drawer>
     </>
   );
