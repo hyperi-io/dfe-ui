@@ -1,4 +1,6 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
+import { RbacProtected } from '@/core/components/RbacProtected';
+import { ApiError } from '@/core/config/api/client';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { EmptyList } from '@/Sources/components/ListSourcesTree/EmptyList';
@@ -22,6 +24,7 @@ export const SourceList = ({
   const {
     data: { items: sources, objects: sourceObjects },
     error,
+    isLoading,
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSource,
@@ -52,6 +55,23 @@ export const SourceList = ({
     [userExpandedKeys],
   );
 
+  // The sidebar's gate and the engine's can disagree, and the engine wins.
+  if (error instanceof ApiError && error.status === 403) {
+    return <RbacProtected.RestrictedRoute reason={error.message} />;
+  }
+
+  if (error) {
+    return <ErrorList className={className} message={error.message} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className={cn('flex justify-center pt-6', className)}>
+        <Spin />
+      </div>
+    );
+  }
+
   if (sources.length === 0) {
     return (
       <EmptyList
@@ -65,10 +85,6 @@ export const SourceList = ({
         }}
       />
     );
-  }
-
-  if (error) {
-    return <ErrorList className={className} message={error.message} />;
   }
 
   return (
