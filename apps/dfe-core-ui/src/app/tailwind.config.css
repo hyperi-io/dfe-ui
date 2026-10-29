@@ -80,7 +80,7 @@
   --color-dark-success: #00a63e;
   --color-warning: #faad14;
   --color-dark-warning: #faad14;
-  --color-error: #ff4d4f;
+  --color-error: #cf1322;
   --color-dark-error: #ff4d4f;
   --color-info: #2ea4f6;
   --color-dark-info: #2ea4f6;
@@ -115,6 +115,11 @@
       opacity: 1;
     }
   }
+}
+
+/* #cf1322 is the AA red on a light surface and too dim on dark. */
+.dark {
+  --color-error: var(--color-dark-error);
 }
 
 @layer base {
