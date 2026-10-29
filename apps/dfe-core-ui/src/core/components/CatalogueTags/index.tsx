@@ -24,7 +24,7 @@ export const CatalogueTags = ({
   };
 
   return (
-    <div className="flex h-[32px] items-center gap-2">
+    <div className="flex h-[32px] items-center gap-2 w-full">
       <CollapsibleSearchInput
         placeholder="Search tags"
         className="w-96"
@@ -33,7 +33,7 @@ export const CatalogueTags = ({
         allowClear
       />
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 w-full overflow-x-auto">
         {isLoading && (
           <span className="flex items-center gap-2 w-full justify-center">
             <Spin /> <span className="sr-only">Loading...</span>
@@ -51,6 +51,7 @@ export const CatalogueTags = ({
             <Button
               key={item.id}
               onClick={() => handleTagClick(item.id)}
+              size="small"
               className={
                 selectedTags.has(item.id)
                   ? 'bg-tertiary/50 text-foreground-muted dark:text-dark-foreground'
