@@ -3,6 +3,7 @@ import { renewEngineSession } from '@/core/auth/renewEngineSession';
 import { safeRedirectPath } from '@/core/config/loginCallback';
 import { authMePath } from '@/core/hooks/useAuthMe/api';
 import { loginPath } from '@/core/hooks/useLogin/api';
+import { createLogger } from '@/core/server/logger';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -73,8 +74,15 @@ const credentialsProvider = CredentialsProvider({
   },
 });
 
+const authLogger = createLogger('dfe-ui.auth');
+
 // The OIDC hand-back provider: an external IdP login lands on /login/oidc with an engine token.
 export const authOptions: NextAuthOptions = {
+  logger: {
+    error: (code, metadata) => authLogger.error(code, { metadata }),
+    warn: (code) => authLogger.warn(code),
+    debug: (code, metadata) => authLogger.debug(code, { metadata }),
+  },
   providers: [credentialsProvider, oidcTokenProvider(baseUrl)],
   callbacks: {
     async jwt({ token, user, trigger }) {
