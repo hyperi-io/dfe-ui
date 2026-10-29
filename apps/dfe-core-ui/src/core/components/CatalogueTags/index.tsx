@@ -2,7 +2,7 @@ import { CollapsibleSearchInput } from '@/core/components/CollapsibleSearchInput
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { useFetchInfiniteFilteredSourceCatalogueTags } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags';
 import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
-import { Spin } from 'antd';
+import { Button, Spin } from 'antd';
 import { useRef, useState } from 'react';
 import { PaginatedTagsList } from './PaginatedTagsList';
 
@@ -77,6 +77,17 @@ export const CatalogueTags = ({
           />
         )}
       </div>
+      {selectedTags.size > 0 && (
+        <Button
+          onClick={() => setSelectedTags(new Set())}
+          size="small"
+          type="text"
+          className="shrink-0"
+          disabled={selectedTags.size === 0}
+        >
+          Clear {selectedTags.size} Tags
+        </Button>
+      )}
     </div>
   );
 };

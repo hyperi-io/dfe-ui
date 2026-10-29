@@ -83,8 +83,13 @@ export const AddFromCatalogueTable = ({
 
   const rowsSelectedOffset = selectedEntries?.length > 0 ? 60 : 0;
   const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
+  const catalogueTagsOffset = searchTags.length > 0 ? 45 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 260 + selectionExceedsLimitOffset + rowsSelectedOffset,
+    offset:
+      260 +
+      selectionExceedsLimitOffset +
+      rowsSelectedOffset +
+      catalogueTagsOffset,
   });
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
