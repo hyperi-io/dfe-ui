@@ -1,7 +1,7 @@
 import { Form } from '@/core/components/Form';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
-import { render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, FormRule } from 'antd';
 import {
@@ -34,7 +34,18 @@ vi.mock('@/core/components/AceEditor', () => ({
 }));
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+const nextFrame = () =>
+  new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+// Form.Item settles its error list a frame late through rc-component's
+// useDelayState, which does not cancel on unmount, so let those frames run
+// before jsdom goes or the last one throws "window is not defined".
+afterEach(async () => {
+  server.resetHandlers();
+  cleanup();
+  await nextFrame();
+  await nextFrame();
+});
 afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
