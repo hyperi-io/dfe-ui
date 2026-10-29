@@ -52,6 +52,10 @@ const CompatibleStyleProviders = ({
               fontSizeHeading4: typography.fontSize['base'],
               fontSizeHeading5: typography.fontSize['sm'],
             },
+            Button: {
+              // White on the tertiary blue reads at 2.71:1, navy at 6.94:1.
+              primaryColor: colors.brand.primary,
+            },
           },
         }}
       >
