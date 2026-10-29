@@ -56,6 +56,20 @@ if (!patchedCSS[RULE_FREE]) {
   patchedCSS[RULE_FREE] = true;
 }
 
+// The emptied CSS above also drops the rules antd uses to hide an element by
+// class alone. Without them role queries and toBeVisible see a hidden
+// Form.Item or a collapsed tab as shown, so a test of "this field is hidden"
+// passes or fails for the wrong reason. These are the classes the suite
+// renders, listed by name so a Tailwind `overflow-hidden` is left alone.
+if (typeof document !== 'undefined') {
+  const hiddenRules = document.createElement('style');
+  hiddenRules.textContent = [
+    '.ant-form-item-hidden, .ant-tabs-content-hidden { display: none }',
+    '.ant-tabs-nav-operations-hidden, .ant-input-clear-icon-hidden { visibility: hidden }',
+  ].join('\n');
+  document.head.appendChild(hiddenRules);
+}
+
 // findBy* and waitFor return the moment their condition holds, so this is only
 // the point a missing condition is declared failed. The 1s default is shorter
 // than the first render of an antd page on a loaded runner.
