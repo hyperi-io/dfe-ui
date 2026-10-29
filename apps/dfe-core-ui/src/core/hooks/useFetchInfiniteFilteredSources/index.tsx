@@ -70,9 +70,13 @@ export const useFetchInfiniteFilteredSources = ({
       return hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    // A 403 is the engine's answer, and retrying it only delays saying so.
+    // A 4xx is the engine's answer, and retrying it only delays saying so.
     retry: (failures, error) =>
-      !(error instanceof ApiError && error.status === 403) && failures < 3,
+      !(
+        error instanceof ApiError &&
+        error.status >= 400 &&
+        error.status < 500
+      ) && failures < 3,
   });
 
   const flattenedData = useMemo(() => {

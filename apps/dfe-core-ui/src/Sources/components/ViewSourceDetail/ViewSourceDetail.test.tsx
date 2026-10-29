@@ -100,4 +100,25 @@ describe('ViewSourceDetail', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText('No source selected')).not.toBeInTheDocument();
   });
+
+  it.each([403, 404])(
+    'asks the engine once for a %i on a named source',
+    async (status) => {
+      let calls = 0;
+      server.use(
+        http.get('/api/v1/sources/:name/versions/:version', () => {
+          calls += 1;
+          return HttpResponse.json(
+            { code: 'refused', message: 'the engine said no' },
+            { status },
+          );
+        }),
+      );
+      searchParamsRef.current = new URLSearchParams('source_name=okta');
+      render(<ViewSourceDetail />, { wrapper });
+
+      expect(await screen.findByText('the engine said no')).toBeInTheDocument();
+      expect(calls).toBe(1);
+    },
+  );
 });

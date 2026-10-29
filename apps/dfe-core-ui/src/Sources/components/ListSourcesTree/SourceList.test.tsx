@@ -1,7 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { render, screen } from '@testing-library/react';
-import { http, HttpResponse } from 'msw';
+import { render, screen, waitFor } from '@testing-library/react';
+import { delay, http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
   afterAll,
@@ -103,5 +103,45 @@ describe('SourceList', () => {
     render(<SourceList />, { wrapper });
 
     expect(await screen.findByText('No sources found')).toBeInTheDocument();
+  });
+
+  it('shows a spinner, not an empty list, while the list loads', async () => {
+    server.use(
+      http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, async () => {
+        await delay(400);
+        return HttpResponse.json({
+          items: [],
+          objects: { items: [], children: {} },
+          total: 0,
+          page: 1,
+          per_page: 10,
+          total_pages: 1,
+          next_page: null,
+          prev_page: null,
+        });
+      }),
+    );
+    const { container } = render(<SourceList />, { wrapper });
+
+    expect(container.querySelector('.ant-spin')).toBeInTheDocument();
+    expect(screen.queryByText('No sources found')).not.toBeInTheDocument();
+    expect(await screen.findByText('No sources found')).toBeInTheDocument();
+  });
+
+  it.each([403, 404, 422])('asks the engine once for a %i', async (status) => {
+    let calls = 0;
+    server.use(
+      http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, () => {
+        calls += 1;
+        return HttpResponse.json(
+          { code: 'refused', message: 'refused' },
+          { status },
+        );
+      }),
+    );
+    render(<SourceList />, { wrapper });
+
+    expect(await screen.findByText('refused')).toBeInTheDocument();
+    await waitFor(() => expect(calls).toBe(1));
   });
 });

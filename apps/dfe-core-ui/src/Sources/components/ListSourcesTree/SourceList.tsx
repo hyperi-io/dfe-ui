@@ -24,6 +24,7 @@ export const SourceList = ({
   const {
     data: { items: sources, objects: sourceObjects },
     error,
+    isLoading,
     loadMoreRef,
     isFetchingNextPage,
     setSelectedSource,
@@ -61,6 +62,14 @@ export const SourceList = ({
 
   if (error) {
     return <ErrorList className={className} message={error.message} />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className={cn('flex justify-center pt-6', className)}>
+        <Spin />
+      </div>
+    );
   }
 
   if (sources.length === 0) {
