@@ -21,6 +21,14 @@ import {
 import { TransformForm } from './TransformForm';
 import { server } from './TransformForm.mocks';
 
+// jsdom has no IntersectionObserver, and the catalogue the variant select reads pages on one.
+class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
@@ -132,5 +140,120 @@ describe('TransformForm', () => {
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(await screen.findByText('Engine is required')).toBeInTheDocument();
+  });
+
+  describe('variant', () => {
+    const pickEngine = async (
+      user: ReturnType<typeof userEvent.setup>,
+      app: string,
+    ) => {
+      await user.click(await screen.findByLabelText(/^Transform Engine/));
+      await user.click(await screen.findByTitle(app));
+    };
+
+    it('asks for a variant on an engine the catalogue offers programs for', async () => {
+      const user = userEvent.setup();
+      render(<Harness />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-elastic');
+
+      expect(await screen.findByLabelText(/^Variant/)).toBeInTheDocument();
+    });
+
+    it('asks for no variant on an engine that runs authored files', async () => {
+      const user = userEvent.setup();
+      render(<Harness />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-vrl');
+
+      // The catalogue has answered once the engine list has, so absence is settled.
+      await waitFor(() =>
+        expect(screen.getByLabelText(/^Transform Engine/)).toBeEnabled(),
+      );
+      expect(screen.queryByLabelText(/^Variant/)).not.toBeInTheDocument();
+    });
+
+    it('refuses to submit an elastic transform with no variant', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(<Harness onFinish={onFinish} />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-elastic');
+      await screen.findByLabelText(/^Variant/);
+      await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+      expect(
+        await screen.findByText('Variant is required'),
+      ).toBeInTheDocument();
+      expect(onFinish).not.toHaveBeenCalled();
+    });
+
+    it('submits the variant picked from the catalogue', async () => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(<Harness onFinish={onFinish} />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-elastic');
+      await user.click(await screen.findByLabelText(/^Variant/));
+      await user.click(
+        await screen.findByTitle('Okta system log (filebeat.okta.default)'),
+      );
+      await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+      const values = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+      expect(values.transform).toMatchObject({
+        engine: 'elastic',
+        variant: 'filebeat.okta.default',
+      });
+    });
+
+    it('keeps a stored variant when the catalogue cannot be read', async () => {
+      const onFinish = vi.fn();
+      const user = userEvent.setup();
+      server.use(API_CONFIG_MOCKS.sources.catalogue.get.error());
+      const Stored = () => {
+        const [form] = Form.useForm<CreateUpdateSourceFormData>();
+        return (
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            initialValues={{
+              transform: {
+                engine: 'elastic',
+                variant: 'filebeat.okta.default',
+              },
+            }}
+          >
+            <TransformForm formValidation={acceptAll} />
+            <Button htmlType="submit">Submit</Button>
+          </Form>
+        );
+      };
+      render(<Stored />, { wrapper });
+
+      await waitFor(() =>
+        expect(screen.getByLabelText(/^Transform Engine/)).toBeEnabled(),
+      );
+      await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+      const values = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+      expect(values.transform?.variant).toBe('filebeat.okta.default');
+    });
+
+    it('offers no variant when the catalogue cannot be read', async () => {
+      const user = userEvent.setup();
+      server.use(API_CONFIG_MOCKS.sources.catalogue.get.error());
+      render(<Harness />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-elastic');
+
+      await waitFor(() =>
+        expect(screen.getByLabelText(/^Transform Engine/)).toBeEnabled(),
+      );
+      expect(screen.queryByLabelText(/^Variant/)).not.toBeInTheDocument();
+    });
   });
 });
