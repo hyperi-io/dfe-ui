@@ -3,6 +3,10 @@ import { useFetchApps } from '@/core/hooks/apps/instances/useFetchApps';
 import { FormRule, Input, Select } from 'antd';
 import { EnvKeyValueBuilder } from './EnvKeyValueBuilder';
 import { getTransformEngines } from './TransformTabContent.helpers';
+import {
+  TransformVariantSelect,
+  useEngineOffersVariants,
+} from './TransformVariantSelect';
 
 export const TransformForm = ({
   formValidation,
@@ -12,6 +16,8 @@ export const TransformForm = ({
   const { data: apps, isLoading } = useFetchApps();
   const engines = getTransformEngines(apps);
   const hasEngines = engines.length > 0;
+  const engine = Form.useWatch<string | undefined>(['transform', 'engine']);
+  const { offersVariants, isUnknown } = useEngineOffersVariants(engine);
 
   return (
     <>
@@ -45,6 +51,24 @@ export const TransformForm = ({
           <Input placeholder="Enter config file" allowClear />
         </Form.Item>
       </div>
+      {engine && isUnknown && (
+        <Form.Item name={['transform', 'variant']} hidden>
+          <input type="hidden" />
+        </Form.Item>
+      )}
+      {engine && !isUnknown && offersVariants && (
+        <Form.Item
+          name={['transform', 'variant']}
+          label="Variant"
+          extra="The compiled-in program this transform runs. Without one it has nothing to run."
+          rules={[
+            formValidation,
+            { required: true, message: 'Variant is required' },
+          ]}
+        >
+          <TransformVariantSelect engine={engine} />
+        </Form.Item>
+      )}
       <Form.Item
         name={['transform', 'files']}
         label="Files"
