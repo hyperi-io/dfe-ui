@@ -6,6 +6,7 @@ import { TApplyDefaultsResponse } from '@/Platform/hooks/system/useApplyDefaults
 import { TDefaultsDriftSourceItem } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
 import { Button, Spin, Tag } from 'antd';
 import { type RefObject, useState } from 'react';
+import { ValueMove } from './ValueMove';
 
 const NoDriftTag = () => {
   return (
@@ -28,10 +29,12 @@ const DriftTag = ({
   if (shownCurrent === shownDefault) {
     return <NoDriftTag />;
   }
+  const from = shownCurrent ?? 'none';
+  const to = shownDefault ?? 'none';
   return (
     <span className="flex items-center gap-2">
       <Tag color="warning">Drift</Tag>
-      Current: {shownCurrent} | Default: {shownDefault}
+      <ValueMove from={from} to={to} label={`current ${from}, default ${to}`} />
     </span>
   );
 };

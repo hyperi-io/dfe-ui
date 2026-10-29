@@ -155,6 +155,29 @@ describe('ApplyDefaultsContent', () => {
     expect(within(row).queryAllByText('Drift').length > 0).toBe(drifted);
   });
 
+  test.each([
+    ['a TTL', { stored: '14', default: '90' }, 'current 14, default 90'],
+    [
+      'a TTL with no default',
+      { stored: '14', default: null },
+      'current 14, default none',
+    ],
+  ])('shows %s as current then default', async (_case, ttl, spoken) => {
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[
+          { ...driftSource('custom_source', false), ttl_days: ttl },
+        ]}
+      />,
+      { wrapper },
+    );
+
+    const row = await screen.findByRole('row', { name: /custom_source/ });
+    expect(within(row).getByText(spoken)).toBeInTheDocument();
+    // The arrow is an icon, never ASCII punctuation in the cell.
+    expect(within(row).queryByText(/\||->|Current:/)).toBeNull();
+  });
+
   test('renders the element that loads the next page under the table', async () => {
     const loadMoreRef = createRef<HTMLDivElement>();
     render(
