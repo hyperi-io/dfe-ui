@@ -99,6 +99,8 @@ export interface ListSourcesContextValue {
   loadMoreRef: React.RefObject<HTMLDivElement | null>;
   isFetchingNextPage: boolean;
   selectedSourceName: string | null;
+  /** True while no source is named in the URL, so `selectedSourceName` is the fallback and not the reader's pick. */
+  isDefaultSelection: boolean;
   selectedSourceVersion: string | null;
   setSelectedSource: ({
     source_name,
@@ -166,6 +168,8 @@ export const ListSourcesProvider = ({
       );
     });
   }, [searchParams]);
+
+  const isDefaultSelection = !searchParams.get('source_name');
 
   const hasFilters = useMemo(() => hasSearchFilters(filters), [filters]);
 
@@ -260,6 +264,7 @@ export const ListSourcesProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSourceName,
+      isDefaultSelection,
       setSelectedSource: handleSetSelectedSource,
       selectedSourceVersion,
     }),
@@ -276,6 +281,7 @@ export const ListSourcesProvider = ({
       loadMoreRef,
       isFetchingNextPage,
       selectedSourceName,
+      isDefaultSelection,
       handleSetSelectedSource,
       selectedSourceVersion,
     ],
