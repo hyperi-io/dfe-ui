@@ -68,6 +68,7 @@ export const CreateRuleDrawer = ({
           </Button>
         </RbacProtected.Unrestricted>
         <RbacProtected.Restricted
+          visibleTo={RbacProtected.rbacActions.rule_read}
           tooltip={{
             show: true,
             placement: 'bottom',

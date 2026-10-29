@@ -1,5 +1,6 @@
 import { CreateHuntDrawer } from '@/Hunts/components/CreateHuntDrawer';
 import { UseFetchInfiniteFilteredHuntsProps } from '@/core/hooks/useFetchInfiniteFilteredHunts/types';
+import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Button } from 'antd';
@@ -15,6 +16,9 @@ export const EmptyList = ({
   defaultFilters: UseFetchInfiniteFilteredHuntsProps;
   className?: string;
 }) => {
+  const { isAuthorized: canCreate } = RbacProtected.useRbac({
+    action: RbacProtected.rbacActions.hunt_write,
+  });
   return (
     <div
       className={cn(
@@ -30,7 +34,9 @@ export const EmptyList = ({
         <p className="text-foreground-muted dark:text-dark-foreground-muted">
           {hasFilters
             ? 'Please update your filters to see hunts.'
-            : 'Create a hunt to start building hunts from saved searches.'}
+            : canCreate
+              ? 'Create a hunt to start building hunts from saved searches.'
+              : 'No hunt has been added yet.'}
         </p>
       </div>
       {hasFilters ? (

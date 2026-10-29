@@ -10,7 +10,7 @@ import { ListHuntsProvider } from '@/Hunts/contexts/ListHuntsContext';
 export const HuntListScene = () => {
   return (
     <MainContentCard>
-      <RbacProtected action={RbacProtected.rbacActions.rule_read}>
+      <RbacProtected action={RbacProtected.rbacActions.hunt_read}>
         <RbacProtected.Unrestricted>
           <ListHuntsProvider>
             <Splitter
