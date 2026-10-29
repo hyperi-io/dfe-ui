@@ -21,9 +21,6 @@ import {
   server,
 } from './CreateDerivedSchemaDrawer.mocks';
 
-/** antd plus the base column table in jsdom outruns the 20s default on this flow. */
-const DRAWER_FLOW_TIMEOUT_MS = 90_000;
-
 class MockIntersectionObserver {
   observe = vi.fn();
   unobserve = vi.fn();
@@ -68,80 +65,72 @@ const tickColumn = async (
 };
 
 describe('CreateDerivedSchemaDrawer', () => {
-  it(
-    'sends the base, the base version and the ordered selection',
-    async () => {
-      const user = userEvent.setup();
-      render(<CreateDerivedSchemaDrawer />, { wrapper });
+  it('sends the base, the base version and the ordered selection', async () => {
+    const user = userEvent.setup();
+    render(<CreateDerivedSchemaDrawer />, { wrapper });
 
-      await openDrawer(user);
+    await openDrawer(user);
 
-      await user.type(screen.getByLabelText(/^Name/), DERIVED_SCHEMA_NAME);
-      await user.type(screen.getByLabelText(/^Description/), 'subset');
-      await pickBaseSchema(user);
+    await user.type(screen.getByLabelText(/^Name/), DERIVED_SCHEMA_NAME);
+    await user.type(screen.getByLabelText(/^Description/), 'subset');
+    await pickBaseSchema(user);
 
-      await tickColumn(user, 'timestamp');
-      await tickColumn(user, 'message');
+    await tickColumn(user, 'timestamp');
+    await tickColumn(user, 'message');
 
-      // message inherits word_search from the base; asking for fragments is the
-      // one thing a derived schema may change.
-      const messageIndex = screen.getByLabelText('Index use case for message');
-      await waitFor(() => expect(messageIndex).toBeEnabled(), {
-        timeout: 5000,
-      });
-      await user.click(messageIndex);
-      await user.click(
-        await screen.findByTitle(
-          'I search for fragments inside words',
-          {},
-          { timeout: 5000 },
-        ),
-      );
+    // message inherits word_search from the base; asking for fragments is the
+    // one thing a derived schema may change.
+    const messageIndex = screen.getByLabelText('Index use case for message');
+    await waitFor(() => expect(messageIndex).toBeEnabled(), {
+      timeout: 5000,
+    });
+    await user.click(messageIndex);
+    await user.click(
+      await screen.findByTitle(
+        'I search for fragments inside words',
+        {},
+        { timeout: 5000 },
+      ),
+    );
 
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
 
-      await waitFor(() => expect(capturedRequests).toHaveLength(1), {
-        timeout: 5000,
-      });
+    await waitFor(() => expect(capturedRequests).toHaveLength(1), {
+      timeout: 5000,
+    });
 
-      const body = capturedRequests[0];
-      expect(body.path).toBe(DERIVED_SCHEMA_PATH);
-      expect(body.base).toBe(BASE_SCHEMA_PATH);
-      expect(body.base_version).toBe('1.0.0');
-      expect(body.current).toBe('1.0.0');
-      expect(body.versions['1.0.0'].summary).toBe('subset');
-      expect(body.versions['1.0.0'].date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(body.versions['1.0.0'].select).toEqual([
-        { name: 'timestamp' },
-        { name: 'message', index: 'substring_search' },
-      ]);
-    },
-    DRAWER_FLOW_TIMEOUT_MS,
-  );
+    const body = capturedRequests[0];
+    expect(body.path).toBe(DERIVED_SCHEMA_PATH);
+    expect(body.base).toBe(BASE_SCHEMA_PATH);
+    expect(body.base_version).toBe('1.0.0');
+    expect(body.current).toBe('1.0.0');
+    expect(body.versions['1.0.0'].summary).toBe('subset');
+    expect(body.versions['1.0.0'].date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(body.versions['1.0.0'].select).toEqual([
+      { name: 'timestamp' },
+      { name: 'message', index: 'substring_search' },
+    ]);
+  });
 
-  it(
-    'refuses to submit a derived schema with no columns selected',
-    async () => {
-      const user = userEvent.setup();
-      render(<CreateDerivedSchemaDrawer />, { wrapper });
+  it('refuses to submit a derived schema with no columns selected', async () => {
+    const user = userEvent.setup();
+    render(<CreateDerivedSchemaDrawer />, { wrapper });
 
-      await openDrawer(user);
+    await openDrawer(user);
 
-      await user.type(screen.getByLabelText(/^Name/), DERIVED_SCHEMA_NAME);
-      await user.type(screen.getByLabelText(/^Description/), 'empty');
-      await pickBaseSchema(user);
+    await user.type(screen.getByLabelText(/^Name/), DERIVED_SCHEMA_NAME);
+    await user.type(screen.getByLabelText(/^Description/), 'empty');
+    await pickBaseSchema(user);
 
-      await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
 
-      expect(
-        await screen.findByText(
-          'Select at least one column from the base schema',
-          {},
-          { timeout: 5000 },
-        ),
-      ).toBeInTheDocument();
-      expect(capturedRequests).toHaveLength(0);
-    },
-    DRAWER_FLOW_TIMEOUT_MS,
-  );
+    expect(
+      await screen.findByText(
+        'Select at least one column from the base schema',
+        {},
+        { timeout: 5000 },
+      ),
+    ).toBeInTheDocument();
+    expect(capturedRequests).toHaveLength(0);
+  });
 });

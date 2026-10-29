@@ -2,9 +2,7 @@
 // Restore Node's native fetch (undici) so MSW's setupServer interceptors work.
 import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
-import userEvent, {
-  PointerEventsCheckLevel,
-} from '@testing-library/user-event';
+import { createRequire } from 'node:module';
 import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
 import { afterEach, beforeEach, vi } from 'vitest';
@@ -35,25 +33,27 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
   })) as unknown as typeof window.matchMedia;
 }
 
-// user-event's pointer-events check calls getComputedStyle on the target and
-// every ancestor before each action. jsdom matches every antd stylesheet rule
-// per call (about 60ms each with the rules a drawer injects), so one click
-// cost seconds and grew with the host's load. A test that needs the check
-// passes pointerEventsCheck itself.
-const USER_EVENT_PATCHED = Symbol.for('dfe-ui.userEvent.setupPatched');
-type UserEventSetup = typeof userEvent.setup;
-const patchableUserEvent = userEvent as {
-  setup: UserEventSetup;
-  [USER_EVENT_PATCHED]?: true;
+const requireFromHere = createRequire(import.meta.url);
+
+// antd writes every component's CSS into <style> tags. jsdom answers each
+// getComputedStyle call by matching all of those rules (24-85ms a call), and
+// user-event and Testing Library's role queries make thousands of calls, so a
+// drawer flow took 36s. Nothing here asserts on layout, so the tags are still
+// created and keyed as before but carry no rules.
+const cssinjsRequire = createRequire(
+  requireFromHere.resolve('@ant-design/cssinjs'),
+);
+const dynamicCSS = cssinjsRequire('@rc-component/util/lib/Dom/dynamicCSS') as {
+  updateCSS: (css: string, key: string, option?: object) => HTMLStyleElement;
 };
-if (!patchableUserEvent[USER_EVENT_PATCHED]) {
-  const setupUser: UserEventSetup = userEvent.setup.bind(userEvent);
-  patchableUserEvent.setup = (options) =>
-    setupUser({
-      pointerEventsCheck: PointerEventsCheckLevel.Never,
-      ...options,
-    });
-  patchableUserEvent[USER_EVENT_PATCHED] = true;
+// Setup runs once per test file in a shared worker, so wrap only once.
+const RULE_FREE = Symbol.for('dfe-ui.cssinjs.ruleFree');
+const patchedCSS = dynamicCSS as typeof dynamicCSS & { [RULE_FREE]?: true };
+if (!patchedCSS[RULE_FREE]) {
+  const updateCSSWithRules = dynamicCSS.updateCSS;
+  dynamicCSS.updateCSS = (_css, key, option) =>
+    updateCSSWithRules('', key, option);
+  patchedCSS[RULE_FREE] = true;
 }
 
 // findBy* and waitFor return the moment their condition holds, so this is only
