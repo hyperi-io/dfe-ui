@@ -3,6 +3,7 @@ import {
   TSourceSummary,
 } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { render, renderHook } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { TreeDataNode } from 'antd';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -422,5 +423,53 @@ describe('useTransformSourceToTree', () => {
     });
     expect(result.current.tree[0].key).toBe('source:b');
     expect(result.current.tree).not.toEqual(firstTree);
+  });
+
+  it.each([
+    ['an enabled source', true, 'pw/demo: source is enabled'],
+    ['a disabled source', false, 'pw/demo: source is disabled'],
+  ])('names the status button of %s', (_case, enabled, name) => {
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: { items: [baseSource({ name: 'pw/demo', enabled })] },
+        setSelectedSource: vi.fn(),
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByRole } = renderSourceNodeTitle(result.current.tree[0]);
+    expect(getByRole('button', { name })).toBeInTheDocument();
+  });
+
+  it('selects the source when its name is clicked, without reaching a row action', async () => {
+    const setSelectedSource = vi.fn();
+    const { result } = renderHook(() =>
+      useTransformSourceToTree({
+        sourceObjects: { items: [baseSource({ name: 'pwtestvm' })] },
+        setSelectedSource,
+        selectedSourceName: null,
+        ...defaultSelection,
+      }),
+    );
+
+    const { getByText, getByRole } = renderSourceNodeTitle(
+      result.current.tree[0],
+    );
+    const user = userEvent.setup();
+    await user.click(getByText('pwtestvm'));
+
+    expect(setSelectedSource).toHaveBeenCalledWith({
+      source_name: 'pwtestvm',
+      source_version: 'v1',
+    });
+    // The row action is a sibling of the name, not an overlay inside it.
+    const name = getByText('pwtestvm');
+    expect(
+      name.contains(getByRole('button', { name: 'Delete pwtestvm' })),
+    ).toBe(false);
+    expect(
+      getByRole('button', { name: 'Delete pwtestvm' }).closest('.absolute'),
+    ).toBeNull();
   });
 });

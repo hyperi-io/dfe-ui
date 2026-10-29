@@ -212,6 +212,11 @@ const sourceSummaryToTreeData = ({
                     type="default"
                     shape="circle"
                     size="small"
+                    aria-label={`${mainSource.name}: ${
+                      mainSource.enabled
+                        ? 'source is enabled'
+                        : 'source is disabled'
+                    }`}
                     className={cn(
                       'p-0.5',
                       mainSource.enabled
@@ -310,6 +315,7 @@ const sourceSummaryToTreeData = ({
                         shape="circle"
                         size="small"
                         className="p-0.5"
+                        aria-label={`${source.name}: undeployed changes, open Build & Deploy`}
                         icon={<IconRocketOff />}
                         onClick={() => {
                           // Working-branch changes are resolved on Build & Deploy.
@@ -334,6 +340,11 @@ const sourceSummaryToTreeData = ({
                     type="default"
                     shape="circle"
                     size="small"
+                    aria-label={`${source.name}: ${
+                      source.enabled
+                        ? 'source is enabled'
+                        : 'source is disabled'
+                    }`}
                     className={cn(
                       'p-0.5',
                       source.enabled
