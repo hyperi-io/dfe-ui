@@ -19,8 +19,11 @@ interface CreateFieldMapDrawerProps {
   onSuccess?: (data: TCreateFieldMapResponse) => void;
   initialValues?: TCreateFieldMapResponse;
   disabledFields?: {
+    standard?: boolean;
     source?: boolean;
   };
+  /** Disables the trigger, for a caller that cannot create a map yet. */
+  disabled?: boolean;
 }
 
 export const CreateFieldMapDrawer = ({
@@ -29,6 +32,7 @@ export const CreateFieldMapDrawer = ({
   onSuccess,
   initialValues,
   disabledFields,
+  disabled,
 }: CreateFieldMapDrawerProps) => {
   const { trigger } = className ?? {};
   const [api, contextHolder] = notification.useNotification();
@@ -69,8 +73,12 @@ export const CreateFieldMapDrawer = ({
         <RbacProtected.Unrestricted>
           <Button
             type="default"
-            className={cn('border border-tertiary text-tertiary', trigger)}
-            icon={<IconPlus className="text-tertiary" />}
+            className={cn(
+              !disabled && 'border border-tertiary text-tertiary',
+              trigger,
+            )}
+            icon={<IconPlus className={cn(!disabled && 'text-tertiary')} />}
+            disabled={disabled}
             onClick={() => setIsDrawerVisible(true)}
           >
             {title}

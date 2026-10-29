@@ -238,3 +238,45 @@ describe('ViewsTabContent with an existing Sigma view', () => {
     await waitFor(() => expect(addView()).toBeEnabled());
   });
 });
+
+describe('ViewsTabContent logsource fields', () => {
+  it.each([
+    { standard: 'sigma', shown: true },
+    { standard: 'ecs', shown: false },
+    { standard: 'cim', shown: false },
+    { standard: 'ocsf', shown: false },
+    { standard: '', shown: false },
+  ])(
+    'shows taxonomy, category and service on a $standard view: $shown',
+    async ({ standard, shown }) => {
+      render(<Harness views={[{ standard }]} />, { wrapper });
+
+      await screen.findByRole('button', { name: /Delete .*view/ });
+      // antd hides a Form.Item by class alone, and its CSS does not load in tests.
+      for (const label of ['Taxonomy', 'Category', 'Service']) {
+        const item = screen.getByLabelText(label).closest('.ant-form-item');
+        expect(item?.classList.contains('ant-form-item-hidden')).toBe(!shown);
+      }
+    },
+  );
+
+  it('keeps a stored taxonomy on an ECS view it no longer shows', async () => {
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <Harness
+        views={[{ standard: 'ecs', taxonomy: 'windows' }]}
+        onFinish={onFinish}
+      />,
+      { wrapper },
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    const values = onFinish.mock.calls[0]?.[0] as CreateUpdateSourceFormData;
+    expect(values.views).toMatchObject([
+      { standard: 'ecs', taxonomy: 'windows' },
+    ]);
+  });
+});

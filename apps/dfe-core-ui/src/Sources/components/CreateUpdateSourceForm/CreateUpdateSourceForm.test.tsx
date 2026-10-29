@@ -303,47 +303,55 @@ describe('CreateUpdateSourceForm views', () => {
     { standard: 'ecs', field_map: 'ecs/shared-probe' },
   ];
 
-  it('keeps the views of a source whose Views tab is hidden', async () => {
-    const user = userEvent.setup();
-    const onFinish = vi.fn();
-    render(
-      <CreateUpdateSourceForm
-        onFinish={onFinish}
-        isPending={false}
-        error={null}
-        buttonLabel="Update Source"
-        initialValues={{
-          source: 'shared-probe',
-          enabled: true,
-          archive: false,
-          origin: 'receiver',
-          match: {
-            field: 'data_stream.dataset',
-            operator: 'equals',
-            value: 'probe.log',
-          },
-          receiver_ui_config: { table: 'main' },
-          views: storedViews,
-        }}
-      />,
-      { wrapper },
-    );
+  it.each([
+    { name: 'with views', views: storedViews, tab: true },
+    { name: 'with no views', views: [], tab: false },
+  ])(
+    'a shared-table source $name shows the Views tab: $tab, and keeps its views',
+    async ({ views, tab }) => {
+      const user = userEvent.setup();
+      const onFinish = vi.fn();
+      render(
+        <CreateUpdateSourceForm
+          onFinish={onFinish}
+          isPending={false}
+          error={null}
+          buttonLabel="Update Source"
+          initialValues={{
+            source: 'shared-probe',
+            enabled: true,
+            archive: false,
+            origin: 'receiver',
+            match: {
+              field: 'data_stream.dataset',
+              operator: 'equals',
+              value: 'probe.log',
+            },
+            receiver_ui_config: { table: 'main' },
+            views,
+          }}
+        />,
+        { wrapper },
+      );
 
-    await screen.findByLabelText(/^Source Name/, {}, { timeout: 15_000 });
-    expect(
-      screen.queryByRole('tab', { name: 'Views' }),
-    ).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Update Source' }));
+      await screen.findByLabelText(/^Source Name/, {}, { timeout: 15_000 });
+      expect(!!screen.queryByRole('tab', { name: 'Views' })).toBe(tab);
+      // A shared-table source has no meta schema, so the Transform tab stays hidden.
+      expect(
+        screen.queryByRole('tab', { name: 'Transform' }),
+      ).not.toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Update Source' }));
 
-    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
-      timeout: 10_000,
-    });
-    const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
-    // The engine's update replaces the version, so a body without views clears them.
-    expect(transformSourceFormDataToRequestBody(submitted).views).toEqual(
-      storedViews,
-    );
-  });
+      await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), {
+        timeout: 10_000,
+      });
+      const submitted = onFinish.mock.calls[0][0] as CreateUpdateSourceFormData;
+      // The engine's update replaces the version, so a body without views clears them.
+      expect(transformSourceFormDataToRequestBody(submitted).views).toEqual(
+        views,
+      );
+    },
+  );
 });
 
 describe('CreateUpdateSourceForm meta schema', () => {
