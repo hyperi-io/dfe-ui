@@ -41,7 +41,7 @@ export const NotificationCard = ({
     ),
     warning: cn(
       // Card Border & Background
-      'border-warning/30 bg-warning/10 dark:border-dark-warning/25 dark:bg-dark-warning/25',
+      'border-warning/30 bg-warning/10 dark:border-dark-warning/25 dark:bg-dark-warning/20',
     ),
     error: cn(
       // Card Border & Background
