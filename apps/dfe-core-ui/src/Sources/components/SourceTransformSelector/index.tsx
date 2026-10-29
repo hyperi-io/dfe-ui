@@ -134,7 +134,7 @@ export const SourceTransformSelector = ({
     reset();
   };
 
-  const confirmSwitch = () => {
+  const confirmSwitch = (variant: string | null) => {
     if (!sourceDetail || !pendingEngine) return;
     // The same round trip the edit drawer writes with, so this carries every
     // field that form carries rather than a body assembled a second way. The
@@ -156,9 +156,8 @@ export const SourceTransformSelector = ({
       fetcher: written.fetcher,
       transport: written.transport,
       archive: written.archive,
-      // variant names a compiled-in program of one app, so it cannot survive a
-      // move to another.
-      transform: { ...written.transform, engine: pendingEngine, variant: null },
+      // The dialog settles the variant against the incoming engine's programs.
+      transform: { ...written.transform, engine: pendingEngine, variant },
     });
   };
 
@@ -264,19 +263,22 @@ export const SourceTransformSelector = ({
           the one still carrying records, so its files and health stay here. */}
         {running && <AppInstancePanels app={running.app} instance={source} />}
 
-        <SwitchTransformModal
-          open={pending !== undefined}
-          source={source}
-          from={selected?.service ?? null}
-          to={pending?.service ?? null}
-          isPending={isPending}
-          // Once the deployment has refused this engine, repeating the write only
-          // repeats the refusal.
-          refused={pendingEngine !== null && pendingEngine in refusals}
-          error={getApiErrorResponseBody(error)?.message ?? error?.message}
-          onConfirm={confirmSwitch}
-          onCancel={closeModal}
-        />
+        {pending && (
+          <SwitchTransformModal
+            source={source}
+            from={selected?.service ?? null}
+            to={pending.service}
+            engine={pending.engine}
+            storedVariant={sourceDetail?.version?.transform?.variant ?? null}
+            isPending={isPending}
+            // Once the deployment has refused this engine, repeating the write
+            // only repeats the refusal.
+            refused={pending.engine in refusals}
+            error={getApiErrorResponseBody(error)?.message ?? error?.message}
+            onConfirm={confirmSwitch}
+            onCancel={closeModal}
+          />
+        )}
       </SectionCard>
     </>
   );
