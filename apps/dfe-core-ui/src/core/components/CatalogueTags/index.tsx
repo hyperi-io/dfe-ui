@@ -11,11 +11,18 @@ const NO_TAGS: TInfiniteFilteredSourceCatalogueTagsResponse['items'] = [];
 
 export const CatalogueTags = ({
   onChange,
+  selected,
 }: {
   onChange?: (tags: string[]) => void;
+  /** When set, the parent owns the selection. Omit it to keep the selection here. */
+  selected?: string[];
 }) => {
   const [search, setSearch] = useState('');
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [internalSelected, setInternalSelected] = useState<Set<string>>(
+    new Set(),
+  );
+  const selectedTags =
+    selected === undefined ? internalSelected : new Set(selected);
 
   const pendingNext = useRef(false);
   const {
@@ -36,7 +43,7 @@ export const CatalogueTags = ({
     const next = new Set(selectedTags);
     if (next.has(tagId)) next.delete(tagId);
     else next.add(tagId);
-    setSelectedTags(next);
+    if (selected === undefined) setInternalSelected(next);
     onChange?.(Array.from(next));
   };
 
@@ -79,7 +86,10 @@ export const CatalogueTags = ({
       </div>
       {selectedTags.size > 0 && (
         <Button
-          onClick={() => setSelectedTags(new Set())}
+          onClick={() => {
+            if (selected === undefined) setInternalSelected(new Set());
+            onChange?.([]);
+          }}
           size="small"
           type="text"
           className="shrink-0"

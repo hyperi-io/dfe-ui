@@ -9,7 +9,7 @@ import {
 } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
@@ -66,6 +66,13 @@ export const AddFromCatalogueTable = ({
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
+  const filterTagsKey = (filters.tags ?? []).join('\0');
+  useEffect(() => {
+    queueMicrotask(() => {
+      setSearchTags(filterTagsKey === '' ? [] : filterTagsKey.split('\0'));
+      setPage(1);
+    });
+  }, [filterTagsKey]);
 
   const {
     data: { items: entries, total },
@@ -184,8 +191,10 @@ export const AddFromCatalogueTable = ({
       )}
 
       <CatalogueTags
+        selected={searchTags}
         onChange={(tags) => {
           setSearchTags(tags);
+          setPage(1);
         }}
       />
 
