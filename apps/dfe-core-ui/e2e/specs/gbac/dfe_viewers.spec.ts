@@ -4,20 +4,21 @@ import { BASE_URL, e2eClient } from '../../config/e2e.client';
 import { expectSettingsMenu, logOut } from '../../config/settingsMenu.helpers';
 import {
   expectLoggedOut,
-  expectSourcesLanding,
+  expectLanding,
   loginAs,
+  OBSERVE_LANDING,
 } from '../../config/login.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
   await e2eClient({ playwright, seedScript: 'seed_setup_complete' });
   await e2eClient({ playwright, seedScript: 'seed_dfe_viewers_user' });
-  await loginAs(page, 'dfe_viewers');
+  await loginAs(page, 'dfe_viewers', OBSERVE_LANDING);
 });
 
 test('Sidebar Navigation', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expectSourcesLanding(page);
+  await expectLanding(page, OBSERVE_LANDING);
 
   /* Shows the correct sidebar navigation links */
   await expect(
@@ -37,7 +38,7 @@ test('Sidebar Navigation', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Sources', exact: true }),
-  ).toHaveCount(2);
+  ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Settings actions', exact: true }),
   ).toBeVisible();
@@ -65,7 +66,7 @@ test('Sidebar Navigation', async ({ page }) => {
 
 test('User actions', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expectSourcesLanding(page);
+  await expectLanding(page, OBSERVE_LANDING);
 
   await expectSettingsMenu(page, {
     user: 'dfe_viewers',
@@ -76,10 +77,10 @@ test('User actions', async ({ page }) => {
 
 test('Logout', async ({ page }) => {
   await page.goto(BASE_URL);
-  await expectSourcesLanding(page);
+  await expectLanding(page, OBSERVE_LANDING);
 
   await logOut(page);
-  await expectLoggedOut(page);
+  await expectLoggedOut(page, OBSERVE_LANDING);
 });
 
 test('Sources', async ({ page }) => {
