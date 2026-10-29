@@ -12,7 +12,6 @@ import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { SettingsActionButton } from '@/core/components/SettingsActionButton';
 import { ThemeToggle } from '@/core/components/ThemeToggle';
 import { useTheme } from '@/core/contexts/ClientContext/ThemeContext';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { cn } from '@/core/utils/style';
 import { Logo } from './Logo';
 import { SidebarMenu } from './SidebarMenu';
@@ -24,9 +23,6 @@ export const Sidebar = () => {
   const { colorMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
-  const { componentHeight } = useSetComponentHeight({
-    offset: 130,
-  });
   return (
     <Sider
       className="h-screen border-r border-solid border-gray-200 dark:border-dark-background-secondary"
@@ -36,8 +32,10 @@ export const Sidebar = () => {
       collapsed={collapsed}
       width={250}
     >
-      <div className="flex flex-col h-full justify-between">
-        <div className="relative">
+      {/* One column: the menu takes what the logo and footer leave and
+          scrolls inside it, so the footer can never sit over a nav item. */}
+      <div className="flex flex-col h-full">
+        <div className="relative shrink-0">
           <Logo collapsed={collapsed} colorMode={colorMode} />
           <Button
             shape="circle"
@@ -62,14 +60,15 @@ export const Sidebar = () => {
             }
             onClick={() => setCollapsed(!collapsed)}
           />
-          <CustomScrollbar innerPadding={false} height={componentHeight}>
-            <SidebarMenu className="h-full" collapsed={collapsed} />
-          </CustomScrollbar>
         </div>
+
+        <CustomScrollbar innerPadding={false} className="flex-1 min-h-0">
+          <SidebarMenu collapsed={collapsed} />
+        </CustomScrollbar>
 
         <div
           className={cn(
-            'absolute bottom-0 left-0 right-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background',
+            'shrink-0 flex gap-x-1 gap-y-2 flex-wrap px-7 content-end py-4 w-full items-center justify-end bg-background dark:bg-dark-background',
             collapsed && 'justify-center flex-col-reverse',
           )}
         >
