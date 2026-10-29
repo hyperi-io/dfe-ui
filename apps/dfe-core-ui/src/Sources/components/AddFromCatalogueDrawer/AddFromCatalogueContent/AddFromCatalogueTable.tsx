@@ -52,13 +52,17 @@ export const AddFromCatalogueTable = ({
   selectedEntries,
   onSelectedEntriesChange = () => {},
   onUpload,
+  filters = {},
 }: {
   selectedEntries: AddFromCatalogueFormValues[];
   onSelectedEntriesChange?: (entries: AddFromCatalogueFormValues[]) => void;
   onUpload?: () => void;
+  filters?: {
+    tags?: string[];
+  };
 }) => {
   const [search, setSearch] = useState('');
-  const [searchTags, setSearchTags] = useState<string[]>([]);
+  const [searchTags, setSearchTags] = useState<string[]>(filters.tags ?? []);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();

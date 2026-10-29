@@ -7,7 +7,13 @@ import {
 import { AddFromCatalogueResponse } from './AddFromCatalogueResponse';
 import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 
-export const AddFromCatalogueContent = () => {
+export const AddFromCatalogueContent = ({
+  filters,
+}: {
+  filters: {
+    tags?: string[];
+  };
+}) => {
   const [selectedEntries, setSelectedEntries] = useState<
     AddFromCatalogueFormValues[]
   >([]);
@@ -51,6 +57,7 @@ export const AddFromCatalogueContent = () => {
         />
       ) : (
         <AddFromCatalogueTable
+          filters={filters}
           selectedEntries={selectedEntries}
           onSelectedEntriesChange={(entries) => setSelectedEntries(entries)}
           onUpload={() => setShowForm(true)}
