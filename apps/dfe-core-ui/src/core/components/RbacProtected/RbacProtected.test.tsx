@@ -144,4 +144,48 @@ describe('RbacProtected', () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  describe('a restricted control limited to readers', () => {
+    const LimitedToReaders = () => (
+      <RbacProtected action={UI_DISPLAY_ACTIONS.hunt_write}>
+        <RbacProtected.Unrestricted>
+          <p>Add Hunt</p>
+        </RbacProtected.Unrestricted>
+        <RbacProtected.Restricted visibleTo={UI_DISPLAY_ACTIONS.hunt_read}>
+          <p>Add Hunt disabled</p>
+        </RbacProtected.Restricted>
+        <p>page rendered</p>
+      </RbacProtected>
+    );
+
+    it.each([
+      ['a writer', ['hunt:write', 'hunt:read'], 'Add Hunt'],
+      ['a reader who cannot write', ['hunt:read'], 'Add Hunt disabled'],
+      ['a wildcard holder', ['hunt:*'], 'Add Hunt'],
+      ['a user who cannot read', ['source:read'], null],
+      ['a user with no permissions', [], null],
+    ])('shows %s the right control', async (_who, permissions, shown) => {
+      server.use(
+        API_CONFIG_MOCKS.auth.me.get.success({
+          mockedResponse: { ...ADMIN_MOCKED_RESPONSE, permissions },
+        }),
+      );
+      render(<LimitedToReaders />, { wrapper });
+
+      // Nothing renders while permissions load, so wait for them first.
+      await waitFor(() => {
+        expect(useAuthStore.getState().me).not.toBeNull();
+      });
+      await waitFor(() => {
+        expect(
+          screen.queryByText(shown ?? 'page rendered'),
+        ).toBeInTheDocument();
+      });
+      for (const text of ['Add Hunt', 'Add Hunt disabled']) {
+        if (text !== shown) {
+          expect(screen.queryByText(text)).not.toBeInTheDocument();
+        }
+      }
+    });
+  });
 });
