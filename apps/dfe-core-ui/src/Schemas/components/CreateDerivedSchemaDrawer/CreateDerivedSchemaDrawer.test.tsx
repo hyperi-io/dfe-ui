@@ -1,6 +1,7 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { CreateDerivedSchemaDrawer } from '@/Schemas/components/CreateDerivedSchemaDrawer';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { columnCheckbox } from '@/Schemas/components/DerivedSchemaFieldPicker/DerivedSchemaFieldPicker.mocks';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   afterAll,
@@ -63,13 +64,7 @@ const tickColumn = async (
   columnName: string,
 ) => {
   await screen.findByText(columnName, {}, { timeout: 5000 });
-  await user.click(
-    within(
-      // The pattern is built from a column name literal this test passes in.
-      // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-      screen.getByRole('row', { name: new RegExp(`\\b${columnName}\\b`) }),
-    ).getByRole('checkbox'),
-  );
+  await user.click(columnCheckbox(columnName));
 };
 
 describe('CreateDerivedSchemaDrawer', () => {

@@ -1,7 +1,10 @@
 // jsdom 28+ provides its own fetch that MSW cannot intercept.
 // Restore Node's native fetch (undici) so MSW's setupServer interceptors work.
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
+import userEvent, {
+  PointerEventsCheckLevel,
+} from '@testing-library/user-event';
 import React from 'react';
 import { fetch, Headers, Request, Response } from 'undici';
 import { afterEach, beforeEach, vi } from 'vitest';
@@ -31,6 +34,32 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
     dispatchEvent: () => false,
   })) as unknown as typeof window.matchMedia;
 }
+
+// user-event's pointer-events check calls getComputedStyle on the target and
+// every ancestor before each action. jsdom matches every antd stylesheet rule
+// per call (about 60ms each with the rules a drawer injects), so one click
+// cost seconds and grew with the host's load. A test that needs the check
+// passes pointerEventsCheck itself.
+const USER_EVENT_PATCHED = Symbol.for('dfe-ui.userEvent.setupPatched');
+type UserEventSetup = typeof userEvent.setup;
+const patchableUserEvent = userEvent as {
+  setup: UserEventSetup;
+  [USER_EVENT_PATCHED]?: true;
+};
+if (!patchableUserEvent[USER_EVENT_PATCHED]) {
+  const setupUser: UserEventSetup = userEvent.setup.bind(userEvent);
+  patchableUserEvent.setup = (options) =>
+    setupUser({
+      pointerEventsCheck: PointerEventsCheckLevel.Never,
+      ...options,
+    });
+  patchableUserEvent[USER_EVENT_PATCHED] = true;
+}
+
+// findBy* and waitFor return the moment their condition holds, so this is only
+// the point a missing condition is declared failed. The 1s default is shorter
+// than the first render of an antd page on a loaded runner.
+configure({ asyncUtilTimeout: 15_000 });
 
 globalThis.fetch = fetch as unknown as typeof globalThis.fetch;
 globalThis.Headers = Headers as unknown as typeof globalThis.Headers;

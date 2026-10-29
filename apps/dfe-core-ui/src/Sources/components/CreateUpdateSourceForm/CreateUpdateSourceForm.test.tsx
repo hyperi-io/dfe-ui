@@ -558,14 +558,15 @@ describe('CreateUpdateSourceForm transform', () => {
         { wrapper },
       );
 
-      await user.click(
-        await screen.findByRole(
-          'tab',
-          { name: 'Transform' },
-          { timeout: 15_000 },
-        ),
+      // A role query with a name works out the name of every tab, radio and
+      // button in the form, and findByRole repeats that on every render while
+      // it waits. The text and label queries find the same controls.
+      const transformTab = (await screen.findByText('Transform')).closest(
+        '[role="tab"]',
       );
-      await user.click(screen.getByRole('radio', { name: 'No Transform' }));
+      expect(transformTab).not.toBeNull();
+      await user.click(transformTab as HTMLElement);
+      await user.click(screen.getByLabelText('No Transform'));
       expect(
         screen.queryByLabelText(/^Transform Engine/),
       ).not.toBeInTheDocument();

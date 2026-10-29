@@ -18,6 +18,7 @@ import {
 import {
   BASE_SCHEMA_PATH,
   BASE_SCHEMA_VERSION,
+  columnCheckbox,
   server,
 } from './DerivedSchemaFieldPicker.mocks';
 
@@ -58,13 +59,6 @@ const Harness = ({
     />
   );
 };
-
-const rowCheckbox = (columnName: string) =>
-  within(
-    // The pattern is built from a column name literal this test passes in.
-    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-    screen.getByRole('row', { name: new RegExp(`\\b${columnName}\\b`) }),
-  ).getByRole('checkbox');
 
 const indexSelect = (columnName: string) =>
   screen.getByLabelText(`Index use case for ${columnName}`);
@@ -110,7 +104,7 @@ describe('DerivedSchemaFieldPicker', () => {
     await screen.findByText('message', {}, { timeout: 15000 });
     expect(indexSelect('message')).toBeDisabled();
 
-    await user.click(rowCheckbox('message'));
+    await user.click(columnCheckbox('message'));
 
     await waitFor(() => expect(indexSelect('message')).toBeEnabled());
   });
@@ -121,7 +115,7 @@ describe('DerivedSchemaFieldPicker', () => {
     render(<Harness onChange={onChange} />, { wrapper });
 
     await screen.findByText('message', {}, { timeout: 15000 });
-    await user.click(rowCheckbox('message'));
+    await user.click(columnCheckbox('message'));
 
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     expect(onChange).toHaveBeenLastCalledWith([{ name: 'message' }]);
@@ -137,8 +131,8 @@ describe('DerivedSchemaFieldPicker', () => {
       render(<Harness onChange={onChange} />, { wrapper });
 
       await screen.findByText('message', {}, { timeout: 15000 });
-      await user.click(rowCheckbox('message'));
-      await user.click(rowCheckbox('timestamp'));
+      await user.click(columnCheckbox('message'));
+      await user.click(columnCheckbox('timestamp'));
 
       await waitFor(() =>
         expect(onChange).toHaveBeenLastCalledWith([
@@ -155,7 +149,7 @@ describe('DerivedSchemaFieldPicker', () => {
     render(<Harness onChange={onChange} />, { wrapper });
 
     await screen.findByText('message', {}, { timeout: 45000 });
-    await user.click(rowCheckbox('message'));
+    await user.click(columnCheckbox('message'));
     await waitFor(() => expect(indexSelect('message')).toBeEnabled());
 
     await user.click(indexSelect('message'));
