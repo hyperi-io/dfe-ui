@@ -1,4 +1,6 @@
 import { registerOTel } from '@vercel/otel';
+import type { Instrumentation } from 'next';
+import { createLogger } from '@/core/server/logger';
 
 // Next's instrumentation hook: runs ONCE per server process, before anything serves.
 //
@@ -23,3 +25,20 @@ export function register(): void {
     serviceName: process.env.OTEL_SERVICE_NAME ?? 'dfe-ui',
   });
 }
+
+const requestLogger = createLogger('dfe-ui.server');
+
+// Headers are left out: the cookie and authorization they carry belong in no log.
+export const onRequestError: Instrumentation.onRequestError = (
+  error,
+  request,
+  context,
+) => {
+  requestLogger.error('request failed', {
+    method: request.method,
+    path: request.path,
+    route: context.routePath,
+    router: context.routerKind,
+    error,
+  });
+};
