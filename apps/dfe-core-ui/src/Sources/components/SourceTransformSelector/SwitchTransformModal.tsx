@@ -150,7 +150,6 @@ export const SwitchTransformModal = ({
         {catalogueError && (
           <NotificationCard
             type="warning"
-            variant="subtle"
             title="Could not read the source catalogue, so the variant stays as it is"
             description={catalogueError.message}
           />
