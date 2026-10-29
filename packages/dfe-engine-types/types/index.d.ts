@@ -1071,7 +1071,8 @@ export interface paths {
          * @description List sources with pagination, search, filtering, and a full object tree.
          *
          *     The landing source (``main``) is always the first item when it is in the
-         *     result set; remaining sources keep the requested sort.
+         *     result set; remaining sources keep the requested sort. A caller held to its
+         *     orgs does not see a fetcher source bound to another org.
          */
         get: operations["sources.list"];
         put?: never;
@@ -1107,15 +1108,45 @@ export interface paths {
          * List Catalogue
          * @description List the sources the installed dfe-schemas catalogue ships ready to create.
          *
-         *     An entry already stored as a source is left out, matched on the catalogue entry
-         *     name even when the source was given a different one. A source written by hand
-         *     does not hide an entry. Each entry says whether the deployed transform ships
+         *     ``tags`` keeps an entry whose holding directory is one of the names given.
+         *     ``untagged`` is a file that sits in the catalogue root, and omitting ``tags``
+         *     lists every entry. An entry already stored as a source is left out, matched
+         *     on the catalogue entry name even when the source was given a different one. A
+         *     source written by hand does not hide an entry. Each entry says whether the
+         *     deployed transform ships
          *     its default variant, read off that app's mounted contract, so a console can
          *     hold back an entry the create would refuse. It also says whether this
          *     deployment can run the entry at all: a source that needs a per-source app
          *     (a fetcher or a transform) is refused on a gRPC deployment.
          */
         get: operations["sources.catalogue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/catalogue-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalogue Tags
+         * @description List the directories under the catalogue that hold source files.
+         *
+         *     A tag is one directory directly under ``catalogue/``. Files that sit in the
+         *     catalogue root, rather than in one of those directories, are the tag
+         *     ``untagged``. ``id`` is the directory key. ``name`` and ``description`` come
+         *     from ``registries/catalogue-tags.yaml`` beside that catalogue. ``name`` keeps
+         *     a tag whose key or display name starts with it, so ``act`` matches
+         *     ``active-mq`` and does not match a name that only contains those letters later.
+         */
+        get: operations["sources.catalogue-tags"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7193,6 +7224,27 @@ export interface components {
             restart_required?: string[];
         };
         /**
+         * CatalogueTagObject
+         * @description One directory under the catalogue that holds source files.
+         */
+        CatalogueTagObject: {
+            /**
+             * Id
+             * @description The directory name, which is the tag key. untagged is the files that sit in the catalogue root rather than in a directory
+             */
+            id: string;
+            /**
+             * Name
+             * @description The name the console shows, from the tag dictionary
+             */
+            name: string;
+            /**
+             * Description
+             * @description What this tag groups, from the tag dictionary
+             */
+            description: string;
+        };
+        /**
          * CelCheckBatchRequest
          * @description Request to validate multiple CEL expressions in one call.
          */
@@ -11388,6 +11440,41 @@ export interface components {
              */
             readonly prev_page: number | null;
         };
+        /** PaginatedResponse[CatalogueTagObject] */
+        PaginatedResponse_CatalogueTagObject_: {
+            /** Items */
+            items: components["schemas"]["CatalogueTagObject"][];
+            /**
+             * Total
+             * @description Total matching items across all pages
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number (1-based)
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /**
+             * Total Pages
+             * @description Number of pages, 1 when ``per_page`` is -1 and every item is on one page.
+             */
+            readonly total_pages: number;
+            /**
+             * Next Page
+             * @description The next page number, or None on the last page or when every item is on one.
+             */
+            readonly next_page: number | null;
+            /**
+             * Prev Page
+             * @description The previous page number, or None on the first page.
+             */
+            readonly prev_page: number | null;
+        };
         /** PaginatedResponse[DerivedSchemaSummary] */
         PaginatedResponse_DerivedSchemaSummary_: {
             /** Items */
@@ -12225,6 +12312,12 @@ export interface components {
             }[];
             /** Warnings */
             warnings?: string[];
+            /**
+             * Error
+             * @description Set when a write failed and the run stopped there: the report is what landed before it, with every review branch and PR already opened
+             * @default
+             */
+            error: string;
             /**
              * Review Required
              * @description A generated rule or hunt was routed to a review branch, not to the branch the hunt runner syncs; nothing here runs until those branches merge
@@ -16528,6 +16621,11 @@ export interface components {
              * @description Human-readable label
              */
             display_name?: string | null;
+            /**
+             * Issuer
+             * @description OIDC issuer URL. An empty one is refused, since a login needs it
+             */
+            issuer?: string | null;
             /**
              * Client Id
              * @description OIDC client ID (not a secret)
@@ -20901,6 +20999,8 @@ export interface operations {
                 intake?: string | null;
                 /** @description Search the entry name, package and data stream */
                 search?: string | null;
+                /** @description Only entries in one of these holding directories. Repeat the param for more than one. untagged is the files that sit in the catalogue root. Omit it to list the whole catalogue */
+                tags?: string[] | null;
                 page?: number;
                 per_page?: number;
             };
@@ -20917,6 +21017,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_CatalogueEntryObject_"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "sources.catalogue-tags": {
+        parameters: {
+            query?: {
+                /** @description Keep tags whose directory key or display name starts with this. The match ignores case */
+                name?: string | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_CatalogueTagObject_"];
                 };
             };
             /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
