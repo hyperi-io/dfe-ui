@@ -3,7 +3,7 @@
   "info": {
     "title": "DFE Engine API",
     "description": "Data Fusion Engine -- configuration, scheduling, and query API",
-    "version": "1.22.77"
+    "version": "1.22.78"
   },
   "paths": {
     "/api/v1/auth/login": {
@@ -5857,7 +5857,7 @@
           "Sources"
         ],
         "summary": "List Sources",
-        "description": "List sources with pagination, search, filtering, and a full object tree.\n\nThe landing source (``main``) is always the first item when it is in the\nresult set; remaining sources keep the requested sort.",
+        "description": "List sources with pagination, search, filtering, and a full object tree.\n\nThe landing source (``main``) is always the first item when it is in the\nresult set; remaining sources keep the requested sort. A caller held to its\norgs does not see a fetcher source bound to another org.",
         "operationId": "sources.list",
         "parameters": [
           {
@@ -6140,7 +6140,7 @@
           "Sources"
         ],
         "summary": "List Catalogue",
-        "description": "List the sources the installed dfe-schemas catalogue ships ready to create.\n\nAn entry already stored as a source is left out, matched on the catalogue entry\nname even when the source was given a different one. A source written by hand\ndoes not hide an entry. Each entry says whether the deployed transform ships\nits default variant, read off that app's mounted contract, so a console can\nhold back an entry the create would refuse. It also says whether this\ndeployment can run the entry at all: a source that needs a per-source app\n(a fetcher or a transform) is refused on a gRPC deployment.",
+        "description": "List the sources the installed dfe-schemas catalogue ships ready to create.\n\n``tags`` keeps an entry whose holding directory is one of the names given.\n``untagged`` is a file that sits in the catalogue root, and omitting ``tags``\nlists every entry. ``engine`` keeps an entry whose transform engine is that\none, without regard to case, and an engine no entry uses lists nothing. An\nentry already stored as a source is left out unless ``include_stored`` is set,\nmatched on the catalogue entry name even when the source was given a different\none. A source written by hand does not hide an entry. Each entry says whether\nthe deployed transform ships its default variant, read off that app's mounted\ncontract, so a console can hold back an entry the create would refuse. It also\nsays whether this deployment can run the entry at all: a source that needs a\nper-source app (a fetcher or a transform) is refused on a gRPC deployment.",
         "operationId": "sources.catalogue",
         "parameters": [
           {
@@ -6178,6 +6178,57 @@
               "title": "Search"
             },
             "description": "Search the entry name, package and data stream"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only entries in one of these holding directories. Repeat the param for more than one. untagged is the files that sit in the catalogue root. Omit it to list the whole catalogue",
+              "title": "Tags"
+            },
+            "description": "Only entries in one of these holding directories. Repeat the param for more than one. untagged is the files that sit in the catalogue root. Omit it to list the whole catalogue"
+          },
+          {
+            "name": "engine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only entries whose transform engine is this one, matched without regard to case. An engine no entry uses lists nothing. Omit it to list every engine",
+              "title": "Engine"
+            },
+            "description": "Only entries whose transform engine is this one, matched without regard to case. An engine no entry uses lists nothing. Omit it to list every engine"
+          },
+          {
+            "name": "include_stored",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "List entries already stored as a source too. Off by default, so the create-from-catalogue page offers only what is left to create",
+              "default": false,
+              "title": "Include Stored"
+            },
+            "description": "List entries already stored as a source too. Off by default, so the create-from-catalogue page offers only what is left to create"
           },
           {
             "name": "page",
@@ -6255,6 +6306,119 @@
             "sources"
           ],
           "verb": "catalogue",
+          "read_only": true,
+          "cli": {
+            "hidden": false,
+            "aliases": [],
+            "positional": []
+          },
+          "action": "source:read"
+        }
+      }
+    },
+    "/api/v1/sources/catalogue-tags": {
+      "get": {
+        "tags": [
+          "Sources"
+        ],
+        "summary": "List Catalogue Tags",
+        "description": "List the directories under the catalogue that hold source files.\n\nA tag is one directory directly under ``catalogue/``. Files that sit in the\ncatalogue root, rather than in one of those directories, are the tag\n``untagged``. ``id`` is the directory key. ``name`` and ``description`` come\nfrom ``registries/catalogue-tags.yaml`` beside that catalogue. ``name`` keeps\na tag whose key or display name starts with it, so ``act`` matches\n``active-mq`` and does not match a name that only contains those letters later.",
+        "operationId": "sources.catalogue-tags",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Keep tags whose directory key or display name starts with this. The match ignores case",
+              "title": "Name"
+            },
+            "description": "Keep tags whose directory key or display name starts with this. The match ignores case"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_CatalogueTagObject_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refused: the session lacks the action this route checks, or its account must replace an issued password first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-scalo": {
+          "group": "sources",
+          "resource": "sources",
+          "hierarchy": [
+            "sources"
+          ],
+          "verb": "catalogue-tags",
           "read_only": true,
           "cli": {
             "hidden": false,
@@ -8753,7 +8917,7 @@
           "Kafka Topics"
         ],
         "summary": "List Topic Status",
-        "description": "Report each source topic's existence, shape, config and drift.\n\nRead-only: it creates nothing, so a status call against a broker mid-restart\nreports that it could not be read rather than reporting every topic missing.",
+        "description": "Report each source topic's existence, shape, config and drift.\n\nRead-only: it creates nothing, so a status call against a broker mid-restart\nreports that it could not be read rather than reporting every topic missing.\nA caller held to its orgs sees the topics of the sources it may read.",
         "operationId": "kafka.topics",
         "parameters": [
           {
@@ -32124,6 +32288,33 @@
         "title": "CatalogueSourcesResponse",
         "description": "What creating the requested catalogue entries did.\n\n``created`` is what was stored. ``failed`` is what was left unstored. A later\nentry failing does not remove an earlier one. The apps are reconciled once,\nfor everything that was stored."
       },
+      "CatalogueTagObject": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "The directory name, which is the tag key. untagged is the files that sit in the catalogue root rather than in a directory"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name the console shows, from the tag dictionary"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "What this tag groups, from the tag dictionary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "title": "CatalogueTagObject",
+        "description": "One directory under the catalogue that holds source files."
+      },
       "CelCheckBatchRequest": {
         "properties": {
           "expressions": {
@@ -39265,6 +39456,75 @@
         ],
         "title": "PaginatedResponse[CatalogueEntryObject]"
       },
+      "PaginatedResponse_CatalogueTagObject_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogueTagObject"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total matching items across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-based)"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "description": "Number of pages, 1 when ``per_page`` is -1 and every item is on one page.",
+            "readOnly": true
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page",
+            "description": "The next page number, or None on the last page or when every item is on one.",
+            "readOnly": true
+          },
+          "prev_page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prev Page",
+            "description": "The previous page number, or None on the first page.",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "per_page",
+          "total_pages",
+          "next_page",
+          "prev_page"
+        ],
+        "title": "PaginatedResponse[CatalogueTagObject]"
+      },
       "PaginatedResponse_DerivedSchemaSummary_": {
         "properties": {
           "items": {
@@ -40898,6 +41158,12 @@
             },
             "type": "array",
             "title": "Warnings"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Set when a write failed and the run stopped there: the report is what landed before it, with every review branch and PR already opened",
+            "default": ""
           },
           "review_required": {
             "type": "boolean",
@@ -48809,6 +49075,18 @@
             ],
             "title": "Display Name",
             "description": "Human-readable label"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issuer",
+            "description": "OIDC issuer URL. An empty one is refused, since a login needs it"
           },
           "client_id": {
             "anyOf": [
