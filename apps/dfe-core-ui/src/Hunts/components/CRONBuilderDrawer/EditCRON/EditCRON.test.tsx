@@ -186,8 +186,14 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Hourly' }));
 
-      expect(screen.getByText('Every hour and minute')).toBeVisible();
-      expect(screen.getByText('At specific hour and minute')).toBeVisible();
+      expect(screen.getByRole('tab', { name: 'Hourly' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByText('Every hour and minute')).toBeInTheDocument();
+      expect(
+        screen.getByText('At specific hour and minute'),
+      ).toBeInTheDocument();
       expect(generatedExpression()).toHaveValue('0 */1 * * *');
 
       const hours = screen.getByPlaceholderText('Hours');
@@ -211,9 +217,15 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Daily' }));
 
-      expect(screen.getByText('Every number of days')).toBeVisible();
-      expect(screen.getByText('On a specific day of the month')).toBeVisible();
-      expect(screen.getByLabelText('Day interval')).toBeVisible();
+      expect(screen.getByRole('tab', { name: 'Daily' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByText('Every number of days')).toBeInTheDocument();
+      expect(
+        screen.getByText('On a specific day of the month'),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText('Day interval')).toBeInTheDocument();
       expect(generatedExpression()).toHaveValue('0 1 */1 * *');
 
       const day = screen.getByRole('spinbutton', { name: 'Day interval' });
@@ -239,8 +251,12 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Weekly' }));
 
-      expect(screen.getByText('Days of the week')).toBeVisible();
-      expect(screen.getByRole('option', { name: 'Sun' })).toBeVisible();
+      expect(screen.getByRole('tab', { name: 'Weekly' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByText('Days of the week')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Sun' })).toBeInTheDocument();
       expect(generatedExpression()).toHaveValue('0 1 * * MON,TUE,WED,THU,FRI');
 
       await user.click(screen.getByRole('option', { name: 'Sat' }));
@@ -258,8 +274,12 @@ describe('EditCron', () => {
 
       await user.click(screen.getByRole('tab', { name: 'Monthly' }));
 
-      expect(screen.getByText('Specific day of the month')).toBeVisible();
-      expect(screen.getByText('Last day of every month')).toBeVisible();
+      expect(screen.getByRole('tab', { name: 'Monthly' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByText('Specific day of the month')).toBeInTheDocument();
+      expect(screen.getByText('Last day of every month')).toBeInTheDocument();
       expect(generatedExpression()).toHaveValue('0 1 1 * *');
 
       const day = screen.getByRole('spinbutton', { name: 'Day of the month' });

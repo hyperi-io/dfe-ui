@@ -18,6 +18,7 @@ import {
 import {
   BASE_SCHEMA_PATH,
   BASE_SCHEMA_VERSION,
+  columnCheckbox,
   server,
 } from './DerivedSchemaFieldPicker.mocks';
 
@@ -58,13 +59,6 @@ const Harness = ({
     />
   );
 };
-
-const rowCheckbox = (columnName: string) =>
-  within(
-    // The pattern is built from a column name literal this test passes in.
-    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-    screen.getByRole('row', { name: new RegExp(`\\b${columnName}\\b`) }),
-  ).getByRole('checkbox');
 
 const indexSelect = (columnName: string) =>
   screen.getByLabelText(`Index use case for ${columnName}`);
@@ -110,7 +104,7 @@ describe('DerivedSchemaFieldPicker', () => {
     await screen.findByText('message', {}, { timeout: 15000 });
     expect(indexSelect('message')).toBeDisabled();
 
-    await user.click(rowCheckbox('message'));
+    await user.click(columnCheckbox('message'));
 
     await waitFor(() => expect(indexSelect('message')).toBeEnabled());
   });
@@ -121,41 +115,36 @@ describe('DerivedSchemaFieldPicker', () => {
     render(<Harness onChange={onChange} />, { wrapper });
 
     await screen.findByText('message', {}, { timeout: 15000 });
-    await user.click(rowCheckbox('message'));
+    await user.click(columnCheckbox('message'));
 
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     expect(onChange).toHaveBeenLastCalledWith([{ name: 'message' }]);
   });
 
-  // Two clicks follow the 15s content backstop, which overruns the 20s suite limit on a busy worker.
-  it(
-    'orders the selection by the base schema, not by the order ticked',
-    { timeout: 45_000 },
-    async () => {
-      const user = userEvent.setup();
-      const onChange = vi.fn();
-      render(<Harness onChange={onChange} />, { wrapper });
+  it('orders the selection by the base schema, not by the order ticked', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Harness onChange={onChange} />, { wrapper });
 
-      await screen.findByText('message', {}, { timeout: 15000 });
-      await user.click(rowCheckbox('message'));
-      await user.click(rowCheckbox('timestamp'));
+    await screen.findByText('message', {}, { timeout: 15000 });
+    await user.click(columnCheckbox('message'));
+    await user.click(columnCheckbox('timestamp'));
 
-      await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith([
-          { name: 'timestamp' },
-          { name: 'message' },
-        ]),
-      );
-    },
-  );
+    await waitFor(() =>
+      expect(onChange).toHaveBeenLastCalledWith([
+        { name: 'timestamp' },
+        { name: 'message' },
+      ]),
+    );
+  });
 
   it('writes the index only once the user changes it', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />, { wrapper });
 
-    await screen.findByText('message', {}, { timeout: 45000 });
-    await user.click(rowCheckbox('message'));
+    await screen.findByText('message', {}, { timeout: 15000 });
+    await user.click(columnCheckbox('message'));
     await waitFor(() => expect(indexSelect('message')).toBeEnabled());
 
     await user.click(indexSelect('message'));
@@ -163,7 +152,7 @@ describe('DerivedSchemaFieldPicker', () => {
       await screen.findByTitle(
         'I search for fragments inside words',
         {},
-        { timeout: 45000 },
+        { timeout: 15000 },
       ),
     );
 
@@ -172,7 +161,7 @@ describe('DerivedSchemaFieldPicker', () => {
         { name: 'message', index: 'substring_search' },
       ]),
     );
-  }, 60_000);
+  });
 
   it('filters the listed columns by name', async () => {
     const user = userEvent.setup();

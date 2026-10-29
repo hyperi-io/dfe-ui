@@ -63,7 +63,7 @@ describe('AddFromCatalogueTable pagination', () => {
 
     expect(screen.getByText('entry-0')).toBeInTheDocument();
     expect(screen.getByText('10 of 1064 entries shown')).toBeInTheDocument();
-    await user.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+    await user.click(screen.getByLabelText('Select row 1'));
     expect(screen.getByText(/1 entries selected/)).toBeInTheDocument();
 
     await user.click(
