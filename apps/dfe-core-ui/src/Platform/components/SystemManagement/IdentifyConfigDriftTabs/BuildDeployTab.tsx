@@ -1,4 +1,3 @@
-import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
 import { useBulkActionSources } from '@/core/hooks/useBulkActionSources';
 import {
@@ -10,11 +9,9 @@ import { useState } from 'react';
 
 export const BuildDeployTab = ({
   appliedSources,
-  appliedSuccessMessage,
   onSuccess,
 }: {
   appliedSources: TBulkActionSourcesRequestBody['sources'];
-  appliedSuccessMessage: string;
   onSuccess?: (response?: TBulkActionSourcesResponse) => void;
 }) => {
   const { notification } = App.useApp();
@@ -48,9 +45,6 @@ export const BuildDeployTab = ({
   ];
   return (
     <div className="flex flex-col gap-4">
-      {appliedSuccessMessage && (
-        <NotificationCard title={appliedSuccessMessage} type="success" />
-      )}
       <Table<TBulkActionSourcesRequestBody['sources'][number]>
         rowKey="source"
         dataSource={appliedSources}
