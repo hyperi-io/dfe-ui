@@ -34,7 +34,7 @@ const formatNotificationCardTitleAndDescription = (step: CurrentStep) => {
       return {
         title: 'Config Drift Identified',
         description:
-          'Configuration drift has been identified for sources in your environment. Applying defaults pins them in each source and alters the deployed table where it can: TTL moves and missing header columns are added straight away. An engine change needs a table rebuild, and the result below says so.',
+          'Apply pins the defaults on each selected source, so later default changes stop moving it. TTL and missing header columns reach the deployed table straight away, and an engine change needs a table rebuild.',
       };
   }
 };
@@ -108,6 +108,8 @@ export const IdentifyConfigDriftTabs = ({
     data: { items: defaultsDriftSources } = {},
     isLoading,
     error,
+    loadMoreRef,
+    isFetchingNextPage,
   } = useFetchInfiniteDefaultsDriftSources();
 
   if (error) {
@@ -160,6 +162,8 @@ export const IdentifyConfigDriftTabs = ({
             <ConfigDriftTab
               onSuccess={handleConfigDriftSuccess}
               defaultsDriftSources={defaultsDriftSources ?? []}
+              loadMoreRef={loadMoreRef}
+              isFetchingNextPage={isFetchingNextPage}
             />
           )}
           {currentStep === 'build-deploy' && (

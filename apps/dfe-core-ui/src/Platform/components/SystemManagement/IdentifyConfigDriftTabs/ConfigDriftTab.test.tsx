@@ -16,7 +16,8 @@ import {
   test,
   vi,
 } from 'vitest';
-import { ConfigDriftTab } from './ConfigDriftTab';
+import { createRef } from 'react';
+import { asShown, ConfigDriftTab } from './ConfigDriftTab';
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -116,5 +117,78 @@ describe('ApplyDefaultsContent', () => {
       expect(screen.getByText('0 selected')).toBeInTheDocument();
     });
     expect(applyButton).toBeDisabled();
+  });
+
+  test.each([
+    ['common-header/timeseries', 'timeseries'],
+    ['timeseries', 'timeseries'],
+    ['my-common-header/x', 'my-common-header/x'],
+    [90, '90'],
+    [null, undefined],
+  ])('reads %s as %s', (value, shown) => {
+    expect(asShown(value)).toBe(shown);
+  });
+
+  test.each([
+    [
+      'the prefixed and bare names of one header',
+      'timeseries',
+      'common-header/timeseries',
+      false,
+    ],
+    ['two different headers', 'timeseries', 'common-header/syslog', true],
+  ])('treats %s as drift: %s', async (_case, stored, dflt, drifted) => {
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[
+          {
+            ...driftSource('custom_source', false),
+            ttl_days: { stored: '90', default: '90' },
+            common_header_type: { stored, default: dflt },
+          },
+        ]}
+      />,
+      { wrapper },
+    );
+
+    const row = await screen.findByRole('row', { name: /custom_source/ });
+    expect(within(row).queryAllByText('Drift').length > 0).toBe(drifted);
+  });
+
+  test.each([
+    ['a TTL', { stored: '14', default: '90' }, 'current 14, default 90'],
+    [
+      'a TTL with no default',
+      { stored: '14', default: null },
+      'current 14, default none',
+    ],
+  ])('shows %s as current then default', async (_case, ttl, spoken) => {
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[
+          { ...driftSource('custom_source', false), ttl_days: ttl },
+        ]}
+      />,
+      { wrapper },
+    );
+
+    const row = await screen.findByRole('row', { name: /custom_source/ });
+    expect(within(row).getByText(spoken)).toBeInTheDocument();
+    // The arrow is an icon, never ASCII punctuation in the cell.
+    expect(within(row).queryByText(/\||->|Current:/)).toBeNull();
+  });
+
+  test('renders the element that loads the next page under the table', async () => {
+    const loadMoreRef = createRef<HTMLDivElement>();
+    render(
+      <ConfigDriftTab
+        defaultsDriftSources={[driftSource('custom_source', false)]}
+        loadMoreRef={loadMoreRef}
+      />,
+      { wrapper },
+    );
+
+    await screen.findByRole('row', { name: /custom_source/ });
+    expect(loadMoreRef.current).toBeInstanceOf(HTMLDivElement);
   });
 });
