@@ -1,5 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { FormNotification } from '@/core/components/FormNotification';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { OrganisationSelect } from '@/core/components/OrganisationSelect';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { GroupMemberSelect } from '@/Settings/components/GroupManagement/GroupMemberSelect';
@@ -36,6 +37,7 @@ export const CreateUpdateGroupForm = ({
   },
   disabledFields,
   showMembersField = false,
+  savedLink,
 }: {
   name: string;
   onFinish: (
@@ -52,16 +54,28 @@ export const CreateUpdateGroupForm = ({
     organisation?: boolean;
   };
   showMembersField?: boolean;
+  /** The link as the engine holds it now, which can move after the form opens. */
+  savedLink?: GroupSourceLink;
 }) => {
   const [form] = Form.useForm<CreateUpdateGroupFormData>();
   // antd reads initialValues only at mount, so the link an edit is judged against is fixed then too.
-  const [stored] = useState<GroupSourceLink>(() => ({
+  const [stored, setStored] = useState<GroupSourceLink>(() => ({
     source_id: initialValues.source_id,
     source_provider: initialValues.source_provider,
   }));
   const formSchema = useMemo(() => createGroupFormSchema(stored), [stored]);
   const formValidation =
     useAntdZodResolver<CreateUpdateGroupFormData>(formSchema);
+
+  const linkMoved =
+    !!savedLink &&
+    (savedLink.source_id !== stored.source_id ||
+      savedLink.source_provider !== stored.source_provider);
+  const loadSavedLink = () => {
+    if (!savedLink) return;
+    setStored(savedLink);
+    form.setFieldsValue(savedLink);
+  };
 
   const watchScope = Form.useWatch('scope', form);
   const isScopeOrg = watchScope === 'org';
@@ -111,6 +125,21 @@ export const CreateUpdateGroupForm = ({
           rules={[formValidation]}
         >
           <OrganisationSelect disabled={disabledFields?.organisation} />
+        </Form.Item>
+      )}
+
+      {linkMoved && (
+        <Form.Item>
+          <NotificationCard
+            type="warning"
+            title="The saved link changed since this form opened"
+            description={`Saved now: source ID "${savedLink.source_id}", provider "${savedLink.source_provider}". Saving keeps it unless you edit the link fields.`}
+            action={
+              <Button htmlType="button" onClick={loadSavedLink}>
+                Load saved link
+              </Button>
+            }
+          />
         </Form.Item>
       )}
 

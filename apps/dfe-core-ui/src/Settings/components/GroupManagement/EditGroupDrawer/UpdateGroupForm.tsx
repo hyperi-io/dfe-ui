@@ -73,6 +73,10 @@ export const UpdateGroupForm = ({
       }}
       buttonLabel="Update Group"
       showMembersField
+      savedLink={{
+        source_id: initialValues.source_id,
+        source_provider: initialValues.source_provider,
+      }}
     />
   );
 };
