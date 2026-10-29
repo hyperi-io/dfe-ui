@@ -5,11 +5,10 @@ import {
   ResetPasswordForm,
   TResetPasswordFormValues,
 } from '@/core/components/ResetPasswordForm';
-import { Tooltip } from '@/core/components/Tooltip';
 import { useAccountResetPassword } from '@/core/hooks/useAccountResetPassword';
 import { IconRefresh } from '@repo/dfe-icons';
 import { App, Button } from 'antd';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 export const ResetPasswordModal = ({
   username,
@@ -49,13 +48,26 @@ export const ResetPasswordModal = ({
     setOpen(true);
   };
 
+  const reasonId = useId();
+  // The reason is visible text, since a disabled button takes no focus and its tooltip no keyboard.
   if (disabledReason) {
     return (
-      <Tooltip title={disabledReason}>
-        <Button type="primary" icon={<IconRefresh />} disabled>
+      <div className="flex flex-col items-start gap-1">
+        <Button
+          type="primary"
+          icon={<IconRefresh />}
+          disabled
+          aria-describedby={reasonId}
+        >
           Reset Password
         </Button>
-      </Tooltip>
+        <p
+          id={reasonId}
+          className="text-xs text-foreground-muted dark:text-dark-foreground-muted"
+        >
+          {disabledReason}
+        </p>
+      </div>
     );
   }
 

@@ -8,6 +8,8 @@ import type { UI_DISPLAY_ACTIONS_TYPE } from './hooks/rbac.constants';
 import { useRbac } from './hooks/useRbac';
 import { RbacProtectedContext } from './RbacProtected';
 
+const RESTRICTED_REASON = 'Insufficient role permissions';
+
 interface TooltipProps extends AbstractTooltipProps {
   show?: boolean;
   triggerComponent?: React.ReactNode;
@@ -48,15 +50,20 @@ export const Restricted = ({
           destroyOnHidden
           className="absolute"
           color="gray"
-          trigger="click"
+          // Focus opens it too, so a keyboard user reaches the reason.
+          trigger={['click', 'focus']}
           title={
             <div className="flex items-center gap-2 text-white">
-              <IconInfoCircle /> Insufficient role permissions
+              <IconInfoCircle /> {RESTRICTED_REASON}
             </div>
           }
           {...tooltip}
         >
-          <button type="button" className="absolute z-10 h-full w-full">
+          <button
+            type="button"
+            aria-label={RESTRICTED_REASON}
+            className="absolute z-10 h-full w-full"
+          >
             {tooltip.showIcon && (
               <span className="absolute left-7 top-1.5 bg-white rounded-full p-1">
                 <IconLock className="text-black w-4 h-4" />
