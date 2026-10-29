@@ -195,11 +195,13 @@ describe('ConfigureOIDCForm', () => {
 
     await fillField(user, 'Okta Org Domain', 'dev-123.okta.com');
 
-    expect(screen.getByLabelText('Okta Domain')).toHaveValue(
-      'dev-123.okta.com',
+    await waitFor(() =>
+      expect(screen.getByLabelText('Okta Domain')).toHaveValue(
+        'dev-123.okta.com',
+      ),
     );
     expect(
-      screen.getByText('Issuer: https://dev-123.okta.com'),
+      await screen.findByText('Issuer: https://dev-123.okta.com'),
     ).toBeInTheDocument();
   });
 
