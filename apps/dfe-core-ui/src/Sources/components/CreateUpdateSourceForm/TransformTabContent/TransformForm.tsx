@@ -63,17 +63,9 @@ export const TransformForm = ({
           rules={[formValidation]}
         />
       )}
-      <Form.Item
-        name={['transform', 'files']}
-        label="Files"
-        rules={[formValidation]}
-      >
-        <Select
-          placeholder="Select files"
-          mode="multiple"
-          options={[]}
-          allowClear
-        />
+      {/* No picker, since the Processing tab links files, but registered so an edit sends back the stored ones. */}
+      <Form.Item name={['transform', 'files']} hidden>
+        <input type="hidden" />
       </Form.Item>
       <EnvKeyValueBuilder formValidation={formValidation} />
     </>
