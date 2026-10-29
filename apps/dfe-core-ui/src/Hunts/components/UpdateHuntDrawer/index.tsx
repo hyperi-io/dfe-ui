@@ -55,7 +55,7 @@ export const UpdateHuntDrawer = ({
       onClose?.();
       onSuccess?.(response);
       api.success({
-        title: `${response.name} updated successfully`,
+        title: `Hunt ${response.display_name || response.name} updated successfully`,
         placement: 'bottomLeft',
       });
     },
