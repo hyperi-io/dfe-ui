@@ -252,10 +252,10 @@ describe('ViewsTabContent logsource fields', () => {
       render(<Harness views={[{ standard }]} />, { wrapper });
 
       await screen.findByRole('button', { name: /Delete .*view/ });
-      // antd hides a Form.Item by class alone, and its CSS does not load in tests.
       for (const label of ['Taxonomy', 'Category', 'Service']) {
-        const item = screen.getByLabelText(label).closest('.ant-form-item');
-        expect(item?.classList.contains('ant-form-item-hidden')).toBe(!shown);
+        const field = screen.getByLabelText(label);
+        if (shown) expect(field).toBeVisible();
+        else expect(field).not.toBeVisible();
       }
     },
   );

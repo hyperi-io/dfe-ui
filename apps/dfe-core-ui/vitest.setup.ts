@@ -56,6 +56,18 @@ if (!patchedCSS[RULE_FREE]) {
   patchedCSS[RULE_FREE] = true;
 }
 
+// The emptied CSS above also drops the one rule antd uses to hide an element by
+// class alone (a hidden Form.Item, a collapsed panel, a closed dropdown or
+// tooltip). Without it role queries and toBeVisible see those elements as
+// shown, so a test of "this field is hidden" passes or fails for the wrong
+// reason. One rule restores it, and getComputedStyle still has next to nothing
+// to match.
+if (typeof document !== 'undefined') {
+  const hiddenRules = document.createElement('style');
+  hiddenRules.textContent = '[class*="ant-"][class*="-hidden"]{display:none}';
+  document.head.appendChild(hiddenRules);
+}
+
 // findBy* and waitFor return the moment their condition holds, so this is only
 // the point a missing condition is declared failed. The 1s default is shorter
 // than the first render of an antd page on a loaded runner.
