@@ -3,8 +3,13 @@ import {
   getZodSchemaForRule,
   isZodFieldRequired,
 } from '@/core/utils/zod/useAntdZodResolver';
-import { Form as AntdForm, type FormItemProps, type FormProps } from 'antd';
-import type { ReactNode } from 'react';
+import {
+  Form as AntdForm,
+  type FormInstance,
+  type FormItemProps,
+  type FormProps,
+} from 'antd';
+import { type ReactNode, useEffect, useRef } from 'react';
 
 const zodRequiredFromRules = (
   name: FormItemProps['name'],
@@ -47,16 +52,45 @@ const FormItem = ({
 };
 type AntdFormType = typeof AntdForm;
 
+const ERROR_SELECTOR = '.ant-form-item-explain-error';
+
+// Ant Design gives a field error no role and no prop to add one, so it is
+// set as each message is inserted, and a screen reader announces it then
+// rather than only when the field next takes focus.
+const markErrorsAsAlerts = (root: HTMLElement) => {
+  const mark = () =>
+    root
+      .querySelectorAll(`${ERROR_SELECTOR}:not([role])`)
+      .forEach((error) => error.setAttribute('role', 'alert'));
+  mark();
+  const observer = new MutationObserver(mark);
+  observer.observe(root, { childList: true, subtree: true });
+  return () => observer.disconnect();
+};
+
 const FormWrapper = ({
   className,
   layout = 'vertical',
   children,
   ...rest
 }: FormProps) => {
+  const formRef = useRef<FormInstance & { nativeElement?: HTMLElement }>(null);
+
+  useEffect(() => {
+    const root = formRef.current?.nativeElement;
+    return root ? markErrorsAsAlerts(root) : undefined;
+  }, []);
+
   return (
     <AntdForm
+      ref={formRef}
       layout={layout}
-      className={cn('w-full flex flex-col gap-3', className)}
+      className={cn(
+        'w-full flex flex-col gap-3',
+        // Empty alt text on the drawn mark keeps it out of the field's name.
+        "[&_label.ant-form-item-required]:before:content-['*'_/_'']",
+        className,
+      )}
       {...rest}
     >
       {children as ReactNode}
