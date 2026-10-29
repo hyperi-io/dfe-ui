@@ -206,9 +206,15 @@ describe('SecurityAccountsDetails', () => {
 
     const target = await card('admin');
     expect(within(target).getByText('Retired')).toBeInTheDocument();
-    expect(
-      within(target).getByRole('button', { name: /Reset Password/ }),
-    ).toBeDisabled();
+    const reset = within(target).getByRole('button', {
+      name: /Reset Password/,
+    });
+    expect(reset).toBeDisabled();
+    // A disabled button takes no focus, so the reason has to be on screen.
+    expect(reset).toHaveAccessibleDescription(
+      'This account is retired and cannot sign in, so there is nothing to reset.',
+    );
+    expect(within(target).getByText(/nothing to reset/)).toBeVisible();
     expect(
       within(await card('breakglass')).getByRole('button', {
         name: /Reset Password/,

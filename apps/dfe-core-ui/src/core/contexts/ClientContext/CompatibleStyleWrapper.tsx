@@ -35,6 +35,10 @@ const CompatibleStyleProviders = ({
             fontFamily: typography.fontFamily.base,
             fontFamilyCode: typography.fontFamily.mono,
             colorPrimary: colors.brand.tertiary,
+            // Dark keeps Ant Design's red, which already reads at 5.64:1 there.
+            ...(colorMode === 'light' && {
+              colorError: colors.semantic.errorOnLight,
+            }),
           },
           components: {
             Layout: {
@@ -47,6 +51,10 @@ const CompatibleStyleProviders = ({
               fontSizeHeading3: typography.fontSize['md'],
               fontSizeHeading4: typography.fontSize['base'],
               fontSizeHeading5: typography.fontSize['sm'],
+            },
+            Button: {
+              // White on the tertiary blue reads at 2.71:1, navy at 6.94:1.
+              primaryColor: colors.brand.primary,
             },
           },
         }}

@@ -1,7 +1,11 @@
 import { Modal } from '@/core/components/Modal';
 import { NotificationCard } from '@/core/components/NotificationCard';
+import {
+  RuleCostEstimate,
+  ruleSaveWarnings,
+} from '@/Rules/components/RuleSaveNotice';
 import { TRuleCreateResponse } from '@/Rules/hooks/useCreateRule/types';
-import { IconAlertCircle } from '@repo/dfe-icons';
+import { IconAlertCircle, IconInfoCircle } from '@repo/dfe-icons';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -19,12 +23,8 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
     router.push(`/rules?name=${response?.rule?.name}`);
   };
 
-  const {
-    rule,
-    sanitize_summary: _sanitize_summary,
-    sql_errors,
-    cost_estimate: _cost_estimate,
-  } = response ?? {};
+  const { rule, sql_errors, cost_estimate } = response ?? {};
+  const warnings = response ? ruleSaveWarnings(response) : [];
   return (
     <Modal
       open={open}
@@ -32,7 +32,9 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
       onClose={handleClose}
       title={
         <span className="flex items-center gap-x-2">
-          Rule created successfully
+          {warnings.length > 0
+            ? 'Rule created with warnings'
+            : 'Rule created successfully'}
         </span>
       }
     >
@@ -68,7 +70,7 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
         <dd>{rule?.created_at}</dd>
       </dl>
 
-      {rule?.warnings && rule.warnings.length > 0 && (
+      {warnings.length > 0 && (
         <NotificationCard
           className="w-full"
           title={
@@ -78,7 +80,7 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
           }
           description={
             <ul className="text-xs list-disc list-inside ">
-              {rule.warnings.map((warning) => (
+              {warnings.map((warning) => (
                 <li key={warning}>{warning}</li>
               ))}
             </ul>
@@ -105,57 +107,22 @@ export const ResponseModal = ({ response, onClose }: ResponseModalProps) => {
           type="error"
         />
       )}
-      {/* {cost_estimate && (
-        <SimpleCollapse
+      {cost_estimate && (
+        <NotificationCard
+          className="w-full"
           title={
             <span className="flex items-center gap-x-2">
-              <IconInfoCircle /> Cost Estimate
+              <IconInfoCircle /> Alert volume preview
             </span>
           }
-        >
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs [&_dt]:font-medium">
-            <dt>Estimated Rows</dt>
-            <dd>{cost_estimate.estimated_rows}</dd>
-            <dt>Explain Plan</dt>
-            <dd>{cost_estimate.explain_plan}</dd>
-            <dt>Explain Duration Ms</dt>
-            <dd>{cost_estimate.explain_duration_ms}</dd>
-            <dt>Window Minutes</dt>
-            <dd>{cost_estimate.window_minutes}</dd>
-          </dl>
-          {cost_estimate.warnings && cost_estimate.warnings.length > 0 && (
-            <>
-              <span className="flex items-center gap-x-2 text-warning">
-                <IconAlertCircle /> Cost Estimate Warnings
-              </span>
-              <ul className="text-xs list-disc list-inside">
-                {cost_estimate.warnings.map((warning) => (
-                  <li key={warning}>{warning}</li>
-                ))}
-              </ul>
-            </>
-          )}
-        </SimpleCollapse>
-      )} */}
-
-      {/* {sanitize_summary && Object.keys(sanitize_summary)?.length > 0 && (
-        <SimpleCollapse
-          title={
-            <span className="flex items-center gap-x-2">
-              <IconInfoCircle /> Sanitize Summary
-            </span>
-          }
-        >
-          {Object.entries(sanitize_summary).map(([key, value]) => (
-            <div key={key}>
-              <span className="font-medium">{key}:</span>{' '}
-              {typeof value === 'object' && value !== null
-                ? JSON.stringify(value)
-                : String(value)}
+          description={
+            <div className="text-xs">
+              <RuleCostEstimate estimate={cost_estimate} />
             </div>
-          ))}
-        </SimpleCollapse>
-      )} */}
+          }
+          type="info"
+        />
+      )}
     </Modal>
   );
 };
