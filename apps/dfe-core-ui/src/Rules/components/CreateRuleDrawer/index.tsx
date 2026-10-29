@@ -4,6 +4,7 @@ import {
   CreateUpdateRuleForm,
   CreateUpdateRuleFormData,
 } from '@/Rules/components/CreateUpdateRuleForm';
+import { ruleSaveNotice } from '@/Rules/components/RuleSaveNotice';
 import { useListRulesContext } from '@/Rules/contexts/ListRulesContext';
 import { useCreateRule } from '@/Rules/hooks/useCreateRule';
 
@@ -39,10 +40,7 @@ export const CreateRuleDrawer = ({
     onSuccess: (response) => {
       setSelectedRuleName(response.rule.name);
       setIsDrawerVisible(false);
-      api.success({
-        title: 'Rule created successfully',
-        placement: 'bottomLeft',
-      });
+      api.open(ruleSaveNotice(response, 'created'));
     },
   });
   const handleCreateRule = (values: CreateUpdateRuleFormData) => {

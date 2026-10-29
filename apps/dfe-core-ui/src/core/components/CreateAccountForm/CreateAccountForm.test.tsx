@@ -20,6 +20,11 @@ import {
   test,
   vi,
 } from 'vitest';
+import {
+  listedOrgs,
+  MockIntersectionObserver,
+  signedInAs,
+} from '@/core/components/AccountOrgFormItem/AccountOrgFormItem.mocks';
 import { CreateAccountForm } from '.';
 
 // The group picker reads RBAC and the groups list, and the password rule depends on neither.
@@ -27,14 +32,18 @@ vi.mock('@/core/components/AccountGroupSelect', () => ({
   AccountGroupSelect: () => null,
 }));
 
-const server = setupServer();
+// The organisation picker lists the organisations and starts on the signed-in user's own.
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
+const server = setupServer(signedInAs(''), listedOrgs);
+// Only the writes, so a check that nothing went out ignores the pickers' reads.
 const sent: Request[] = [];
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 beforeEach(() => {
   sent.length = 0;
   server.events.on('request:start', ({ request }) => {
-    sent.push(request.clone());
+    if (request.method !== 'GET') sent.push(request.clone());
   });
 });
 afterEach(() => {
@@ -218,4 +227,89 @@ describe('CreateAccountForm username', () => {
       });
     },
   );
+});
+
+describe('CreateAccountForm organisation', () => {
+  const fillAndSubmit = async (
+    user: ReturnType<typeof userEvent.setup>,
+    org?: { pick?: string; clear?: boolean },
+  ) => {
+    await user.type(screen.getByLabelText(/^Username/), 'new-user');
+    await user.type(screen.getByLabelText(/^Email/), 'new-user@example.com');
+    await user.click(screen.getByLabelText(/^Password/));
+    await user.paste(TWELVE_CHARS);
+    if (org?.clear) {
+      await user.click(await screen.findByLabelText('close-circle'));
+    }
+    if (org?.pick) {
+      await user.click(screen.getByRole('combobox', { name: 'Organisation' }));
+      await user.click(await screen.findByTitle(org.pick));
+    }
+    await user.click(screen.getByRole('button', { name: 'Create Account' }));
+  };
+
+  test.each([
+    { name: 'the signed-in org', me: 'acme', org: undefined, sends: 'acme' },
+    {
+      name: 'no org for a user bound to none',
+      me: '',
+      org: undefined,
+      sends: '',
+    },
+    {
+      name: 'the org picked',
+      me: 'acme',
+      org: { pick: 'Globex' },
+      sends: 'globex',
+    },
+    {
+      name: 'no org once cleared',
+      me: 'acme',
+      org: { clear: true },
+      sends: '',
+    },
+  ])('sends $name', async ({ me, org, sends }) => {
+    server.use(
+      signedInAs(me),
+      API_CONFIG_MOCKS.accounts.default.post.success(),
+    );
+    const user = userEvent.setup();
+    render(<CreateAccount />, { wrapper });
+    if (me) {
+      expect(await screen.findByTitle('Acme Corp')).toBeInTheDocument();
+    }
+
+    await fillAndSubmit(user, org);
+
+    await waitFor(() => expect(sent).toHaveLength(1));
+    expect(await sent[0]?.json()).toMatchObject({ org: sends });
+  });
+
+  test('sends no org from the setup wizard, and asks for no signed-in user', async () => {
+    server.use(API_CONFIG_MOCKS.accounts.default.post.success());
+    const reads: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      if (request.method === 'GET') reads.push(new URL(request.url).pathname);
+    });
+    const user = userEvent.setup();
+    const onFinish = vi.fn();
+    render(
+      <CreateAccountForm
+        onFinish={onFinish}
+        error={null}
+        isPending={false}
+        hiddenFields={{ org: true }}
+      />,
+      { wrapper },
+    );
+
+    expect(
+      screen.queryByRole('combobox', { name: 'Organisation' }),
+    ).not.toBeInTheDocument();
+    await fillAndSubmit(user);
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    expect(onFinish.mock.calls[0]?.[0]).toMatchObject({ org: '' });
+    expect(reads).not.toContain(API_CONFIG_MOCKS.accounts.me.mockedUrl);
+  });
 });
