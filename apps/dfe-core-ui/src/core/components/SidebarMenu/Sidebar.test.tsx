@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Sidebar } from './index';
 import { server } from './SuiteVersion/SuiteVersion.mocks';
@@ -41,5 +42,38 @@ describe('Sidebar footer version', () => {
     render(<Sidebar />, { wrapper });
 
     expect(await screen.findByText('2.2.0-rc.13')).toBeInTheDocument();
+  });
+});
+
+// jsdom has no layout, so these pin the structure that keeps the footer off the
+// nav: the footer sits in the column's flow and the menu box is sized by flex,
+// not by a window-height sum that ignores how tall the footer is.
+describe('Sidebar footer and menu share one column', () => {
+  it.each([
+    { state: 'expanded', collapse: false },
+    { state: 'collapsed', collapse: true },
+  ])('the footer is in flow when $state', async ({ collapse }) => {
+    const user = userEvent.setup();
+    render(<Sidebar />, { wrapper });
+
+    if (collapse) {
+      await user.click(
+        screen.getByRole('button', { name: 'Collapse sidebar' }),
+      );
+      expect(
+        screen.getByRole('button', { name: 'Expand sidebar' }),
+      ).toBeInTheDocument();
+    }
+
+    const footer = screen.getByRole('button', {
+      name: 'Settings actions',
+    }).parentElement;
+    expect(footer).not.toHaveClass('absolute');
+    expect(footer).toHaveClass('shrink-0');
+
+    const menuBox = screen.getByRole('list').parentElement;
+    expect(menuBox).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto');
+    expect(menuBox?.style.height).toBe('');
+    expect(menuBox?.nextElementSibling).toBe(footer);
   });
 });
