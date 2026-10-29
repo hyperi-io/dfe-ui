@@ -35,6 +35,10 @@ const CompatibleStyleProviders = ({
             fontFamily: typography.fontFamily.base,
             fontFamilyCode: typography.fontFamily.mono,
             colorPrimary: colors.brand.tertiary,
+            // Dark keeps Ant Design's red, which already reads at 5.64:1 there.
+            ...(colorMode === 'light' && {
+              colorError: colors.semantic.errorOnLight,
+            }),
           },
           components: {
             Layout: {

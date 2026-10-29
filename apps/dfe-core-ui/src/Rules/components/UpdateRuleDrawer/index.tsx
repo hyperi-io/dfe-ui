@@ -1,5 +1,6 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
+import { ruleSaveNotice } from '@/Rules/components/RuleSaveNotice';
 import { TRuleDetail } from '@/Rules/hooks/useFetchRuleDetail/types';
 import { TRuleUpdateResponse } from '@/Rules/hooks/useUpdateRule/types';
 import { IconEdit } from '@repo/dfe-icons';
@@ -35,10 +36,7 @@ export const UpdateRuleDrawer = ({
     setIsDrawerVisible(false);
     onClose?.();
     onSuccess?.(response);
-    api.success({
-      title: `${response.rule.display_name ?? response.rule.name} updated successfully`,
-      placement: 'bottomLeft',
-    });
+    api.open(ruleSaveNotice(response, 'updated'));
   };
 
   return (
