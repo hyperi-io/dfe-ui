@@ -5,7 +5,8 @@ import { AuthStoreSync } from '@/core/components/AuthStoreSync';
 import { SessionAuthBridge } from '@/core/components/SessionAuthBridge';
 import '@/core/config/zodJitless';
 import { ThemeProvider } from '@/core/contexts/ClientContext/ThemeContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createQueryClient } from '@/core/config/api/queryClient';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { CompatibleStyleWrapper } from './CompatibleStyleWrapper';
 
@@ -16,7 +17,7 @@ import { Button } from 'antd';
 import { useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
-const client = new QueryClient();
+const client = createQueryClient();
 export const ClientContext = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   return (

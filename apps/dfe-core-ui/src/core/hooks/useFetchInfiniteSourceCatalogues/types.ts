@@ -17,6 +17,10 @@ export interface UseFetchInfiniteSourceCataloguesProps {
   search?: string;
   intake?: TSourceCatalogueIntake;
   tags?: string[];
+  /** Only entries whose transform engine is this one, matched without regard to case. */
+  engine?: string;
+  /** List entries already stored as a source too. */
+  include_stored?: boolean;
   per_page?: number;
   page?: number;
 }

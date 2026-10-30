@@ -142,8 +142,18 @@ export const sources = {
       }: {
         mockedResponse?: TSourceCataloguesResponse;
       } = {}) => {
-        return http.get(sources.catalogue.mockedUrl, () => {
-          return HttpResponse.json(mockedResponse);
+        // The engine filters by `engine` without regard to case, and its total counts the filtered entries.
+        return http.get(sources.catalogue.mockedUrl, ({ request }) => {
+          const engine = new URL(request.url).searchParams.get('engine');
+          if (!engine) return HttpResponse.json(mockedResponse);
+          const items = mockedResponse.items.filter(
+            (entry) => entry.engine?.toLowerCase() === engine.toLowerCase(),
+          );
+          return HttpResponse.json({
+            ...mockedResponse,
+            items,
+            total: items.length,
+          });
         });
       },
       error: ({

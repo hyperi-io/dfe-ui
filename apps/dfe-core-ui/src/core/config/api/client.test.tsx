@@ -11,6 +11,7 @@ import {
 } from 'vitest';
 import {
   ApiError,
+  ApiTimeoutError,
   createApiClient,
   getApiErrorFieldMessages,
   getApiErrorFields,
@@ -20,6 +21,41 @@ import {
 } from './client';
 
 const BASE_URL = 'https://api.example.com';
+
+// The deadlines are config, so short ones keep the never-answering cases quick.
+vi.mock('@/core/config/engineTimeout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/core/config/engineTimeout')>()),
+  ENGINE_READ_DEADLINE_MS: 300,
+  ENGINE_WRITE_DEADLINE_MS: 500,
+}));
+
+/** A fetch that accepts the request and never answers, or answers headers and stalls the body. */
+const silentEngine =
+  (stall: 'headers' | 'body') =>
+  (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+    new Promise((resolve, reject) => {
+      const signal = init?.signal;
+      if (signal?.aborted) {
+        reject(signal.reason);
+        return;
+      }
+      signal?.addEventListener('abort', () => reject(signal.reason));
+      if (stall === 'body') {
+        const body = new ReadableStream({
+          start(controller) {
+            signal?.addEventListener('abort', () =>
+              controller.error(signal.reason),
+            );
+          },
+        });
+        resolve(
+          new Response(body, {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
+      }
+    });
 
 const server = setupServer();
 
@@ -114,6 +150,133 @@ describe('createApiClient', () => {
     });
 
     expect(data).toEqual(mockSource);
+  });
+
+  // A destination name may hold '#', '?', '%' or a space, and a raw one sends
+  // the request to a different resource: 'ops#1' would delete 'ops'.
+  test.each([
+    ['a fragment marker', 'ops#1', '/api/v1/alerts/destinations/ops%231'],
+    ['a query marker', 'a?b=c', '/api/v1/alerts/destinations/a%3Fb%3Dc'],
+    ['a percent sign', '100%', '/api/v1/alerts/destinations/100%25'],
+    ['a space', 'on call', '/api/v1/alerts/destinations/on%20call'],
+    ['unicode', 'café', '/api/v1/alerts/destinations/caf%C3%A9'],
+    ['a plain name', 'ops-1', '/api/v1/alerts/destinations/ops-1'],
+    [
+      'a slash and dot segments',
+      'a/../../destinations/ops',
+      '/api/v1/alerts/destinations/a%2F..%2F..%2Fdestinations%2Fops',
+    ],
+  ])(
+    'a path param with %s reaches the resource it names',
+    async (_case, name, path) => {
+      let requested = '';
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: async (input) => {
+          requested = String(input);
+          return new Response(null, { status: 204 });
+        },
+      });
+
+      await client.delete('/api/v1/alerts/destinations/{name}', {
+        pathParams: { name },
+      });
+
+      expect(requested).toBe(`${BASE_URL}${path}`);
+    },
+  );
+
+  test('a path-typed param keeps its slashes and encodes each segment', async () => {
+    let requested = '';
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      fetch: async (input) => {
+        requested = String(input);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    await client.get('/api/v1/schemas/definitions/{schema_path}/export', {
+      pathParams: { schema_path: 'aws/cloud trail#x' },
+    });
+
+    expect(requested).toBe(
+      `${BASE_URL}/api/v1/schemas/definitions/aws/cloud%20trail%23x/export`,
+    );
+  });
+
+  // URL parsing resolves '..' even as %2E%2E, so such a value never leaves the client.
+  test.each([
+    [
+      'a bare dot-dot name',
+      '/api/v1/alerts/destinations/{name}',
+      { name: '..' },
+    ],
+    ['a dot name', '/api/v1/alerts/destinations/{name}', { name: '.' }],
+    [
+      'a path-typed value that climbs',
+      '/api/v1/schemas/definitions/{schema_path}',
+      { schema_path: 'aws/../../../sources/main' },
+    ],
+  ] as const)(
+    'refuses %s before any request',
+    async (_case, path, pathParams) => {
+      let sent = false;
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: async () => {
+          sent = true;
+          return new Response(null, { status: 204 });
+        },
+      });
+
+      await expect(
+        client.delete(path, { pathParams } as never),
+      ).rejects.toThrow('cannot name a resource');
+      expect(sent).toBe(false);
+    },
+  );
+
+  test.each([
+    ['a read that gets no headers', 'get', 'headers', '0.3'],
+    ['a read whose body stalls', 'get', 'body', '0.3'],
+    ['a write that gets no headers', 'delete', 'headers', '0.5'],
+    ['a write whose body stalls', 'post', 'body', '0.5'],
+  ] as const)(
+    '%s fails with the reason once its deadline passes',
+    async (_case, method, stall, seconds) => {
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: silentEngine(stall),
+      });
+      const path =
+        method === 'post'
+          ? '/api/v1/sources/{name}/build'
+          : '/api/v1/sources/{name}';
+      const call = (
+        client[method] as (p: string, o: unknown) => Promise<unknown>
+      )(path, { pathParams: { name: 'source' } });
+
+      await expect(call).rejects.toThrow(
+        `The engine did not answer in ${seconds} s`,
+      );
+      await expect(call).rejects.toBeInstanceOf(ApiTimeoutError);
+    },
+  );
+
+  test('a caller that cancels gets its own abort, not a timeout', async () => {
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      fetch: silentEngine('headers'),
+    });
+    const controller = new AbortController();
+    const call = client.get('/api/v1/sources/{name}', {
+      pathParams: { name: 'source' },
+      signal: controller.signal,
+    });
+    controller.abort();
+
+    await expect(call).rejects.not.toBeInstanceOf(ApiTimeoutError);
   });
 
   test('query params are appended to URL', async () => {

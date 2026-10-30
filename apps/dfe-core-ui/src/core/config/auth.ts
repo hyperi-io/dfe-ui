@@ -1,4 +1,9 @@
 import { oidcTokenProvider } from '@/core/auth/oidcTokenProvider';
+import { ApiTimeoutError } from '@/core/config/api/client';
+import {
+  ENGINE_READ_DEADLINE_MS,
+  ENGINE_WRITE_DEADLINE_MS,
+} from '@/core/config/engineTimeout';
 import { renewEngineSession } from '@/core/auth/renewEngineSession';
 import { safeRedirectPath } from '@/core/config/loginCallback';
 import { authMePath } from '@/core/hooks/useAuthMe/api';
@@ -32,36 +37,60 @@ const credentialsProvider = CredentialsProvider({
     username: { label: 'Username', type: 'text' },
     password: { label: 'Password', type: 'password' },
   },
+  // A thrown message reaches the login form, and a null reads as a wrong password.
   async authorize(credentials, req) {
     if (!credentials?.username || !credentials?.password) return null;
-    const loginRes = await fetch(`${baseUrl}${loginPath}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...forwardedForHeader(req?.headers),
-      },
-      body: JSON.stringify({
-        username: credentials.username,
-        password: credentials.password,
-      }),
-    });
-    if (!loginRes.ok) return null;
-    const tokenData = (await loginRes.json()) as {
+    let tokenData: {
       access_token: string;
       expires_in?: number;
       password_change_required?: boolean;
     };
+    let roles: string[];
+    let deadlineMs = ENGINE_WRITE_DEADLINE_MS;
+    try {
+      const loginRes = await fetch(`${baseUrl}${loginPath}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...forwardedForHeader(req?.headers),
+        },
+        body: JSON.stringify({
+          username: credentials.username,
+          password: credentials.password,
+        }),
+        signal: AbortSignal.timeout(ENGINE_WRITE_DEADLINE_MS),
+      });
+      if (loginRes.status === 429) {
+        const refusal = (await loginRes.json().catch(() => null)) as {
+          message?: unknown;
+        } | null;
+        throw new Error(
+          typeof refusal?.message === 'string'
+            ? refusal.message
+            : 'Too many failed attempts; try again later',
+        );
+      }
+      if (!loginRes.ok) return null;
+      tokenData = (await loginRes.json()) as typeof tokenData;
 
-    const meRes = await fetch(`${baseUrl}${authMePath}`, {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
-      },
-    });
-    const roles: string[] =
-      meRes.ok &&
-      meRes.headers.get('content-type')?.includes('application/json')
-        ? (((await meRes.json()) as { roles?: string[] }).roles ?? [])
-        : [];
+      deadlineMs = ENGINE_READ_DEADLINE_MS;
+      const meRes = await fetch(`${baseUrl}${authMePath}`, {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+        signal: AbortSignal.timeout(ENGINE_READ_DEADLINE_MS),
+      });
+      roles =
+        meRes.ok &&
+        meRes.headers.get('content-type')?.includes('application/json')
+          ? (((await meRes.json()) as { roles?: string[] }).roles ?? [])
+          : [];
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        throw new ApiTimeoutError(deadlineMs, { cause: error });
+      }
+      throw error;
+    }
 
     return {
       id: credentials.username,

@@ -5,8 +5,23 @@ import { setupServer } from 'msw/node';
 import type { Account, Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import type { CredentialsConfig } from 'next-auth/providers/credentials';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { authOptions, forwardedForHeader } from './auth';
+
+// A short deadline keeps the silent-engine case quick.
+vi.mock('@/core/config/engineTimeout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/core/config/engineTimeout')>()),
+  ENGINE_READ_DEADLINE_MS: 300,
+  ENGINE_WRITE_DEADLINE_MS: 300,
+}));
 
 const ENGINE = 'http://localhost';
 
@@ -215,4 +230,53 @@ describe('the login audit names the client, not this pod', () => {
 
     expect(seen.loginForwardedFor).toBe('203.0.113.7');
   });
+});
+
+describe('a password login the engine does not grant says why', () => {
+  const login = () =>
+    (
+      authOptions.providers[0] as CredentialsConfig & {
+        options: CredentialsConfig;
+      }
+    ).options.authorize(
+      { username: 'admin', password: 'correct horse battery' },
+      { headers: {}, body: {}, query: {}, method: 'POST' },
+    );
+
+  test('a wrong password is no session, shown as the generic refusal', async () => {
+    server.use(
+      http.post(`${ENGINE}/api/v1/auth/login`, () =>
+        HttpResponse.json({ code: 'unauthorized' }, { status: 401 }),
+      ),
+    );
+
+    await expect(login()).resolves.toBeNull();
+  });
+
+  test.each([
+    [
+      'throttles the account',
+      () =>
+        HttpResponse.json(
+          {
+            code: 'too_many_attempts',
+            message: 'Too many failed attempts; try again in 42 seconds',
+          },
+          { status: 429, headers: { 'Retry-After': '42' } },
+        ),
+      'Too many failed attempts; try again in 42 seconds',
+    ],
+    [
+      'never answers',
+      () => new Promise<never>(() => undefined),
+      'The engine did not answer in 0.3 s',
+    ],
+  ])(
+    'the reason reaches the form when the engine %s',
+    async (_why, answer, reason) => {
+      server.use(http.post(`${ENGINE}/api/v1/auth/login`, answer));
+
+      await expect(login()).rejects.toThrow(reason);
+    },
+  );
 });

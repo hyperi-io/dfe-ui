@@ -1,5 +1,8 @@
 import { API_CONFIG } from '@/core/config/api/endpoints';
-import { ENGINE_CALL_TIMEOUT_MS } from '@/core/config/engineTimeout';
+import {
+  ENGINE_CALL_TIMEOUT_MS,
+  GATEWAY_UNAVAILABLE_STATUSES,
+} from '@/core/config/engineTimeout';
 import { TFetchSetupStatusResponse } from '@/core/hooks/useFetchSetupStatus/types';
 
 /** No engine URL configured: a broken deployment, never a transient failure. */
@@ -21,8 +24,6 @@ export class EngineUnreachableError extends Error {
     this.name = 'EngineUnreachableError';
   }
 }
-
-const GATEWAY_UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
 
 export const getSetupStatus = async (): Promise<TFetchSetupStatusResponse> => {
   // Server-side fetch: INTERNAL_API_URL is read at request time, while

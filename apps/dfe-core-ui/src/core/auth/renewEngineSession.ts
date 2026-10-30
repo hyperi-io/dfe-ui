@@ -1,4 +1,8 @@
 import { API_CONFIG } from '@/core/config/api/endpoints';
+import {
+  ENGINE_CALL_TIMEOUT_MS,
+  GATEWAY_UNAVAILABLE_STATUSES,
+} from '@/core/config/engineTimeout';
 import type { TRefreshTokenResponse } from '@/core/hooks/useRefreshToken/types';
 import { decodeJwt } from 'jose';
 import type { JWT } from 'next-auth/jwt';
@@ -37,15 +41,25 @@ export async function renewEngineSession(
     return { ...token, error: 'AccessTokenExpired' };
   }
 
+  // An engine that did not answer has not refused the token, so a session whose
+  // token still works keeps it and the next scheduled check asks again.
+  const stillValid =
+    typeof token.accessTokenExpiresAt === 'number' &&
+    Date.now() < token.accessTokenExpiresAt;
+
   let refreshed: TRefreshTokenResponse | null;
   try {
-    refreshed = await readJson<TRefreshTokenResponse>(
-      await fetchImpl(`${baseUrl}${API_CONFIG.auth.refresh}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${current}` },
-      }),
-    );
+    const response = await fetchImpl(`${baseUrl}${API_CONFIG.auth.refresh}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${current}` },
+      signal: AbortSignal.timeout(ENGINE_CALL_TIMEOUT_MS),
+    });
+    if (GATEWAY_UNAVAILABLE_STATUSES.has(response.status) && stillValid) {
+      return token;
+    }
+    refreshed = await readJson<TRefreshTokenResponse>(response);
   } catch {
+    if (stillValid) return token;
     refreshed = null;
   }
   if (!refreshed?.access_token) {
@@ -57,6 +71,7 @@ export async function renewEngineSession(
     const me = await readJson<{ roles?: string[] }>(
       await fetchImpl(`${baseUrl}${API_CONFIG.auth.me}`, {
         headers: { Authorization: `Bearer ${refreshed.access_token}` },
+        signal: AbortSignal.timeout(ENGINE_CALL_TIMEOUT_MS),
       }),
     );
     if (me?.roles) {
