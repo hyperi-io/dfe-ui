@@ -1,5 +1,5 @@
+import { TSourceCatalogueItem } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { TSourceCatalogueItem } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { AddFromCatalogueTable } from './AddFromCatalogueTable';
 
-vi.mock('@/Sources/hooks/useFetchInfiniteSourceCatalogues', () => ({
+vi.mock('@/core/hooks/useFetchInfiniteSourceCatalogues', () => ({
   useFetchInfiniteSourceCatalogues: ({
     page = 1,
     per_page = 50,

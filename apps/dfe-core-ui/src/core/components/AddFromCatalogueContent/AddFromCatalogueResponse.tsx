@@ -1,8 +1,8 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
+import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import {
   IconChevronDown,
   IconChevronUp,
@@ -10,6 +10,7 @@ import {
   IconCircleX,
   IconLink,
 } from '@repo/dfe-icons';
+import { cn } from '@repo/dfe-shared-ui';
 import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -19,8 +20,10 @@ const formatCountTitleMessage = (created: number) => {
 };
 export const AddFromCatalogueResponse = ({
   data,
+  className,
 }: {
   data?: TCatalogueBulkSourceResponse;
+  className?: string;
 }) => {
   const failedCount = data?.failed.length ?? 0;
   const createdCount = data?.created.length ?? 0;
@@ -94,7 +97,10 @@ export const AddFromCatalogueResponse = ({
   ];
 
   return (
-    <CustomScrollbar height={scrollHeight} className="flex flex-col gap-2">
+    <CustomScrollbar
+      height={scrollHeight}
+      className={cn('flex flex-col gap-2', className)}
+    >
       {failedCount > 0 && (
         <NotificationCard
           type="error"

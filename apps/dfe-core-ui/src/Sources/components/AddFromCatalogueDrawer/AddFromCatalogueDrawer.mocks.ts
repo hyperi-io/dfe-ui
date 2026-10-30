@@ -4,7 +4,7 @@ import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
 import {
   TSourceCatalogueItem,
   TSourceCataloguesResponse,
-} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+} from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 

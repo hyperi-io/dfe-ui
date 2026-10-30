@@ -1,10 +1,10 @@
 import { Form } from '@/core/components/Form';
+import { TransportSelect } from '@/core/components/TransportSelect';
 import {
   CreateUpdateSourceFormData,
   type DisabledFields,
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { OriginFormSection } from '@/Sources/components/CreateUpdateSourceForm/SourceDetailsTabContent/OriginFormSection';
-import { TransportSelect } from '@/Sources/components/TransportSelect';
 import { FormInstance, FormRule, Input, Switch } from 'antd';
 
 export const SourceDetailsTabContent = ({

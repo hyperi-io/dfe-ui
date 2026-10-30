@@ -18,6 +18,15 @@ class ResizeObserverMock {
 globalThis.ResizeObserver =
   ResizeObserverMock as unknown as typeof ResizeObserver;
 
+// jsdom does not provide IntersectionObserver - infinite lists page on one
+class IntersectionObserverMock {
+  observe = () => undefined;
+  unobserve = () => undefined;
+  disconnect = () => undefined;
+}
+globalThis.IntersectionObserver =
+  IntersectionObserverMock as unknown as typeof IntersectionObserver;
+
 // jsdom does not provide matchMedia - Ant Design's responsive observer calls it
 // from a layout effect, so without it any component using the grid throws.
 if (typeof window !== 'undefined' && !window.matchMedia) {

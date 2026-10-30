@@ -1,5 +1,5 @@
+import { SOURCE_TRANSPORT_LABELS } from '@/core/constants/source.constants';
 import { useFetchDeployment } from '@/core/hooks/useFetchDeployment';
-import { SOURCE_TRANSPORT_LABELS } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 import { Select, SelectProps } from 'antd';
 
 export const TransportSelect = (props: SelectProps) => {

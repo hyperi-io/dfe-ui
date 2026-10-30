@@ -1,3 +1,4 @@
+import { TOrganisation } from '@/core/hooks/useFetchSetupStatus/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -63,5 +64,33 @@ describe('SetupWizard', () => {
     await user.click(await screen.findByRole('button', { name: /Back/ }));
 
     expect(mockReplace).toHaveBeenCalledWith('/setup/welcome');
+  });
+
+  test('the source step renders on its own screen', () => {
+    stepParamRef.current = 'configureSource';
+    renderWelcome('configureOrganisation');
+
+    expect(
+      screen.getByRole('heading', { name: 'Configure Source' }),
+    ).toBeInTheDocument();
+  });
+
+  test('Next from organisation opens the source step', async () => {
+    const user = userEvent.setup();
+    stepParamRef.current = 'configureOrganisation';
+    render(
+      <SetupWizard
+        oidcProvider={null}
+        organisation={{ name: 'acme' } as TOrganisation}
+        userCreated={false}
+        firstPendingStep="configureOrganisation"
+        setupComplete={false}
+      />,
+      { wrapper },
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Next/ }));
+
+    expect(mockReplace).toHaveBeenCalledWith('/setup/configureSource');
   });
 });

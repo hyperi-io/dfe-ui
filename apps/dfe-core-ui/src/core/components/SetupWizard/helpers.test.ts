@@ -54,11 +54,12 @@ describe('isSetupWizardStep', () => {
 });
 
 describe('SETUP_WIZARD_STEPS', () => {
-  it('is the four-screen flow plus the completion screen', async () => {
+  it('lists the wizard screens in walk order', async () => {
     const { SETUP_WIZARD_STEPS } = await import('./server.helpers');
     expect(SETUP_WIZARD_STEPS).toEqual([
       'welcome',
       'configureOrganisation',
+      'configureSource',
       'configureLogin',
       'configureUser',
       'complete',
@@ -92,7 +93,9 @@ describe('getFirstPendingWizardStep', () => {
     expect(getFirstPendingWizardStep(['organisations', 'first_user'])).toBe(
       'configureOrganisation',
     );
-    expect(getFirstPendingWizardStep(['first_user'])).toBe('configureLogin');
+    // The engine does not report the source screen, so a jump to login stops
+    // there instead of leaping over it.
+    expect(getFirstPendingWizardStep(['first_user'])).toBe('configureSource');
   });
 
   it('never sends Next from welcome back to welcome', async () => {

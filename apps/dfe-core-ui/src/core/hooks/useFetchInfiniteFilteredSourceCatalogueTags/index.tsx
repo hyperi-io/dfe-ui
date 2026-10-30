@@ -1,25 +1,28 @@
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
-import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
+import { useDebounce } from '@/core/hooks/useDebounce';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
-import { sourceCatalogues } from './api';
-import { UseFetchInfiniteSourceCataloguesProps } from './types';
+import { fetchInfiniteFilteredSourceCatalogueTags } from './api';
+import { UseFetchInfiniteFilteredSourceCatalogueTagsProps } from './types';
 
-/** useFetchInfiniteSourceCatalogues props */
+const SEARCH_DEBOUNCE_MS = 300;
+
+/** useFetchInfiniteFilteredSourceCatalogueTags props */
 /**
- * @param search - The search query to filter the source catalogues by.
- * @param intake - The intake to filter the source catalogues by.
- * @param per_page - The number of source catalogues to fetch per page.
+ * @param name - The name of the source to filter the catalogue tags by.
+ * @param page - The page number to fetch.
+ * @param per_page - The number of catalogue tags to fetch per page.
  */
 /**
- * @returns A list of source catalogues.
+ * @returns A list of catalogue tags.
  */
-export const useFetchInfiniteSourceCatalogues = ({
-  search,
-  intake,
-  per_page = 10,
-  // Allow page control from the caller
+
+export const useFetchInfiniteFilteredSourceCatalogueTags = ({
+  name,
   page,
-}: UseFetchInfiniteSourceCataloguesProps = {}) => {
+  per_page,
+}: UseFetchInfiniteFilteredSourceCatalogueTagsProps = {}) => {
+  const debouncedName = useDebounce(name ?? '', SEARCH_DEBOUNCE_MS);
   const {
     data,
     isLoading,
@@ -29,23 +32,27 @@ export const useFetchInfiniteSourceCatalogues = ({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: QUERY_KEYS.sources.catalogue({ search, intake, per_page, page }),
+    queryKey: QUERY_KEYS.sources.catalogueTags({
+      name: debouncedName,
+      page,
+      per_page,
+    }),
     queryFn: async ({ pageParam = 1, signal }) =>
-      sourceCatalogues({
+      fetchInfiniteFilteredSourceCatalogueTags({
         queryParams: {
-          search: search,
-          intake: intake,
-          per_page: per_page ?? 10,
-          page: page ?? pageParam,
+          name: debouncedName,
+          page: pageParam,
+          per_page,
         },
         signal,
       }),
-    getNextPageParam: (lastPage) => {
-      const nextPage = lastPage.next_page;
-      return nextPage != null && nextPage > 0 ? nextPage : undefined;
+    getNextPageParam: (lastPage, allPages) => {
+      const pageSize = per_page ?? lastPage.per_page;
+      const hasMore =
+        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
+      return hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    placeholderData: keepPreviousData,
   });
 
   const flattenedData = useMemo(() => {

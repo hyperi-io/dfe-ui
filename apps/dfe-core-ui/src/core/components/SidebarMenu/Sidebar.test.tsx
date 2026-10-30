@@ -73,7 +73,7 @@ describe('Sidebar footer and menu share one column', () => {
 
     const menuBox = screen.getByRole('list').parentElement;
     expect(menuBox).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto');
-    expect(menuBox?.style.height).toBe('');
+    expect(menuBox?.style.height).toBe('100%');
     expect(menuBox?.nextElementSibling).toBe(footer);
   });
 });

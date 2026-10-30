@@ -1,13 +1,14 @@
 import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/types';
+import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
+import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { TSourceCataloguesResponse } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
-import { TSourceCataloguesResponse } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
@@ -826,6 +827,45 @@ export const sources = {
             return HttpResponse.json(mockedResponse, { status });
           },
         );
+      },
+    },
+  },
+  catalogueTags: {
+    mockedUrl: '/api/v1/sources/catalogue-tags',
+    get: {
+      success: ({
+        mockedResponse = {
+          items: [
+            {
+              id: 'string',
+              name: 'string',
+              description: 'string',
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10,
+          total_pages: 1,
+          next_page: null,
+          prev_page: null,
+        },
+      }: {
+        mockedResponse?: TInfiniteFilteredSourceCatalogueTagsResponse;
+      } = {}) => {
+        return http.get(sources.catalogueTags.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse);
+        });
+      },
+      error: ({
+        mockedResponse = DEFAULT_VALIDATION_ERROR,
+        status = 422,
+      }: {
+        mockedResponse?: TValidationError;
+        status?: number;
+      } = {}) => {
+        return http.get(sources.catalogueTags.mockedUrl, () => {
+          return HttpResponse.json(mockedResponse, { status });
+        });
       },
     },
   },
