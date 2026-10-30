@@ -1,6 +1,9 @@
 import { Form } from '@/core/components/Form';
+import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useFetchInfiniteSourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues';
+import { sourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues/api';
+import { useQuery } from '@tanstack/react-query';
 import {
   Select,
   type FormItemProps,
@@ -25,8 +28,10 @@ export const variantOptions = (
 ) => {
   const seen = new Set<string>();
   const options: { label: string; value: string }[] = [];
+  // The engine matches an entry without regard to case, as the catalogue filter does.
+  const wanted = engine.toLowerCase();
   for (const entry of entries) {
-    if (entry.engine !== engine) continue;
+    if (entry.engine?.toLowerCase() !== wanted) continue;
     for (const variant of entry.variants ?? []) {
       if (seen.has(variant)) continue;
       seen.add(variant);
@@ -45,12 +50,27 @@ export const variantOptions = (
 
 /** Whether the catalogue offers compiled-in programs for *engine*, so a source on it must name one. */
 export const useEngineOffersVariants = (engine?: string | null) => {
-  const { data, isLoading, isError, error } = useFetchInfiniteSourceCatalogues({
-    per_page: PAGE_SIZE,
+  // One entry of this engine's is enough, stored ones included, since a source
+  // created from an entry still runs the entry's program.
+  const queryParams = {
+    engine: engine ?? '',
+    include_stored: true,
+    per_page: 1,
+  };
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: [...QUERY_KEYS.sources.catalogue(queryParams), 'count'],
+    queryFn: ({ signal }) => sourceCatalogues({ queryParams, signal }),
+    enabled: !!engine,
   });
+  // The entry is checked as well as the count, so an engine that ignores the
+  // filter cannot make every engine ask for a variant.
+  const wanted = engine?.toLowerCase();
   return {
     offersVariants:
-      !!engine && data.items.some((entry) => entry.engine === engine),
+      !!wanted &&
+      (data?.items ?? []).some(
+        (entry) => entry.engine?.toLowerCase() === wanted,
+      ),
     // Unknown until the catalogue answers, so a stored variant must survive the wait.
     isUnknown: isLoading || isError,
     catalogueError: error,
@@ -93,6 +113,8 @@ export const TransformVariantSelect = ({
     isLoading,
   } = useFetchInfiniteSourceCatalogues({
     search: debouncedSearch || undefined,
+    engine,
+    include_stored: true,
     per_page: PAGE_SIZE,
   });
 

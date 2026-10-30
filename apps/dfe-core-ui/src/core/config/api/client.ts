@@ -6,13 +6,36 @@ import type {
   DfeClientSuccessResponseBody,
 } from './client.types';
 
+/** The engine's `:path` route params, whose value spans several segments. */
+const MULTI_SEGMENT_PARAMS = new Set(['schema_path', 'label']);
+
+/** One segment. A `.` or `..` is refused, since URL parsing resolves it even percent-encoded. */
+const encodeSegment = (segment: string): string => {
+  if (segment === '.' || segment === '..') {
+    throw new Error(`"${segment}" cannot name a resource`);
+  }
+  return encodeURIComponent(segment);
+};
+
+/**
+ * A path param as URL path segments: `#`, `?`, `%` or `/` in a raw name would
+ * end or reshape the path and send the request to another resource.
+ */
+const encodePathParam = (key: string, value: string): string =>
+  MULTI_SEGMENT_PARAMS.has(key)
+    ? value.split('/').map(encodeSegment).join('/')
+    : encodeSegment(value);
+
 /** Replaces {param} segments in path with values from params. */
 function applyPathParams(
   path: string,
   pathParams?: Record<string, string>,
 ): string {
   if (!pathParams) return path;
-  return path.replace(/\{(\w+)\}/g, (_, key) => pathParams[key] ?? `{${key}}`);
+  return path.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const value = pathParams[key];
+    return value === undefined ? `{${key}}` : encodePathParam(key, value);
+  });
 }
 
 /** Builds URL with optional query string. */

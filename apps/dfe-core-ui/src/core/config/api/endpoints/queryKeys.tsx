@@ -84,6 +84,8 @@ export const QUERY_KEYS = Object.freeze({
       search,
       intake,
       tags,
+      engine,
+      include_stored,
       per_page,
       page,
     }: UseFetchInfiniteSourceCataloguesProps = {}) => [
@@ -92,6 +94,8 @@ export const QUERY_KEYS = Object.freeze({
       ...(search ? ['search', search] : []),
       ...(intake ? ['intake', intake] : []),
       ...(tags ? ['tags', tags.join(',')] : []),
+      ...(engine ? ['engine', engine] : []),
+      ...(include_stored ? ['include_stored'] : []),
       ...(per_page ? ['per_page', per_page] : []),
       ...(page ? ['page', page] : []),
     ],

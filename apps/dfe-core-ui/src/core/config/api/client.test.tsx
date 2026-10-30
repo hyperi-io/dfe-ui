@@ -116,6 +116,91 @@ describe('createApiClient', () => {
     expect(data).toEqual(mockSource);
   });
 
+  // A destination name may hold '#', '?', '%' or a space, and a raw one sends
+  // the request to a different resource: 'ops#1' would delete 'ops'.
+  test.each([
+    ['a fragment marker', 'ops#1', '/api/v1/alerts/destinations/ops%231'],
+    ['a query marker', 'a?b=c', '/api/v1/alerts/destinations/a%3Fb%3Dc'],
+    ['a percent sign', '100%', '/api/v1/alerts/destinations/100%25'],
+    ['a space', 'on call', '/api/v1/alerts/destinations/on%20call'],
+    ['unicode', 'café', '/api/v1/alerts/destinations/caf%C3%A9'],
+    ['a plain name', 'ops-1', '/api/v1/alerts/destinations/ops-1'],
+    [
+      'a slash and dot segments',
+      'a/../../destinations/ops',
+      '/api/v1/alerts/destinations/a%2F..%2F..%2Fdestinations%2Fops',
+    ],
+  ])(
+    'a path param with %s reaches the resource it names',
+    async (_case, name, path) => {
+      let requested = '';
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: async (input) => {
+          requested = String(input);
+          return new Response(null, { status: 204 });
+        },
+      });
+
+      await client.delete('/api/v1/alerts/destinations/{name}', {
+        pathParams: { name },
+      });
+
+      expect(requested).toBe(`${BASE_URL}${path}`);
+    },
+  );
+
+  test('a path-typed param keeps its slashes and encodes each segment', async () => {
+    let requested = '';
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      fetch: async (input) => {
+        requested = String(input);
+        return new Response(null, { status: 204 });
+      },
+    });
+
+    await client.get('/api/v1/schemas/definitions/{schema_path}/export', {
+      pathParams: { schema_path: 'aws/cloud trail#x' },
+    });
+
+    expect(requested).toBe(
+      `${BASE_URL}/api/v1/schemas/definitions/aws/cloud%20trail%23x/export`,
+    );
+  });
+
+  // URL parsing resolves '..' even as %2E%2E, so such a value never leaves the client.
+  test.each([
+    [
+      'a bare dot-dot name',
+      '/api/v1/alerts/destinations/{name}',
+      { name: '..' },
+    ],
+    ['a dot name', '/api/v1/alerts/destinations/{name}', { name: '.' }],
+    [
+      'a path-typed value that climbs',
+      '/api/v1/schemas/definitions/{schema_path}',
+      { schema_path: 'aws/../../../sources/main' },
+    ],
+  ] as const)(
+    'refuses %s before any request',
+    async (_case, path, pathParams) => {
+      let sent = false;
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: async () => {
+          sent = true;
+          return new Response(null, { status: 204 });
+        },
+      });
+
+      await expect(
+        client.delete(path, { pathParams } as never),
+      ).rejects.toThrow('cannot name a resource');
+      expect(sent).toBe(false);
+    },
+  );
+
   test('query params are appended to URL', async () => {
     const mockList = { items: [], total: 0 };
     let capturedUrl = '';

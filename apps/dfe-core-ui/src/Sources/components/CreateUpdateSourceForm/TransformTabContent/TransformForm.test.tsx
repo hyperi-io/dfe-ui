@@ -1,12 +1,14 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
+import { OKTA_CATALOGUE_ENTRY } from '@/core/config/api/endpoints/generator/mocks/sources';
 import { Form } from '@/core/components/Form';
+import { http, HttpResponse } from 'msw';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import {
   CreateUpdateSourceFormData,
   formSchema,
 } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, FormRule } from 'antd';
 import {
@@ -170,6 +172,86 @@ describe('TransformForm', () => {
       await waitFor(() =>
         expect(screen.getByLabelText(/^Transform Engine/)).toBeEnabled(),
       );
+      expect(screen.queryByLabelText(/^Variant/)).not.toBeInTheDocument();
+    });
+
+    it('asks for a variant on an engine whose entries sort past the first page', async () => {
+      const elastic = Array.from({ length: 60 }, (_, i) => ({
+        ...OKTA_CATALOGUE_ENTRY,
+        name: `elastic_${i}`,
+      }));
+      const vrl = {
+        ...OKTA_CATALOGUE_ENTRY,
+        name: 'zz_vrl',
+        display_name: 'Late VRL entry',
+        engine: 'VRL',
+        variants: ['vrl.late'],
+      };
+      // The engine's order and paging, so only a filtered ask can see the late entry.
+      server.use(
+        http.get(
+          API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
+          ({ request }) => {
+            const params = new URL(request.url).searchParams;
+            const engine = params.get('engine')?.toLowerCase();
+            const perPage = Number(params.get('per_page') ?? 25);
+            const page = Number(params.get('page') ?? 1);
+            const all = [...elastic, vrl].filter(
+              (entry) => !engine || entry.engine?.toLowerCase() === engine,
+            );
+            const totalPages = Math.ceil(all.length / perPage);
+            return HttpResponse.json({
+              items: all.slice((page - 1) * perPage, page * perPage),
+              total: all.length,
+              page,
+              per_page: perPage,
+              total_pages: totalPages,
+              next_page: page < totalPages ? page + 1 : null,
+              prev_page: page > 1 ? page - 1 : null,
+            });
+          },
+        ),
+      );
+      const user = userEvent.setup();
+      render(<Harness />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-vrl');
+      await user.click(await screen.findByLabelText(/^Variant/));
+
+      expect(
+        await screen.findByTitle('Late VRL entry (vrl.late)'),
+      ).toBeInTheDocument();
+    });
+
+    it('asks for no variant on vrl when the engine ignores the engine filter', async () => {
+      let askedForVrl = false;
+      server.use(
+        http.get(
+          API_CONFIG_MOCKS.sources.catalogue.mockedUrl,
+          ({ request }) => {
+            if (new URL(request.url).searchParams.get('engine') === 'vrl') {
+              askedForVrl = true;
+            }
+            return HttpResponse.json({
+              items: [OKTA_CATALOGUE_ENTRY],
+              total: 1069,
+              page: 1,
+              per_page: 1,
+              total_pages: 1069,
+              next_page: 2,
+              prev_page: null,
+            });
+          },
+        ),
+      );
+      const user = userEvent.setup();
+      render(<Harness />, { wrapper });
+
+      await pickEngine(user, 'dfe-transform-vrl');
+
+      // Settled once the answer has been rendered, so absence is not the loading state.
+      await waitFor(() => expect(askedForVrl).toBe(true));
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
       expect(screen.queryByLabelText(/^Variant/)).not.toBeInTheDocument();
     });
 
