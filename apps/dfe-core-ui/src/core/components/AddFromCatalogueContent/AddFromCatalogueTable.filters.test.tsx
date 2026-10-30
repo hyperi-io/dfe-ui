@@ -7,7 +7,7 @@ const { catalogue } = vi.hoisted(() => ({
   catalogue: vi.fn(),
 }));
 
-vi.mock('@/Sources/hooks/useFetchInfiniteSourceCatalogues', () => ({
+vi.mock('@/core/hooks/useFetchInfiniteSourceCatalogues', () => ({
   useFetchInfiniteSourceCatalogues: (props: { tags?: string[] }) =>
     catalogue(props),
 }));
