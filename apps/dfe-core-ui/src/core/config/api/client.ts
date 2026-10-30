@@ -125,8 +125,11 @@ export function createApiClient(config: ApiClientConfig) {
     data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>;
     headers: Headers;
   }> {
-    const { pathParams, queryParams, headerParams, body, signal } =
-      options ?? {};
+    const { pathParams, queryParams, headerParams, body, signal, deadlineMs } =
+      (options ?? {}) as DfeClientRequestOptions<Path, Method> & {
+        signal?: AbortSignal;
+        deadlineMs?: number;
+      };
     if (signal?.aborted) {
       throw new DOMException('Request was aborted', 'AbortError');
     }
@@ -162,9 +165,10 @@ export function createApiClient(config: ApiClientConfig) {
 
     // One deadline for the headers and the body, so an engine that accepts the
     // connection and then says nothing ends in an error rather than a spinner.
-    const deadlineMs =
-      method === 'get' ? ENGINE_READ_DEADLINE_MS : ENGINE_WRITE_DEADLINE_MS;
-    const deadline = AbortSignal.timeout(deadlineMs);
+    const allowedMs =
+      deadlineMs ??
+      (method === 'get' ? ENGINE_READ_DEADLINE_MS : ENGINE_WRITE_DEADLINE_MS);
+    const deadline = AbortSignal.timeout(allowedMs);
     const init: RequestInit = {
       method: method.toUpperCase(),
       headers,
@@ -178,7 +182,7 @@ export function createApiClient(config: ApiClientConfig) {
       return await exchange<Path, Method>(url, init, resolvedPath);
     } catch (error) {
       if (deadline.aborted && !signal?.aborted && isAbort(error)) {
-        throw new ApiTimeoutError(deadlineMs, { cause: error });
+        throw new ApiTimeoutError(allowedMs, { cause: error });
       }
       throw error;
     }
