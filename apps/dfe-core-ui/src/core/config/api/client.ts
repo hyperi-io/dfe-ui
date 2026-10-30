@@ -1,3 +1,7 @@
+import {
+  ENGINE_READ_DEADLINE_MS,
+  ENGINE_WRITE_DEADLINE_MS,
+} from '@/core/config/engineTimeout';
 import type { paths } from '@repo/dfe-engine-types';
 import type {
   DfeClientHttpMethod,
@@ -6,13 +10,41 @@ import type {
   DfeClientSuccessResponseBody,
 } from './client.types';
 
+/** The engine's `:path` route params, whose value spans several segments. */
+const MULTI_SEGMENT_PARAMS = new Set(['schema_path', 'label']);
+
+/** One segment. A `.` or `..` is refused, since URL parsing resolves it even percent-encoded. */
+const encodeSegment = (segment: string): string => {
+  if (segment === '.' || segment === '..') {
+    throw new Error(`"${segment}" cannot name a resource`);
+  }
+  return encodeURIComponent(segment);
+};
+
+/**
+ * A path param as URL path segments: `#`, `?`, `%` or `/` in a raw name would
+ * end or reshape the path and send the request to another resource.
+ */
+const encodePathParam = (key: string, value: string): string =>
+  MULTI_SEGMENT_PARAMS.has(key)
+    ? value.split('/').map(encodeSegment).join('/')
+    : encodeSegment(value);
+
+/** A fetch or body read cut off by an abort signal, which rejects with the signal's reason. */
+const isAbort = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error.name === 'AbortError' || error.name === 'TimeoutError');
+
 /** Replaces {param} segments in path with values from params. */
 function applyPathParams(
   path: string,
   pathParams?: Record<string, string>,
 ): string {
   if (!pathParams) return path;
-  return path.replace(/\{(\w+)\}/g, (_, key) => pathParams[key] ?? `{${key}}`);
+  return path.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const value = pathParams[key];
+    return value === undefined ? `{${key}}` : encodePathParam(key, value);
+  });
 }
 
 /** Builds URL with optional query string. */
@@ -93,8 +125,11 @@ export function createApiClient(config: ApiClientConfig) {
     data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>;
     headers: Headers;
   }> {
-    const { pathParams, queryParams, headerParams, body, signal } =
-      options ?? {};
+    const { pathParams, queryParams, headerParams, body, signal, deadlineMs } =
+      (options ?? {}) as DfeClientRequestOptions<Path, Method> & {
+        signal?: AbortSignal;
+        deadlineMs?: number;
+      };
     if (signal?.aborted) {
       throw new DOMException('Request was aborted', 'AbortError');
     }
@@ -128,15 +163,42 @@ export function createApiClient(config: ApiClientConfig) {
       ...definedHeaders(headerParams as Record<string, unknown> | undefined),
     };
 
+    // One deadline for the headers and the body, so an engine that accepts the
+    // connection and then says nothing ends in an error rather than a spinner.
+    const allowedMs =
+      deadlineMs ??
+      (method === 'get' ? ENGINE_READ_DEADLINE_MS : ENGINE_WRITE_DEADLINE_MS);
+    const deadline = AbortSignal.timeout(allowedMs);
     const init: RequestInit = {
       method: method.toUpperCase(),
       headers,
       ...(hasJsonBody && {
         body: formDataBody ?? JSON.stringify(body),
       }),
-      ...(signal !== undefined && { signal }),
+      signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
     };
 
+    try {
+      return await exchange<Path, Method>(url, init, resolvedPath);
+    } catch (error) {
+      if (deadline.aborted && !signal?.aborted && isAbort(error)) {
+        throw new ApiTimeoutError(allowedMs, { cause: error });
+      }
+      throw error;
+    }
+  }
+
+  async function exchange<
+    Path extends keyof paths,
+    Method extends DfeClientHttpMethod,
+  >(
+    url: string,
+    init: RequestInit,
+    resolvedPath: string,
+  ): Promise<{
+    data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>;
+    headers: Headers;
+  }> {
     const fetchFn = customFetch ?? globalThis.fetch;
     const res = await fetchFn(url, init);
     type Body = DfeClientSuccessResponseBody<
@@ -318,6 +380,14 @@ export class ApiError extends Error {
     this.status = status;
     this.statusText = statusText;
     this.detail = detail;
+  }
+}
+
+/** The engine did not answer a browser call within its deadline. */
+export class ApiTimeoutError extends Error {
+  constructor(deadlineMs: number, options?: ErrorOptions) {
+    super(`The engine did not answer in ${deadlineMs / 1000} s`, options);
+    this.name = 'ApiTimeoutError';
   }
 }
 

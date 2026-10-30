@@ -131,6 +131,40 @@ describe('renewEngineSession', () => {
     expect(token).toEqual({ ...SESSION, error: 'AccessTokenExpired' });
   });
 
+  // An engine restart inside the refresh window must not sign out a session
+  // whose token still works: the next scheduled check asks again.
+  describe('while the token it holds is still valid', () => {
+    const LIVE: JWT = {
+      ...SESSION,
+      accessTokenExpiresAt: Date.now() + 240_000,
+    };
+
+    test.each([
+      ['is unreachable', new TypeError('fetch failed')],
+      ['answers 502 from the gateway', jsonResponse(502, {})],
+      ['answers 503 while it restarts', jsonResponse(503, {})],
+      ['answers 504', jsonResponse(504, {})],
+    ])('keeps the session when the engine %s', async (_why, refresh) => {
+      const { fetchImpl } = engine(refresh);
+
+      const token = await renewEngineSession(LIVE, BASE, fetchImpl);
+
+      expect(token).toEqual(LIVE);
+    });
+
+    test.each([
+      ['refuses the token', jsonResponse(401, { code: 'unauthorized' })],
+      ['has ended the session', jsonResponse(401, { code: 'session_ended' })],
+      ['answers without a token', jsonResponse(200, { expires_in: 3600 })],
+    ])('still ends the session when the engine %s', async (_why, refresh) => {
+      const { fetchImpl } = engine(refresh);
+
+      const token = await renewEngineSession(LIVE, BASE, fetchImpl);
+
+      expect(token).toEqual({ ...LIVE, error: 'AccessTokenExpired' });
+    });
+  });
+
   test('asks the engine nothing for a session with no token', async () => {
     const { calls, fetchImpl } = engine(jsonResponse(200, {}));
 

@@ -75,4 +75,26 @@ describe('SourceFlowTabContent', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText('Input')).not.toBeInTheDocument();
   });
+
+  it.each([
+    [403, 'source:read is not granted'],
+    [500, 'the flow resolver failed'],
+  ])(
+    'says the flow is not readable when the engine answers %i',
+    async (status, message) => {
+      server.use(
+        API_CONFIG_MOCKS.sources.sourceFlow.get.error({
+          mockedResponse: { code: 'error', message },
+          status,
+        }),
+      );
+
+      render(<SourceFlowTabContent source="source" />, { wrapper });
+
+      expect(
+        await screen.findByText('The flow is not readable'),
+      ).toBeInTheDocument();
+      expect(screen.getByText(message)).toBeInTheDocument();
+    },
+  );
 });

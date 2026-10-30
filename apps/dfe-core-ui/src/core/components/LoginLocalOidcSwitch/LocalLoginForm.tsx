@@ -12,6 +12,15 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
+/**
+ * What the form says about a failed login. NextAuth reports a wrong password
+ * as CredentialsSignin, and anything else as the reason the server gave.
+ */
+export const loginFailureText = (error: Error): string =>
+  error.message && error.message !== 'CredentialsSignin'
+    ? error.message
+    : 'Unable to login. Please try again.';
+
 export const LocalLoginForm = ({
   callbackUrl,
   className,
@@ -51,10 +60,7 @@ export const LocalLoginForm = ({
       </Form.Item>
 
       {error && (
-        <FormNotification
-          text="Unable to login. Please try again."
-          type="error"
-        />
+        <FormNotification text={loginFailureText(error)} type="error" />
       )}
       <Button
         loading={isPending}

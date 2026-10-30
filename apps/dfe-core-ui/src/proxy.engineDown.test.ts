@@ -20,7 +20,8 @@ vi.mock('next-auth/jwt', () => ({
 
 // The budget is config, so a short one keeps the silent-engine cases quick.
 // The listeners and the sockets stay real.
-vi.mock('@/core/config/engineTimeout', () => ({
+vi.mock('@/core/config/engineTimeout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/core/config/engineTimeout')>()),
   ENGINE_CALL_TIMEOUT_MS: TEST_BUDGET_MS,
 }));
 

@@ -73,12 +73,19 @@ export type DfeClientRequestOptions<
 > =
   DfeClientOperationFor<Path, Method> extends infer Op
     ? Op extends never
-      ? { pathParams?: undefined; queryParams?: undefined; body?: undefined }
+      ? {
+          pathParams?: undefined;
+          queryParams?: undefined;
+          body?: undefined;
+          deadlineMs?: number;
+        }
       : {
           pathParams?: DfeClientPathParams<Op>;
           queryParams?: DfeClientQueryParams<Op>;
           headerParams?: DfeClientHeaderParams<Op>;
           body?: DfeClientRequestBody<Op>;
           signal?: AbortSignal;
+          /** Overrides the default deadline, for a call the engine is known to answer slowly. */
+          deadlineMs?: number;
         }
     : never;

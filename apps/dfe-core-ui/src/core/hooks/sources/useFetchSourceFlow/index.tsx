@@ -24,9 +24,6 @@ export const useFetchSourceFlow = ({
     queryKey: QUERY_KEYS.sources.sourceFlow({ name: source }),
     queryFn: () => fetchSourceFlowApi({ pathParams: { name: source ?? '' } }),
     enabled: !!source && queryEnabled,
-    // A refusal is a stable property of the source and the deployment, so
-    // retrying it only delays the message the user needs.
-    retry: (_count, err) => !(err instanceof ApiError && err.status === 422),
   });
 
   const refusal =
