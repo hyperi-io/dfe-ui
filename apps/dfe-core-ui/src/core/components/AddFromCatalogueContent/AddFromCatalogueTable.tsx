@@ -1,14 +1,15 @@
+import { CatalogueTags } from '@/core/components/CatalogueTags';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { useFetchInfiniteSourceCatalogues } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues';
+import { useFetchInfiniteSourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues';
 import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
-} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+} from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import { AddFromCatalogueFormValues } from './AddFromCatalogueForm';
 import { INTAKE_OPTIONS, INTAKE_OPTIONS_MAP } from './constants';
@@ -51,15 +52,27 @@ export const AddFromCatalogueTable = ({
   selectedEntries,
   onSelectedEntriesChange = () => {},
   onUpload,
+  filters = {},
 }: {
   selectedEntries: AddFromCatalogueFormValues[];
   onSelectedEntriesChange?: (entries: AddFromCatalogueFormValues[]) => void;
   onUpload?: () => void;
+  filters?: {
+    tags?: string[];
+  };
 }) => {
   const [search, setSearch] = useState('');
+  const [searchTags, setSearchTags] = useState<string[]>(filters.tags ?? []);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [intakeFilter, setIntakeFilter] = useState<TSourceCatalogueIntake>();
+  const filterTagsKey = (filters.tags ?? []).join('\0');
+  useEffect(() => {
+    queueMicrotask(() => {
+      setSearchTags(filterTagsKey === '' ? [] : filterTagsKey.split('\0'));
+      setPage(1);
+    });
+  }, [filterTagsKey]);
 
   const {
     data: { items: entries, total },
@@ -69,6 +82,7 @@ export const AddFromCatalogueTable = ({
     search,
     intake: intakeFilter,
     per_page: pageSize,
+    tags: searchTags,
     page,
   });
 
@@ -80,8 +94,13 @@ export const AddFromCatalogueTable = ({
 
   const rowsSelectedOffset = selectedEntries?.length > 0 ? 60 : 0;
   const selectionExceedsLimitOffset = selectionExceedsLimit ? 45 : 0;
+  const catalogueTagsOffset = searchTags.length > 0 ? 45 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 260 + selectionExceedsLimitOffset + rowsSelectedOffset,
+    offset:
+      300 +
+      selectionExceedsLimitOffset +
+      rowsSelectedOffset +
+      catalogueTagsOffset,
   });
 
   // A wide row scrolls sideways, so the name and its Select stay pinned in view.
@@ -170,6 +189,14 @@ export const AddFromCatalogueTable = ({
           }
         />
       )}
+
+      <CatalogueTags
+        selected={searchTags}
+        onChange={(tags) => {
+          setSearchTags(tags);
+          setPage(1);
+        }}
+      />
 
       <Table<TSourceCatalogueItem>
         loading={isLoading || isFetchingNextPage}

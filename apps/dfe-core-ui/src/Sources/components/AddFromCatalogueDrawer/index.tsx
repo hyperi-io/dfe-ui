@@ -1,11 +1,11 @@
 'use client';
 
+import { AddFromCatalogueContent } from '@/core/components/AddFromCatalogueContent';
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { AddFromCatalogueContent } from './AddFromCatalogueContent';
 
 const TITLE = 'Add from catalogue';
 

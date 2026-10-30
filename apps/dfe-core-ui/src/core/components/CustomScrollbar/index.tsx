@@ -5,28 +5,26 @@ interface CustomScrollbarProps extends HTMLAttributes<HTMLDivElement> {
   innerPadding?: boolean;
   // Omit to let the parent size the box, as a flex child with min-h-0 does.
   height?: number;
+  maxHeight?: number;
 }
 
 export const CustomScrollbar = ({
   children,
   innerPadding = true,
   height,
+  maxHeight,
   className,
   ...props
 }: CustomScrollbarProps) => {
   return (
     <div
-      style={
-        height === undefined
-          ? undefined
-          : {
-              // Fixed height, not max-height: a max-height box grows with its
-              // content and can sit taller than a clipped parent, so the last
-              // rows are below the fold and the scrollport never reaches them.
-              height: `${height}px`,
-              maxHeight: `${height}px`,
-            }
-      }
+      style={{
+        // Fixed height, not max-height: a max-height box grows with its
+        // content and can sit taller than a clipped parent, so the last
+        // rows are below the fold and the scrollport never reaches them.
+        height: height ? `${height}px` : '100%',
+        maxHeight: `${maxHeight ?? height}px`,
+      }}
       className={cn(
         innerPadding && 'pr-2',
         // Height and overflow

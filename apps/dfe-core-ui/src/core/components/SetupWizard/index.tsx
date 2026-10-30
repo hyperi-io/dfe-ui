@@ -2,6 +2,7 @@ import { TSetupWizardProps } from '@/core/hooks/useFetchSetupStatus/types';
 import { CompleteStep } from './CompleteStep';
 import { ConfigureOidcStep } from './ConfigureOidcStep';
 import { ConfigureOrganisationStep } from './ConfigureOrganisation';
+import { ConfigureSourceStep } from './ConfigureSourceStep';
 import { ConfigureUserStep } from './ConfigureUserStep';
 import { useSetupWizardNavigateToStep } from './helpers';
 import { SETUP_WIZARD_STEPS } from './server.helpers';
@@ -62,6 +63,25 @@ export const SetupWizard = ({
           }
         />
       )}
+      {currentStep === 'configureSource' && (
+        <ConfigureSourceStep
+          goPrevious={() =>
+            navigateToStep(
+              SETUP_WIZARD_STEPS[
+                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) - 1
+              ],
+            )
+          }
+          goNext={() =>
+            navigateToStep(
+              SETUP_WIZARD_STEPS[
+                SETUP_WIZARD_STEPS.findIndex((step) => step === currentStep) + 1
+              ],
+            )
+          }
+        />
+      )}
+
       {currentStep === 'configureUser' && (
         <ConfigureUserStep
           oidcProviderName={oidcProvider?.name}
@@ -82,6 +102,7 @@ export const SetupWizard = ({
           }
         />
       )}
+
       {currentStep === 'complete' && (
         <CompleteStep
           goPrevious={

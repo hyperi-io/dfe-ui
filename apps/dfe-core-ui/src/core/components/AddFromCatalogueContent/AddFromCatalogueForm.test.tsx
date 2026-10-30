@@ -1,5 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { SOURCE_NAME_VALIDATOR } from '@/Sources/utils/validation';
+import { SOURCE_NAME_VALIDATOR } from '@/core/validationSchemas/source.validation';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

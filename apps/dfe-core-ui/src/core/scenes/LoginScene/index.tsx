@@ -1,10 +1,11 @@
 'use client';
 
 import { LoginLocalOidcSwitch } from '@/core/components/LoginLocalOidcSwitch';
-import { type TLoginRefusal } from '@/core/config/loginRefusal';
+import { NotificationCard } from '@/core/components/NotificationCard';
 import { loginNotice } from '@/core/config/loginNotice';
+import { type TLoginRefusal } from '@/core/config/loginRefusal';
 import { cn } from '@/core/utils/style';
-import { IconPrimaryLogoFull } from '@repo/dfe-icons';
+import { IconCircleCheckFilled, IconPrimaryLogoFull } from '@repo/dfe-icons';
 import { Alert } from 'antd';
 import './Login.css';
 
@@ -44,10 +45,10 @@ const Login = ({
           />
         )}
         {shown && (
-          <Alert
+          <NotificationCard
             className="w-full"
             type="success"
-            showIcon
+            icon={<IconCircleCheckFilled />}
             title={shown.title}
             description={shown.description}
           />

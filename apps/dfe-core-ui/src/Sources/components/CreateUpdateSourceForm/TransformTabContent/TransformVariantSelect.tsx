@@ -1,6 +1,6 @@
 import { Form } from '@/core/components/Form';
 import { useDebounce } from '@/core/hooks/useDebounce';
-import { useFetchInfiniteSourceCatalogues } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues';
+import { useFetchInfiniteSourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues';
 import {
   Select,
   type FormItemProps,

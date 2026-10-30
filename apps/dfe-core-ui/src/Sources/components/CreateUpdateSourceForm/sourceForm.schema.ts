@@ -1,10 +1,7 @@
+import { SOURCE_TRANSPORTS } from '@/core/constants/source.constants';
+import { sourceNameValidator } from '@/core/validationSchemas/source.validation';
 import { MAX_VIEWS } from '@/Sources/components/CreateUpdateSourceForm/ViewsTabContent/constants';
 import { TCreateSourceRequestBody } from '@/Sources/hooks/useCreateSource/types';
-import {
-  ENGINE_OWNED_FETCHER_KEYS,
-  fetcherFileKeysIn,
-  parseFetcherConfig,
-} from '@/Sources/utils/transformSourceData/helpers';
 import { TCompatBinding } from '@/Sources/hooks/useFetchCompat/types';
 import {
   isMatchGroup,
@@ -14,7 +11,11 @@ import {
   TMatchFormNode,
   TMatchOperator,
 } from '@/Sources/utils/sourceMatch';
-import { sourceNameValidator } from '@/Sources/utils/validation';
+import {
+  ENGINE_OWNED_FETCHER_KEYS,
+  fetcherFileKeysIn,
+  parseFetcherConfig,
+} from '@/Sources/utils/transformSourceData/helpers';
 
 import z from 'zod';
 
@@ -57,17 +58,6 @@ export const RECEIVER_TABLE_LABELS: Record<
 > = {
   own: 'Own table',
   main: 'Shared table',
-};
-
-/** Which of a deployment's two transports carries this source's records. */
-export const SOURCE_TRANSPORTS = ['bus', 'direct'] as const;
-
-export const SOURCE_TRANSPORT_LABELS: Record<
-  (typeof SOURCE_TRANSPORTS)[number],
-  string
-> = {
-  bus: 'Bus - a broker holds records between stages',
-  direct: 'Direct - point to point, nothing stored between stages',
 };
 
 const sourceDetailsTabSchema = {
