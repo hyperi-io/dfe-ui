@@ -2117,7 +2117,7 @@ export interface paths {
          * @description Delete a detection rule.
          *
          *     A production+team delete is routed to a review branch, so the runner keeps
-         *     compiling the rule until that branch is merged; ``X-DFE-Review-Required`` says so.
+         *     compiling the rule until that branch is merged, which ``X-DFE-Review-Required`` says.
          */
         delete: operations["rules.delete"];
         options?: never;
@@ -13350,7 +13350,7 @@ export interface components {
         };
         /**
          * RuleUpdateRequest
-         * @description Update an existing hunt rule (re-runs creation pipeline; ``source_type`` is not accepted).
+         * @description Update an existing hunt rule (re-runs creation pipeline, and ``source_type`` is not accepted).
          */
         RuleUpdateRequest: {
             /**
