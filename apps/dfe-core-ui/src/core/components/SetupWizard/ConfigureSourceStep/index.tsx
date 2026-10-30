@@ -33,7 +33,7 @@ export const ConfigureSourceStep = ({
   return (
     <Card
       classNames={{
-        root: 'w-3/4 min-h-[400px] my-4',
+        root: 'w-3/4 my-4',
         body: 'flex flex-col gap-2',
       }}
     >
