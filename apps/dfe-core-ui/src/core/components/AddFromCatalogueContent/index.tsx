@@ -1,5 +1,5 @@
-import { useCreateBulkSourceFromCatalogue } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
+import { useCreateBulkSourceFromCatalogue } from '@/core/hooks/useCreateBulkSourceFromCatalogue';
+import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { cn } from '@repo/dfe-shared-ui';
 import { useState } from 'react';
 import {

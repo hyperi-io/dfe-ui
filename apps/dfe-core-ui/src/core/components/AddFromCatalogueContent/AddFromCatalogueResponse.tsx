@@ -1,8 +1,8 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
+import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import {
   IconChevronDown,
   IconChevronUp,

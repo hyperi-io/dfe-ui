@@ -1,12 +1,16 @@
+import { AddFromCatalogueContent } from '@/core/components/AddFromCatalogueContent';
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SkipForNow } from '@/core/components/SetupWizard/SkipForNow';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { AddFromCatalogueContent } from '@/Sources/components/AddFromCatalogueDrawer/AddFromCatalogueContent';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import { IconArrowLeft } from '@repo/dfe-icons';
 import { Button, Card } from 'antd';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+import {
+  getCreatedSourceCount,
+  rememberCreatedSources,
+  subscribeCreatedSourceCount,
+} from './createdSources';
 import { TagSelect } from './TagSelect';
 
 export const ConfigureSourceStep = ({
@@ -17,8 +21,11 @@ export const ConfigureSourceStep = ({
   goNext: () => void;
 }) => {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [sourceCreatedResponse, setSourceCreatedResponse] =
-    useState<TCatalogueBulkSourceResponse | null>(null);
+  const createdCount = useSyncExternalStore(
+    subscribeCreatedSourceCount,
+    getCreatedSourceCount,
+    () => null,
+  );
 
   const tableOffset = selectedTags.size > 0 ? -300 : 0;
   const { componentHeight } = useSetComponentHeight({
@@ -33,14 +40,14 @@ export const ConfigureSourceStep = ({
     >
       <h1 className="text-2xl font-light">Configure Source</h1>
 
-      {sourceCreatedResponse && (
+      {createdCount !== null && (
         <NotificationCard
           type="success"
           title="Sources created"
-          description={`${sourceCreatedResponse.created.length} sources created successfully`}
+          description={`${createdCount} sources created successfully`}
         />
       )}
-      {!sourceCreatedResponse && (
+      {createdCount === null && (
         <CustomScrollbar height={componentHeight}>
           {selectedTags.size === 0 && (
             <TagSelect
@@ -60,7 +67,7 @@ export const ConfigureSourceStep = ({
               responseController={{
                 displayEnabled: false,
                 setResponse: (data) => {
-                  setSourceCreatedResponse(data);
+                  rememberCreatedSources(data.created.length);
                 },
               }}
             />

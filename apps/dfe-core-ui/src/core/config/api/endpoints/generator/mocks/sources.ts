@@ -1,11 +1,11 @@
 import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/types';
+import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
 import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
-import { TCatalogueBulkSourceResponse } from '@/Sources/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
 import { TSourceCataloguesResponse } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';

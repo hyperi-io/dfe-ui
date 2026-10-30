@@ -5,7 +5,7 @@ import { RbacProtected } from '@/core/components/RbacProtected';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { AddFromCatalogueContent } from './AddFromCatalogueContent';
+import { AddFromCatalogueContent } from '../../../core/components/AddFromCatalogueContent';
 
 const TITLE = 'Add from catalogue';
 
