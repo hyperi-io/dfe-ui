@@ -27,14 +27,13 @@ export const ConfigureSourceStep = ({
     () => null,
   );
 
-  const tableOffset = selectedTags.size > 0 ? -300 : 0;
   const { componentHeight } = useSetComponentHeight({
-    offset: 650 + tableOffset,
+    offset: 200,
   });
   return (
     <Card
       classNames={{
-        root: 'w-3/4 min-h-[400px] max-h-[700px]',
+        root: 'w-3/4 min-h-[400px] my-4',
         body: 'flex flex-col gap-2',
       }}
     >
@@ -48,7 +47,7 @@ export const ConfigureSourceStep = ({
         />
       )}
       {createdCount === null && (
-        <CustomScrollbar height={componentHeight}>
+        <CustomScrollbar maxHeight={componentHeight}>
           {selectedTags.size === 0 && (
             <TagSelect
               onChange={(tag) =>
@@ -59,7 +58,6 @@ export const ConfigureSourceStep = ({
 
           {selectedTags.size > 0 && (
             <AddFromCatalogueContent
-              className="max-h-75"
               filters={{ tags: Array.from(selectedTags) }}
               onSuccess={() => {
                 return goNext();
