@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError } from './client';
+import { ApiError, ApiTimeoutError } from './client';
 import { createQueryClient, shouldRetryQuery } from './queryClient';
 
 const apiError = (status: number) => new ApiError(status, '', { message: '' });
@@ -24,6 +24,13 @@ describe('shouldRetryQuery', () => {
       false,
     ],
     ['a 500 after many failures', apiError(500), 7, false],
+    ['a read past its deadline', new ApiTimeoutError(30_000), 0, true],
+    [
+      'a read past its deadline a second time',
+      new ApiTimeoutError(30_000),
+      1,
+      false,
+    ],
   ])('%s', (_case, error, failures, expected) => {
     expect(shouldRetryQuery(failures, error)).toBe(expected);
   });
@@ -31,6 +38,12 @@ describe('shouldRetryQuery', () => {
   it('is what the console query client retries with', () => {
     expect(createQueryClient().getDefaultOptions().queries?.retry).toBe(
       shouldRetryQuery,
+    );
+  });
+
+  it('never retries a write, which may already have landed', () => {
+    expect(createQueryClient().getDefaultOptions().mutations?.retry ?? 0).toBe(
+      0,
     );
   });
 });

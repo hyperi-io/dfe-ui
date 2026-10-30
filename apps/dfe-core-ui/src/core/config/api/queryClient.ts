@@ -7,7 +7,7 @@ const MAX_QUERY_RETRIES = 1;
 /**
  * Whether a failed read is worth asking again.
  *
- * A dropped connection or a 5xx may clear, and a 401 has already refreshed the
+ * A dropped connection, a missed deadline or a 5xx may clear, and a 401 has already refreshed the
  * token by the time it lands here. Every other 4xx is the engine's answer.
  */
 export const shouldRetryQuery = (

@@ -121,4 +121,30 @@ describe('ViewSourceDetail', () => {
       expect(calls).toBe(1);
     },
   );
+
+  it('renders a source whose detail carries no version', async () => {
+    server.use(
+      http.get('/api/v1/sources/:name/versions/:version', () =>
+        HttpResponse.json({
+          source: 'okta',
+          display_name: 'Okta',
+          enabled: true,
+          current: '1.0.0',
+          deployed_version: '1.0.0',
+          selected: '1.0.0',
+          versions: ['1.0.0'],
+        }),
+      ),
+      http.get('/api/v1/auth/me', () =>
+        HttpResponse.json({ user_id: 'admin', roles: [], permissions: [] }),
+      ),
+    );
+    searchParamsRef.current = new URLSearchParams('source_name=okta');
+    render(<ViewSourceDetail />, { wrapper });
+
+    expect(
+      await screen.findByRole('heading', { name: /Source Configuration/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Header:/)).not.toBeInTheDocument();
+  });
 });

@@ -11,6 +11,7 @@ import {
 } from 'vitest';
 import {
   ApiError,
+  ApiTimeoutError,
   createApiClient,
   getApiErrorFieldMessages,
   getApiErrorFields,
@@ -20,6 +21,41 @@ import {
 } from './client';
 
 const BASE_URL = 'https://api.example.com';
+
+// The deadlines are config, so short ones keep the never-answering cases quick.
+vi.mock('@/core/config/engineTimeout', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/core/config/engineTimeout')>()),
+  ENGINE_READ_DEADLINE_MS: 300,
+  ENGINE_WRITE_DEADLINE_MS: 500,
+}));
+
+/** A fetch that accepts the request and never answers, or answers headers and stalls the body. */
+const silentEngine =
+  (stall: 'headers' | 'body') =>
+  (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+    new Promise((resolve, reject) => {
+      const signal = init?.signal;
+      if (signal?.aborted) {
+        reject(signal.reason);
+        return;
+      }
+      signal?.addEventListener('abort', () => reject(signal.reason));
+      if (stall === 'body') {
+        const body = new ReadableStream({
+          start(controller) {
+            signal?.addEventListener('abort', () =>
+              controller.error(signal.reason),
+            );
+          },
+        });
+        resolve(
+          new Response(body, {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
+      }
+    });
 
 const server = setupServer();
 
@@ -200,6 +236,48 @@ describe('createApiClient', () => {
       expect(sent).toBe(false);
     },
   );
+
+  test.each([
+    ['a read that gets no headers', 'get', 'headers', '0.3'],
+    ['a read whose body stalls', 'get', 'body', '0.3'],
+    ['a write that gets no headers', 'delete', 'headers', '0.5'],
+    ['a write whose body stalls', 'post', 'body', '0.5'],
+  ] as const)(
+    '%s fails with the reason once its deadline passes',
+    async (_case, method, stall, seconds) => {
+      const client = createApiClient({
+        baseUrl: BASE_URL,
+        fetch: silentEngine(stall),
+      });
+      const path =
+        method === 'post'
+          ? '/api/v1/sources/{name}/build'
+          : '/api/v1/sources/{name}';
+      const call = (
+        client[method] as (p: string, o: unknown) => Promise<unknown>
+      )(path, { pathParams: { name: 'source' } });
+
+      await expect(call).rejects.toThrow(
+        `The engine did not answer in ${seconds} s`,
+      );
+      await expect(call).rejects.toBeInstanceOf(ApiTimeoutError);
+    },
+  );
+
+  test('a caller that cancels gets its own abort, not a timeout', async () => {
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      fetch: silentEngine('headers'),
+    });
+    const controller = new AbortController();
+    const call = client.get('/api/v1/sources/{name}', {
+      pathParams: { name: 'source' },
+      signal: controller.signal,
+    });
+    controller.abort();
+
+    await expect(call).rejects.not.toBeInstanceOf(ApiTimeoutError);
+  });
 
   test('query params are appended to URL', async () => {
     const mockList = { items: [], total: 0 };

@@ -13,12 +13,10 @@ export const SourceDetailHighlight = ({
 }: {
   source: TSourceVersionDetail;
 }) => {
-  const {
-    source: sourceName,
-    deployed_version,
-    selected,
-    version: { schema, header },
-  } = source;
+  const { source: sourceName, deployed_version, selected, version } = source;
+  // A detail without its version still renders the page, just without this banner.
+  const schema = version?.schema;
+  const header = version?.header;
 
   const isSelectedVersionDeployed = deployed_version === selected;
   return (

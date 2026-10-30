@@ -144,6 +144,11 @@ export const TransformVariantSelect = ({
       placeholder="Search the catalogue for a variant"
       showSearch={{ onSearch: setSearch, filterOption: false }}
       onPopupScroll={handlePopupScroll}
+      // Sized by the field's box rather than measured: a list opened while a
+      // dialog still scales in would keep the scaled width.
+      getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+      popupMatchSelectWidth={false}
+      styles={{ popup: { root: { width: '100%' } } }}
       allowClear
     />
   );
