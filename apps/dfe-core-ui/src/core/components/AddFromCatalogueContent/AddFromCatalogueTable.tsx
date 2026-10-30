@@ -1,12 +1,12 @@
 import { CatalogueTags } from '@/core/components/CatalogueTags';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { Table } from '@/core/components/Table';
-import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { useFetchInfiniteSourceCatalogues } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues';
+import { useFetchInfiniteSourceCatalogues } from '@/core/hooks/useFetchInfiniteSourceCatalogues';
 import {
   TSourceCatalogueIntake,
   TSourceCatalogueItem,
-} from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+} from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
+import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import { Button, Input, Select, Tag } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
@@ -97,7 +97,7 @@ export const AddFromCatalogueTable = ({
   const catalogueTagsOffset = searchTags.length > 0 ? 45 : 0;
   const { componentHeight } = useSetComponentHeight({
     offset:
-      260 +
+      300 +
       selectionExceedsLimitOffset +
       rowsSelectedOffset +
       catalogueTagsOffset,

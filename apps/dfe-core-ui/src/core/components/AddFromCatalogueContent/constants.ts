@@ -1,4 +1,4 @@
-import { TSourceCatalogueIntake } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
+import { TSourceCatalogueIntake } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 
 // Keyed by the engine's intake enum, so an intake it adds fails typecheck until it has a label.
 export const INTAKE_OPTIONS_MAP: Readonly<

@@ -4,11 +4,11 @@ import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/ty
 import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { TSourceListResponse } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { TSourceCataloguesResponse } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
-import { TSourceCataloguesResponse } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';

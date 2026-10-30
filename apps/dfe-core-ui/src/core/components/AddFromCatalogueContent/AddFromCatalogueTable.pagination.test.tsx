@@ -1,5 +1,5 @@
+import { TSourceCatalogueItem } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { TSourceCatalogueItem } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';

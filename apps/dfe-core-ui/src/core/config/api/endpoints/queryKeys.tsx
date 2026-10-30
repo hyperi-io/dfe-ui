@@ -8,6 +8,7 @@ import { UseFetchInfiniteFilteredRulesProps } from '@/core/hooks/useFetchInfinit
 import { UseFetchInfiniteFilteredSchemasProps } from '@/core/hooks/useFetchInfiniteFilteredSchemas/types';
 import { UseFetchInfiniteFilteredSourceCatalogueTagsProps } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
 import { UseFetchInfiniteFilteredSourcesProps } from '@/core/hooks/useFetchInfiniteFilteredSources/types';
+import { UseFetchInfiniteSourceCataloguesProps } from '@/core/hooks/useFetchInfiniteSourceCatalogues/types';
 import { UseFetchInfiniteFilteredAlertsProps } from '@/Hunts/hooks/useFetchInfiniteFilteredAlerts/types';
 import { UseFetchGitOpsLogProps } from '@/Platform/hooks/gitops/useFetchGitOpsLog/types';
 import { UseFetchInfiniteDefaultsDriftSourcesProps } from '@/Platform/hooks/system/useFetchInifniteDefaultDriftSources/types';
@@ -16,7 +17,6 @@ import { useFetchInfiniteFilteredApiKeysProps } from '@/Settings/hooks/apiKeys/u
 import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { UseFetchInfiniteFilteredRolesProps } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
 import { UseFetchInfiniteFilteredRoleScopesProps } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoleScopes/types';
-import { UseFetchInfiniteSourceCataloguesProps } from '@/Sources/hooks/useFetchInfiniteSourceCatalogues/types';
 import { UseFetchInfiniteSourceColumnsProps } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
 
 export const QUERY_KEYS = Object.freeze({

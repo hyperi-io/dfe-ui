@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { SOURCE_NAME_VALIDATOR, sourceNameValidator } from './validation';
+import {
+  SOURCE_NAME_VALIDATOR,
+  sourceNameValidator,
+} from './source.validation';
 
 const firstMessage = (value: string) => {
   const result = sourceNameValidator.safeParse(value);
