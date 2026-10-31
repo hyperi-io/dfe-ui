@@ -8,6 +8,9 @@ const EmptyText = () => (
   <span className="text-foreground/50 dark:text-foreground/50">None</span>
 );
 
+const formatValue = (value: unknown) =>
+  typeof value === 'string' ? value : JSON.stringify(value);
+
 export const ViewActionDetail = ({ name }: { name: string }) => {
   const { data, isLoading, error } = useFetchGovernanceActionDetail({ name });
 
@@ -43,9 +46,9 @@ export const ViewActionDetail = ({ name }: { name: string }) => {
                     className="border rounded-md p-2 border-foreground/10 dark:border-foreground/10"
                     key={change.path}
                   >
-                    <pre>
+                    <pre className="whitespace-pre-wrap break-words">
                       {Object.entries(change)
-                        .map(([key, value]) => `${key}: ${value}`)
+                        .map(([key, value]) => `${key}: ${formatValue(value)}`)
                         .join(', ')}
                     </pre>
                   </li>
