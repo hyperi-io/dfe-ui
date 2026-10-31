@@ -1,11 +1,17 @@
-# DFE UI
+# dfe-ui
 
+[![Build Status](https://github.com/hyperi-io/dfe-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/hyperi-io/dfe-ui/actions)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue)](LICENSE)
 
-The web UI of the Data Fusion Engine (DFE) product suite. It consumes ONLY
-the dfe-engine API (the control pyramid rule - the UI never reaches past the
-API to the infrastructure), and embeds the DFE HyperDX fork as the
-data-explore surface.
+The console of a DFE deployment, where an operator sets up and runs it. It manages the deployment through the dfe-engine API alone, never past it to the infrastructure. Observe embeds DFE's HyperDX, which the browser loads from HyperDX's own URL, and the console sends its own telemetry to an OTLP endpoint when `OTEL_EXPORTER_OTLP_ENDPOINT` is set.
+
+## What it gives you
+
+- Sources and their ingest rules, defined in one place.
+- Schemas and meta schemas, transforms, field maps and the library they draw on.
+- Detection rules and hunts.
+- An Observe view that embeds HyperDX for searching and charting the data.
+- Platform and admin settings, and a first-run setup flow.
 
 ## Quick start
 
@@ -50,7 +56,7 @@ A Turborepo/yarn-workspaces monorepo with one shipped app and four packages:
 
 ## Issues
 
-Open bugs: [this repo](https://github.com/hyperi-io/dfe-ui/issues?q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor) | [whole DFE suite](https://github.com/search?type=issues&q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor+repo%3Ahyperi-io%2Fdfe-infra+repo%3Ahyperi-io%2Fdfe-docker+repo%3Ahyperi-io%2Fdfe-deploy+repo%3Ahyperi-io%2Fdfe-engine+repo%3Ahyperi-io%2Fdfe-loader+repo%3Ahyperi-io%2Fdfe-receiver+repo%3Ahyperi-io%2Fdfe-fetcher+repo%3Ahyperi-io%2Fdfe-archiver+repo%3Ahyperi-io%2Fdfe-transform-vrl+repo%3Ahyperi-io%2Fdfe-transform-vector+repo%3Ahyperi-io%2Fdfe-transform-elastic+repo%3Ahyperi-io%2Fdfe-ui+repo%3Ahyperi-io%2Fdfe-hyperdx+repo%3Ahyperi-io%2Fscalo-rs+repo%3Ahyperi-io%2Fscalo-py+repo%3Ahyperi-io%2Flogreducer+repo%3Ahyperi-io%2Fdfe-schemas+repo%3Ahyperi-io%2Fvector-vrl+repo%3Ahyperi-io%2Fculvert+repo%3Ahyperi-io%2Fclickhouse-dfe+repo%3Ahyperi-io%2Ffactbook-rs)
+Open bugs: [this repo](https://github.com/hyperi-io/dfe-ui/issues?q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor) | [whole DFE suite](https://github.com/search?type=issues&q=is%3Aopen+is%3Aissue+type%3ABug+-label%3Abacklog+-label%3Anext-minor+repo%3Ahyperi-io%2Fdfe-infra+repo%3Ahyperi-io%2Fdfe-docker+repo%3Ahyperi-io%2Fdfe-deploy+repo%3Ahyperi-io%2Fdfe-engine+repo%3Ahyperi-io%2Fdfe-loader+repo%3Ahyperi-io%2Fdfe-receiver+repo%3Ahyperi-io%2Fdfe-fetcher+repo%3Ahyperi-io%2Fdfe-archiver+repo%3Ahyperi-io%2Fdfe-transform-vrl+repo%3Ahyperi-io%2Fdfe-transform-vector+repo%3Ahyperi-io%2Fdfe-transform-elastic+repo%3Ahyperi-io%2Fdfe-ui+repo%3Ahyperi-io%2Fdfe-hyperdx+repo%3Ahyperi-io%2Fscalo-rs+repo%3Ahyperi-io%2Fscalo-py+repo%3Ahyperi-io%2Flogreducer+repo%3Ahyperi-io%2Fdfe-schemas+repo%3Ahyperi-io%2Fvector-vrl+repo%3Ahyperi-io%2Fculvert+repo%3Ahyperi-io%2Fdfe-clickhouse-rs+repo%3Ahyperi-io%2Ffactbook-rs)
 
 ## License
 
