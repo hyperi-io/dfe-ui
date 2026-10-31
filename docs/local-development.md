@@ -8,7 +8,7 @@ workspaces. Bring the engine up first, then one command boots the console.
 
 The engine is the only backend the console needs. Run it as a local process on
 port 8003 per
-[dfe-engine docs/LOCAL-DEV.md](https://github.com/hyperi-io/dfe-engine/blob/main/docs/LOCAL-DEV.md),
+[dfe-engine docs/local-dev.md](https://github.com/hyperi-io/dfe-engine/blob/main/docs/local-dev.md),
 then:
 
 ```bash
