@@ -12,3 +12,11 @@
 [[IgnoredVulns]]
 id = "GHSA-gcqx-w48m-w2h4"
 reason = "deepmerge 4.3.1, pulled only by @svgr/plugin-svgo 8.1.0, a devDependency of packages/dfe-icons that runs in the icon generate script over our own committed SVG files. It is in no server or browser bundle, so no request input reaches mergeObject(). No fixed deepmerge release exists (4.3.1 is the latest, vulnerable range >= 4.2.0). Drop when deepmerge ships a fix or @svgr/plugin-svgo leaves it."
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+reason = "glob 13.0.6, pulled only by @joshwooding/vite-plugin-react-docgen-typescript, the Storybook docgen plugin, which walks our own source tree at build time. It is in no server or browser bundle, and the bypass needs a caller bounding a walk of an attacker-chosen tree with an AbortSignal. Moderate. Fixed in 14.0.2, which the plugin's ^13 range blocks. Drop when it moves up."
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+reason = "minimatch 3.1.5, 5.1.9 and 10.2.6, pulled only by eslint and its plugins, glob under the Storybook docgen plugin, and @redocly/openapi-core under openapi-typescript (the dfe-engine-types generator). All run at build or lint time over patterns written in config, never request input, and none is in a server or browser bundle. Moderate. Fixed in 11.0.1, which every parent's range blocks. Drop when they move up."
