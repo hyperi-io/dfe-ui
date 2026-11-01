@@ -1,9 +1,12 @@
 import NextAuth from 'next-auth';
 import { getToken } from 'next-auth/jwt';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { endEngineSessions } from '@/core/auth/endEngineSessions';
 import { authOptions, engineBaseUrl } from '@/core/config/auth';
-import { expiredEngineTokenCookies } from '@/core/config/engineTokenCookie';
+import {
+  engineTokenCookieFor,
+  expiredEngineTokenCookies,
+} from '@/core/config/engineTokenCookie';
 
 type TRouteContext = { params: Promise<{ nextauth: string[] }> };
 
@@ -14,6 +17,50 @@ const handler = NextAuth(authOptions) as (
 
 // NextAuth clears its session cookie only when the sign-out passed its CSRF check.
 const SESSION_CLEARED = /^(__Secure-)?next-auth\.session-token(\.\d+)?=;/;
+
+// The name=value pair of a session cookie NextAuth is setting, chunks included.
+const SESSION_PAIR =
+  /^((?:__Secure-)?next-auth\.session-token(?:\.\d+)?=[^;\s]+)/;
+
+/**
+ * A renewed session holds a new engine token, but the proxy only mirrors the
+ * token into dfe_token on page loads, so an operator who stays in the embedded
+ * HyperDX would keep the old one until it expired. The renewed session cookie
+ * is read back from the response so the mirror is replanted with it.
+ */
+async function plantRenewedEngineToken(
+  req: NextRequest,
+  response: Response,
+): Promise<void> {
+  const pairs = response.headers
+    .getSetCookie()
+    .map((cookie) => SESSION_PAIR.exec(cookie)?.[1])
+    .filter((pair): pair is string => pair !== undefined);
+  if (pairs.length === 0) {
+    return;
+  }
+
+  const renewed = await getToken({
+    req: new NextRequest(req.url, { headers: { cookie: pairs.join('; ') } }),
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  if (renewed?.error !== undefined) {
+    return;
+  }
+  const cookie = engineTokenCookieFor(
+    renewed,
+    req.nextUrl.protocol === 'https:',
+  );
+  if (!cookie) {
+    return;
+  }
+  const carrier = new NextResponse();
+  carrier.cookies.set(cookie);
+  response.headers.append(
+    'Set-Cookie',
+    carrier.headers.get('set-cookie') ?? '',
+  );
+}
 
 /**
  * A sign-out also ends the account's engine sessions and drops the engine token
@@ -32,6 +79,9 @@ async function POST(
     : null;
 
   const response = await handler(req, context);
+  if (nextauth[0] === 'session' && response.ok) {
+    await plantRenewedEngineToken(req, response);
+  }
   if (!signingOut) {
     return response;
   }

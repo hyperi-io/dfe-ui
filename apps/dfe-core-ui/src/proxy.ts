@@ -5,10 +5,7 @@ import {
   createNonce,
   cspSources,
 } from '@/core/config/contentSecurityPolicy';
-import {
-  DFE_TOKEN_COOKIE,
-  engineTokenCookieDomain,
-} from '@/core/config/engineTokenCookie';
+import { engineTokenCookieFor } from '@/core/config/engineTokenCookie';
 import { ENGINE_UNAVAILABLE_PATH } from '@/core/config/engineUnavailable';
 import {
   LOGIN_CALLBACK_PATH_HEADER,
@@ -59,31 +56,10 @@ async function plantEngineTokenCookie(
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  const accessToken = token?.accessToken;
-  if (typeof accessToken !== 'string' || accessToken === '') {
-    return;
+  const cookie = engineTokenCookieFor(token, req.nextUrl.protocol === 'https:');
+  if (cookie) {
+    res.cookies.set(cookie);
   }
-  if (token?.passwordChangeRequired === true) {
-    return;
-  }
-
-  const expiresAt =
-    typeof token?.accessTokenExpiresAt === 'number'
-      ? token.accessTokenExpiresAt
-      : undefined;
-  const maxAge =
-    expiresAt !== undefined
-      ? Math.max(0, Math.floor((expiresAt - Date.now()) / 1000))
-      : undefined;
-
-  res.cookies.set(DFE_TOKEN_COOKIE, accessToken, {
-    domain: engineTokenCookieDomain(),
-    path: '/',
-    httpOnly: true,
-    secure: req.nextUrl.protocol === 'https:',
-    sameSite: 'lax',
-    maxAge,
-  });
 }
 
 const authMiddleware = withAuth({
