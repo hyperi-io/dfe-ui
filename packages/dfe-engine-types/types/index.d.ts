@@ -1088,7 +1088,8 @@ export interface paths {
          *     brings every schema it pins.
          *
          *     201 when the apps follow the new source, 202 when the source is stored and the
-         *     reconcile that brings the apps into step with it did not complete.
+         *     reconcile that brings the apps into step with it did not complete, or when
+         *     production+team sent it to review (``review_required``).
          */
         post: operations["sources.create"];
         delete?: never;
@@ -1371,6 +1372,10 @@ export interface paths {
          *     The answer reports the reconcile as a create or an update does: on a
          *     deployment that renders the app config itself, ``restart_required`` names the
          *     command that takes away the containers the source's instances ran in.
+         *
+         *     A delete production+team sends to review answers ``review_required`` and
+         *     touches nothing else: main still carries the source, so its topics, records and
+         *     HyperDX source stay until the branch is merged.
          */
         delete: operations["sources.delete"];
         options?: never;
@@ -2760,6 +2765,10 @@ export interface paths {
          *     datasource adapters rather than parameterized views. The SQL runs as the
          *     engine's own ClickHouse user, so it requires ``raw_query:execute``, which no
          *     built-in role but ``admin`` holds, and ClickHouse runs it read-only.
+         *
+         *     It returns at most ``options.limit`` rows, or ``query_views.default_limit``,
+         *     capped at ``query_views.max_limit``, with ``has_more`` set when the query had
+         *     more. The datasource stops reading past the cap.
          */
         post: operations["queries.raw"];
         delete?: never;
@@ -6735,10 +6744,31 @@ export interface components {
          * @description Result of a bulk operation.
          */
         BulkActionResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Action */
             action: string;
             /** Succeeded */
             succeeded?: string[];
+            /**
+             * Awaiting Review
+             * @description Sources whose write went to a review branch: main still carries them as they were, so nothing else was done for them
+             */
+            awaiting_review?: string[];
             /**
              * Failed
              * @description One entry per source left untouched: its name, the same code the single-source route answers with, and the message
@@ -13448,8 +13478,8 @@ export interface components {
          *     refused when the request is built.
          */
         SampleRequest: {
-            /** @default smart */
-            mode: components["schemas"]["SampleMode"];
+            /** @description Sample mode; absent takes sampler.default_mode */
+            mode?: components["schemas"]["SampleMode"];
             /** @default clickhouse */
             backend: components["schemas"]["SampleBackend"];
             /**
@@ -14822,6 +14852,22 @@ export interface components {
          * @description A deleted source, and what the apps now need to follow the delete.
          */
         SourceDeleteResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Source */
             source: string;
             /**
@@ -15248,6 +15294,22 @@ export interface components {
          * @description Legacy compact metadata after create/update (prefer full ``Source`` on write).
          */
         SourceResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Source */
             source: string;
             /**
@@ -20950,7 +21012,7 @@ export interface operations {
                     "application/json": components["schemas"]["SourceResponse"];
                 };
             };
-            /** @description The source was stored and the apps were not brought into step with it: apps_sync_error says why, and POST /sources/reconcile-apps retries it */
+            /** @description The source was stored and the apps were not brought into step with it: apps_sync_error says why, and POST /sources/reconcile-apps retries it. Or, with review_required, the source awaits review on a branch and main does not carry it yet */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -23425,7 +23487,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -23476,7 +23538,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -23629,7 +23691,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions) (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
+            /** @description Refused, nothing written. The body failed validation (code validation_error). Or the hunt runner could not compile the rule -- its SQL does not parse as one SELECT, names no <db>.<table> source, names a source that is not a table name (letters, digits, '_' and '-'), has no WHERE to detect with, or calls a function that reads outside the row (url, s3, a dictionary) or sends it to another service (the ai* functions), or carries a CEL filter that does not transpile (code invalid_sql, the errors in context.sql_errors). Or the rule matches every event in its source (code rule_matches_everything, the source and detection WHERE in context). */
             422: {
                 headers: {
                     [name: string]: unknown;

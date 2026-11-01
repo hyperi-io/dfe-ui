@@ -43,6 +43,7 @@ describe('.usePatchSource', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TSourcePatchResponse = {
+        review_required: false,
         source: expect.any(String),
         message: expect.any(String),
         current: expect.any(String),

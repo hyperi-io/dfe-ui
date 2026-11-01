@@ -6,6 +6,10 @@ import {
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
+import {
+  announceAwaitingReview,
+  awaitsReview,
+} from '@/Sources/utils/sourceReview';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';
@@ -35,6 +39,14 @@ export const CreateSourceDrawer = ({
     reset: resetCreateSource,
   } = useCreateSource({
     onSuccess: (response) => {
+      if (awaitsReview(response)) {
+        setIsDrawerVisible(false);
+        announceAwaitingReview(api, `${response.source} awaiting review`, {
+          detail: `${response.source} is saved on a review branch. It is added once the review is merged.`,
+          review: response,
+        });
+        return;
+      }
       setSelectedSource({
         source_name: response.source,
         source_version: response.current,

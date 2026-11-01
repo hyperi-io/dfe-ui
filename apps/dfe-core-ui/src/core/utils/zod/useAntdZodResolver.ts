@@ -1,6 +1,8 @@
 import { FormInstance, FormRule } from 'antd';
 import { NamePath } from 'antd/es/form/interface';
-import { useCallback } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
+import { useCallback, useRef } from 'react';
 import z from 'zod';
 
 type FieldPath = (string | number)[];
@@ -125,11 +127,33 @@ const fieldFromRule = (
   (rule as { field?: string | number | FieldPath | null }).field;
 
 export const useAntdZodResolver = <T = unknown>(schema: z.ZodType<T>) => {
+  // Ant Design runs every field's validator against the same form, so equal
+  // values share one parse instead of each field re-parsing every row.
+  const lastParse = useRef<{
+    schema: z.ZodType<T>;
+    values: unknown;
+    result: Promise<z.ZodSafeParseResult<T>>;
+  } | null>(null);
+
+  const parseForm = useCallback(
+    (values: unknown) => {
+      const last = lastParse.current;
+      if (last?.schema === schema && isEqual(last.values, values)) {
+        return last.result;
+      }
+      const result = schema.safeParseAsync(values);
+      // A snapshot, so an in-place edit of a row cannot pass for unchanged values.
+      lastParse.current = { schema, values: cloneDeep(values), result };
+      return result;
+    },
+    [schema],
+  );
+
   const resolver = useCallback(
     ({ getFieldsValue }: FormInstance) => ({
       validator: async (rule: FormRule, _value: unknown) => {
         const field = fieldFromRule(rule);
-        const result = await schema.safeParseAsync(getFieldsValue());
+        const result = await parseForm(getFieldsValue());
         const pathMatches = (issue: z.ZodIssue) => {
           const path = issue.path;
           if (field == null) return true;
@@ -154,7 +178,7 @@ export const useAntdZodResolver = <T = unknown>(schema: z.ZodType<T>) => {
         return error ? Promise.reject(error) : Promise.resolve();
       },
     }),
-    [schema],
+    [parseForm],
   );
 
   schemaByResolver.set(resolver, schema);

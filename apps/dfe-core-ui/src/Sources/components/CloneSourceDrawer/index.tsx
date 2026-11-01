@@ -8,6 +8,10 @@ import {
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
+import {
+  announceAwaitingReview,
+  awaitsReview,
+} from '@/Sources/utils/sourceReview';
 import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
 import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
@@ -58,6 +62,14 @@ export const CloneSourceDrawer = ({
     reset: resetCreateSource,
   } = useCreateSource({
     onSuccess: (response) => {
+      if (awaitsReview(response)) {
+        setIsDrawerVisible(false);
+        announceAwaitingReview(api, `${response.source} awaiting review`, {
+          detail: `The clone ${response.source} is saved on a review branch. It is added once the review is merged.`,
+          review: response,
+        });
+        return;
+      }
       setSelectedSource({
         source_name: response.source,
         source_version: response.current,

@@ -31,18 +31,18 @@ export const QUERY_KEYS = Object.freeze({
   sources: {
     default: ({
       search,
-      status: status,
+      status,
       sort_by,
       sort_order,
       per_page,
     }: UseFetchInfiniteFilteredSourcesProps = {}) => {
       return [
         'sources',
-        ...(search ? [search] : []),
-        ...(status ? [status] : []),
-        ...(sort_by ? [sort_by] : []),
-        ...(sort_order ? [sort_order] : []),
-        ...(per_page ? [per_page] : []),
+        ...(search ? ['search', search] : []),
+        ...(status ? ['status', status] : []),
+        ...(sort_by ? ['sort_by', sort_by] : []),
+        ...(sort_order ? ['sort_order', sort_order] : []),
+        ...(per_page ? ['per_page', per_page] : []),
       ];
     },
     source: ({

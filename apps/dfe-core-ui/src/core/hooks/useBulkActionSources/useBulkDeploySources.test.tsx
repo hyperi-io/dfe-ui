@@ -47,6 +47,7 @@ describe('.useBulkActionSources', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TBulkActionSourcesResponse = {
+        review_required: false,
         action: 'string',
         succeeded: ['string'],
         deployments: [

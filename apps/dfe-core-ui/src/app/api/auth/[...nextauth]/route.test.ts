@@ -132,6 +132,67 @@ describe('NextAuth route', () => {
     expect(endEngineSessions).not.toHaveBeenCalled();
   });
 
+  describe('session renewal', () => {
+    const RENEWED_SESSION =
+      '__Secure-next-auth.session-token=renewed-session; Path=/; HttpOnly; Secure; SameSite=Lax';
+    const expiresAt = Date.now() + 3_600_000;
+
+    beforeEach(() => {
+      nextAuthAnswers([RENEWED_SESSION]);
+      getToken.mockResolvedValue({
+        accessToken: 'renewed-jwt',
+        accessTokenExpiresAt: expiresAt,
+      });
+    });
+
+    test('plants the renewed engine token the session now holds', async () => {
+      vi.stubEnv('DFE_COOKIE_DOMAIN', 'example.com');
+
+      const response = await POST(...call('session'));
+
+      const [planted] = dfeTokenCookies(response);
+      expect(planted).toMatch(/^dfe_token=renewed-jwt;/);
+      expect(planted).toMatch(/Max-Age=3[56]\d\d/);
+      expect(planted).toContain('Domain=example.com');
+      expect(planted).toContain('Path=/');
+      expect(planted).toContain('HttpOnly');
+      expect(planted).toContain('Secure');
+      expect(planted).toMatch(/SameSite=lax/i);
+      const { req } = getToken.mock.calls[0][0];
+      expect(req.headers.get('cookie')).toBe(
+        '__Secure-next-auth.session-token=renewed-session',
+      );
+    });
+
+    test.each([
+      [
+        'an expired session',
+        { accessToken: 'old', error: 'AccessTokenExpired' },
+      ],
+      [
+        'an account that must change its password',
+        { accessToken: 'new', passwordChangeRequired: true },
+      ],
+      ['no access token', { roles: [] }],
+      ['no session at all', null],
+    ])('plants nothing for %s', async (_label, token) => {
+      getToken.mockResolvedValue(token);
+
+      const response = await POST(...call('session'));
+
+      expect(dfeTokenCookies(response)).toEqual([]);
+    });
+
+    test('plants nothing when NextAuth set no session cookie', async () => {
+      nextAuthAnswers([]);
+
+      const response = await POST(...call('session'));
+
+      expect(dfeTokenCookies(response)).toEqual([]);
+      expect(getToken).not.toHaveBeenCalled();
+    });
+  });
+
   test('GET is NextAuth untouched', () => {
     expect(GET).toBe(nextAuthHandler);
   });

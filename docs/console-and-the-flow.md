@@ -22,13 +22,13 @@ flowchart LR
 Each group is one RBAC family: a heading appears exactly when at least one
 destination under it is the signed-in user's.
 
-| Group | Destinations | What the user does there | RBAC family |
-| --- | --- | --- | --- |
-| Observe | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | look at the data | `dashboard_read` |
-| Data flow | Sources, Meta Schemas, Library | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*` |
-| Detect | Rules, Hunts | define what to look for | `rule_*`, `hunt_*` |
-| Stack | Components, Platform, Admin Tools | see and tune what is running | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
-| Access | Settings | who may do what | `org_*`, `account_*`, `role_*`, `group_*`, `oidc_*`, `api_key_*` |
+| Group     | Destinations                                                     | What the user does there                               | RBAC family                                                                              |
+| --------- | ---------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Observe   | Search, Saved Searches, Chart Explorer, Dashboards, Hunt Results | look at the data                                       | `dashboard_read`                                                                         |
+| Data flow | Sources, Meta Schemas, Library                                   | define what comes in, how it is shaped, where it lands | `source_*`, `schema_*`, `library_*`                                                      |
+| Detect    | Rules, Hunts                                                     | define what to look for                                | `rule_*`, `hunt_*`                                                                       |
+| Stack     | Components, Platform, Admin Tools                                | see and tune what is running                           | `deployment_*`, `service_*`, `helmvars_*`, `lifecycle_*`, `config_write`, `governance_*` |
+| Access    | Settings                                                         | who may do what                                        | `org_*`, `account_*`, `role_*`, `group_*`, `oidc_*`, `api_key_*`                         |
 
 The Observe destinations are HyperDX embeds and appear only once a HyperDX URL
 is configured.
@@ -38,21 +38,21 @@ is configured.
 The destinations and their routes are unchanged; what moved is the order and
 the grouping.
 
-| Old position | New group | Route |
-| --- | --- | --- |
-| Search (1st) | Observe | `/observe/search` |
-| Saved Searches (2nd) | Observe | `/observe/search/list` |
-| Chart Explorer (3rd) | Observe | `/observe/chart` |
-| Dashboards (4th) | Observe | `/observe/dashboards` |
-| Hunt Results (5th) | Observe | `/observe/hunt-results` |
-| Sources (6th) | Data flow | `/sources` |
-| Meta Schemas (7th) | Data flow | `/schemas` |
-| Library (11th) | Data flow | `/library` |
-| Rules (8th) | Detect | `/rules` |
-| Hunts (9th) | Detect | `/hunts` |
-| Components (10th) | Stack | `/components` |
-| Platform (14th) | Stack | `/platform` |
-| Settings (13th) | Access | `/settings` |
+| Old position         | New group | Route                   |
+| -------------------- | --------- | ----------------------- |
+| Search (1st)         | Observe   | `/observe/search`       |
+| Saved Searches (2nd) | Observe   | `/observe/search/list`  |
+| Chart Explorer (3rd) | Observe   | `/observe/chart`        |
+| Dashboards (4th)     | Observe   | `/observe/dashboards`   |
+| Hunt Results (5th)   | Observe   | `/observe/hunt-results` |
+| Sources (6th)        | Data flow | `/sources`              |
+| Meta Schemas (7th)   | Data flow | `/schemas`              |
+| Library (11th)       | Data flow | `/library`              |
+| Rules (8th)          | Detect    | `/rules`                |
+| Hunts (9th)          | Detect    | `/hunts`                |
+| Components (10th)    | Stack     | `/components`           |
+| Platform (14th)      | Stack     | `/platform`             |
+| Settings (13th)      | Access    | `/settings`             |
 
 ## The Source page follows the flow
 

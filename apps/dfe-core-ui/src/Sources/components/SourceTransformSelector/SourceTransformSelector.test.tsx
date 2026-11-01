@@ -179,6 +179,40 @@ describe('SourceTransformSelector', () => {
     });
   });
 
+  it('says the switch awaits review and keeps showing the deployed engine', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.put('/api/v1/sources/syslog', () =>
+        HttpResponse.json({
+          source: 'syslog',
+          message: 'updated',
+          current: '2.0.0',
+          versions: ['1.0.0', '2.0.0'],
+          review_required: true,
+          pr_url: 'https://github.com/acme/deploy/pull/9',
+        }),
+      ),
+    );
+    const onSourceUpdated = vi.fn();
+    renderSelector(onSourceUpdated);
+
+    await user.click(
+      await screen.findByRole('radio', { name: /dfe-transform-vector/ }),
+    );
+    await confirmSwitch(user);
+
+    expect(
+      await screen.findByText('Switch to dfe-transform-vector awaiting review'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the review request' }),
+    ).toHaveAttribute('href', 'https://github.com/acme/deploy/pull/9');
+    expect(onSourceUpdated).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('radio', { name: /dfe-transform-vrl/ }),
+    ).toBeChecked();
+  });
+
   it('offers no deploy or undeploy on a transform', async () => {
     renderSelector();
 

@@ -4,8 +4,12 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
+import {
+  announceAwaitingReview,
+  awaitsReview,
+} from '@/Sources/utils/sourceReview';
 import { IconTrash } from '@repo/dfe-icons';
-import { Button, ButtonProps } from 'antd';
+import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';
 
 interface DeleteSourceModalProps {
@@ -20,9 +24,18 @@ export const DeleteSourceModal = ({
   trigger,
 }: DeleteSourceModalProps) => {
   const [open, setOpen] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
   const { mutate, isPending, error } = useDeleteSource({
-    onSuccess: () => {
+    onSuccess: (response) => {
       setOpen(false);
+      // Main still carries the source, so the caller has nothing to move off.
+      if (awaitsReview(response)) {
+        announceAwaitingReview(api, `Delete of ${source} awaiting review`, {
+          detail: `${source} stays in the list until the review is merged.`,
+          review: response,
+        });
+        return;
+      }
       onSuccess?.();
     },
   });
@@ -32,6 +45,7 @@ export const DeleteSourceModal = ({
 
   return (
     <>
+      {contextHolder}
       <RbacProtected action={RbacProtected.rbacActions.source_delete}>
         <RbacProtected.Unrestricted>
           {trigger ? (

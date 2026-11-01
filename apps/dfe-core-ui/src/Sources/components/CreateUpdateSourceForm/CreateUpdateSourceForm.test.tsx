@@ -291,8 +291,10 @@ describe('CreateUpdateSourceForm compatibility', () => {
       { timeout: 15_000 },
     );
     const item = aliases.closest('.ant-form-item');
-    expect(item).toHaveTextContent(
-      "'firewall' already maps to cisco-asa under dfe-legacy-2x",
+    await waitFor(() =>
+      expect(item).toHaveTextContent(
+        "'firewall' already maps to cisco-asa under dfe-legacy-2x",
+      ),
     );
   });
 });

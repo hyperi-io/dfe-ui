@@ -1,11 +1,11 @@
-# Creating a Rule from a HyperDx Search
+# Creating a Rule from a HyperDX Search
 
 ## Overview
 
-DFE UI integrates with HyperDx so users can create rules directly from search results. HyperDx queries data with Lucene/SQL. When a user runs a search and clicks the **Create Rule** trigger, HyperDx fetches the raw SQL for that search and sends it to DFE UI.
+DFE UI integrates with HyperDX so users can create rules directly from search results. When a user runs a search and clicks the **Create Rule** trigger, HyperDX creates the rule in the engine and opens it in the console.
 
 ## Flow
 
-1. **HyperDx** – The user clicks the "Create Rule" trigger. HyperDx calls the `/exportSql` endpoint to fetch the raw SQL for the current search.
-2. **Messaging** – HyperDx posts the search data to a browser message listener on the `/rules/create` page. HyperDx retries until DFE UI responds.
-3. **DFE UI** – On receipt, DFE UI stores the search in IndexedDB and adds its ID to the URL query string. The data remains available until the user clears their cache.
+1. **HyperDX** - The user clicks the "Create Rule" trigger. HyperDX calls the `/exportSql` endpoint to fetch the raw SQL for the current search.
+2. **Engine** - HyperDX posts the search to the engine's `dfe/create-rule` route, which stores the rule.
+3. **DFE UI** - HyperDX opens `/rules/{id}`, the rule's own page. The console keeps no copy of the search.

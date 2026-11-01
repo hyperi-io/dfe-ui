@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import type { FormInstance } from 'antd';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import z from 'zod';
 import {
   getZodSchemaForRule,
@@ -126,5 +126,61 @@ describe('useAntdZodResolver', () => {
     const rule = formValidation(mockForm);
 
     await expect(rule.validator!({ field: null }, '')).rejects.toBeDefined();
+  });
+
+  describe('one validation of the whole form is shared by its fields', () => {
+    const rowsSchema = (parsed: () => void) =>
+      z
+        .object({
+          rows: z.array(z.object({ name: z.string().min(1, 'Name required') })),
+        })
+        .refine(() => {
+          parsed();
+          return true;
+        });
+    const rows = (...names: string[]) => ({
+      rows: names.map((name) => ({ name })),
+    });
+
+    test('equal values read for every row parse the form once', async () => {
+      const parsed = vi.fn();
+      const { result } = renderHook(() =>
+        useAntdZodResolver(rowsSchema(parsed)),
+      );
+      // A fresh object each call, as Ant Design's getFieldsValue returns.
+      const rule = (result.current as ResolverFn)({
+        getFieldsValue: () => rows('a', '', 'c'),
+      } as never);
+
+      const checks = await Promise.allSettled(
+        [0, 1, 2].map((i) =>
+          rule.validator({ field: ['rows', i, 'name'] }, ''),
+        ),
+      );
+
+      expect(parsed).toHaveBeenCalledTimes(1);
+      expect(checks.map((c) => c.status)).toEqual([
+        'fulfilled',
+        'rejected',
+        'fulfilled',
+      ]);
+    });
+
+    test('values that changed are parsed again', async () => {
+      const parsed = vi.fn();
+      const { result } = renderHook(() =>
+        useAntdZodResolver(rowsSchema(parsed)),
+      );
+      const current = rows('');
+      const rule = (result.current as ResolverFn)({
+        getFieldsValue: () => current,
+      } as never);
+      const check = () => rule.validator({ field: ['rows', 0, 'name'] }, '');
+
+      await expect(check()).rejects.toBe('Name required');
+      current.rows[0]!.name = 'fixed';
+      await expect(check()).resolves.toBeUndefined();
+      expect(parsed).toHaveBeenCalledTimes(2);
+    });
   });
 });
