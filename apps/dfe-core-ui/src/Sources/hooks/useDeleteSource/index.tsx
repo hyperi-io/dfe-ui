@@ -2,8 +2,10 @@ import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteSource } from './api';
 
+export type TDeleteSourceResponse = Awaited<ReturnType<typeof deleteSource>>;
+
 interface UseDeleteSourceProps {
-  onSuccess?: () => void;
+  onSuccess?: (data: TDeleteSourceResponse) => void;
   onError?: (error: Error) => void;
 }
 
@@ -18,11 +20,11 @@ export const useDeleteSource = ({
       deleteSource({
         pathParams: { name: source },
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.sources.default(),
       });
-      onSuccess?.();
+      onSuccess?.(data);
     },
     onError: (error) => {
       onError?.(error);

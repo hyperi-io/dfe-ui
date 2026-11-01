@@ -10,6 +10,7 @@ import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
+import { awaitsReview } from '@/Sources/utils/sourceReview';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';
@@ -43,16 +44,19 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
     reset: resetUpdateSource,
   } = useUpdateSource({
     onSuccess: (response) => {
-      setSelectedSource({
-        source_name: response.source,
-        source_version: response.current,
-      });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.source({
-          name: response.source,
-          version: source_version,
-        }),
-      });
+      // A held version is not on main yet, so the page stays on the one it shows.
+      if (!awaitsReview(response)) {
+        setSelectedSource({
+          source_name: response.source,
+          source_version: response.current,
+        });
+        void queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.sources.source({
+            name: response.source,
+            version: source_version,
+          }),
+        });
+      }
       onSuccess?.(response);
     },
   });
