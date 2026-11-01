@@ -12,7 +12,8 @@ import { useFetchSavedSearchFromParams } from '@/Rules/hooks/useFetchSavedSearch
 import { useHandleIncomingSearchMessage } from '@/Rules/hooks/useHandleIncomingSearchMessage';
 
 export const CreateRuleScene = () => {
-  const { search: messageSearch } = useHandleIncomingSearchMessage();
+  const { search: messageSearch, notificationContextHolder: messageHolder } =
+    useHandleIncomingSearchMessage();
   const { storedSearch, notificationContextHolder } =
     useFetchSavedSearchFromParams({
       search: messageSearch,
@@ -40,6 +41,7 @@ export const CreateRuleScene = () => {
 
   return (
     <>
+      {messageHolder}
       {notificationContextHolder}
       <MainContentCard className="p-0">
         <RbacProtected action={RbacProtected.rbacActions.rule_write}>
