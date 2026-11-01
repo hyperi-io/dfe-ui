@@ -72,10 +72,12 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     data,
     isLoading,
     isError,
+    isFetching,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteQuery({
     enabled: enabled && !!schema_path && !!version,
     queryKey: QUERY_KEYS.schemas.schemaDetail({
@@ -171,7 +173,9 @@ export const useFetchInfiniteFilteredSchemaDetailColumns = ({
     setSelectedSearchableColumns,
     isLoading,
     isError,
+    isFetching,
     error,
+    refetch,
     fetchNextPage,
     hasNextPage,
     loadMoreRef,

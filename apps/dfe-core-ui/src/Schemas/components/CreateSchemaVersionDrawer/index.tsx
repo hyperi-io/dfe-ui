@@ -15,7 +15,7 @@ import { useCreateSchemaVersion } from '@/Schemas/hooks/useCreateSchemaVersion';
 import { useFetchInfiniteFilteredSchemaDetailColumns } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns';
 import { TMetaSchemaDetailResponse } from '@/Schemas/hooks/useFetchInfiniteSchemaDetailColumns/types';
 import { IconLock, IconPlus } from '@repo/dfe-icons';
-import { Button, notification, Spin } from 'antd';
+import { Alert, Button, notification, Spin } from 'antd';
 import { useMemo, useState } from 'react';
 import {
   metaSchemaDetailToCreateVersionFormInitialValues,
@@ -93,15 +93,24 @@ export const CreateSchemaVersionDrawerBase = ({
 
   const sourceVersion = schema?.selected ?? null;
 
-  const { data: fullSchemaDetail, isLoading: isLoadingSchemaDetail } =
-    useFetchInfiniteFilteredSchemaDetailColumns({
-      schema_path: selectedSchemaPath,
-      version: sourceVersion,
-      per_page: -1,
-      enabled: isDrawerVisible,
-    });
+  const canReadFullSchema = !!selectedSchemaPath && !!sourceVersion;
 
-  const detailForForm = fullSchemaDetail ?? schema;
+  const {
+    data: fullSchemaDetail,
+    isLoading: isLoadingSchemaDetail,
+    isError: isFullSchemaError,
+    isFetching: isFetchingSchemaDetail,
+    refetch: refetchFullSchema,
+  } = useFetchInfiniteFilteredSchemaDetailColumns({
+    schema_path: selectedSchemaPath,
+    version: sourceVersion,
+    per_page: -1,
+    enabled: isDrawerVisible,
+  });
+
+  // The schema prop is one filtered page, so it never stands in for the full
+  // read: a new version built from it would drop the columns it left out.
+  const detailForForm = canReadFullSchema ? fullSchemaDetail : schema;
 
   const formInitialValues = useMemo(
     () =>
@@ -112,9 +121,16 @@ export const CreateSchemaVersionDrawerBase = ({
     [detailForForm, path, name],
   );
 
+  const fullReadFailed =
+    canReadFullSchema && isFullSchemaError && fullSchemaDetail == null;
+  const isReadingFullSchema =
+    isLoadingSchemaDetail || (fullReadFailed && isFetchingSchemaDetail);
+
   /** Keep the form mounted while reviewing (hidden) so column state is preserved on Back. */
   const formReady =
-    isDrawerVisible && (!isLoadingSchemaDetail || fullSchemaDetail != null);
+    isDrawerVisible &&
+    !isReadingFullSchema &&
+    (!canReadFullSchema || fullSchemaDetail != null);
 
   return (
     <>
@@ -182,6 +198,18 @@ export const CreateSchemaVersionDrawerBase = ({
                   tableTitle: 'Base Schema Columns',
                 },
               }}
+            />
+          ) : fullReadFailed && !isReadingFullSchema ? (
+            <Alert
+              type="error"
+              showIcon
+              title="The schema could not be read in full."
+              description="A new version needs every column of the current one, so the form stays closed until the read succeeds."
+              action={
+                <Button size="small" onClick={() => void refetchFullSchema()}>
+                  Retry
+                </Button>
+              }
             />
           ) : (
             <div className="flex h-[calc(100vh-120px)] items-center justify-center">
