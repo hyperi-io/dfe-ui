@@ -1,11 +1,8 @@
 import { Popover } from '@/core/components/Popover';
 import { cn } from '@/core/utils/style';
 import { usePatchSource } from '@/Sources/hooks/usePatchSource';
-import {
-  AwaitingReviewNote,
-  awaitsReview,
-  type ReviewFields,
-} from '@/Sources/utils/sourceReview';
+import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
+import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
 import { IconCapture, IconCaptureOff } from '@repo/dfe-icons';
 import { Alert, Button } from 'antd';
 import { useState } from 'react';
@@ -23,7 +20,7 @@ export const SourceEnabledTag = ({
   const [held, setHeld] = useState<{
     sourceName: string;
     enabled: boolean;
-    review: ReviewFields;
+    review: Omit<TSourcePatchResponse, 'path'>;
   } | null>(null);
 
   const { mutate: patchSource, error: errorUpdateSource } = usePatchSource({

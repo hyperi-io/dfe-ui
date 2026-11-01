@@ -5,7 +5,9 @@ import {
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
-import { App } from 'antd';
+import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
+import { Alert, App } from 'antd';
+import { useState } from 'react';
 
 export const CreateSourceStep = ({
   schemaPath,
@@ -15,12 +17,18 @@ export const CreateSourceStep = ({
   onSuccess: (response: TCreateSourceResponse) => void;
 }) => {
   const { notification } = App.useApp();
+  const [held, setHeld] = useState<TCreateSourceResponse | null>(null);
   const {
     mutate: createSourceMutation,
     isPending: isCreatingSource,
     error: createSourceError,
   } = useCreateSource({
     onSuccess: (response) => {
+      // The source is not on main yet, so the wizard has no source to build or deploy.
+      if (awaitsReview(response)) {
+        setHeld(response);
+        return;
+      }
       notification.success({
         title: `${response.source} created successfully`,
         placement: 'bottomLeft',
@@ -33,6 +41,21 @@ export const CreateSourceStep = ({
     const transformedValues = transformSourceFormDataToRequestBody(values);
     createSourceMutation(transformedValues);
   };
+  if (held) {
+    return (
+      <Alert
+        type="info"
+        showIcon
+        title={`${held.source} awaiting review`}
+        description={
+          <AwaitingReviewNote
+            detail={`${held.source} is saved on a review branch. Build and deploy it once the review is merged.`}
+            review={held}
+          />
+        }
+      />
+    );
+  }
   return (
     <CreateUpdateSourceForm
       onFinish={handleCreateSource}

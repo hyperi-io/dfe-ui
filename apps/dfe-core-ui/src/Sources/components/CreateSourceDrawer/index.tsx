@@ -6,10 +6,8 @@ import {
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
-import {
-  announceAwaitingReview,
-  awaitsReview,
-} from '@/Sources/utils/sourceReview';
+import { awaitsReview } from '@/core/utils/sourceReview';
+import { announceAwaitingReview } from '@/Sources/utils/sourceReview';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconPlus } from '@repo/dfe-icons';
 import { Button, notification } from 'antd';

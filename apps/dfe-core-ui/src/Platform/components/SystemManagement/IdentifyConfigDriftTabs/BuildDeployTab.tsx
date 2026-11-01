@@ -4,6 +4,7 @@ import {
   TBulkActionSourcesRequestBody,
   TBulkActionSourcesResponse,
 } from '@/core/hooks/useBulkActionSources/types';
+import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
 import { App, Button } from 'antd';
 import { useState } from 'react';
 
@@ -17,6 +18,24 @@ export const BuildDeployTab = ({
   const { notification } = App.useApp();
   const { mutate: bulkActionDeploy, isPending } = useBulkActionSources({
     onSuccess: (response) => {
+      const held = response.awaiting_review ?? [];
+      if (awaitsReview(response) || held.length > 0) {
+        notification.info({
+          title: `${held.length} source${held.length === 1 ? '' : 's'} awaiting review`,
+          description: (
+            <AwaitingReviewNote
+              detail={`${held.join(', ')} ${held.length === 1 ? 'is' : 'are'} saved on a review branch. Main is unchanged until the review is merged, so nothing was deployed for ${held.length === 1 ? 'it' : 'them'}.`}
+              review={response}
+            />
+          ),
+          placement: 'bottomLeft',
+          duration: 0,
+        });
+      }
+      // Nothing moved when every source was held.
+      if (held.length > 0 && (response.succeeded ?? []).length === 0) {
+        return;
+      }
       notification.success({
         title: 'Deployments successfully queued',
         placement: 'bottomLeft',

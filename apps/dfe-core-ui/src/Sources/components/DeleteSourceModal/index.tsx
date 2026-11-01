@@ -4,10 +4,8 @@ import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { Tooltip } from '@/core/components/Tooltip';
-import {
-  announceAwaitingReview,
-  awaitsReview,
-} from '@/Sources/utils/sourceReview';
+import { awaitsReview } from '@/core/utils/sourceReview';
+import { announceAwaitingReview } from '@/Sources/utils/sourceReview';
 import { IconTrash } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';

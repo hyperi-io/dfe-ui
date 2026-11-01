@@ -1,10 +1,8 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
-import {
-  announceAwaitingReview,
-  awaitsReview,
-} from '@/Sources/utils/sourceReview';
+import { awaitsReview } from '@/core/utils/sourceReview';
+import { announceAwaitingReview } from '@/Sources/utils/sourceReview';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';
