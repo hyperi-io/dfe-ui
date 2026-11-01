@@ -36,7 +36,7 @@ describe('transformHuntDetailToFormData', () => {
     const expectedFormData: CreateUpdateHuntFormData = {
       name: 'my_hunt',
       display_name: 'My Hunt',
-      cron: '0 * * * *',
+      cron: ['0 * * * *', '0 0 * * *'],
       log_buffer: 120,
       customers: ['org_a'],
       rules: ['rule_one'],
@@ -61,7 +61,7 @@ describe('transformHuntFormDataToUpdateRequest', () => {
 
     const expectedRequest: THuntUpdateRequest = {
       display_name: 'My Hunt',
-      cron: '0 * * * *',
+      cron: ['0 * * * *', '0 0 * * *'],
       log_buffer: 120,
       global_target_table_name: 'target',
       global_source_table_name: 'windows_audit',
@@ -92,6 +92,50 @@ describe('transformHuntFormDataToUpdateRequest', () => {
     expect(request.global_target_table_name).toBe('dns_alerts');
   });
 
+  it.each([
+    {
+      case: 'sends the list when the hunt keeps several expressions',
+      stored: ['0 * * * *', '0 0 * * *'],
+      form: ['0 * * * *', '0 0 * * *'],
+      sent: ['0 * * * *', '0 0 * * *'],
+    },
+    {
+      case: 'sends what the form holds when an expression is edited',
+      stored: ['0 * * * *', '0 0 * * *', '*/5 * * * *'],
+      form: ['*/10 * * * *', '0 0 * * *', '*/5 * * * *'],
+      sent: ['*/10 * * * *', '0 0 * * *', '*/5 * * * *'],
+    },
+    {
+      case: 'drops an expression the user removed',
+      stored: ['0 * * * *', '0 0 * * *'],
+      form: ['0 * * * *'],
+      sent: '0 * * * *',
+    },
+    {
+      case: 'sends a plain string when the hunt stored one',
+      stored: '0 * * * *',
+      form: ['*/10 * * * *'],
+      sent: '*/10 * * * *',
+    },
+  ])('cron: $case', ({ stored, form, sent }) => {
+    const hunt = { ...huntDetail, cron: stored };
+    const formValues = { ...transformHuntDetailToFormData(hunt), cron: form };
+
+    expect(transformHuntFormDataToUpdateRequest(formValues, hunt).cron).toEqual(
+      sent,
+    );
+  });
+
+  it.each([
+    ['a stored string', '0 * * * *', ['0 * * * *']],
+    ['a stored list', ['0 * * * *', '0 0 * * *'], ['0 * * * *', '0 0 * * *']],
+    ['no stored expression', undefined, []],
+  ])('the form reads %s as a list', (_label, stored, expected) => {
+    const hunt = { ...huntDetail, cron: stored } as THuntDetailResponse;
+
+    expect(transformHuntDetailToFormData(hunt).cron).toEqual(expected);
+  });
+
   it.each(['', '   ', null, undefined])(
     'sends no target table key when the form value is %j',
     (blank) => {
@@ -112,7 +156,7 @@ describe('transformHuntFormDataToCreateRequest', () => {
   const formValues: CreateUpdateHuntFormData = {
     name: 'my_hunt',
     display_name: 'My Hunt',
-    cron: '*/15 * * * *',
+    cron: ['*/15 * * * *'],
     log_buffer: 60,
     customers: ['org_a'],
     rules: ['rule_one'],
@@ -121,9 +165,18 @@ describe('transformHuntFormDataToCreateRequest', () => {
   };
 
   it('sends the form as it is when both tables are filled', () => {
-    expect(transformHuntFormDataToCreateRequest(formValues)).toEqual(
-      formValues,
-    );
+    expect(transformHuntFormDataToCreateRequest(formValues)).toEqual({
+      ...formValues,
+      cron: '*/15 * * * *',
+    });
+  });
+
+  it('sends every expression when the form holds several', () => {
+    const cron = ['*/15 * * * *', '0 0 * * *'];
+
+    expect(
+      transformHuntFormDataToCreateRequest({ ...formValues, cron }).cron,
+    ).toEqual(cron);
   });
 
   it.each(['', '   ', null, undefined])(

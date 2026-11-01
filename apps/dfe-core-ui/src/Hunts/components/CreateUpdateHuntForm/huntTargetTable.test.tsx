@@ -92,7 +92,7 @@ type RequestBody = Record<string, unknown>;
 const hunt: THuntDetailResponse = {
   name: 'windows_audit',
   display_name: 'Windows audit',
-  cron: '*/5 * * * *',
+  cron: ['*/5 * * * *'],
   log_buffer: 60,
   global_target_table_name: 'alerts',
   global_source_table_name: 'windows_audit',

@@ -14,6 +14,7 @@ import {
 } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
+import { AwaitingReviewNote, awaitsReview } from '@/Sources/utils/sourceReview';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
@@ -87,6 +88,11 @@ export const SourceTransformSelector = ({
 }) => {
   const queryClient = useQueryClient();
   const [pendingEngine, setPendingEngine] = useState<string | null>(null);
+  const [held, setHeld] = useState<{
+    source: string;
+    service: string;
+    review: TSourceUpdateResponse;
+  } | null>(null);
   // An engine the deployment has already refused for this source, and its
   // words. Kept so the option is not offered a second time.
   const [refusals, setRefusals] = useState<Record<string, string>>({});
@@ -112,6 +118,15 @@ export const SourceTransformSelector = ({
   } = useUpdateSource({
     onSuccess: (response) => {
       setPendingEngine(null);
+      // Main still carries the old transform, so nothing on screen moves.
+      if (awaitsReview(response)) {
+        setHeld({
+          source,
+          service: pending?.service ?? 'the new transform',
+          review: response,
+        });
+        return;
+      }
       // The instance of a transform is derived from the source, so the
       // catalogue's instance list is stale the moment the source is written.
       void queryClient.invalidateQueries({
@@ -187,7 +202,10 @@ export const SourceTransformSelector = ({
         <Radio.Group
           value={engine}
           disabled={switchDisabled}
-          onChange={(event) => setPendingEngine(event.target.value)}
+          onChange={(event) => {
+            setHeld(null);
+            setPendingEngine(event.target.value);
+          }}
           className="w-full"
         >
           <div className="flex w-full flex-col gap-2">
@@ -247,6 +265,20 @@ export const SourceTransformSelector = ({
             })}
           </div>
         </Radio.Group>
+
+        {held?.source === source && (
+          <NotificationCard
+            type="info"
+            variant="subtle"
+            title={`Switch to ${held.service} awaiting review`}
+            description={
+              <AwaitingReviewNote
+                detail={`The source keeps its current transform until the review is merged.`}
+                review={held.review}
+              />
+            }
+          />
+        )}
 
         {!engine && (
           <NotificationCard

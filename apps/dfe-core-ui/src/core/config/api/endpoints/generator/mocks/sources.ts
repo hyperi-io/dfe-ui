@@ -101,6 +101,7 @@ export const sources = {
     post: {
       success: ({
         mockedResponse = {
+          review_required: false,
           source: 'string',
           message: 'ok',
           current: 'string',
@@ -348,6 +349,7 @@ export const sources = {
     put: {
       success: ({
         mockedResponse = {
+          review_required: false,
           source: 'string',
           message: 'ok',
           current: 'string',
@@ -385,6 +387,7 @@ export const sources = {
     patch: {
       success: ({
         mockedResponse = {
+          review_required: false,
           source: 'string',
           message: 'ok',
           current: 'string',
@@ -685,6 +688,7 @@ export const sources = {
     post: {
       success: ({
         mockedResponse = {
+          review_required: false,
           action: 'string',
           succeeded: ['string'],
           deployments: [

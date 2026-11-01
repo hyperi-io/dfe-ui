@@ -70,6 +70,7 @@ describe('.useUpdateSource', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TSourceUpdateResponse = {
+        review_required: false,
         source: 'string',
         message: 'ok',
         current: 'string',

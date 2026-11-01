@@ -8,15 +8,15 @@ Users can create a schema from metadata fields plus columns. Columns can come fr
 
 ## Component map
 
-| Piece | Role |
-|--------|------|
-| `CreateSchemaForm` | Ant Design `Form` with `preserve`, wires `onFinish`, clears a top-level error banner on change. |
-| `CreateSchemaFormProvider` (`CreateSchemaForm.context.tsx`) | Holds `uploadedSchemaColumns`, `invalidUploadedSchemaColumns`, `schemaColumns`, sync helpers, and merges form ↔ invalid-row state. |
-| `SchemaUploadCollapse` | Upload type (CSV vs JSON), file dragger, tabs for uploaded vs additional columns once a file produced rows. |
-| `SchemaUploadFileSection` | Calls `convertCsv` (CSV) or `useElasticConvert` (JSON); pushes rows into context via `handleSetUploadedSchemaColumns`. |
-| `UploadedSchemaTable` | “Valid” uploaded columns: `AddSchemaTable` over `uploadedColumns` **with pagination** (default page size 50). |
-| `InvalidColumnsCollapse` | Rows that failed `rowSchema` on import: separate `Form.List` `invalidColumns`, **no pagination**, effect-driven promotion back to valid. |
-| `AddSchemaTable` | `Form.List` + table; syncs list from `initialValues` when a `JSON.stringify` signature of those values changes. |
+| Piece                                                       | Role                                                                                                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateSchemaForm`                                          | Ant Design `Form` with `preserve`, wires `onFinish`, clears a top-level error banner on change.                                          |
+| `CreateSchemaFormProvider` (`CreateSchemaForm.context.tsx`) | Holds `uploadedSchemaColumns`, `invalidUploadedSchemaColumns`, `schemaColumns`, sync helpers, and merges form ↔ invalid-row state.       |
+| `SchemaUploadCollapse`                                      | Upload type (CSV vs JSON), file dragger, tabs for uploaded vs additional columns once a file produced rows.                              |
+| `SchemaUploadFileSection`                                   | Calls `convertCsv` (CSV) or `useElasticConvert` (JSON); pushes rows into context via `handleSetUploadedSchemaColumns`.                   |
+| `UploadedSchemaTable`                                       | “Valid” uploaded columns: `AddSchemaTable` over `uploadedColumns` **with pagination** (default page size 50).                            |
+| `InvalidColumnsCollapse`                                    | Rows that failed `rowSchema` on import: separate `Form.List` `invalidColumns`, **no pagination**, effect-driven promotion back to valid. |
+| `AddSchemaTable`                                            | `Form.List` + table; syncs list from `initialValues` when a `JSON.stringify` signature of those values changes.                          |
 
 ## Implementation flow
 

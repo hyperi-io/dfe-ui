@@ -66,15 +66,15 @@ The fork iframe is optional for console work. Wiring it up is covered in
 
 ## Every deployment fact is an environment variable
 
-| Variable                                 | When               | Purpose                                                                                     |
-| ---------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`                    | build-time inlined | engine base URL for browser-side fetches                                                    |
-| `INTERNAL_API_URL`                       | runtime            | engine base URL for server-side fetches (middleware, NextAuth)                              |
-| `NEXTAUTH_URL` / `NEXTAUTH_SECRET`       | runtime            | NextAuth session config -- any non-empty secret works for dev                               |
-| `DFE_COOKIE_DOMAIN`                      | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                             |
-| `HYPERDX_URL` / `HYPERDX_PORT`           | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                    |
-| `LOG_LEVEL`                              | runtime            | server log threshold, `DEBUG` to `ERROR`, default `INFO`                                    |
-| `LOG_FORMAT`                             | runtime            | `json` or `text`. Unset writes JSON in production or with an OTLP endpoint, text otherwise  |
+| Variable                           | When               | Purpose                                                                                    |
+| ---------------------------------- | ------------------ | ------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_API_URL`              | build-time inlined | engine base URL for browser-side fetches                                                   |
+| `INTERNAL_API_URL`                 | runtime            | engine base URL for server-side fetches (middleware, NextAuth)                             |
+| `NEXTAUTH_URL` / `NEXTAUTH_SECRET` | runtime            | NextAuth session config -- any non-empty secret works for dev                              |
+| `DFE_COOKIE_DOMAIN`                | runtime            | parent domain for the `dfe_token` cookie -- leave unset locally                            |
+| `HYPERDX_URL` / `HYPERDX_PORT`     | runtime            | the embed pair, either shape -- see [observe-embed.md](observe-embed.md)                   |
+| `LOG_LEVEL`                        | runtime            | server log threshold, `DEBUG` to `ERROR`, default `INFO`                                   |
+| `LOG_FORMAT`                       | runtime            | `json` or `text`. Unset writes JSON in production or with an OTLP endpoint, text otherwise |
 
 `NEXT_PUBLIC_*` values are baked in at build time -- `next dev` reads them at
 boot, so changing one needs a dev-server restart (a production image needs a
@@ -83,10 +83,10 @@ present, and explicit shell values win over it (Next.js env precedence).
 
 ## Two ports, and 3000 matters
 
-| Port | Owner              | Notes                                                              |
-| ---- | ------------------ | ------------------------------------------------------------------ |
-| 3000 | dfe-ui `next dev`  | must be 3000, 5173 or 5174 unless the engine's CORS list is extended |
-| 8003 | dfe-engine API     | Swagger at `/docs`, JWKS at `/.well-known/jwks.json`               |
+| Port | Owner             | Notes                                                                |
+| ---- | ----------------- | -------------------------------------------------------------------- |
+| 3000 | dfe-ui `next dev` | must be 3000, 5173 or 5174 unless the engine's CORS list is extended |
+| 8003 | dfe-engine API    | Swagger at `/docs`, JWKS at `/.well-known/jwks.json`                 |
 
 ## Two curls verify the loop
 

@@ -3,12 +3,16 @@ import type { THuntCreateRequest } from '@/Hunts/hooks/useCreateHunt/types';
 import type { THuntDetailResponse } from '@/Hunts/hooks/useFetchHuntDetail/types';
 import type { THuntUpdateRequest } from '@/Hunts/hooks/useUpdateHunt/types';
 
-const normalizeCron = (cron: THuntDetailResponse['cron']): string => {
+const cronList = (cron: THuntDetailResponse['cron']): string[] => {
   if (Array.isArray(cron)) {
-    return cron[0] ?? '';
+    return cron;
   }
-  return cron ?? '';
+  return cron ? [cron] : [];
 };
+
+/** The engine takes one expression as a string and several as a list. */
+const cronForRequest = (cron: string[]): string | string[] =>
+  cron.length === 1 ? cron[0]! : cron;
 
 export const transformHuntDetailToFormData = (
   hunt: THuntDetailResponse,
@@ -16,7 +20,7 @@ export const transformHuntDetailToFormData = (
   display_name: hunt.display_name,
   name: hunt.name,
   customers: hunt.customers ?? [],
-  cron: normalizeCron(hunt.cron),
+  cron: cronList(hunt.cron),
   log_buffer: hunt.log_buffer ?? 60,
   rules: hunt.rules.map((rule) => rule.rule_name),
   global_target_table_name: hunt.global_target_table_name ?? '',
@@ -35,8 +39,8 @@ const targetTableField = (values: CreateUpdateHuntFormData) =>
 export const transformHuntFormDataToCreateRequest = (
   values: CreateUpdateHuntFormData,
 ): THuntCreateRequest => {
-  const { global_target_table_name: _target, ...rest } = values;
-  return { ...rest, ...targetTableField(values) };
+  const { global_target_table_name: _target, cron, ...rest } = values;
+  return { ...rest, cron: cronForRequest(cron), ...targetTableField(values) };
 };
 
 export const transformHuntFormDataToUpdateRequest = (
@@ -44,7 +48,7 @@ export const transformHuntFormDataToUpdateRequest = (
   hunt: THuntDetailResponse,
 ): THuntUpdateRequest => ({
   display_name: values.display_name ?? null,
-  cron: values.cron,
+  cron: cronForRequest(values.cron),
   log_buffer: values.log_buffer,
   ...targetTableField(values),
   global_source_table_name: values.global_source_table_name,

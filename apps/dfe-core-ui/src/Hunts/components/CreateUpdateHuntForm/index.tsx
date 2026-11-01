@@ -6,7 +6,7 @@ import { getApiErrorResponseBody } from '@/core/config/api/client';
 import { useAntdZodResolver } from '@/core/utils/zod/useAntdZodResolver';
 import { RULE_HUNT_NAME_VALIDATOR } from '@/core/validationSchemas/utils';
 import { CRONBuilderDrawer } from '@/Hunts/components/CRONBuilderDrawer';
-import { IconDeviceFloppy } from '@repo/dfe-icons';
+import { IconDeviceFloppy, IconPlus, IconTrash } from '@repo/dfe-icons';
 import { Button, FormProps, Input } from 'antd';
 import { useEffect, useMemo } from 'react';
 import z from 'zod';
@@ -44,7 +44,11 @@ const buildFormSchema = (nameIsNew: boolean) =>
       )
       .min(1, { message: 'Rules are required' }),
     cron: z
-      .string({ message: 'Cron is required' })
+      .array(
+        z
+          .string({ message: 'Cron is required' })
+          .min(1, { message: 'Cron is required' }),
+      )
       .min(1, { message: 'Cron is required' }),
     log_buffer: z
       .number({ message: 'Log buffer is required' })
@@ -143,9 +147,52 @@ export const CreateUpdateHuntForm = ({
         <RuleSelect mode="multiple" placeholder="Select rules" />
       </Form.Item>
 
-      <Form.Item name="cron" label="Cron Expression" rules={[formValidation]}>
-        <CRONBuilderDrawer placeholder="Enter expression" />
-      </Form.Item>
+      <Form.List name="cron">
+        {(fields, { add, remove }, { errors }) => (
+          <div className="flex flex-col gap-y-2">
+            <div className="flex items-center justify-between">
+              <span>
+                <span className="text-error">* </span>
+                {fields.length > 1 ? 'Cron Expressions' : 'Cron Expression'}
+              </span>
+              <Button
+                size="small"
+                aria-label="Add cron expression"
+                shape="circle"
+                icon={<IconPlus />}
+                type="default"
+                onClick={() => add('')}
+              />
+            </div>
+            {fields.map(({ key, name, ...restField }, index) => (
+              <div key={key} className="flex gap-2">
+                <Form.Item
+                  {...restField}
+                  name={name}
+                  className="w-full"
+                  rules={[formValidation]}
+                >
+                  <CRONBuilderDrawer
+                    aria-label="Cron expression"
+                    placeholder="Enter expression"
+                  />
+                </Form.Item>
+                <Button
+                  aria-label={`Remove cron expression ${index + 1}`}
+                  icon={<IconTrash />}
+                  size="small"
+                  shape="circle"
+                  type="default"
+                  disabled={fields.length === 1}
+                  className="hover:border-error hover:text-error mt-xs"
+                  onClick={() => remove(name)}
+                />
+              </div>
+            ))}
+            {errors.length > 0 && <Form.ErrorList errors={errors} />}
+          </div>
+        )}
+      </Form.List>
 
       {error && !unknownOrg && <ApiErrorNotification error={error} />}
 

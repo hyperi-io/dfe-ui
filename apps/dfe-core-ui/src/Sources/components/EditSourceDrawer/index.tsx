@@ -1,6 +1,10 @@
 import { Drawer } from '@/core/components/Drawer';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
+import {
+  announceAwaitingReview,
+  awaitsReview,
+} from '@/Sources/utils/sourceReview';
 import { IconEdit } from '@repo/dfe-icons';
 import { Button, ButtonProps, notification } from 'antd';
 import { cloneElement, useState } from 'react';
@@ -31,6 +35,17 @@ export const EditSourceDrawer = ({
   const handleOnSuccess = (response: TSourceUpdateResponse) => {
     setIsDrawerVisible(false);
     onClose?.();
+    if (awaitsReview(response)) {
+      announceAwaitingReview(
+        api,
+        `${response.source} changes awaiting review`,
+        {
+          detail: `The changes to ${response.source} are saved on a review branch. They apply once the review is merged.`,
+          review: response,
+        },
+      );
+      return;
+    }
     onSuccess?.(response);
     api.success({
       title: `${response.source} updated successfully`,
