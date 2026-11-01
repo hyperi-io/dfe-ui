@@ -14,7 +14,7 @@ import {
 } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
 import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
-import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
+import { AwaitingReviewNote, awaitsReview } from '@/Sources/utils/sourceReview';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';

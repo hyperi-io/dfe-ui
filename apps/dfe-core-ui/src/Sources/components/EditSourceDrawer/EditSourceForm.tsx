@@ -10,7 +10,7 @@ import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
-import { awaitsReview } from '@/core/utils/sourceReview';
+import { awaitsReview } from '@/Sources/utils/sourceReview';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from '@/Sources/utils/transformSourceData/transformSourceRequestBodyToFormData';
 import { useQueryClient } from '@tanstack/react-query';

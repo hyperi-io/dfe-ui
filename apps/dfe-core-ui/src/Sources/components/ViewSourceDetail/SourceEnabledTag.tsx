@@ -2,7 +2,7 @@ import { Popover } from '@/core/components/Popover';
 import { cn } from '@/core/utils/style';
 import { usePatchSource } from '@/Sources/hooks/usePatchSource';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
-import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
+import { AwaitingReviewNote, awaitsReview } from '@/Sources/utils/sourceReview';
 import { IconCapture, IconCaptureOff } from '@repo/dfe-icons';
 import { Alert, Button } from 'antd';
 import { useState } from 'react';
@@ -60,6 +60,7 @@ export const SourceEnabledTag = ({
         <>
           {heldHere ? (
             <Alert
+              className="w-96 max-w-[80vw]"
               type="info"
               showIcon
               title={`The change to ${enabled ? 'disable' : 'enable'} ${sourceName} is awaiting review. The source stays ${enabled ? 'enabled' : 'disabled'} until it is merged.`}

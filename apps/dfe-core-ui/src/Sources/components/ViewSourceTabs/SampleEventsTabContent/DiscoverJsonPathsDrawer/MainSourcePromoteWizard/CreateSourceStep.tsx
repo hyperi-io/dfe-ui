@@ -5,7 +5,7 @@ import {
 import { useCreateSource } from '@/Sources/hooks/useCreateSource';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
-import { AwaitingReviewNote, awaitsReview } from '@/core/utils/sourceReview';
+import { AwaitingReviewNote, awaitsReview } from '@/Sources/utils/sourceReview';
 import { Alert, App } from 'antd';
 import { useState } from 'react';
 
