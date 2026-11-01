@@ -8,14 +8,14 @@
   ],
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
+      "types": "./src/index.ts",
       "default": "./src/index.ts"
     }
   },
   "main": "./src/index.ts",
-  "types": "./types/index.d.ts",
+  "types": "./src/index.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc --noEmit"
   },
   "peerDependencies": {
     "antd": "^6.3.1",
