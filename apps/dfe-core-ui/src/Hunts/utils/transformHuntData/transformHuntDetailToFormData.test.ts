@@ -61,7 +61,7 @@ describe('transformHuntFormDataToUpdateRequest', () => {
 
     const expectedRequest: THuntUpdateRequest = {
       display_name: 'My Hunt',
-      cron: '0 * * * *',
+      cron: ['0 * * * *', '0 0 * * *'],
       log_buffer: 120,
       global_target_table_name: 'target',
       global_source_table_name: 'windows_audit',
@@ -90,6 +90,47 @@ describe('transformHuntFormDataToUpdateRequest', () => {
 
     expect(request.global_source_table_name).toBe('dns_audit');
     expect(request.global_target_table_name).toBe('dns_alerts');
+  });
+
+  it.each([
+    {
+      case: 'keeps every expression when the first is untouched',
+      stored: ['0 * * * *', '0 0 * * *'],
+      edited: '0 * * * *',
+      sent: ['0 * * * *', '0 0 * * *'],
+    },
+    {
+      case: 'replaces only the first expression when it is edited',
+      stored: ['0 * * * *', '0 0 * * *', '*/5 * * * *'],
+      edited: '*/10 * * * *',
+      sent: ['*/10 * * * *', '0 0 * * *', '*/5 * * * *'],
+    },
+    {
+      case: 'sends a plain string when the hunt stored one',
+      stored: '0 * * * *',
+      edited: '*/10 * * * *',
+      sent: '*/10 * * * *',
+    },
+    {
+      case: 'sends a plain string when the stored array held one',
+      stored: ['0 * * * *'],
+      edited: '*/10 * * * *',
+      sent: '*/10 * * * *',
+    },
+    {
+      case: 'sends a plain string when the stored array is empty',
+      stored: [],
+      edited: '*/10 * * * *',
+      sent: '*/10 * * * *',
+    },
+  ])('cron: $case', ({ stored, edited, sent }) => {
+    const hunt = { ...huntDetail, cron: stored };
+    const formValues = transformHuntDetailToFormData(hunt);
+    formValues.cron = edited;
+
+    expect(transformHuntFormDataToUpdateRequest(formValues, hunt).cron).toEqual(
+      sent,
+    );
   });
 
   it.each(['', '   ', null, undefined])(

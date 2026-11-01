@@ -20,6 +20,7 @@ export const ConfigurationDetailsTabContent = ({
   rules,
 }: THuntDetailResponse) => {
   const rulesList = rules?.map((rule) => rule.rule_name);
+  const cronText = Array.isArray(cron) ? cron.join(', ') : cron;
   return (
     <div className="relative h-full min-h-0">
       <dl className="grid grid-cols-[200px_1fr] gap-x-6 gap-y-1 mb-4">
@@ -28,7 +29,7 @@ export const ConfigurationDetailsTabContent = ({
         <dt className={dataListTermStyle}>Display Name:</dt>
         <dd>{display_name ? display_name : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Cron:</dt>
-        <dd>{cron ? cron : <EmptyData />}</dd>
+        <dd>{cronText ? cronText : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Log Buffer:</dt>
         <dd>{log_buffer ? log_buffer : <EmptyData />}</dd>
         <dt className={dataListTermStyle}>Global Target Table Name:</dt>

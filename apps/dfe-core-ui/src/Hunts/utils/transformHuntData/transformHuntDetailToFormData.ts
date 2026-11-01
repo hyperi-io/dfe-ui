@@ -10,6 +10,18 @@ const normalizeCron = (cron: THuntDetailResponse['cron']): string => {
   return cron ?? '';
 };
 
+/**
+ * The form edits one expression, the first. The hunt's other expressions ride
+ * along unchanged so saving an edit never drops a schedule.
+ */
+const cronForUpdate = (
+  edited: string,
+  stored: THuntDetailResponse['cron'],
+): string | string[] =>
+  Array.isArray(stored) && stored.length > 1
+    ? [edited, ...stored.slice(1)]
+    : edited;
+
 export const transformHuntDetailToFormData = (
   hunt: THuntDetailResponse,
 ): CreateUpdateHuntFormData => ({
@@ -44,7 +56,7 @@ export const transformHuntFormDataToUpdateRequest = (
   hunt: THuntDetailResponse,
 ): THuntUpdateRequest => ({
   display_name: values.display_name ?? null,
-  cron: values.cron,
+  cron: cronForUpdate(values.cron, hunt.cron),
   log_buffer: values.log_buffer,
   ...targetTableField(values),
   global_source_table_name: values.global_source_table_name,
