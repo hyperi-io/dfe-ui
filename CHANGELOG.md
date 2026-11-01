@@ -3,6 +3,46 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.36](https://github.com/hyperi-io/dfe-ui/compare/v1.7.35...v1.7.36) (2026-11-01)
+
+### Bug Fixes
+
+* announce form errors and keep them from moving the form ([#637](https://github.com/hyperi-io/dfe-ui/issues/637)) ([1adb8ff](https://github.com/hyperi-io/dfe-ui/commit/1adb8ff354ffbb446c5b5738011667fb5e74a7d3)), closes [#cf1322](https://github.com/hyperi-io/dfe-ui/issues/cf1322) [#cf1322](https://github.com/hyperi-io/dfe-ui/issues/cf1322)
+* ask for the variant when a source runs the elastic transform ([#645](https://github.com/hyperi-io/dfe-ui/issues/645)) ([884ffbd](https://github.com/hyperi-io/dfe-ui/commit/884ffbd094a5435a815cc58edd69149e84269284))
+* clear the osv-scanner findings ([#632](https://github.com/hyperi-io/dfe-ui/issues/632)) ([7661b11](https://github.com/hyperi-io/dfe-ui/commit/7661b11a6a15ff3fe898044bff9218b96b795808))
+* clearer org, hunt and rule notices ([#638](https://github.com/hyperi-io/dfe-ui/issues/638)) ([58d8269](https://github.com/hyperi-io/dfe-ui/commit/58d82695f986903fd744899bce76cd8b58acb171))
+* close the console holes and give engine calls their own deadlines ([#673](https://github.com/hyperi-io/dfe-ui/issues/673)) ([396ce3b](https://github.com/hyperi-io/dfe-ui/commit/396ce3b9a07ca345eebcdda57c3d81061351d238)), closes [#662](https://github.com/hyperi-io/dfe-ui/issues/662)
+* declare the peers yarn install warned about ([#657](https://github.com/hyperi-io/dfe-ui/issues/657)) ([93d345d](https://github.com/hyperi-io/dfe-ui/commit/93d345dfec7a48e952196e3a69c8a2896fcbd09c))
+* **dfe-ui:** fix forms, sessions and keys ([#679](https://github.com/hyperi-io/dfe-ui/issues/679)) ([48a4dd5](https://github.com/hyperi-io/dfe-ui/commit/48a4dd59b22b25647f06a52264c236a20781a1da))
+* drop the Files picker that never had anything to pick ([#647](https://github.com/hyperi-io/dfe-ui/issues/647)) ([acedc5e](https://github.com/hyperi-io/dfe-ui/commit/acedc5eb436497103c24432004530fd3d89e9067))
+* drop the unused helm variable update hook ([#633](https://github.com/hyperi-io/dfe-ui/issues/633)) ([8909905](https://github.com/hyperi-io/dfe-ui/commit/8909905f58d54a369b2c8d51f9fb6aed76942ea3))
+* give each setup step one forward action and a visible Skip ([#649](https://github.com/hyperi-io/dfe-ui/issues/649)) ([e0b5381](https://github.com/hyperi-io/dfe-ui/commit/e0b5381b7c449c99b333067c7889d44552cb295c))
+* keep the dark warning notification title at AA contrast ([#670](https://github.com/hyperi-io/dfe-ui/issues/670)) ([94c8191](https://github.com/hyperi-io/dfe-ui/commit/94c81912dfa8ca3871becc6eb3273bccb642da1a))
+* keep the sidebar footer off the nav ([#634](https://github.com/hyperi-io/dfe-ui/issues/634)) ([fb8429f](https://github.com/hyperi-io/dfe-ui/commit/fb8429fc2ad20b6a876885fd92081b35a8f89b76))
+* keep the subtle notification text at AA contrast ([#667](https://github.com/hyperi-io/dfe-ui/issues/667)) ([7c30a3a](https://github.com/hyperi-io/dfe-ui/commit/7c30a3a103562c406889a2699ba25536064d8992))
+* land a read-only viewer on Search instead of Sources ([#642](https://github.com/hyperi-io/dfe-ui/issues/642)) ([c9c9828](https://github.com/hyperi-io/dfe-ui/commit/c9c9828bcacf7e5c7763264dda220936a04b4694))
+* let a keyboard user reach why an action is disabled ([#651](https://github.com/hyperi-io/dfe-ui/issues/651)) ([454c0ef](https://github.com/hyperi-io/dfe-ui/commit/454c0ef07350c7b696f4a27caebd6719d03ff2a5))
+* let tests see what antd hides by class ([#668](https://github.com/hyperi-io/dfe-ui/issues/668)) ([1408fe1](https://github.com/hyperi-io/dfe-ui/commit/1408fe13509533e6775da97e4c5df694beb70c21))
+* let the origin form's late frames run before jsdom goes ([#650](https://github.com/hyperi-io/dfe-ui/issues/650)) ([3f19847](https://github.com/hyperi-io/dfe-ui/commit/3f19847bcc08a8bffc27be74c2f3f85e135a11ac))
+* list every drifted source and stop flagging one header as drift ([#655](https://github.com/hyperi-io/dfe-ui/issues/655)) ([e94018b](https://github.com/hyperi-io/dfe-ui/commit/e94018b62383a90efb34eaf9424ffacf5aa5d7a8))
+* prove a session the engine ended signs out once ([#641](https://github.com/hyperi-io/dfe-ui/issues/641)) ([4096f59](https://github.com/hyperi-io/dfe-ui/commit/4096f59d6176008a15285485ff5a1b5754708dc6))
+* put navy text on primary buttons so they read at 6.94:1 ([#646](https://github.com/hyperi-io/dfe-ui/issues/646)) ([37ebd99](https://github.com/hyperi-io/dfe-ui/commit/37ebd9913db3d074b15e5c1eb49c5a47ffbd7791))
+* put the source tree actions beside the name, not over it ([#644](https://github.com/hyperi-io/dfe-ui/issues/644)) ([6b7c377](https://github.com/hyperi-io/dfe-ui/commit/6b7c377c7f03d6f64decb0fd65e68f11ccb0b263))
+* require a variant when switching to elastic ([#661](https://github.com/hyperi-io/dfe-ui/issues/661)) ([6944062](https://github.com/hyperi-io/dfe-ui/commit/694406252604d10ab0283457d35c50c0b9f78afe))
+* say why the Sources list is refused, and stop selecting a main that is not there ([#666](https://github.com/hyperi-io/dfe-ui/issues/666)) ([a61d8e1](https://github.com/hyperi-io/dfe-ui/commit/a61d8e15cb2cf4139a8381f267a792bdd3b2e78c)), closes [#664](https://github.com/hyperi-io/dfe-ui/issues/664)
+* **security:** bump glob and minimatch, typecheck source packages ([#680](https://github.com/hyperi-io/dfe-ui/issues/680)) ([f9fdb96](https://github.com/hyperi-io/dfe-ui/commit/f9fdb96755178f0a16fc044c11f60a046df234bb))
+* **security:** record glob and minimatch as build-time only ([#676](https://github.com/hyperi-io/dfe-ui/issues/676)) ([f9afd36](https://github.com/hyperi-io/dfe-ui/commit/f9afd360cfd5a49f2d8e08535595915b21f7f7db))
+* show a read-only user no create buttons they cannot use ([#643](https://github.com/hyperi-io/dfe-ui/issues/643)) ([a05c483](https://github.com/hyperi-io/dfe-ui/commit/a05c4830b9ac49d50c826b597fa323a7b5fa1563))
+* show an object change value as JSON in the action detail ([#677](https://github.com/hyperi-io/dfe-ui/issues/677)) ([01a2c30](https://github.com/hyperi-io/dfe-ui/commit/01a2c307ef2206736efe28d246c4ba7b8f626493))
+* show the ClickHouse RBAC reconcile result as a table ([#636](https://github.com/hyperi-io/dfe-ui/issues/636)) ([aaff5c8](https://github.com/hyperi-io/dfe-ui/commit/aaff5c87c6c71303efa89d66c5e74709617927ea))
+* show the engine's reason on the Helm tab ([#660](https://github.com/hyperi-io/dfe-ui/issues/660)) ([c14bb3a](https://github.com/hyperi-io/dfe-ui/commit/c14bb3a3775037d585f45166fe1948b87920618f))
+* show what Apply defaults did to each source's table ([#654](https://github.com/hyperi-io/dfe-ui/issues/654)) ([04442c6](https://github.com/hyperi-io/dfe-ui/commit/04442c62e78c7ea8b493696a587548077a2e1bd3))
+* source catalogue setup wizard ([#671](https://github.com/hyperi-io/dfe-ui/issues/671)) ([fda9461](https://github.com/hyperi-io/dfe-ui/commit/fda94615966b616e73bc0975505d487b8c8fa11a))
+* stop dfe-ui tests timing out on slow runners ([#653](https://github.com/hyperi-io/dfe-ui/issues/653)) ([f9d1cbc](https://github.com/hyperi-io/dfe-ui/commit/f9d1cbc93d88bbcf93e6b7eac35b1dc23ed17db4))
+* tell an open group form when its saved link moved ([#652](https://github.com/hyperi-io/dfe-ui/issues/652)) ([957a753](https://github.com/hyperi-io/dfe-ui/commit/957a753cdb3e14b44dec2c7579c69063f4655cdc))
+* tidy the Views tab and field map controls ([#635](https://github.com/hyperi-io/dfe-ui/issues/635)) ([4de8639](https://github.com/hyperi-io/dfe-ui/commit/4de8639d840d4dfbfdf508747dcbc469d88d8769))
+* write the console's server logs as scalo JSON on stdout ([#648](https://github.com/hyperi-io/dfe-ui/issues/648)) ([dca6a2e](https://github.com/hyperi-io/dfe-ui/commit/dca6a2eb4119e0726f601cd3787269428a632792))
+
 ## [1.7.35](https://github.com/hyperi-io/dfe-ui/compare/v1.7.34...v1.7.35) (2026-10-28)
 
 ### Bug Fixes
