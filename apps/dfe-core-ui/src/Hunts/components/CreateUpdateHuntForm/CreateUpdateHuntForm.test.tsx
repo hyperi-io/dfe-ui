@@ -19,7 +19,9 @@ vi.mock('@/core/components/SourceSelect', () => ({
 }));
 vi.mock('./RuleSelect', () => ({ RuleSelect: () => null }));
 vi.mock('@/Hunts/components/CRONBuilderDrawer', () => ({
-  CRONBuilderDrawer: () => null,
+  CRONBuilderDrawer: ({ value }: { value?: string }) => (
+    <input readOnly aria-label="Cron expression" value={value ?? ''} />
+  ),
 }));
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
@@ -59,7 +61,7 @@ describe('CreateUpdateHuntForm name', () => {
           name: 'imported.hunt',
           customers: ['acme'],
           rules: ['brute_force'],
-          cron: '*/15 * * * *',
+          cron: ['*/15 * * * *'],
           log_buffer: 60,
           global_source_table_name: 'windows_audit',
         }}
@@ -73,6 +75,72 @@ describe('CreateUpdateHuntForm name', () => {
     expect(
       screen.queryByText(RULE_HUNT_NAME_VALIDATOR.message('Name')),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('CreateUpdateHuntForm cron expressions', () => {
+  const stored = {
+    name: 'multi',
+    customers: ['acme'],
+    rules: ['brute_force'],
+    cron: ['0 * * * *', '0 0 * * *'],
+    log_buffer: 60,
+    global_source_table_name: 'windows_audit',
+  };
+  const renderForm = (onFinish = vi.fn()) =>
+    render(
+      <CreateUpdateHuntForm
+        onFinish={onFinish}
+        isPending={false}
+        error={null}
+        disabledFields={{ name: true }}
+        initialValues={stored}
+      />,
+      { wrapper },
+    );
+
+  test('shows every stored expression', () => {
+    renderForm();
+
+    expect(
+      screen
+        .getAllByLabelText('Cron expression')
+        .map((input) => (input as HTMLInputElement).value),
+    ).toEqual(['0 * * * *', '0 0 * * *']);
+  });
+
+  test('saves the list without an expression the user removed', async () => {
+    const onFinish = vi.fn();
+    renderForm(onFinish);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Remove cron expression 1' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save Hunt' }));
+
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    expect(onFinish.mock.calls[0]?.[0].cron).toEqual(['0 0 * * *']);
+  });
+
+  test('keeps the last expression and refuses a new blank one', async () => {
+    const onFinish = vi.fn();
+    renderForm(onFinish);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Remove cron expression 1' }),
+    );
+    expect(
+      screen.getByRole('button', { name: 'Remove cron expression 1' }),
+    ).toBeDisabled();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Add cron expression' }),
+    );
+    expect(screen.getAllByLabelText('Cron expression')).toHaveLength(2);
+    await userEvent.click(screen.getByRole('button', { name: 'Save Hunt' }));
+
+    expect(await screen.findByText('Cron is required')).toBeInTheDocument();
+    expect(onFinish).not.toHaveBeenCalled();
   });
 });
 
