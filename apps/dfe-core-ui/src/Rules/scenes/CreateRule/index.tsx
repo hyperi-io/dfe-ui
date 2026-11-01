@@ -46,7 +46,9 @@ export const CreateRuleScene = () => {
       <MainContentCard className="p-0">
         <RbacProtected action={RbacProtected.rbacActions.rule_write}>
           <RbacProtected.Unrestricted>
+            {/* A form reads its initial values once, so a search that arrives after it mounted needs a new form. */}
             <CreateUpdateRuleForm
+              key={storedSearch?.id ?? 'blank'}
               onFinish={handleCreateCustomRule}
               isPending={isPending}
               error={createRuleError}
