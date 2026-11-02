@@ -200,24 +200,19 @@ test.describe('a source whose other transforms are free', () => {
     await loginAs(page, 'initial_user');
   });
 
-  test('moves from one transform to another in one action each', async ({
+  test('moves from the seeded transform to another in one action', async ({
     page,
     request,
   }) => {
     await openProcessingTab(page, FREE_SOURCE);
 
-    // The seed leaves the source naming no engine, so the first choice sets one.
-    await page.getByRole('radio', { name: /dfe-transform-vrl/ }).click();
-    await page
-      .getByRole('dialog')
-      .getByRole('button', { name: 'Set transform' })
-      .click();
+    // seed_source names vrl, so the first choice is already made.
     await expect(
       page.getByRole('radio', { name: /dfe-transform-vrl/ }),
     ).toBeChecked();
     expect(await engineTransformEngine(request, FREE_SOURCE)).toBe('vrl');
 
-    // And the second moves it, in one action, with no undeploy in between.
+    // The move is one action, with no undeploy in between.
     await page.getByRole('radio', { name: /dfe-transform-vector/ }).click();
     await page
       .getByRole('dialog')
