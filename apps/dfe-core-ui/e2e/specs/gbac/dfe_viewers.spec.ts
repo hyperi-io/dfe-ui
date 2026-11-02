@@ -16,365 +16,373 @@ test.beforeEach(async ({ playwright, page }) => {
   await loginAs(page, 'dfe_viewers', OBSERVE_LANDING);
 });
 
-test('Sidebar Navigation', async ({ page }) => {
-  await page.goto(BASE_URL);
-  await expectLanding(page, OBSERVE_LANDING);
+test.describe('', { tag: ['@core', '@gbac'] }, () => {
+  test('Sidebar Navigation', async ({ page }) => {
+    await page.goto(BASE_URL);
+    await expectLanding(page, OBSERVE_LANDING);
 
-  /* Shows the correct sidebar navigation links */
-  await expect(
-    page.getByRole('link', { name: 'Hunt Results', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Search', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Saved Searches', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Chart Explorer', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Dashboards', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Sources', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Settings actions', exact: true }),
-  ).toBeVisible();
+    /* Shows the correct sidebar navigation links */
+    await expect(
+      page.getByRole('link', { name: 'Hunt Results', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Search', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Saved Searches', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Chart Explorer', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Dashboards', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Sources', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Settings actions', exact: true }),
+    ).toBeVisible();
 
-  /* Does not show other sidebar navigation links */
-  await expect(
-    page.getByRole('link', { name: 'Meta Schemas', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Rules', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Hunts', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Components', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Library', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByRole('link', { name: 'Admin Tools', exact: true }),
-  ).toBeHidden();
-});
-
-test('User actions', async ({ page }) => {
-  await page.goto(BASE_URL);
-  await expectLanding(page, OBSERVE_LANDING);
-
-  await expectSettingsMenu(page, {
-    user: 'dfe_viewers',
-    platformSettings: false,
-    adminSettings: true,
-  });
-});
-
-test('Logout', async ({ page }) => {
-  await page.goto(BASE_URL);
-  await expectLanding(page, OBSERVE_LANDING);
-
-  await logOut(page);
-  await expectLoggedOut(page, OBSERVE_LANDING);
-});
-
-test('Sources', async ({ page }) => {
-  await page.goto(`${BASE_URL}/sources`);
-
-  await expect(
-    page.getByRole('link', { name: 'Sources', exact: true }),
-  ).toHaveCount(2);
-  await expect(
-    page.getByRole('button', { name: 'Add Source', exact: true }),
-  ).toBeHidden();
-  /* reset_all leaves the engine-owned `main` source, which no API can delete */
-  await expect(page.getByRole('treeitem')).toHaveCount(1);
-  await expect(page.getByRole('treeitem', { name: /main/ })).toBeVisible();
-  /* The console opens main on landing rather than showing an empty detail */
-  await expect(
-    page.getByRole('heading', { name: /Source Configuration: main/ }),
-  ).toBeVisible();
-});
-
-test('Meta Schemas', async ({ page }) => {
-  await page.goto(`${BASE_URL}/schemas`);
-
-  await expect(
-    page.getByRole('link', { name: 'Meta Schemas', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Other Schemas', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Add Schema', exact: true }),
-  ).toBeDisabled();
-
-  /* Meta Schemas */
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-
-  /* Other Schemas */
-  await page.getByRole('link', { name: 'Other Schemas', exact: true }).click();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-});
-
-test('Rules', async ({ page }) => {
-  await page.goto(`${BASE_URL}/rules`);
-
-  await expect(
-    page.getByRole('link', { name: 'Rules', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Create new rule', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-});
-
-test('Hunts', async ({ page }) => {
-  await page.goto(`${BASE_URL}/hunts`);
-
-  await expect(
-    page.getByRole('link', { name: 'Hunts', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Add Hunt', exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByText('You do not have sufficient permissions'),
-  ).toBeVisible();
-});
-
-test.describe('Settings', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/settings`);
+    /* Does not show other sidebar navigation links */
+    await expect(
+      page.getByRole('link', { name: 'Meta Schemas', exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('link', { name: 'Rules', exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('link', { name: 'Hunts', exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('link', { name: 'Components', exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('link', { name: 'Library', exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole('link', { name: 'Admin Tools', exact: true }),
+    ).toBeHidden();
   });
 
-  test('Tabs', async ({ page }) => {
-    await expect(page).toHaveURL(`${BASE_URL}/settings/admin`);
+  test('User actions', async ({ page }) => {
+    await page.goto(BASE_URL);
+    await expectLanding(page, OBSERVE_LANDING);
+
+    await expectSettingsMenu(page, {
+      user: 'dfe_viewers',
+      platformSettings: false,
+      adminSettings: true,
+    });
+  });
+
+  test('Logout', async ({ page }) => {
+    await page.goto(BASE_URL);
+    await expectLanding(page, OBSERVE_LANDING);
+
+    await logOut(page);
+    await expectLoggedOut(page, OBSERVE_LANDING);
+  });
+
+  test('Sources', async ({ page }) => {
+    await page.goto(`${BASE_URL}/sources`);
 
     await expect(
-      page.getByRole('link', { name: 'Admin Controls', exact: true }),
-    ).toBeVisible();
-
+      page.getByRole('link', { name: 'Sources', exact: true }),
+    ).toHaveCount(2);
     await expect(
-      page.getByRole('tab', { name: 'Organisation Management' }),
-    ).toBeVisible();
+      page.getByRole('button', { name: 'Add Source', exact: true }),
+    ).toBeHidden();
+    /* reset_all leaves the engine-owned `main` source, which no API can delete */
+    await expect(page.getByRole('treeitem')).toHaveCount(1);
+    await expect(page.getByRole('treeitem', { name: /main/ })).toBeVisible();
+    /* The console opens main on landing rather than showing an empty detail */
     await expect(
-      page.getByRole('tab', { name: 'Role Management' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('tab', { name: 'Group Management' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('tab', { name: 'Account Management' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('tab', { name: 'OIDC Provider Management' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('tab', { name: 'API Key Management' }),
+      page.getByRole('heading', { name: /Source Configuration: main/ }),
     ).toBeVisible();
   });
 
-  test('Organisation Management', async ({ page }) => {
+  test('Meta Schemas', async ({ page }) => {
+    await page.goto(`${BASE_URL}/schemas`);
+
     await expect(
-      page.getByRole('button', {
-        name: 'Configure New Organisation',
-        exact: true,
-      }),
+      page.getByRole('link', { name: 'Meta Schemas', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Other Schemas', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Add Schema', exact: true }),
     ).toBeDisabled();
 
+    /* Meta Schemas */
+    await expect(
+      page.getByText('You do not have sufficient permissions'),
+    ).toBeVisible();
+
+    /* Other Schemas */
     await page
-      .getByRole('button', { name: 'organisation actions', exact: true })
+      .getByRole('link', { name: 'Other Schemas', exact: true })
       .click();
     await expect(
-      page.getByRole('button', {
-        name: 'View organisation details',
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', {
-        name: 'Edit organisation',
-        exact: true,
-      }),
-    ).toBeDisabled();
-    await expect(
-      page.getByRole('button', { name: 'Delete organisation', exact: true }),
-    ).toBeDisabled();
-  });
-
-  test('Role Management', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Role Management' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/admin/role-management`);
-
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(2);
-    await expect(
-      page.getByRole('button', {
-        name: 'Configure New Custom Role',
-        exact: true,
-      }),
-    ).toBeDisabled();
-  });
-
-  test('Group Management', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Group Management' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/admin/group-management`);
-
-    await expect(
       page.getByText('You do not have sufficient permissions'),
     ).toBeVisible();
-    await expect(
-      page.getByRole('button', {
-        name: 'Configure New Group',
-        exact: true,
-      }),
-    ).toBeDisabled();
   });
 
-  test('Account Management', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Account Management' }).click();
-    await expect(page).toHaveURL(
-      `${BASE_URL}/settings/admin/account-management`,
-    );
-
-    /* Two cards read account_read: Manage existing accounts, Blocked accounts */
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(2);
-    await expect(
-      page.getByRole('button', {
-        name: 'Invite New User',
-        exact: true,
-      }),
-    ).toBeDisabled();
-  });
-
-  test('OIDC Provider Management', async ({ page }) => {
-    await page.getByRole('tab', { name: 'OIDC Provider Management' }).click();
-    await expect(page).toHaveURL(
-      `${BASE_URL}/settings/admin/oidc-provider-management`,
-    );
+  test('Rules', async ({ page }) => {
+    await page.goto(`${BASE_URL}/rules`);
 
     await expect(
-      page.getByText('You do not have sufficient permissions'),
+      page.getByRole('link', { name: 'Rules', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole('button', {
-        name: 'Configure New OIDC Provider',
-        exact: true,
-      }),
-    ).toBeDisabled();
-  });
-
-  test('API Key Management', async ({ page }) => {
-    await page.getByRole('tab', { name: 'API Key Management' }).click();
-    await expect(page).toHaveURL(
-      `${BASE_URL}/settings/admin/api-key-management`,
-    );
-
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', {
-        name: 'Generate API Key',
-        exact: true,
-      }),
-    ).toBeDisabled();
-  });
-});
-
-test.describe('Platform', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/settings/platform`);
-  });
-
-  test('Tabs', async ({ page }) => {
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
-
-    await expect(
-      page.getByRole('tab', { name: 'System Settings' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('tab', { name: 'Git Operations' }),
-    ).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Governance' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Lifecycle' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Repository' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Helm' })).toBeVisible();
-  });
-
-  test('System Settings', async ({ page }) => {
-    await page.getByRole('tab', { name: 'System Settings' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
-
-    /* Three cards read system_read: ClickHouse Cloud, System Settings, Retention */
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(3);
-  });
-
-  test('Git Operations', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Git Operations' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/gitops`);
-
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', {
-        name: 'Enable/Disable Auto Merge',
-        exact: true,
-      }),
-    ).toBeDisabled();
-  });
-
-  test('Governance', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Governance' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/governance`);
-
-    await expect(
-      page.getByText('You do not have sufficient permissions'),
-    ).toHaveCount(2);
-    await expect(
-      page.getByRole('button', { name: 'Reconcile', exact: true }),
-    ).toBeDisabled();
-    await expect(
-      page.getByRole('button', { name: 'Add Action', exact: true }),
-    ).toBeDisabled();
-    await expect(
-      page.getByRole('button', { name: 'Add Policy', exact: true }),
-    ).toBeDisabled();
-  });
-
-  test('Lifecycle', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Lifecycle' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/lifecycle`);
-
+      page.getByRole('button', { name: 'Create new rule', exact: true }),
+    ).toBeHidden();
     await expect(
       page.getByText('You do not have sufficient permissions'),
     ).toBeVisible();
   });
 
-  test('Helm', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Helm' }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/settings/platform/helm`);
+  test('Hunts', async ({ page }) => {
+    await page.goto(`${BASE_URL}/hunts`);
 
+    await expect(
+      page.getByRole('link', { name: 'Hunts', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Add Hunt', exact: true }),
+    ).toBeHidden();
     await expect(
       page.getByText('You do not have sufficient permissions'),
     ).toBeVisible();
+  });
+
+  test.describe('Settings', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(`${BASE_URL}/settings`);
+    });
+
+    test('Tabs', async ({ page }) => {
+      await expect(page).toHaveURL(`${BASE_URL}/settings/admin`);
+
+      await expect(
+        page.getByRole('link', { name: 'Admin Controls', exact: true }),
+      ).toBeVisible();
+
+      await expect(
+        page.getByRole('tab', { name: 'Organisation Management' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'Role Management' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'Group Management' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'Account Management' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'OIDC Provider Management' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'API Key Management' }),
+      ).toBeVisible();
+    });
+
+    test('Organisation Management', async ({ page }) => {
+      await expect(
+        page.getByRole('button', {
+          name: 'Configure New Organisation',
+          exact: true,
+        }),
+      ).toBeDisabled();
+
+      await page
+        .getByRole('button', { name: 'organisation actions', exact: true })
+        .click();
+      await expect(
+        page.getByRole('button', {
+          name: 'View organisation details',
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: 'Edit organisation',
+          exact: true,
+        }),
+      ).toBeDisabled();
+      await expect(
+        page.getByRole('button', { name: 'Delete organisation', exact: true }),
+      ).toBeDisabled();
+    });
+
+    test('Role Management', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Role Management' }).click();
+      await expect(page).toHaveURL(
+        `${BASE_URL}/settings/admin/role-management`,
+      );
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toHaveCount(2);
+      await expect(
+        page.getByRole('button', {
+          name: 'Configure New Custom Role',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('Group Management', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Group Management' }).click();
+      await expect(page).toHaveURL(
+        `${BASE_URL}/settings/admin/group-management`,
+      );
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: 'Configure New Group',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('Account Management', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Account Management' }).click();
+      await expect(page).toHaveURL(
+        `${BASE_URL}/settings/admin/account-management`,
+      );
+
+      /* Two cards read account_read: Manage existing accounts, Blocked accounts */
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toHaveCount(2);
+      await expect(
+        page.getByRole('button', {
+          name: 'Invite New User',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('OIDC Provider Management', async ({ page }) => {
+      await page.getByRole('tab', { name: 'OIDC Provider Management' }).click();
+      await expect(page).toHaveURL(
+        `${BASE_URL}/settings/admin/oidc-provider-management`,
+      );
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: 'Configure New OIDC Provider',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('API Key Management', async ({ page }) => {
+      await page.getByRole('tab', { name: 'API Key Management' }).click();
+      await expect(page).toHaveURL(
+        `${BASE_URL}/settings/admin/api-key-management`,
+      );
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: 'Generate API Key',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+  });
+
+  test.describe('Platform', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(`${BASE_URL}/settings/platform`);
+    });
+
+    test('Tabs', async ({ page }) => {
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
+
+      await expect(
+        page.getByRole('tab', { name: 'System Settings' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'Git Operations' }),
+      ).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Governance' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Lifecycle' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Repository' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Helm' })).toBeVisible();
+    });
+
+    test('System Settings', async ({ page }) => {
+      await page.getByRole('tab', { name: 'System Settings' }).click();
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform`);
+
+      /* Three cards read system_read: ClickHouse Cloud, System Settings, Retention */
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toHaveCount(3);
+    });
+
+    test('Git Operations', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Git Operations' }).click();
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform/gitops`);
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: 'Enable/Disable Auto Merge',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('Governance', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Governance' }).click();
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform/governance`);
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toHaveCount(2);
+      await expect(
+        page.getByRole('button', { name: 'Reconcile', exact: true }),
+      ).toBeDisabled();
+      await expect(
+        page.getByRole('button', { name: 'Add Action', exact: true }),
+      ).toBeDisabled();
+      await expect(
+        page.getByRole('button', { name: 'Add Policy', exact: true }),
+      ).toBeDisabled();
+    });
+
+    test('Lifecycle', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Lifecycle' }).click();
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform/lifecycle`);
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+    });
+
+    test('Helm', async ({ page }) => {
+      await page.getByRole('tab', { name: 'Helm' }).click();
+      await expect(page).toHaveURL(`${BASE_URL}/settings/platform/helm`);
+
+      await expect(
+        page.getByText('You do not have sufficient permissions'),
+      ).toBeVisible();
+    });
   });
 });
