@@ -2391,6 +2391,10 @@ export interface paths {
          *     reaches new tables only, and existing columns keep their type. ``live``
          *     reports each source: what reached the table, what did not and why. A
          *     ClickHouse failure is reported on that source, and the pin stays committed.
+         *
+         *     A pin production+team sends to review is listed in ``awaiting_review`` with
+         *     ``review_required`` and the review headers, and its table is left alone until
+         *     the branch merges, since main still carries the source as it was.
          */
         post: operations["system.defaults.apply"];
         delete?: never;
@@ -6403,10 +6407,31 @@ export interface components {
          */
         ApplyDefaultsResponse: {
             /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
+            /**
              * Updated
              * @description Sources whose current version was written with the defaults
              */
             updated: components["schemas"]["ApplyDefaultsPin"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose pin went to a review branch: main still carries them as they were, so their tables are left alone and are not listed in live
+             */
+            awaiting_review?: string[];
             /**
              * Unchanged
              * @description Sources whose current version already matched the defaults
@@ -6414,7 +6439,7 @@ export interface components {
             unchanged: components["schemas"]["ApplyDefaultsPin"][];
             /**
              * Live
-             * @description One entry per named source, in request order: what reached its table.
+             * @description One entry per named source not awaiting review, in request order: what reached its table.
              */
             live: components["schemas"]["SourceLiveApply"][];
         };
@@ -7235,10 +7260,31 @@ export interface components {
          *     for everything that was stored.
          */
         CatalogueSourcesResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Created */
             created: components["schemas"]["CatalogueCreatedSource"][];
             /** Failed */
             failed: components["schemas"]["CatalogueSourceFailure"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose create went to a review branch, so main does not carry them yet
+             */
+            awaiting_review?: string[];
             /**
              * Apps Synced
              * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
@@ -7672,6 +7718,22 @@ export interface components {
          * @description The bindings an apply leaves, and what the apps did with them.
          */
         CompatWriteResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
@@ -13282,6 +13344,22 @@ export interface components {
          */
         RuleOrderResponse: {
             /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
+            /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
              */
@@ -13905,6 +13983,22 @@ export interface components {
              * @description Whether the DDL was executed against ClickHouse
              */
             applied: boolean;
+            /**
+             * Review Required
+             * @description True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR for that record
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying it
+             */
+            review_branch?: string | null;
             /**
              * Create Table
              * @description CREATE TABLE DDL
@@ -16064,9 +16158,25 @@ export interface components {
         };
         /**
          * SyncReportModel
-         * @description Counts from a provider sync into the catalogue.
+         * @description Counts from a provider sync into the catalogue, and whether its import awaits review.
          */
         SyncReportModel: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Source */
             source: string;
             /** Total */
