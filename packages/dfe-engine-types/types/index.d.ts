@@ -394,7 +394,7 @@ export interface paths {
          * Rotate Password
          * @description Rotate the local admin's password in the deployment's secret store.
          *
-         *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
+         *     The store that injects ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
          *     password, so the engine writes the new value through its secrets backend and
          *     never into its own YAML. The next boot reconcile issues the rotated value to
          *     the admin, who must replace it at the following login. Returns 501 with the
@@ -2391,6 +2391,10 @@ export interface paths {
          *     reaches new tables only, and existing columns keep their type. ``live``
          *     reports each source: what reached the table, what did not and why. A
          *     ClickHouse failure is reported on that source, and the pin stays committed.
+         *
+         *     A pin production+team sends to review is listed in ``awaiting_review`` with
+         *     ``review_required`` and the review headers, and its table is left alone until
+         *     the branch merges, since main still carries the source as it was.
          */
         post: operations["system.defaults.apply"];
         delete?: never;
@@ -3395,7 +3399,7 @@ export interface paths {
          *     (snake_case ``name``, ``@source:`` dotted ``expr``).
          *
          *     Upload size is capped by ``api.elastic_converter_max_upload_bytes`` (reject with 413 and
-         *     ``upload_too_large`` when exceeded). Override with ``DFE_API_ELASTIC_CONVERTER_*``.
+         *     ``upload_too_large`` when exceeded). Override with ``DFE_ENGINE_API_ELASTIC_CONVERTER_*``.
          */
         post: operations["schemas.elastic-converter"];
         delete?: never;
@@ -6403,10 +6407,31 @@ export interface components {
          */
         ApplyDefaultsResponse: {
             /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
+            /**
              * Updated
              * @description Sources whose current version was written with the defaults
              */
             updated: components["schemas"]["ApplyDefaultsPin"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose pin went to a review branch: main still carries them as they were, so their tables are left alone and are not listed in live
+             */
+            awaiting_review?: string[];
             /**
              * Unchanged
              * @description Sources whose current version already matched the defaults
@@ -6414,7 +6439,7 @@ export interface components {
             unchanged: components["schemas"]["ApplyDefaultsPin"][];
             /**
              * Live
-             * @description One entry per named source, in request order: what reached its table.
+             * @description One entry per named source not awaiting review, in request order: what reached its table.
              */
             live: components["schemas"]["SourceLiveApply"][];
         };
@@ -7235,10 +7260,31 @@ export interface components {
          *     for everything that was stored.
          */
         CatalogueSourcesResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Created */
             created: components["schemas"]["CatalogueCreatedSource"][];
             /** Failed */
             failed: components["schemas"]["CatalogueSourceFailure"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose create went to a review branch, so main does not carry them yet
+             */
+            awaiting_review?: string[];
             /**
              * Apps Synced
              * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
@@ -7672,6 +7718,22 @@ export interface components {
          * @description The bindings an apply leaves, and what the apps did with them.
          */
         CompatWriteResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
@@ -8430,7 +8492,7 @@ export interface components {
         DeploymentResponse: {
             /**
              * Profile
-             * @description The tier this deployment was stood up as (DFE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
+             * @description The tier this deployment was stood up as (DFE_ENGINE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
              */
             profile: string;
             transports: components["schemas"]["TransportFacts"];
@@ -9243,7 +9305,7 @@ export interface components {
             directory_backend: "live" | "mock";
             /**
              * Mock Directory Env
-             * @default DFE_OIDC_MOCK_DIRECTORY
+             * @default DFE_ENGINE_OIDC_MOCK_DIRECTORY
              */
             mock_directory_env: string;
             /**
@@ -12849,7 +12911,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12892,7 +12954,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12945,7 +13007,7 @@ export interface components {
          * RotatePasswordRequest
          * @description A rotation the deployment can boot on.
          *
-         *     The rotated value becomes ``DFE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
+         *     The rotated value becomes ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
          *     refuses an empty or default one outside a dev posture, so an unconstrained
          *     rotation is a way for an admin to lock the deployment out of its own restart.
          *     Both rules are the ones that gate startup, not a second opinion on them.
@@ -13281,6 +13343,22 @@ export interface components {
          * @description The field's blocks as the reorder leaves them.
          */
         RuleOrderResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
@@ -13906,6 +13984,22 @@ export interface components {
              */
             applied: boolean;
             /**
+             * Review Required
+             * @description True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR for that record
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying it
+             */
+            review_branch?: string | null;
+            /**
              * Create Table
              * @description CREATE TABLE DDL
              */
@@ -14368,7 +14462,7 @@ export interface components {
             clickhouse_data_database: string;
             /**
              * Clickhouse Default Ttl Days
-             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_CLICKHOUSE_DEFAULT_TTL_DAYS.
+             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS.
              */
             clickhouse_default_ttl_days: number;
             /** Sources Dir */
@@ -14436,7 +14530,7 @@ export interface components {
             default_ttl_days: number;
             /**
              * Default Engine
-             * @description MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The Replicated prefix every DFE table takes is added at DDL time, not here.
+             * @description MergeTree-family engine variant a source's table gets when its schema names none (clickhouse.default_engine). The Replicated prefix every DFE table takes is added at DDL time, not here.
              * @default MergeTree
              */
             default_engine: string;
@@ -15385,7 +15479,7 @@ export interface components {
             ttl_days?: number | null;
             /**
              * Engine
-             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).
+             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (clickhouse.default_engine, itself MergeTree unless overridden).
              * @default
              */
             engine: string;
@@ -16064,9 +16158,25 @@ export interface components {
         };
         /**
          * SyncReportModel
-         * @description Counts from a provider sync into the catalogue.
+         * @description Counts from a provider sync into the catalogue, and whether its import awaits review.
          */
         SyncReportModel: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Source */
             source: string;
             /** Total */
@@ -27059,7 +27169,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
+            /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_ENGINE_API_ELASTIC_CONVERTER_* env vars. */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -31009,7 +31119,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES. */
+            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_ENGINE_REPOSITORY_MAX_OBJECT_BYTES. */
             413: {
                 headers: {
                     [name: string]: unknown;
