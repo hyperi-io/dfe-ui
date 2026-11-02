@@ -39,35 +39,134 @@ const login = async (page: Page) => {
   await page.getByRole('button', { name: 'Login', exact: true }).click();
 };
 
-test.describe('redirect when setup is not complete', () => {
-  test('an anonymous visitor is sent to the login, not the wizard', async ({
+test.describe('', { tag: ['@core'] }, () => {
+  test.describe('redirect when setup is not complete', () => {
+    test('an anonymous visitor is sent to the login, not the wizard', async ({
+      page,
+    }) => {
+      await page.goto(baseUrl);
+
+      await expect(page).toHaveURL(new RegExp(`^${loginPageUrl}`));
+    });
+
+    test('the issued password is changed before the wizard, or anything else, opens', async ({
+      page,
+    }) => {
+      await page.goto(`${baseUrl}/sources`);
+      await login(page);
+
+      await expectForcedPasswordChange(page);
+      // Neither the wizard nor a console page renders around the change.
+      await page.goto(`${baseUrl}/setup`);
+      await expectForcedPasswordChange(page);
+      await page.goto(`${baseUrl}/sources`);
+      await expectForcedPasswordChange(page);
+    });
+
+    test('/sources lands on the wizard once signed in', async ({ page }) => {
+      await page.goto(`${baseUrl}/sources`);
+      await login(page);
+      await completeForcedPasswordChange(page);
+
+      await expect(page).toHaveURL(welcomePageUrl);
+    });
+  });
+
+  test('setup from start testing forward and back navigation', async ({
     page,
   }) => {
+    test.slow();
+    /* LOGIN */
     await page.goto(baseUrl);
-
     await expect(page).toHaveURL(new RegExp(`^${loginPageUrl}`));
-  });
-
-  test('the issued password is changed before the wizard, or anything else, opens', async ({
-    page,
-  }) => {
-    await page.goto(`${baseUrl}/sources`);
     await login(page);
 
+    /* FORCED PASSWORD CHANGE */
     await expectForcedPasswordChange(page);
-    // Neither the wizard nor a console page renders around the change.
-    await page.goto(`${baseUrl}/setup`);
-    await expectForcedPasswordChange(page);
-    await page.goto(`${baseUrl}/sources`);
-    await expectForcedPasswordChange(page);
-  });
-
-  test('/sources lands on the wizard once signed in', async ({ page }) => {
-    await page.goto(`${baseUrl}/sources`);
-    await login(page);
     await completeForcedPasswordChange(page);
 
+    /* WELCOME */
     await expect(page).toHaveURL(welcomePageUrl);
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(page).toHaveURL(configureOrganisationPageUrl);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page).toHaveURL(welcomePageUrl);
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+    /* CONFIGURE ORGANISATION */
+    await expect(page).toHaveURL(configureOrganisationPageUrl);
+    // Save is the only way forward until the organisation exists.
+    await expect(
+      page.getByRole('button', { name: 'Next', exact: true }),
+    ).toHaveCount(0);
+    await textbox(page, 'Name').fill('test_organisation');
+    await textbox(page, 'Display Name').fill('Test Organisation');
+    await page
+      .getByRole('button', { name: 'Save and continue', exact: true })
+      .click();
+
+    /* CONFIGURE SOURCE */
+    await expect(page).toHaveURL(configureSourcePageUrl);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page).toHaveURL(configureOrganisationPageUrl);
+    await expect(
+      page.getByText('Primary organisation configured'),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(page).toHaveURL(configureSourcePageUrl);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page).toHaveURL(configureOrganisationPageUrl);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page).toHaveURL(welcomePageUrl);
+    // The organisation exists now. Welcome's Next stops on the source step,
+    // which the engine's setup machine does not report.
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await expect(page).toHaveURL(configureSourcePageUrl);
+    await page
+      .getByRole('button', { name: 'Skip for now', exact: true })
+      .click();
+
+    /* CONFIGURE LOGIN (OIDC) */
+    await expect(page).toHaveURL(configureLoginPageUrl);
+    // Next appears after the provider is tested. Until then, skip is the way on.
+    await expect(
+      page.getByRole('button', { name: 'Next', exact: true }),
+    ).toHaveCount(0);
+    await page
+      .getByRole('button', { name: 'Skip for now', exact: true })
+      .click();
+    await expect(page).toHaveURL(configureUserPageUrl);
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(page).toHaveURL(configureLoginPageUrl);
+    await page
+      .getByRole('button', { name: 'Skip for now', exact: true })
+      .click();
+
+    /* CONFIGURE USER */
+    await expect(page).toHaveURL(configureUserPageUrl);
+    await expect(
+      page.getByRole('button', { name: 'Next', exact: true }),
+    ).toBeDisabled();
+    await textbox(page, 'Username').fill('test_username');
+    await textbox(page, 'Email').fill('test_username@example.com');
+    await textbox(page, 'Password').fill('test_password');
+    await page
+      .getByRole('button', { name: 'Create Account', exact: true })
+      .click();
+
+    /* COMPLETE -- the account completed setup, so the steps behind it are closed */
+    await expect(page).toHaveURL(completePageUrl);
+    await expect(
+      page.getByRole('heading', { name: 'Complete', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Back', exact: true }),
+    ).toHaveCount(0);
+    // Already signed in, so it lands in the app, not back on login.
+    await page
+      .getByRole('button', { name: 'Get started', exact: true })
+      .click();
+    await expectSourcesLanding(page);
   });
 });
 
