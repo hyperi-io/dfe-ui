@@ -222,7 +222,7 @@ test.beforeAll(async () => {
   // plan refuses a version with no DDL to apply, so the tables go with them.
   for (const { name } of SOURCES) {
     await clickhouse(`DROP TABLE IF EXISTS dfe.\`${name}\``);
-    forgetDeployRecords(name);
+    await forgetDeployRecords(name);
   }
   // The receiver and loader compile their routing from an instance overlay, so
   // without one they keep the committed defaults and no source rule is in force.

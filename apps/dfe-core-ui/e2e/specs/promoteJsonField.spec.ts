@@ -6,6 +6,7 @@ import {
   engine,
   forgetDeployRecords,
   forgetEngineToken,
+  qualifiedTable,
   tableColumns,
   tableIndices,
 } from '../config/engineApi.helpers';
@@ -119,7 +120,7 @@ const landRowsWithJson = async () => {
     url: { original: 'https://example.test/a/b?c=d' },
   }).replace(/'/g, "\\'");
   await clickhouse(
-    `INSERT INTO dfe.\`${SOURCE}\` (timestamp, event_dataset, _json) ` +
+    `INSERT INTO ${await qualifiedTable(SOURCE)} (timestamp, event_dataset, _json) ` +
       `SELECT now(), '${MATCH_VALUE}', '${payload}' FROM numbers(5)`,
   );
 };
@@ -142,8 +143,8 @@ test.beforeAll(async () => {
 
   // reset_all clears the registry and leaves ClickHouse and the fork alone, so a
   // rerun would otherwise discover a table and a schema the registry has lost.
-  await clickhouse(`DROP TABLE IF EXISTS dfe.\`${SOURCE}\``);
-  forgetDeployRecords(SOURCE);
+  await clickhouse(`DROP TABLE IF EXISTS ${await qualifiedTable(SOURCE)}`);
+  await forgetDeployRecords(SOURCE);
   await engine('DELETE', `/api/v1/schemas/definitions/${FORKED_SCHEMA}`).catch(
     () => undefined,
   );
@@ -260,6 +261,12 @@ test(
         .getByRole('cell', { name: `@source: ${UI_PATH}`, exact: true }),
     ).toBeVisible();
 
+    // The dev indicator sits on this button and takes the click.
+    await page.evaluate(() => {
+      document
+        .querySelectorAll('nextjs-portal')
+        .forEach((node) => node.remove());
+    });
     await drawer
       .getByRole('button', { name: 'Promote Fields', exact: true })
       .click();
