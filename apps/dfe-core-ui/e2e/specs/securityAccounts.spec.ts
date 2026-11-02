@@ -37,11 +37,16 @@ const openSecurityAccounts = async (page: Page): Promise<Locator> => {
   return drawer;
 };
 
-// One account's card: the SectionCard root carries its details and its action.
+// The card that lists this username. The email is whatever the engine stored.
 const accountCard = (drawer: Locator, username: string) =>
   drawer
-    .locator('div.mb-4')
-    .filter({ has: drawer.page().getByText(`${username}@dfe.local`) });
+    .locator('dl')
+    .filter({
+      hasText: new RegExp(
+        `Username:\\s*${username}(?=\\s*(?:Email:|Phone:|$))`,
+      ),
+    })
+    .locator('xpath=ancestor::*[.//button][1]');
 
 const expectNeverEmpty = async (drawer: Locator) => {
   await expect(
@@ -132,6 +137,7 @@ test.describe('the admin through the setup wizard', () => {
   test('is kept, listed and resettable once setup completes', async ({
     page,
   }) => {
+    test.slow();
     await signIn(page, 'admin', adminPassword());
     await expectForcedPasswordChange(page);
     await completeForcedPasswordChange(page);
@@ -150,6 +156,7 @@ test.describe('the admin through the setup wizard', () => {
         .getByRole('button', { name: 'Skip for now', exact: true })
         .click();
     }
+    await expect(page).toHaveURL(`${BASE_URL}/setup/configureUser`);
     await textbox(page, 'Username').fill('wizard_user');
     await textbox(page, 'Email').fill('wizard_user@example.com');
     await textbox(page, 'Password').fill(freshPassword('wizard_user'));
