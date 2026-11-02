@@ -29,9 +29,9 @@ afterAll(() => server.close());
 
 const { wrapper } = buildTestWrapper().withTheme().withReactQuery();
 
-const SOLO_REASON = 'solo operator posture (DFE_GITOPS_MODE=solo)';
+const SOLO_REASON = 'solo operator posture (DFE_ENGINE_GITOPS_MODE=solo)';
 const TEAM_REASON =
-  'production posture (DFE_ENV=production) with DFE_GITOPS_MODE=team; set DFE_GITOPS_MODE=solo (or a dev DFE_ENV) to permit auto-merge';
+  'production posture (DFE_ENGINE_ENV=production) with DFE_ENGINE_GITOPS_MODE=team; set DFE_ENGINE_GITOPS_MODE=solo (or a dev DFE_ENGINE_ENV) to permit auto-merge';
 
 const autoMergeUrl = API_CONFIG_MOCKS.gitops.autoMerge.mockedUrl;
 

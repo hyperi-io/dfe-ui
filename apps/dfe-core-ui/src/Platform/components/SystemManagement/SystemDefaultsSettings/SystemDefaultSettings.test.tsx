@@ -19,7 +19,7 @@ describe('SystemDefaultsSettings', () => {
       await screen.findByText('90 days', {}, { timeout: 15000 }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Set by DFE_CLICKHOUSE_DEFAULT_TTL_DAYS/),
+      screen.getByText(/Set by DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS/),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'System defaults actions' }),

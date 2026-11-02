@@ -1462,7 +1462,7 @@
           "Accounts"
         ],
         "summary": "Rotate Password",
-        "description": "Rotate the local admin's password in the deployment's secret store.\n\nThe store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that\npassword, so the engine writes the new value through its secrets backend and\nnever into its own YAML. The next boot reconcile issues the rotated value to\nthe admin, who must replace it at the following login. Returns 501 with the\ncommand that changes it where it is kept when the deployment has not declared\na secrets path for the password. Every other account, ``breakglass`` included,\nchanges its password through reset-password.",
+        "description": "Rotate the local admin's password in the deployment's secret store.\n\nThe store that injects ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that\npassword, so the engine writes the new value through its secrets backend and\nnever into its own YAML. The next boot reconcile issues the rotated value to\nthe admin, who must replace it at the following login. Returns 501 with the\ncommand that changes it where it is kept when the deployment has not declared\na secrets path for the password. Every other account, ``breakglass`` included,\nchanges its password through reset-password.",
         "operationId": "auth.accounts.rotate-password",
         "parameters": [
           {
@@ -24773,7 +24773,7 @@
             }
           },
           "413": {
-            "description": "The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES.",
+            "description": "The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_ENGINE_REPOSITORY_MAX_OBJECT_BYTES.",
             "content": {
               "application/json": {
                 "schema": {
@@ -34220,7 +34220,7 @@
           "profile": {
             "type": "string",
             "title": "Profile",
-            "description": "The tier this deployment was stood up as (DFE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden."
+            "description": "The tier this deployment was stood up as (DFE_ENGINE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden."
           },
           "transports": {
             "$ref": "#/components/schemas/TransportFacts"
@@ -35489,7 +35489,7 @@
           "mock_directory_env": {
             "type": "string",
             "title": "Mock Directory Env",
-            "default": "DFE_OIDC_MOCK_DIRECTORY"
+            "default": "DFE_ENGINE_OIDC_MOCK_DIRECTORY"
           },
           "service_account_json_env": {
             "type": "string",
@@ -42059,7 +42059,7 @@
           "deployment_default": {
             "type": "integer",
             "title": "Deployment Default",
-            "description": "DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set."
+            "description": "DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set."
           },
           "editable": {
             "type": "boolean",
@@ -42133,7 +42133,7 @@
           "deployment_default": {
             "type": "integer",
             "title": "Deployment Default",
-            "description": "DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set."
+            "description": "DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set."
           },
           "editable": {
             "type": "boolean",
@@ -42241,7 +42241,7 @@
           "new_password"
         ],
         "title": "RotatePasswordRequest",
-        "description": "A rotation the deployment can boot on.\n\nThe rotated value becomes ``DFE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate\nrefuses an empty or default one outside a dev posture, so an unconstrained\nrotation is a way for an admin to lock the deployment out of its own restart.\nBoth rules are the ones that gate startup, not a second opinion on them."
+        "description": "A rotation the deployment can boot on.\n\nThe rotated value becomes ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate\nrefuses an empty or default one outside a dev posture, so an unconstrained\nrotation is a way for an admin to lock the deployment out of its own restart.\nBoth rules are the ones that gate startup, not a second opinion on them."
       },
       "RotatePasswordResponse": {
         "properties": {
@@ -44830,7 +44830,7 @@
           "clickhouse_default_ttl_days": {
             "type": "integer",
             "title": "Clickhouse Default Ttl Days",
-            "description": "Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_CLICKHOUSE_DEFAULT_TTL_DAYS."
+            "description": "Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS."
           },
           "sources_dir": {
             "type": "string",

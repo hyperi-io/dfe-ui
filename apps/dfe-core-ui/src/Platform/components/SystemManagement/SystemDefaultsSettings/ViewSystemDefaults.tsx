@@ -31,8 +31,8 @@ export const ViewSystemDefaults = ({
             </dd>
           </dl>
           <p className="mt-2 text-xs text-foreground/50 dark:text-foreground/50">
-            Set by DFE_CLICKHOUSE_DEFAULT_TTL_DAYS. A change applies to every
-            table that follows the default when the engine restarts.
+            Set by DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS. A change applies to
+            every table that follows the default when the engine restarts.
           </p>
         </>
       </RbacProtected.Unrestricted>

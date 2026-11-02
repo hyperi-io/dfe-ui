@@ -394,7 +394,7 @@ export interface paths {
          * Rotate Password
          * @description Rotate the local admin's password in the deployment's secret store.
          *
-         *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
+         *     The store that injects ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
          *     password, so the engine writes the new value through its secrets backend and
          *     never into its own YAML. The next boot reconcile issues the rotated value to
          *     the admin, who must replace it at the following login. Returns 501 with the
@@ -8430,7 +8430,7 @@ export interface components {
         DeploymentResponse: {
             /**
              * Profile
-             * @description The tier this deployment was stood up as (DFE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
+             * @description The tier this deployment was stood up as (DFE_ENGINE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
              */
             profile: string;
             transports: components["schemas"]["TransportFacts"];
@@ -9243,7 +9243,7 @@ export interface components {
             directory_backend: "live" | "mock";
             /**
              * Mock Directory Env
-             * @default DFE_OIDC_MOCK_DIRECTORY
+             * @default DFE_ENGINE_OIDC_MOCK_DIRECTORY
              */
             mock_directory_env: string;
             /**
@@ -12849,7 +12849,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12892,7 +12892,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12945,7 +12945,7 @@ export interface components {
          * RotatePasswordRequest
          * @description A rotation the deployment can boot on.
          *
-         *     The rotated value becomes ``DFE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
+         *     The rotated value becomes ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
          *     refuses an empty or default one outside a dev posture, so an unconstrained
          *     rotation is a way for an admin to lock the deployment out of its own restart.
          *     Both rules are the ones that gate startup, not a second opinion on them.
@@ -14368,7 +14368,7 @@ export interface components {
             clickhouse_data_database: string;
             /**
              * Clickhouse Default Ttl Days
-             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_CLICKHOUSE_DEFAULT_TTL_DAYS.
+             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS.
              */
             clickhouse_default_ttl_days: number;
             /** Sources Dir */
@@ -31009,7 +31009,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES. */
+            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_ENGINE_REPOSITORY_MAX_OBJECT_BYTES. */
             413: {
                 headers: {
                     [name: string]: unknown;
