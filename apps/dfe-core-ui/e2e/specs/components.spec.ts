@@ -73,28 +73,30 @@ test('A pool carries the name the engine gives it, else its id', async ({
  * A Compose deployment has no KEDA, so the endpoint refuses the dials.
  * The Kubernetes form is covered by ScalingCard.test.tsx.
  */
-test('Scaling dials are refused on a Compose deployment @docker-only', async ({
-  page,
-}) => {
-  await openComponents(page);
+test(
+  'Scaling dials are refused on a Compose deployment',
+  { tag: ['@docker-only'] },
+  async ({ page }) => {
+    await openComponents(page);
 
-  await expect(page.getByText('Scaling')).toBeVisible();
-  await expect(page.getByText('Deploy target: docker')).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Scaling dials do not apply here' }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('Compose has no KEDA', { exact: false }),
-  ).toBeVisible();
+    await expect(page.getByText('Scaling')).toBeVisible();
+    await expect(page.getByText('Deploy target: docker')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Scaling dials do not apply here' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText('Compose has no KEDA', { exact: false }),
+    ).toBeVisible();
 
-  /* The refusal replaces the dials, so neither label reaches the DOM */
-  await expect(
-    page.getByLabel('Minimum replicas', { exact: true }),
-  ).toBeHidden();
-  await expect(
-    page.getByLabel('Maximum replicas', { exact: true }),
-  ).toBeHidden();
-});
+    /* The refusal replaces the dials, so neither label reaches the DOM */
+    await expect(
+      page.getByLabel('Minimum replicas', { exact: true }),
+    ).toBeHidden();
+    await expect(
+      page.getByLabel('Maximum replicas', { exact: true }),
+    ).toBeHidden();
+  },
+);
 
 test('Backing services', async ({ page }) => {
   await openComponents(page);
