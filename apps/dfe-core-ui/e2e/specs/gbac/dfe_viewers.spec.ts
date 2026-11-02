@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
 import { BASE_URL, e2eClient } from '../../config/e2e.client';
-import { expectSettingsMenu, logOut } from '../../config/settingsMenu.helpers';
 import {
-  expectLoggedOut,
   expectLanding,
+  expectLoggedOut,
   loginAs,
   OBSERVE_LANDING,
 } from '../../config/login.helpers';
+import { expectSettingsMenu, logOut } from '../../config/settingsMenu.helpers';
 
 test.beforeEach(async ({ playwright, page }) => {
   await e2eClient({ playwright, seedScript: 'reset_all' });
@@ -133,8 +133,8 @@ test('Rules', async ({ page }) => {
     page.getByRole('link', { name: 'Rules', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Add Rule', exact: true }),
-  ).toBeDisabled();
+    page.getByRole('button', { name: 'Create new rule', exact: true }),
+  ).toBeHidden();
   await expect(
     page.getByText('You do not have sufficient permissions'),
   ).toBeVisible();
@@ -148,7 +148,7 @@ test('Hunts', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Add Hunt', exact: true }),
-  ).toBeDisabled();
+  ).toBeHidden();
   await expect(
     page.getByText('You do not have sufficient permissions'),
   ).toBeVisible();
