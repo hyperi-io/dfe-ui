@@ -1,8 +1,8 @@
 import { Page, expect, test } from '@playwright/test';
 
+import { seedAppManagement } from '../config/appManagement.helpers';
 import { BASE_URL, e2eClient } from '../config/e2e.client';
 import { loginAs } from '../config/login.helpers';
-import { seedAppManagement } from '../config/appManagement.helpers';
 
 /** The fixture source every app-management seed binds its instances to. */
 const SEED_SOURCE = 'seedsource';
@@ -157,12 +157,16 @@ test('A source with no meta schema, not deployed, offers no Processing tab', asy
     playwright,
     seedScript: 'seed_three_transforms',
   });
+  await seedAppManagement({
+    playwright,
+    seedScript: 'seed_undeployed_source',
+  });
   await page.goto(`${BASE_URL}/sources`);
   await page
-    .getByTestId('source-tree-item-filebeatvrl')
+    .getByTestId('source-tree-item-undeployedsource')
     .click({ position: { x: 2, y: 2 } });
   await expect(page).toHaveURL(
-    (url) => url.searchParams.get('source_name') === 'filebeatvrl',
+    (url) => url.searchParams.get('source_name') === 'undeployedsource',
   );
 
   await expect(
@@ -170,7 +174,7 @@ test('A source with no meta schema, not deployed, offers no Processing tab', asy
   ).toBeVisible();
   await expect(
     page.getByRole('tab', { name: 'Processing', exact: true }),
-  ).toHaveCount(0);
+  ).toBeHidden();
 });
 
 test('A fetcher source starts at its fetcher, with no receiver routing', async ({
