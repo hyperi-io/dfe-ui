@@ -70,22 +70,33 @@ test('A pool carries the name the engine gives it, else its id', async ({
 });
 
 /*
- * A Compose deployment has no KEDA, so the endpoint refuses the dials.
- * The Kubernetes form is covered by ScalingCard.test.tsx.
+ * Off Kubernetes the endpoint refuses the dials. Compose has no KEDA, and an
+ * unset target stays unknown rather than being treated as Compose. The
+ * Kubernetes form is covered by ScalingCard.test.tsx.
  */
 test(
-  'Scaling dials are refused on a Compose deployment',
+  'Scaling dials are refused off Kubernetes',
   { tag: ['@docker-only'] },
   async ({ page }) => {
     await openComponents(page);
 
     await expect(page.getByText('Scaling')).toBeVisible();
-    await expect(page.getByText('Deploy target: docker')).toBeVisible();
+    const target = page.getByText(/^Deploy target: (docker|unknown)$/);
+    await expect(target).toBeVisible();
+    const deployTarget = (await target.innerText()).replace(
+      'Deploy target: ',
+      '',
+    );
     await expect(
       page.getByRole('heading', { name: 'Scaling dials do not apply here' }),
     ).toBeVisible();
     await expect(
-      page.getByText('Compose has no KEDA', { exact: false }),
+      page.getByText(
+        deployTarget === 'docker'
+          ? 'Compose has no KEDA'
+          : 'deploy target is unknown, so scaling dials cannot be applied safely',
+        { exact: false },
+      ),
     ).toBeVisible();
 
     /* The refusal replaces the dials, so neither label reaches the DOM */
