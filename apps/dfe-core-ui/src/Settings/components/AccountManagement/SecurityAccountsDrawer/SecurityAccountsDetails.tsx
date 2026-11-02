@@ -58,6 +58,7 @@ export const SecurityAccountsDetails = () => {
       {noAccounts && (
         <NotificationCard
           className="w-full"
+          classNames={{ container: 'min-w-0', description: 'break-words' }}
           type="warning"
           icon={<IconInfoCircle />}
           title="This deployment has no admin or break-glass account"
