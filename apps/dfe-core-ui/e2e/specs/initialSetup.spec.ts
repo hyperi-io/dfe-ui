@@ -93,6 +93,9 @@ test('setup from start testing forward and back navigation', async ({
 
   /* CONFIGURE ORGANISATION */
   await expect(page).toHaveURL(configureOrganisationPageUrl);
+  await expect(
+    page.getByRole('heading', { name: 'Configure Primary Organisation' }),
+  ).toBeVisible();
   // Until the organisation exists the form's save is the one way forward.
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
@@ -129,6 +132,9 @@ test('setup from start testing forward and back navigation', async ({
 
   /* CONFIGURE LOGIN (OIDC) */
   await expect(page).toHaveURL(configureLoginPageUrl);
+  await expect(
+    page.getByRole('heading', { name: 'Configure OIDC Provider' }),
+  ).toBeVisible();
   // Skip is the one way forward until a provider has been added and tested.
   await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
