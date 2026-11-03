@@ -58,10 +58,11 @@ export const SecurityAccountsDetails = () => {
       {noAccounts && (
         <NotificationCard
           className="w-full"
+          classNames={{ container: 'min-w-0', description: 'break-words' }}
           type="warning"
           icon={<IconInfoCircle />}
           title="This deployment has no admin or break-glass account"
-          description="To get the admin back, set DFE_AUTH_LOCAL_ADMIN_PASSWORD for the engine and restart it. If the admin was retired, first remove admin_retired from governance/settings/auth.yaml in the deploy repo."
+          description="To get the admin back, set DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD for the engine and restart it. If the admin was retired, first remove admin_retired from governance/settings/auth.yaml in the deploy repo."
         />
       )}
 

@@ -137,8 +137,8 @@ checkout:
 
 ```bash
 cp .env.example .env     # once, if you have no .env yet
-cp .env .env.e2e         # once; set DFE_ENV=test in .env.e2e
-make e2e-server          # http://localhost:8003, DFE_E2E_SERVER=true
+cp .env .env.e2e         # once; set DFE_ENGINE_ENV=test in .env.e2e
+make e2e-server          # http://localhost:8003, DFE_ENGINE_E2E_SERVER=true
 ```
 
 Each start wipes `tmp/e2e` and every ClickHouse database named `dfe_e2e*`,
@@ -147,7 +147,7 @@ then serves. `./config` and a dev stack's own databases stay put.
 removes it and drops those databases.
 
 ClickHouse has to answer the wipe. `.env.e2e` supplies
-`DFE_CLICKHOUSE_USERNAME` and `DFE_CLICKHOUSE_PASSWORD` (the same password as
+`DFE_ENGINE_CLICKHOUSE_USERNAME` and `DFE_ENGINE_CLICKHOUSE_PASSWORD` (the same password as
 dfe-docker's `CLICKHOUSE_PASSWORD`; an empty one is refused). If port 8003 is
 already taken, usually by a `dfe-engine` container, stop that listener or run
 `E2E_PORT=8004 make e2e-server` and point the console and the suite at that
@@ -161,11 +161,11 @@ wipes the seeded state. The engine's ready check is `GET /readyz`.
 
 A dfe-docker or cluster engine takes the same specs once it mounts the e2e
 helpers. Both settings are needed, because the helpers refuse to mount, and
-every seed call answers 500 (`e2e seed helpers require DFE_ENV=test`), unless
+every seed call answers 500 (`e2e seed helpers require DFE_ENGINE_ENV=test`), unless
 the posture is exactly `test`:
 
-- `DFE_ENV=test`. `dev` is not enough. On dfe-docker it goes in `.env`.
-- `DFE_E2E_SERVER=true`. On dfe-docker it goes in `env/engine.env`, which
+- `DFE_ENGINE_ENV=test`. `dev` is not enough. On dfe-docker it goes in `.env`.
+- `DFE_ENGINE_E2E_SERVER=true`. On dfe-docker it goes in `env/engine.env`, which
   compose forwards to the engine container.
 
 Point `BASE_URL` at the console and `NEXT_PUBLIC_API_URL` at the engine, as

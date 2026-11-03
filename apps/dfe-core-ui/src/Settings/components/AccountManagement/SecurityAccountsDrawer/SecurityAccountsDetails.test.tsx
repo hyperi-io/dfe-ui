@@ -235,7 +235,9 @@ describe('SecurityAccountsDetails', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/set DFE_AUTH_LOCAL_ADMIN_PASSWORD for the engine/),
+      screen.getByText(
+        /set DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD for the engine/,
+      ),
     ).toBeInTheDocument();
   });
 

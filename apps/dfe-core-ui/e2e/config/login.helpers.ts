@@ -8,7 +8,8 @@ import { BASE_URL } from './e2e.client';
 export const adminPassword = (): string => {
   // The engine's own name for it, so a deployment's env file feeds the suite as it stands.
   const password =
-    process.env.E2E_ADMIN_PASSWORD || process.env.DFE_AUTH_LOCAL_ADMIN_PASSWORD;
+    process.env.E2E_ADMIN_PASSWORD ||
+    process.env.DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD;
   if (!password) {
     throw new Error(
       'E2E_ADMIN_PASSWORD is not set: put the admin password this deployment ' +
