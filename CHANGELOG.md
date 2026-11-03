@@ -3,6 +3,13 @@
 Rendered by CI and committed back at the end of a release -- do not edit by
 hand. Release notes also appear on the GitHub Releases page, one per tag.
 
+## [1.7.37](https://github.com/hyperi-io/dfe-ui/compare/v1.7.36...v1.7.37) (2026-11-03)
+
+### Bug Fixes
+
+* **sources:** support external origin and transform pipelines ([#684](https://github.com/hyperi-io/dfe-ui/issues/684)) ([339b1af](https://github.com/hyperi-io/dfe-ui/commit/339b1af31bb88fc9ba3f358d9e2a73c94aedbd57))
+* **ui:** use the engine's DFE_ENGINE_ prefix ([#682](https://github.com/hyperi-io/dfe-ui/issues/682)) ([b92f82c](https://github.com/hyperi-io/dfe-ui/commit/b92f82c51e3f127abb2d562965ef668903f194e9))
+
 ## [1.7.36](https://github.com/hyperi-io/dfe-ui/compare/v1.7.35...v1.7.36) (2026-11-01)
 
 ### Bug Fixes
