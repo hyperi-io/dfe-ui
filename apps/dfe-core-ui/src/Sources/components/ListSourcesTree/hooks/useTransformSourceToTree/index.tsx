@@ -37,6 +37,10 @@ const originTagIcon = (origin: string) => {
           F
         </span>
       );
+    case 'external':
+      return (
+        <span className={cn(baseStyle, 'text-teal-600 bg-teal-500/10')}>E</span>
+      );
     default:
       return (
         <span className={cn(baseStyle, 'text-gray-500 bg-gray-500/10')}>

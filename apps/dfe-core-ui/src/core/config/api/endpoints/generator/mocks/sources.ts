@@ -1,5 +1,6 @@
 import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
+import { TSourceLag } from '@/core/hooks/sources/useFetchSourceLag/types';
 import { TBulkActionSourcesResponse } from '@/core/hooks/useBulkActionSources/types';
 import { TCatalogueBulkSourceResponse } from '@/core/hooks/useCreateBulkSourceFromCatalogue/types';
 import { TInfiniteFilteredSourceCatalogueTagsResponse } from '@/core/hooks/useFetchInfiniteFilteredSourceCatalogueTags/types';
@@ -216,6 +217,7 @@ export const sources = {
     post: {
       success: ({
         mockedResponse = {
+          review_required: false,
           created: [
             {
               entry: 'okta',
@@ -460,11 +462,13 @@ export const sources = {
           origin: 'receiver',
           input: 'tags.collector.type equals source',
           transform: {
+            engine: 'vrl',
             app: 'dfe-transform-vrl',
             instance: 'dfe-transform-vrl-source',
             variant: null,
             endpoint: null,
             topics: ['source_land', 'source_load'],
+            consumer_group: 'dfe-transform-vrl-source',
           },
           outputs: { loader: 'source_load', archive: false },
           table: 'source',
@@ -499,6 +503,34 @@ export const sources = {
           sources.sourceFlow.mockedUrl.replace('{name}', name),
           () => {
             return HttpResponse.json(mockedResponse, { status });
+          },
+        );
+      },
+    },
+  },
+  sourceLag: {
+    mockedUrl: '/api/v1/sources/{name}/lag',
+    get: {
+      success: ({
+        mockedResponse = {
+          source: 'source',
+          consumer_group: 'dfe-external-source',
+          topic: 'source_land',
+          lag: 12,
+          committed: true,
+          state: 'stable',
+          members: 1,
+          error: null,
+        },
+        name = 'source',
+      }: {
+        mockedResponse?: TSourceLag;
+        name?: string;
+      } = {}) => {
+        return http.get(
+          sources.sourceLag.mockedUrl.replace('{name}', name),
+          () => {
+            return HttpResponse.json(mockedResponse);
           },
         );
       },
@@ -807,6 +839,7 @@ export const sources = {
     post: {
       success: ({
         mockedResponse = {
+          review_required: false,
           source_name: 'string',
           version: 'string',
           dry_run: false,

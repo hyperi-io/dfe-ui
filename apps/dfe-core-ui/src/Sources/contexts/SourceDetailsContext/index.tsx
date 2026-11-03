@@ -13,7 +13,7 @@ export interface SourceDetailsContextValue {
   errorSourceDetail: Error | null | undefined;
   isMetaSchemaDefined: boolean;
   isMainSource: boolean;
-  originType: 'fetcher' | 'receiver' | undefined | null;
+  originType: 'fetcher' | 'receiver' | 'external' | undefined | null;
   canPromoteFields: boolean;
   isDeployed: boolean;
 }

@@ -1,6 +1,6 @@
 import type { TSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow/types';
 import { describe, expect, it } from 'vitest';
-import { flowStages } from './flowStages';
+import { flowStages, lagText } from './flowStages';
 
 const busFlow: TSourceFlow = {
   source: 'auth',
@@ -9,6 +9,7 @@ const busFlow: TSourceFlow = {
   origin: 'receiver',
   input: 'tags.collector.type equals auth',
   transform: {
+    engine: 'vrl',
     app: 'dfe-transform-vrl',
     instance: 'dfe-transform-vrl-auth',
     variant: null,
@@ -91,5 +92,67 @@ describe('flowStages', () => {
       label: 'Archive',
       value: 'kept',
     });
+  });
+
+  it("draws the customer's own transform with its group and lag, and no app link", () => {
+    const { stages } = flowStages(
+      {
+        ...busFlow,
+        transform: {
+          engine: 'external',
+          app: null,
+          instance: null,
+          variant: null,
+          endpoint: null,
+          topics: ['auth_land', 'auth_load'],
+          consumer_group: 'dfe-external-auth',
+        },
+      },
+      { lag: 3, committed: true, error: null },
+    );
+
+    expect(stages[1].title).toBe('Your own pipeline');
+    expect(stages[1].href).toBeUndefined();
+    expect(stages[1].engineOwned).toBeFalsy();
+    expect(stages[1].details).toContainEqual({
+      label: 'Group',
+      value: 'dfe-external-auth',
+      code: true,
+    });
+    expect(stages[1].details).toContainEqual({
+      label: 'Lag',
+      value: '3 records behind',
+    });
+  });
+
+  it('names the topic an external origin writes', () => {
+    const { stages } = flowStages({
+      ...busFlow,
+      origin: 'external',
+      input: 'auth_land',
+      transform: null,
+    });
+
+    expect(stages[0].title).toBe('Your pipeline writes auth_land');
+  });
+});
+
+describe('lagText', () => {
+  it.each([
+    ['still reading', undefined, 'reading'],
+    ['one record', { lag: 1, committed: true, error: null }, '1 record behind'],
+    [
+      'never committed',
+      { lag: 5, committed: false, error: null },
+      '5 records behind, nothing committed yet',
+    ],
+    [
+      'broker unreachable',
+      { lag: null, committed: null, error: 'broker unreachable' },
+      'broker unreachable',
+    ],
+    ['no reason given', { lag: null, committed: null }, 'not read'],
+  ])('%s', (_name, partial, expected) => {
+    expect(lagText(partial)).toBe(expected);
   });
 });

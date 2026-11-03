@@ -14,6 +14,15 @@ export const EMPTY_FETCHER: NonNullable<CreateUpdateSourceFormData['fetcher']> =
     config: '',
   };
 
+export const EMPTY_EXTERNAL: NonNullable<
+  CreateUpdateSourceFormData['external']
+> = {
+  credential_ref: null,
+  org: null,
+  allowed_org_ids: [],
+  allowed_sources: [],
+};
+
 export const EMPTY_RECEIVER_UI_CONFIG: NonNullable<
   CreateUpdateSourceFormData['receiver_ui_config']
 > = {

@@ -62,6 +62,12 @@ export const QUERY_KEYS = Object.freeze({
       'flow',
       ...(name ? [name] : []),
     ],
+    sourceLag: ({ name }: { name?: string | null } = {}) => [
+      'sources',
+      '{name}',
+      'lag',
+      ...(name ? [name] : []),
+    ],
     sourceColumns: ({
       source_name,
       version,

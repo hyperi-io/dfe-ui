@@ -3,12 +3,14 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SectionCard } from '@/core/components/SectionCard';
 import { useFetchSourceFlow } from '@/core/hooks/sources/useFetchSourceFlow';
+import { useFetchSourceLag } from '@/core/hooks/sources/useFetchSourceLag';
 import { FlowArrow, FlowStage } from '@/Sources/components/FlowStage';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
 import { Spin } from 'antd';
 import { Fragment } from 'react';
 import { MAIN_SOURCE_NAME } from './defaultSource';
-import { flowStages } from './flowStages';
+import { ExternalConnectionPanel } from './ExternalConnectionPanel';
+import { flowStages, LAG_NOT_READ } from './flowStages';
 
 const Heading = ({ title }: { title: string }) => (
   <h2 className="text-foreground-muted dark:text-dark-foreground-muted text-base font-semibold">
@@ -39,7 +41,15 @@ export const SourceFlowTabContent = ({
     error,
   } = useFetchSourceFlow({ source });
 
-  const { isMetaSchemaDefined, isDeployed } = useSourceDetailsContext();
+  const { isMetaSchemaDefined, isDeployed, sourceDetail } =
+    useSourceDetailsContext();
+
+  // Only the customer's own transform has a consumer group of theirs to read.
+  const isExternalTransform = !!flow?.transform && flow.transform.app == null;
+  const { data: lag, isError: lagUnread } = useFetchSourceLag({
+    source,
+    queryEnabled: isExternalTransform,
+  });
 
   if (isLoading) {
     return (
@@ -76,7 +86,10 @@ export const SourceFlowTabContent = ({
     );
   }
 
-  const { stages: rawStages, arrows } = flowStages(flow);
+  const { stages: rawStages, arrows } = flowStages(
+    flow,
+    lagUnread ? LAG_NOT_READ : lag,
+  );
 
   const isMainSource = source === MAIN_SOURCE_NAME;
 
@@ -85,24 +98,29 @@ export const SourceFlowTabContent = ({
       ? rawStages.filter((stage) => stage.stage !== 'Transform')
       : rawStages;
 
+  const connection = sourceDetail?.connection;
+
   return (
-    <SectionCard title={<Heading title={title} />} description={description}>
-      {/* A container query, not a viewport one: this card sits beside the
+    <>
+      <SectionCard title={<Heading title={title} />} description={description}>
+        {/* A container query, not a viewport one: this card sits beside the
           source tree, so the width that decides between a row and a column is
           the card's own and never the window's. */}
-      <div className="@container">
-        <div
-          data-testid="source-flow"
-          className="flex flex-col gap-2 @2xl:flex-row @2xl:items-stretch"
-        >
-          {stages.map((stage, index) => (
-            <Fragment key={stage.stage}>
-              {index > 0 && <FlowArrow label={arrows[index - 1]} />}
-              <FlowStage {...stage} />
-            </Fragment>
-          ))}
+        <div className="@container">
+          <div
+            data-testid="source-flow"
+            className="flex flex-col gap-2 @2xl:flex-row @2xl:items-stretch"
+          >
+            {stages.map((stage, index) => (
+              <Fragment key={stage.stage}>
+                {index > 0 && <FlowArrow label={arrows[index - 1]} />}
+                <FlowStage {...stage} />
+              </Fragment>
+            ))}
+          </div>
         </div>
-      </div>
-    </SectionCard>
+      </SectionCard>
+      {connection && <ExternalConnectionPanel connection={connection} />}
+    </>
   );
 };

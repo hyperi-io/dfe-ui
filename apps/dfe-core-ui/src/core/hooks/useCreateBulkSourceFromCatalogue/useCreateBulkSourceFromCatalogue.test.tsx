@@ -55,6 +55,7 @@ describe('.useCreateSource', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TCatalogueBulkSourceResponse = {
+        review_required: false,
         created: [
           {
             entry: 'okta',
