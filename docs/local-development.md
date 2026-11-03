@@ -111,7 +111,7 @@ in the app (the `/setup` wizard on a fresh engine).
   allowlist is `localhost:3000/5173/5174` only. On any other port the login
   page sticks on "Loading setup" and the browser console fills with CORS
   errors on `/api/v1/auth/setup-status`. Extend the engine's
-  `DFE_API_CORS_ORIGINS` (comma-separated) or stay on port 3000.
+  `DFE_ENGINE_API_CORS_ORIGINS` (comma-separated) or stay on port 3000.
 - **A fresh engine bounces `/` to `/setup`.** The middleware consults the
   engine's setup-status on every request. Until initial setup completes,
   everything except `/login` and `/setup` redirects to the wizard -- that is
