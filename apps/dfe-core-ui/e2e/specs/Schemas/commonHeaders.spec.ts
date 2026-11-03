@@ -105,6 +105,38 @@ const expectStoredSchema = async (page: Page, name: string, column: string) => {
   await expect(page.getByText(column, { exact: true }).first()).toBeVisible();
 };
 
+/** The current-version control commits on its check. */
+const setCurrentVersion = async (
+  page: Page,
+  option: string,
+  shown: string,
+) => {
+  const current = page
+    .locator('dt')
+    .filter({ hasText: 'Current Version:' })
+    .locator('xpath=following-sibling::dd[1]');
+  await current.getByRole('button').click();
+  await current.getByRole('combobox').click();
+  const choices = page
+    .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .locator('.ant-select-item-option-content');
+  await expect(choices.first()).toBeVisible();
+  const plain = choices.getByText(option, { exact: true });
+  await (await plain.count()
+    ? plain
+    : choices.getByText(`${option} (Current)`, { exact: true })
+  ).click();
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PATCH' &&
+      response.url().includes('/definitions/') &&
+      response.ok(),
+  );
+  await current.locator('button:has(.prefix__icon-tabler-check)').click();
+  await saved;
+  await expect(current).toContainText(shown);
+};
+
 /** Headers sit under a collapsed folder, so the filter has to open it. */
 const showInTree = async (page: Page, name: string) => {
   await page.getByRole('button', { name: /^Filters/ }).click();
@@ -361,5 +393,29 @@ test.describe('', { tag: ['@core', '@schema'] }, () => {
     const tree = page.getByRole('tree');
     await expect(tree.getByText('1.0.0', { exact: true })).toBeVisible();
     await expect(tree.getByText(body.current, { exact: true })).toBeVisible();
+  });
+
+  test('a core common header can change its current version and cannot gain one', async ({
+    page,
+  }) => {
+    await showInTree(page, 'minimal');
+    const leaf = page.getByRole('tree').getByText('minimal', { exact: true });
+    await leaf.hover();
+    await expect(
+      page.getByRole('button', {
+        name: 'Delete common-header/minimal',
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await leaf.click();
+    await expect(page.getByText('common-header/minimal.yml')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Add Schema Version', exact: true }),
+    ).toBeDisabled();
+    try {
+      await setCurrentVersion(page, '1.0.0', '1.0.0');
+    } finally {
+      await setCurrentVersion(page, '1.0.3', '1.0.3');
+    }
   });
 });

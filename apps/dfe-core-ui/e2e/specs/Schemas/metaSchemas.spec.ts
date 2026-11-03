@@ -101,6 +101,38 @@ const expectStoredSchema = async (page: Page, name: string, column: string) => {
   await expect(page.getByText(column, { exact: true }).first()).toBeVisible();
 };
 
+/** The current-version control commits on its check. */
+const setCurrentVersion = async (
+  page: Page,
+  option: string,
+  shown: string,
+) => {
+  const current = page
+    .locator('dt')
+    .filter({ hasText: 'Current Version:' })
+    .locator('xpath=following-sibling::dd[1]');
+  await current.getByRole('button').click();
+  await current.getByRole('combobox').click();
+  const choices = page
+    .locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)')
+    .locator('.ant-select-item-option-content');
+  await expect(choices.first()).toBeVisible();
+  const plain = choices.getByText(option, { exact: true });
+  await (await plain.count()
+    ? plain
+    : choices.getByText(`${option} (Current)`, { exact: true })
+  ).click();
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PATCH' &&
+      response.url().includes('/definitions/') &&
+      response.ok(),
+  );
+  await current.locator('button:has(.prefix__icon-tabler-check)').click();
+  await saved;
+  await expect(current).toContainText(shown);
+};
+
 /** The tree lists every shipped schema, so the one just written is filtered into view. */
 const showInTree = async (page: Page, name: string) => {
   await page.getByRole('button', { name: /^Filters/ }).click();
@@ -384,5 +416,22 @@ test.describe('', { tag: ['@core', '@schema'] }, () => {
     expect(body.versions['1.0.0']?.select).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: 'host_name' })]),
     );
+  });
+
+  test('a core meta schema can change its current version and cannot gain one', async ({
+    page,
+  }) => {
+    await showInTree(page, 'syslog');
+    const leaf = page.getByRole('tree').getByText('syslog', { exact: true });
+    await leaf.hover();
+    await expect(
+      page.getByRole('button', { name: 'Delete meta/syslog', exact: true }),
+    ).toHaveCount(0);
+    await leaf.click();
+    await expect(page.getByText('meta/syslog.yml')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Add Schema Version', exact: true }),
+    ).toBeDisabled();
+    await setCurrentVersion(page, '1.0.0', '1.0.0');
   });
 });
