@@ -73,6 +73,7 @@ const MOCK_COMPAT_PROFILES: TCompatProfileSummary[] = [
 ];
 
 const orderResponse = (blocks: TRuleBlock[]): TRuleOrderResponse => ({
+  review_required: false,
   dry_run: false,
   reload: 'hot',
   apps_synced: [],

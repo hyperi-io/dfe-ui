@@ -394,7 +394,7 @@ export interface paths {
          * Rotate Password
          * @description Rotate the local admin's password in the deployment's secret store.
          *
-         *     The store that injects ``DFE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
+         *     The store that injects ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD`` is the source of that
          *     password, so the engine writes the new value through its secrets backend and
          *     never into its own YAML. The next boot reconcile issues the rotated value to
          *     the admin, who must replace it at the following login. Returns 501 with the
@@ -1417,6 +1417,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{name}/lag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get External Lag
+         * @description How far the customer's own transform is behind on this source's landing topic.
+         *
+         *     Read from the broker on each call. A broker that cannot be reached answers 200
+         *     with nulls and the reason, because "no lag" and "could not look" call for
+         *     opposite reactions.
+         */
+        get: operations["sources.lag.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{name}/signals": {
         parameters: {
             query?: never;
@@ -2391,6 +2415,10 @@ export interface paths {
          *     reaches new tables only, and existing columns keep their type. ``live``
          *     reports each source: what reached the table, what did not and why. A
          *     ClickHouse failure is reported on that source, and the pin stays committed.
+         *
+         *     A pin production+team sends to review is listed in ``awaiting_review`` with
+         *     ``review_required`` and the review headers, and its table is left alone until
+         *     the branch merges, since main still carries the source as it was.
          */
         post: operations["system.defaults.apply"];
         delete?: never;
@@ -3395,7 +3423,7 @@ export interface paths {
          *     (snake_case ``name``, ``@source:`` dotted ``expr``).
          *
          *     Upload size is capped by ``api.elastic_converter_max_upload_bytes`` (reject with 413 and
-         *     ``upload_too_large`` when exceeded). Override with ``DFE_API_ELASTIC_CONVERTER_*``.
+         *     ``upload_too_large`` when exceeded). Override with ``DFE_ENGINE_API_ELASTIC_CONVERTER_*``.
          */
         post: operations["schemas.elastic-converter"];
         delete?: never;
@@ -6403,10 +6431,31 @@ export interface components {
          */
         ApplyDefaultsResponse: {
             /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
+            /**
              * Updated
              * @description Sources whose current version was written with the defaults
              */
             updated: components["schemas"]["ApplyDefaultsPin"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose pin went to a review branch: main still carries them as they were, so their tables are left alone and are not listed in live
+             */
+            awaiting_review?: string[];
             /**
              * Unchanged
              * @description Sources whose current version already matched the defaults
@@ -6414,7 +6463,7 @@ export interface components {
             unchanged: components["schemas"]["ApplyDefaultsPin"][];
             /**
              * Live
-             * @description One entry per named source, in request order: what reached its table.
+             * @description One entry per named source not awaiting review, in request order: what reached its table.
              */
             live: components["schemas"]["SourceLiveApply"][];
         };
@@ -7235,10 +7284,31 @@ export interface components {
          *     for everything that was stored.
          */
         CatalogueSourcesResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Created */
             created: components["schemas"]["CatalogueCreatedSource"][];
             /** Failed */
             failed: components["schemas"]["CatalogueSourceFailure"][];
+            /**
+             * Awaiting Review
+             * @description Sources whose create went to a review branch, so main does not carry them yet
+             */
+            awaiting_review?: string[];
             /**
              * Apps Synced
              * @description Deploy-repo writes made so the apps follow this change (service/instance: action)
@@ -7672,6 +7742,22 @@ export interface components {
          * @description The bindings an apply leaves, and what the apps did with them.
          */
         CompatWriteResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
@@ -8430,7 +8516,7 @@ export interface components {
         DeploymentResponse: {
             /**
              * Profile
-             * @description The tier this deployment was stood up as (DFE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
+             * @description The tier this deployment was stood up as (DFE_ENGINE_PROFILE). Empty means the deployer named none, and every optional app is then reported as offered rather than hidden.
              */
             profile: string;
             transports: components["schemas"]["TransportFacts"];
@@ -8894,6 +8980,117 @@ export interface components {
             } | null;
         };
         /**
+         * ExternalConnectionModel
+         * @description What the customer's own pipeline connects with. Never a secret.
+         */
+        ExternalConnectionModel: {
+            /**
+             * Role
+             * @description origin writes the landing topic; transform reads it and writes the transformed one
+             * @enum {string}
+             */
+            role: "origin" | "transform";
+            /**
+             * Reads
+             * @description The topic a transform consumes; null for an origin
+             */
+            reads?: string | null;
+            /**
+             * Writes
+             * @description The topic the pipeline produces to
+             */
+            writes: string;
+            /**
+             * Consumer Group
+             * @description The consumer group a transform must read in; null for an origin
+             */
+            consumer_group?: string | null;
+            /**
+             * Bootstrap
+             * @description The broker address the pipeline connects to
+             */
+            bootstrap: string;
+            /**
+             * Security Protocol
+             * @description The broker's security protocol for this deployment
+             */
+            security_protocol: string;
+            /**
+             * Sasl Mechanism
+             * @description The SASL mechanism the broker contract derives, empty where there is no auth
+             */
+            sasl_mechanism: string;
+            /**
+             * Credential Ref
+             * @description Where the pipeline's own Kafka credential is kept, as the operator set it
+             */
+            credential_ref?: string | null;
+            /**
+             * Org
+             * @description The registered org the records belong to; null is the default org
+             */
+            org?: string | null;
+            /**
+             * Allowed Org Ids
+             * @description Further tenant ids a record may keep in _org_id; any other is replaced
+             */
+            allowed_org_ids: string[];
+            /**
+             * Allowed Sources
+             * @description Further source names a record may keep in _source; any other is replaced
+             */
+            allowed_sources: string[];
+            /**
+             * Header Fields
+             * @description The common header fields the loader reads, in column order
+             */
+            header_fields: components["schemas"]["HeaderFieldModel"][];
+            /**
+             * Sample Record
+             * @description A record carrying every header field, for the pipeline to copy
+             */
+            sample_record: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * ExternalLagResponse
+         * @description How far the customer's transform is behind on the landing topic.
+         */
+        ExternalLagResponse: {
+            /** Source */
+            source: string;
+            /** Consumer Group */
+            consumer_group: string;
+            /** Topic */
+            topic: string;
+            /**
+             * Lag
+             * @description Records the group has not committed past; null when the broker was not reached
+             */
+            lag: number | null;
+            /**
+             * Committed
+             * @description False while the group has never committed, so every record counts as unread
+             */
+            committed: boolean | null;
+            /**
+             * State
+             * @description The group's state (stable, empty, dead, ...); null when not reached
+             */
+            state: string | null;
+            /**
+             * Members
+             * @description Live consumers in the group; null when not reached
+             */
+            members: number | null;
+            /**
+             * Error
+             * @description Why the broker could not be asked; null on an answer
+             */
+            error?: string | null;
+        };
+        /**
          * FetcherRoute
          * @description One fetched record family this fetcher hands to a DIFFERENT source's landing.
          *
@@ -9104,15 +9301,20 @@ export interface components {
          */
         FlowTransformModel: {
             /**
-             * App
-             * @description Catalogued app running it, e.g. dfe-transform-vrl
+             * Engine
+             * @description The engine the source names; external for the customer's own
              */
-            app: string;
+            engine: string;
+            /**
+             * App
+             * @description Catalogued app running it, e.g. dfe-transform-vrl; null for external
+             */
+            app?: string | null;
             /**
              * Instance
-             * @description Its deployed name, e.g. dfe-transform-vrl-auth
+             * @description Its deployed name, e.g. dfe-transform-vrl-auth; null for external
              */
-            instance: string;
+            instance?: string | null;
             /**
              * Variant
              * @description The compiled-in program it runs, where the app offers a catalogue of them
@@ -9128,6 +9330,11 @@ export interface components {
              * @description Bus: the landing and transformed topics. Null on direct.
              */
             topics?: string[] | null;
+            /**
+             * Consumer Group
+             * @description Bus: the consumer group it reads the landing topic in. Null on direct.
+             */
+            consumer_group?: string | null;
         };
         /**
          * FromHyperdxRequest
@@ -9243,7 +9450,7 @@ export interface components {
             directory_backend: "live" | "mock";
             /**
              * Mock Directory Env
-             * @default DFE_OIDC_MOCK_DIRECTORY
+             * @default DFE_ENGINE_OIDC_MOCK_DIRECTORY
              */
             mock_directory_env: string;
             /**
@@ -9450,6 +9657,24 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HeaderFieldModel
+         * @description One common header field, and what setting it buys.
+         */
+        HeaderFieldModel: {
+            /** Field */
+            field: string;
+            /**
+             * When Missing
+             * @description What the loader does when the record leaves it out
+             */
+            when_missing: string;
+            /**
+             * When Set
+             * @description What the record gets when the pipeline sets it
+             */
+            when_set: string;
         };
         /**
          * HistoryEntry
@@ -12849,7 +13074,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12892,7 +13117,7 @@ export interface components {
             origin: "override" | "deployment";
             /**
              * Deployment Default
-             * @description DFE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
+             * @description DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS as deployed; applies whenever no override is set.
              */
             deployment_default: number;
             /**
@@ -12945,7 +13170,7 @@ export interface components {
          * RotatePasswordRequest
          * @description A rotation the deployment can boot on.
          *
-         *     The rotated value becomes ``DFE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
+         *     The rotated value becomes ``DFE_ENGINE_AUTH_LOCAL_ADMIN_PASSWORD``, and the boot gate
          *     refuses an empty or default one outside a dev posture, so an unconstrained
          *     rotation is a way for an admin to lock the deployment out of its own restart.
          *     Both rules are the ones that gate startup, not a second opinion on them.
@@ -13281,6 +13506,22 @@ export interface components {
          * @description The field's blocks as the reorder leaves them.
          */
         RuleOrderResponse: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /**
              * Dry Run
              * @description Nothing was written: this is what the write would do
@@ -13906,6 +14147,22 @@ export interface components {
              */
             applied: boolean;
             /**
+             * Review Required
+             * @description True when production+team sent the deployed-version record to a review branch: the table is live, and main records the version once it merges
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR for that record
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying it
+             */
+            review_branch?: string | null;
+            /**
              * Create Table
              * @description CREATE TABLE DDL
              */
@@ -14368,7 +14625,7 @@ export interface components {
             clickhouse_data_database: string;
             /**
              * Clickhouse Default Ttl Days
-             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_CLICKHOUSE_DEFAULT_TTL_DAYS.
+             * @description Retention in days a time-series table gets when it declares none; 0 = none. The admin's override when one is set, else DFE_ENGINE_CLICKHOUSE_DEFAULT_TTL_DAYS.
              */
             clickhouse_default_ttl_days: number;
             /** Sources Dir */
@@ -14436,7 +14693,7 @@ export interface components {
             default_ttl_days: number;
             /**
              * Default Engine
-             * @description MergeTree-family engine variant a source's table gets when its schema names none (DFE_CLICKHOUSE_DEFAULT_ENGINE). The Replicated prefix every DFE table takes is added at DDL time, not here.
+             * @description MergeTree-family engine variant a source's table gets when its schema names none (clickhouse.default_engine). The Replicated prefix every DFE table takes is added at DDL time, not here.
              * @default MergeTree
              */
             default_engine: string;
@@ -14953,6 +15210,8 @@ export interface components {
             versions?: {
                 [key: string]: components["schemas"]["SourceVersionDetail"];
             };
+            /** @description Where the customer's own pipeline plugs in, for a source with an external origin or transform; null otherwise */
+            connection?: components["schemas"]["ExternalConnectionModel"] | null;
             /**
              * Enabled
              * @description Compat accessor over the tri-state: enabled == (state == active).
@@ -14971,9 +15230,9 @@ export interface components {
             readonly transform: components["schemas"]["SourceTransform"] | null;
             /**
              * Origin
-             * @description How the deployed version's data enters: a receiver match, a fetcher, or nothing.
+             * @description How the deployed version's data enters: a receiver match, a fetcher, the customer's pipeline, or nothing.
              */
-            readonly origin: ("receiver" | "fetcher") | null;
+            readonly origin: ("receiver" | "fetcher" | "external") | null;
             /**
              * Transport
              * @description Declared transport on the deployed version (None = the deployment default).
@@ -15004,6 +15263,35 @@ export interface components {
              * @description Tri-state lifecycle (active | dormant | disabled); wins over enabled
              */
             state?: ("active" | "dormant" | "disabled") | null;
+        };
+        /**
+         * SourceExternal
+         * @description External origin: the customer's own pipeline produces to this source's landing topic.
+         *
+         *     Nothing the engine runs selects these records, so there is no match and no
+         *     fetcher. The engine creates the topic and the loader reads it like any other.
+         */
+        SourceExternal: {
+            /**
+             * Credential Ref
+             * @description Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:
+             */
+            credential_ref?: string | null;
+            /**
+             * Org
+             * @description The registered org the pipeline's records belong to. Unset is the default org. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             */
+            org?: string | null;
+            /**
+             * Allowed Org Ids
+             * @description Further tenant ids a record may keep in _org_id, for a provider whose pipeline carries its own customers' records. Empty keeps every record in org
+             */
+            allowed_org_ids?: string[];
+            /**
+             * Allowed Sources
+             * @description Further source names a record may keep in _source, which sends it to that source's table. Empty keeps every record in this source's table
+             */
+            allowed_sources?: string[];
         };
         /**
          * SourceFetcher
@@ -15070,12 +15358,12 @@ export interface components {
             carrier: string;
             /**
              * Origin
-             * @description receiver, fetcher, or null when nothing selects the records
+             * @description receiver, fetcher, external, or null when nothing selects the records
              */
             origin?: string | null;
             /**
              * Input
-             * @description The receiver match that selects the records, or the fetcher instance polling them
+             * @description The receiver match that selects the records, the fetcher instance polling them, or the landing topic an external pipeline writes
              */
             input: string;
             transform?: components["schemas"]["FlowTransformModel"] | null;
@@ -15385,7 +15673,7 @@ export interface components {
             ttl_days?: number | null;
             /**
              * Engine
-             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (DFE_CLICKHOUSE_DEFAULT_ENGINE, itself MergeTree unless overridden).
+             * @description MergeTree-family engine VARIANT, optionally parameterised - e.g. MergeTree, ReplacingMergeTree, ReplacingMergeTree(version_col), SummingMergeTree(a, b). Declare the base variant only: the Replicated form every DFE table takes is added at DDL time, so do NOT prefix Replicated/Shared here. Empty (the default) means inherit the deployment default (clickhouse.default_engine, itself MergeTree unless overridden).
              * @default
              */
             engine: string;
@@ -15552,9 +15840,9 @@ export interface components {
             has_fetcher: boolean;
             /**
              * Origin
-             * @description How data enters: a receiver match, a fetcher, or null when nothing selects it
+             * @description How data enters: a receiver match, a fetcher, the customer's own pipeline (external), or null when nothing selects it
              */
-            origin?: ("receiver" | "fetcher") | null;
+            origin?: ("receiver" | "fetcher" | "external") | null;
             /**
              * Current Table Topic Type
              * @description Where the working ``current`` version lands: ``own`` when that version pins a meta schema, ``main`` when it does not (even if a deployed older version still has its own table)
@@ -15569,12 +15857,34 @@ export interface components {
         };
         /**
          * SourceTransform
-         * @description Transform stage configuration: the engine is one of the catalogue's transform apps.
+         * @description Transform stage configuration: a catalogued transform app, or the customer's own pipeline.
+         *
+         *     The :class:`ExternalPipeline` fields are read only for ``external`` and refused otherwise.
          */
         SourceTransform: {
             /**
+             * Credential Ref
+             * @description Where the customer's pipeline keeps the Kafka principal it authenticates as, e.g. vault:kv/acme/kafka/vector. A reference only: the engine never reads, stores or mints the credential, and refuses a value that is not one of vault:, bao:, openbao:, env: or file:
+             */
+            credential_ref?: string | null;
+            /**
+             * Org
+             * @description The registered org the pipeline's records belong to. Unset is the default org. A record carrying any other _org_id lands here, unless allowed_org_ids lists it
+             */
+            org?: string | null;
+            /**
+             * Allowed Org Ids
+             * @description Further tenant ids a record may keep in _org_id, for a provider whose pipeline carries its own customers' records. Empty keeps every record in org
+             */
+            allowed_org_ids?: string[];
+            /**
+             * Allowed Sources
+             * @description Further source names a record may keep in _source, which sends it to that source's table. Empty keeps every record in this source's table
+             */
+            allowed_sources?: string[];
+            /**
              * Engine
-             * @description Transform engine - a catalogued transform app by engine name (e.g. vrl, vector)
+             * @description Transform engine - a catalogued transform app by engine name (e.g. vrl, vector), or external for a pipeline the customer runs on the bus
              */
             engine: string;
             /**
@@ -15628,6 +15938,8 @@ export interface components {
             views?: components["schemas"]["SourceView"][];
             /** @description SaaS API fetcher (optional) */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description External origin: the customer's own pipeline writes the landing topic */
+            external?: components["schemas"]["SourceExternal"] | null;
             /** @description Receiver match rule (receiver-based sources) */
             match?: components["schemas"]["SourceMatch"] | null;
             /**
@@ -15671,7 +15983,7 @@ export interface components {
              *     Serialized on API responses (source detail ``versions`` and the single-version
              *     GET). Derived from ``match`` / ``when`` / ``fetcher``, never stored in YAML.
              */
-            readonly origin: ("receiver" | "fetcher") | null;
+            readonly origin: ("receiver" | "fetcher" | "external") | null;
         };
         /**
          * SourceVersionGetDetailResponse
@@ -15746,6 +16058,8 @@ export interface components {
             current_table_topic_type: "own" | "main";
             /** @description Configuration snapshot for ``selected`` plus pipeline artifacts */
             version: components["schemas"]["SourceVersionDetail"];
+            /** @description Where the customer's own pipeline plugs in, for a ``selected`` version with an external origin or transform; null otherwise */
+            connection?: components["schemas"]["ExternalConnectionModel"] | null;
         };
         /**
          * SourceView
@@ -15850,8 +16164,10 @@ export interface components {
             schema?: components["schemas"]["SourceSchema"] | null;
             /** @description Transform stage (optional, top-level) */
             transform?: components["schemas"]["SourceTransform"] | null;
-            /** @description Fetcher-based origin. One of match, when or fetcher is set */
+            /** @description Fetcher-based origin. One of match, when, fetcher or external is set */
             fetcher?: components["schemas"]["SourceFetcher"] | null;
+            /** @description External origin: the customer's own pipeline writes the landing topic. One of match, when, fetcher or external is set */
+            external?: components["schemas"]["SourceExternal"] | null;
             /**
              * Transport
              * @description bus or direct; null takes the deployment default
@@ -16064,9 +16380,25 @@ export interface components {
         };
         /**
          * SyncReportModel
-         * @description Counts from a provider sync into the catalogue.
+         * @description Counts from a provider sync into the catalogue, and whether its import awaits review.
          */
         SyncReportModel: {
+            /**
+             * Review Required
+             * @description True when production+team sent the write to a review branch: main is unchanged and the apps follow once the branch is merged
+             * @default false
+             */
+            review_required: boolean;
+            /**
+             * Pr Url
+             * @description The review PR, where a forge is configured to open one
+             */
+            pr_url?: string | null;
+            /**
+             * Review Branch
+             * @description The branch carrying the write, while it awaits review
+             */
+            review_branch?: string | null;
             /** Source */
             source: string;
             /** Total */
@@ -21848,6 +22180,53 @@ export interface operations {
             };
         };
     };
+    "sources.lag.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalLagResponse"];
+                };
+            };
+            /** @description No valid session: the credentials are missing, invalid or expired, or the account behind them is disabled or blocked */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Refused: the session lacks the action this route checks, or its account must replace an issued password first */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The source's transform is not the customer's own pipeline */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "sources.signals.list": {
         parameters: {
             query?: never;
@@ -27059,7 +27438,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_API_ELASTIC_CONVERTER_* env vars. */
+            /** @description Upload or declared Content-Length exceeds api.elastic_converter_max_upload_bytes (HTTP 413, code upload_too_large). Tune via DFE_ENGINE_API_ELASTIC_CONVERTER_* env vars. */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -31009,7 +31388,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_REPOSITORY_MAX_OBJECT_BYTES. */
+            /** @description The file exceeds repository.max_object_bytes (HTTP 413, code payload_too_large). Tune via DFE_ENGINE_REPOSITORY_MAX_OBJECT_BYTES. */
             413: {
                 headers: {
                     [name: string]: unknown;

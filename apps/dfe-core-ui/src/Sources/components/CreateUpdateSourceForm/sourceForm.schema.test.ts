@@ -422,3 +422,60 @@ describe('formSchema expression', () => {
     expect(messagesAt(data, ['match', 'field'])).toEqual([]);
   });
 });
+
+describe('formSchema external pipeline', () => {
+  const external = {
+    ...BASE,
+    origin: 'external',
+    schema: { meta_schema: 'meta/acme', meta_schema_version: '1.0.0' },
+  } as CreateUpdateSourceFormData;
+
+  test.each([
+    ['a reference', 'vault:kv/acme/kafka', []],
+    ['nothing', '', []],
+    [
+      'a literal secret',
+      'hunter2',
+      [
+        'Name where the credential is kept, never the credential: start with vault:, bao:, openbao:, env:, file:',
+      ],
+    ],
+  ])('a credential holding %s', (_name, credentialRef, expected) => {
+    expect(
+      messagesAt({ ...external, external: { credential_ref: credentialRef } }, [
+        'external',
+        'credential_ref',
+      ]),
+    ).toEqual(expected);
+  });
+
+  test('a tenant id with a comma is refused', () => {
+    expect(
+      messagesAt({ ...external, external: { allowed_org_ids: ['a,b'] } }, [
+        'external',
+        'allowed_org_ids',
+      ]),
+    ).toEqual(['a,b is not a tenant id: no commas or spaces']);
+  });
+
+  test('an external origin owns its table, so it needs a meta schema', () => {
+    expect(
+      messagesAt({ ...external, schema: {} }, ['schema', 'meta_schema']),
+    ).toEqual(['Meta schema is required']);
+  });
+
+  test('the pipeline cannot be both the origin and the transform', () => {
+    expect(
+      messagesAt(
+        {
+          ...external,
+          transform_ui_config: { assign: 'external' },
+          transform: { engine: 'external' },
+        },
+        ['transform_ui_config', 'assign'],
+      ),
+    ).toEqual([
+      'Your pipeline already writes the landing topic, so transform there or pick a DFE transform',
+    ]);
+  });
+});

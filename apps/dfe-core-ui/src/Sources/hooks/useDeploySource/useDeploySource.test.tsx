@@ -47,6 +47,7 @@ describe('.useDeploySource', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TSourceDeployResponse = {
+        review_required: false,
         source_name: 'string',
         version: 'string',
         dry_run: false,
