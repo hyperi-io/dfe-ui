@@ -140,10 +140,16 @@ test.describe('the admin through the setup wizard', () => {
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     await textbox(page, 'Name').fill('test_organisation');
     await textbox(page, 'Display Name').fill('Test Organisation');
-    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await page
-      .getByRole('button', { name: 'Skip for now', exact: true })
+      .getByRole('button', { name: 'Save and continue', exact: true })
       .click();
+    // The source screen, then the login screen: skip both.
+    for (const path of ['configureSource', 'configureLogin']) {
+      await expect(page).toHaveURL(`${BASE_URL}/setup/${path}`);
+      await page
+        .getByRole('button', { name: 'Skip for now', exact: true })
+        .click();
+    }
     await textbox(page, 'Username').fill('wizard_user');
     await textbox(page, 'Email').fill('wizard_user@example.com');
     await textbox(page, 'Password').fill(freshPassword('wizard_user'));
