@@ -1,11 +1,11 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { BASE_URL, e2eClient } from '../config/e2e.client';
-import { loginAs } from '../config/login.helpers';
 import {
   deploySeededSources,
   seedAppManagement,
-} from '../config/appManagement.helpers';
+} from '../../config/appManagement.helpers';
+import { BASE_URL, e2eClient } from '../../config/e2e.client';
+import { loginAs } from '../../config/login.helpers';
 
 /**
  * One source per transform app.
@@ -65,58 +65,59 @@ const openProcessingTab = async (page: Page, source: string) => {
   );
   await page.getByRole('tab', { name: 'Processing', exact: true }).click();
 };
+test.describe('', { tag: ['@core', '@source'] }, () => {
+  for (const { engine, source, app } of TRANSFORMS) {
+    test(`${engine}: its own source carries its own instance`, async ({
+      page,
+    }) => {
+      await openProcessingTab(page, source);
 
-for (const { engine, source, app } of TRANSFORMS) {
-  test(`${engine}: its own source carries its own instance`, async ({
+      // The source names one engine, and that option is the selected one.
+      await expect(page.getByRole('radio', { name: app })).toBeChecked();
+      await expect(page.getByText('Running for this source.')).toHaveCount(1);
+
+      // No card reports itself undeployed: the transform instances are bound
+      // one per source rather than shared.
+      await expect(page.getByText('Not deployed for this source.')).toHaveCount(
+        STANDALONE_PER_SOURCE_APPS,
+      );
+    });
+  }
+
+  test('an app that authors files gets an editor, and elastic does not', async ({
     page,
   }) => {
-    await openProcessingTab(page, source);
+    await openProcessingTab(page, 'filebeatvrl');
+    await expect(
+      page.getByRole('tab', { name: 'transforms', exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText('Read from config.transforms.dir. Accepts .vrl.'),
+    ).toBeVisible();
 
-    // The source names one engine, and that option is the selected one.
-    await expect(page.getByRole('radio', { name: app })).toBeChecked();
-    await expect(page.getByText('Running for this source.')).toHaveCount(1);
+    await openProcessingTab(page, 'filebeatvector');
+    await expect(
+      page.getByRole('tab', { name: 'transforms', exact: true }),
+    ).toBeVisible();
 
-    // No card reports itself undeployed: the transform instances are bound
-    // one per source rather than shared.
-    await expect(page.getByText('Not deployed for this source.')).toHaveCount(
-      STANDALONE_PER_SOURCE_APPS,
-    );
+    // dfe-transform-elastic selects a compiled-in program by source name and reads
+    // no authored files, so it is the one app with nothing to edit.
+    await openProcessingTab(page, 'filebeatelastic');
+    await expect(page.getByText('Files', { exact: true })).toHaveCount(0);
   });
-}
 
-test('an app that authors files gets an editor, and elastic does not', async ({
-  page,
-}) => {
-  await openProcessingTab(page, 'filebeatvrl');
-  await expect(
-    page.getByRole('tab', { name: 'transforms', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('Read from config.transforms.dir. Accepts .vrl.'),
-  ).toBeVisible();
-
-  await openProcessingTab(page, 'filebeatvector');
-  await expect(
-    page.getByRole('tab', { name: 'transforms', exact: true }),
-  ).toBeVisible();
-
-  // dfe-transform-elastic selects a compiled-in program by source name and reads
-  // no authored files, so it is the one app with nothing to edit.
-  await openProcessingTab(page, 'filebeatelastic');
-  await expect(page.getByText('Files', { exact: true })).toHaveCount(0);
-});
-
-test('a transform offers no deploy, because the source carries the choice', async ({
-  page,
-}) => {
-  for (const { source } of TRANSFORMS) {
-    await openProcessingTab(page, source);
-    // A receiver source has no standalone app left to deploy.
-    await expect(
-      page.getByRole('button', { name: 'Deploy', exact: true }),
-    ).toHaveCount(STANDALONE_PER_SOURCE_APPS);
-    await expect(
-      page.getByRole('button', { name: 'Undeploy', exact: true }),
-    ).toHaveCount(0);
-  }
+  test('a transform offers no deploy, because the source carries the choice', async ({
+    page,
+  }) => {
+    for (const { source } of TRANSFORMS) {
+      await openProcessingTab(page, source);
+      // A receiver source has no standalone app left to deploy.
+      await expect(
+        page.getByRole('button', { name: 'Deploy', exact: true }),
+      ).toHaveCount(STANDALONE_PER_SOURCE_APPS);
+      await expect(
+        page.getByRole('button', { name: 'Undeploy', exact: true }),
+      ).toHaveCount(0);
+    }
+  });
 });
