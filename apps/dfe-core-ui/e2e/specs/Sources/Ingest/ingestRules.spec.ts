@@ -20,7 +20,9 @@ const EXPRESSION = 'rulescel';
 const EXTRA = 'rulesextra';
 const MADE = [COMPOUND, EXPRESSION, EXTRA];
 
-test.describe.configure({ mode: 'serial' });
+// Login compiles the landing page, and the save expects their own 30s, so the
+// 30s default ends the test while the first of those is still waiting.
+test.describe.configure({ mode: 'serial', timeout: 90_000 });
 
 let token: string | undefined;
 

@@ -133,19 +133,42 @@ export const expectLoggedOut = (page: Page, from = SOURCES_LANDING) =>
       (url.searchParams.get('callbackUrl') ?? '').startsWith(from),
   );
 
+/**
+ * The Next dev indicator is a closed shadow host, so Playwright's click lands
+ * on it while reporting the button underneath. It sits on drawer and dialog
+ * submits. Production has no such host.
+ */
+const letClicksThroughDevIndicator = async (page: Page) => {
+  await page.addInitScript(() => {
+    const hide = () => {
+      document.querySelectorAll('nextjs-portal').forEach((node) => {
+        (node as HTMLElement).style.setProperty('pointer-events', 'none');
+      });
+    };
+    hide();
+    new MutationObserver(hide).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  });
+};
+
 export const loginAs = async (
   page: Page,
   user: string,
   landing = SOURCES_LANDING,
 ) => {
+  await letClicksThroughDevIndicator(page);
   await page.goto(`${BASE_URL}/login`);
 
   await textbox(page, 'Username').fill(user);
   await textbox(page, 'Password').fill(adminPassword());
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   // Either the console lands, or the account is on an issued password and must change it first.
+  // The first navigation compiles the landing page, which outlasts the default expect.
   await expect(page).toHaveURL(
     (url) => url.pathname === landing || url.pathname === CHANGE_PASSWORD_PATH,
+    { timeout: 30_000 },
   );
   if (new URL(page.url()).pathname === CHANGE_PASSWORD_PATH) {
     await completeForcedPasswordChange(page, user);

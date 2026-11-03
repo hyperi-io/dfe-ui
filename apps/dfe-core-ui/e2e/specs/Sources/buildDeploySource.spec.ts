@@ -58,7 +58,9 @@ test.describe('Build and deploy', { tag: ['@core', '@source'] }, () => {
       .getByRole('textbox', { name: /Display Name/ })
       .fill('Test Deploy');
     await drawer.getByRole('textbox', { name: /^Field/ }).fill('_json.data');
-    await drawer.getByRole('textbox', { name: /^Value/ }).fill('deploy-use-case');
+    await drawer
+      .getByRole('textbox', { name: /^Value/ })
+      .fill('deploy-use-case');
     await drawer.getByRole('radio', { name: 'Own table', exact: true }).check();
 
     await drawer.getByRole('tab', { name: 'Table Settings' }).click();
@@ -70,7 +72,9 @@ test.describe('Build and deploy', { tag: ['@core', '@source'] }, () => {
       .filter({ has: page.locator('#schema_meta_schema_version') });
     await expect(version).toContainText('1.0.0');
 
-    await drawer.getByRole('button', { name: 'Add Source', exact: true }).click();
+    await drawer
+      .getByRole('button', { name: 'Add Source', exact: true })
+      .click();
     await expect(page.getByText('Source created successfully')).toBeVisible({
       timeout: PLAN_TIMEOUT,
     });
