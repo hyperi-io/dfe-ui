@@ -5,6 +5,9 @@ export type AssignTransformOptions = NonNullable<
   NonNullable<CreateUpdateSourceFormData['transform_ui_config']>['assign']
 >;
 
+/** The engine a source names for a transform the customer runs, which deploys nothing. */
+export const EXTERNAL_ENGINE = 'external';
+
 // The engine names a transform app after the engine it runs, so the two convert
 // by this prefix in both directions.
 const TRANSFORM_SERVICE_PREFIX = 'dfe-transform-';
@@ -37,5 +40,5 @@ export const getInitialAssignTransform = (
   if (!transform?.engine) {
     return 'none';
   }
-  return 'define_transform';
+  return transform.engine === EXTERNAL_ENGINE ? 'external' : 'define_transform';
 };

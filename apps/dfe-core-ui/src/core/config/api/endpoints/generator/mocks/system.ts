@@ -297,6 +297,7 @@ export const system = {
     post: {
       success: ({
         mockedResponse = {
+          review_required: false,
           updated: [
             { source: 'source1', version: '1.0.0' },
             { source: 'source2', version: '1.0.0' },

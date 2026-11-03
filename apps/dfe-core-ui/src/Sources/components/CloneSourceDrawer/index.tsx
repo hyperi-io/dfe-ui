@@ -86,6 +86,7 @@ export const CloneSourceDrawer = ({
     createSourceMutation(transformedValues);
   };
   const clonedFetcher = sourceDetail?.version?.fetcher;
+  const clonedExternal = sourceDetail?.version?.external;
   return (
     <>
       {contextHolder}
@@ -199,9 +200,21 @@ export const CloneSourceDrawer = ({
               // carries the transport choice and the archive decision over.
               transport: sourceDetail.version?.transport ?? null,
               archive: sourceDetail.version?.archive ?? false,
-              // The clone keeps the origin it was cut from; a receiver clone
+              // The clone keeps the origin it was cut from, and a receiver clone
               // still re-asks for its match rule, which must be unique.
-              origin: clonedFetcher ? 'fetcher' : 'receiver',
+              origin: clonedFetcher
+                ? 'fetcher'
+                : clonedExternal
+                  ? 'external'
+                  : 'receiver',
+              external: clonedExternal
+                ? {
+                    credential_ref: clonedExternal.credential_ref ?? null,
+                    org: clonedExternal.org ?? null,
+                    allowed_org_ids: clonedExternal.allowed_org_ids ?? [],
+                    allowed_sources: clonedExternal.allowed_sources ?? [],
+                  }
+                : null,
               fetcher: clonedFetcher
                 ? {
                     source_type: clonedFetcher.source_type ?? '',

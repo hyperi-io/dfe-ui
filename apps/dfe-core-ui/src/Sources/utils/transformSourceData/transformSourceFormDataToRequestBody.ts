@@ -56,6 +56,38 @@ const schemaBody = (
   };
 };
 
+type TFormPipeline = NonNullable<CreateUpdateSourceFormData['external']>;
+
+/** The customer's pipeline fields as the engine takes them, blanks left out. */
+const pipelineBody = (pipeline: TFormPipeline | null | undefined) => ({
+  credential_ref: pipeline?.credential_ref?.trim() || null,
+  org: pipeline?.org || null,
+  allowed_org_ids: pipeline?.allowed_org_ids ?? [],
+  allowed_sources: pipeline?.allowed_sources ?? [],
+});
+
+/** The transform the form asks for: a clear, the customer's own pipeline, or a DFE app. */
+const transformBody = (
+  source: CreateUpdateSourceFormData,
+): Pick<TSourceUpdateRequestBody, 'transform'> | Record<string, never> => {
+  const { transform, transform_ui_config } = source;
+  const assign = transform_ui_config?.assign;
+  if (assign === 'none') return { transform: null };
+  if (assign === 'external') {
+    return { transform: { engine: 'external', ...pipelineBody(transform) } };
+  }
+  if (transform == null) return {};
+  // The pipeline fields belong to an external transform, and the engine refuses them on an app.
+  const {
+    credential_ref: _ref,
+    org: _org,
+    allowed_org_ids: _orgs,
+    allowed_sources: _sources,
+    ...app
+  } = transform;
+  return { transform: { ...app, env: objectArrayToObject(transform.env) } };
+};
+
 /*
  * Transforms the source form data to a request body for the update source API.
  * The selected origin decides which of match, when and fetcher is sent, because
@@ -78,12 +110,15 @@ export const transformSourceFormDataToRequestBody = (
     origin,
     schema,
     views,
-    transform,
-    transform_ui_config,
+    transform: _transform,
+    transform_ui_config: _transformUiConfig,
+    external,
     ...rest
   } = source;
 
   const isFetcherOrigin = origin === 'fetcher';
+  const isExternalOrigin = origin === 'external';
+  const isReceiverOrigin = !isFetcherOrigin && !isExternalOrigin;
 
   const parsedConfig = parseFetcherConfig(fetcher?.config);
   const apiFetcher: TSourceUpdateRequestBody['fetcher'] = isFetcherOrigin
@@ -94,7 +129,7 @@ export const transformSourceFormDataToRequestBody = (
       }
     : null;
 
-  const apiRule = isFetcherOrigin ? { match: null } : receiverRule(source);
+  const apiRule = isReceiverOrigin ? receiverRule(source) : { match: null };
 
   // Form-only: the table, match and compatibility choices that drive
   // progressive disclosure. The engine never sees them.
@@ -119,19 +154,12 @@ export const transformSourceFormDataToRequestBody = (
         }
       : {}),
     ...apiRule,
-    ...(isFetcherOrigin ? {} : compatBody(source)),
-    ...(isFetcherOrigin ? {} : aliasesBody(source)),
-    ...(transform_ui_config?.assign === 'none'
-      ? { transform: null }
-      : transform != null
-        ? {
-            transform: {
-              ...transform,
-              env: objectArrayToObject(transform.env),
-            },
-          }
-        : {}),
+    ...(isReceiverOrigin ? compatBody(source) : {}),
+    ...(isReceiverOrigin ? aliasesBody(source) : {}),
+    ...transformBody(source),
     fetcher: apiFetcher,
+    // The engine reads an absent external as none, so only its own origin sends it.
+    ...(isExternalOrigin ? { external: pipelineBody(external) } : {}),
   };
   return transformedSource;
 };

@@ -5,9 +5,11 @@ import {
   DisabledFields,
 } from '@/Sources/components/CreateUpdateSourceForm';
 import { SourceOrigin } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
+import { ExternalPipelineFields } from '@/Sources/components/CreateUpdateSourceForm/ExternalPipelineFields';
 import { FormInstance, FormRule, Radio } from 'antd';
 import { FetcherFormSection } from './FetcherFormSection';
 import {
+  EMPTY_EXTERNAL,
   EMPTY_FETCHER,
   EMPTY_MATCH,
   EMPTY_RECEIVER_UI_CONFIG,
@@ -29,21 +31,17 @@ export const OriginFormSection = ({
   disabledFields?: DisabledFields;
 }) => {
   const origin = Form.useWatch('origin', form);
+  const sourceName = Form.useWatch('source', form);
 
-  // The engine takes exactly one origin, so the block being left behind goes
+  // The engine takes exactly one origin, so every block but the chosen one goes
   // back to empty rather than travelling with the request.
   const handleOriginChange = (nextOrigin: SourceOrigin) => {
-    form.setFieldsValue(
-      nextOrigin === 'fetcher'
-        ? {
-            match: { ...EMPTY_MATCH },
-            receiver_ui_config: { ...EMPTY_RECEIVER_UI_CONFIG },
-          }
-        : {
-            fetcher: { ...EMPTY_FETCHER },
-            receiver_ui_config: { ...EMPTY_RECEIVER_UI_CONFIG },
-          },
-    );
+    form.setFieldsValue({
+      receiver_ui_config: { ...EMPTY_RECEIVER_UI_CONFIG },
+      ...(nextOrigin === 'receiver' ? {} : { match: { ...EMPTY_MATCH } }),
+      ...(nextOrigin === 'fetcher' ? {} : { fetcher: { ...EMPTY_FETCHER } }),
+      ...(nextOrigin === 'external' ? {} : { external: { ...EMPTY_EXTERNAL } }),
+    });
   };
 
   return (
@@ -58,6 +56,7 @@ export const OriginFormSection = ({
           options={[
             { label: 'Receiver', value: 'receiver' },
             { label: 'Fetcher', value: 'fetcher' },
+            { label: 'Your own pipeline', value: 'external' },
           ]}
         />
       </Form.Item>
@@ -66,6 +65,13 @@ export const OriginFormSection = ({
         <FetcherFormSection
           disabledFields={disabledFields}
           formValidation={formValidation}
+        />
+      )}
+      {origin === 'external' && (
+        <ExternalPipelineFields
+          prefix="external"
+          formValidation={formValidation}
+          summary={`Your Vector, Fluentd or Logstash produces to ${sourceName || '<source>'}_land on Kafka, past the receiver. Kafka only, and DFE creates the topic.`}
         />
       )}
       {origin === 'receiver' && (

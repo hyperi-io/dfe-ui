@@ -39,8 +39,8 @@ export type MatchMode = (typeof MATCH_MODES)[number];
 export const COMPAT_MODES = ['inherit', 'own'] as const;
 export type CompatMode = (typeof COMPAT_MODES)[number];
 
-/** A source is receiver-based or fetcher-based; the engine refuses both or neither. */
-export const SOURCE_ORIGINS = ['receiver', 'fetcher'] as const;
+/** A source takes exactly one origin, and the engine refuses more or none. */
+export const SOURCE_ORIGINS = ['receiver', 'fetcher', 'external'] as const;
 export type SourceOrigin = (typeof SOURCE_ORIGINS)[number];
 
 export const FETCHER_TOPICS = ['own', 'main'] as const;
@@ -58,6 +58,60 @@ export const RECEIVER_TABLE_LABELS: Record<
 > = {
   own: 'Own table',
   main: 'Shared table',
+};
+
+/** The engine keeps a reference to the pipeline's credential, never the credential itself. */
+export const CREDENTIAL_REFERENCE_PREFIXES = [
+  'vault:',
+  'bao:',
+  'openbao:',
+  'env:',
+  'file:',
+] as const;
+
+/** What the customer's own pipeline is held to, as the origin or as the transform. */
+const externalPipelineSchema = {
+  credential_ref: z.string().optional().nullable(),
+  org: z.string().optional().nullable(),
+  allowed_org_ids: z.array(z.string()).optional().nullable(),
+  allowed_sources: z.array(z.string()).optional().nullable(),
+};
+
+/** Refuse what the engine refuses on the pipeline's own fields, at the path the form shows. */
+const checkExternalPipeline = (
+  pipeline:
+    | {
+        credential_ref?: string | null;
+        allowed_org_ids?: string[] | null;
+      }
+    | null
+    | undefined,
+  path: (string | number)[],
+  ctx: IssueSink,
+) => {
+  const reference = pipeline?.credential_ref?.trim();
+  if (
+    reference &&
+    !CREDENTIAL_REFERENCE_PREFIXES.some((prefix) =>
+      reference.startsWith(prefix),
+    )
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `Name where the credential is kept, never the credential: start with ${CREDENTIAL_REFERENCE_PREFIXES.join(', ')}`,
+      path: [...path, 'credential_ref'],
+    });
+  }
+  const badTenant = (pipeline?.allowed_org_ids ?? []).find((id) =>
+    /[,\s]/.test(id),
+  );
+  if (badTenant !== undefined) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `${badTenant} is not a tenant id: no commas or spaces`,
+      path: [...path, 'allowed_org_ids'],
+    });
+  }
 };
 
 const sourceDetailsTabSchema = {
@@ -100,6 +154,8 @@ const originTabSchema = {
     })
     .optional()
     .nullable(),
+  // The customer's own pipeline as the origin. Read only when the origin is external.
+  external: z.object(externalPipelineSchema).optional().nullable(),
   receiver_ui_config: z
     .object({
       table: z.enum(RECEIVER_TABLES).optional().nullable(),
@@ -176,10 +232,12 @@ const checkMetaSchema = (
   },
   ctx: IssueSink,
 ) => {
+  // An external origin writes its own landing topic, so it always has its own table.
   const ownsTable =
-    data.origin === 'fetcher'
+    data.origin === 'external' ||
+    (data.origin === 'fetcher'
       ? data.fetcher?.topic === 'own'
-      : data.receiver_ui_config?.table === 'own';
+      : data.receiver_ui_config?.table === 'own');
   const hasSchema = !isBlank(data.schema?.meta_schema);
   const hasVersion = !isBlank(data.schema?.meta_schema_version);
   if ((ownsTable || hasVersion) && !hasSchema) {
@@ -236,13 +294,18 @@ const transformTabSchema = {
         )
         .optional(),
       files: z.array(z.string()).optional(),
+      ...externalPipelineSchema,
     })
     .optional()
     .nullable(),
-  // Form-only: the No Transform choice, which the request body sends as a clear.
+  // Form-only: No Transform, which the request body sends as a clear, a DFE
+  // transform, or the customer's own pipeline.
   transform_ui_config: z
     .object({
-      assign: z.enum(['none', 'define_transform']).optional().nullable(),
+      assign: z
+        .enum(['none', 'define_transform', 'external'])
+        .optional()
+        .nullable(),
     })
     .optional()
     .nullable(),
@@ -287,6 +350,23 @@ export const formSchema = z
   })
   .superRefine((data, ctx) => {
     checkMetaSchema(data, ctx);
+
+    if (data.transform_ui_config?.assign === 'external') {
+      checkExternalPipeline(data.transform, ['transform'], ctx);
+      if (data.origin === 'external') {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Your pipeline already writes the landing topic, so transform there or pick a DFE transform',
+          path: ['transform_ui_config', 'assign'],
+        });
+      }
+    }
+
+    if (data.origin === 'external') {
+      checkExternalPipeline(data.external, ['external'], ctx);
+      return;
+    }
 
     if (data.origin === 'fetcher') {
       if (!data.fetcher?.source_type?.trim()) {

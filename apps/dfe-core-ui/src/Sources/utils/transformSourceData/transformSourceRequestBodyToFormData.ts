@@ -6,7 +6,8 @@ import { objectToObjectArray, stringifyFetcherConfig } from './helpers';
 
 /*
  * Transforms the source request body to a form data object.
- * A version carrying a fetcher is fetcher-based; anything else is receiver-based.
+ * A version carrying a fetcher is fetcher-based, one carrying external is written
+ * by the customer's own pipeline, and anything else is receiver-based.
  *
  * @param source - The source request body to transform
  * @returns The transformed form data object
@@ -17,6 +18,8 @@ export const transformSourceRequestBodyToFormData = (
   const fetcher = source?.version?.fetcher;
   const hasFetcher = Object.keys(fetcher ?? {}).length > 0;
   const hasMetaSchema = !!source?.version?.schema?.meta_schema;
+  const external = source?.version?.external;
+  const hasExternal = external != null;
 
   const transformedSource: CreateUpdateSourceFormData = {
     ...source,
@@ -51,7 +54,15 @@ export const transformSourceRequestBodyToFormData = (
           config_file: source?.version?.transform?.config_file ?? null,
         }
       : undefined,
-    origin: hasFetcher ? 'fetcher' : 'receiver',
+    origin: hasFetcher ? 'fetcher' : hasExternal ? 'external' : 'receiver',
+    external: hasExternal
+      ? {
+          credential_ref: external.credential_ref ?? null,
+          org: external.org ?? null,
+          allowed_org_ids: external.allowed_org_ids ?? [],
+          allowed_sources: external.allowed_sources ?? [],
+        }
+      : null,
     fetcher: hasFetcher
       ? {
           source_type: fetcher?.source_type ?? '',
@@ -71,7 +82,7 @@ export const transformSourceRequestBodyToFormData = (
         ...(formCustomMappings ? { custom_mappings: formCustomMappings } : {}),
       };
     }),
-    ...(!hasFetcher
+    ...(!hasFetcher && !hasExternal
       ? {
           receiver_ui_config: {
             table: hasMetaSchema ? 'own' : 'main',

@@ -326,4 +326,55 @@ describe('transformSourceFormDataToRequestBody', () => {
       },
     ]);
   });
+
+  test("an external origin sends the pipeline's fields and no match or fetcher", () => {
+    const result = transformSourceFormDataToRequestBody({
+      source: 'acme-logs',
+      enabled: true,
+      archive: false,
+      origin: 'external',
+      match: { field: 'stale', value: 'stale', operator: 'equals' },
+      external: {
+        credential_ref: ' vault:kv/acme/kafka ',
+        org: 'acme',
+        allowed_org_ids: ['acme-eu'],
+        allowed_sources: [],
+      },
+    });
+
+    expect(result.match).toBeNull();
+    expect(result.fetcher).toBeNull();
+    expect(result.external).toStrictEqual({
+      credential_ref: 'vault:kv/acme/kafka',
+      org: 'acme',
+      allowed_org_ids: ['acme-eu'],
+      allowed_sources: [],
+    });
+  });
+
+  test('an external transform sends the reserved engine and none of a DFE app', () => {
+    const result = transformSourceFormDataToRequestBody({
+      source: 'acme-logs',
+      enabled: true,
+      archive: false,
+      origin: 'receiver',
+      match: { field: 'f', value: 'v', operator: 'equals' },
+      transform_ui_config: { assign: 'external' },
+      transform: {
+        engine: 'external',
+        config_file: '/left/over.yaml',
+        env: [{ key: 'A', value: '1' }],
+        credential_ref: '',
+      },
+    });
+
+    expect(result.transform).toStrictEqual({
+      engine: 'external',
+      credential_ref: null,
+      org: null,
+      allowed_org_ids: [],
+      allowed_sources: [],
+    });
+    expect(result).not.toHaveProperty('external');
+  });
 });

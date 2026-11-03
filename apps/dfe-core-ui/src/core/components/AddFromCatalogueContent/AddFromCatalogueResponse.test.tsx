@@ -12,6 +12,7 @@ describe('AddFromCatalogueResponse', () => {
     const { container } = render(
       <AddFromCatalogueResponse
         data={{
+          review_required: false,
           created: [
             {
               entry: 'okta',

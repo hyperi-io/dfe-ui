@@ -42,6 +42,7 @@ describe('.useApplyDefaults', () => {
       result.current.mutate(requestBody);
 
       const expectedResponse: TApplyDefaultsResponse = {
+        review_required: false,
         updated: [
           { source: 'source1', version: '1.0.0' },
           { source: 'source2', version: '1.0.0' },
