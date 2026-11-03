@@ -4,7 +4,7 @@ import { BASE_URL, e2eClient } from '../../config/e2e.client';
 import { loginAs } from '../../config/login.helpers';
 
 /**
- * Creating, updating, cloning and deleting a receiver source from the sources page.
+ * Creating, updating, cloning, enabling and deleting a receiver source from the sources page.
  *
  * The source lands on the shared table, so saving it does not ask for a deploy.
  * A clone keeps that table and asks for a new match, because the rule must be unique.
@@ -199,6 +199,41 @@ test.describe('', { tag: ['@core', '@source'] }, () => {
     ).toBeVisible();
     await expect(
       details.getByText('cloned-use-case', { exact: true }),
+    ).toBeVisible();
+  });
+
+  test('user can disable and enable a source', async ({ page }) => {
+    await createSource(page, {
+      displayName: 'Test Source',
+      description: 'Test Description',
+    });
+
+    const enabled = page.getByRole('button', { name: 'Enabled', exact: true });
+    const disabled = page.getByRole('button', {
+      name: 'Disabled',
+      exact: true,
+    });
+    await expect(enabled).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `${SOURCE}: source is enabled` }),
+    ).toBeVisible();
+
+    await enabled.click();
+    await page
+      .getByRole('button', { name: 'Disable Source', exact: true })
+      .click();
+    await expect(disabled).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `${SOURCE}: source is disabled` }),
+    ).toBeVisible();
+
+    await disabled.click();
+    await page
+      .getByRole('button', { name: 'Enable Source', exact: true })
+      .click();
+    await expect(enabled).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: `${SOURCE}: source is enabled` }),
     ).toBeVisible();
   });
 
