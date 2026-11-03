@@ -13,6 +13,7 @@ import { BASE_URL } from '../config/e2e.client';
 const baseUrl = BASE_URL;
 const welcomePageUrl = `${baseUrl}/setup/welcome`;
 const configureOrganisationPageUrl = `${baseUrl}/setup/configureOrganisation`;
+const configureSourcePageUrl = `${baseUrl}/setup/configureSource`;
 const configureLoginPageUrl = `${baseUrl}/setup/configureLogin`;
 const configureUserPageUrl = `${baseUrl}/setup/configureUser`;
 const completePageUrl = `${baseUrl}/setup/complete`;
@@ -93,29 +94,51 @@ test('setup from start testing forward and back navigation', async ({
   /* CONFIGURE ORGANISATION */
   await expect(page).toHaveURL(configureOrganisationPageUrl);
   await expect(
+    page.getByRole('heading', { name: 'Configure Primary Organisation' }),
+  ).toBeVisible();
+  // Until the organisation exists the form's save is the one way forward.
+  await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await textbox(page, 'Name').fill('test_organisation');
   await textbox(page, 'Display Name').fill('Test Organisation');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page).toHaveURL(configureLoginPageUrl);
+  await page
+    .getByRole('button', { name: 'Save and continue', exact: true })
+    .click();
+  await expect(page).toHaveURL(configureSourcePageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page).toHaveURL(configureOrganisationPageUrl);
   await expect(page.getByText('Primary organisation configured')).toBeVisible();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page).toHaveURL(configureLoginPageUrl);
+  await expect(page).toHaveURL(configureSourcePageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page).toHaveURL(configureOrganisationPageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page).toHaveURL(welcomePageUrl);
-  // The organisation exists now, so welcome's Next skips past it.
+  // The organisation exists now, but welcome's Next still stops at the source
+  // screen, which the engine's setup status does not report.
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+  /* CONFIGURE SOURCE */
+  await expect(page).toHaveURL(configureSourcePageUrl);
+  await expect(
+    page.getByRole('heading', { name: 'Configure Source', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
+  await expect(page).toHaveURL(configureLoginPageUrl);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(configureSourcePageUrl);
+  await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
 
   /* CONFIGURE LOGIN (OIDC) */
   await expect(page).toHaveURL(configureLoginPageUrl);
   await expect(
+    page.getByRole('heading', { name: 'Configure OIDC Provider' }),
+  ).toBeVisible();
+  // Skip is the one way forward until a provider has been added and tested.
+  await expect(
     page.getByRole('button', { name: 'Next', exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
   await expect(page).toHaveURL(configureUserPageUrl);
   await page.getByRole('button', { name: 'Back', exact: true }).click();

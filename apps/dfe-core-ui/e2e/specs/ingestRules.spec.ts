@@ -57,8 +57,12 @@ const completeSetup = async (page: Page) => {
     '/setup/configureOrganisation': async () => {
       await textbox(page, 'Name').fill('rules_e2e');
       await textbox(page, 'Display Name').fill('Rules e2e');
-      await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Save and continue', exact: true })
+        .click();
     },
+    '/setup/configureSource': () =>
+      page.getByRole('button', { name: 'Skip for now', exact: true }).click(),
     '/setup/configureLogin': () =>
       page.getByRole('button', { name: 'Skip for now', exact: true }).click(),
     '/setup/configureUser': async () => {
