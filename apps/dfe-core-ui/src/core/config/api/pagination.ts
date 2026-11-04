@@ -1,3 +1,5 @@
+import type { InfiniteData } from '@tanstack/react-query';
+
 /** The most items the engine returns in one page. A request above it is cut to it. */
 export const MAX_PAGE_SIZE = 1000;
 
@@ -31,3 +33,11 @@ export async function fetchAllPages<T>(
   } while (pageToken);
   return items;
 }
+
+/** The pages of an infinite query as one list: the first page's fields, with every page's items. */
+export const flattenPages = <P extends { items: unknown[] }>(
+  data: InfiniteData<P>,
+): Omit<P, 'items'> & { items: P['items'] } => ({
+  ...data.pages[0]!,
+  items: data.pages.flatMap((page) => page.items),
+});

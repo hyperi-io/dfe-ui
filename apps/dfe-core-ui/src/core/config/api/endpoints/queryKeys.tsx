@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-imports */
+import type { Query, QueryClient } from '@tanstack/react-query';
 import { TLibraryArtifactFilters } from '@/core/hooks/library/useFetchLibraryArtifacts/types';
 import { UseFetchInfiniteFilteredFieldMapsProps } from '@/core/hooks/useFetchInfiniteFilteredFieldMaps/types';
 import { useFetchInfiniteFilteredGroupsProps } from '@/core/hooks/useFetchInfiniteFilteredGroups/types';
@@ -17,7 +18,19 @@ import { useFetchInfiniteFilteredApiKeysProps } from '@/Settings/hooks/apiKeys/u
 import { UseFetchInfiniteFilteredOidcProvidersProps } from '@/Settings/hooks/oidcProviders/useFetchInfiniteFilteredOidcProviders/types';
 import { UseFetchInfiniteFilteredRolesProps } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoles/types';
 import { UseFetchInfiniteFilteredRoleScopesProps } from '@/Settings/hooks/roles/useFetchInfiniteFilteredRoleScopes/types';
-import { UseFetchInfiniteSourceColumnsProps } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
+
+/**
+ * Every sources query. The hand-written keys start with 'sources' and the
+ * openapi-react-query ones with the verb and then the path, so a write marks both stale through this.
+ */
+export const sourcesQueries = {
+  predicate: ({ queryKey: [head, path] }: Query) =>
+    head === 'sources' ||
+    (typeof path === 'string' && path.startsWith('/api/v1/sources')),
+};
+
+export const invalidateSources = (queryClient: QueryClient) =>
+  queryClient.invalidateQueries(sourcesQueries);
 
 export const QUERY_KEYS = Object.freeze({
   auth: {
@@ -67,18 +80,6 @@ export const QUERY_KEYS = Object.freeze({
       '{name}',
       'lag',
       ...(name ? [name] : []),
-    ],
-    sourceColumns: ({
-      source_name,
-      version,
-      page_size,
-    }: UseFetchInfiniteSourceColumnsProps = {}) => [
-      'sources',
-      '{name}',
-      'columns',
-      ...(source_name ? [source_name] : []),
-      ...(version ? [version] : []),
-      ...(page_size ? [page_size] : []),
     ],
     sourceBuild: () => ['sources', '{name}', 'build'],
     sourceVersion: () => ['sources', '{name}', 'versions', '{version}'],

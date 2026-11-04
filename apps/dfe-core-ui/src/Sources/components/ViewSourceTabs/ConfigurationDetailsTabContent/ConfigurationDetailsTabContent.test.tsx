@@ -1,5 +1,5 @@
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import {
   afterAll,

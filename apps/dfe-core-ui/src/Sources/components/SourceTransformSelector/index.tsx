@@ -12,7 +12,7 @@ import {
   buildTransformOptions,
   TransformOption,
 } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent/transformApps';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { useUpdateSource } from '@/Sources/hooks/useUpdateSource';
 import { AwaitingReviewNote, awaitsReview } from '@/Sources/utils/sourceReview';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';

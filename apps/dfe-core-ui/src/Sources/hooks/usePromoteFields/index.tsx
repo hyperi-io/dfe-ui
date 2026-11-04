@@ -1,16 +1,14 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { promoteFields } from './api';
 import { TPromoteFieldRequest, TPromoteFieldResponse } from './types';
 
 export const usePromoteFields = ({
   source_name,
-  source_version,
   onSuccess,
   onError,
 }: {
   source_name: string;
-  source_version: string;
   onSuccess?: (data: TPromoteFieldResponse) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -30,10 +28,7 @@ export const usePromoteFields = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.source({
-          name: source_name,
-          version: source_version,
-        }),
+        ...sourcesQueries,
       });
       onSuccess?.(data);
     },

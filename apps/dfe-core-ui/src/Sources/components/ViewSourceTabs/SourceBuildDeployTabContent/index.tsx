@@ -4,7 +4,7 @@ import { cn } from '@/core/utils/style';
 import { DeploySourceDrawer } from '@/Sources/components/DeploySourceDrawer';
 import { ViewDeployedSourceDrawer } from '@/Sources/components/ViewDeployedSourceDrawer';
 import { useBuildSource } from '@/Sources/hooks/useBuildSource';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { IconPlayerPlay } from '@repo/dfe-icons';
 import { Button, Tabs } from 'antd';
 import { useEffect } from 'react';

@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { QUERY_KEYS, sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateSource } from './api';
 import { TSourceUpdateRequestBody, TSourceUpdateResponse } from './types';
@@ -23,13 +23,10 @@ export const useUpdateSource = ({
     onSuccess: (data) => {
       Promise.all([
         void queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.sources.source({
-            name: data.source,
-            version: data.current,
-          }),
+          ...sourcesQueries,
         }),
         void queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.sources.default(),
+          ...sourcesQueries,
         }),
         void queryClient.invalidateQueries({
           queryKey: QUERY_KEYS.schemas.sampleRows({

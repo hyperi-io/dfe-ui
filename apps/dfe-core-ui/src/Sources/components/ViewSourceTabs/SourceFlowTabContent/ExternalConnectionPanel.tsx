@@ -4,7 +4,7 @@ import { CopyCodeBlock } from '@/core/components/CopyCodeBlock';
 import { SectionCard } from '@/core/components/SectionCard';
 import { Table } from '@/core/components/Table';
 import { cn } from '@/core/utils/style';
-import type { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import type { TSourceVersionDetail } from '@/core/config/api/sources.types';
 
 export type TExternalConnection = NonNullable<
   TSourceVersionDetail['connection']

@@ -4,7 +4,10 @@ import { GenericErrorCard } from '@/core/components/GenericError';
 import { SchemaTable } from '@/core/components/SchemaTable';
 import { Tooltip } from '@/core/components/Tooltip';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
-import { useFetchInfiniteSourceColumns } from '@/Sources/hooks/useFetchInfiniteSourceColumns';
+import { $api, asApiError } from '@/core/config/api';
+import type { TSourceColumnsResponse } from '@/core/config/api/sources.types';
+import type { InfiniteData } from '@tanstack/react-query';
+import { flattenPages, getNextPageToken } from '@/core/config/api/pagination';
 import { IconInfoCircle } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 import { useCallback } from 'react';
@@ -27,7 +30,18 @@ export const SourceColumnsTabContent = ({
     fetchNextPage: fetchNextPageSourceColumns,
     hasNextPage: hasNextPageSourceColumns,
     isFetchingNextPage: isFetchingNextPageSourceColumns,
-  } = useFetchInfiniteSourceColumns({ source_name, page_size: 50 });
+  } = $api.useInfiniteQuery(
+    'get',
+    '/api/v1/sources/{name}/columns',
+    { params: { path: { name: source_name }, query: { page_size: 50 } } },
+    {
+      pageParamName: 'page_token',
+      getNextPageParam: getNextPageToken,
+      initialPageParam: null,
+      select: (data: InfiniteData<TSourceColumnsResponse>) =>
+        flattenPages(data),
+    },
+  );
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
@@ -61,7 +75,7 @@ export const SourceColumnsTabContent = ({
     return (
       <GenericErrorCard
         title="Error fetching source columns"
-        description={error.message}
+        description={asApiError(error)?.message}
       />
     );
   }

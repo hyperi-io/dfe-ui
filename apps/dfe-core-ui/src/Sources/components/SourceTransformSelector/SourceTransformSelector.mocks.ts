@@ -1,7 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { TAuthMeResponse } from '@/core/hooks/useAuthMe/types';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { setupServer } from 'msw/node';
 
 const ADMIN_MOCKED_RESPONSE: TAuthMeResponse = {

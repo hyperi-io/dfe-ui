@@ -12,7 +12,7 @@ import {
   announceAwaitingReview,
   awaitsReview,
 } from '@/Sources/utils/sourceReview';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { $api, asApiError } from '@/core/config/api';
 import { stringifyFetcherConfig } from '@/Sources/utils/transformSourceData/helpers';
 import { transformSourceFormDataToRequestBody } from '@/Sources/utils/transformSourceData/transformSourceFormDataToRequestBody';
 import { IconCopy } from '@repo/dfe-icons';
@@ -48,12 +48,19 @@ export const CloneSourceDrawer = ({
   const {
     data: sourceDetail,
     isLoading: isSourceDetailLoading,
-    error: sourceDetailError,
-  } = useFetchSourceDetail({
-    source_name: sourceName,
-    source_version: sourceVersion,
-  });
+    error: sourceDetailRefusal,
+  } = $api.useQuery(
+    'get',
+    '/api/v1/sources/{name}/versions/{version}',
+    {
+      params: {
+        path: { name: sourceName ?? '', version: sourceVersion ?? '' },
+      },
+    },
+    { enabled: !!sourceName && !!sourceVersion },
+  );
 
+  const sourceDetailError = asApiError(sourceDetailRefusal);
   const { setSelectedSource } = useListSourcesContext();
   const {
     mutate: createSourceMutation,

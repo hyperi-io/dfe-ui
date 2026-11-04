@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import {
   afterAll,
   afterEach,
@@ -112,6 +113,33 @@ describe('useFetchInfiniteFilteredSources', () => {
       });
       expect(result.current.loadMoreRef).toBeDefined();
       expect(result.current.loadMoreRef.current).toBeNull();
+    });
+  });
+
+  describe('first request', () => {
+    it('sends no page_token, so the engine starts at the first page', async () => {
+      const urls: URL[] = [];
+      server.use(
+        http.get(API_CONFIG_MOCKS.sources.default.mockedUrl, ({ request }) => {
+          urls.push(new URL(request.url));
+          return HttpResponse.json({
+            items: [],
+            objects: {},
+            total_size: 0,
+            next_page_token: null,
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useFetchInfiniteFilteredSources(), {
+        wrapper,
+      });
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(urls).toHaveLength(1);
+      expect(urls[0]?.searchParams.has('page_token')).toBe(false);
     });
   });
 
