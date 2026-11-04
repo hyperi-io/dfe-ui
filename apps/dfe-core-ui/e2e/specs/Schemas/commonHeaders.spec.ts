@@ -106,11 +106,7 @@ const expectStoredSchema = async (page: Page, name: string, column: string) => {
 };
 
 /** The current-version control commits on its check. */
-const setCurrentVersion = async (
-  page: Page,
-  option: string,
-  shown: string,
-) => {
+const setCurrentVersion = async (page: Page, option: string, shown: string) => {
   const current = page
     .locator('dt')
     .filter({ hasText: 'Current Version:' })
@@ -122,9 +118,10 @@ const setCurrentVersion = async (
     .locator('.ant-select-item-option-content');
   await expect(choices.first()).toBeVisible();
   const plain = choices.getByText(option, { exact: true });
-  await (await plain.count()
-    ? plain
-    : choices.getByText(`${option} (Current)`, { exact: true })
+  await (
+    (await plain.count())
+      ? plain
+      : choices.getByText(`${option} (Current)`, { exact: true })
   ).click();
   const saved = page.waitForResponse(
     (response) =>
