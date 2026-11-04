@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBulkSourceFromCatalogue } from './api';
 import {
@@ -26,7 +26,7 @@ export const useCreateBulkSourceFromCatalogue = ({
       createBulkSourceFromCatalogue({ body }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.default(),
+        ...sourcesQueries,
       });
       onSuccess?.(data);
     },

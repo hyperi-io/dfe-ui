@@ -1,6 +1,6 @@
 import { CustomScrollbar } from '@/core/components/CustomScrollbar';
 import { GenericErrorCard } from '@/core/components/GenericError';
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useSetComponentHeight } from '@/core/hooks/useSetComponentHeight';
 import {
   CreateUpdateSourceForm,
@@ -27,7 +27,6 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
   const queryClient = useQueryClient();
   const {
     selectedSourceName: source_name,
-    selectedSourceVersion: source_version,
     setSelectedSource,
   } = useListSourcesContext();
 
@@ -51,10 +50,7 @@ export const EditSourceForm = ({ onSuccess }: EditSourceFormProps) => {
           source_version: response.current,
         });
         void queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.sources.source({
-            name: response.source,
-            version: source_version,
-          }),
+          ...sourcesQueries,
         });
       }
       onSuccess?.(response);

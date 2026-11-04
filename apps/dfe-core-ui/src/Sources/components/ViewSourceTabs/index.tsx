@@ -5,7 +5,7 @@ import { SourceFlowTabContent } from '@/Sources/components/ViewSourceTabs/Source
 import { SourceProcessingTabContent } from '@/Sources/components/ViewSourceTabs/SourceProcessingTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
 import { useSourceDetailsContext } from '@/Sources/contexts/SourceDetailsContext';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { cn } from '@/core/utils/style';
 import { Tabs } from 'antd';

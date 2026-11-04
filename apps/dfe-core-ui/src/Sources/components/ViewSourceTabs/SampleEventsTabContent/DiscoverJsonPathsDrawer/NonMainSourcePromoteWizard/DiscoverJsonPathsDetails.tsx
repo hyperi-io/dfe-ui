@@ -35,7 +35,6 @@ export const DiscoverJsonPathsDetails = ({
     error: errorPromotingFields,
   } = usePromoteFields({
     source_name: selectedSourceName,
-    source_version: selectedSourceVersion,
     onSuccess,
   });
 

@@ -1,5 +1,5 @@
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { fromApiRootMatch, TSourceMatch } from '@/Sources/utils/sourceMatch';
 
 import { objectToObjectArray, stringifyFetcherConfig } from './helpers';

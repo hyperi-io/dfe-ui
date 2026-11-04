@@ -1,4 +1,4 @@
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { describe, expect, test } from 'vitest';
 import { transformSourceFormDataToRequestBody } from './transformSourceFormDataToRequestBody';
 import { transformSourceRequestBodyToFormData } from './transformSourceRequestBodyToFormData';

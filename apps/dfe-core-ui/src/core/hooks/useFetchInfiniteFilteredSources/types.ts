@@ -1,13 +1,11 @@
-import {
+import type {
   DfeClientOperationFor,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
-import { fetchSourcesPath } from './api';
 
 export type TSourceListResponse = DfeClientSuccessResponseBody<
-  DfeClientOperationFor<typeof fetchSourcesPath, 'get'>
+  DfeClientOperationFor<'/api/v1/sources', 'get'>
 >;
-
 export type TSourceSummary = TSourceListResponse['objects'];
 export type TSourceListSummary = TSourceListResponse['items'][number];
 interface SourceListRequestParams {

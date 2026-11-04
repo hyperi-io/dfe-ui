@@ -2,7 +2,7 @@ import { Drawer } from '@/core/components/Drawer';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { RbacProtected } from '@/core/components/RbacProtected';
 import { DeployedSourceDetails } from '@/Sources/components/DeployedSourceDetails';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { IconEye } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';

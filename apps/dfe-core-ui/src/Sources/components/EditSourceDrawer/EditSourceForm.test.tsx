@@ -2,7 +2,7 @@ import { ADMIN_MOCKED_RESPONSE } from '@/core/components/RbacProtected/hooks/hoo
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { SourceDetailsProvider } from '@/Sources/contexts/SourceDetailsContext';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { TSourceUpdateRequestBody } from '@/Sources/hooks/useUpdateSource/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

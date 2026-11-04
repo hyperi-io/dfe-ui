@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { buildSource } from './api';
 import { TSourceBuildResponse } from './types';
@@ -31,13 +31,10 @@ export const useBuildSource = ({
     onSuccess: (data) => {
       void Promise.all([
         queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.sources.source({
-            name: data.source_name,
-            version: data.version,
-          }),
+          ...sourcesQueries,
         }),
         queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.sources.default(),
+          ...sourcesQueries,
         }),
       ]);
 
