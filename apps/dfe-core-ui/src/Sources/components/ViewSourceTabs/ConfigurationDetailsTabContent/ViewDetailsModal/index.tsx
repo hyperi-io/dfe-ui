@@ -1,6 +1,6 @@
 import { Modal } from '@/core/components/Modal';
 import { cn } from '@/core/utils/style';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { IconEye } from '@repo/dfe-icons';
 import { Button } from 'antd';
 import { useState } from 'react';

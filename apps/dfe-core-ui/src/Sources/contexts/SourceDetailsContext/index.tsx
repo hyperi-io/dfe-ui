@@ -1,10 +1,10 @@
 'use client';
 
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 
 import { RESOURCE_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { $api, asApiError } from '@/core/config/api';
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 export interface SourceDetailsContextValue {
@@ -38,11 +38,22 @@ export const SourceDetailsProvider = ({
   const {
     data: sourceDetail,
     isLoading: isFetchingSourceDetail,
-    error: errorSourceDetail,
-  } = useFetchSourceDetail({
-    source_name: selectedSourceName,
-    source_version: selectedSourceVersion,
-  });
+    error: sourceDetailRefusal,
+  } = $api.useQuery(
+    'get',
+    '/api/v1/sources/{name}/versions/{version}',
+    {
+      params: {
+        path: {
+          name: selectedSourceName ?? '',
+          version: selectedSourceVersion ?? '',
+        },
+      },
+    },
+    { enabled: !!selectedSourceName && !!selectedSourceVersion },
+  );
+
+  const errorSourceDetail = asApiError(sourceDetailRefusal);
 
   // No version yet means the list is still loading, and the detail cannot be asked for until it names one.
   const isLoadingSourceDetail =

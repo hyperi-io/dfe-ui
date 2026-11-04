@@ -13,14 +13,12 @@ import { PromoteJsonPathsResultCard } from './PromoteJsonPathsResultCard';
 
 export const PromoteJsonPaths = ({
   selectedSourceName,
-  selectedSourceVersion,
   data,
   jsonPaths,
   onSuccess,
   attachedSchemaPath,
 }: {
   selectedSourceName: string;
-  selectedSourceVersion: string;
   jsonPaths: TJsonPathsResponse | null;
   onSuccess?: (response: TPromoteFieldResponse) => void;
   attachedSchemaPath?: string | null;
@@ -33,7 +31,6 @@ export const PromoteJsonPaths = ({
     error: errorPromotingFields,
   } = usePromoteFields({
     source_name: selectedSourceName,
-    source_version: selectedSourceVersion,
     onSuccess: (response) => {
       handleClearFieldsToPromote();
       onSuccess?.(response);

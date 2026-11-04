@@ -1,7 +1,7 @@
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SourceBuildDeployTabContent } from '@/Sources/components/ViewSourceTabs/SourceBuildDeployTabContent';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { useFetchSourceDetail } from '@/Sources/hooks/useFetchSourceDetail';
+import { $api, asApiError } from '@/core/config/api';
 import { App, Spin } from 'antd';
 
 export const BuildDeploySourceStep = ({
@@ -17,10 +17,12 @@ export const BuildDeploySourceStep = ({
     data: sourceDetailData,
     isLoading: isLoadingSourceDetail,
     error: errorSourceDetail,
-  } = useFetchSourceDetail({
-    source_name: createdSource,
-    source_version: '1.0.0',
-  });
+  } = $api.useQuery(
+    'get',
+    '/api/v1/sources/{name}/versions/{version}',
+    { params: { path: { name: createdSource ?? '', version: '1.0.0' } } },
+    { enabled: !!createdSource },
+  );
 
   if (isLoadingSourceDetail) {
     return (
@@ -35,7 +37,7 @@ export const BuildDeploySourceStep = ({
     return (
       <NotificationCard
         title="Unexpected error fetching source detail"
-        description={errorSourceDetail.message}
+        description={asApiError(errorSourceDetail)?.message}
         type="error"
       />
     );

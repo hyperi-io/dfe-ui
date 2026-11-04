@@ -8,7 +8,7 @@ import {
   DefaultOrOverride,
   ttlDaysText,
 } from '@/Sources/components/DefaultOverride';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import {
   COMMON_HEADER_DIR,
   commonHeaderName,

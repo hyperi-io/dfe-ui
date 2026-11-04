@@ -10,8 +10,7 @@ import { TTableEnginesResponse } from '@/core/hooks/useFetchTableEngines/types';
 import { TSourceBuildResponse } from '@/Sources/hooks/useBuildSource/types';
 import { TCreateSourceResponse } from '@/Sources/hooks/useCreateSource/types';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
-import { TSourceColumnsResponse } from '@/Sources/hooks/useFetchInfiniteSourceColumns/types';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { TSourcePatchResponse } from '@/Sources/hooks/usePatchSource/types';
 import { TSourcePlanResponse } from '@/Sources/hooks/usePlanSource/types';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
@@ -522,45 +521,6 @@ export const sources = {
           sources.sourceLag.mockedUrl.replace('{name}', name),
           () => {
             return HttpResponse.json(mockedResponse);
-          },
-        );
-      },
-    },
-  },
-  sourceColumns: {
-    mockedUrl: '/api/v1/sources/{name}/columns',
-    get: {
-      success: ({
-        mockedResponse = {
-          items: [],
-          total_size: 0,
-          next_page_token: null,
-        },
-        source_name = 'source',
-      }: {
-        mockedResponse?: TSourceColumnsResponse;
-        source_name?: string;
-      } = {}) => {
-        return http.get(
-          sources.sourceColumns.mockedUrl.replace('{name}', source_name),
-          () => {
-            return HttpResponse.json(mockedResponse);
-          },
-        );
-      },
-      error: ({
-        mockedResponse = DEFAULT_VALIDATION_ERROR,
-        status = 422,
-        source_name = 'source',
-      }: {
-        mockedResponse?: TValidationError;
-        status?: number;
-        source_name?: string;
-      } = {}) => {
-        return http.get(
-          sources.sourceColumns.mockedUrl.replace('{name}', source_name),
-          () => {
-            return HttpResponse.json(mockedResponse, { status });
           },
         );
       },

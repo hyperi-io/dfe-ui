@@ -43,7 +43,6 @@ describe('.usePromoteFields', () => {
             onSuccess,
             onError,
             source_name: 'source',
-            source_version: 'version',
           }),
         { wrapper },
       );
@@ -97,7 +96,6 @@ describe('.usePromoteFields', () => {
             onSuccess,
             onError,
             source_name: 'source',
-            source_version: 'version',
           }),
         { wrapper },
       );

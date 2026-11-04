@@ -2,7 +2,7 @@ import { AceEditor } from '@/core/components/AceEditor';
 import { NotificationCard } from '@/core/components/NotificationCard';
 import { SimpleCollapse } from '@/core/components/SimpleCollapse';
 import { TSourceDeployResponse } from '@/Sources/hooks/useDeploySource/types';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { IconCircleCheck, IconCircleX } from '@repo/dfe-icons';
 import { Spin } from 'antd';
 

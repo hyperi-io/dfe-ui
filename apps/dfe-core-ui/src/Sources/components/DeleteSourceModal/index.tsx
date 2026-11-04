@@ -1,4 +1,6 @@
-import { useDeleteSource } from '@/Sources/hooks/useDeleteSource';
+import { $api, asApiError } from '@/core/config/api';
+import { invalidateSources } from '@/core/config/api/endpoints/queryKeys';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { FormNotification } from '@/core/components/FormNotification';
 import { Modal } from '@/core/components/Modal';
@@ -25,8 +27,13 @@ export const DeleteSourceModal = ({
 }: DeleteSourceModalProps) => {
   const [open, setOpen] = useState(false);
   const [api, contextHolder] = notification.useNotification();
-  const { mutate, isPending, error } = useDeleteSource({
+  const queryClient = useQueryClient();
+  const { mutate, isPending, error } = $api.useMutation(
+    'delete',
+    '/api/v1/sources/{name}',
+    {
     onSuccess: (response) => {
+      void invalidateSources(queryClient);
       setOpen(false);
       // Main still carries the source, so the caller has nothing to move off.
       if (awaitsReview(response)) {
@@ -38,9 +45,10 @@ export const DeleteSourceModal = ({
       }
       onSuccess?.();
     },
-  });
+    },
+  );
   const handleDeleteSource = () => {
-    mutate(source);
+    mutate({ params: { path: { name: source } } });
   };
 
   return (
@@ -127,7 +135,9 @@ export const DeleteSourceModal = ({
         }
       >
         <p>Are you sure you want to delete this source?</p>
-        {error && <FormNotification text={error.message} type="error" />}
+        {error && (
+          <FormNotification text={asApiError(error)?.message} type="error" />
+        )}
       </Modal>
     </>
   );

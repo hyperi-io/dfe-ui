@@ -13,7 +13,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { SourceTransformSelector } from '.';
 import {
   server,

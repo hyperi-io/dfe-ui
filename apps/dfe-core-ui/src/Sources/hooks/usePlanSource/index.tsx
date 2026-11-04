@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { planSource } from './api';
 import { SourcePlanRequest, TSourcePlanResponse } from './types';
@@ -24,10 +24,7 @@ export const usePlanSource = ({
       }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.source({
-          name: data.source_name,
-          version: data.version,
-        }),
+        ...sourcesQueries,
       });
       onSuccess?.(data);
     },

@@ -88,7 +88,9 @@ const handlers = [
   // The sources list sits behind the drawer and refetches once a source lands.
   API_CONFIG_MOCKS.sources.default.get.success(),
   // The listed source's row fetches its columns and its flow once it renders.
-  API_CONFIG_MOCKS.sources.sourceColumns.get.success({ source_name: 'test' }),
+  http.get('/api/v1/sources/test/columns', () =>
+    HttpResponse.json({ items: [], total_size: 0, next_page_token: null }),
+  ),
   API_CONFIG_MOCKS.sources.sourceFlow.get.success({ name: 'test' }),
 ];
 

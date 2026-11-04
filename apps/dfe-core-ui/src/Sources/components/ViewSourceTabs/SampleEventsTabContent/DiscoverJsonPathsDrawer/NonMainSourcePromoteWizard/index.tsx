@@ -76,7 +76,6 @@ export const NonMainSourcePromoteWizard = ({
           children: (
             <PromoteJsonPaths
               selectedSourceName={String(selectedSourceName)}
-              selectedSourceVersion={String(selectedSourceVersion)}
               jsonPaths={jsonPaths}
               data={promoteTestResponse}
               onSuccess={handleSuccess}

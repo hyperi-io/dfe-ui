@@ -1,6 +1,6 @@
 'use client';
 
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useFetchInfiniteFilteredSources } from '@/core/hooks/useFetchInfiniteFilteredSources';
 import type {
   TSourceListResponse,
@@ -189,7 +189,7 @@ export const ListSourcesProvider = ({
   const handleSetFilters = useCallback(
     (newFilters: UseFetchInfiniteFilteredSourcesProps) => {
       void queryClient.cancelQueries({
-        queryKey: QUERY_KEYS.sources.default(),
+        ...sourcesQueries,
       });
       const updated: ListSourcesQueryParams = {
         ...filters,

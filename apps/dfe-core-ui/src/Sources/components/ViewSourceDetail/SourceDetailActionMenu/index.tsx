@@ -4,7 +4,7 @@ import { CloneSourceDrawer } from '@/Sources/components/CloneSourceDrawer';
 import { DeleteSourceModal } from '@/Sources/components/DeleteSourceModal';
 import { EditSourceDrawer } from '@/Sources/components/EditSourceDrawer';
 import { useListSourcesContext } from '@/Sources/contexts/ListSourcesContext';
-import { TSourceVersionDetail } from '@/Sources/hooks/useFetchSourceDetail/types';
+import { TSourceVersionDetail } from '@/core/config/api/sources.types';
 import { TSourceUpdateResponse } from '@/Sources/hooks/useUpdateSource/types';
 import { IconCopy, IconEdit, IconTrash } from '@repo/dfe-icons';
 import { Button } from 'antd';

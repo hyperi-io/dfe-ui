@@ -165,23 +165,51 @@ export function createApiClient(config: ApiClientConfig) {
       ...definedHeaders(headerParams as Record<string, unknown> | undefined),
     };
 
-    // One deadline for the headers and the body, so an engine that accepts the
-    // connection and then says nothing ends in an error rather than a spinner.
+    return call<Path, Method>(
+      url,
+      resolvedPath,
+      {
+        method: method.toUpperCase(),
+        headers,
+        ...(hasJsonBody && { body: formDataBody ?? JSON.stringify(body) }),
+        signal,
+      },
+      deadlineMs,
+    );
+  }
+
+  /**
+   * One deadline for the headers and the body, so an engine that accepts the
+   * connection and then says nothing ends in an error rather than a spinner.
+   */
+  async function call<
+    Path extends keyof paths,
+    Method extends DfeClientHttpMethod,
+  >(
+    url: string,
+    resolvedPath: string,
+    init: RequestInit,
+    deadlineMs?: number,
+  ): Promise<{
+    data: DfeClientSuccessResponseBody<DfeClientOperationFor<Path, Method>>;
+    headers: Headers;
+  }> {
+    const { signal } = init;
     const allowedMs =
       deadlineMs ??
-      (method === 'get' ? ENGINE_READ_DEADLINE_MS : ENGINE_WRITE_DEADLINE_MS);
+      (init.method === 'GET'
+        ? ENGINE_READ_DEADLINE_MS
+        : ENGINE_WRITE_DEADLINE_MS);
     const deadline = AbortSignal.timeout(allowedMs);
-    const init: RequestInit = {
-      method: method.toUpperCase(),
-      headers,
-      ...(hasJsonBody && {
-        body: formDataBody ?? JSON.stringify(body),
-      }),
-      signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
-    };
-
     try {
-      return await exchange<Path, Method>(url, init, resolvedPath);
+      return await exchange<Path, Method>(
+        url,
+        {
+          ...init,
+          signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
+        },
+        resolvedPath,
+      );
     } catch (error) {
       if (deadline.aborted && !signal?.aborted && isAbort(error)) {
         throw new ApiTimeoutError(allowedMs, { cause: error });
@@ -292,6 +320,27 @@ export function createApiClient(config: ApiClientConfig) {
 
   return {
     request,
+
+    /**
+     * A fetch for openapi-fetch. It takes the same auth, deadline, 401 handling
+     * and ApiError as `request`, and answers the parsed body as a Response.
+     */
+    async fetch(request: Request): Promise<Response> {
+      const url = new URL(request.url);
+      const body = request.body ? await request.text() : undefined;
+      const { data, headers } = await call(url.toString(), url.pathname, {
+        method: request.method,
+        headers: {
+          ...(await getAuthHeaders?.()),
+          ...Object.fromEntries(request.headers),
+        },
+        body,
+        signal: request.signal,
+      });
+      return data === undefined
+        ? new Response(null, { status: 204, headers })
+        : new Response(JSON.stringify(data), { status: 200, headers });
+    },
 
     /**
      * A read whose revision travels in the `ETag` header rather than the body.

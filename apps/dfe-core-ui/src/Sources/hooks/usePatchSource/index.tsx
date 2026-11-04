@@ -1,4 +1,4 @@
-import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
+import { sourcesQueries } from '@/core/config/api/endpoints/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patchSource } from './api';
 import { TSourcePatchRequestBody, TSourcePatchResponse } from './types';
@@ -20,10 +20,10 @@ export const usePatchSource = ({
       }),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.source({ name: response.source }),
+        ...sourcesQueries,
       });
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.sources.default(),
+        ...sourcesQueries,
       });
       onSuccess?.(response);
     },
