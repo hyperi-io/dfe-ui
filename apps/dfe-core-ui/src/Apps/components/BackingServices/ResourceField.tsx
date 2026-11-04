@@ -61,7 +61,7 @@ export const ResourceField = ({
 
   const warning = memoryDownWarning(service, varPath, current, draft);
   const unchanged = draft === (current == null ? '' : String(current));
-  const message = getApiErrorResponseBody(error)?.message ?? error?.message;
+  const message = getApiErrorResponseBody(error)?.detail ?? error?.message;
 
   return (
     <div className="flex flex-col gap-2">

@@ -81,12 +81,13 @@ describe('ResetPasswordForm', () => {
 
   test('names the refused field when the engine answers 422', () => {
     const error = new ApiError(422, 'Unprocessable Entity', {
+      title: 'Error',
       code: 'validation_error',
-      message: '1 validation error(s)',
+      detail: '1 validation error(s)',
       errors: [
         {
           field: 'new_password',
-          message: 'String should have at least 12 characters',
+          detail: 'String should have at least 12 characters',
           code: 'string_too_short',
         },
       ],
@@ -153,8 +154,9 @@ describe('ResetPasswordForm', () => {
 
   test('a wrong current password is marked on that field, not as a banner', () => {
     const error = new ApiError(403, 'Forbidden', {
+      title: 'Error',
       code: 'invalid_current_password',
-      message: "That is not this account's current password.",
+      detail: "That is not this account's current password.",
     });
 
     render(<ResetPasswordForm askCurrentPassword error={error} />, {
@@ -171,8 +173,9 @@ describe('ResetPasswordForm', () => {
 
   test('too many attempts shows the wait the engine gave', () => {
     const error = new ApiError(429, 'Too Many Requests', {
+      title: 'Error',
       code: 'too_many_attempts',
-      message: 'Too many failed attempts; try again in 30 seconds',
+      detail: 'Too many failed attempts; try again in 30 seconds',
     });
 
     render(<ResetPasswordForm askCurrentPassword error={error} />, {

@@ -79,7 +79,7 @@ describe('.useSyncOidcProviderGroups', () => {
         wrapper: testWrapper.wrapper,
       });
       const listKey = QUERY_KEYS.oidcProviders.default({
-        per_page: 10,
+        page_size: 10,
       });
       testWrapper.queryClient?.setQueryData(listKey, { pages: [] });
 

@@ -1,4 +1,4 @@
-import { TAppsResponse } from '@/core/hooks/apps/instances/useFetchApps/types';
+import { TAppCatalogueEntry } from '@/core/hooks/apps/instances/useFetchApps/types';
 import { CreateUpdateSourceFormData } from '@/Sources/components/CreateUpdateSourceForm/sourceForm.schema';
 
 export type AssignTransformOptions = NonNullable<
@@ -25,7 +25,9 @@ export type TransformEngine = {
  * Read off the catalogue rather than listed here, so an engine the manifest adds
  * or drops reaches the picker without a UI release.
  */
-export const getTransformEngines = (apps?: TAppsResponse): TransformEngine[] =>
+export const getTransformEngines = (
+  apps?: TAppCatalogueEntry[],
+): TransformEngine[] =>
   (apps ?? [])
     .filter((app) => app.service.startsWith(TRANSFORM_SERVICE_PREFIX))
     .map((app) => ({

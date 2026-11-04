@@ -1,7 +1,15 @@
 import { ApiError, getApiErrorResponseBody } from '@/core/config/api/client';
-import { components } from '@repo/dfe-engine-types';
 
-export type TRuleError = components['schemas']['RuleError'];
+/**
+ * One reason the receiver refuses a source's rule, from the `rule_errors`
+ * member of an `invalid_rule` problem. A `when` refusal carries the span, in
+ * UTF-16 code units, where the check stopped.
+ */
+export type TRuleError = {
+  field: string;
+  message: string;
+  span?: { start: number; end: number } | null;
+};
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
@@ -16,9 +24,9 @@ export type TOrderConflict = { message: string; blocks: string[] };
 export const getOrderConflict = (error: unknown): TOrderConflict | null => {
   const body = bodyOf(error, 409);
   if (body?.code !== 'order_conflict') return null;
-  const blocks = body.context?.blocks;
+  const blocks = body.blocks;
   return {
-    message: body.message,
+    message: body.detail ?? body.title,
     blocks: Array.isArray(blocks) ? blocks.filter(isString) : [],
   };
 };
@@ -30,9 +38,9 @@ export const getStaleRevision = (error: unknown): TStaleRevision | null => {
   if (!(error instanceof ApiError) || error.status !== 412) return null;
   // A proxy can answer 412 with no body, and the revision still moved.
   const body = getApiErrorResponseBody(error);
-  const etag = body?.context?.etag;
+  const etag = body?.etag;
   return {
-    message: body?.message ?? 'The revision this page read has changed',
+    message: body?.detail ?? 'The revision this page read has changed',
     etag: isString(etag) ? etag : null,
   };
 };
@@ -45,7 +53,7 @@ export const isMissingRevision = (error: unknown): boolean =>
 export const getRuleErrors = (error: unknown): TRuleError[] => {
   const body = bodyOf(error, 422);
   if (body?.code !== 'invalid_rule') return [];
-  const ruleErrors = body.context?.rule_errors;
+  const ruleErrors = body.rule_errors;
   if (!Array.isArray(ruleErrors)) return [];
   return ruleErrors.filter(
     (entry): entry is TRuleError =>
@@ -67,10 +75,10 @@ export type TAliasConflict = {
 export const getAliasConflict = (error: unknown): TAliasConflict | null => {
   const body = bodyOf(error, 409);
   if (body?.code !== 'alias_conflict') return null;
-  const { profile, alias, conflicting_source } = body.context ?? {};
+  const { profile, alias, conflicting_source } = body;
   if (!isString(profile) || !isString(alias)) return null;
   return {
-    message: body.message,
+    message: body.detail ?? body.title,
     profile,
     alias,
     conflictingSource: isString(conflicting_source) ? conflicting_source : '',

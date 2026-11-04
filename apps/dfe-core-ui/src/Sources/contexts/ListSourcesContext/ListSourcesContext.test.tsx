@@ -90,8 +90,8 @@ describe('ListSourcesContext', () => {
       expect(result.current).toMatchObject({
         data: expect.objectContaining({
           items: expect.any(Array),
-          total: expect.any(Number),
-          page: expect.any(Number),
+          total_size: expect.any(Number),
+          next_page_token: expect.any(String),
         }),
         filters: expect.any(Object),
         hasFilters: expect.any(Boolean),
@@ -361,12 +361,8 @@ describe('ListSourcesProvider selected version', () => {
         HttpResponse.json({
           items,
           objects: Object.fromEntries(items.map((i) => [i.name, i])),
-          total: items.length,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: items.length,
+          next_page_token: null,
         } satisfies TSourceListResponse),
       ),
     );

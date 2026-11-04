@@ -1,3 +1,4 @@
+import { getNextPageToken } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -8,7 +9,7 @@ import { UseFetchInfiniteSourceColumnsProps } from './types';
 /**
  * @param source_name - The name of the source to fetch the columns for.
  * @param version - The version of the source to fetch the columns for.
- * @param per_page - The number of source columns to fetch per page.
+ * @param page_size - The number of source columns to fetch per page.
  */
 /**
  * @returns A list of source columns.
@@ -16,7 +17,7 @@ import { UseFetchInfiniteSourceColumnsProps } from './types';
 export const useFetchInfiniteSourceColumns = ({
   source_name,
   version,
-  per_page = 10,
+  page_size = 10,
 }: UseFetchInfiniteSourceColumnsProps = {}) => {
   const {
     data,
@@ -30,35 +31,28 @@ export const useFetchInfiniteSourceColumns = ({
     queryKey: QUERY_KEYS.sources.sourceColumns({
       source_name,
       version,
-      per_page,
+      page_size,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       sourceColumns({
         pathParams: { name: source_name ?? '' },
         queryParams: {
           version: version ?? '',
-          page: pageParam,
-          per_page: per_page ?? 10,
+          page_token: pageParam,
+          page_size: page_size ?? 10,
         },
         signal,
       }),
-    getNextPageParam: (lastPage) => {
-      const nextPage = lastPage.next_page;
-      return nextPage != null && nextPage > 0 ? nextPage : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
   });
 
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -67,7 +61,7 @@ export const useFetchInfiniteSourceColumns = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

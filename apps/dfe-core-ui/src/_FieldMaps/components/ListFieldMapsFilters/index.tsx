@@ -4,7 +4,7 @@ import { ListFieldMapsFilterForm } from './ListFieldMapsFilterForm';
 
 export const ListFieldMapsFilters = () => {
   const {
-    data: { items: fieldMaps, total },
+    data: { items: fieldMaps, total_size: total },
   } = useListFieldMapsContext();
 
   return (

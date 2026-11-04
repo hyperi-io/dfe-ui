@@ -45,12 +45,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
@@ -93,12 +89,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
 
       const expectedResponse = {
         items: expect.any(Array),
-        total: 25,
-        page: 1,
-        per_page: 10,
-        total_pages: 3,
-        next_page: 2,
-        prev_page: 0,
+        total_size: 25,
+        next_page_token: '10',
       };
 
       expect(result.current).toMatchObject({
@@ -195,7 +187,7 @@ describe('useFetchInfiniteFilteredGroups', () => {
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredGroups({ per_page: 10 }),
+        () => useFetchInfiniteFilteredGroups({ page_size: 10 }),
         {
           wrapper,
         },
@@ -229,9 +221,9 @@ describe('useFetchInfiniteFilteredGroups', () => {
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredGroups({ per_page: 5 }),
+        () => useFetchInfiniteFilteredGroups({ page_size: 5 }),
         {
           wrapper,
         },
@@ -244,9 +236,9 @@ describe('useFetchInfiniteFilteredGroups', () => {
       expect(result.current.data.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredGroups({ per_page: 100 }),
+        () => useFetchInfiniteFilteredGroups({ page_size: 100 }),
         {
           wrapper,
         },
@@ -278,12 +270,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
       // Data is empty array due to flattening logic when there's an error
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
     });
   });
@@ -309,7 +297,7 @@ describe('useFetchInfiniteFilteredGroups', () => {
         () =>
           useFetchInfiniteFilteredGroups({
             search: 'test',
-            per_page: 20,
+            page_size: 20,
           }),
         {
           wrapper,
@@ -388,12 +376,8 @@ describe('useFetchInfiniteFilteredGroups', () => {
         API_CONFIG_MOCKS.groups.default.get.success({
           mockedResponse: {
             items: [],
-            total: 0,
-            page: 0,
-            per_page: 0,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );

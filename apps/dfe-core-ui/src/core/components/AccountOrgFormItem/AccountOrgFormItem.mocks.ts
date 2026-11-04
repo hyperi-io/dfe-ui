@@ -35,12 +35,8 @@ export const listedOrgs = API_CONFIG_MOCKS.orgs.default.get.success({
       created_at: '',
       updated_at: '',
     })),
-    total: 2,
-    page: 1,
-    per_page: 10,
-    total_pages: 1,
-    next_page: null,
-    prev_page: null,
+    total_size: 2,
+    next_page_token: null,
   },
 });
 

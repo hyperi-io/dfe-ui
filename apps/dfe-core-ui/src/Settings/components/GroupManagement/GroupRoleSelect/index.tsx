@@ -18,7 +18,7 @@ export const GroupRoleSelect = (props: SelectProps) => {
     isFetchingNextPage,
   } = useFetchInfiniteFilteredRoles({
     search,
-    per_page: ROLES_PER_PAGE,
+    page_size: ROLES_PER_PAGE,
   });
 
   const options = useMemo(

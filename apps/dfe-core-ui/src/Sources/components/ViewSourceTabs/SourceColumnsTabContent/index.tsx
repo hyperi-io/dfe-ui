@@ -21,13 +21,13 @@ export const SourceColumnsTabContent = ({
     offset: 300,
   });
   const {
-    data: { items: sourceColumns = [], total = 0 } = {},
+    data: { items: sourceColumns = [], total_size: total = 0 } = {},
     error,
     isLoading,
     fetchNextPage: fetchNextPageSourceColumns,
     hasNextPage: hasNextPageSourceColumns,
     isFetchingNextPage: isFetchingNextPageSourceColumns,
-  } = useFetchInfiniteSourceColumns({ source_name, per_page: 50 });
+  } = useFetchInfiniteSourceColumns({ source_name, page_size: 50 });
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
@@ -137,7 +137,14 @@ export const SourceColumnsTabContent = ({
         rowKey="name"
         title={() => (
           <div className="flex items-center justify-between w-full">
-            <p> {total > 0 ? <>{total} columns</> : <>No columns loaded</>} </p>
+            <p>
+              {' '}
+              {(total ?? 0) > 0 ? (
+                <>{total} columns</>
+              ) : (
+                <>No columns loaded</>
+              )}{' '}
+            </p>
           </div>
         )}
         visibleColumns={['name', 'type', 'attribute', 'use_case', 'comment']}

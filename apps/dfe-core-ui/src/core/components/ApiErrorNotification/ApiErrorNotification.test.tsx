@@ -9,11 +9,12 @@ describe('ApiErrorNotification', () => {
       <ApiErrorNotification
         error={
           new ApiError(422, 'Unprocessable Entity', {
+            title: 'Error',
             code: 'validation_error',
-            message: '2 validation error(s)',
+            detail: '2 validation error(s)',
             errors: [
-              { field: 'name', message: 'Name is required' },
-              { field: 'columns', message: 'At least one column is required' },
+              { field: 'name', detail: 'Name is required' },
+              { field: 'columns', detail: 'At least one column is required' },
             ],
           })
         }
@@ -32,8 +33,9 @@ describe('ApiErrorNotification', () => {
       <ApiErrorNotification
         error={
           new ApiError(409, 'Conflict', {
+            title: 'Error',
             code: 'conflict',
-            message: "Source 'crates-audit' already exists",
+            detail: "Source 'crates-audit' already exists",
           })
         }
       />,

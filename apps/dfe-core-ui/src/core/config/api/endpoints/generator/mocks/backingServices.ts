@@ -1,4 +1,8 @@
-import { TBackingServicesResponse } from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
+import { problem } from '@/core/utils/test-utils/problem';
+import {
+  TBackingService,
+  TBackingServicesResponse,
+} from '@/Apps/hooks/backingServices/useFetchBackingServices/types';
 import { TUpdateBackingServiceVarResponse } from '@/Apps/hooks/backingServices/useUpdateBackingServiceVar/types';
 import { http, HttpResponse } from 'msw';
 import {
@@ -16,7 +20,7 @@ const declared = (value: unknown, isProtected = false) => ({
 
 /** Run by DFE, so every declared value reaches the service and none is read-only. */
 export const DFE_RUN: Pick<
-  TBackingServicesResponse[number],
+  TBackingService,
   | 'managed_by'
   | 'provider'
   | 'tier'
@@ -41,7 +45,7 @@ export const DFE_RUN: Pick<
  * storage locked, Kafka declaring nothing at all so every value falls to the
  * tier default the engine cannot see.
  */
-const DEFAULT_BACKING_SERVICES: TBackingServicesResponse = [
+const DEFAULT_BACKING_SERVICES: TBackingServicesResponse['items'] = [
   {
     ...DFE_RUN,
     service: 'clickhouse',
@@ -97,9 +101,9 @@ export const backingServices = {
     get: {
       success: ({
         mockedResponse = DEFAULT_BACKING_SERVICES,
-      }: { mockedResponse?: TBackingServicesResponse } = {}) =>
+      }: { mockedResponse?: TBackingServicesResponse['items'] } = {}) =>
         http.get(backingServices.default.mockedUrl, () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
       error: ({
         mockedResponse = DEFAULT_VALIDATION_ERROR,
@@ -157,10 +161,9 @@ export const backingServices = {
             .replace('{name}', name)
             .replace('{path}', path),
           () =>
-            HttpResponse.json(
-              { code: 'scale_down_refused', message, errors: [] },
-              { status: 400 },
-            ),
+            HttpResponse.json(problem(400, 'scale_down_refused', message), {
+              status: 400,
+            }),
         ),
     },
   },

@@ -16,25 +16,25 @@ const ROLE_LIMIT = 3;
 export const RoleManagement = () => {
   const [customRoleSearch, setCustomRoleSearch] = useState('');
   const {
-    data: { items: customRoles, total: customRolesTotal },
+    data: { items: customRoles, total_size: customRolesTotal },
     fetchNextPage: fetchCustomRolesNextPage,
     isLoading: isLoadingCustomRoles,
     error: errorCustomRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: 'custom',
-    per_page: ROLE_LIMIT,
+    page_size: ROLE_LIMIT,
     search: customRoleSearch,
   });
 
   const [coreRoleSearch, setCoreRoleSearch] = useState('');
   const {
-    data: { items: coreRoles, total: coreRolesTotal },
+    data: { items: coreRoles, total_size: coreRolesTotal },
     fetchNextPage: fetchCoreRolesNextPage,
     isLoading: isLoadingCoreRoles,
     error: errorCoreRoles,
   } = useFetchInfiniteFilteredRoles({
     resource_type: RESOURCE_TYPES.CORE,
-    per_page: ROLE_LIMIT,
+    page_size: ROLE_LIMIT,
     search: coreRoleSearch,
   });
 
@@ -89,7 +89,7 @@ export const RoleManagement = () => {
               </ul>
             )}
 
-            {customRoles.length < customRolesTotal && (
+            {customRoles.length < (customRolesTotal ?? 0) && (
               <Button
                 type="link"
                 className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"
@@ -164,7 +164,7 @@ export const RoleManagement = () => {
               </ul>
             )}
 
-            {coreRoles.length < coreRolesTotal && (
+            {coreRoles.length < (coreRolesTotal ?? 0) && (
               <Button
                 type="link"
                 className="text-foreground-muted dark:text-dark-foreground-muted text-sm hover:text-tertiary"

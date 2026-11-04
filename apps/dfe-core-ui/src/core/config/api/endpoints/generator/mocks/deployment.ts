@@ -3,7 +3,7 @@ import { ApiErrorResponseBody } from '@/core/config/api/client';
 import { http, HttpResponse } from 'msw';
 
 /** Every status the engine reports, so one render shows each marker. */
-const DEFAULT_ADMIN_LINKS: TAdminLinksResponse = [
+const DEFAULT_ADMIN_LINKS: TAdminLinksResponse['items'] = [
   {
     name: 'Argo CD',
     purpose: 'Sync, diff and roll back the deployed apps',
@@ -31,8 +31,11 @@ const DEFAULT_ADMIN_LINKS: TAdminLinksResponse = [
 ];
 
 const FORBIDDEN: ApiErrorResponseBody = {
+  type: 'about:blank',
+  title: 'Forbidden',
+  status: 403,
   code: 'forbidden',
-  message: "Action 'deployment:admin_links:read' denied",
+  detail: "Action 'deployment:admin_links:read' denied",
 };
 
 export const deployment = {
@@ -41,9 +44,9 @@ export const deployment = {
     get: {
       success: ({
         mockedResponse = DEFAULT_ADMIN_LINKS,
-      }: { mockedResponse?: TAdminLinksResponse } = {}) =>
+      }: { mockedResponse?: TAdminLinksResponse['items'] } = {}) =>
         http.get(deployment.adminLinks.mockedUrl, () =>
-          HttpResponse.json(mockedResponse),
+          HttpResponse.json({ items: mockedResponse }),
         ),
       error: ({
         mockedResponse = FORBIDDEN,

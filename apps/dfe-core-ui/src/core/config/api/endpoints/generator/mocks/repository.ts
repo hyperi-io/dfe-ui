@@ -68,7 +68,7 @@ export const repository = {
         scope_id = 'scope_id',
         namespace = 'namespace',
       }: {
-        mockedResponse?: TRepositoryObjectsResponse;
+        mockedResponse?: TRepositoryObjectsResponse['items'];
         scope?: RepositoryScope;
         scope_id?: string;
         namespace?: string;
@@ -79,7 +79,7 @@ export const repository = {
             .replace('{scope_id}', scope_id)
             .replace('{namespace}', namespace),
           () => {
-            return HttpResponse.json(mockedResponse);
+            return HttpResponse.json({ items: mockedResponse });
           },
         );
       },

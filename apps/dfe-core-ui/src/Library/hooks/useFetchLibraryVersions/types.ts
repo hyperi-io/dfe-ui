@@ -1,5 +1,6 @@
 import {
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientSuccessResponseBody,
 } from '@/core/config/api/client.types';
 
@@ -9,4 +10,5 @@ export type TLibraryVersionsResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof libraryVersionsPath, 'get'>
 >;
 
-export type TLibraryVersionSummary = TLibraryVersionsResponse[number];
+export type TLibraryVersionSummary =
+  DfeClientPageItem<TLibraryVersionsResponse>;

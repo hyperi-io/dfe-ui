@@ -171,10 +171,11 @@ describe('fieldErrorFrom', () => {
   // into context and leaves errors[] empty, so reading errors[] alone loses it.
   it('reads the refused path out of the error context', () => {
     const error = new ApiError(409, 'Conflict', {
+      title: 'Error',
       code: 'chart_derived',
-      message: 'the deployment sets this through kafka.mode',
+      detail: 'the deployment sets this through kafka.mode',
       errors: [],
-      context: { path: 'config.kafka.brokers' },
+      path: 'config.kafka.brokers',
     });
 
     expect(fieldErrorFrom(error)).toEqual({
@@ -185,8 +186,9 @@ describe('fieldErrorFrom', () => {
 
   it('returns nothing for an error that names no path', () => {
     const error = new ApiError(409, 'Conflict', {
+      title: 'Error',
       code: 'conflict',
-      message: 'stale',
+      detail: 'stale',
       errors: [],
     });
 

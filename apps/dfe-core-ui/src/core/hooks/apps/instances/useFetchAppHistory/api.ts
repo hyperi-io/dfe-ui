@@ -6,4 +6,4 @@ export const appHistoryPath = API_CONFIG.apps.history;
 
 export const fetchAppHistoryApi = (
   options: DfeClientRequestOptions<typeof appHistoryPath, 'get'>,
-) => apiClient.get(appHistoryPath, options);
+) => apiClient.getAll(appHistoryPath, options);

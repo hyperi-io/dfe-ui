@@ -1,3 +1,4 @@
+import { problem } from '@/core/utils/test-utils/problem';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -99,7 +100,7 @@ describe('AdminLinksPanel', () => {
   it('reports any other failure as an error', async () => {
     server.use(
       API_CONFIG_MOCKS.deployment.adminLinks.get.error({
-        mockedResponse: { code: 'internal_error', message: 'engine fell over' },
+        mockedResponse: problem(500, 'internal_error', 'engine fell over'),
         status: 500,
       }),
     );

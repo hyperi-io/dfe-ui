@@ -6,4 +6,4 @@ export const helmFileVariablesPath = API_CONFIG.helm.fileVariables;
 
 export const fetchHelmFileVariablesApi = (
   options: DfeClientRequestOptions<typeof helmFileVariablesPath, 'get'>,
-) => apiClient.get(helmFileVariablesPath, options);
+) => apiClient.getAll(helmFileVariablesPath, options);
