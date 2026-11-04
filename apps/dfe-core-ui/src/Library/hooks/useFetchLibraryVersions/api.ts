@@ -6,4 +6,4 @@ export const libraryVersionsPath = API_CONFIG.library.versions;
 
 export const fetchLibraryVersionsApi = (
   options: DfeClientRequestOptions<typeof libraryVersionsPath, 'get'>,
-) => apiClient.get(libraryVersionsPath, options);
+) => apiClient.getAll(libraryVersionsPath, options);

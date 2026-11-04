@@ -47,7 +47,7 @@ const parseFiltersFromParams = (
     searchParam === null || searchParam === '' ? undefined : searchParam;
   const sortByParam = params.get('sort_by');
   const sort_by: UseFetchInfiniteFilteredSchemasProps['sort_by'] =
-    sortByParam === 'path' || sortByParam === 'description'
+    sortByParam === 'path' || sortByParam === 'updated_at'
       ? sortByParam
       : undefined;
   const sortOrderParam = params.get('sort_order');
@@ -109,12 +109,8 @@ interface ListSchemasContextValue {
 const DEFAULT_SCHEMA_LIST_RESPONSE: TSchemaListResponse = {
   items: [] as TSchemaListResponse['items'],
   objects: {} as TSchemaListResponse['objects'],
-  total: 0,
-  page: 1,
-  per_page: 10,
-  total_pages: 0,
-  next_page: null,
-  prev_page: null,
+  total_size: 0,
+  next_page_token: null,
 };
 
 const ListSchemasContext = createContext<ListSchemasContextValue | null>(null);

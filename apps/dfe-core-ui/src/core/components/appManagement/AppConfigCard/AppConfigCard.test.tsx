@@ -351,7 +351,7 @@ describe('AppConfigCard', () => {
     server.use(
       http.get(CONFIG_URL, () =>
         HttpResponse.json(
-          { code: 'internal_error', message: 'engine is down' },
+          { title: 'Error', code: 'internal_error', detail: 'engine is down' },
           { status: 500 },
         ),
       ),

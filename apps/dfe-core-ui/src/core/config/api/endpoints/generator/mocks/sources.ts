@@ -74,12 +74,8 @@ export const sources = {
             items: [],
             children: {},
           },
-          total: 0,
-          page: 0,
-          per_page: 0,
-          total_pages: 0,
-          next_page: 0,
-          prev_page: 0,
+          total_size: 0,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TSourceListResponse;
@@ -134,12 +130,8 @@ export const sources = {
       success: ({
         mockedResponse = {
           items: [OKTA_CATALOGUE_ENTRY],
-          total: 1,
-          page: 1,
-          per_page: 20,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: 1,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TSourceCataloguesResponse;
@@ -196,12 +188,8 @@ export const sources = {
               argument_hint: 'sign_column',
             },
           ],
-          total: 3,
-          page: 1,
-          per_page: 100,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: 3,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TTableEnginesResponse;
@@ -486,11 +474,14 @@ export const sources = {
         );
       },
       // A refused flow answers with the engine's ErrorResponse, not a field
-      // validation error: what refused is a stage, and the message names it.
+      // validation error: what refused is a stage, and the detail names it.
       error: ({
         mockedResponse = {
+          type: 'about:blank',
+          title: 'Unprocessable Content',
+          status: 422,
           code: 'flow_error',
-          message: 'the flow cannot run as declared',
+          detail: 'the flow cannot run as declared',
         },
         status = 422,
         name = 'source',
@@ -542,12 +533,8 @@ export const sources = {
       success: ({
         mockedResponse = {
           items: [],
-          total: 0,
-          page: 0,
-          per_page: 0,
-          total_pages: 0,
-          next_page: 0,
-          prev_page: 0,
+          total_size: 0,
+          next_page_token: null,
         },
         source_name = 'source',
       }: {
@@ -727,7 +714,7 @@ export const sources = {
             {
               source: 'string',
               version: 'string',
-              task_id: 'string',
+              operation: 'operations/string',
               kind: 'string',
             },
           ],
@@ -889,12 +876,8 @@ export const sources = {
               description: 'string',
             },
           ],
-          total: 1,
-          page: 1,
-          per_page: 10,
-          total_pages: 1,
-          next_page: null,
-          prev_page: null,
+          total_size: 1,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TInfiniteFilteredSourceCatalogueTagsResponse;

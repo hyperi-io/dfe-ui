@@ -1,3 +1,4 @@
+import { getNextPageToken } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -8,7 +9,8 @@ import { UseFetchInfiniteSourceCataloguesProps } from './types';
 /**
  * @param search - The search query to filter the source catalogues by.
  * @param intake - The intake to filter the source catalogues by.
- * @param per_page - The number of source catalogues to fetch per page.
+ * @param page_size - The number of source catalogues to fetch per page.
+ * @param page - The one-based page to open at, read as `skip` on the first request.
  */
 /**
  * @returns A list of source catalogues.
@@ -19,7 +21,7 @@ export const useFetchInfiniteSourceCatalogues = ({
   tags,
   engine,
   include_stored,
-  per_page = 10,
+  page_size = 10,
   // Allow page control from the caller
   page,
 }: UseFetchInfiniteSourceCataloguesProps = {}) => {
@@ -38,10 +40,10 @@ export const useFetchInfiniteSourceCatalogues = ({
       tags,
       engine,
       include_stored,
-      per_page,
+      page_size,
       page,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       sourceCatalogues({
         queryParams: {
           search: search,
@@ -49,16 +51,14 @@ export const useFetchInfiniteSourceCatalogues = ({
           tags: tags,
           engine,
           include_stored,
-          per_page: per_page ?? 10,
-          page: page ?? pageParam,
+          page_size: page_size ?? 10,
+          page_token: pageParam,
+          skip: page && !pageParam ? (page - 1) * page_size : undefined,
         },
         signal,
       }),
-    getNextPageParam: (lastPage) => {
-      const nextPage = lastPage.next_page;
-      return nextPage != null && nextPage > 0 ? nextPage : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
     placeholderData: keepPreviousData,
   });
 
@@ -66,12 +66,8 @@ export const useFetchInfiniteSourceCatalogues = ({
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -80,7 +76,7 @@ export const useFetchInfiniteSourceCatalogues = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

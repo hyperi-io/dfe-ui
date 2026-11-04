@@ -2,13 +2,15 @@ import {
   ENGINE_READ_DEADLINE_MS,
   ENGINE_WRITE_DEADLINE_MS,
 } from '@/core/config/engineTimeout';
-import type { paths } from '@repo/dfe-engine-types';
+import type { components, paths } from '@repo/dfe-engine-types';
 import type {
   DfeClientHttpMethod,
   DfeClientOperationFor,
+  DfeClientPageItem,
   DfeClientRequestOptions,
   DfeClientSuccessResponseBody,
 } from './client.types';
+import { fetchAllPages, MAX_PAGE_SIZE } from './pagination';
 
 /** The engine's `:path` route params, whose value spans several segments. */
 const MULTI_SEGMENT_PARAMS = new Set(['schema_path', 'label']);
@@ -243,10 +245,14 @@ export function createApiClient(config: ApiClientConfig) {
     // The browser follows the proxy's login redirect itself, so a response that
     // was redirected answered for a request the engine never saw.
     if (res.redirected) {
-      throw new ApiError(res.status, res.statusText, {
-        code: 'invalid_response',
-        message: `The request was redirected to ${res.url} and never reached the engine.`,
-      });
+      throw new ApiError(
+        res.status,
+        res.statusText,
+        invalidResponse(
+          res.status,
+          `The request was redirected to ${res.url} and never reached the engine.`,
+        ),
+      );
     }
 
     const contentType = res.headers.get('Content-Type');
@@ -261,10 +267,14 @@ export function createApiClient(config: ApiClientConfig) {
       return empty;
     }
 
-    throw new ApiError(res.status, res.statusText, {
-      code: 'invalid_response',
-      message: `The API answered ${res.status} with ${contentType ?? 'no content type'} instead of JSON, so the request never reached the engine.`,
-    });
+    throw new ApiError(
+      res.status,
+      res.statusText,
+      invalidResponse(
+        res.status,
+        `The API answered ${res.status} with ${contentType ?? 'no content type'} instead of JSON, so the request never reached the engine.`,
+      ),
+    );
   }
 
   async function request<
@@ -309,6 +319,38 @@ export function createApiClient(config: ApiClientConfig) {
       return request(path, 'get', options);
     },
 
+    /**
+     * Every item of a list, read in pages of the largest size the engine allows
+     * until `next_page_token` runs out. For a list the console shows whole.
+     */
+    getAll<Path extends keyof paths>(
+      path: Path,
+      options?: DfeClientRequestOptions<Path, 'get'>,
+    ): Promise<
+      DfeClientPageItem<
+        DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'get'>>
+      >[]
+    > {
+      return fetchAllPages(
+        (page_token) =>
+          request(path, 'get', {
+            ...options,
+            queryParams: {
+              ...(options?.queryParams as object | undefined),
+              page_size: MAX_PAGE_SIZE,
+              page_token,
+            },
+          } as unknown as DfeClientRequestOptions<Path, 'get'>) as Promise<{
+            items: unknown[];
+            next_page_token?: string | null;
+          }>,
+      ) as Promise<
+        DfeClientPageItem<
+          DfeClientSuccessResponseBody<DfeClientOperationFor<Path, 'get'>>
+        >[]
+      >;
+    },
+
     post<Path extends keyof paths>(
       path: Path,
       options?: DfeClientRequestOptions<Path, 'post'>,
@@ -348,20 +390,17 @@ export function createApiClient(config: ApiClientConfig) {
 }
 
 /* import-scope-drift-disable - (exported for tests) */
-/** Extracts a user-facing message from an error detail */
+/** Extracts a user-facing message from an error detail: a problem's `detail`, else its `title`. */
 export function getErrorMessage(detail: unknown): string {
   if (detail != null) {
     if (typeof detail === 'string') return detail;
     if (typeof detail === 'object') {
-      if (
-        'message' in detail &&
-        typeof (detail as { message: unknown }).message === 'string'
-      ) {
-        return (detail as { message: string }).message;
-      }
-      if ('detail' in detail && typeof detail.detail === 'string') {
-        return (detail as { detail: string }).detail;
-      }
+      const { detail: text, title } = detail as {
+        detail?: unknown;
+        title?: unknown;
+      };
+      if (typeof text === 'string' && text) return text;
+      if (typeof title === 'string' && title) return title;
     }
   }
   return String(detail);
@@ -391,23 +430,26 @@ export class ApiTimeoutError extends Error {
   }
 }
 
-/** The engine's FieldError: which field was refused and why. */
-type ApiErrorFieldDetail = {
-  /** Dotted path to the invalid field, empty when the whole body was refused. */
-  field?: string;
-  message: string;
-  code?: string;
-};
+/**
+ * The engine's RFC 9457 problem+json body: `title`, `status`, `detail` and a
+ * stable `code`, with `errors[]` for refused fields. A problem can carry
+ * further members, such as `head` on a 409.
+ */
+export type ApiErrorResponseBody = components['schemas']['Problem'];
 
-/** The engine's ErrorResponse: a machine-readable code beside the prose. */
-export type ApiErrorResponseBody = {
-  code?: string;
-  message: string;
-  errors?: ApiErrorFieldDetail[];
-  context?: Record<string, unknown> | null;
-};
+/** A problem the client raises itself for an answer the engine did not send. */
+const invalidResponse = (
+  status: number,
+  detail: string,
+): ApiErrorResponseBody => ({
+  type: 'about:blank',
+  title: 'Invalid response',
+  status,
+  detail,
+  code: 'invalid_response',
+});
 
-/** Parsed error JSON body from a failed request (`ApiError.detail`). */
+/** Parsed problem+json body from a failed request (`ApiError.detail`). */
 export function getApiErrorResponseBody(
   error: unknown,
 ): ApiErrorResponseBody | null {
@@ -415,8 +457,8 @@ export function getApiErrorResponseBody(
   const { detail } = error;
   if (detail == null || typeof detail !== 'object') return null;
   if (
-    !('message' in detail) ||
-    typeof (detail as { message: unknown }).message !== 'string'
+    !('title' in detail) ||
+    typeof (detail as { title: unknown }).title !== 'string'
   ) {
     return null;
   }
@@ -434,10 +476,22 @@ export function getApiErrorFieldMessages(error: unknown): string[] {
   const errors = getApiErrorResponseBody(error)?.errors;
   if (!Array.isArray(errors)) return [];
   return errors
-    .filter((detail) => typeof detail?.message === 'string' && detail.message)
+    .filter((detail) => typeof detail?.detail === 'string' && detail.detail)
     .map((detail) =>
-      detail.field ? `${detail.field}: ${detail.message}` : detail.message,
+      detail.field ? `${detail.field}: ${detail.detail}` : detail.detail,
     );
+}
+
+/** The summary and the per-field lines of a failed request, as the schema forms show them. */
+export function getApiErrorSummary(error: unknown): {
+  message: string;
+  errors: { message: string }[];
+} {
+  const body = getApiErrorResponseBody(error);
+  return {
+    message: body?.detail ?? 'An unexpected error occurred',
+    errors: (body?.errors ?? []).map(({ detail }) => ({ message: detail })),
+  };
 }
 
 /** The refused fields as form field errors, each name split from the engine's dotted path; a refusal that names no field is left out. */
@@ -448,10 +502,10 @@ export function getApiErrorFields(
   if (!Array.isArray(errors)) return [];
   const byField = new Map<string, string[]>();
   for (const detail of errors) {
-    if (!detail?.field || typeof detail.message !== 'string') continue;
+    if (!detail?.field || typeof detail.detail !== 'string') continue;
     byField.set(detail.field, [
       ...(byField.get(detail.field) ?? []),
-      detail.message,
+      detail.detail,
     ]);
   }
   return Array.from(byField, ([field, messages]) => ({
@@ -482,12 +536,14 @@ export function getApiWriteConflict(error: unknown): ApiWriteConflict | null {
   if (!(error instanceof ApiError)) return null;
   if (error.status !== 409 && error.status !== 412) return null;
   const body = getApiErrorResponseBody(error);
-  if (body?.code !== 'conflict') return null;
-  const head = body.context?.head;
+  const message = body?.detail ?? body?.title;
+  if (!body || !message) return null;
+  if (body.code !== 'conflict') return null;
+  const head = body.head;
   if (typeof head !== 'string' || head === '') return null;
-  const current = body.context?.current;
+  const current = body.current;
   return {
-    message: body.message,
+    message,
     head,
     ...(typeof current === 'string' && current !== '' && { current }),
   };

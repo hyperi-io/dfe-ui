@@ -34,7 +34,7 @@ export const QUERY_KEYS = Object.freeze({
       status,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredSourcesProps = {}) => {
       return [
         'sources',
@@ -42,7 +42,7 @@ export const QUERY_KEYS = Object.freeze({
         ...(status ? ['status', status] : []),
         ...(sort_by ? ['sort_by', sort_by] : []),
         ...(sort_order ? ['sort_order', sort_order] : []),
-        ...(per_page ? ['per_page', per_page] : []),
+        ...(page_size ? ['page_size', page_size] : []),
       ];
     },
     source: ({
@@ -71,14 +71,14 @@ export const QUERY_KEYS = Object.freeze({
     sourceColumns: ({
       source_name,
       version,
-      per_page,
+      page_size,
     }: UseFetchInfiniteSourceColumnsProps = {}) => [
       'sources',
       '{name}',
       'columns',
       ...(source_name ? [source_name] : []),
       ...(version ? [version] : []),
-      ...(per_page ? [per_page] : []),
+      ...(page_size ? [page_size] : []),
     ],
     sourceBuild: () => ['sources', '{name}', 'build'],
     sourceVersion: () => ['sources', '{name}', 'versions', '{version}'],
@@ -92,7 +92,7 @@ export const QUERY_KEYS = Object.freeze({
       tags,
       engine,
       include_stored,
-      per_page,
+      page_size,
       page,
     }: UseFetchInfiniteSourceCataloguesProps = {}) => [
       'sources',
@@ -102,21 +102,19 @@ export const QUERY_KEYS = Object.freeze({
       ...(tags ? ['tags', tags.join(',')] : []),
       ...(engine ? ['engine', engine] : []),
       ...(include_stored ? ['include_stored'] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
       ...(page ? ['page', page] : []),
     ],
     fromCatalogue: () => ['sources', 'from-catalogue'],
     engines: () => ['sources', 'engines'],
     catalogueTags: ({
       name,
-      page,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredSourceCatalogueTagsProps = {}) => [
       'sources',
       'catalogue-tags',
       ...(name ? [name] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
   },
   ingest: {
@@ -137,14 +135,14 @@ export const QUERY_KEYS = Object.freeze({
       standard,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredFieldMapsProps = {}) => [
       'field-maps',
       ...(search ? ['search', search] : []),
       ...(standard ? ['standard', standard] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     standard: ({ standard }: { standard?: string | null } = {}) => [
       'field-maps',
@@ -170,7 +168,7 @@ export const QUERY_KEYS = Object.freeze({
       source,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredRulesProps = {}) => [
       'rules',
       ...(search ? ['search', search] : []),
@@ -178,7 +176,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(source ? ['source', source] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     validate: () => ['rules', 'validate'],
     rule: ({ name }: { name?: string | null } = {}) => [
@@ -193,7 +191,7 @@ export const QUERY_KEYS = Object.freeze({
       hunt,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredAlertsProps = {}) => [
       'alerts',
       'destinations',
@@ -201,7 +199,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(hunt ? ['hunt', hunt] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     destination: ({ name }: { name?: string | null } = {}) => [
       'alerts',
@@ -220,14 +218,14 @@ export const QUERY_KEYS = Object.freeze({
       schema_type,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredSchemasProps = {}) => [
       'schemas',
       ...(search ? ['search', search] : []),
       ...(schema_type?.length ? ['schema_type', schema_type.join(',')] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     schemaVersions: () => [
       'schemas',
@@ -259,7 +257,7 @@ export const QUERY_KEYS = Object.freeze({
       comment,
       attribute,
       selectedSearchableColumns,
-      per_page,
+      page_size,
     }: {
       schema_path?: string | null;
       version?: string | null;
@@ -271,7 +269,7 @@ export const QUERY_KEYS = Object.freeze({
       comment?: string | null;
       attribute?: string | null;
       selectedSearchableColumns?: string[] | null;
-      per_page?: number | null;
+      page_size?: number | null;
     } = {}) => [
       'schemas',
       'definitions',
@@ -290,7 +288,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(selectedSearchableColumns
         ? ['selectedSearchableColumns', selectedSearchableColumns.join(',')]
         : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     elasticConvert: () => ['schemas', 'elastic-converter'],
     sampleRows: ({
@@ -332,15 +330,13 @@ export const QUERY_KEYS = Object.freeze({
       search,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredOrganisationsProps = {}) => [
       'orgs',
       ...(search ? ['search', search] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     org: ({ name }: { name?: string | null } = {}) => [
       'orgs',
@@ -353,16 +349,14 @@ export const QUERY_KEYS = Object.freeze({
       search,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }: useFetchInfiniteFilteredGroupsProps = {}) => [
       'auth',
       'groups',
       ...(search ? ['search', search] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     group: ({ name }: { name?: string | null } = {}) => [
       'auth',
@@ -381,8 +375,7 @@ export const QUERY_KEYS = Object.freeze({
       blocked,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }: TFetchAccountsQueryParams = {}) => [
       'auth',
       'accounts',
@@ -392,8 +385,7 @@ export const QUERY_KEYS = Object.freeze({
       ...(blocked ? ['blocked', blocked] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     account: ({ username }: { username?: string | null } = {}) => [
       'auth',
@@ -409,13 +401,13 @@ export const QUERY_KEYS = Object.freeze({
     default: ({
       search,
       resource_type,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredRolesProps = {}) => [
       'auth',
       'roles',
       ...(search ? ['search', search] : []),
       ...(resource_type ? ['resource_type', resource_type] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     role: ({ name }: { name?: string | null } = {}) => [
       'auth',
@@ -425,13 +417,13 @@ export const QUERY_KEYS = Object.freeze({
     ],
     scopes: ({
       search,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredRoleScopesProps = {}) => [
       'auth',
       'roles',
       'scopes',
       ...(search ? ['search', search] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
   },
   hunts: {
@@ -439,13 +431,13 @@ export const QUERY_KEYS = Object.freeze({
       search,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredHuntsProps = {}) => [
       'hunts',
       ...(search ? ['search', search] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     engineStatus: () => ['hunts', 'status'],
     hunt: ({ name }: { name?: string | null } = {}) => [
@@ -474,16 +466,14 @@ export const QUERY_KEYS = Object.freeze({
       search,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }: UseFetchInfiniteFilteredOidcProvidersProps = {}) => [
       'auth',
       'oidc-providers',
       ...(search ? ['search', search] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     provider: ({ name }: { name?: string | null } = {}) => [
       'auth',
@@ -859,15 +849,13 @@ export const QUERY_KEYS = Object.freeze({
     defaults: () => ['system', 'defaults'],
     defaultsDrift: ({
       search,
-      page,
-      per_page,
+      page_size,
     }: UseFetchInfiniteDefaultsDriftSourcesProps = {}) => [
       'system',
       'defaults',
       'drift',
       ...(search ? ['search', search] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     applyDefaults: () => ['system', 'defaults', 'apply'],
     deployment: () => ['system', 'deployment'],
@@ -877,16 +865,14 @@ export const QUERY_KEYS = Object.freeze({
       search,
       sort_by,
       sort_order,
-      page,
-      per_page,
+      page_size,
     }: useFetchInfiniteFilteredApiKeysProps = {}) => [
       'auth',
       'api-keys',
       ...(search ? ['search', search] : []),
       ...(sort_by ? ['sort_by', sort_by] : []),
       ...(sort_order ? ['sort_order', sort_order] : []),
-      ...(page ? ['page', page] : []),
-      ...(per_page ? ['per_page', per_page] : []),
+      ...(page_size ? ['page_size', page_size] : []),
     ],
     apiKey: () => ['auth', 'api-keys', '{short_token}'],
   },

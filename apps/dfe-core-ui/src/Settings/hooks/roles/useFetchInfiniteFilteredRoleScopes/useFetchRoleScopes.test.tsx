@@ -47,13 +47,9 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
-        scopes: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        items: [],
+        total_size: 0,
+        next_page_token: null,
       });
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
@@ -75,8 +71,8 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       const responseItem: TRoleScopeItem = 'string';
 
       expect(result.current.data).toBeDefined();
-      expect(result.current.data.scopes).toHaveLength(10);
-      expect(result.current.data.scopes[0]).toBe(responseItem);
+      expect(result.current.data.items).toHaveLength(10);
+      expect(result.current.data.items[0]).toBe(responseItem);
       expect(result.current.isError).toBe(false);
     });
 
@@ -93,13 +89,9 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       });
 
       const expectedResponse = {
-        scopes: expect.any(Array),
-        total: 25,
-        page: 1,
-        per_page: 10,
-        total_pages: 3,
-        next_page: 2,
-        prev_page: 0,
+        items: expect.any(Array),
+        total_size: 25,
+        next_page_token: '10',
       };
 
       expect(result.current).toMatchObject({
@@ -130,7 +122,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.scopes).toHaveLength(10);
+      expect(result.current.data.items).toHaveLength(10);
 
       // Fetch next page
       void result.current.fetchNextPage();
@@ -138,14 +130,14 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       // Wait for next page data to be loaded (20 items)
       await waitFor(
         () => {
-          expect(result.current.data.scopes).toHaveLength(20);
+          expect(result.current.data.items).toHaveLength(20);
         },
         { timeout: 3000 },
       );
 
       // Data should be flattened - 20 items total
-      expect(result.current.data.scopes[0]).toBe('string');
-      expect(result.current.data.scopes[10]).toBe('string');
+      expect(result.current.data.items[0]).toBe('string');
+      expect(result.current.data.items[10]).toBe('string');
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
@@ -162,27 +154,27 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       });
 
       // Initial page has 10 items
-      expect(result.current.data.scopes).toHaveLength(10);
+      expect(result.current.data.items).toHaveLength(10);
 
       // Fetch page 2
       await result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.scopes.length).toBe(20);
+          expect(result.current.data.items.length).toBe(20);
         },
         { timeout: 3000 },
       );
 
       // Verify we have 20 items (pages 1 and 2)
-      expect(result.current.data.scopes).toHaveLength(20);
-      expect(result.current.data.scopes[0]).toBe('string');
-      expect(result.current.data.scopes[10]).toBe('string');
-      expect(result.current.data.scopes[19]).toBe('string');
+      expect(result.current.data.items).toHaveLength(20);
+      expect(result.current.data.items[0]).toBe('string');
+      expect(result.current.data.items[10]).toBe('string');
+      expect(result.current.data.items[19]).toBe('string');
     });
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoleScopes({ per_page: 10 }),
+        () => useFetchInfiniteFilteredRoleScopes({ page_size: 10 }),
         {
           wrapper,
         },
@@ -196,7 +188,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.scopes.length).toBeGreaterThanOrEqual(20);
+          expect(result.current.data.items.length).toBeGreaterThanOrEqual(20);
         },
         { timeout: 3000 },
       );
@@ -205,20 +197,20 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       void result.current.fetchNextPage();
       await waitFor(
         () => {
-          expect(result.current.data.scopes).toHaveLength(25);
+          expect(result.current.data.items).toHaveLength(25);
         },
         { timeout: 3000 },
       );
 
       // All 25 items should be loaded, no more pages
-      expect(result.current.data.scopes).toHaveLength(25);
+      expect(result.current.data.items).toHaveLength(25);
     });
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoleScopes({ per_page: 5 }),
+        () => useFetchInfiniteFilteredRoleScopes({ page_size: 5 }),
         {
           wrapper,
         },
@@ -228,12 +220,12 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.scopes).toHaveLength(5);
+      expect(result.current.data.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredRoleScopes({ per_page: 100 }),
+        () => useFetchInfiniteFilteredRoleScopes({ page_size: 100 }),
         {
           wrapper,
         },
@@ -244,7 +236,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       });
 
       // Should return all 25 items
-      expect(result.current.data.scopes).toHaveLength(25);
+      expect(result.current.data.items).toHaveLength(25);
     });
   });
 
@@ -267,13 +259,9 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       expect(result.current.error).toBeDefined();
       // Data is empty array due to flattening logic when there's an error
       expect(result.current.data).toEqual({
-        scopes: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        items: [],
+        total_size: 0,
+        next_page_token: null,
       });
     });
   });
@@ -291,7 +279,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.scopes).toBeDefined();
+      expect(result.current.data.items).toBeDefined();
     });
 
     it('should handle multiple filters simultaneously', async () => {
@@ -299,7 +287,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         () =>
           useFetchInfiniteFilteredRoleScopes({
             search: 'test',
-            per_page: 20,
+            page_size: 20,
           }),
         {
           wrapper,
@@ -310,7 +298,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.scopes).toBeDefined();
+      expect(result.current.data.items).toBeDefined();
     });
   });
 
@@ -346,7 +334,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       });
 
       expect(result.current.isFetchingNextPage).toBe(false);
-      const initialLength = result.current.data.scopes.length;
+      const initialLength = result.current.data.items.length;
 
       // Start fetching next page
       void result.current.fetchNextPage();
@@ -354,7 +342,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       // Wait for data to update
       await waitFor(
         () => {
-          expect(result.current.data.scopes.length).toBeGreaterThan(
+          expect(result.current.data.items.length).toBeGreaterThan(
             initialLength,
           );
         },
@@ -386,16 +374,12 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       server.use(
         API_CONFIG_MOCKS.roles.scopes.get.success({
           mockedResponse: {
-            scopes: [],
+            items: [],
             wildcard: false,
             argo_namespace_prefix: 'string',
             notes: 'string',
-            total: 0,
-            page: 0,
-            per_page: 0,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );
@@ -411,7 +395,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data.scopes).toHaveLength(0);
+      expect(result.current.data.items).toHaveLength(0);
       expect(result.current.isError).toBe(false);
     });
   });
@@ -434,7 +418,7 @@ describe('useFetchInfiniteFilteredRoleScopes', () => {
       rerender({ search: 'new search' });
 
       // The query should still be using the old keyword initially
-      expect(result.current.data.scopes).toBeDefined();
+      expect(result.current.data.items).toBeDefined();
     });
   });
 });

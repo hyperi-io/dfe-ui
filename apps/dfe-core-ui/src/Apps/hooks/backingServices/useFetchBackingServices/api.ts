@@ -6,4 +6,4 @@ export const backingServicesPath = API_CONFIG.backingServices.default;
 
 export const fetchBackingServicesApi = (
   options?: DfeClientRequestOptions<typeof backingServicesPath, 'get'>,
-) => apiClient.get(backingServicesPath, options);
+) => apiClient.getAll(backingServicesPath, options);

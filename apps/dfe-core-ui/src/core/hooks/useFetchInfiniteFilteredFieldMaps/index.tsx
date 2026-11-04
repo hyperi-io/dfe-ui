@@ -1,3 +1,4 @@
+import { getNextPageToken, toOrderBy } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
@@ -10,7 +11,7 @@ import { UseFetchInfiniteFilteredFieldMapsProps } from './types';
  * @param search - The search query to filter the field maps by standard and source names.
  * @param sort_by - The field to sort the field maps by (standard, source, mapping_count).
  * @param sort_order - The order to sort the field maps by.
- * @param per_page - The number of field maps to fetch per page.
+ * @param page_size - The number of field maps to fetch per page.
  */
 /**
  * @returns A list of field maps.
@@ -20,7 +21,7 @@ export const useFetchInfiniteFilteredFieldMaps = ({
   standard,
   sort_by,
   sort_order,
-  per_page,
+  page_size,
 }: UseFetchInfiniteFilteredFieldMapsProps = {}) => {
   const {
     data,
@@ -36,39 +37,29 @@ export const useFetchInfiniteFilteredFieldMaps = ({
       standard,
       sort_by,
       sort_order,
-      per_page,
+      page_size,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchInfiniteFieldMaps({
         queryParams: {
           search: search,
           standard: standard,
-          sort_by,
-          sort_order,
-          page: pageParam,
-          per_page,
+          order_by: toOrderBy(sort_by, sort_order),
+          page_token: pageParam,
+          page_size,
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
   });
 
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -77,7 +68,7 @@ export const useFetchInfiniteFilteredFieldMaps = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

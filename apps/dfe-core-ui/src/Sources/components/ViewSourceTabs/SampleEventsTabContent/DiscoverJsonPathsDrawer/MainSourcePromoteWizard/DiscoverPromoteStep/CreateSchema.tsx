@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SCHEMA_FIELD_TYPES } from '@/core/components/CreateSchemaForm/fieldType.constants';
 import { ReviewCreateSchemaForm } from '@/core/components/ReviewCreateSchemaForm';
-import { getApiErrorResponseBody } from '@/core/config/api/client';
+import { getApiErrorSummary } from '@/core/config/api/client';
 import {
   CreateSchemaReviewProvider,
   useCreateSchemaReviewContext,
@@ -63,11 +63,7 @@ export const CreateSchemaBase = ({
         onSuccess?.(response);
       },
       onError: (error) => {
-        const body = getApiErrorResponseBody(error);
-        setFormErrorMessage({
-          message: body?.message ?? 'An unexpected error occurred',
-          errors: body?.errors ?? [],
-        });
+        setFormErrorMessage(getApiErrorSummary(error));
       },
     },
   );

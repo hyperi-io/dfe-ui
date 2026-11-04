@@ -1,3 +1,4 @@
+import { getNextPageToken } from '@/core/config/api/pagination';
 import { QUERY_KEYS } from '@/core/config/api/endpoints/queryKeys';
 import { useDebounce } from '@/core/hooks/useDebounce';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -11,7 +12,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 /**
  * @param search - The search query to filter the roles by name and description.
  * @param resource_type - The type of the resource to filter the roles by (organisation, source, schema, service).
- * @param per_page - The number of roles to fetch per page.
+ * @param page_size - The number of roles to fetch per page.
  */
 /**
  * @returns A list of roles.
@@ -19,7 +20,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export const useFetchInfiniteFilteredRoles = ({
   search,
   resource_type,
-  per_page,
+  page_size,
 }: UseFetchInfiniteFilteredRolesProps = {}) => {
   const debouncedSearch = useDebounce(search ?? '', SEARCH_DEBOUNCE_MS);
 
@@ -35,37 +36,28 @@ export const useFetchInfiniteFilteredRoles = ({
     queryKey: QUERY_KEYS.roles.default({
       search: debouncedSearch,
       resource_type: resource_type as ResourceType,
-      per_page,
+      page_size,
     }),
-    queryFn: async ({ pageParam = 1, signal }) =>
+    queryFn: async ({ pageParam, signal }) =>
       fetchInfiniteFilteredRoles({
         queryParams: {
           search: debouncedSearch || undefined,
           resource_type: resource_type as ResourceType,
-          page: pageParam,
-          per_page,
+          page_token: pageParam,
+          page_size,
         },
         signal,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const pageSize = per_page ?? lastPage.per_page;
-      const hasMore =
-        lastPage.items && pageSize > 0 && lastPage.items.length >= pageSize;
-      return hasMore ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
+    getNextPageParam: getNextPageToken,
+    initialPageParam: undefined as string | undefined,
   });
 
   const flattenedData = useMemo(() => {
     if (!data?.pages?.length) {
       return {
         items: [],
-        total: 0,
-        page: 1,
-        per_page: per_page ?? 10,
-        total_pages: 0,
-        next_page: null as number | null,
-        prev_page: null as number | null,
+        total_size: 0,
+        next_page_token: null,
       };
     }
 
@@ -74,7 +66,7 @@ export const useFetchInfiniteFilteredRoles = ({
       ...data.pages[0],
       items: allItems,
     };
-  }, [data, per_page]);
+  }, [data]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

@@ -12,7 +12,7 @@ export const TagSelect = ({
     hasNextPage,
     fetchNextPage,
   } = useFetchInfiniteFilteredSourceCatalogueTags({
-    per_page: 9,
+    page_size: 9,
   });
 
   return (

@@ -3,4 +3,5 @@ import { API_CONFIG } from '@/core/config/api/endpoints';
 
 export const governanceActionsPath = API_CONFIG.governance.actions;
 
-export const governanceActionsApi = () => apiClient.get(governanceActionsPath);
+export const governanceActionsApi = () =>
+  apiClient.getAll(governanceActionsPath);

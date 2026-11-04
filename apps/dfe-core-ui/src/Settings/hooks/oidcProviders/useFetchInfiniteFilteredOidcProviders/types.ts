@@ -14,7 +14,6 @@ export interface UseFetchInfiniteFilteredOidcProvidersProps {
   search?: string;
   sort_by?: 'name' | 'type' | 'created_at';
   sort_order?: 'asc' | 'desc';
-  page?: number;
-  per_page?: number;
+  page_size?: number;
   enabled?: boolean;
 }

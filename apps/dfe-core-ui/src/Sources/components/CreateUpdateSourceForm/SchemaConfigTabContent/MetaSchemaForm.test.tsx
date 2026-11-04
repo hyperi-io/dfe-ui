@@ -302,12 +302,8 @@ describe('MetaSchemaForm Engine', () => {
       API_CONFIG_MOCKS.sources.engines.get.success({
         mockedResponse: {
           items: [],
-          total: 0,
-          page: 1,
-          per_page: 100,
-          total_pages: 0,
-          next_page: null,
-          prev_page: null,
+          total_size: 0,
+          next_page_token: null,
         },
       }),
     );

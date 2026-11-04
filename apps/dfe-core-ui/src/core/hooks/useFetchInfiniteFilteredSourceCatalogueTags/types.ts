@@ -11,8 +11,7 @@ export type TInfiniteFilteredSourceCatalogueTagsResponse =
 
 interface TInfiniteFilteredSourceCatalogueTagsRequestParams {
   name?: string;
-  page?: number;
-  per_page?: number;
+  page_size?: number;
 }
 
 export type UseFetchInfiniteFilteredSourceCatalogueTagsProps =

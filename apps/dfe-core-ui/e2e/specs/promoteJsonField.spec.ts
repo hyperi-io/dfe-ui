@@ -44,17 +44,14 @@ const API_USE_CASE = 'substring_search';
 
 type MetaSchemaColumns = {
   current: string;
-  version: {
-    columns: {
-      items: {
-        name: string;
-        type: string;
-        use_case: string | null;
-        expr: string;
-        _field_type: string;
-      }[];
-    };
-  };
+  next_page_token?: string | null;
+  items: {
+    name: string;
+    type: string;
+    use_case: string | null;
+    expr: string;
+    _field_type: string;
+  }[];
 };
 
 type PromoteResponse = {
@@ -77,12 +74,12 @@ type JsonPaths = { paths: { path: string; promoted_to?: string | null }[] };
 const metaSchemaColumns = (schema: string, version: string) =>
   engine<MetaSchemaColumns>(
     'GET',
-    `/api/v1/schemas/definitions/${schema}/versions/columns?version=${version}&per_page=-1`,
+    `/api/v1/schemas/definitions/${schema}/versions/columns?version=${version}&page_size=1000`,
   );
 
 const columnNamed = async (schema: string, version: string, name: string) => {
-  const { version: v } = await metaSchemaColumns(schema, version);
-  return v.columns.items.find((column) => column.name === name);
+  const { items } = await metaSchemaColumns(schema, version);
+  return items.find((column) => column.name === name);
 };
 
 const sourceSchemaPin = async () => {

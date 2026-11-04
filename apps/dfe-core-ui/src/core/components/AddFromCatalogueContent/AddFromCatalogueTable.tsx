@@ -75,13 +75,13 @@ export const AddFromCatalogueTable = ({
   }, [filterTagsKey]);
 
   const {
-    data: { items: entries, total },
+    data: { items: entries, total_size: total },
     isLoading,
     isFetchingNextPage,
   } = useFetchInfiniteSourceCatalogues({
     search,
     intake: intakeFilter,
-    per_page: pageSize,
+    page_size: pageSize,
     tags: searchTags,
     page,
   });

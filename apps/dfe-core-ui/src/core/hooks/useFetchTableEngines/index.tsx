@@ -10,7 +10,7 @@ export const useFetchTableEngines = () => {
     staleTime: Infinity,
     queryFn: ({ signal }) =>
       fetchTableEngines({
-        queryParams: { per_page: 100 },
+        queryParams: { page_size: 100 },
         signal,
       }),
   });

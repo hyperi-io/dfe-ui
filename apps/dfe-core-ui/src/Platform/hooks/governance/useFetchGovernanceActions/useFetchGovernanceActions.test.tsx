@@ -21,7 +21,7 @@ describe('.useFetchGovernanceActions', () => {
       wrapper,
     });
 
-    const response: TGovernanceActionsResponse = ['string'];
+    const response: TGovernanceActionsResponse['items'] = ['string'];
 
     await waitFor(() => {
       expect(result.current).toEqual({

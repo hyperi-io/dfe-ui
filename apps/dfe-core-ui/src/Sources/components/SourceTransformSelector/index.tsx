@@ -139,7 +139,7 @@ export const SourceTransformSelector = ({
       setRefusals((held) => ({
         ...held,
         [pendingEngine]:
-          getApiErrorResponseBody(refused)?.message ?? refused.message,
+          getApiErrorResponseBody(refused)?.detail ?? refused.message,
       }));
     },
   });
@@ -306,7 +306,7 @@ export const SourceTransformSelector = ({
             // Once the deployment has refused this engine, repeating the write
             // only repeats the refusal.
             refused={pending.engine in refusals}
-            error={getApiErrorResponseBody(error)?.message ?? error?.message}
+            error={getApiErrorResponseBody(error)?.detail ?? error?.message}
             onConfirm={confirmSwitch}
             onCancel={closeModal}
           />

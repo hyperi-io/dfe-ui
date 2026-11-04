@@ -37,7 +37,7 @@ export const ArtifactDetailDrawer = ({
   });
 
   const deleteMessage =
-    getApiErrorResponseBody(deleteError)?.message ?? deleteError?.message;
+    getApiErrorResponseBody(deleteError)?.detail ?? deleteError?.message;
 
   return (
     <Drawer

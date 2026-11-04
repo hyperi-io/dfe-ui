@@ -8,9 +8,9 @@ export const BASE_SCHEMA_PATH = 'meta/filebeat';
 export const BASE_SCHEMA_VERSION = '1.0.0';
 
 const column = (
-  overrides: Partial<
-    TMetaSchemaDetailResponse['version']['columns']['items'][number]
-  > & { name: string },
+  overrides: Partial<TMetaSchemaDetailResponse['items'][number]> & {
+    name: string;
+  },
 ) => ({
   type: 'String',
   attribute: [],
@@ -31,27 +31,21 @@ export const BASE_COLUMNS_RESPONSE: TMetaSchemaDetailResponse = {
     date: '2026-09-21',
     type: 'model',
     summary: 'filebeat',
-    columns: {
-      items: [
-        column({ name: 'timestamp', type: 'DateTime64', use_case: 'range' }),
-        column({
-          name: 'host_name',
-          attribute: ['lowcardinality'],
-          use_case: 'dimension',
-          comment: 'Reporting host',
-        }),
-        // Written before the rename, so the picker has to read it as word_search.
-        column({ name: 'message', use_case: 'fulltext' }),
-        column({ name: 'log_offset', type: 'Int64' }),
-      ],
-      total: 4,
-      page: 1,
-      per_page: 200,
-      total_pages: 1,
-      next_page: null,
-      prev_page: null,
-    },
   },
+  items: [
+    column({ name: 'timestamp', type: 'DateTime64', use_case: 'range' }),
+    column({
+      name: 'host_name',
+      attribute: ['lowcardinality'],
+      use_case: 'dimension',
+      comment: 'Reporting host',
+    }),
+    // Written before the rename, so the picker has to read it as word_search.
+    column({ name: 'message', use_case: 'fulltext' }),
+    column({ name: 'log_offset', type: 'Int64' }),
+  ],
+  total_size: 4,
+  next_page_token: null,
 };
 
 export const server = setupServer(

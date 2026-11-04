@@ -6,4 +6,4 @@ export const repositoryObjectsPath = API_CONFIG.repository.objects;
 
 export const fetchRepositoryObjectsApi = (
   options: DfeClientRequestOptions<typeof repositoryObjectsPath, 'get'>,
-) => apiClient.get(repositoryObjectsPath, options);
+) => apiClient.getAll(repositoryObjectsPath, options);

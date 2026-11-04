@@ -54,7 +54,7 @@ export const ArtifactTags = ({
 
   const entries = Object.entries(artifact.tags ?? {});
   const message =
-    getApiErrorResponseBody(setError)?.message ?? setError?.message;
+    getApiErrorResponseBody(setError)?.detail ?? setError?.message;
 
   return (
     <div className="flex flex-col gap-3">

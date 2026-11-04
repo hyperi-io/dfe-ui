@@ -291,12 +291,12 @@ describe('createApiClient', () => {
 
     const client = createApiClient({ baseUrl: BASE_URL });
     await client.request('/api/v1/sources', 'get', {
-      queryParams: { search: 'foo', enabled: true, sort_order: 'asc' },
+      queryParams: { search: 'foo', enabled: true, order_by: 'name desc' },
     });
 
     expect(capturedUrl).toContain('search=foo');
     expect(capturedUrl).toContain('enabled=true');
-    expect(capturedUrl).toContain('sort_order=asc');
+    expect(capturedUrl).toContain('order_by=name+desc');
   });
 
   test('array query params are repeated for the same key', async () => {
@@ -388,7 +388,7 @@ describe('createApiClient', () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/auth/me`, () =>
         HttpResponse.json(
-          { message: 'Unauthorized', detail: 'Token expired' },
+          { title: 'Unauthorized', status: 401, detail: 'Token expired' },
           { status: 401 },
         ),
       ),
@@ -400,7 +400,7 @@ describe('createApiClient', () => {
     await expect(client.get('/api/v1/auth/me')).rejects.toMatchObject({
       status: 401,
       statusText: 'Unauthorized',
-      detail: { message: 'Unauthorized', detail: 'Token expired' },
+      detail: { title: 'Unauthorized', status: 401, detail: 'Token expired' },
     });
   });
 
@@ -408,7 +408,10 @@ describe('createApiClient', () => {
     const onUnauthorized = vi.fn();
     server.use(
       http.get(`${BASE_URL}/api/v1/auth/me`, () =>
-        HttpResponse.json({ message: 'Unauthorized' }, { status: 401 }),
+        HttpResponse.json(
+          { title: 'Unauthorized', status: 401 },
+          { status: 401 },
+        ),
       ),
     );
 
@@ -422,7 +425,10 @@ describe('createApiClient', () => {
     const onUnauthorized = vi.fn();
     server.use(
       http.post(`${BASE_URL}/api/v1/auth/refresh`, () =>
-        HttpResponse.json({ message: 'Unauthorized' }, { status: 401 }),
+        HttpResponse.json(
+          { title: 'Unauthorized', status: 401 },
+          { status: 401 },
+        ),
       ),
     );
 
@@ -437,7 +443,11 @@ describe('createApiClient', () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/sources`, () =>
         HttpResponse.json(
-          { code: 'password_change_required', message: 'Change it first' },
+          {
+            title: 'Error',
+            code: 'password_change_required',
+            detail: 'Change it first',
+          },
           { status: 403 },
         ),
       ),
@@ -457,7 +467,7 @@ describe('createApiClient', () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/sources`, () =>
         HttpResponse.json(
-          { code: 'forbidden', message: 'No role for that' },
+          { title: 'Error', code: 'forbidden', detail: 'No role for that' },
           { status: 403 },
         ),
       ),
@@ -472,10 +482,13 @@ describe('createApiClient', () => {
     expect(onPasswordChangeRequired).not.toHaveBeenCalled();
   });
 
-  test('ApiError message prefers message from JSON detail', async () => {
+  test('ApiError message prefers detail from a problem', async () => {
     server.use(
       http.get(`${BASE_URL}/api/v1/auth/me`, () =>
-        HttpResponse.json({ message: 'Custom error message' }, { status: 500 }),
+        HttpResponse.json(
+          { title: 'Error', status: 500, detail: 'Custom error message' },
+          { status: 500 },
+        ),
       ),
     );
 
@@ -493,12 +506,13 @@ describe('createApiClient', () => {
 describe('getApiErrorResponseBody', () => {
   test('returns ErrorResponse from ApiError.detail', () => {
     const error = new ApiError(422, 'Unprocessable Entity', {
+      title: 'Error',
       code: 'validation_error',
-      message: '1 validation error(s)',
+      detail: '1 validation error(s)',
       errors: [
         {
           field: '',
-          message:
+          detail:
             "Value error, current version '1.0.0' must define at least one column",
           code: 'value_error',
         },
@@ -506,12 +520,13 @@ describe('getApiErrorResponseBody', () => {
     });
 
     expect(getApiErrorResponseBody(error)).toEqual({
+      title: 'Error',
       code: 'validation_error',
-      message: '1 validation error(s)',
+      detail: '1 validation error(s)',
       errors: [
         {
           field: '',
-          message:
+          detail:
             "Value error, current version '1.0.0' must define at least one column",
           code: 'value_error',
         },
@@ -531,10 +546,14 @@ describe('getErrorMessage', () => {
     );
   });
 
-  test('returns message when detail has message property', () => {
-    expect(getErrorMessage({ message: 'Validation failed' })).toBe(
-      'Validation failed',
-    );
+  test('returns the detail of a problem', () => {
+    expect(
+      getErrorMessage({ title: 'Unprocessable', detail: 'Validation failed' }),
+    ).toBe('Validation failed');
+  });
+
+  test('falls back to the title of a problem with no detail', () => {
+    expect(getErrorMessage({ title: 'Unprocessable' })).toBe('Unprocessable');
   });
 
   test('returns String(detail) for other types', () => {
@@ -543,8 +562,8 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(404)).toBe('404');
   });
 
-  test('returns String(detail) when message is not a string', () => {
-    expect(getErrorMessage({ message: 123 })).toBe('[object Object]');
+  test('returns String(detail) when detail is not a string', () => {
+    expect(getErrorMessage({ detail: 123 })).toBe('[object Object]');
   });
 });
 
@@ -646,7 +665,7 @@ describe('getWithEtag', () => {
     server.use(
       http.get(RULES_URL, () =>
         HttpResponse.json(
-          { code: 'not_configured', message: 'no deploy repo' },
+          { title: 'Error', code: 'not_configured', detail: 'no deploy repo' },
           { status: 503 },
         ),
       ),
@@ -664,9 +683,11 @@ describe('getApiWriteConflict', () => {
   test('reads the revision to retry against', () => {
     const conflict = getApiWriteConflict(
       apiError(409, {
+        title: 'Error',
         code: 'conflict',
-        message: 'base revision is stale',
-        context: { current: 'aaaaaaa1111', head: 'bbbbbbb2222' },
+        detail: 'base revision is stale',
+        current: 'aaaaaaa1111',
+        head: 'bbbbbbb2222',
       }),
     );
 
@@ -686,7 +707,9 @@ describe('getApiWriteConflict', () => {
       'scaling_unsupported',
     ]) {
       expect(
-        getApiWriteConflict(apiError(409, { code, message: 'refused' })),
+        getApiWriteConflict(
+          apiError(409, { title: 'Error', code, detail: 'refused' }),
+        ),
       ).toBeNull();
     }
   });
@@ -695,7 +718,11 @@ describe('getApiWriteConflict', () => {
   test('ignores a conflict that carries no head', () => {
     expect(
       getApiWriteConflict(
-        apiError(409, { code: 'conflict', message: 'name already exists' }),
+        apiError(409, {
+          title: 'Error',
+          code: 'conflict',
+          detail: 'name already exists',
+        }),
       ),
     ).toBeNull();
   });
@@ -768,11 +795,12 @@ describe('getApiErrorFieldMessages', () => {
   test('names the field each line belongs to', () => {
     const lines = getApiErrorFieldMessages(
       apiError(422, {
+        title: 'Error',
         code: 'validation_error',
-        message: '2 validation error(s)',
+        detail: '2 validation error(s)',
         errors: [
-          { field: 'name', message: 'Name is required', code: 'value_error' },
-          { field: '', message: 'At least one column is required' },
+          { field: 'name', detail: 'Name is required', code: 'value_error' },
+          { field: '', detail: 'At least one column is required' },
         ],
       }),
     );
@@ -786,7 +814,11 @@ describe('getApiErrorFieldMessages', () => {
   test('returns nothing when the engine sent no field detail', () => {
     expect(
       getApiErrorFieldMessages(
-        apiError(409, { code: 'conflict', message: 'already exists' }),
+        apiError(409, {
+          title: 'Error',
+          code: 'conflict',
+          detail: 'already exists',
+        }),
       ),
     ).toEqual([]);
     expect(getApiErrorFieldMessages(new Error('offline'))).toEqual([]);
@@ -797,17 +829,18 @@ describe('getApiErrorFields', () => {
   test('groups the messages under each field, split into a form name', () => {
     const fields = getApiErrorFields(
       apiError(422, {
+        title: 'Error',
         code: 'validation_error',
-        message: '3 validation error(s)',
+        detail: '3 validation error(s)',
         errors: [
           {
             field: 'groups.api_token_env',
-            message: 'OKTA_TOKEN is not set in the engine',
+            detail: 'OKTA_TOKEN is not set in the engine',
             code: 'env_var_not_set',
           },
-          { field: 'client_id', message: 'Client ID is required' },
-          { field: 'client_id', message: 'Client ID is too long' },
-          { field: '', message: 'At least one column is required' },
+          { field: 'client_id', detail: 'Client ID is required' },
+          { field: 'client_id', detail: 'Client ID is too long' },
+          { field: '', detail: 'At least one column is required' },
         ],
       }),
     );
@@ -827,7 +860,11 @@ describe('getApiErrorFields', () => {
   test('returns nothing when the engine named no field', () => {
     expect(
       getApiErrorFields(
-        apiError(409, { code: 'conflict', message: 'already exists' }),
+        apiError(409, {
+          title: 'Error',
+          code: 'conflict',
+          detail: 'already exists',
+        }),
       ),
     ).toEqual([]);
     expect(getApiErrorFields(new Error('offline'))).toEqual([]);

@@ -55,9 +55,9 @@ export const SourceAppInstance = ({
   } = useDeleteAppInstance({ service: app.service, instance: source });
 
   const createMessage =
-    getApiErrorResponseBody(createError)?.message ?? createError?.message;
+    getApiErrorResponseBody(createError)?.detail ?? createError?.message;
   const deleteMessage =
-    getApiErrorResponseBody(deleteError)?.message ?? deleteError?.message;
+    getApiErrorResponseBody(deleteError)?.detail ?? deleteError?.message;
 
   if (!isDeployed) {
     return (

@@ -90,19 +90,18 @@ const RECEIVER_SOURCE: CreateUpdateSourceFormData = {
 describe('CreateUpdateSourceForm expression', () => {
   it('shows a refused expression with the engine reason beside it and the span underlined', async () => {
     const refusal = new ApiError(422, 'Unprocessable Content', {
+      title: 'Error',
       code: 'invalid_rule',
-      message: 'The receiver would refuse this rule',
-      errors: [{ field: 'when', message: "unknown function 'lower'" }],
-      context: {
-        source: 'okta',
-        rule_errors: [
-          {
-            field: 'when',
-            message: "unknown function 'lower'",
-            span: { start: 0, end: 5 },
-          },
-        ],
-      },
+      detail: 'The receiver would refuse this rule',
+      errors: [{ field: 'when', detail: "unknown function 'lower'" }],
+      source: 'okta',
+      rule_errors: [
+        {
+          field: 'when',
+          message: "unknown function 'lower'",
+          span: { start: 0, end: 5 },
+        },
+      ],
     });
     render(
       <CreateUpdateSourceForm
@@ -263,14 +262,13 @@ describe('CreateUpdateSourceForm compatibility', () => {
 
   it('shows an alias another source already claims on that alias field', async () => {
     const refusal = new ApiError(409, 'Conflict', {
+      title: 'Error',
       code: 'alias_conflict',
-      message: "'firewall' already maps to cisco-asa under dfe-legacy-2x",
-      context: {
-        source: 'okta',
-        conflicting_source: 'cisco-asa',
-        profile: 'dfe-legacy-2x',
-        alias: 'firewall',
-      },
+      detail: "'firewall' already maps to cisco-asa under dfe-legacy-2x",
+      source: 'okta',
+      conflicting_source: 'cisco-asa',
+      profile: 'dfe-legacy-2x',
+      alias: 'firewall',
     });
     render(
       <CreateUpdateSourceForm
