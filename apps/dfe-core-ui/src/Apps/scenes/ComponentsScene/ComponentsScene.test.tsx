@@ -1,6 +1,7 @@
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { ComponentsScene } from '.';
 import { server } from './ComponentsScene.mocks';
@@ -88,6 +89,79 @@ describe('ComponentsScene', () => {
     expect(
       screen.queryByRole('heading', { name: /routing/ }),
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps the components whose name matches and says so when none do', async () => {
+    const user = userEvent.setup();
+    const hyperdx = { service: 'hyperdx', instance: 'default' };
+    server.use(
+      API_CONFIG_MOCKS.apps.status.get.success(hyperdx),
+      API_CONFIG_MOCKS.apps.metrics.get.success(hyperdx),
+      API_CONFIG_MOCKS.apps.metricsSeries.get.success(hyperdx),
+      API_CONFIG_MOCKS.apps.config.get.success(hyperdx),
+      API_CONFIG_MOCKS.apps.history.get.success(hyperdx),
+      API_CONFIG_MOCKS.apps.default.get.success({
+        mockedResponse: [
+          {
+            service: 'dfe-receiver',
+            display_name: null,
+            scale_deployed: true,
+            multiplicity: 'single',
+            has_compiled_routing: true,
+            routing_scope: 'stack',
+            optional: false,
+            offered: true,
+            file_sets: [],
+            instances: ['default'],
+          },
+          {
+            service: 'hyperdx',
+            display_name: 'Search',
+            scale_deployed: false,
+            multiplicity: 'single',
+            has_compiled_routing: false,
+            routing_scope: 'stack',
+            optional: false,
+            offered: true,
+            file_sets: [],
+            instances: ['default'],
+          },
+        ],
+      }),
+    );
+
+    render(<ComponentsScene />, { wrapper });
+
+    expect(
+      await screen.findByRole('tab', { name: /^dfe-receiver/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^Search/ })).toBeInTheDocument();
+
+    const search = screen.getByRole('searchbox', { name: 'Search components' });
+    await user.type(search, 'receiver');
+
+    expect(
+      screen.getByRole('tab', { name: /^dfe-receiver/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', { name: /^Search/ }),
+    ).not.toBeInTheDocument();
+
+    await user.clear(search);
+    await user.type(search, 'HYPERDX');
+
+    expect(screen.getByRole('tab', { name: /^Search/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', { name: /^dfe-receiver/ }),
+    ).not.toBeInTheDocument();
+
+    await user.clear(search);
+    await user.type(search, 'no-such-component');
+
+    expect(
+      screen.getByText('No components match this search.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
   it('says so plainly when nothing is deployed yet', async () => {
