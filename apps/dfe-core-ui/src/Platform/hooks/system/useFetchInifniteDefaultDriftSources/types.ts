@@ -14,5 +14,5 @@ export type TDefaultsDriftSourceItem =
 export interface UseFetchInfiniteDefaultsDriftSourcesProps {
   search?: string;
   page?: number;
-  per_page?: number;
+  page_size?: number;
 }

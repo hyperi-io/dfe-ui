@@ -50,12 +50,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
       expect(result.current.isError).toBe(false);
       expect(result.current.isFetchingNextPage).toBe(false);
@@ -127,12 +123,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
 
       const expectedResponse = {
         items: expect.any(Array),
-        total: 25,
-        page: 1,
-        per_page: 10,
-        total_pages: 3,
-        next_page: 2,
-        prev_page: 0,
+        total_size: 25,
+        next_page_token: '10',
       };
 
       expect(result.current).toMatchObject({
@@ -215,7 +207,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
 
     it('should not have next page when all data is loaded', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredOidcProviders({ per_page: 10 }),
+        () => useFetchInfiniteFilteredOidcProviders({ page_size: 10 }),
         {
           wrapper,
         },
@@ -249,9 +241,9 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
   });
 
   describe('custom page size', () => {
-    it('should respect per_page parameter', async () => {
+    it('should respect page_size parameter', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredOidcProviders({ per_page: 5 }),
+        () => useFetchInfiniteFilteredOidcProviders({ page_size: 5 }),
         {
           wrapper,
         },
@@ -264,9 +256,9 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       expect(result.current.data.items).toHaveLength(5);
     });
 
-    it('should handle per_page larger than available data', async () => {
+    it('should handle page_size larger than available data', async () => {
       const { result } = renderHook(
-        () => useFetchInfiniteFilteredOidcProviders({ per_page: 100 }),
+        () => useFetchInfiniteFilteredOidcProviders({ page_size: 100 }),
         {
           wrapper,
         },
@@ -301,12 +293,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
       // Data is empty array due to flattening logic when there's an error
       expect(result.current.data).toEqual({
         items: [],
-        total: 0,
-        page: 1,
-        per_page: 10,
-        total_pages: 0,
-        next_page: null,
-        prev_page: null,
+        total_size: 0,
+        next_page_token: null,
       });
     });
   });
@@ -353,7 +341,7 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
             search: 'test',
             sort_by: 'name',
             sort_order: 'asc',
-            per_page: 20,
+            page_size: 20,
           }),
         {
           wrapper,
@@ -441,12 +429,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
         API_CONFIG_MOCKS.oidcProviders.default.get.success({
           mockedResponse: {
             items: [],
-            total: 0,
-            page: 0,
-            per_page: 0,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
+            total_size: 0,
+            next_page_token: null,
           },
         }),
       );
@@ -497,12 +481,8 @@ describe('useFetchInfiniteFilteredOidcProviders', () => {
           listRequests += 1;
           return HttpResponse.json({
             items: [],
-            total: 0,
-            page: 1,
-            per_page: 10,
-            total_pages: 0,
-            next_page: 0,
-            prev_page: 0,
+            total_size: 0,
+            next_page_token: null,
           });
         }),
       );

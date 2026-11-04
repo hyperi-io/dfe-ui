@@ -61,12 +61,12 @@ export const ListSchemasFilterForm = ({
         sortDirectionValue={filters.sort_order}
         sortByOptions={[
           { label: 'Path', value: 'path' },
-          { label: 'Description', value: 'description' },
+          { label: 'Updated', value: 'updated_at' },
         ]}
         onChange={({ sortBy, sortDirection }) =>
           setFilters({
             ...(sortBy !== undefined && {
-              sort_by: sortBy as 'path' | 'description',
+              sort_by: sortBy as 'path' | 'updated_at',
             }),
             ...(sortDirection !== undefined && {
               sort_order: sortDirection as 'asc' | 'desc',

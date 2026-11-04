@@ -1,3 +1,4 @@
+import { MAX_PAGE_SIZE } from '@/core/config/api/pagination';
 import {
   getSchemaLeafName,
   getSchemaPathPrefix,
@@ -62,7 +63,7 @@ export const CommonHeaderSelect = ({
     isFetchingNextPage,
   } = useFetchInfiniteFilteredSchemas({
     search: searchValue,
-    per_page: -1,
+    page_size: MAX_PAGE_SIZE,
     schema_type: ['common-header'],
   });
 

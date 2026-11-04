@@ -27,12 +27,8 @@ export const groups = {
               source_provider: 'string',
             },
           ],
-          total: 25,
-          page: 1,
-          per_page: 10,
-          total_pages: 3,
-          next_page: 2,
-          prev_page: 0,
+          total_size: 25,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TGroupsResponse;

@@ -15,9 +15,11 @@ const refusal = (status: number, body: unknown) =>
 describe('getOrderConflict', () => {
   test('reads the blocks the field has now from a 409 order_conflict', () => {
     const error = refusal(409, {
+      title: 'Error',
       code: 'order_conflict',
-      message: 'send every one of them',
-      context: { target: '_source', blocks: ['source.a', 'source.b', 7] },
+      detail: 'send every one of them',
+      target: '_source',
+      blocks: ['source.a', 'source.b', 7],
     });
 
     expect(getOrderConflict(error)).toEqual({
@@ -29,7 +31,11 @@ describe('getOrderConflict', () => {
   test('is null for a 409 the deploy repo raised, which a reload does not explain', () => {
     expect(
       getOrderConflict(
-        refusal(409, { code: 'conflict', message: 'kept moving' }),
+        refusal(409, {
+          title: 'Error',
+          code: 'conflict',
+          detail: 'kept moving',
+        }),
       ),
     ).toBeNull();
     expect(getOrderConflict(new Error('network'))).toBeNull();
@@ -39,9 +45,10 @@ describe('getOrderConflict', () => {
 describe('getStaleRevision', () => {
   test('carries the current ETag from a 412', () => {
     const error = refusal(412, {
+      title: 'Error',
       code: 'etag_mismatch',
-      message: 'If-Match does not match the current ETag',
-      context: { etag: '"order-2"' },
+      detail: 'If-Match does not match the current ETag',
+      etag: '"order-2"',
     });
 
     expect(getStaleRevision(error)).toEqual({
@@ -59,7 +66,9 @@ describe('getStaleRevision', () => {
 
   test('is null for any other status', () => {
     expect(
-      getStaleRevision(refusal(409, { code: 'conflict', message: 'x' })),
+      getStaleRevision(
+        refusal(409, { title: 'Error', code: 'conflict', detail: 'x' }),
+      ),
     ).toBeNull();
   });
 });
@@ -68,7 +77,11 @@ describe('isMissingRevision', () => {
   test('is a 428 and nothing else', () => {
     expect(
       isMissingRevision(
-        refusal(428, { code: 'precondition_required', message: 'x' }),
+        refusal(428, {
+          title: 'Error',
+          code: 'precondition_required',
+          detail: 'x',
+        }),
       ),
     ).toBe(true);
     expect(isMissingRevision(refusal(412, ''))).toBe(false);
@@ -78,21 +91,20 @@ describe('isMissingRevision', () => {
 describe('getRuleErrors', () => {
   test('returns each refusal with its span from a 422 invalid_rule', () => {
     const error = refusal(422, {
+      title: 'Error',
       code: 'invalid_rule',
-      message: 'The receiver would refuse this rule',
-      errors: [{ field: 'when', message: 'unknown function lower' }],
-      context: {
-        source: 'okta',
-        rule_errors: [
-          {
-            field: 'when',
-            message: 'unknown function lower',
-            span: { start: 0, end: 5 },
-          },
-          { field: 'match', message: 'a group needs a part' },
-          { message: 'no field, so not a rule error' },
-        ],
-      },
+      detail: 'The receiver would refuse this rule',
+      errors: [{ field: 'when', detail: 'unknown function lower' }],
+      source: 'okta',
+      rule_errors: [
+        {
+          field: 'when',
+          message: 'unknown function lower',
+          span: { start: 0, end: 5 },
+        },
+        { field: 'match', message: 'a group needs a part' },
+        { message: 'no field, so not a rule error' },
+      ],
     });
 
     expect(getRuleErrors(error)).toEqual([
@@ -108,7 +120,11 @@ describe('getRuleErrors', () => {
   test('is empty for a 422 with another code', () => {
     expect(
       getRuleErrors(
-        refusal(422, { code: 'validation_error', message: '1 error' }),
+        refusal(422, {
+          title: 'Error',
+          code: 'validation_error',
+          detail: '1 error',
+        }),
       ),
     ).toEqual([]);
   });
@@ -117,14 +133,13 @@ describe('getRuleErrors', () => {
 describe('getAliasConflict', () => {
   test('names the profile, alias and the source already holding it', () => {
     const error = refusal(409, {
+      title: 'Error',
       code: 'alias_conflict',
-      message: 'firewall is already cisco-asa under dfe-legacy-2x',
-      context: {
-        source: 'fortigate',
-        conflicting_source: 'cisco-asa',
-        profile: 'dfe-legacy-2x',
-        alias: 'firewall',
-      },
+      detail: 'firewall is already cisco-asa under dfe-legacy-2x',
+      source: 'fortigate',
+      conflicting_source: 'cisco-asa',
+      profile: 'dfe-legacy-2x',
+      alias: 'firewall',
     });
 
     expect(getAliasConflict(error)).toEqual({
@@ -138,7 +153,7 @@ describe('getAliasConflict', () => {
   test('is null for a match conflict', () => {
     expect(
       getAliasConflict(
-        refusal(409, { code: 'match_conflict', message: 'x', context: {} }),
+        refusal(409, { title: 'Error', code: 'match_conflict', detail: 'x' }),
       ),
     ).toBeNull();
   });
@@ -149,15 +164,17 @@ describe('isMatchNotSampleable', () => {
     expect(
       isMatchNotSampleable(
         refusal(422, {
+          title: 'Error',
           code: 'match_not_sampleable',
-          message: 'Preview is not available',
-          context: { source: 'okta', match: 'when' },
+          detail: 'Preview is not available',
+          source: 'okta',
+          match: 'when',
         }),
       ),
     ).toBe(true);
     expect(
       isMatchNotSampleable(
-        refusal(422, { code: 'discovery_failed', message: 'x' }),
+        refusal(422, { title: 'Error', code: 'discovery_failed', detail: 'x' }),
       ),
     ).toBe(false);
     expect(isMatchNotSampleable(null)).toBe(false);

@@ -165,7 +165,10 @@ describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
     const message = "source_id 'dfe-viewers' is already another group's";
     server.use(
       http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () =>
-        HttpResponse.json({ code: 'conflict', message }, { status: 409 }),
+        HttpResponse.json(
+          { title: 'Error', code: 'conflict', detail: message },
+          { status: 409 },
+        ),
       ),
     );
     const user = await openCreateDrawer();
@@ -184,7 +187,10 @@ describe('CreateGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
     const message = "source_id 'dfe-viewers' is already another group's";
     server.use(
       http.post(API_CONFIG_MOCKS.groups.default.mockedUrl, () =>
-        HttpResponse.json({ code: 'conflict', message }, { status: 409 }),
+        HttpResponse.json(
+          { title: 'Error', code: 'conflict', detail: message },
+          { status: 409 },
+        ),
       ),
     );
     const user = await openCreateDrawer();

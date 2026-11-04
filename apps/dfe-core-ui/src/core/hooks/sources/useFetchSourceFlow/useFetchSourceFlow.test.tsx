@@ -1,3 +1,4 @@
+import { problem } from '@/core/utils/test-utils/problem';
 import { API_CONFIG_MOCKS } from '@/core/config/api/endpoints/generator';
 import { buildTestWrapper } from '@/core/utils/test-utils/buildTestWrapper';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -32,11 +33,11 @@ describe('useFetchSourceFlow', () => {
   it('returns a refused flow as its reason rather than an error', async () => {
     server.use(
       API_CONFIG_MOCKS.sources.sourceFlow.get.error({
-        mockedResponse: {
-          code: 'flow_error',
-          message:
-            "source 'source' asks to be archived: archive needs the bus transport",
-        },
+        mockedResponse: problem(
+          422,
+          'flow_error',
+          "source 'source' asks to be archived: archive needs the bus transport",
+        ),
         status: 422,
       }),
     );

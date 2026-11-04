@@ -149,12 +149,8 @@ export const rules = {
               created_at: 'string',
             },
           ],
-          total: 0,
-          page: 0,
-          per_page: 0,
-          total_pages: 0,
-          next_page: 0,
-          prev_page: 0,
+          total_size: 0,
+          next_page_token: null,
         },
       }: {
         mockedResponse?: TRuleListResponse;

@@ -21,6 +21,6 @@ export interface UseFetchInfiniteSourceCataloguesProps {
   engine?: string;
   /** List entries already stored as a source too. */
   include_stored?: boolean;
-  per_page?: number;
+  page_size?: number;
   page?: number;
 }

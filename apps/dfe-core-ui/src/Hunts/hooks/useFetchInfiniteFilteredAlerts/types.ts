@@ -11,7 +11,7 @@ export type TAlertListResponseItem = TAlertListResponse['items'][number];
 export type UseFetchInfiniteFilteredAlertsProps = {
   search?: string;
   hunt?: string;
-  per_page?: number;
+  page_size?: number;
   sort_by?: string;
   sort_order?: string;
 };

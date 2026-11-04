@@ -34,7 +34,7 @@ export const metaSchemaDetailToCreateVersionFormInitialValues = (
   }
 
   const formType = toFormType(schema.version.type);
-  const items = schema.version.columns?.items ?? [];
+  const items = schema.items ?? [];
   const schemaColumns = items.map((column) =>
     listItemFromPartial({
       ...column,

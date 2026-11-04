@@ -41,9 +41,9 @@ const parseFiltersFromParams = (
     standardParam === null || standardParam === '' ? undefined : standardParam;
   const sort_by = params.get('sort_by') ?? undefined;
   const sort_order = params.get('sort_order') ?? undefined;
-  const per_pageParam = params.get('per_page');
-  const per_page = per_pageParam ? parseInt(per_pageParam, 10) : undefined;
-  return { search, standard, sort_by, sort_order, per_page };
+  const page_sizeParam = params.get('page_size');
+  const page_size = page_sizeParam ? parseInt(page_sizeParam, 10) : undefined;
+  return { search, standard, sort_by, sort_order, page_size };
 };
 
 const filtersToSearchString = (f: ListFieldMapsQueryParams): string => {
@@ -90,12 +90,8 @@ interface ListFieldMapsContextValue {
 
 const DEFAULT_FIELD_MAP_LIST_RESPONSE: TFieldMapListResponse = {
   items: [] as TFieldMapSummary[],
-  total: 0,
-  page: 1,
-  per_page: 10,
-  total_pages: 0,
-  next_page: null,
-  prev_page: null,
+  total_size: 0,
+  next_page_token: null,
 };
 
 const ListFieldMapsContext = createContext<ListFieldMapsContextValue | null>(

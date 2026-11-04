@@ -16,5 +16,5 @@ export type ResourceType = (typeof RESOURCE_TYPES)[keyof typeof RESOURCE_TYPES];
 export interface UseFetchInfiniteFilteredRolesProps {
   search?: string;
   resource_type?: ResourceType;
-  per_page?: number;
+  page_size?: number;
 }

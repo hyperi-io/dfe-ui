@@ -8,9 +8,9 @@ export type TRoleScopesResponse = DfeClientSuccessResponseBody<
   DfeClientOperationFor<typeof fetchInfiniteFilteredRoleScopesPath, 'get'>
 >;
 
-export type TRoleScopeItem = TRoleScopesResponse['scopes'][number];
+export type TRoleScopeItem = TRoleScopesResponse['items'][number];
 
 export interface UseFetchInfiniteFilteredRoleScopesProps {
   search?: string;
-  per_page?: number;
+  page_size?: number;
 }

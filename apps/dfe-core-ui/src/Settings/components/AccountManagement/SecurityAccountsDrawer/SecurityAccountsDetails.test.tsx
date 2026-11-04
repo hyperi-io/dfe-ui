@@ -72,7 +72,11 @@ const present = (detail: TAccountDetailResponse) =>
 const absent = (username: string) =>
   http.get(ACCOUNT_URL.replace('{username}', username), () =>
     HttpResponse.json(
-      { code: 'not_found', message: `Account '${username}' not found` },
+      {
+        title: 'Error',
+        code: 'not_found',
+        detail: `Account '${username}' not found`,
+      },
       { status: 404 },
     ),
   );
@@ -246,7 +250,11 @@ describe('SecurityAccountsDetails', () => {
       setupStatus(),
       http.get(ACCOUNT_URL.replace('{username}', 'admin'), () =>
         HttpResponse.json(
-          { code: 'internal', message: 'The account store is unreachable.' },
+          {
+            title: 'Error',
+            code: 'internal',
+            detail: 'The account store is unreachable.',
+          },
           { status: 500 },
         ),
       ),
@@ -368,8 +376,9 @@ describe('SecurityAccountsDetails', () => {
       http.post(RESET_URL.replace('{username}', 'admin'), () =>
         HttpResponse.json(
           {
+            title: 'Error',
             code: 'password_reused',
-            message:
+            detail:
               "The new password must differ from the account's current password and from the password it was last issued",
           },
           { status: 400 },

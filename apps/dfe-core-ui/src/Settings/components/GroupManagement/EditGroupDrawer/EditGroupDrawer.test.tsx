@@ -234,7 +234,7 @@ describe('EditGroupDrawer', { timeout: GROUP_DRAWER_TEST_TIMEOUT_MS }, () => {
     server.use(
       http.put(groupUrl, () =>
         HttpResponse.json(
-          { code: 'missing_source_provider', message },
+          { title: 'Error', code: 'missing_source_provider', detail: message },
           { status: 422 },
         ),
       ),

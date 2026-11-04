@@ -15,8 +15,7 @@ interface SourceListRequestParams {
   status?: 'enabled' | 'disabled';
   sort_by?: string;
   sort_order?: string;
-  page?: number;
-  per_page?: number;
+  page_size?: number;
 }
 
 export type UseFetchInfiniteFilteredSourcesProps = Omit<

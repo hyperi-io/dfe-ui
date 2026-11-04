@@ -6,4 +6,4 @@ export const adminLinksPath = API_CONFIG.deployment.adminLinks;
 
 export const fetchAdminLinksApi = (
   options?: DfeClientRequestOptions<typeof adminLinksPath, 'get'>,
-) => apiClient.get(adminLinksPath, options);
+) => apiClient.getAll(adminLinksPath, options);

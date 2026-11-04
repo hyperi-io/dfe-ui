@@ -10,7 +10,7 @@ export const ListHuntsFilters = ({
   onCollapseChange?: (open: boolean) => void;
 }) => {
   const {
-    data: { items: hunts, total },
+    data: { items: hunts, total_size: total },
     hasFilters,
     filters,
   } = useListHuntsContext();

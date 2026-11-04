@@ -69,7 +69,7 @@ export const DerivedSchemaFieldPicker = ({
   } = useFetchInfiniteFilteredSchemaDetailColumns({
     schema_path: basePath,
     version: baseVersion,
-    per_page: BASE_COLUMNS_PER_PAGE,
+    page_size: BASE_COLUMNS_PER_PAGE,
   });
 
   // The whole base has to be pickable, so the filter never misses a column
@@ -80,7 +80,7 @@ export const DerivedSchemaFieldPicker = ({
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const columnItems = useMemo(() => data?.version.columns.items ?? [], [data]);
+  const columnItems = useMemo(() => data?.items ?? [], [data]);
 
   const baseColumns: DerivedBaseColumn[] = useMemo(
     () => columnItems.map(baseColumnFrom),

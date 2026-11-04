@@ -74,6 +74,7 @@ describe('.useCloneSchema', () => {
         expect(result.current).toEqual({
           mutate: expect.any(Function),
           isPending: false,
+          isReadingColumns: false,
           error: undefined,
         });
       });
@@ -126,6 +127,7 @@ describe('.useCloneSchema', () => {
       expect(result.current).toEqual({
         mutate: expect.any(Function),
         isPending: false,
+        isReadingColumns: false,
         error: {
           message: 'Unable to clone schema',
         },
